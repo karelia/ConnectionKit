@@ -1,0 +1,63 @@
+/* Controller */
+
+#import <Cocoa/Cocoa.h>
+
+@class AbstractConnection;
+
+@interface Controller : NSObject
+{
+    IBOutlet NSButton *btnConnect;
+    IBOutlet NSButton *btnDelete;
+    IBOutlet NSButton *btnNewFolder;
+    IBOutlet NSButton *btnPermissions;
+    IBOutlet NSButton *btnRefresh;
+    IBOutlet NSButton *btnStop;
+    IBOutlet NSButton *cBtnCancel;
+    IBOutlet NSButton *cBtnConnect;
+    IBOutlet NSTextField *cHost;
+    IBOutlet NSPanel *connectWindow;
+    IBOutlet NSTextField *cPass;
+    IBOutlet NSTextField *cPort;
+    IBOutlet NSPopUpButton *cTypePopup;
+    IBOutlet NSTextField *cURL;
+    IBOutlet NSTextField *cUser;
+    IBOutlet NSPopUpButton *localPopup;
+    IBOutlet NSTableView *localTable;
+    IBOutlet NSPopUpButton *remotePopup;
+    IBOutlet NSTableView *remoteTable;
+    IBOutlet NSTextField *status;
+    IBOutlet NSTableView *transferTable;
+    IBOutlet NSWindow *window;
+	IBOutlet NSDrawer *logDrawer;
+	IBOutlet NSTextView *log;
+	IBOutlet NSPopUpButton *savedHosts;
+	IBOutlet NSButton *btnDisconnect;
+	IBOutlet NSTextField *initialDirectory;
+	
+	AbstractConnection *con;
+	NSMutableArray *remoteFiles;
+	NSMutableArray *localFiles;
+	NSMutableArray *transfers;
+	NSString *currentLocalPath;
+	NSString *currentRemotePath;
+	
+	int downloadCounter;
+	int uploadCounter;
+	BOOL isConnected;
+	
+	NSMutableArray *_savedHosts;
+}
+- (IBAction)cancelConnect:(id)sender;
+- (IBAction)connect:(id)sender;
+- (IBAction)deleteFile:(id)sender;
+- (IBAction)localFileSelected:(id)sender;
+- (IBAction)localPopupChanged:(id)sender;
+- (IBAction)newFolder:(id)sender;
+- (IBAction)permissions:(id)sender;
+- (IBAction)refresh:(id)sender;
+- (IBAction)remoteFileSelected:(id)sender;
+- (IBAction)remotePopupChanged:(id)sender;
+- (IBAction)showConnect:(id)sender;
+- (IBAction)stopTransfer:(id)sender;
+- (IBAction)transferSelected:(id)sender;
+@end

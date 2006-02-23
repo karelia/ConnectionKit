@@ -1,0 +1,14 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {cancel = id; ok = id; }; 
+            CLASS = InputDialog; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {input = id; panel = id; title = id; }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = "java.lang.Object"; LANGUAGE = Java; }
+    ); 
+    IBVersion = 1; 
+}

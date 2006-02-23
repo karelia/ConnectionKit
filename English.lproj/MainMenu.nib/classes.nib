@@ -1,0 +1,60 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                cancelConnect = id; 
+                connect = id; 
+                connectionTypeChanged = id; 
+                deleteFile = id; 
+                disconnect = id; 
+                localFileSelected = id; 
+                localPopupChanged = id; 
+                newFolder = id; 
+                permissions = id; 
+                printQueueDescription = id; 
+                refresh = id; 
+                remoteFileSelected = id; 
+                remotePopupChanged = id; 
+                saveHost = id; 
+                savedHostsChanged = id; 
+                showConnect = id; 
+                stopTransfer = id; 
+                transferSelected = id; 
+            }; 
+            CLASS = Controller; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                btnConnect = NSButton; 
+                btnDelete = NSButton; 
+                btnDisconnect = NSButton; 
+                btnNewFolder = NSButton; 
+                btnPermissions = NSButton; 
+                btnRefresh = NSButton; 
+                btnStop = NSButton; 
+                cBtnCancel = NSButton; 
+                cBtnConnect = NSButton; 
+                cHost = NSTextField; 
+                cPass = NSTextField; 
+                cPort = NSTextField; 
+                cTypePopup = NSPopUpButton; 
+                cURL = NSTextField; 
+                cUser = NSTextField; 
+                connectWindow = NSPanel; 
+                initialDirectory = NSTextField; 
+                localPopup = NSPopUpButton; 
+                localTable = NSTableView; 
+                log = NSTextView; 
+                logDrawer = NSDrawer; 
+                remotePopup = NSPopUpButton; 
+                remoteTable = NSTableView; 
+                savedHosts = id; 
+                status = NSTextField; 
+                transferTable = NSTableView; 
+                window = NSWindow; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}
