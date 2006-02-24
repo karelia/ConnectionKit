@@ -51,6 +51,7 @@
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
+		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
 		79D1D76E07613A43003FA7BB /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76C07613A43003FA7BB /* InputDialog.nib */; };
 		79D1D77107613A4E003FA7BB /* InputDialog.h in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76F07613A4E003FA7BB /* InputDialog.h */; };
 		79D1D77207613A4E003FA7BB /* InputDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79D1D77007613A4E003FA7BB /* InputDialog.m */; };
@@ -180,6 +181,7 @@
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = ../../../../System/Library/Frameworks/Security.framework; sourceTree = SOURCE_ROOT; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
+		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
 		79D1D76D07613A43003FA7BB /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/InputDialog.nib; sourceTree = "<group>"; };
 		79D1D76F07613A4E003FA7BB /* InputDialog.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InputDialog.h; sourceTree = "<group>"; };
 		79D1D77007613A4E003FA7BB /* InputDialog.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InputDialog.m; sourceTree = "<group>"; };
@@ -281,6 +283,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				79BCC31D09AEC831007EF4D1 /* icon.icns */,
 				79E2DAF207656297007609C1 /* console.tiff */,
 				79D1D88D0762D700003FA7BB /* symlink_file.tif */,
 				79D1D88E0762D700003FA7BB /* symlink_folder.tif */,
@@ -452,6 +455,7 @@
 				79E2DAF307656297007609C1 /* console.tiff in Resources */,
 				79158559076573880036D96E /* PermissionsController.h in Resources */,
 				797F9184096DFAD60029D7DE /* README in Resources */,
+				79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

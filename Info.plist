@@ -7,7 +7,7 @@
 	<key>CFBundleExecutable</key>
 	<string>FTPConnection</string>
 	<key>CFBundleIconFile</key>
-	<string></string>
+	<string>icon</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.ftp.sample</string>
 	<key>CFBundleInfoDictionaryVersion</key>
