@@ -403,14 +403,26 @@ static NSArray *sftpErrors = nil;
 				[self sendData:[[NSString stringWithFormat:@"%@\n", [self password]] dataUsingEncoding:NSUTF8StringEncoding]];
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:@"#####"
 																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
-			} else if ([self bufferMatchesAtLeastOneString:[NSArray arrayWithObject:@"Are you sure you want to continue connecting (yes/no)?"]]) {
+			} else if ([self bufferMatchesAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", @"@@@", nil]]) {
 				//need to authenticate the host. Should we really default to yes?
 				if ([AbstractConnection debugEnabled])
 					NSLog(@"Connecting to unknown host. Awaiting repsonse from delegate");
 				if (_flags.authorizeConnection) {
+					NSRange msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
+					while (msgRange.location == NSNotFound)
+					{
+						[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
+						NSData *bufData = [self availableData];
+						if ([bufData length] > 0) {
+							NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
+							[_inputBuffer appendString:buf];
+						} 
+						msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
+					}
+					NSString *message = [_inputBuffer substringToIndex:msgRange.location];
 					[_forwarder connection:self 
 				 authorizeConnectionToHost:[self host] 
-								   message:@"Do you wish to authorize the connection?"];
+								   message:[NSString stringWithFormat:@"%@\nDo you wish to authorize the connection?", message]];
 				} else if (_flags.error) {
 					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
 													   code:SFTPErrorPermissionDenied
