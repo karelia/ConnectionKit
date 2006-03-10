@@ -1495,7 +1495,7 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 																  attributes:[AbstractConnection dataAttributes]] autorelease]];
 
 		if ([AbstractConnection debugEnabled])
-			NSLog(@"Contents of Directory %@:\n %@", _currentPath, results);
+			NSLog(@"Contents of Directory %@: %@", _currentPath, results);
 		
 		if (_flags.directoryContents)
 		{
