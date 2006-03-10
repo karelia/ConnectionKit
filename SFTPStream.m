@@ -256,7 +256,7 @@ enum { START = 200, STOP };
     }
 
     if (( mf = fdopen( _master, "r+" )) == NULL ) {
-        NSLog( @"failed to open file stream with fdopen: %s\n", strerror( errno ));
+        NSLog( @"failed to open file stream with fdopen: %s", strerror( errno ));
         return;
     }
     setvbuf( mf, NULL, _IONBF, 0 );
