@@ -47,6 +47,7 @@ enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTP
 	NSString			*_currentDir;
 	
 	long long			_transferSpeed;
+	BOOL				_sentTransferBegan;
 	unsigned long long	_transferSize;
 	unsigned long long	_progressiveTransfer;
 }

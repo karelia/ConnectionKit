@@ -185,12 +185,12 @@ typedef struct __flags {
 - (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path;
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
-- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(int)length; 
+- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length; 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath;
 - (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
-- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(int)length;
+- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath;
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con;
