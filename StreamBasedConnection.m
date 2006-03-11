@@ -585,7 +585,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	} else if (stream == (NSStream *)_receiveStream) {
 		[self handleReceiveStreamEvent:theEvent];
 	} else {
-		NSLog(@"StreamBasedConnection: unknown stream");
+		NSLog(@"StreamBasedConnection: unknown stream (%@)", stream);
 	}
 }
 

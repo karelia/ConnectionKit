@@ -95,6 +95,7 @@ static NSArray *sftpErrors = nil;
 {
 	if (self = [super initWithHost:host port:port username:username password:password]) {
 		_inputBuffer = [[NSMutableString alloc] init];
+		_sentTransferBegan = NO;
 	}
 	return self;
 }
@@ -375,7 +376,7 @@ static NSArray *sftpErrors = nil;
 	NSString *str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];	
 	[_inputBuffer appendString:str];
 	
-	int trys = 3;
+	int trys = 5;
 	
 	//we wait 5 times of no data
 	while (trys >= 0) {
@@ -573,19 +574,19 @@ static NSArray *sftpErrors = nil;
 				long eta;
 				
 				[self getProgress:&percent transferred:&amount speed:&_transferSpeed eta:&eta];
-				if (percent == 0) {
+				if (percent == 0 && !_sentTransferBegan) {
 					_transferSize = [[[self currentUpload] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 					if (_flags.didBeginUpload)
 						[_forwarder connection:self uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 					_progressiveTransfer = 0;
 				}
+				_sentTransferBegan = YES;
+				NSLog(@"%3d %%", percent);
 				// we can't be guaranteed that it is exact to the byte count so work it out off the percent.
 				unsigned long long bytes = (percent/100.0) * _transferSize;
-				NSString *tmpDiff = [NSString stringWithFormat:@"%lld", bytes - _progressiveTransfer];
-				int diff = [tmpDiff intValue];
-				
+				unsigned long long diff = bytes - _progressiveTransfer;
 				_progressiveTransfer = amount;
-				if (_flags.uploadPercent)
+				if (percent > 0 && _flags.uploadPercent)
 					[_forwarder connection:self 
 									upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
 							  progressedTo:[NSNumber numberWithInt:percent]];
@@ -597,13 +598,13 @@ static NSArray *sftpErrors = nil;
 				if (percent == 100) {
 					if (_progressiveTransfer != _transferSize) {
 						// fix up an difference
-						tmpDiff = [NSString stringWithFormat:@"%lld", bytes - _progressiveTransfer];
-						diff = [tmpDiff intValue];
+						diff = bytes - _progressiveTransfer;
 						[_forwarder connection:self 
 										upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
 							  sentDataOfLength:diff];
 						_transferSize = 0;
 						_progressiveTransfer = 0;
+						_sentTransferBegan = NO;
 					}
 					if (_flags.uploadFinished)
 						[_forwarder connection:self uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
@@ -681,10 +682,8 @@ static NSArray *sftpErrors = nil;
 				}
 			}
 			[self emptyBuffer];
-			[_inputBuffer appendString:@"sftp> "];
-			if ([self bufferContainsCommandPrompt]) {
-				[self setState:ConnectionIdleState];
-			}
+			//[_inputBuffer appendString:@"sftp> "];
+			[self setState:ConnectionIdleState];
 			break;
 		}
 		case ConnectionAwaitingRenameState:

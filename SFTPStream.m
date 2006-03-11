@@ -133,7 +133,7 @@ enum { START = 200, STOP };
 {
 	_status = NSStreamStatusWriting;
 	//if ([AbstractConnection logStateChanges])
-		NSLog(@"sftp_stream <<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
+		//NSLog(@"sftp_stream <<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
 	
 	int wr = write( _master, buffer, len);
 	if (wr != len) {
@@ -285,7 +285,7 @@ enum { START = 200, STOP };
 			
 			if (amount > 0) {
 				//if ([AbstractConnection logStateChanges])
-					NSLog(@"sftp_stream >> %d: %@",amount, [[[NSString alloc] initWithBytes:buf length:amount encoding:NSUTF8StringEncoding] autorelease]);
+					//NSLog(@"sftp_stream >> %d: %@",amount, [[[NSString alloc] initWithBytes:buf length:amount encoding:NSUTF8StringEncoding] autorelease]);
 				
 				[_bufferLock lock];
 				[_buffer appendBytes:buf length:amount];
