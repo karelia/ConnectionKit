@@ -88,6 +88,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_sendBufferLock release];
 	[_sendBuffer release];
 	[_fileCheckingConnection release];
+	[_fileCheckingLock release];
 	
 	[super dealloc];
 }
