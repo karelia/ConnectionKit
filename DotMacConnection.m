@@ -152,7 +152,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
 {
 	[myPort setDelegate:nil];
 	[myPort release];
-	[myLock lock];
+	[myLock release];
 	[myForwarder release];
 	
     [self setCurrentDirectory:nil];
