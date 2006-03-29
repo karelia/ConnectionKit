@@ -522,21 +522,24 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			NSError *error = nil;
-			
-			if (GET_STATE == ConnectionNotConnectedState) {
-				error = [NSError errorWithDomain:ConnectionErrorDomain
-											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"Is the FTP service running on %@?", [self host]]
-																			 forKey:NSLocalizedDescriptionKey]];
+			if (_flags.error)
+			{
+				NSError *error = nil;
+				
+				if (GET_STATE == ConnectionNotConnectedState) {
+					error = [NSError errorWithDomain:ConnectionErrorDomain
+												code:ConnectionStreamError
+											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"Is the FTP service running on %@?", [self host]]
+																				 forKey:NSLocalizedDescriptionKey]];
+				}
+				else {
+					error = [NSError errorWithDomain:ConnectionErrorDomain
+												code:ConnectionStreamError
+											userInfo:[NSDictionary dictionaryWithObject:@"Receive Stream Error" forKey:NSLocalizedDescriptionKey]];
+				}
+				
+				[_forwarder connection:self didReceiveError:error];
 			}
-			else {
-				[NSError errorWithDomain:ConnectionErrorDomain
-									code:ConnectionStreamError
-								userInfo:[NSDictionary dictionaryWithObject:@"Receive Stream Error" forKey:NSLocalizedDescriptionKey]];
-			}
-			
-			[_forwarder connection:self didReceiveError:error];
 			
 			break;
 		}
