@@ -671,11 +671,11 @@ static NSArray *sftpErrors = nil;
 		}
 		case ConnectionCreateDirectoryState:
 		{
+			//get the command from the history - it will be mkdir
+			NSString *cmd = [[self lastCommand] command];
+			NSString *folderName = [cmd substringFromIndex:6]; // "mkdir "
 			if ([self bufferContainsError]){
 				if (_flags.error) {
-					//get the command from the history - it will be mkdir
-					NSString *cmd = [[self lastCommand] command];
-					NSString *folderName = [cmd substringFromIndex:6]; // "mkdir "
 					// This is most likely because the directory exists. Not sure what the message would be if it was permission denied
 					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
 													   code:SFTPErrorPermissionDenied
@@ -684,6 +684,11 @@ static NSArray *sftpErrors = nil;
 				}
 			}
 			[self emptyBuffer];
+			if (_flags.createDirectory)
+			{
+				[_forwarder connection:self didCreateDirectory:folderName];
+			}
+				
 			//[_inputBuffer appendString:@"sftp> "];
 			[self setState:ConnectionIdleState];
 			break;
