@@ -579,9 +579,9 @@ static NSArray *sftpErrors = nil;
 					if (_flags.didBeginUpload)
 						[_forwarder connection:self uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 					_progressiveTransfer = 0;
+					_sentTransferBegan = YES;
 				}
-				_sentTransferBegan = YES;
-				NSLog(@"%3d %%", percent);
+				//NSLog(@"%3d %%", percent);
 				// we can't be guaranteed that it is exact to the byte count so work it out off the percent.
 				unsigned long long bytes = (percent/100.0) * _transferSize;
 				unsigned long long diff = bytes - _progressiveTransfer;
@@ -602,10 +602,12 @@ static NSArray *sftpErrors = nil;
 						[_forwarder connection:self 
 										upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
 							  sentDataOfLength:diff];
-						_transferSize = 0;
-						_progressiveTransfer = 0;
-						_sentTransferBegan = NO;
 					}
+					//reset the values
+					_transferSize = 0;
+					_progressiveTransfer = 0;
+					_sentTransferBegan = NO;
+					
 					if (_flags.uploadFinished)
 						[_forwarder connection:self uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 					//delete the temp data file if we uploaded a blob of data
