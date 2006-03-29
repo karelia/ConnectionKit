@@ -599,9 +599,12 @@ static NSArray *sftpErrors = nil;
 					if (_progressiveTransfer != _transferSize) {
 						// fix up an difference
 						diff = bytes - _progressiveTransfer;
-						[_forwarder connection:self 
-										upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
-							  sentDataOfLength:diff];
+						if (_flags.uploadProgressed)
+						{
+							[_forwarder connection:self 
+											upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
+								  sentDataOfLength:diff];
+						}
 					}
 					//reset the values
 					_transferSize = 0;
