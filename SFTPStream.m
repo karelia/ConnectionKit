@@ -215,7 +215,7 @@ enum { START = 200, STOP };
 			[self connectToServerWithParams:_args];
 			break;
 		case STOP:
-			// we should really quit in a graceful way.
+			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
 			break;
 	}
 }

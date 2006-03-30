@@ -74,9 +74,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)dealloc
 {
+	[self sendPortMessage:KILL_THREAD];
 	[_port setDelegate:nil];
-	// And remove the port from the runloop
-	// ??? Not sure how to remove port from [OTHER-RUN-LOOP removePort:mPort forMode:(NSString *)kCFRunLoopCommonModes];
     [_port release];
 	
 	[self closeStreams];
@@ -222,6 +221,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			
 		case FORCE_DISCONNECT:
 			break;
+		case KILL_THREAD:
+		{
+			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
+			break;
+		}
 	}
 }
 
