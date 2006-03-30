@@ -336,7 +336,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
-#warning This is a hack
+#warning Applying KVC hack
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
 	

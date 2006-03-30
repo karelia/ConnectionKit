@@ -631,7 +631,7 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 				NSHost *host = [NSHost hostWithAddress:hostString];
-#warning This is a Hack
+#warning Applying KVC hack
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 				
 				[self closeDataStreams];
@@ -655,7 +655,7 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 					[self sendCommand:@"EPRT"];
 				}
 				NSHost *host = [NSHost hostWithName:_connectionHost];
-#warning This is a hack
+#warning Applying KVC hack
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 					
 				[self closeDataStreams];
