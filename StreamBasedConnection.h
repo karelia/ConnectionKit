@@ -86,5 +86,5 @@ enum { StreamErrorFailedSocketCreation = 7000 };
 
 extern const unsigned int kStreamChunkSize;
 
-enum { CONNECT = 0, COMMAND, ABORT, DISCONNECT, FORCE_DISCONNECT };		// port messages
+enum { CONNECT = 0, COMMAND, ABORT, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };		// port messages
 

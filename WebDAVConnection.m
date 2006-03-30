@@ -36,7 +36,7 @@
 #import "AbstractConnection.h"
 #import "InterThreadMessaging.h"
 
-enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
+enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };
 
 @implementation WebDAVConnection
 
@@ -77,6 +77,16 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
 		
 	}
 	return self;
+}
+
+- (void)dealloc
+{
+	[self sendPortMessage:KILL_THREAD];
+	[_port setDelegate:nil];
+	[_port release];
+	[_lock release];
+	[_forwarder release];
+	[super dealloc];
 }
 
 #pragma mark -
@@ -167,8 +177,12 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
 			{
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
 			}
-			
 			break;
+		case KILL_THREAD:
+		{
+			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
+		}
+		break;
 	}
 }
 

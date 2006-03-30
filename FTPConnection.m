@@ -934,6 +934,13 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
+			else if (GET_STATE == ConnectionSentFeatureRequestState)
+			{
+				// the server doesn't support FEAT before login
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+				[self setState:ConnectionSentUsernameState];
+				return;
+			}
 			else //any other error here is that we are not logged in
 			{
 				if (_flags.error) {
