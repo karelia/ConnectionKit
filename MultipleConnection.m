@@ -164,7 +164,7 @@
 
 - (id)currentCreateDirectory
 {
-	[_folderCreations objectAtIndex:0];
+	return [_folderCreations objectAtIndex:0];
 }
 
 - (unsigned)numberOfCreateDirectories
@@ -576,7 +576,6 @@
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent
 {
 	NSMutableDictionary *rec = [self uploadWithRemotePath:remotePath];
-	NSMutableArray *connections = [rec objectForKey:@"Connections"];
 	NSNumber *per = [rec objectForKey:@"percent"];
 	int val = [per intValue];
 	val += [percent intValue];
@@ -605,7 +604,6 @@
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath
 {
 	NSMutableDictionary *rec = [self uploadWithRemotePath:remotePath];
-	NSMutableArray *connections = [rec objectForKey:@"Connections"];
 	NSNumber *didSend = [rec objectForKey:@"didSendBegin"];
 	
 	if (!didSend)
