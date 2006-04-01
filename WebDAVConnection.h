@@ -37,12 +37,15 @@
 
 @interface WebDAVConnection : AbstractQueueConnection
 {
-	DAVSession *_session;
+	DAVSession			*_session;
 	
-	NSLock *_lock;
-	NSPort *_port;
-	NSThread *_bgThread;
-	RunLoopForwarder *_forwarder;
+	NSMutableArray		*myPendingInvocations;
+	NSString			*myCurrentDirectory;
+	
+	NSLock				*_lock;
+	NSPort				*_port;
+	NSThread			*_bgThread;
+	RunLoopForwarder	*_forwarder;
 }
 
 
