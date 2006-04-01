@@ -68,6 +68,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
                           username:username
                           password:password])
 	{
+		[DAVSession setDefaultUserAgent:@"ConnectionFramework - http://www.dlsxtreme.com/ConnectionFramework/"];
 		[NSThread prepareForInterThreadMessages];
         _lock = [[NSLock alloc] init];
 		_port = [[NSPort port] retain];
@@ -144,7 +145,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 		}
 		case COMMAND:
 		{
-			
+			[self processInvocations];
 			break;
 		}
 		case ABORT:
@@ -186,6 +187,45 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 	}
 }
 
+- (void)queueInvocation:(NSInvocation *)anInvocation
+{
+    [myPendingInvocations addObject:anInvocation];
+	if ([NSThread currentThread] != _bgThread)
+	{
+		[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
+	}
+	else
+	{
+		[self processInvocations];	// in background thread, just check the queue now for anything to do
+	}
+}
+
+- (void)dequeueInvocation:(NSInvocation *)anInvocation
+{
+    [myPendingInvocations removeObject:anInvocation];
+}
+
+- (void)processInvocations
+{
+	NSAssert([NSThread currentThread] == _bgThread, @"Processing Invocations from wrong thread");
+	
+    if ( !_transactionInProgress )
+    {
+        if ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) )
+        {
+            NSInvocation *invocation = [myPendingInvocations objectAtIndex:0];
+            if ( nil != invocation )
+            {
+                [invocation retain];
+                [self dequeueInvocation:invocation];
+                _transactionInProgress = YES;
+                [invocation invoke];
+                [invocation release];
+            }
+        }
+    }
+}
+
 #pragma mark -
 #pragma mark Abstract Connection Protocol
 
@@ -206,22 +246,23 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
+	// this is really a no-op
 	
 }
 
 - (NSString *)currentDirectory
 {
-	
+	return myCurrentDirectory;
 }
 
 - (NSString *)rootDirectory
 {
-	
+	return nil;
 }
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	
+	DAVMakeCollection *op = [DAVMakeCollection makeCollectionRequestWithSession:_session path:dirPath];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
