@@ -183,18 +183,21 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 - (void)savedHostsChanged:(id)sender
 {
 	NSDictionary *host = [[sender selectedItem] representedObject];
-	[cHost setStringValue:[host objectForKey:HostKey]];
-	[cUser setStringValue:[host objectForKey:UsernameKey]];
-	[cPort setStringValue:[host objectForKey:PortKey]];
-	if ([host objectForKey:InitialDirectoryKey])
-		[initialDirectory setStringValue:[host objectForKey:InitialDirectoryKey]];
-	else
-		[initialDirectory setStringValue:@""];
-	
-	NSString *pass = [Controller keychainPasswordForServer:[host objectForKey:HostKey] account:[host objectForKey:UsernameKey]];
-	if (pass)
-		[cPass setStringValue:pass];
-	[connectWindow makeFirstResponder:cPass];
+	if (host)
+	{
+		[cHost setStringValue:[host objectForKey:HostKey]];
+		[cUser setStringValue:[host objectForKey:UsernameKey]];
+		[cPort setStringValue:[host objectForKey:PortKey]];
+		if ([host objectForKey:InitialDirectoryKey])
+			[initialDirectory setStringValue:[host objectForKey:InitialDirectoryKey]];
+		else
+			[initialDirectory setStringValue:@""];
+		
+		NSString *pass = [Controller keychainPasswordForServer:[host objectForKey:HostKey] account:[host objectForKey:UsernameKey]];
+		if (pass)
+			[cPass setStringValue:pass];
+		[connectWindow makeFirstResponder:cPass];
+	}
 }
 
 - (void)saveHost:(id)sender

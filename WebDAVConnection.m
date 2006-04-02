@@ -58,6 +58,18 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 #pragma mark init methods
 
++ (id)connectionToHost:(NSString *)host
+				  port:(NSString *)port
+			  username:(NSString *)username
+			  password:(NSString *)password
+{
+	WebDAVConnection *c = [[self alloc] initWithHost:host
+                                                port:port
+                                            username:username
+                                            password:password];
+	return [c autorelease];
+}
+
 - (id)initWithHost:(NSString *)host
 			  port:(NSString *)port
 		  username:(NSString *)username
@@ -68,13 +80,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
                           username:username
                           password:password])
 	{
-		[DAVSession setDefaultUserAgent:@"ConnectionFramework - http://www.dlsxtreme.com/ConnectionFramework/"];
-		[NSThread prepareForInterThreadMessages];
-        _lock = [[NSLock alloc] init];
-		_port = [[NSPort port] retain];
-		[_port setDelegate:self];
 		
-		[NSThread detachNewThreadSelector:@selector(runDAVBackgroundThread:) toTarget:self withObject:nil];
 		
 	}
 	return self;
@@ -83,147 +89,8 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 - (void)dealloc
 {
 	[self sendPortMessage:KILL_THREAD];
-	[_port setDelegate:nil];
-	[_port release];
-	[_lock release];
-	[_forwarder release];
+	
 	[super dealloc];
-}
-
-#pragma mark -
-#pragma mark Threading
-
-- (void)runDAVBackgroundThread:(id)notUsed
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	_bgThread = [NSThread currentThread];
-	[NSThread prepareForInterThreadMessages];
-// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
-// But then again, we can't remove the thread, so it really doesn't mean much.
-	[[NSRunLoop currentRunLoop] addPort:_port forMode:(NSString *)kCFRunLoopCommonModes];
-	[[NSRunLoop currentRunLoop] run];
-	
-	[pool release];
-}
-
-- (void)sendPortMessage:(int)aMessage
-{
-	if (nil != _port)
-	{
-		NSPortMessage *message
-		= [[NSPortMessage alloc] initWithSendPort:_port
-									  receivePort:_port components:nil];
-		[message setMsgid:aMessage];
-		
-		@try {
-			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
-			if (!sent)
-			{
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"WebDAVConnection couldn't send message %d", aMessage);
-			}
-		} @catch (NSException *ex) {
-			NSLog(@"%@", ex);
-		} @finally {
-			[message release];
-		} 
-	}
-}
-
-- (void)handlePortMessage:(NSPortMessage *)portMessage
-{
-	int message = [portMessage msgid];
-	
-	switch (message)
-	{
-		case CONNECT:
-		{
-			_session = [[DAVSession sessionWithScheme:@"http" host:[self host] port:[[self port] intValue]] retain];
-			[_session setUsername:[self username] andPassword:[self password]];
-			
-			break;
-		}
-		case COMMAND:
-		{
-			[self processInvocations];
-			break;
-		}
-		case ABORT:
-			
-			if ( _flags.cancel ) 
-			{
-				[_forwarder connectionDidCancelTransfer:self];
-			}
-			break;
-			
-		case CANCEL_ALL:
-			
-			if ( _flags.cancel ) 
-			{
-				[_forwarder connectionDidCancelTransfer:self];
-			}
-				break;
-		case DISCONNECT:
-		{
-			// a no-op for WebDAV protocol
-			if ( _flags.didDisconnect ) 
-			{
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			}
-			break;
-		}
-		case FORCE_DISCONNECT:
-#warning Need to clear all the queues
-			if ( _flags.didDisconnect ) 
-			{
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			}
-			break;
-		case KILL_THREAD:
-		{
-			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
-		}
-		break;
-	}
-}
-
-- (void)queueInvocation:(NSInvocation *)anInvocation
-{
-    [myPendingInvocations addObject:anInvocation];
-	if ([NSThread currentThread] != _bgThread)
-	{
-		[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
-	}
-	else
-	{
-		[self processInvocations];	// in background thread, just check the queue now for anything to do
-	}
-}
-
-- (void)dequeueInvocation:(NSInvocation *)anInvocation
-{
-    [myPendingInvocations removeObject:anInvocation];
-}
-
-- (void)processInvocations
-{
-	NSAssert([NSThread currentThread] == _bgThread, @"Processing Invocations from wrong thread");
-	
-    if ( !_transactionInProgress )
-    {
-        if ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) )
-        {
-            NSInvocation *invocation = [myPendingInvocations objectAtIndex:0];
-            if ( nil != invocation )
-            {
-                [invocation retain];
-                [self dequeueInvocation:invocation];
-                _transactionInProgress = YES;
-                [invocation invoke];
-                [invocation release];
-            }
-        }
-    }
 }
 
 #pragma mark -
@@ -246,7 +113,6 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	// this is really a no-op
 	
 }
 
@@ -262,21 +128,24 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	DAVMakeCollection *op = [DAVMakeCollection makeCollectionRequestWithSession:_session path:dirPath];
+	
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
-	
+	//we cannot set permissions via webdav
+	[self createDirectory:dirPath];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
-	
+	//we cannot set permissions via webdav
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	NSAssert((nil != fromPath), @"fromPath is nil!");
+    NSAssert((nil != toPath), @"toPath is nil!");
 	
 }
 
@@ -357,7 +226,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)directoryContents
 {
-	
+
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
