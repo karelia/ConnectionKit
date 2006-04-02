@@ -1,13 +1,9 @@
 /*
- 
- WebDAVConnection.h
- Marvel
- 
- Copyright (c) 2004-2005 Biophony LLC. All rights reserved.
+ Copyright (c) 2004, Greg Hulands <ghulands@framedphotographics.com>
+ All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
  are permitted provided that the following conditions are met:
- 
  
  Redistributions of source code must retain the above copyright notice, this list 
  of conditions and the following disclaimer.
@@ -16,7 +12,7 @@
  list of conditions and the following disclaimer in the documentation and/or other 
  materials provided with the distribution.
  
- Neither the name of Biophony LLC nor the names of its contributors may be used to 
+ Neither the name of Greg Hulands nor the names of its contributors may be used to 
  endorse or promote products derived from this software without specific prior 
  written permission.
  
@@ -29,16 +25,43 @@
  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
  */
-#import "AbstractQueueConnection.h"
 
-@class DAVSession, RunLoopForwarder;
+#import <Cocoa/Cocoa.h>
 
-@interface WebDAVConnection : AbstractStreamConnection
-{	
-	BOOL requestInflight;
+
+@interface DAVRequest : NSObject 
+{
+	NSString *myMethod;
+	NSString *myURI;
+	
+	NSMutableDictionary *myHeaders;
+	NSMutableData *myContent;
 }
 
++ (id)messageWithMethod:(NSString *)method uri:(NSString *)uri;
+
+- (id)initWithMethod:(NSString *)method uri:(NSString *)uri;
+
+- (void)setHeader:(NSString *)val forKey:(NSString *)key;
+- (void)addHeader:(NSString *)val forKey:(NSString *)key;
+- (id)headerForKey:(NSString *)key;
+
+- (void)appendContent:(NSData *)data;
+- (void)appendContentString:(NSString *)str;
+- (void)setContent:(NSData *)data;
+- (void)setContentString:(NSString *)str;
+
+- (NSData *)content;
+- (NSString *)contentString;
+
+- (unsigned)contentLength;
+
+- (NSData *)serialized;
 
 @end
+
+extern NSString *DAVGetMethod;
+extern NSString *DAVPutMethod;
+extern NSString *DAVMakeCollectionMethod;
+extern NSString *DAVPropFindMethod;

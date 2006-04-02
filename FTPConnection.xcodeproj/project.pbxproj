@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		79004AFA097278BB004A0934 /* DAVKitPrivate.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79004AF8097278BB004A0934 /* DAVKitPrivate.h */; };
-		79004B1D09727DD6004A0934 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79004B1B09727DD6004A0934 /* DAVKit.framework */; };
 		79158559076573880036D96E /* PermissionsController.h in Resources */ = {isa = PBXBuildFile; fileRef = 79158557076573880036D96E /* PermissionsController.h */; };
 		7915855A076573880036D96E /* PermissionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79158558076573880036D96E /* PermissionsController.m */; };
 		792017AB08B1630C00F652C9 /* WebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AA08B1630C00F652C9 /* WebDAVConnection.m */; };
@@ -52,6 +50,8 @@
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
+		79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */; };
+		79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CC0D8009DFBFA300F975D2 /* DAVResponse.m */; };
 		79D1D76E07613A43003FA7BB /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76C07613A43003FA7BB /* InputDialog.nib */; };
 		79D1D77107613A4E003FA7BB /* InputDialog.h in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76F07613A4E003FA7BB /* InputDialog.h */; };
 		79D1D77207613A4E003FA7BB /* InputDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79D1D77007613A4E003FA7BB /* InputDialog.m */; };
@@ -63,6 +63,8 @@
 		79DF884D07606D680006D6DD /* ProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DF884B07606D680006D6DD /* ProgressCell.m */; };
 		79E2DAF307656297007609C1 /* console.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79E2DAF207656297007609C1 /* console.tiff */; };
 		79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79EBC65E076AA23C001C7BF1 /* Carbon.framework */; };
+		79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79FDC96209DFBCDF00373F71 /* DAVRequest.h */; };
+		79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FDC96309DFBCDF00373F71 /* DAVRequest.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -109,7 +111,8 @@
 				79640E5F094671A000A8789D /* FTPOverSSLConnection.h in CopyFiles */,
 				79640E7F09469FD300A8789D /* SSLStream.h in CopyFiles */,
 				799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */,
-				79004AFA097278BB004A0934 /* DAVKitPrivate.h in CopyFiles */,
+				79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */,
+				79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -132,8 +135,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* FTPConnection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPConnection_Prefix.pch; sourceTree = "<group>"; };
-		79004AF8097278BB004A0934 /* DAVKitPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVKitPrivate.h; sourceTree = "<group>"; };
-		79004B1B09727DD6004A0934 /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DAVKit.framework; path = /System/Library/PrivateFrameworks/DAVKit.framework; sourceTree = "<absolute>"; };
 		79158557076573880036D96E /* PermissionsController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = PermissionsController.h; sourceTree = "<group>"; };
 		79158558076573880036D96E /* PermissionsController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = PermissionsController.m; sourceTree = "<group>"; };
 		792017A908B1630C00F652C9 /* WebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = WebDAVConnection.h; sourceTree = "<group>"; };
@@ -178,10 +179,12 @@
 		797C0AE8093FEAB1004ABB69 /* SFTPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPStream.m; sourceTree = "<group>"; };
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		797F96FC096DFD240029D7DE /* DotMacKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DotMacKit.framework; path = /Library/Frameworks/DotMacKit.framework; sourceTree = "<absolute>"; };
-		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = ../../../../System/Library/Frameworks/Security.framework; sourceTree = SOURCE_ROOT; };
+		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
+		79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVResponse.h; sourceTree = "<group>"; };
+		79CC0D8009DFBFA300F975D2 /* DAVResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVResponse.m; sourceTree = "<group>"; };
 		79D1D76D07613A43003FA7BB /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/InputDialog.nib; sourceTree = "<group>"; };
 		79D1D76F07613A4E003FA7BB /* InputDialog.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InputDialog.h; sourceTree = "<group>"; };
 		79D1D77007613A4E003FA7BB /* InputDialog.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InputDialog.m; sourceTree = "<group>"; };
@@ -193,6 +196,8 @@
 		79DF884B07606D680006D6DD /* ProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressCell.m; sourceTree = "<group>"; };
 		79E2DAF207656297007609C1 /* console.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = console.tiff; sourceTree = "<group>"; };
 		79EBC65E076AA23C001C7BF1 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		79FDC96209DFBCDF00373F71 /* DAVRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVRequest.h; sourceTree = "<group>"; };
+		79FDC96309DFBCDF00373F71 /* DAVRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVRequest.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* FTPConnection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FTPConnection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionProtocol.h; sourceTree = "<group>"; };
@@ -207,7 +212,6 @@
 				79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */,
 				797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */,
 				797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */,
-				79004B1D09727DD6004A0934 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,7 +236,6 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				79004B1B09727DD6004A0934 /* DAVKit.framework */,
 				797F987F096E1BDF0029D7DE /* Security.framework */,
 				797F96FC096DFD240029D7DE /* DotMacKit.framework */,
 				79EBC65E076AA23C001C7BF1 /* Carbon.framework */,
@@ -326,11 +329,7 @@
 				792017AD08B1632800F652C9 /* DotMacConnection.m */,
 				792017AE08B1632800F652C9 /* FileConnection.h */,
 				792017AF08B1632800F652C9 /* FileConnection.m */,
-				79004AF8097278BB004A0934 /* DAVKitPrivate.h */,
-				792017A908B1630C00F652C9 /* WebDAVConnection.h */,
-				792017AA08B1630C00F652C9 /* WebDAVConnection.m */,
-				7920196C08B1C32A00F652C9 /* WebDAVSecureConnection.h */,
-				7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */,
+				79FDC97509DFBF2D00373F71 /* DAV */,
 				793997ED075FDACB00F713EB /* RunLoopForwarder.h */,
 				793997EE075FDACB00F713EB /* RunLoopForwarder.m */,
 				797F987B096E1B730029D7DE /* Socket with SSL Capabitlities */,
@@ -370,6 +369,21 @@
 			children = (
 			);
 			name = "Socket with SSL Capabitlities";
+			sourceTree = "<group>";
+		};
+		79FDC97509DFBF2D00373F71 /* DAV */ = {
+			isa = PBXGroup;
+			children = (
+				79FDC96209DFBCDF00373F71 /* DAVRequest.h */,
+				79FDC96309DFBCDF00373F71 /* DAVRequest.m */,
+				79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */,
+				79CC0D8009DFBFA300F975D2 /* DAVResponse.m */,
+				792017A908B1630C00F652C9 /* WebDAVConnection.h */,
+				792017AA08B1630C00F652C9 /* WebDAVConnection.m */,
+				7920196C08B1C32A00F652C9 /* WebDAVSecureConnection.h */,
+				7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */,
+			);
+			name = DAV;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -487,6 +501,8 @@
 				79640E60094671A000A8789D /* FTPOverSSLConnection.m in Sources */,
 				79640E8009469FD300A8789D /* SSLStream.m in Sources */,
 				798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */,
+				79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */,
+				79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
