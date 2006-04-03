@@ -28,11 +28,11 @@
  */
 
 #import "DAVRequest.h"
-
+#import "DAVResponse.h"
 
 @implementation DAVRequest
 
-+ (id)messageWithMethod:(NSString *)method uri:(NSString *)uri
++ (id)requestWithMethod:(NSString *)method uri:(NSString *)uri
 {
 	return [[[DAVRequest alloc] initWithMethod:method uri:uri] autorelease];
 }
@@ -59,11 +59,25 @@
 
 - (void)dealloc
 {
+	[myUserInfo release];
 	[myMethod release];
 	[myURI release];
 	[myHeaders release];
 	[myContent release];
 	[super dealloc];
+}
+
+- (NSString *)description
+{
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ %@ HTTP/1.1\n", myMethod, myURI];
+	NSEnumerator *e = [myHeaders keyEnumerator];
+	NSString *key;
+	
+	while (key = [e nextObject])
+	{
+		[str appendFormat:@"%@: %@\n", key, [myHeaders objectForKey:key]];
+	}
+	return str;
 }
 
 - (void)setHeader:(NSString *)val forKey:(NSString *)key
@@ -94,6 +108,17 @@
 - (id)headerForKey:(NSString *)key
 {
 	return [myHeaders objectForKey:key];
+}
+
+- (void)setUserInfo:(id)ui
+{
+	[myUserInfo autorelease];
+	myUserInfo = [ui retain];
+}
+
+- (id)userInfo
+{
+	return myUserInfo;
 }
 
 - (void)appendContent:(NSData *)data
@@ -158,12 +183,73 @@
 		header = [NSString stringWithFormat:@"%@: %@\r\n", key, header];
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
+	NSString *encoding = [NSString stringWithFormat:@"Content-Type: text/xml; charset=\"utf-8\"\r\n"];
+	[packet appendData:[encoding dataUsingEncoding:NSUTF8StringEncoding]];
+	NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
+	[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
+	
 	NSString *spacer = [NSString stringWithString:@"\r\n"];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	//append the content
 	[packet appendData:myContent];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
+	
+	return packet;
 }
+
+- (DAVResponse *)responseWithData:(NSData *)data
+{
+	NSRange r = [DAVResponse canConstructResponseWithData:data];
+	if (r.location != NSNotFound)
+	{
+		return [DAVResponse responseWithRequest:self data:data];
+	}
+	return nil;
+}
+
+@end
+
+@implementation DAVDirectoryContentsRequest : DAVRequest
+
++ (id)directoryContentsForPath:(NSString *)path
+{
+	return [[[DAVDirectoryContentsRequest alloc] initWithMethod:nil uri:path] autorelease];
+}
+
+- (id)initWithMethod:(NSString *)method uri:(NSString *)uri
+{
+	if (self = [super initWithMethod:@"PROPFIND" uri:uri])
+	{
+		[self setHeader:[NSNumber numberWithInt:1] forKey:@"Depth"];
+		myPath = [uri copy];
+		
+		NSMutableString *xml = [NSMutableString string];
+		[xml appendString:@"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"];
+		[xml appendString:@"<D:propfind xmlns:D=\"DAV:\">\n"];
+		[xml appendString:@"<D:allprop/>\n"];
+		[xml appendString:@"</D:propfind>\n"];
+		
+		[self setContentString:xml];
+	}
+	return self;
+}
+
+- (void)dealloc
+{
+	[myPath release];
+	[super dealloc];
+}
+
+- (DAVResponse *)responseWithData:(NSData *)data
+{
+	NSRange r = [DAVResponse canConstructResponseWithData:data];
+	if (r.location != NSNotFound)
+	{
+		return [DAVDirectoryContentsResponse responseWithRequest:self data:data];
+	}
+	return nil;
+}
+
 
 @end

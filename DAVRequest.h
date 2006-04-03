@@ -29,23 +29,28 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class DAVResponse;
 
 @interface DAVRequest : NSObject 
 {
-	NSString *myMethod;
-	NSString *myURI;
+	NSString			*myMethod;
+	NSString			*myURI;
+	id					myUserInfo;
 	
 	NSMutableDictionary *myHeaders;
-	NSMutableData *myContent;
+	NSMutableData		*myContent;
 }
 
-+ (id)messageWithMethod:(NSString *)method uri:(NSString *)uri;
++ (id)requestWithMethod:(NSString *)method uri:(NSString *)uri;
 
 - (id)initWithMethod:(NSString *)method uri:(NSString *)uri;
 
 - (void)setHeader:(NSString *)val forKey:(NSString *)key;
 - (void)addHeader:(NSString *)val forKey:(NSString *)key;
 - (id)headerForKey:(NSString *)key;
+
+- (void)setUserInfo:(id)ui;
+- (id)userInfo;
 
 - (void)appendContent:(NSData *)data;
 - (void)appendContentString:(NSString *)str;
@@ -59,9 +64,16 @@
 
 - (NSData *)serialized;
 
+- (DAVResponse *)responseWithData:(NSData *)data;
+
 @end
 
-extern NSString *DAVGetMethod;
-extern NSString *DAVPutMethod;
-extern NSString *DAVMakeCollectionMethod;
-extern NSString *DAVPropFindMethod;
+@interface DAVDirectoryContentsRequest : DAVRequest
+{
+	NSString *myPath;
+}
+
++ (id)directoryContentsForPath:(NSString *)path;
+- (NSString *)path;
+
+@end

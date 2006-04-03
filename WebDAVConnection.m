@@ -1,13 +1,9 @@
 /*
- 
- WebDAVConnection.m
- Marvel
- 
- Copyright (c) 2004-2005 Biophony LLC. All rights reserved.
+ Copyright (c) 2004, Greg Hulands <ghulands@framedphotographics.com>
+ All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
  are permitted provided that the following conditions are met:
- 
  
  Redistributions of source code must retain the above copyright notice, this list 
  of conditions and the following disclaimer.
@@ -16,7 +12,7 @@
  list of conditions and the following disclaimer in the documentation and/or other 
  materials provided with the distribution.
  
- Neither the name of Biophony LLC nor the names of its contributors may be used to 
+ Neither the name of Greg Hulands nor the names of its contributors may be used to 
  endorse or promote products derived from this software without specific prior 
  written permission.
  
@@ -29,14 +25,13 @@
  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
  */
-#import "WebDAVConnection.h"
-#import "DAVKitPrivate.h"
-#import "AbstractConnection.h"
-#import "InterThreadMessaging.h"
 
-enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };
+#import "WebDAVConnection.h"
+#import "AbstractConnection.h"
+#import "DAVRequest.h"
+#import "DAVResponse.h"
+#import "GSNSDataExtensions.h"
 
 @implementation WebDAVConnection
 
@@ -80,8 +75,10 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
                           username:username
                           password:password])
 	{
-		
-		
+		myRequests = [[NSMutableArray alloc] init];
+		myResponseBuffer = [[NSMutableData data] retain];
+		NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
+		myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64EncodingWithLineLength:0]] retain];
 	}
 	return self;
 }
@@ -89,31 +86,165 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 - (void)dealloc
 {
 	[self sendPortMessage:KILL_THREAD];
-	
+	[myCurrentRequest release];
+	[myCurrentDirectory release];
+	[myResponseBuffer release];
+	[myRequests release];
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Stream Overrides
+
+- (void)handlePortMessage:(NSPortMessage *)portMessage
+{
+    int message = [portMessage msgid];
+	
+	switch (message)
+	{
+		case CONNECT:
+		{
+			[super handlePortMessage:portMessage];
+			_flags.isConnected = YES;
+			[self setState:ConnectionIdleState];
+			if (_flags.didConnect)
+			{
+				[_forwarder connection:self didConnectToHost:[self host]];
+			}
+			break;
+		}
+		default: [super handlePortMessage:portMessage];
+	}
+}
+
+- (void)processReceivedData:(NSData *)data
+{
+	[myResponseBuffer appendData:data];
+	NSRange responseRange = [DAVResponse canConstructResponseWithData:myResponseBuffer];
+	if (responseRange.location != NSNotFound)
+	{
+		NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
+		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
+		[myResponseBuffer replaceBytesInRange:responseRange withBytes:NULL length:0];
+		
+		if ([response code] == 401)
+		{
+			if (myAuthorization != nil)
+			{
+				// the user or password supplied is bad
+				if (_flags.badPassword)
+				{
+					[_forwarder connectionDidSendBadPassword:self];
+					[self setState:ConnectionNotConnectedState];
+					if (_flags.didDisconnect)
+					{
+						[_forwarder connection:self didDisconnectFromHost:[self host]];
+					}
+				}
+			}
+			else
+			{
+				// need to append authorization
+				NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+				NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+				NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+				NSScanner *scanner = [NSScanner scannerWithString:auth];
+				NSString *authMethod = nil;
+				NSString *realm = nil;
+				[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
+				[scanner scanUpToString:@"Realm\"" intoString:nil];
+				[scanner scanUpToCharactersFromSet:quote intoString:&realm];
+				
+				if ([authMethod isEqualToString:@"Basic"])
+				{
+					NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
+					NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+					[myAuthorization autorelease];
+					myAuthorization = [[authData base64EncodingWithLineLength:0] retain];
+					//resend the request with auth
+					[self sendCommand:myCurrentRequest];
+				}
+				else
+				{
+					@throw [NSException exceptionWithName:NSInternalInconsistencyException
+												   reason:@"Only Basic Authentication is supported at the moment"
+												 userInfo:nil];
+				}
+			}
+		}
+		NSLog(@"Received DAVResponse:\n%@", response);
+		NSLog(@"XML Document:\n%@", [response contentString]);
+	}
+}
+
+- (void)sendCommand:(id)command
+{
+	if ([command isKindOfClass:[DAVRequest class]])
+	{
+		NSLog(@"Sending DAVRequest:\n%@", command);
+		
+		DAVRequest *req = (DAVRequest *)command;
+		//make sure we set the host name
+		[req setHeader:[self host] forKey:@"Host"];
+		if (myAuthorization)
+		{
+			[req setHeader:myAuthorization forKey:@"Authorization"];
+		}
+		[self sendData:[req serialized]];
+	}
+	else 
+	{
+		//we are an invocation
+		NSInvocation *inv = (NSInvocation *)command;
+		[inv invoke];
+	}
+}
+
+- (void)checkQueue
+{
+	if (myCurrentRequest)
+		return;
+	if ([myRequests count] > 0)
+	{
+		[_queueLock lock];
+		myCurrentRequest = [[myRequests objectAtIndex:0] retain];
+		[myRequests removeObjectAtIndex:0];
+		[_queueLock unlock];
+		[self sendCommand:myCurrentRequest];
+	}
+}
+
+- (void)queueRequest:(id)request
+{
+	[_queueLock lock];
+	[myRequests addObject:request];
+	[_queueLock unlock];
+	
+	[self sendPortMessage:COMMAND];
 }
 
 #pragma mark -
 #pragma mark Abstract Connection Protocol
 
-- (void)connect
+- (void)davDidChangeToDirectory:(NSString *)dirPath
 {
-	[self sendPortMessage:CONNECT];
-}
-
-- (void)disconnect
-{
-	[self sendPortMessage:DISCONNECT];
-}
-
-- (void)forceDisconnect
-{
-	[self sendPortMessage:FORCE_DISCONNECT];
+	[myCurrentDirectory autorelease];
+	myCurrentDirectory = [dirPath copy];
+	if (_flags.changeDirectory)
+	{
+		[_forwarder connection:self didChangeToDirectory:dirPath];
+	}
+	[myCurrentRequest release];
+	myCurrentRequest = nil;
+	[self checkQueue];
 }
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDidChangeToDirectory:)
+													  target:self
+												   arguments:[NSArray arrayWithObjects: dirPath]];
+	[self queueRequest:inv];
 }
 
 - (NSString *)currentDirectory
@@ -133,13 +264,11 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
-	//we cannot set permissions via webdav
 	[self createDirectory:dirPath];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
-	//we cannot set permissions via webdav
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
@@ -201,37 +330,40 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_T
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+								   reason:@"WebDAV does not currently support downloading"
+								 userInfo:nil];
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
 {
-	
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+								   reason:@"WebDAV does not currently support downloading"
+								 userInfo:nil];
 }
 
-- (unsigned)numberOfTransfers
+- (void)davDirectoryContents:(NSString *)dir
 {
-	
-}
-
-- (void)cancelTransfer
-{
-	
-}
-
-- (void)cancelAll
-{
-	
+	DAVRequest *r = [DAVDirectoryContentsRequest directoryContentsForPath:dir != nil ? dir : myCurrentDirectory];
+	[myCurrentRequest autorelease];
+	myCurrentRequest = [r retain];
+	[self sendCommand:r];
 }
 
 - (void)directoryContents
 {
-
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
+													  target:self
+												   arguments:[NSArray array]];
+	[self queueRequest:inv];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
+													  target:self
+												   arguments:[NSArray arrayWithObject:dirPath]];
+	[self queueRequest:inv];
 }
 
 - (long long)transferSpeed
