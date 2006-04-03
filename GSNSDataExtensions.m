@@ -44,7 +44,9 @@
 #import "GSNSDataExtensions.h"
 
 // Comment this out (or change it to a zero) to disable AltiVec processing.
+#if defined (MACOSX_DEPLOYMENT_TARGET_ppc)
 #define COMPILE_FOR_ALTIVEC		1
+#endif
 
 static unsigned long local_preprocessForDecode( const unsigned char *inBytes, unsigned long inBytesLength, unsigned char *outData );
 
