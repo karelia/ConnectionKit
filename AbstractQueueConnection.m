@@ -352,7 +352,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 @implementation ConnectionCommand
 
-+ (id)command:(NSString *)type 
++ (id)command:(id)type 
    awaitState:(ConnectionState)await
 	sentState:(ConnectionState)sent
 	dependant:(ConnectionCommand *)dep
@@ -365,7 +365,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 							 userInfo:ui];
 }
 
-+ (id)command:(NSString *)type 
++ (id)command:(id)type 
    awaitState:(ConnectionState)await
 	sentState:(ConnectionState)sent
    dependants:(NSArray *)deps
@@ -378,7 +378,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 											  userInfo:ui] autorelease];
 }
 
-- (id)initWithCommand:(NSString *)type 
+- (id)initWithCommand:(id)type 
 		   awaitState:(ConnectionState)await
 			sentState:(ConnectionState)sent
 		   dependants:(NSArray *)deps
@@ -402,7 +402,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 	[super dealloc];
 }
 
-- (void)setCommand:(NSString *)type
+- (void)setCommand:(id)type
 {
 	[_command autorelease];
 	_command = [type copy];
@@ -424,7 +424,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 	_userInfo = [ui retain];
 }
 
-- (NSString *)command
+- (id)command
 {
 	return _command;
 }
