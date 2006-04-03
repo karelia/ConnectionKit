@@ -35,7 +35,6 @@
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
 	NSString		*myCurrentDirectory;
-	NSMutableArray	*myRequests;
 	NSString		*myAuthorization;
 }
 

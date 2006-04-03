@@ -43,6 +43,8 @@
 	{
 		myHeaders = [[NSMutableDictionary dictionary] retain];
 		myContent = [[NSMutableData data] retain];
+		
+		[myHeaders setObject:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
 	}
 	return self;
 }
@@ -78,6 +80,16 @@
 		[str appendFormat:@"%@: %@\n", key, [myHeaders objectForKey:key]];
 	}
 	return str;
+}
+
+- (NSString *)method
+{
+	return myMethod;
+}
+
+- (NSString *)uri
+{
+	return myURI;
 }
 
 - (void)setHeader:(NSString *)val forKey:(NSString *)key
@@ -219,9 +231,15 @@
 
 - (id)initWithMethod:(NSString *)method uri:(NSString *)uri
 {
+	if (![uri hasPrefix:@"/"])
+	{
+		uri = [NSString stringWithFormat:@"/%@", uri];
+	}
+	
 	if (self = [super initWithMethod:@"PROPFIND" uri:uri])
 	{
-		[self setHeader:[NSNumber numberWithInt:1] forKey:@"Depth"];
+		[self setHeader:@"1" forKey:@"Depth"];
+		
 		myPath = [uri copy];
 		
 		NSMutableString *xml = [NSMutableString string];
@@ -251,5 +269,9 @@
 	return nil;
 }
 
+- (NSString *)path
+{
+	return myPath;
+}
 
 @end

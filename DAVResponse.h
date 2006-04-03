@@ -42,10 +42,13 @@
 // returns the range of data required to construct the response object
 + (NSRange)canConstructResponseWithData:(NSData *)data;
 
+//designated initializer - do not use initWithRequest:data:
 + (id)responseWithRequest:(DAVRequest *)request data:(NSData *)data;
 - (id)initWithRequest:(DAVRequest *)request data:(NSData *)data;
 
 - (int)code;
+- (NSString *)response; //eg Multi Status
+- (NSString *)formattedResponse; // sublcasses override to format their contents
 
 - (NSXMLDocument *)xmlDocument;
 - (DAVRequest *)request;

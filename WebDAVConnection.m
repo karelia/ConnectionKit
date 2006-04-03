@@ -31,7 +31,7 @@
 #import "AbstractConnection.h"
 #import "DAVRequest.h"
 #import "DAVResponse.h"
-#import "GSNSDataExtensions.h"
+#import "NSData+Connection.h"
 
 @implementation WebDAVConnection
 
@@ -75,10 +75,9 @@
                           username:username
                           password:password])
 	{
-		myRequests = [[NSMutableArray alloc] init];
 		myResponseBuffer = [[NSMutableData data] retain];
 		NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
-		myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64EncodingWithLineLength:0]] retain];
+		myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
 	}
 	return self;
 }
@@ -89,7 +88,6 @@
 	[myCurrentRequest release];
 	[myCurrentDirectory release];
 	[myResponseBuffer release];
-	[myRequests release];
 	[super dealloc];
 }
 
@@ -127,6 +125,14 @@
 		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
 		[myResponseBuffer replaceBytesInRange:responseRange withBytes:NULL length:0];
 		
+		if ([self transcript])
+		{
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
+																	  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
+																	  attributes:[AbstractConnection dataAttributes]] autorelease]];
+		}
+		
 		if ([response code] == 401)
 		{
 			if (myAuthorization != nil)
@@ -144,6 +150,11 @@
 			}
 			else
 			{
+				if ([self transcript])
+				{
+					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
+																			  attributes:[AbstractConnection sentAttributes]] autorelease]];
+				}
 				// need to append authorization
 				NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
 				NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
@@ -160,20 +171,38 @@
 					NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
 					NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
 					[myAuthorization autorelease];
-					myAuthorization = [[authData base64EncodingWithLineLength:0] retain];
+					myAuthorization = [[authData base64Encoding] retain];
 					//resend the request with auth
 					[self sendCommand:myCurrentRequest];
 				}
 				else
 				{
+					if ([self transcript])
+					{
+						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"WebDAVConnection only supports Basic Authentication!\n"] 
+																				  attributes:[AbstractConnection sentAttributes]] autorelease]];
+					}
 					@throw [NSException exceptionWithName:NSInternalInconsistencyException
 												   reason:@"Only Basic Authentication is supported at the moment"
 												 userInfo:nil];
 				}
 			}
 		}
-		NSLog(@"Received DAVResponse:\n%@", response);
-		NSLog(@"XML Document:\n%@", [response contentString]);
+		
+		switch (GET_STATE)
+		{
+			case ConnectionAwaitingDirectoryContentsState:
+			{
+				if (_flags.directoryContents)
+				{
+					DAVDirectoryContentsResponse *dav = (DAVDirectoryContentsResponse *)response;
+					[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
+				}
+				break;
+			}
+				
+			default: break;
+		}
 	}
 }
 
@@ -181,15 +210,22 @@
 {
 	if ([command isKindOfClass:[DAVRequest class]])
 	{
-		NSLog(@"Sending DAVRequest:\n%@", command);
-		
 		DAVRequest *req = (DAVRequest *)command;
-		//make sure we set the host name
+		
+		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
+		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
 		if (myAuthorization)
 		{
 			[req setHeader:myAuthorization forKey:@"Authorization"];
 		}
+		
+		if ([self transcript])
+		{
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
+																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
+		}
+		
 		[self sendData:[req serialized]];
 	}
 	else 
@@ -198,29 +234,6 @@
 		NSInvocation *inv = (NSInvocation *)command;
 		[inv invoke];
 	}
-}
-
-- (void)checkQueue
-{
-	if (myCurrentRequest)
-		return;
-	if ([myRequests count] > 0)
-	{
-		[_queueLock lock];
-		myCurrentRequest = [[myRequests objectAtIndex:0] retain];
-		[myRequests removeObjectAtIndex:0];
-		[_queueLock unlock];
-		[self sendCommand:myCurrentRequest];
-	}
-}
-
-- (void)queueRequest:(id)request
-{
-	[_queueLock lock];
-	[myRequests addObject:request];
-	[_queueLock unlock];
-	
-	[self sendPortMessage:COMMAND];
 }
 
 #pragma mark -
@@ -236,15 +249,20 @@
 	}
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
-	[self checkQueue];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDidChangeToDirectory:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects: dirPath]];
-	[self queueRequest:inv];
+												   arguments:[NSArray arrayWithObjects: dirPath, nil]];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionChangedDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (NSString *)currentDirectory
@@ -355,7 +373,12 @@
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
 													  target:self
 												   arguments:[NSArray array]];
-	[self queueRequest:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv 
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingDirectoryContentsState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
@@ -363,7 +386,12 @@
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];
-	[self queueRequest:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv 
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingDirectoryContentsState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (long long)transferSpeed

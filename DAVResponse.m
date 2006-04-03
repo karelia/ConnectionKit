@@ -28,9 +28,21 @@
  */
 
 #import "DAVResponse.h"
+#import "AbstractConnectionProtocol.h"
 
+static NSMutableDictionary *responseMap = nil;
 
 @implementation DAVResponse
+
++ (void)load
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	responseMap = [[NSMutableDictionary dictionary] retain];
+	[responseMap setObject:NSStringFromClass([DAVDirectoryContentsResponse class]) forKey:NSStringFromClass([DAVDirectoryContentsRequest class])];
+	
+	[pool release];
+}
 
 + (NSRange)canConstructResponseWithData:(NSData *)data
 {
@@ -157,6 +169,12 @@
 
 + (id)responseWithRequest:(DAVRequest *)request data:(NSData *)data
 {
+	//see if we map a certain request to a specific response
+	NSString *clsStr = [responseMap objectForKey:NSStringFromClass([request class])];
+	if (clsStr)
+	{
+		return [[[NSClassFromString(clsStr) alloc] initWithRequest:request data:data] autorelease];
+	}
 	return [[[DAVResponse alloc] initWithRequest:request data:data] autorelease];
 }
 
@@ -287,7 +305,18 @@
 	{
 		[str appendFormat:@"%@: %@\n", key, [[myHeaders objectForKey:key] description]];
 	}
+	//[str appendFormat:@"\n%@\n", [[self xmlDocument] XMLStringWithOptions:NSXMLNodePrettyPrint]];
 	return str;
+}
+
+- (NSString *)formattedResponse
+{
+	return [self description];
+}
+
+- (NSString *)response
+{
+	return myResponse;
 }
 
 - (NSXMLDocument *)xmlDocument
@@ -329,9 +358,49 @@
 - (NSArray *)directoryContents
 {
 	NSMutableArray *contents = [NSMutableArray array];
+	NSXMLDocument *doc = [self xmlDocument];
+	NSXMLElement *xml = [doc rootElement];
+	
+	NSArray *responses = [xml elementsForLocalName:@"response" URI:@"DAV:"];
+	NSEnumerator *e = [responses objectEnumerator];
+	NSXMLElement *response;
+	
+	while (response = [e nextObject])
+	{
+		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+		NSLog(@"\n%@", [response XMLStringWithOptions:NSXMLNodePrettyPrint]);
+		
+		NSString *href = [[[response elementsForLocalName:@"href" URI:@"DAV:"] objectAtIndex:0] stringValue];
+			
+		if ([href isEqualToString:[self path]])
+		{
+			continue;
+		}
+		NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [self headerForKey:@"Host"], href]];
+		NSString *path = [url path];
+
+		[attribs setObject:href forKey:@"DAVURI"];
+		[attribs setObject:[path lastPathComponent] forKey:cxFilenameKey];
+		
+		[contents addObject:attribs];
+	}
 	
 	
 	return contents;
+}
+
+- (NSString *)formattedResponse
+{
+	NSMutableString *s = [NSMutableString stringWithFormat:@"Directory Listing for %@:\n", [self path]];
+	NSEnumerator *e = [[self directoryContents] objectEnumerator];
+	NSDictionary *cur;
+	
+	while (cur = [e nextObject])
+	{
+		[s appendFormat:@"%@\n", [cur objectForKey:cxFilenameKey]];
+	}
+	
+	return s;
 }
 
 @end
