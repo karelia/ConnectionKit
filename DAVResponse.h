@@ -28,7 +28,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-
+#import "DAVRequest.h"
 
 @interface DAVResponse : DAVRequest 
 {
@@ -39,9 +39,25 @@
 	
 }
 
-+ (BOOL)canConstructResponseWithData:(NSData *)data;
+// returns the range of data required to construct the response object
++ (NSRange)canConstructResponseWithData:(NSData *)data;
+
 + (id)responseWithRequest:(DAVRequest *)request data:(NSData *)data;
+- (id)initWithRequest:(DAVRequest *)request data:(NSData *)data;
+
+- (int)code;
 
 - (NSXMLDocument *)xmlDocument;
+- (DAVRequest *)request;
+
+@end
+
+@interface DAVDirectoryContentsResponse : DAVResponse
+{
+	
+}
+
+- (NSString *)path;
+- (NSArray *)directoryContents; // dictionaries with NSFileManager keys
 
 @end

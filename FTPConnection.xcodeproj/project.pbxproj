@@ -47,6 +47,8 @@
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
 		797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
+		7981D96709E0C27B00E217F5 /* GSNSDataExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */; };
+		7981D96809E0C27B00E217F5 /* GSNSDataExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */; };
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
@@ -113,6 +115,7 @@
 				799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */,
 				79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */,
 				79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */,
+				7981D96709E0C27B00E217F5 /* GSNSDataExtensions.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +183,8 @@
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		797F96FC096DFD240029D7DE /* DotMacKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DotMacKit.framework; path = /Library/Frameworks/DotMacKit.framework; sourceTree = "<absolute>"; };
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GSNSDataExtensions.h; sourceTree = "<group>"; };
+		7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = GSNSDataExtensions.m; sourceTree = "<group>"; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
@@ -374,6 +379,8 @@
 		79FDC97509DFBF2D00373F71 /* DAV */ = {
 			isa = PBXGroup;
 			children = (
+				7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */,
+				7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */,
 				79FDC96209DFBCDF00373F71 /* DAVRequest.h */,
 				79FDC96309DFBCDF00373F71 /* DAVRequest.m */,
 				79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */,
@@ -503,6 +510,7 @@
 				798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */,
 				79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */,
 				79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */,
+				7981D96809E0C27B00E217F5 /* GSNSDataExtensions.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -552,6 +560,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
 				);
+				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_DYNAMIC_NO_PIC = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -577,6 +586,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
 				);
+				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
@@ -600,6 +610,7 @@
 					"$(FRAMEWORK_SEARCH_PATHS)",
 					"$(SYSTEM_LIBRARY_DIR)/PrivateFrameworks",
 				);
+				GCC_ALTIVEC_EXTENSIONS = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
