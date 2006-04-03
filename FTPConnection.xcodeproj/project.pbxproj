@@ -47,8 +47,6 @@
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
 		797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
-		7981D96709E0C27B00E217F5 /* GSNSDataExtensions.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */; };
-		7981D96809E0C27B00E217F5 /* GSNSDataExtensions.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */; };
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
@@ -67,6 +65,9 @@
 		79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79EBC65E076AA23C001C7BF1 /* Carbon.framework */; };
 		79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79FDC96209DFBCDF00373F71 /* DAVRequest.h */; };
 		79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FDC96309DFBCDF00373F71 /* DAVRequest.m */; };
+		79FEE8F809E11B10009E1D59 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FEE8F709E11B10009E1D59 /* libcurl.dylib */; };
+		79FEE91209E11B6B009E1D59 /* NSData+Connection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79FEE91009E11B6B009E1D59 /* NSData+Connection.h */; };
+		79FEE91309E11B6B009E1D59 /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FEE91109E11B6B009E1D59 /* NSData+Connection.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -115,7 +116,7 @@
 				799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */,
 				79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */,
 				79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */,
-				7981D96709E0C27B00E217F5 /* GSNSDataExtensions.h in CopyFiles */,
+				79FEE91209E11B6B009E1D59 /* NSData+Connection.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -183,8 +184,6 @@
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		797F96FC096DFD240029D7DE /* DotMacKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DotMacKit.framework; path = /Library/Frameworks/DotMacKit.framework; sourceTree = "<absolute>"; };
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = GSNSDataExtensions.h; sourceTree = "<group>"; };
-		7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = GSNSDataExtensions.m; sourceTree = "<group>"; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
@@ -203,6 +202,9 @@
 		79EBC65E076AA23C001C7BF1 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		79FDC96209DFBCDF00373F71 /* DAVRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVRequest.h; sourceTree = "<group>"; };
 		79FDC96309DFBCDF00373F71 /* DAVRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVRequest.m; sourceTree = "<group>"; };
+		79FEE8F709E11B10009E1D59 /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
+		79FEE91009E11B6B009E1D59 /* NSData+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Connection.h"; sourceTree = "<group>"; };
+		79FEE91109E11B6B009E1D59 /* NSData+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Connection.m"; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* FTPConnection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FTPConnection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionProtocol.h; sourceTree = "<group>"; };
@@ -217,6 +219,7 @@
 				79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */,
 				797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */,
 				797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */,
+				79FEE8F809E11B10009E1D59 /* libcurl.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -241,6 +244,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				79FEE8F709E11B10009E1D59 /* libcurl.dylib */,
 				797F987F096E1BDF0029D7DE /* Security.framework */,
 				797F96FC096DFD240029D7DE /* DotMacKit.framework */,
 				79EBC65E076AA23C001C7BF1 /* Carbon.framework */,
@@ -379,8 +383,8 @@
 		79FDC97509DFBF2D00373F71 /* DAV */ = {
 			isa = PBXGroup;
 			children = (
-				7981D96509E0C27B00E217F5 /* GSNSDataExtensions.h */,
-				7981D96609E0C27B00E217F5 /* GSNSDataExtensions.m */,
+				79FEE91009E11B6B009E1D59 /* NSData+Connection.h */,
+				79FEE91109E11B6B009E1D59 /* NSData+Connection.m */,
 				79FDC96209DFBCDF00373F71 /* DAVRequest.h */,
 				79FDC96309DFBCDF00373F71 /* DAVRequest.m */,
 				79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */,
@@ -510,7 +514,7 @@
 				798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */,
 				79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */,
 				79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */,
-				7981D96809E0C27B00E217F5 /* GSNSDataExtensions.m in Sources */,
+				79FEE91309E11B6B009E1D59 /* NSData+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -568,6 +572,7 @@
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FTPConnection_Prefix.pch;
+				HEADER_SEARCH_PATHS = /usr/include;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
@@ -581,6 +586,10 @@
 		796C440508AE0FD300C8A0F2 /* Deployment */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = (
+					i386,
+					ppc,
+				);
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(FRAMEWORK_SEARCH_PATHS)",
@@ -592,6 +601,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FTPConnection_Prefix.pch;
+				HEADER_SEARCH_PATHS = /usr/include;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";
@@ -615,6 +625,7 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = FTPConnection_Prefix.pch;
+				HEADER_SEARCH_PATHS = /usr/include;
 				INFOPLIST_FILE = Info.plist;
 				INSTALL_PATH = "$(HOME)/Applications";
 				LIBRARY_SEARCH_PATHS = "";

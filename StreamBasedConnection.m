@@ -284,15 +284,15 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	BOOL nextTry = 0 != [self numberOfCommands];
 	while (nextTry)
 	{
-		ConnectionCommand *command = [self currentCommand];
+		ConnectionCommand *command = [[self currentCommand] retain];
 		if (GET_STATE == [command awaitState])
 		{
-			[self sendCommand:[command command]];
-			
 			_state = [command sentState];	// don't use setter; we don't want to recurse
 			[_commandHistory insertObject:command atIndex:0];
 			[self dequeueCommand];
 			nextTry = (0 != [_commandQueue count]);		// go to next one, there's something else to do
+			
+			[self sendCommand:[command command]];
 		}
 		else
 		{
@@ -300,6 +300,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 				NSLog(@"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
 			nextTry = NO;		// don't try.  
 		}
+		[command release];
 	}
 	if ([self numberOfFileChecks] > 0) {
 		NSString *fileToCheck = [self currentFileCheck];

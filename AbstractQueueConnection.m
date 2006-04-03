@@ -220,7 +220,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 	DEQUEUE(_fileCheckQueue);
 }
 
-#define CURRENT_QUEUE(q) [_queueLock lock]; id obj = [q objectAtIndex:0]; [_queueLock unlock]; return obj;
+#define CURRENT_QUEUE(q) [_queueLock lock]; id obj = nil; if ([q count] > 0) { obj = [q objectAtIndex:0]; } [_queueLock unlock]; return obj;
 
 - (id)currentCommand
 {
@@ -385,7 +385,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 			 userInfo:(id)ui
 {
 	if (self = [super init]) {
-		_command = [type copy];
+		_command = [type retain];
 		_awaitState = await;
 		_sentState = sent;
 		_dependants = [[NSMutableArray arrayWithArray:deps] retain];

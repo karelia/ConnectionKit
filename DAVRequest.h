@@ -59,6 +59,8 @@
 
 - (NSData *)content;
 - (NSString *)contentString;
+- (NSString *)method;
+- (NSString *)uri;
 
 - (unsigned)contentLength;
 
