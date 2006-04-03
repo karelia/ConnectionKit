@@ -42,6 +42,7 @@
        */
 
 #import "GSNSDataExtensions.h"
+#import <curl/curl.h>
 
 // Comment this out (or change it to a zero) to disable AltiVec processing.
 #if defined (MACOSX_DEPLOYMENT_TARGET_ppc)
@@ -182,6 +183,17 @@ static char gEncodingTable[ 64 ] = {
     self = [ self initWithData:mutableData ];
 
     return self;
+}
+
+- (NSString *)base64Encoding
+{
+	const char *buffer = (const char *)[self bytes];
+	size_t size = [self length];
+	char *dest = nil;
+	
+	size_t new_size = Curl_base64_encode(buffer, size, &dest);
+	NSString *result = [[[NSString alloc] initWithBytesNoCopy:dest length:new_size encoding:NSASCIIStringEncoding freeWhenDone:YES] autorelease];
+	return result;
 }
 
 - (NSString *)base64EncodingWithLineLength:(unsigned int)inLineLength
