@@ -47,36 +47,36 @@
 
 @interface ConnectionCommand : NSObject
 {
-	NSString		*_command;
+	id				_command;
 	NSMutableArray	*_dependants; 
 	ConnectionState _awaitState;
 	ConnectionState _sentState;
 	id				_userInfo;
 }
 
-+ (id)command:(NSString *)type 
++ (id)command:(id)type 
    awaitState:(ConnectionState)await
 	sentState:(ConnectionState)sent
 	dependant:(ConnectionCommand *)dep
 	 userInfo:(id)ui;
 
-+ (id)command:(NSString *)type 
++ (id)command:(id)type 
    awaitState:(ConnectionState)await
 	sentState:(ConnectionState)sent
    dependants:(NSArray *)deps
 	 userInfo:(id)ui;
 
-- (id)initWithCommand:(NSString *)type 
+- (id)initWithCommand:(id)type 
 		   awaitState:(ConnectionState)await
 			sentState:(ConnectionState)sent
 		   dependants:(NSArray *)deps
 			 userInfo:(id)ui;
 
-- (void)setCommand:(NSString *)type;
+- (void)setCommand:(id)type;
 - (void)setAwaitState:(ConnectionState)await;
 - (void)setSentState:(ConnectionState)sent;
 - (void)setUserInfo:(id)ui;
-- (NSString *)command;
+- (id)command;
 - (ConnectionState)awaitState;
 - (ConnectionState)sentState;
 - (id)userInfo;
