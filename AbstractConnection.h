@@ -87,13 +87,13 @@ typedef enum {
 	connectionFlags _flags;
 }
 
-+ (id)connectionWithName:(NSString *)name
-					host:(NSString *)host
-					port:(NSString *)port
-				username:(NSString *)username
-				password:(NSString *)password;
++ (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
+												 host:(NSString *)host
+												 port:(NSString *)port
+											 username:(NSString *)username
+											 password:(NSString *)password;
 
-+ (id)connectionWithURL:(NSURL *)url;
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url;
 
 // Convenience Superclass methods for basic getting & setting
 

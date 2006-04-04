@@ -170,11 +170,11 @@ NSDictionary *sDataAttributes;
 	return nil;
 }
 
-+ (id)connectionWithName:(NSString *)name
-					host:(NSString *)host
-					port:(NSString *)port
-				username:(NSString *)username
-				password:(NSString *)password
++ (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
+												 host:(NSString *)host
+												 port:(NSString *)port
+											 username:(NSString *)username
+											 password:(NSString *)password
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -216,10 +216,10 @@ NSDictionary *sDataAttributes;
 /*!	Tries to guess what kind of connection to make based upon the port or ..... ?????????
 */
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
++ (id <AbstractConnectionProtocol>)connectionToHost:(NSString *)host
+											   port:(NSString *)port
+										   username:(NSString *)username
+										   password:(NSString *)password
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -261,7 +261,7 @@ NSDictionary *sDataAttributes;
 	return nil;
 }
 
-+ (id)connectionWithURL:(NSURL *)url
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url
 {
 	NSString *resourceSpec = [url resourceSpecifier];
 	NSString *host = [url host];
