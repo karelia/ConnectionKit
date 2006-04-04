@@ -64,3 +64,20 @@
 - (NSArray *)directoryContents; // dictionaries with NSFileManager keys
 
 @end
+
+@interface DAVCreateDirectoryResponse : DAVResponse
+{
+}
+
+- (NSString *)directory;
+
+@end
+
+@interface DAVUploadFileResponse : DAVResponse
+{
+	
+}
+
+- (NSString *)remoteFile;
+
+@end

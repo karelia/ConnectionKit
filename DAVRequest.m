@@ -44,7 +44,8 @@
 		myHeaders = [[NSMutableDictionary dictionary] retain];
 		myContent = [[NSMutableData data] retain];
 		
-		[myHeaders setObject:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
+		[self setHeader:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
+		[self setHeader:@"text/xml; charset=\"utf-8\"" forKey:@"Content-Type"];
 	}
 	return self;
 }
@@ -195,10 +196,11 @@
 		header = [NSString stringWithFormat:@"%@: %@\r\n", key, header];
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
-	NSString *encoding = [NSString stringWithFormat:@"Content-Type: text/xml; charset=\"utf-8\"\r\n"];
-	[packet appendData:[encoding dataUsingEncoding:NSUTF8StringEncoding]];
-	NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
-	[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
+	if ([myContent length] > 0)
+	{
+		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
+		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
+	}
 	
 	NSString *spacer = [NSString stringWithString:@"\r\n"];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
@@ -222,7 +224,7 @@
 
 @end
 
-@implementation DAVDirectoryContentsRequest : DAVRequest
+@implementation DAVDirectoryContentsRequest
 
 + (id)directoryContentsForPath:(NSString *)path
 {
@@ -234,6 +236,10 @@
 	if (![uri hasPrefix:@"/"])
 	{
 		uri = [NSString stringWithFormat:@"/%@", uri];
+	}
+	if (![uri hasSuffix:@"/"])
+	{
+		uri = [NSString stringWithFormat:@"%@/", uri];
 	}
 	
 	if (self = [super initWithMethod:@"PROPFIND" uri:uri])
@@ -272,6 +278,105 @@
 - (NSString *)path
 {
 	return myPath;
+}
+
+@end
+
+@implementation DAVCreateDirectoryRequest
+
++ (id)createDirectoryWithPath:(NSString *)path
+{
+	return [[[DAVCreateDirectoryRequest alloc] initWithMethod:nil uri:path] autorelease];
+}
+
+- (id)initWithMethod:(NSString *)method uri:(NSString *)uri
+{
+	if (![uri hasPrefix:@"/"])
+	{
+		uri = [NSString stringWithFormat:@"/%@", uri];
+	}
+	if (![uri hasSuffix:@"/"])
+	{
+		uri = [NSString stringWithFormat:@"%@/", uri];
+	}
+
+	if (self = [super initWithMethod:@"MKCOL" uri:uri])
+	{
+		myDirectory = [uri copy];
+		[myHeaders removeObjectForKey:@"Content-Type"];
+	}
+	
+	return self;
+}
+
+- (void)dealloc
+{
+	[myDirectory release];
+	[super dealloc];
+}
+
+- (NSString *)path
+{
+	return myDirectory;
+}
+
+@end
+
+@implementation DAVUploadFileRequest
+
+- (id)initWithData:(NSData *)data filename:(NSString *)filename
+{
+	if (self = [super initWithMethod:@"PUT" uri:filename])
+	{
+		myFilename = [filename copy];
+		[self setContent:data];
+		[self setHeader:@"application/octet-stream" forKey:@"Content-Type"];
+	}
+	return self;
+}
+
+- (id)initWithFile:(NSString *)local filename:(NSString *)remote
+{
+	if (self = [super initWithMethod:@"PUT" uri:remote])
+	{
+		myLocalFilename = [local copy];
+		myFilename = [remote copy];
+		[self setHeader:@"application/octet-stream" forKey:@"Content-Type"];
+	}
+	return self;
+}
+
++ (id)uploadWithData:(NSData *)data filename:(NSString *)filename
+{
+	return [[[DAVUploadFileRequest alloc] initWithData:data filename:filename] autorelease];
+}
+
++ (id)uploadWithFile:(NSString *)localFile filename:(NSString *)filename
+{
+	return [[[DAVUploadFileRequest alloc] initWithFile:localFile filename:filename] autorelease];
+}
+
+- (void)dealloc
+{
+	[myLocalFilename release];
+	[myFilename release];
+	[super dealloc];
+}
+
+- (NSString *)remoteFile
+{
+	return myFilename;
+}
+
+- (NSData *)serialized
+{
+	// load the file data at the latest possible time.
+	if (myLocalFilename && [myContent length] == 0)
+	{
+		NSData *data = [NSData dataWithContentsOfFile:myLocalFilename];
+		[self setContent:data];
+	}
+	return [super serialized];
 }
 
 @end

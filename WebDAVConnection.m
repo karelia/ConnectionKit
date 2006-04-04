@@ -33,6 +33,8 @@
 #import "DAVResponse.h"
 #import "NSData+Connection.h"
 
+NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
+
 @implementation WebDAVConnection
 
 #pragma mark class methods
@@ -174,6 +176,7 @@
 					myAuthorization = [[authData base64Encoding] retain];
 					//resend the request with auth
 					[self sendCommand:myCurrentRequest];
+					return;
 				}
 				else
 				{
@@ -193,14 +196,105 @@
 		{
 			case ConnectionAwaitingDirectoryContentsState:
 			{
-				if (_flags.directoryContents)
+				DAVDirectoryContentsResponse *dav = (DAVDirectoryContentsResponse *)response;
+				NSString *err = nil;
+				switch ([dav code])
 				{
-					DAVDirectoryContentsResponse *dav = (DAVDirectoryContentsResponse *)response;
-					[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
+					case 200:
+					case 207: //multi-status
+					{
+						if (_flags.directoryContents)
+						{
+							[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
+						}
+						break;
+					}
+					default: 
+					{
+						err = @"Unknown Error Occurred";
+					}
 				}
+				if (err)
+				{
+					NSLog(@"%@", [dav contentString]);
+					if (_flags.error)
+					{
+						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
+															 code:[dav code]
+														 userInfo:[NSDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey]];
+						[_forwarder connection:self didReceiveError:error];
+					}
+				}				
+				[self setState:ConnectionIdleState];
 				break;
 			}
+			case ConnectionCreateDirectoryState:
+			{
+				DAVCreateDirectoryResponse *dav = (DAVCreateDirectoryResponse *)response;
+				NSString *err = nil;
+				switch ([dav code])
+				{
+					case 201: 
+					{
+						if (_flags.createDirectory)
+						{
+							[_forwarder connection:self didCreateDirectory:[dav directory]];
+						}
+						break;
+					}
+					case 403:
+					case 405:
+					{		
+						err = @"The server does not allow the creation of directories at the current location";
+						break;
+					}
+					case 409:
+					{
+						err = @"An intermediate directory does not exist and needs to be created before the current directory";
+						break;
+					}
+					case 415:
+					{
+						err = @"The body of the request is not supported";
+						break;
+					}
+					case 507:
+					{
+						err = @"Insufficient storage space available";
+						break;
+					}
+					default: 
+					{
+						err = @"An unknown error occured";
+						break;
+					}
+				}
+				if (err)
+				{
+					NSLog(@"%@", [dav contentString]);
+					if (_flags.error)
+					{
+						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
+															 code:[dav code]
+														 userInfo:[NSDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey]];
+						[_forwarder connection:self didReceiveError:error];
+					}
+				}
+				[self setState:ConnectionIdleState];
+				break;
+			}
+			case ConnectionUploadingFileState:
+			{
+				NSLog(@"Uploading Completed:\n\n\%@\n\n", response);
+				if (_flags.uploadFinished)
+				{
+					[_forwarder connection:self
+						   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+				}
+				[self dequeueUpload];
 				
+				[self setState:ConnectionIdleState];
+			}
 			default: break;
 		}
 	}
@@ -210,7 +304,9 @@
 {
 	if ([command isKindOfClass:[DAVRequest class]])
 	{
-		DAVRequest *req = (DAVRequest *)command;
+		DAVRequest *req = [(DAVRequest *)command retain];
+		[myCurrentRequest release];
+		myCurrentRequest = req;
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
@@ -220,13 +316,56 @@
 			[req setHeader:myAuthorization forKey:@"Authorization"];
 		}
 		
+		if (myDAVFlags.isInReconnection)
+		{
+			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
+			return;
+		}
+		if (myDAVFlags.needsReconnection)
+		{
+			myDAVFlags.isInReconnection = YES;
+			[self openStreamsToPort:[[self port] intValue]];
+			[self scheduleStreamsOnRunLoop];
+			
+			while (myDAVFlags.isInReconnection)
+			{
+				[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
+				return;
+			}
+		}
+		
 		if ([self transcript])
 		{
 			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
 																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
 		}
 		
-		[self sendData:[req serialized]];
+		NSData *packet = [req serialized];
+		// if we are uploading or downloading set up the transfer sizes
+		if (GET_STATE == ConnectionUploadingFileState)
+		{
+			bytesToTransfer = [packet length];
+			bytesTransferred = 0;
+			
+			if (_flags.didBeginUpload)
+			{
+				[_forwarder connection:self
+						uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+			}
+		}
+		if (GET_STATE == ConnectionDownloadingFileState)
+		{
+			bytesToTransfer = [packet length];
+			bytesTransferred = 0;
+			
+			if (_flags.didBeginDownload)
+			{
+				[_forwarder connection:self
+					  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+			}
+			
+		}
+		[self sendData:packet];
 	}
 	else 
 	{
@@ -277,16 +416,24 @@
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	
+	DAVCreateDirectoryRequest *req = [DAVCreateDirectoryRequest createDirectoryWithPath:dirPath];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionCreateDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
+	//we don't support setting permissions
 	[self createDirectory:dirPath];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	//no op
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
@@ -308,42 +455,69 @@
 
 - (void)uploadFile:(NSString *)localPath
 {
-	
+	[self uploadFile:localPath toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
+	//[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO];
+	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithFile:localPath filename:remotePath];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+	[attribs setObject:localPath forKey:QueueUploadLocalFileKey];
+	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
+	[self queueUpload:attribs];
+	[self queueCommand:cmd];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {
-	
+	// currently we aren't checking remote existence
+	[self uploadFile:localPath toFile:remotePath];
 }
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
 {
-	
+	// we don't support upload resumption
+	[self uploadFile:localPath];
 }
 
 - (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
 {
-	
+	[self uploadFile:localPath toFile:remotePath];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
+	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithData:data filename:remotePath];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+	[attribs setObject:data forKey:QueueUploadLocalDataKey];
+	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
+	[self queueUpload:attribs];
+	[self queueCommand:cmd];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {
-	
+	// we don't support checking remote existence
+	[self uploadFromData:data toFile:remotePath];
 }
 
 - (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
 {
-	
+	// we don't support upload resumption
+	[self uploadFromData:data toFile:remotePath];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
@@ -394,14 +568,112 @@
 	[self queueCommand:cmd];
 }
 
-- (long long)transferSpeed
+- (void)checkExistenceOfPath:(NSString *)path
 {
 	
 }
 
-- (void)checkExistenceOfPath:(NSString *)path
+#pragma mark -
+#pragma mark Stream Overrides
+
+- (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
 {
-	
+	switch (theEvent) 
+	{
+		case NSStreamEventEndEncountered: 
+		{
+			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
+			NSLog(@"disconnected receive stream");
+			[self closeStreams];
+			myDAVFlags.needsReconnection = YES;
+			break;
+		}
+		case NSStreamEventOpenCompleted:
+		{
+			if (!_flags.isConnected)
+			{
+				[super handleReceiveStreamEvent:theEvent];
+			}
+			else
+			{
+				NSLog(@"receive reconnected");
+				myDAVFlags.needsReconnection = NO;
+				myDAVFlags.isInReconnection = NO;
+			}
+			break;
+		}
+		default:
+			[super handleReceiveStreamEvent:theEvent];
+	}
+}
+
+- (void)handleSendStreamEvent:(NSStreamEvent)theEvent
+{
+	switch (theEvent) 
+	{
+		case NSStreamEventEndEncountered: 
+		{
+			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
+			NSLog(@"disconnected send stream");
+			[self closeStreams];
+			myDAVFlags.needsReconnection = YES;
+			break;
+		}
+		case NSStreamEventOpenCompleted:
+		{
+			if (!_flags.isConnected)
+			{
+				[super handleReceiveStreamEvent:theEvent];
+			}
+			else
+			{
+				NSLog(@"send reconnected");
+				myDAVFlags.needsReconnection = NO;
+				myDAVFlags.isInReconnection = NO;
+			}
+			break;
+		}
+		default:
+			[super handleReceiveStreamEvent:theEvent];
+	}
+}
+
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+{
+	if (GET_STATE == ConnectionUploadingFileState)
+	{
+		bytesTransferred += length;
+		if (_flags.uploadPercent)
+		{
+			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			[_forwarder connection:self 
+							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+					  progressedTo:[NSNumber numberWithInt:percent]];
+		}
+		if (_flags.uploadProgressed)
+		{
+			[_forwarder connection:self 
+							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+				  sentDataOfLength:length];
+		}
+	}
+	else if (GET_STATE == ConnectionDownloadingFileState)
+	{
+		bytesTransferred += length;
+		if (_flags.downloadPercent)
+		{
+			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			[_forwarder connection:self 
+						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+					  progressedTo:[NSNumber numberWithInt:percent]];
+		}
+		if (_flags.downloadProgressed)
+		{
+			[_forwarder connection:self
+						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+			  receivedDataOfLength:length];
+		}
+	}
 }
 
 @end

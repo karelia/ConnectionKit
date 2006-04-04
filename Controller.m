@@ -75,8 +75,8 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 	if (showLog) {
 		[logDrawer open:self];
 	}
-	[AbstractConnection setDebugEnabled:YES];
-	[AbstractConnection setLogStateChanges:YES];
+	//[AbstractConnection setDebugEnabled:YES];
+	//[AbstractConnection setLogStateChanges:YES];
 	
 	remoteFiles = [[NSMutableArray array] retain];
 	localFiles = [[NSMutableArray array] retain];
@@ -353,7 +353,8 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 {
 	if (val)
 	{
-		[con createDirectory:val];
+		NSString *dir = [[con currentDirectory] stringByAppendingPathComponent:val];
+		[con createDirectory:dir];
 		[con directoryContents];
 	}
 }

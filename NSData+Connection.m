@@ -47,4 +47,9 @@
 	return result;
 }
 
+- (NSString *)descriptionAsString
+{
+	return [[[NSString alloc] initWithData:self encoding:NSUTF8StringEncoding] autorelease];
+}
+
 @end
