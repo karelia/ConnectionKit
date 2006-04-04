@@ -572,6 +572,7 @@ static NSImage *_homeImage = nil;
 
 + (NSString *)formattedSpeed:(long) spd
 {
+	if (spd == 0) return @"0 B/s";
 	NSString *suffix[] = {
 		@"B", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB"
 	};

@@ -445,7 +445,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							   withBytes:NULL
 								  length:0];
-		[self stream:self sentBytesOfLength:chunkLength];
+		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
 	[_sendBufferLock unlock];
 }
@@ -562,6 +562,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventEndEncountered:
 		{
+			NSLog(@"send ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
@@ -601,6 +602,17 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)theEvent
 {
+	NSString *name = nil;
+	switch (theEvent)
+	{
+		case NSStreamEventNone: name = @"NSStreamEventNone"; break;
+		case NSStreamEventOpenCompleted: name = @"NSStreamEventOpenCompleted"; break;
+		case NSStreamEventHasBytesAvailable: name = @"NSStreamEventHasBytesAvailable"; break;
+		case NSStreamEventHasSpaceAvailable: name = @"NSStreamEventHasSpaceAvailable"; break;
+		case NSStreamEventErrorOccurred: name = @"NSStreamEventErrorOccurred"; break;
+		case NSStreamEventEndEncountered: name = @"NSStreamEventEndEncountered"; break;
+	}
+	//NSLog(@"%@ %@", stream, name);
 	if (stream == (NSStream *)_sendStream) {
 		[self handleSendStreamEvent:theEvent];
 	} else if (stream == (NSStream *)_receiveStream) {
