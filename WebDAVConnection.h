@@ -36,7 +36,17 @@
 	NSMutableData	*myResponseBuffer;
 	NSString		*myCurrentDirectory;
 	NSString		*myAuthorization;
+	
+	struct __davflags {
+		unsigned needsReconnection: 1;
+		unsigned isInReconnection: 1;
+		unsigned unused: 30;
+	} myDAVFlags;
+	
+	unsigned long long bytesTransferred;
+	unsigned long long bytesToTransfer;
 }
 
-
 @end
+
+extern NSString *WebDAVErrorDomain;

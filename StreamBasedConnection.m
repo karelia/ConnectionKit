@@ -188,6 +188,18 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	}
 }
 
+- (void)scheduleStreamsOnRunLoop
+{
+	[_receiveStream setDelegate:self];
+	[_sendStream setDelegate:self];
+	
+	[_receiveStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+	[_sendStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+	
+	[_receiveStream open];
+	[_sendStream open];
+}
+
 /*" NSPortDelegate method gets called in the background thread.
 "*/
 - (void)handlePortMessage:(NSPortMessage *)portMessage
@@ -198,14 +210,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	{
 		case CONNECT:
 		{
-			[_receiveStream setDelegate:self];
-			[_sendStream setDelegate:self];
-			
-			[_receiveStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-			[_sendStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-			
-			[_receiveStream open];
-			[_sendStream open];
+			[self scheduleStreamsOnRunLoop];
 			break;
 		}
 		case COMMAND:
@@ -318,10 +323,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_forwarder setDelegate:delegate];	// note that its delegate it not retained.
 }
 
-- (void)connect
+- (void)openStreamsToPort:(unsigned)port
 {
-	[self emptyCommandQueue];
-	
 	NSHost *host = [NSHost hostWithName:_connectionHost];
 	if(!host){
 		if ([AbstractConnection debugEnabled])
@@ -335,8 +338,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 					_connectionHost, @"host", nil]];
             [_forwarder connection:self didReceiveError:error];
 		}
-		
-		
 		return;
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
@@ -345,34 +346,43 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
 	
-	int connectionPort = [_connectionPort intValue];
-	if (0 == connectionPort)
-	{
-		connectionPort = 21;	// standard FTP control port
-	}
 	[self closeStreams];		// make sure streams are closed before opening/allocating new ones
 	
 	[NSStream getStreamsToHost:host
-						  port:connectionPort
+						  port:port
 				   inputStream:&_receiveStream
 				  outputStream:&_sendStream];
 	
 	[_receiveStream retain];	// the above objects are created autorelease; we have to retain them
 	[_sendStream retain];
 	
-	if(!_receiveStream && _sendStream){
+	if(!_receiveStream || !_sendStream){
 		if ([AbstractConnection debugEnabled])
-			NSLog(@"Cannot create a stream for the host: %@", _connectionHost);
+			NSLog(@"Cannot create a stream to the host: %@", _connectionHost);
 		
 		if (_flags.error) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:@"FTP Stream Unavailable"
+											 userInfo:[NSDictionary dictionaryWithObject:@"Stream Unavailable"
 																				  forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:error];
 		}
 		return;
 	}
+}
+
+- (void)connect
+{
+	[self emptyCommandQueue];
+	
+	int connectionPort = [_connectionPort intValue];
+	if (0 == connectionPort)
+	{
+		connectionPort = 21;	// standard FTP control port
+	}
+	
+	[self openStreamsToPort:connectionPort];
+	
 	[self sendPortMessage:CONNECT];	// finish the job -- scheduling in the runloop -- in the background thread
 }
 
@@ -403,6 +413,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_sendStream release];
 	_receiveStream = nil;
 	_sendStream = nil;
+	[_sendBuffer setLength:0];
 }
 
 - (void)processReceivedData:(NSData *)data
@@ -434,6 +445,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							   withBytes:NULL
 								  length:0];
+		[self stream:self sentBytesOfLength:chunkLength];
 	}
 	[_sendBufferLock unlock];
 }
@@ -572,7 +584,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 									   withBytes:NULL
 										  length:0];
-				
+				[self stream:_sendStream sentBytesOfLength:chunkLength];
 			}
 			
 			[_sendBufferLock unlock];
@@ -596,6 +608,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	} else {
 		NSLog(@"StreamBasedConnection: unknown stream (%@)", stream);
 	}
+}
+
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+{
+	// we do nothing - just allow subclasses to know that something was sent
 }
 
 #pragma mark -

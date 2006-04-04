@@ -59,11 +59,18 @@
 	NSConditionLock		*_fileCheckingLock;
 }
 
+- (void)openStreamsToPort:(unsigned)port;
+- (void)scheduleStreamsOnRunLoop;
+
 - (void)setSendStream:(NSStream *)stream;
 - (void)setReceiveStream:(NSStream *)stream;
 - (NSStream *)sendStream;
 - (NSStream *)receiveStream;
 - (void)closeStreams;
+
+- (void)handleSendStreamEvent:(NSStreamEvent)theEvent;
+- (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent;
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length;
 
 // Get the local command port
 - (unsigned)localPort;

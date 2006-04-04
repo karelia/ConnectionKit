@@ -38,5 +38,6 @@
 @interface NSData (Connection)
 
 - (NSString *)base64Encoding;
+- (NSString *)descriptionAsString;
 
 @end

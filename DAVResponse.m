@@ -30,6 +30,18 @@
 #import "DAVResponse.h"
 #import "AbstractConnectionProtocol.h"
 
+@interface NSCalendarDate (Connection)
+/*
+ We will try and guess the date by trying these formats
+ -----------------
+ Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+ Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+ Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+ 2006-02-05T23:22:39Z			; ISO 8601 date format
+ */
++ (id)calendarDateWithString:(NSString *)string;
+@end
+
 static NSMutableDictionary *responseMap = nil;
 
 @implementation DAVResponse
@@ -40,6 +52,8 @@ static NSMutableDictionary *responseMap = nil;
 	
 	responseMap = [[NSMutableDictionary dictionary] retain];
 	[responseMap setObject:NSStringFromClass([DAVDirectoryContentsResponse class]) forKey:NSStringFromClass([DAVDirectoryContentsRequest class])];
+	[responseMap setObject:NSStringFromClass([DAVCreateDirectoryResponse class]) forKey:NSStringFromClass([DAVCreateDirectoryRequest class])];
+	[responseMap setObject:NSStringFromClass([DAVUploadFileResponse class]) forKey:NSStringFromClass([DAVUploadFileRequest class])];
 	
 	[pool release];
 }
@@ -58,6 +72,10 @@ static NSMutableDictionary *responseMap = nil;
 			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
 			{
 				int responseCode = [[response objectAtIndex:1] intValue];
+				if (responseCode == 204)
+				{
+					NSLog(@"breaking");
+				}
 				NSMutableDictionary *headers = [NSMutableDictionary dictionary];
 				
 				if ([response count] >= 3)
@@ -119,16 +137,25 @@ static NSMutableDictionary *responseMap = nil;
 					unsigned start = contentStart.location + contentStart.length;
 					if (!isChunkedTransfer)
 					{
-						// The end will be the next two line feeds past the start of the content
-						NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
-														   options:NSLiteralSearch 
-															 range:NSMakeRange(start, [packet length] - start)];
-						unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
-						NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
-						NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
-						
-						packetRange.location = 0;
-						packetRange.length = end;
+						// The end will be the next two line feeds past the start of the content provided there is a content length
+						if ([[headers objectForKey:@"Content-Length"] intValue] > 0)
+						{
+							NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
+															   options:NSLiteralSearch 
+																 range:NSMakeRange(start, [packet length] - start)];
+							unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
+							NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
+							NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
+							
+							packetRange.location = 0;
+							packetRange.length = end;
+						}
+						else
+						{
+							// it must be just a response with just headers
+							packetRange.location = 0;
+							packetRange.length = start + 2; //2 extra for the \r\n 
+						}
 					}
 					else
 					{
@@ -171,8 +198,10 @@ static NSMutableDictionary *responseMap = nil;
 {
 	//see if we map a certain request to a specific response
 	NSString *clsStr = [responseMap objectForKey:NSStringFromClass([request class])];
+	
 	if (clsStr)
 	{
+		NSLog(@"Matched Request: %@ to %@", [request className], clsStr);
 		return [[[NSClassFromString(clsStr) alloc] initWithRequest:request data:data] autorelease];
 	}
 	return [[[DAVResponse alloc] initWithRequest:request data:data] autorelease];
@@ -253,14 +282,18 @@ static NSMutableDictionary *responseMap = nil;
 					unsigned start = contentStart.location + contentStart.length;
 					if (!isChunkedTransfer)
 					{
-						// The end will be the next two line feeds past the start of the content
-						NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
-														   options:NSLiteralSearch 
-															 range:NSMakeRange(start, [packet length] - start)];
-						unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
-						NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
-						NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
-						[self appendContent:cd];
+						if ([[myHeaders objectForKey:@"Content-Length"] intValue] > 0)
+						{
+							// The end will be the next two line feeds past the start of the content
+							NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
+															   options:NSLiteralSearch 
+																 range:NSMakeRange(start, [packet length] - start)];
+							unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
+							NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
+							NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
+							
+							[self setContent:cd];
+						}
 					}
 					else
 					{
@@ -328,7 +361,7 @@ static NSMutableDictionary *responseMap = nil;
 													   error:&err];
 	if (err)
 	{
-		NSLog(@"%@", err);
+		NSLog(@"Failed to create NSXMLDocument:\n%@", err);
 	}
 	return [xml autorelease];
 }
@@ -345,6 +378,59 @@ static NSMutableDictionary *responseMap = nil;
 
 @end
 
+@implementation NSCalendarDate (Connection)
+/*
+ We will try and guess the date by trying these formats
+ -----------------
+ Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+ Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+ Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+ 2006-02-05T23:22:39Z			; ISO 8601 date format
+ */
++ (id)calendarDateWithString:(NSString *)string
+{
+	NSCalendarDate *date = nil;
+	// Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
+	date = [NSCalendarDate dateWithString:string calendarFormat:@"%a, %d %b %Y %H:%M:%S %Z"];
+	if (date)
+	{
+		return date;
+	}
+	// Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
+	date = [NSCalendarDate dateWithString:string calendarFormat:@"%A, %d-%b-%y %H:%M:%S %Z"];
+	if (date)
+	{
+		return date;
+	}
+	// Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
+	date = [NSCalendarDate dateWithString:string calendarFormat:@"%a %b %e %H:%M:%S %Y"];
+	if (date)
+	{
+		return date;
+	}
+	// 2006-02-05T23:22:39Z			; ISO 8601 date format
+	if ([string hasSuffix:@"Z"])
+	{
+		date = [NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"];
+		if (date)
+		{
+			return date;
+		}
+	}
+	else
+	{
+		date = [NSCalendarDate dateWithString:string calendarFormat:@"%Y-%m-%dT%H:%M:%S%z"];
+		if (date)
+		{
+			return date;
+		}
+	}
+	return date;
+}
+
+@end
+
+
 @implementation DAVDirectoryContentsResponse : DAVResponse
 
 - (NSString *)path
@@ -353,6 +439,7 @@ static NSMutableDictionary *responseMap = nil;
 	{
 		return [(DAVDirectoryContentsRequest *)[self request] path];
 	}
+	return nil;
 }
 
 - (NSArray *)directoryContents
@@ -368,10 +455,10 @@ static NSMutableDictionary *responseMap = nil;
 	while (response = [e nextObject])
 	{
 		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-		NSLog(@"\n%@", [response XMLStringWithOptions:NSXMLNodePrettyPrint]);
+		//NSLog(@"\n%@", [response XMLStringWithOptions:NSXMLNodePrettyPrint]);
 		
+		// filename
 		NSString *href = [[[response elementsForLocalName:@"href" URI:@"DAV:"] objectAtIndex:0] stringValue];
-			
 		if ([href isEqualToString:[self path]])
 		{
 			continue;
@@ -382,10 +469,42 @@ static NSMutableDictionary *responseMap = nil;
 		[attribs setObject:href forKey:@"DAVURI"];
 		[attribs setObject:[path lastPathComponent] forKey:cxFilenameKey];
 		
+		NSXMLElement *props = [[[[response elementsForLocalName:@"propstat" URI:@"DAV:"] objectAtIndex:0] elementsForLocalName:@"prop" URI:@"DAV:"] objectAtIndex:0];
+		
+		NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
+		NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
+		@try {
+			// we could be a directory
+			NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
+			NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
+			
+			long long size;
+			[sizeScanner scanLongLong:&size];
+			[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
+		}
+		@catch (NSException *e) {
+			
+		}
+		
+		NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
+		[attribs setObject:created forKey:NSFileCreationDate];
+		NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
+		[attribs setObject:modified forKey:NSFileModificationDate];
+		
+		//see if we are a directory or file
+		NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
+		if ([resourceType childCount] == 0)
+		{
+			[attribs setObject:NSFileTypeRegular forKey:NSFileType];
+		}
+		else
+		{
+			// WebDAV does not support the notion of Symbolic Links so currently we can take it to be a directory if the node has any children
+			[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+		}
+		
 		[contents addObject:attribs];
 	}
-	
-	
 	return contents;
 }
 
@@ -394,13 +513,62 @@ static NSMutableDictionary *responseMap = nil;
 	NSMutableString *s = [NSMutableString stringWithFormat:@"Directory Listing for %@:\n", [self path]];
 	NSEnumerator *e = [[self directoryContents] objectEnumerator];
 	NSDictionary *cur;
-	
 	while (cur = [e nextObject])
 	{
-		[s appendFormat:@"%@\n", [cur objectForKey:cxFilenameKey]];
+		[s appendFormat:@"%@\t\t\t%@\n", [cur objectForKey:NSFileModificationDate], [cur objectForKey:cxFilenameKey]];
 	}
 	
 	return s;
+}
+
+@end
+
+@implementation DAVCreateDirectoryResponse
+
+- (NSString *)directory
+{
+	if ([[self request] isKindOfClass:[DAVCreateDirectoryRequest class]])
+	{
+		return [(DAVCreateDirectoryRequest *)[self request] path];
+	}
+	return nil;
+}
+
+- (NSString *)formattedResponse
+{
+	if ([self code] == 201) 
+	{
+		return [NSString stringWithFormat:@"Created Directory: %@", [self directory]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"Failed to Create Directory: %@", [self directory]];
+	}
+}
+@end
+
+
+@implementation DAVUploadFileResponse
+
+- (NSString *)remoteFile
+{
+	if ([[self request] isKindOfClass:[DAVUploadFileRequest class]])
+	{
+		return [(DAVUploadFileRequest *)[self request] remoteFile];
+	}
+	return nil;
+}
+
+- (NSString *)formattedResponse
+{
+	if ([self code] == 201)
+	{
+		return [NSString stringWithFormat:@"Uploaded file to: %@", [self remoteFile]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"Failed to upload file to: %@", [self remoteFile]];
+	}
 }
 
 @end
