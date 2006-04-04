@@ -232,6 +232,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			{
 				DAVCreateDirectoryResponse *dav = (DAVCreateDirectoryResponse *)response;
 				NSString *err = nil;
+				NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+				
 				switch ([dav code])
 				{
 					case 201: 
@@ -243,9 +245,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 						break;
 					}
 					case 403:
-					case 405:
 					{		
 						err = @"The server does not allow the creation of directories at the current location";
+						break;
+					}
+					case 405:
+					{		
+						err = @"The directory already exists";
+						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 						break;
 					}
 					case 409:
@@ -274,9 +281,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					NSLog(@"%@", [dav contentString]);
 					if (_flags.error)
 					{
+						[ui setObject:err forKey:NSLocalizedDescriptionKey];
 						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
 															 code:[dav code]
-														 userInfo:[NSDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey]];
+														 userInfo:ui];
 						[_forwarder connection:self didReceiveError:error];
 					}
 				}
@@ -285,14 +293,32 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			case ConnectionUploadingFileState:
 			{
-				NSLog(@"Uploading Completed:\n\n\%@\n\n", response);
-				if (_flags.uploadFinished)
+				DAVUploadFileResponse *dav = (DAVUploadFileResponse *)response;
+				switch ([dav code])
 				{
-					[_forwarder connection:self
-						   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+					case 200:
+					case 201:
+					case 204:
+					{
+						if (_flags.uploadFinished)
+						{
+							[_forwarder connection:self
+								   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+						}
+					}
+					case 409:
+					{		
+						if (_flags.error)
+						{
+							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+															   code:[dav code]
+														   userInfo:[NSDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey]];
+							[_forwarder connection:self didReceiveError:err];
+						}
+					}
+					break;
 				}
 				[self dequeueUpload];
-				
 				[self setState:ConnectionIdleState];
 			}
 			default: break;
@@ -623,7 +649,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		{
 			if (!_flags.isConnected)
 			{
-				[super handleReceiveStreamEvent:theEvent];
+				[super handleSendStreamEvent:theEvent];
 			}
 			else
 			{
@@ -634,7 +660,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			break;
 		}
 		default:
-			[super handleReceiveStreamEvent:theEvent];
+			[super handleSendStreamEvent:theEvent];
 	}
 }
 

@@ -326,6 +326,11 @@
 
 - (id)initWithData:(NSData *)data filename:(NSString *)filename
 {
+	if (![filename hasPrefix:@"/"])
+	{
+		filename = [NSString stringWithFormat:@"/%@", filename];
+	}
+
 	if (self = [super initWithMethod:@"PUT" uri:filename])
 	{
 		myFilename = [filename copy];
@@ -337,6 +342,11 @@
 
 - (id)initWithFile:(NSString *)local filename:(NSString *)remote
 {
+	if (![remote hasPrefix:@"/"])
+	{
+		remote = [NSString stringWithFormat:@"/%@", remote];
+	}
+
 	if (self = [super initWithMethod:@"PUT" uri:remote])
 	{
 		myLocalFilename = [local copy];

@@ -561,7 +561,7 @@ static NSMutableDictionary *responseMap = nil;
 
 - (NSString *)formattedResponse
 {
-	if ([self code] == 201)
+	if ([self code] == 200 || [self code] == 201 || [self code] == 204)
 	{
 		return [NSString stringWithFormat:@"Uploaded file to: %@", [self remoteFile]];
 	}
