@@ -28,19 +28,16 @@
  */
 
 #import "DAVResponse.h"
+#import "DAVDirectoryContentsRequest.h"
+#import "DAVCreateDirectoryRequest.h"
+#import "DAVUploadFileRequest.h"
+
+#import "DAVDirectoryContentsResponse.h"
+#import "DAVCreateDirectoryResponse.h"
+#import "DAVUploadFileResponse.h"
+
 #import "AbstractConnectionProtocol.h"
 
-@interface NSCalendarDate (Connection)
-/*
- We will try and guess the date by trying these formats
- -----------------
- Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
- Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
- Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
- 2006-02-05T23:22:39Z			; ISO 8601 date format
- */
-+ (id)calendarDateWithString:(NSString *)string;
-@end
 
 static NSMutableDictionary *responseMap = nil;
 
@@ -51,9 +48,9 @@ static NSMutableDictionary *responseMap = nil;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	responseMap = [[NSMutableDictionary dictionary] retain];
-	[responseMap setObject:NSStringFromClass([DAVDirectoryContentsResponse class]) forKey:NSStringFromClass([DAVDirectoryContentsRequest class])];
-	[responseMap setObject:NSStringFromClass([DAVCreateDirectoryResponse class]) forKey:NSStringFromClass([DAVCreateDirectoryRequest class])];
-	[responseMap setObject:NSStringFromClass([DAVUploadFileResponse class]) forKey:NSStringFromClass([DAVUploadFileRequest class])];
+	[responseMap setObject:@"DAVDirectoryContentsResponse" forKey:@"DAVDirectoryContentsRequest"];
+	[responseMap setObject:@"DAVCreateDirectoryResponse" forKey:@"DAVCreateDirectoryRequest"];
+	[responseMap setObject:@"DAVUploadFileResponse" forKey:@"DAVUploadFileRequest"];
 	
 	[pool release];
 }
@@ -426,149 +423,6 @@ static NSMutableDictionary *responseMap = nil;
 		}
 	}
 	return date;
-}
-
-@end
-
-
-@implementation DAVDirectoryContentsResponse : DAVResponse
-
-- (NSString *)path
-{
-	if ([[self request] isKindOfClass:[DAVDirectoryContentsRequest class]])
-	{
-		return [(DAVDirectoryContentsRequest *)[self request] path];
-	}
-	return nil;
-}
-
-- (NSArray *)directoryContents
-{
-	NSMutableArray *contents = [NSMutableArray array];
-	NSXMLDocument *doc = [self xmlDocument];
-	NSXMLElement *xml = [doc rootElement];
-	
-	NSArray *responses = [xml elementsForLocalName:@"response" URI:@"DAV:"];
-	NSEnumerator *e = [responses objectEnumerator];
-	NSXMLElement *response;
-	
-	while (response = [e nextObject])
-	{
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-		//NSLog(@"\n%@", [response XMLStringWithOptions:NSXMLNodePrettyPrint]);
-		
-		// filename
-		NSString *href = [[[response elementsForLocalName:@"href" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		if ([href isEqualToString:[self path]])
-		{
-			continue;
-		}
-		NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [self headerForKey:@"Host"], href]];
-		NSString *path = [url path];
-
-		[attribs setObject:href forKey:@"DAVURI"];
-		[attribs setObject:[path lastPathComponent] forKey:cxFilenameKey];
-		
-		NSXMLElement *props = [[[[response elementsForLocalName:@"propstat" URI:@"DAV:"] objectAtIndex:0] elementsForLocalName:@"prop" URI:@"DAV:"] objectAtIndex:0];
-		
-		NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		@try {
-			// we could be a directory
-			NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
-			NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
-			
-			long long size;
-			[sizeScanner scanLongLong:&size];
-			[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
-		}
-		@catch (NSException *e) {
-			
-		}
-		
-		NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
-		[attribs setObject:created forKey:NSFileCreationDate];
-		NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
-		[attribs setObject:modified forKey:NSFileModificationDate];
-		
-		//see if we are a directory or file
-		NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
-		if ([resourceType childCount] == 0)
-		{
-			[attribs setObject:NSFileTypeRegular forKey:NSFileType];
-		}
-		else
-		{
-			// WebDAV does not support the notion of Symbolic Links so currently we can take it to be a directory if the node has any children
-			[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
-		}
-		
-		[contents addObject:attribs];
-	}
-	return contents;
-}
-
-- (NSString *)formattedResponse
-{
-	NSMutableString *s = [NSMutableString stringWithFormat:@"Directory Listing for %@:\n", [self path]];
-	NSEnumerator *e = [[self directoryContents] objectEnumerator];
-	NSDictionary *cur;
-	while (cur = [e nextObject])
-	{
-		[s appendFormat:@"%@\t\t\t%@\n", [cur objectForKey:NSFileModificationDate], [cur objectForKey:cxFilenameKey]];
-	}
-	
-	return s;
-}
-
-@end
-
-@implementation DAVCreateDirectoryResponse
-
-- (NSString *)directory
-{
-	if ([[self request] isKindOfClass:[DAVCreateDirectoryRequest class]])
-	{
-		return [(DAVCreateDirectoryRequest *)[self request] path];
-	}
-	return nil;
-}
-
-- (NSString *)formattedResponse
-{
-	if ([self code] == 201) 
-	{
-		return [NSString stringWithFormat:@"Created Directory: %@", [self directory]];
-	}
-	else
-	{
-		return [NSString stringWithFormat:@"Failed to Create Directory: %@", [self directory]];
-	}
-}
-@end
-
-
-@implementation DAVUploadFileResponse
-
-- (NSString *)remoteFile
-{
-	if ([[self request] isKindOfClass:[DAVUploadFileRequest class]])
-	{
-		return [(DAVUploadFileRequest *)[self request] remoteFile];
-	}
-	return nil;
-}
-
-- (NSString *)formattedResponse
-{
-	if ([self code] == 200 || [self code] == 201 || [self code] == 204)
-	{
-		return [NSString stringWithFormat:@"Uploaded file to: %@", [self remoteFile]];
-	}
-	else
-	{
-		return [NSString stringWithFormat:@"Failed to upload file to: %@", [self remoteFile]];
-	}
 }
 
 @end

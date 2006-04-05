@@ -434,20 +434,24 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_sendBufferLock lock];
 	BOOL bufferEmpty = [_sendBuffer length] == 0;
 	[_sendBuffer appendData:data];
+	[_sendBufferLock unlock];
 	
 	//NSLog(@"SBC << %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
 	
 	if (bufferEmpty) {
 		// prime the sending
+		[_sendBufferLock lock];
 		unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
-		uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
-		[_sendStream write:bytes maxLength:chunkLength];
+		NSData *chunk = [_sendBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							   withBytes:NULL
 								  length:0];
+		[_sendBufferLock unlock];
+		uint8_t *bytes = (uint8_t *)[chunk bytes];
+		[_sendStream write:bytes maxLength:chunkLength];
 		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
-	[_sendBufferLock unlock];
+	
 }
 
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
@@ -578,7 +582,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		case NSStreamEventHasSpaceAvailable:
 		{
 			[_sendBufferLock lock];
-			
 			unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 			if (chunkLength > 0) {
 				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
@@ -586,10 +589,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 									   withBytes:NULL
 										  length:0];
-				[self stream:_sendStream sentBytesOfLength:chunkLength];
 			}
-			
 			[_sendBufferLock unlock];
+			[self stream:_sendStream sentBytesOfLength:chunkLength];
 			break;
 		}
 		default:

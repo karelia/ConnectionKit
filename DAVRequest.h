@@ -70,36 +70,4 @@
 
 @end
 
-@interface DAVDirectoryContentsRequest : DAVRequest
-{
-	NSString *myPath;
-}
-
-+ (id)directoryContentsForPath:(NSString *)path;
-- (NSString *)path;
-
-@end
-
-@interface DAVCreateDirectoryRequest : DAVRequest
-{
-	NSString *myDirectory;
-}
-
-+ (id)createDirectoryWithPath:(NSString *)path;
-- (NSString *)path;
-
-@end
-
-@interface DAVUploadFileRequest : DAVRequest
-{
-	NSString *myLocalFilename;
-	NSString *myFilename;
-}
-
-+ (id)uploadWithData:(NSData *)data filename:(NSString *)filename;
-+ (id)uploadWithFile:(NSString *)localFile filename:(NSString *)filename;
-
-- (NSString *)remoteFile;
-@end
-
 
