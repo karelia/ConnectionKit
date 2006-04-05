@@ -247,6 +247,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					case 403:
 					{		
 						err = @"The server does not allow the creation of directories at the current location";
+						//we fake the directory exists as this is usually the case if it is the root directory
+						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 						break;
 					}
 					case 405:
@@ -609,7 +611,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		case NSStreamEventEndEncountered: 
 		{
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
-			NSLog(@"disconnected receive stream");
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
 			break;
@@ -622,7 +623,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			else
 			{
-				NSLog(@"receive reconnected");
 				myDAVFlags.needsReconnection = NO;
 				myDAVFlags.isInReconnection = NO;
 			}
@@ -640,7 +640,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		case NSStreamEventEndEncountered: 
 		{
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
-			NSLog(@"disconnected send stream");
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
 			break;
@@ -653,7 +652,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			else
 			{
-				NSLog(@"send reconnected");
 				myDAVFlags.needsReconnection = NO;
 				myDAVFlags.isInReconnection = NO;
 			}
@@ -661,6 +659,27 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		default:
 			[super handleSendStreamEvent:theEvent];
+	}
+}
+
+- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
+{
+	if (GET_STATE == ConnectionDownloadingFileState)
+	{
+		bytesTransferred += length;
+		if (_flags.downloadPercent)
+		{
+			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			[_forwarder connection:self 
+						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+					  progressedTo:[NSNumber numberWithInt:percent]];
+		}
+		if (_flags.downloadProgressed)
+		{
+			[_forwarder connection:self
+						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+			  receivedDataOfLength:length];
+		}
 	}
 }
 
@@ -681,23 +700,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[_forwarder connection:self 
 							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
 				  sentDataOfLength:length];
-		}
-	}
-	else if (GET_STATE == ConnectionDownloadingFileState)
-	{
-		bytesTransferred += length;
-		if (_flags.downloadPercent)
-		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			[_forwarder connection:self 
-						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-					  progressedTo:[NSNumber numberWithInt:percent]];
-		}
-		if (_flags.downloadProgressed)
-		{
-			[_forwarder connection:self
-						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-			  receivedDataOfLength:length];
 		}
 	}
 }
