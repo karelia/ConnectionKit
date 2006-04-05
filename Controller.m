@@ -299,9 +299,14 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 	NSDictionary *d = [remoteFiles objectAtIndex:row];
 	if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeRegular] ||
 		[[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-		[con deleteFile:[d objectForKey:cxFilenameKey]];
+	{
+		NSString *file = [[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]];
+		[con deleteFile:file];
+	}
 	else
-		[con deleteDirectory:[d objectForKey:cxFilenameKey]];
+	{
+		[con deleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+	}
 }
 
 - (IBAction)localFileSelected:(id)sender

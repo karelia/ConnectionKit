@@ -222,6 +222,10 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			break;
 			
 		case DISCONNECT:
+			if (_flags.didDisconnect)
+			{
+				[_forwarder connection:self didDisconnectFromHost:[self host]];
+			}
 			break;
 			
 		case FORCE_DISCONNECT:
@@ -373,6 +377,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)connect
 {
+	// do we really need to do this?
 	[self emptyCommandQueue];
 	
 	int connectionPort = [_connectionPort intValue];

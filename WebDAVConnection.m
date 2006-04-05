@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2004, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@framedphotographics.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -33,10 +33,12 @@
 #import "DAVDirectoryContentsRequest.h"
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"
+#import "DAVDeleteRequest.h"
 #import "DAVResponse.h"
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVCreateDirectoryResponse.h"
 #import "DAVUploadFileResponse.h"
+#import "DAVDeleteResponse.h"
 #import "NSData+Connection.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
@@ -340,6 +342,77 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				[self dequeueUpload];
 				[self setState:ConnectionIdleState];
+				break;
+			}
+			case ConnectionDeleteFileState:
+			{
+				DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
+				switch ([dav code])
+				{
+					case 200:
+					case 201:
+					case 204:
+					{
+						if (_flags.deleteFile)
+						{
+							[_forwarder connection:self didDeleteFile:[self currentDeletion]];
+						}
+						break;
+					}
+					default:
+					{
+						if (_flags.error)
+						{
+							NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+							[ui setObject:[NSString stringWithFormat:@"Failed to delete file: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+							[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+							
+							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+															   code:[dav code]
+														   userInfo:ui];
+							[_forwarder connection:self didReceiveError:err];
+						}
+					}
+				}
+				[self dequeueDeletion];
+				[self setState:ConnectionIdleState];
+				break;
+			}
+			case ConnectionDeleteDirectoryState:
+			{
+				DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
+				switch ([dav code])
+				{
+					case 200:
+					case 201:
+					case 204:
+					{
+						if (_flags.deleteDirectory)
+						{
+							[_forwarder connection:self didDeleteDirectory:[self currentDeletion]];
+						}
+						break;
+					}
+					default:
+					{
+						if (_flags.error)
+						{
+							NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+							[ui setObject:[NSString stringWithFormat:@"Failed to delete directory: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+							[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+							
+							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+															   code:[dav code]
+														   userInfo:ui];
+							[_forwarder connection:self didReceiveError:err];
+						}
+					}
+				}
+				[self dequeueDeletion];
+				[self setState:ConnectionIdleState];
+				break;
 			}
 			default: break;
 		}
@@ -428,6 +501,29 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark -
 #pragma mark Abstract Connection Protocol
 
+- (void)davDisconnect
+{
+	[self closeStreams];
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
+	[self setState:ConnectionNotConnectedState];
+}
+
+- (void)disconnect
+{
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDisconnect)
+													  target:self
+												   arguments:[NSArray array]];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSentQuitState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
+}
+
 - (void)davDidChangeToDirectory:(NSString *)dirPath
 {
 	[myCurrentDirectory autorelease];
@@ -495,12 +591,26 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)deleteFile:(NSString *)path
 {
-	
+	DAVDeleteRequest *req = [DAVDeleteRequest deleteFileWithPath:path];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDeleteFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueDeletion:path];
+	[self queueCommand:cmd];
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
-	
+	DAVDeleteRequest *req = [DAVDeleteRequest deleteFileWithPath:dirPath];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDeleteDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueDeletion:dirPath];
+	[self queueCommand:cmd];
 }
 
 - (void)uploadFile:(NSString *)localPath
