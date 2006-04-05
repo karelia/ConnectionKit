@@ -1,0 +1,18 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {cancel = id; choose = id; }; 
+            CLASS = ConnectionOpenPanel; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                myConnection = id; 
+                oChooseButton = NSButton; 
+                oDirectoryBrowser = NSBrowser; 
+                oRealPanel = NSPanel; 
+            }; 
+            SUPERCLASS = NSPanel; 
+        }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}

@@ -64,6 +64,9 @@
 		797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
+		79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */; };
+		79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */; };
+		7985902009E3C88E003EA241 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
 		79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */; };
@@ -141,6 +144,7 @@
 				79252EB009E3663B00157A78 /* DAVUploadFileResponse.h in CopyFiles */,
 				7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */,
 				7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */,
+				79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -224,6 +228,9 @@
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
 		797F96FC096DFD240029D7DE /* DotMacKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DotMacKit.framework; path = /Library/Frameworks/DotMacKit.framework; sourceTree = "<absolute>"; };
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionOpenPanel.h; sourceTree = "<group>"; };
+		79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionOpenPanel.m; sourceTree = "<group>"; };
+		7985901F09E3C88E003EA241 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
@@ -270,6 +277,7 @@
 			isa = PBXGroup;
 			children = (
 				7939980A075FE1C600F713EB /* Connections */,
+				79858FE109E3C498003EA241 /* Connection UI */,
 				793998C6076006D800F713EB /* Support Classes */,
 				7939985C075FFFB400F713EB /* Controller.h */,
 				7939985D075FFFB400F713EB /* Controller.m */,
@@ -353,6 +361,7 @@
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				79D1D76C07613A43003FA7BB /* InputDialog.nib */,
 				79204BCC07652BDE004798B1 /* Permissions.nib */,
+				7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -418,6 +427,15 @@
 			children = (
 			);
 			name = "Socket with SSL Capabitlities";
+			sourceTree = "<group>";
+		};
+		79858FE109E3C498003EA241 /* Connection UI */ = {
+			isa = PBXGroup;
+			children = (
+				79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */,
+				79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */,
+			);
+			name = "Connection UI";
 			sourceTree = "<group>";
 		};
 		79FDC97509DFBF2D00373F71 /* DAV */ = {
@@ -537,6 +555,7 @@
 				79158559076573880036D96E /* PermissionsController.h in Resources */,
 				797F9184096DFAD60029D7DE /* README in Resources */,
 				79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */,
+				7985902009E3C88E003EA241 /* ConnectionOpenPanel.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -579,6 +598,7 @@
 				79252EB109E3663B00157A78 /* DAVUploadFileResponse.m in Sources */,
 				7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */,
 				7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */,
+				79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -607,6 +627,14 @@
 				79204BCD07652BDE004798B1 /* English */,
 			);
 			name = Permissions.nib;
+			sourceTree = "<group>";
+		};
+		7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				7985901F09E3C88E003EA241 /* English */,
+			);
+			name = ConnectionOpenPanel.nib;
 			sourceTree = "<group>";
 		};
 		79D1D76C07613A43003FA7BB /* InputDialog.nib */ = {
