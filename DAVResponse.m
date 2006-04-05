@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2004, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@framedphotographics.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -51,6 +51,7 @@ static NSMutableDictionary *responseMap = nil;
 	[responseMap setObject:@"DAVDirectoryContentsResponse" forKey:@"DAVDirectoryContentsRequest"];
 	[responseMap setObject:@"DAVCreateDirectoryResponse" forKey:@"DAVCreateDirectoryRequest"];
 	[responseMap setObject:@"DAVUploadFileResponse" forKey:@"DAVUploadFileRequest"];
+	[responseMap setObject:@"DAVDeleteResponse" forKey:@"DAVDeleteRequest"];
 	
 	[pool release];
 }
@@ -69,10 +70,6 @@ static NSMutableDictionary *responseMap = nil;
 			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
 			{
 				int responseCode = [[response objectAtIndex:1] intValue];
-				if (responseCode == 204)
-				{
-					NSLog(@"breaking");
-				}
 				NSMutableDictionary *headers = [NSMutableDictionary dictionary];
 				
 				if ([response count] >= 3)

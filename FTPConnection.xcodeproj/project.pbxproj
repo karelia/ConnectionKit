@@ -15,6 +15,22 @@
 		7920195608B1A83E00F652C9 /* SFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920195508B1A83E00F652C9 /* SFTPConnection.m */; };
 		7920196E08B1C32A00F652C9 /* WebDAVSecureConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */; };
 		79204BCE07652BDE004798B1 /* Permissions.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79204BCC07652BDE004798B1 /* Permissions.nib */; };
+		79252DFE09E3630A00157A78 /* DAVDirectoryContentsRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252DFC09E3630A00157A78 /* DAVDirectoryContentsRequest.h */; };
+		79252DFF09E3630A00157A78 /* DAVDirectoryContentsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252DFD09E3630A00157A78 /* DAVDirectoryContentsRequest.m */; };
+		79252E1609E3637B00157A78 /* DAVCreateDirectoryRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E1409E3637B00157A78 /* DAVCreateDirectoryRequest.h */; };
+		79252E1709E3637B00157A78 /* DAVCreateDirectoryRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E1509E3637B00157A78 /* DAVCreateDirectoryRequest.m */; };
+		79252E2C09E363FC00157A78 /* DAVUploadFileRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E2A09E363FC00157A78 /* DAVUploadFileRequest.h */; };
+		79252E2D09E363FC00157A78 /* DAVUploadFileRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E2B09E363FC00157A78 /* DAVUploadFileRequest.m */; };
+		79252E7409E3657300157A78 /* DAVDirectoryContentsResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E7209E3657300157A78 /* DAVDirectoryContentsResponse.h */; };
+		79252E7509E3657300157A78 /* DAVDirectoryContentsResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7309E3657300157A78 /* DAVDirectoryContentsResponse.m */; };
+		79252E7E09E365E100157A78 /* DAVCreateDirectoryResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E7C09E365E100157A78 /* DAVCreateDirectoryResponse.h */; };
+		79252E7F09E365E100157A78 /* DAVCreateDirectoryResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7D09E365E100157A78 /* DAVCreateDirectoryResponse.m */; };
+		79252EB009E3663B00157A78 /* DAVUploadFileResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252EAE09E3663B00157A78 /* DAVUploadFileResponse.h */; };
+		79252EB109E3663B00157A78 /* DAVUploadFileResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252EAF09E3663B00157A78 /* DAVUploadFileResponse.m */; };
+		7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7925367D09E3819300157A78 /* DAVDeleteRequest.h */; };
+		7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925367E09E3819300157A78 /* DAVDeleteRequest.m */; };
+		7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7925368909E3828300157A78 /* DAVDeleteResponse.h */; };
+		7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925368A09E3828300157A78 /* DAVDeleteResponse.m */; };
 		7929B78109353D870002A18F /* FileTransfer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7929B77F09353D870002A18F /* FileTransfer.h */; };
 		7929B78209353D870002A18F /* FileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929B78009353D870002A18F /* FileTransfer.m */; };
 		7931CB710940227B00740CA2 /* StreamBasedConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7931CB6F0940227B00740CA2 /* StreamBasedConnection.h */; };
@@ -117,6 +133,14 @@
 				79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */,
 				79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */,
 				79FEE91209E11B6B009E1D59 /* NSData+Connection.h in CopyFiles */,
+				79252DFE09E3630A00157A78 /* DAVDirectoryContentsRequest.h in CopyFiles */,
+				79252E1609E3637B00157A78 /* DAVCreateDirectoryRequest.h in CopyFiles */,
+				79252E2C09E363FC00157A78 /* DAVUploadFileRequest.h in CopyFiles */,
+				79252E7409E3657300157A78 /* DAVDirectoryContentsResponse.h in CopyFiles */,
+				79252E7E09E365E100157A78 /* DAVCreateDirectoryResponse.h in CopyFiles */,
+				79252EB009E3663B00157A78 /* DAVUploadFileResponse.h in CopyFiles */,
+				7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */,
+				7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -152,6 +176,22 @@
 		7920196C08B1C32A00F652C9 /* WebDAVSecureConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebDAVSecureConnection.h; sourceTree = "<group>"; };
 		7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebDAVSecureConnection.m; sourceTree = "<group>"; };
 		79204BCD07652BDE004798B1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Permissions.nib; sourceTree = "<group>"; };
+		79252DFC09E3630A00157A78 /* DAVDirectoryContentsRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVDirectoryContentsRequest.h; sourceTree = "<group>"; };
+		79252DFD09E3630A00157A78 /* DAVDirectoryContentsRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDirectoryContentsRequest.m; sourceTree = "<group>"; };
+		79252E1409E3637B00157A78 /* DAVCreateDirectoryRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVCreateDirectoryRequest.h; sourceTree = "<group>"; };
+		79252E1509E3637B00157A78 /* DAVCreateDirectoryRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVCreateDirectoryRequest.m; sourceTree = "<group>"; };
+		79252E2A09E363FC00157A78 /* DAVUploadFileRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVUploadFileRequest.h; sourceTree = "<group>"; };
+		79252E2B09E363FC00157A78 /* DAVUploadFileRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVUploadFileRequest.m; sourceTree = "<group>"; };
+		79252E7209E3657300157A78 /* DAVDirectoryContentsResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVDirectoryContentsResponse.h; sourceTree = "<group>"; };
+		79252E7309E3657300157A78 /* DAVDirectoryContentsResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDirectoryContentsResponse.m; sourceTree = "<group>"; };
+		79252E7C09E365E100157A78 /* DAVCreateDirectoryResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVCreateDirectoryResponse.h; sourceTree = "<group>"; };
+		79252E7D09E365E100157A78 /* DAVCreateDirectoryResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVCreateDirectoryResponse.m; sourceTree = "<group>"; };
+		79252EAE09E3663B00157A78 /* DAVUploadFileResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVUploadFileResponse.h; sourceTree = "<group>"; };
+		79252EAF09E3663B00157A78 /* DAVUploadFileResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVUploadFileResponse.m; sourceTree = "<group>"; };
+		7925367D09E3819300157A78 /* DAVDeleteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVDeleteRequest.h; sourceTree = "<group>"; };
+		7925367E09E3819300157A78 /* DAVDeleteRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDeleteRequest.m; sourceTree = "<group>"; };
+		7925368909E3828300157A78 /* DAVDeleteResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVDeleteResponse.h; sourceTree = "<group>"; };
+		7925368A09E3828300157A78 /* DAVDeleteResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDeleteResponse.m; sourceTree = "<group>"; };
 		7929B77F09353D870002A18F /* FileTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileTransfer.h; sourceTree = "<group>"; };
 		7929B78009353D870002A18F /* FileTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransfer.m; sourceTree = "<group>"; };
 		7931CB6F0940227B00740CA2 /* StreamBasedConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamBasedConnection.h; sourceTree = "<group>"; };
@@ -387,8 +427,24 @@
 				79FEE91109E11B6B009E1D59 /* NSData+Connection.m */,
 				79FDC96209DFBCDF00373F71 /* DAVRequest.h */,
 				79FDC96309DFBCDF00373F71 /* DAVRequest.m */,
+				79252DFC09E3630A00157A78 /* DAVDirectoryContentsRequest.h */,
+				79252DFD09E3630A00157A78 /* DAVDirectoryContentsRequest.m */,
+				79252E1409E3637B00157A78 /* DAVCreateDirectoryRequest.h */,
+				79252E1509E3637B00157A78 /* DAVCreateDirectoryRequest.m */,
+				79252E2A09E363FC00157A78 /* DAVUploadFileRequest.h */,
+				79252E2B09E363FC00157A78 /* DAVUploadFileRequest.m */,
 				79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */,
 				79CC0D8009DFBFA300F975D2 /* DAVResponse.m */,
+				79252E7209E3657300157A78 /* DAVDirectoryContentsResponse.h */,
+				79252E7309E3657300157A78 /* DAVDirectoryContentsResponse.m */,
+				79252E7C09E365E100157A78 /* DAVCreateDirectoryResponse.h */,
+				79252E7D09E365E100157A78 /* DAVCreateDirectoryResponse.m */,
+				79252EAE09E3663B00157A78 /* DAVUploadFileResponse.h */,
+				79252EAF09E3663B00157A78 /* DAVUploadFileResponse.m */,
+				7925367D09E3819300157A78 /* DAVDeleteRequest.h */,
+				7925367E09E3819300157A78 /* DAVDeleteRequest.m */,
+				7925368909E3828300157A78 /* DAVDeleteResponse.h */,
+				7925368A09E3828300157A78 /* DAVDeleteResponse.m */,
 				792017A908B1630C00F652C9 /* WebDAVConnection.h */,
 				792017AA08B1630C00F652C9 /* WebDAVConnection.m */,
 				7920196C08B1C32A00F652C9 /* WebDAVSecureConnection.h */,
@@ -515,6 +571,14 @@
 				79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */,
 				79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */,
 				79FEE91309E11B6B009E1D59 /* NSData+Connection.m in Sources */,
+				79252DFF09E3630A00157A78 /* DAVDirectoryContentsRequest.m in Sources */,
+				79252E1709E3637B00157A78 /* DAVCreateDirectoryRequest.m in Sources */,
+				79252E2D09E363FC00157A78 /* DAVUploadFileRequest.m in Sources */,
+				79252E7509E3657300157A78 /* DAVDirectoryContentsResponse.m in Sources */,
+				79252E7F09E365E100157A78 /* DAVCreateDirectoryResponse.m in Sources */,
+				79252EB109E3663B00157A78 /* DAVUploadFileResponse.m in Sources */,
+				7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */,
+				7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

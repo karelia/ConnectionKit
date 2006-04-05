@@ -27,14 +27,30 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import "DAVDeleteResponse.h"
+#import "DAVDeleteRequest.h"
 
-#import <Cocoa/Cocoa.h>
-#import "DAVResponse.h"
+@implementation DAVDeleteResponse
 
-@interface DAVCreateDirectoryResponse : DAVResponse
+- (NSString *)path
 {
+	if ([[self request] isKindOfClass:[DAVDeleteRequest class]])
+	{
+		return [(DAVDeleteRequest *)[self request] path];
+	}
+	return nil;
 }
 
-- (NSString *)directory;
+- (NSString *)formattedResponse
+{
+	if ([self code] == 204)
+	{
+		return [NSString stringWithFormat:@"Deleted path: %@", [self path]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"Failed to delete path: %@", [self path]];
+	}
+}
 
 @end

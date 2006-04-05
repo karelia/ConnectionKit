@@ -27,14 +27,15 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 #import <Cocoa/Cocoa.h>
-#import "DAVResponse.h"
+#import "DAVRequest.h"
 
-@interface DAVCreateDirectoryResponse : DAVResponse
+@interface DAVDeleteRequest : DAVRequest
 {
 }
 
-- (NSString *)directory;
++ (id)deleteFileWithPath:(NSString *)path;
+
+- (NSString *)path;
 
 @end

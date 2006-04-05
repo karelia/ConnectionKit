@@ -220,7 +220,14 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 	DEQUEUE(_fileCheckQueue);
 }
 
-#define CURRENT_QUEUE(q) [_queueLock lock]; id obj = nil; if ([q count] > 0) { obj = [q objectAtIndex:0]; } [_queueLock unlock]; return obj;
+#define CURRENT_QUEUE(q) \
+	[_queueLock lock]; \
+	id obj = nil; \
+	if ([q count] > 0) { \
+		obj = [q objectAtIndex:0]; \
+	} \
+	[_queueLock unlock]; \
+	return obj;
 
 - (id)currentCommand
 {

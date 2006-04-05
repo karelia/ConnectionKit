@@ -27,14 +27,49 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#import "DAVDeleteRequest.h"
 
-#import <Cocoa/Cocoa.h>
-#import "DAVResponse.h"
+@interface NSString (Connection)
+- (NSString *)encodeLegally;
+@end
 
-@interface DAVCreateDirectoryResponse : DAVResponse
+@implementation DAVDeleteRequest
+
++ (id)deleteFileWithPath:(NSString *)path
 {
+	if (![path hasPrefix:@"/"])
+	{
+		path = [NSString stringWithFormat:@"/%@", path];
+	}
+	
+	return [[[DAVDeleteRequest alloc] initWithMethod:nil uri:[path encodeLegally]] autorelease];
 }
 
-- (NSString *)directory;
+- (id)initWithMethod:(NSString *)method uri:(NSString *)uri
+{
+	if (self = [super initWithMethod:@"DELETE" uri:uri])
+	{
+		[myHeaders removeObjectForKey:@"Content-Type"];
+	}
+	return self;
+}
+
+- (NSString *)path
+{
+	return [self uri];
+}
 
 @end
+
+@implementation NSString (Connection)
+
+- (NSString *)encodeLegally
+{
+	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
+																			NULL, (CFStringRef) self, (CFStringRef) @"%+#", NULL,
+																			CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+	return result;
+}
+
+@end
+
