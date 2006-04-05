@@ -227,12 +227,13 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				if (err)
 				{
-					NSLog(@"%@", [dav contentString]);
 					if (_flags.error)
 					{
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
 															 code:[dav code]
-														 userInfo:[NSDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey]];
+														 userInfo:ui];
 						[_forwarder connection:self didReceiveError:error];
 					}
 				}				
@@ -291,10 +292,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				if (err)
 				{
-					NSLog(@"%@", [dav contentString]);
 					if (_flags.error)
 					{
 						[ui setObject:err forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+						[ui setObject:[dav directory] forKey:@"directory"];
 						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
 															 code:[dav code]
 														 userInfo:ui];
@@ -318,14 +321,18 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 							[_forwarder connection:self
 								   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 						}
+						break;
 					}
 					case 409:
 					{		
 						if (_flags.error)
 						{
+							NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey];
+							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+
 							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
 															   code:[dav code]
-														   userInfo:[NSDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey]];
+														   userInfo:ui];
 							[_forwarder connection:self didReceiveError:err];
 						}
 					}
