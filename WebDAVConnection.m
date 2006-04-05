@@ -30,7 +30,13 @@
 #import "WebDAVConnection.h"
 #import "AbstractConnection.h"
 #import "DAVRequest.h"
+#import "DAVDirectoryContentsRequest.h"
+#import "DAVCreateDirectoryRequest.h"
+#import "DAVUploadFileRequest.h"
 #import "DAVResponse.h"
+#import "DAVDirectoryContentsResponse.h"
+#import "DAVCreateDirectoryResponse.h"
+#import "DAVUploadFileResponse.h"
 #import "NSData+Connection.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
@@ -126,6 +132,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
 		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
 		[myResponseBuffer replaceBytesInRange:responseRange withBytes:NULL length:0];
+		
+		if ([AbstractConnection debugEnabled])
+		{
+			NSLog(@"WebDAV Received:\n%@", response);
+		}
 		
 		if ([self transcript])
 		{
@@ -392,6 +403,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 			}
 			
+		}
+		if ([AbstractConnection debugEnabled])
+		{
+			NSLog(@"WebDAV Sending:\n%@", req);
 		}
 		[self sendData:packet];
 	}

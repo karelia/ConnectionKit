@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2004, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@framedphotographics.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -26,43 +26,15 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 #import <Cocoa/Cocoa.h>
 #import "DAVRequest.h"
 
-@interface DAVResponse : DAVRequest 
+@interface DAVCreateDirectoryRequest : DAVRequest
 {
-	DAVRequest		*myRequest;
-	int				myResponseCode;
-	NSString		*myResponse;
-	
-	
+	NSString *myDirectory;
 }
 
-// returns the range of data required to construct the response object
-+ (NSRange)canConstructResponseWithData:(NSData *)data;
++ (id)createDirectoryWithPath:(NSString *)path;
+- (NSString *)path;
 
-//designated initializer - do not use initWithRequest:data:
-+ (id)responseWithRequest:(DAVRequest *)request data:(NSData *)data;
-- (id)initWithRequest:(DAVRequest *)request data:(NSData *)data;
-
-- (int)code;
-- (NSString *)response; //eg Multi Status
-- (NSString *)formattedResponse; // sublcasses override to format their contents
-
-- (NSXMLDocument *)xmlDocument;
-- (DAVRequest *)request;
-
-@end
-
-@interface NSCalendarDate (Connection)
-/*
- We will try and guess the date by trying these formats
- -----------------
- Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
- Sunday, 06-Nov-94 08:49:37 GMT ; RFC 850, obsoleted by RFC 1036
- Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
- 2006-02-05T23:22:39Z			; ISO 8601 date format
- */
-+ (id)calendarDateWithString:(NSString *)string;
 @end
