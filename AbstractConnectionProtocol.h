@@ -78,7 +78,7 @@ typedef struct __flags {
 } connectionFlags;
 
 
-@protocol AbstractConnectionProtocol
+@protocol AbstractConnectionProtocol <NSObject>
 
 + (NSString *)name;
 

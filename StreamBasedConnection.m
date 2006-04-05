@@ -462,6 +462,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
 				//NSLog(@"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
 			free(buf);
@@ -602,17 +603,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)theEvent
 {
-	NSString *name = nil;
-	switch (theEvent)
-	{
-		case NSStreamEventNone: name = @"NSStreamEventNone"; break;
-		case NSStreamEventOpenCompleted: name = @"NSStreamEventOpenCompleted"; break;
-		case NSStreamEventHasBytesAvailable: name = @"NSStreamEventHasBytesAvailable"; break;
-		case NSStreamEventHasSpaceAvailable: name = @"NSStreamEventHasSpaceAvailable"; break;
-		case NSStreamEventErrorOccurred: name = @"NSStreamEventErrorOccurred"; break;
-		case NSStreamEventEndEncountered: name = @"NSStreamEventEndEncountered"; break;
-	}
-	//NSLog(@"%@ %@", stream, name);
 	if (stream == (NSStream *)_sendStream) {
 		[self handleSendStreamEvent:theEvent];
 	} else if (stream == (NSStream *)_receiveStream) {
@@ -625,6 +615,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
 	// we do nothing - just allow subclasses to know that something was sent
+}
+
+- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
+{
+	// we do nothing - just allow subclasses to know that something was read
 }
 
 #pragma mark -
