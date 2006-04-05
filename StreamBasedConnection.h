@@ -71,6 +71,7 @@
 - (void)handleSendStreamEvent:(NSStreamEvent)theEvent;
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent;
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length;
+- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length;
 
 // Get the local command port
 - (unsigned)localPort;
