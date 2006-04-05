@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2005, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2005-2006, Greg Hulands <ghulands@framedphotographics.com>
  All rights reserved.
  
  
