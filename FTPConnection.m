@@ -898,6 +898,13 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 					break;
 				}
 			}
+			if (GET_STATE == ConnectionSentFeatureRequestState)
+			{
+				[self setState:ConnectionSentUsernameState];
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+				break;
+			}
+			break;
 		}
 		case 503: //Bad sequence of commands
 		{
