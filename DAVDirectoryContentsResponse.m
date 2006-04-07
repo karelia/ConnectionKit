@@ -72,8 +72,24 @@
 		
 		NSXMLElement *props = [[[[response elementsForLocalName:@"propstat" URI:@"DAV:"] objectAtIndex:0] elementsForLocalName:@"prop" URI:@"DAV:"] objectAtIndex:0];
 		
-		NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
+		@try {
+			NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
+			NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
+			[attribs setObject:created forKey:NSFileCreationDate];
+		} 
+		@catch (NSException *e) {
+			
+		}
+		
+		@try {
+			NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
+			NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
+			[attribs setObject:modified forKey:NSFileModificationDate];
+		}
+		@catch (NSException *e) {
+			
+		}
+		
 		@try {
 			// we could be a directory
 			NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
@@ -86,12 +102,7 @@
 		@catch (NSException *e) {
 			
 		}
-		
-		NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
-		[attribs setObject:created forKey:NSFileCreationDate];
-		NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
-		[attribs setObject:modified forKey:NSFileModificationDate];
-		
+
 		//see if we are a directory or file
 		NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
 		if ([resourceType childCount] == 0)
