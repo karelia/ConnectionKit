@@ -904,6 +904,11 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
 				break;
 			}
+			if (GET_STATE == ConnectionSettingPermissionsState)
+			{
+				[self setState:ConnectionIdleState];
+				break;
+			}
 			break;
 		}
 		case 503: //Bad sequence of commands
