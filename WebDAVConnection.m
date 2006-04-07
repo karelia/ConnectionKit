@@ -88,6 +88,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		myResponseBuffer = [[NSMutableData data] retain];
 		NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
 		myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
+		myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	}
 	return self;
 }
@@ -221,6 +222,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 							[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
 						}
 						break;
+					}
+					case 404:
+					{		
+						err = [NSString stringWithFormat: @"There is no WebDAV access to the directory: %@", [dav path]];
 					}
 					default: 
 					{

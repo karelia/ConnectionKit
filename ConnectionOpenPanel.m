@@ -156,7 +156,10 @@
 			containsObject = [[currentObject objectForKey: @"fileName"] isEqualToString: [self newFolderName]];
 		
 		if (!containsObject)
-			[[self connection] createDirectory: [self newFolderName]];
+		{
+			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:[self newFolderName]];
+			[[self connection] createDirectory: dir];
+		}
 		else
 		{  
 			[[self connection] changeToDirectory: [[[self connection] currentDirectory] stringByAppendingPathComponent: [self newFolderName]]];
@@ -169,7 +172,6 @@
 
 - (IBAction) goToFolder: (id) sender
 {
-	int selectedItem = [parentDirectories selectionIndex];
 	[[parentDirectories arrangedObjects] count];
 	NSString *newPath = [[[[[[self connection] currentDirectory] pathComponents] subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))] componentsJoinedByString: @"/"] substringFromIndex: 1];
 	
@@ -543,7 +545,7 @@
 	[[self connection] connect];
 }
 
-- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
+/*- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
 {
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
@@ -553,7 +555,7 @@
 	
 	[self setIsLoading: YES];
 	[[self connection] connect];
-}
+}*/
 
 - (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (int)returnCode contextInfo:(void*) contextInfo
 {
@@ -576,17 +578,17 @@
 }
 
 #pragma mark ----=connection callback=----
-//- (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
-//{
-//	if (NSRunAlertPanel(@"Authorize Connection?", @"%@\nHost: %@", @"Yes", @"No", nil, message, host) == NSOKButton)
-//		return YES;
-//	return NO;
-//}
+- (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
+{
+	if (NSRunAlertPanel(@"Authorize Connection?", @"%@\nHost: %@", @"Yes", @"No", nil, message, host) == NSOKButton)
+		return YES;
+	return NO;
+}
 	
 - (void)connection:(AbstractConnection *)aConn didConnectToHost:(NSString *)host
 {
 	NSString *dir = [self initialDirectory];
-	if (dir && [dir length] > 0)
+	if (dir && [dir length] > 0) 
 		[aConn changeToDirectory: dir];
 	[aConn directoryContents];
 }
@@ -598,6 +600,13 @@
 
 - (void)connection:(AbstractConnection *)aConn didReceiveError:(NSError *)error
 {
+	NSAlert *a = [NSAlert alertWithMessageText:NSLocalizedString(@"A Connection Error Occurred", @"ConnectionOpenPanel")
+								 defaultButton:NSLocalizedString(@"OK", @"OK")
+							   alternateButton:nil
+								   otherButton:nil
+					 informativeTextWithFormat:[[error userInfo] objectForKey:NSLocalizedDescriptionKey]];
+	[a runModal];
+	
 	if ([[self window] isSheet])
 		[[NSApplication sharedApplication] endSheet:[self window] returnCode: [error code]];
 	else
@@ -616,10 +625,10 @@
 	[self close];
 }
 
-- (NSString *)connection:(AbstractConnection *)aConn needsAccountForUsername:(NSString *)username
+/*- (NSString *)connection:(AbstractConnection *)aConn needsAccountForUsername:(NSString *)username
 {
 	//	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
-}
+}*/
 
 - (void)connection:(AbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
 {
@@ -633,14 +642,16 @@
 }
 
 static NSImage *folder = nil;
-static NSImage *upload = nil;
-static NSImage *download = nil;
 static NSImage *symFolder = nil;
 static NSImage *symFile = nil;
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
 	//set the parent directory (in reverse order)
 	//
+	if ([dirPath hasSuffix:@"/"])
+	{
+		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
+	}
 	NSMutableArray *reverseArray = [NSMutableArray array];
 	NSEnumerator *theEnum = [[dirPath pathComponents] reverseObjectEnumerator];
 	id currentItem;
