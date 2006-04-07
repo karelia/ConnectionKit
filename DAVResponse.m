@@ -195,7 +195,7 @@ static NSMutableDictionary *responseMap = nil;
 	
 	if (clsStr)
 	{
-		NSLog(@"Matched Request: %@ to %@", [request className], clsStr);
+	//	NSLog(@"Matched Request: %@ to %@", [request className], clsStr);
 		return [[[NSClassFromString(clsStr) alloc] initWithRequest:request data:data] autorelease];
 	}
 	return [[[DAVResponse alloc] initWithRequest:request data:data] autorelease];
