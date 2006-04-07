@@ -3,8 +3,3 @@ Notes on Using the Connection Framework
 Dependencies:
 
 DotMacSDK v2 DP2 is currently tested
-
-Use of the WebDAVConnection requires the use of the Apple Private Framework to be linked in, DAVKit.framework.
-When not linking in this framework you will need to include the InterThreadMessaging class yourself. There is 
-however a multiple symbols warning when linking DotMacSDK and DAVKit, but testing has showed this to be okay if 
-you add the -bind_at_load to the linker flags in the target.
