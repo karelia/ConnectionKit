@@ -51,16 +51,22 @@ enum { kChangeToDirectory = 7000,
 	kDirectoryContents
 };
 
-@interface FileConnection : AbstractConnection {
+@class RunLoopForwarder;
 
-	int myCurrentOperation;
-
+@interface FileConnection : AbstractConnection 
+{
+	int				myCurrentOperation;
+	NSMutableArray  *myPendingInvocations;
+	NSString		*myCurrentDirectory;
+	
+	NSThread		*_bgThread;
+	NSPort			*myPort;
+	NSLock			*myLock;
+	RunLoopForwarder*myForwarder;
 }
 
 - (int)currentOperation;
 - (void)setCurrentOperation:(int)aCurrentOperation;
-
-
 
 + (FileConnection *)connection;
 
