@@ -33,28 +33,12 @@
 #import "ConnectionOpenPanel.h"
 #import "AbstractConnectionProtocol.h"
 
-@interface ConnectionNode : NSObject
-{
-	NSDictionary *myAttributes;
-	NSMutableArray *myContents;
-}
-
-+ (id)nodeWithAttributes:(NSDictionary *)attribs;
-
-- (BOOL)isLeaf;
-
-- (void)addItem:(ConnectionNode *)item;
-- (NSArray *)items;
-
-@end
-
-
 @implementation ConnectionOpenPanel
 
 - (id) initWithConnection: (id <AbstractConnectionProtocol>) inConnection
 {
 	NSAssert (inConnection, @"no valid connection");
-	self = [super initWithWindowNibName: @"connectionOpenPanel"];
+	self = [super initWithWindowNibName: @"ConnectionOpenPanel"];
 	
 	if (self)
 	{
@@ -73,7 +57,7 @@
 
 + (ConnectionOpenPanel *) connectionOpenPanel: (id <AbstractConnectionProtocol>) inConnection
 {
-	return [[[connectionOpenPanelController alloc] initWithConnection: inConnection] autorelease];
+	return [[[ConnectionOpenPanel alloc] initWithConnection: inConnection] autorelease];
 }
 
 - (void) awakeFromNib
@@ -209,14 +193,14 @@
 //=========================================================== 
 //  connection 
 //=========================================================== 
-- (AbstractConnection *)connection
+- (id <AbstractConnectionProtocol>)connection
 {
 	//NSLog(@"in -connection, returned connection = %@", connection);
 	
 	return [[connection retain] autorelease]; 
 }
 
-- (void)setConnection:(AbstractConnection *)aConnection
+- (void)setConnection:(id <AbstractConnectionProtocol>)aConnection
 {
 	//NSLog(@"in -setConnection:, old value of connection: %@, changed to: %@", connection, aConnection);
 	
@@ -775,120 +759,37 @@ static NSImage *symFile = nil;
 	//disable the cell we can't select
 	//
 	
-	BOOL returnValue = YES;
+	BOOL enabled = YES;
 	
 	if ([[[[directoryContents arrangedObjects] objectAtIndex: rowIndex] valueForKey: @"isLeaf"] boolValue])
 	{
-		returnValue = [self canChooseFiles];
+		enabled = [self canChooseFiles];
 	}
 	else
-		returnValue = [self canChooseDirectories];
+	{
+		enabled = [self canChooseDirectories];
+	}
+		
 	
-	[aCell setEnabled: returnValue];
-}
-
-/*#pragma mark -
-#pragma mark NSBrowser Delegate Methods
-
-- (ConnectionNode *)nodeAtColumn:(int)column
-{
-	return nil;
-}
-
-- (ConnectionNode *)nodeAtColumn:(int)column row:(int)row
-{
-	if (column == 0)
+	[aCell setEnabled: enabled];
+	if ([aCell isKindOfClass:[NSTextFieldCell class]])
 	{
-		return [myRoot objectAtIndex:row];
-	}
-	return [[[self nodeAtColumn:column] items] objectAtIndex:row];
-}
-
-- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column
-{
-	if (column == 0)
-	{
-		[myRoot count];
-	}
-	else
-	{
-		return [[[self nodeAtColumn:column] items] count];
-	}
-}
-
-- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(int)row column:(int)column
-{
-	ConnectionNode *node = [self nodeAtColumn:column row:row];
-	[cell setStringValue:[node attributeForKey:cxFilenameKey]];
-	if ([[node attributeForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
-	{
-		if (myFlags.canChooseFolders)
+		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+		if (enabled)
 		{
-			[cell setState:NSOnState];
+			[attribs setObject:[NSColor blackColor] forKey:NSForegroundColorAttributeName];
 		}
 		else
 		{
-			[cell setState:NSOffState];
+			[attribs setObject:[NSColor lightGrayColor] forKey:NSForegroundColorAttributeName];
 		}
+		NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithAttributedString:[aCell attributedStringValue]];
+		[str addAttributes:attribs range:NSMakeRange(0,[str length])];
+		[aCell setAttributedStringValue:str];
+		[str release];
 	}
-	else
-	{
-		// we are a file of some type
-		if (myFlags.canChooseFiles)
-		{
-			[cell setState:NSOnState];
-		}
-		else
-		{
-			[cell setState:NSOffState];
-		}
-	}
-}*/
+}
 
 @end
 
 
-@implementation ConnectionNode
-{
-	NSDictionary *myAttributes;
-	NSMutableArray *myContents;
-}
-
-- (id)initWithAttributes:(NSDictionary *)attribs
-{
-	if (self = [super init])
-	{
-		myAttributes = [attribs retain];
-		myContents = [[NSMutableArray array] retain];
-	}
-	return self;
-}
-
-- (void)dealloc
-{
-	[myAttributes release];
-	[myContents release];
-	[super dealloc];
-}
-
-+ (id)nodeWithAttributes:(NSDictionary *)attribs
-{
-	return [[[ConnectionNode alloc] initWithAttributes:attribs] autorelease];
-}
-
-- (BOOL)isLeaf
-{
-	return [myContents count] == 0;
-}
-
-- (void)addItem:(ConnectionNode *)item
-{
-	[myContents addObject:item];
-}
-
-- (NSArray *)items
-{
-	return [NSArray arrayWithArray:myContents];
-}
-
-@end

@@ -71,8 +71,8 @@ enum {
 - (IBAction) goToFolder: (id) sender;
 - (IBAction) createNewFolder: (id) sender;
 
-- (AbstractConnection *)connection;
-- (void)setConnection:(AbstractConnection *)aConnection;
+- (id <AbstractConnectionProtocol>)connection;
+- (void)setConnection:(id <AbstractConnectionProtocol>)aConnection;
 - (BOOL)canChooseDirectories;
 - (void)setCanChooseDirectories:(BOOL)flag;
 - (BOOL)canChooseFiles;
