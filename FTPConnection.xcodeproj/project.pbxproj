@@ -58,6 +58,7 @@
 		79640E8009469FD300A8789D /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640E7E09469FD300A8789D /* SSLStream.m */; };
 		796833090943FB4300213256 /* AbstractQueueConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 796833070943FB4300213256 /* AbstractQueueConnection.h */; };
 		7968330A0943FB4300213256 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 796833080943FB4300213256 /* AbstractQueueConnection.m */; };
+		79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
 		797C0AE9093FEAB1004ABB69 /* SFTPStream.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 797C0AE7093FEAB1004ABB69 /* SFTPStream.h */; };
 		797C0AEA093FEAB1004ABB69 /* SFTPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 797C0AE8093FEAB1004ABB69 /* SFTPStream.m */; };
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
@@ -66,7 +67,6 @@
 		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
 		79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */; };
 		79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */; };
-		7985902009E3C88E003EA241 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */; };
 		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
 		79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */; };
@@ -223,6 +223,7 @@
 		79640E7E09469FD300A8789D /* SSLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSLStream.m; sourceTree = "<group>"; };
 		796833070943FB4300213256 /* AbstractQueueConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractQueueConnection.h; sourceTree = "<group>"; };
 		796833080943FB4300213256 /* AbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractQueueConnection.m; sourceTree = "<group>"; };
+		79730F8809E61D1400B93CB1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		797C0AE7093FEAB1004ABB69 /* SFTPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPStream.h; sourceTree = "<group>"; };
 		797C0AE8093FEAB1004ABB69 /* SFTPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPStream.m; sourceTree = "<group>"; };
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -230,7 +231,6 @@
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionOpenPanel.h; sourceTree = "<group>"; };
 		79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionOpenPanel.m; sourceTree = "<group>"; };
-		7985901F09E3C88E003EA241 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79BCC31D09AEC831007EF4D1 /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = "<group>"; };
@@ -361,7 +361,7 @@
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				79D1D76C07613A43003FA7BB /* InputDialog.nib */,
 				79204BCC07652BDE004798B1 /* Permissions.nib */,
-				7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */,
+				79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -555,7 +555,7 @@
 				79158559076573880036D96E /* PermissionsController.h in Resources */,
 				797F9184096DFAD60029D7DE /* README in Resources */,
 				79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */,
-				7985902009E3C88E003EA241 /* ConnectionOpenPanel.nib in Resources */,
+				79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -629,10 +629,10 @@
 			name = Permissions.nib;
 			sourceTree = "<group>";
 		};
-		7985901E09E3C88E003EA241 /* ConnectionOpenPanel.nib */ = {
+		79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				7985901F09E3C88E003EA241 /* English */,
+				79730F8809E61D1400B93CB1 /* English */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = "<group>";
