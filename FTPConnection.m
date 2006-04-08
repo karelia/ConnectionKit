@@ -668,6 +668,44 @@ static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFSt
 		{
 			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
 			{	
+				// We need to absorb all the login info message
+				NSMutableString *buffer = [NSMutableString string];
+				BOOL atEnd = NO;
+				NSRange r;
+				
+				if ((r = [_commandBuffer rangeOfString:@"230 "]).location != NSNotFound) {
+					buffer = [[_commandBuffer copy] autorelease];
+					//need to drop out of the commandBuffer up to the new line.
+					NSRange newLineRange;
+					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+					
+					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+															  options:NSCaseInsensitiveSearch 
+																range:toEnd]).location != NSNotFound
+						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+																 options:NSCaseInsensitiveSearch
+																   range:toEnd]).location != NSNotFound)
+						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+					atEnd = YES;
+				}
+				
+				while (atEnd == NO)
+				{
+					NSData *data = [self availableData];
+					
+					if ([data length] > 0)
+					{
+						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+						[buffer appendString:line];
+						
+						if ([line rangeOfString:@"230 "].location != NSNotFound)
+							atEnd = YES;
+						
+						[line release];
+					}
+				}
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection dataAttributes]] autorelease]];
+								
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
 				[self queueCommand:[ConnectionCommand command:@"PWD"
 												   awaitState:ConnectionIdleState
@@ -2033,6 +2071,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (![self setupActiveConnectionWithPort:0])
 	{
 		//try doing a port command
+		_serverSupport.canUseEPRT = NO;
 		[self setState:FTPSettingActiveState];
 		return [self setupActiveConnection];
 	}
