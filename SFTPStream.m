@@ -209,7 +209,6 @@ enum { START = 200, STOP };
 "*/
 - (void)handlePortMessage:(NSPortMessage *)portMessage
 {
-	NSLog(@"received port message: %d", [portMessage msgid]);
 	switch ([portMessage msgid]) {
 		case START:
 			[self connectToServerWithParams:_args];
@@ -217,6 +216,7 @@ enum { START = 200, STOP };
 		case STOP:
 			_keepChecking = NO;
 			close(_master);
+			[SFTPStream cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkBuffers:) object:nil];
 			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
 			break;
 	}
@@ -272,8 +272,11 @@ enum { START = 200, STOP };
 	fd_set readmask;
 	FD_ZERO(&readmask);
 	FD_SET(_master, &readmask);
+	struct timeval timeout;
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
 	
-	switch(select( _master + 1, &readmask, NULL, NULL, NULL )) 
+	switch(select(_master + 1, &readmask, NULL, NULL, &timeout)) 
 	{
 		case -1:
 		{
@@ -283,8 +286,13 @@ enum { START = 200, STOP };
 		case 0:	
 		{
 			/* timeout */
-			NSLog(@"sftp timed out");
-			continue;
+			if (_keepChecking == YES)
+			{
+				[self performSelector:@selector(checkBuffers:)
+						   withObject:nil
+						   afterDelay:0.1]; 
+			}
+			return;
 		}	
 		default:
 			break;
@@ -313,7 +321,7 @@ enum { START = 200, STOP };
 	{
 		[self performSelector:@selector(checkBuffers:)
 				   withObject:nil
-				   afterDelay:0.0]; 
+				   afterDelay:0.1]; 
 	}
 }
 
