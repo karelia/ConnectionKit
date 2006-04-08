@@ -63,6 +63,7 @@ enum { START = 200, STOP };
 
 - (void)sendPortMessage:(int)msg;
 - (oneway void)connectToServerWithParams:( NSArray * )params;
+- (void)checkBuffers:(id)notused;
 
 @end
 
@@ -85,6 +86,7 @@ enum { START = 200, STOP };
 
 - (void)dealloc
 {
+	[self sendPortMessage:STOP];
 	[_port setDelegate:nil];
 	[_port release];
 	[_args release];
@@ -106,9 +108,7 @@ enum { START = 200, STOP };
 
 - (void)close
 {
-	[_port setDelegate:nil];
-	[_port release];
-	_port = nil;
+	_status = NSStreamStatusNotOpen;
 }
 
 - (void)scheduleInRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
@@ -209,12 +209,14 @@ enum { START = 200, STOP };
 "*/
 - (void)handlePortMessage:(NSPortMessage *)portMessage
 {
-	
+	NSLog(@"received port message: %d", [portMessage msgid]);
 	switch ([portMessage msgid]) {
 		case START:
 			[self connectToServerWithParams:_args];
 			break;
 		case STOP:
+			_keepChecking = NO;
+			close(_master);
 			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
 			break;
 	}
@@ -223,11 +225,8 @@ enum { START = 200, STOP };
 - (oneway void)connectToServerWithParams:( NSArray * )params
 {
 	if (_sftppid > 0) return;
-	fd_set		readmask;
     struct winsize	win_size = { 24, 512, 0, 0 };
-    FILE		*mf = NULL;
     char		ttyname[ MAXPATHLEN ], **execargs;
-    char		buf[ MAXPATHLEN * 2 ];
     NSArray		*argv = nil, *passedInArgs = [ params copy ];    
     NSString    *sftpBinary = @"/usr/bin/sftp";
 	int			rc = 0;
@@ -237,7 +236,8 @@ enum { START = 200, STOP };
     rc = [ argv createArgv: &execargs ];
     [ passedInArgs release ];
 	    
-    switch (( _sftppid = forkpty( &_master, ttyname, NULL, &win_size ))) {
+    switch (( _sftppid = forkpty( &_master, ttyname, NULL, &win_size ))) 
+	{
 		case 0:
 			execve( execargs[ 0 ], ( char ** )execargs, environ );
 			NSLog( @"Couldn't launch sftp: %s", strerror( errno ));
@@ -251,62 +251,69 @@ enum { START = 200, STOP };
 			break;
     }
     
-    if ( fcntl( _master, F_SETFL, O_NONBLOCK ) < 0 ) {	/* prevent master from blocking */
+    if ( fcntl( _master, F_SETFL, O_NONBLOCK ) < 0 ) 
+	{	/* prevent master from blocking */
         NSLog( @"fcntl non-block failed: %s", strerror( errno ));
     }
 
-    if (( mf = fdopen( _master, "r+" )) == NULL ) {
+    if (( _mf = fdopen( _master, "r+" )) == NULL ) {
         NSLog( @"failed to open file stream with fdopen: %s", strerror( errno ));
         return;
     }
-    setvbuf( mf, NULL, _IONBF, 0 );
+    setvbuf( _mf, NULL, _IONBF, 0 );
+	_keepChecking = YES;
 
-    for ( ;; ) {
-        NSAutoreleasePool *p = [[NSAutoreleasePool alloc] init];
-        FD_ZERO( &readmask );
-        FD_SET( _master, &readmask );
-        
-        switch( select( _master + 1, &readmask, NULL, NULL, NULL )) {
-			case -1:
-				NSLog( @"select: %s", strerror( errno ));
-				break;
-				
-			case 0:	/* timeout */
-				NSLog(@"sftp timed out");
-				continue;
-					
-				default:
-					break;
-        }
-        
-        if ( FD_ISSET( _master, &readmask )) {
-			size_t amount;
-			amount = read(fileno(mf), buf, MAXPATHLEN);
+    [self checkBuffers:nil];
+}
+
+- (void)checkBuffers:(id)notused 
+{
+	char *buf[ MAXPATHLEN ];
+	fd_set readmask;
+	FD_ZERO(&readmask);
+	FD_SET(_master, &readmask);
+	
+	switch(select( _master + 1, &readmask, NULL, NULL, NULL )) 
+	{
+		case -1:
+		{
+			NSLog( @"select: %s", strerror( errno ));
+			break;
+		}
+		case 0:	
+		{
+			/* timeout */
+			NSLog(@"sftp timed out");
+			continue;
+		}	
+		default:
+			break;
+	}
+	
+	if (FD_ISSET( _master, &readmask )) 
+	{
+		size_t amount;
+		amount = read(fileno(_mf), buf, MAXPATHLEN);
+		
+		if (amount > 0) 
+		{
+			[_bufferLock lock];
+			[_buffer appendBytes:buf length:amount];
+			[_bufferLock unlock];
 			
-			if (amount > 0) {
-				//if ([AbstractConnection logStateChanges])
-					//NSLog(@"sftp_stream >> %d: %@",amount, [[[NSString alloc] initWithBytes:buf length:amount encoding:NSUTF8StringEncoding] autorelease]);
-				
-				[_bufferLock lock];
-				[_buffer appendBytes:buf length:amount];
-				[_bufferLock unlock];
-				
-				if ([self delegate])
-					[_forwarder stream:self handleEvent:NSStreamEventHasBytesAvailable];
-			} else {
-				//NSLog(@"read 0 bytes, shutting down");
-				int status;
-				_sftppid = wait( &status );
-				_status = NSStreamStatusClosed;
-				close( _master );
-				free( execargs );
-				
-				[_forwarder stream:self handleEvent:NSStreamEventEndEncountered];
-				break;
+			if ([self delegate])
+			{
+				[_forwarder stream:self handleEvent:NSStreamEventHasBytesAvailable];
 			}
 		}
-		//[NSThread sleepUntilDate:[NSDate distantPast]];
-		[p release];
+	}
+	
+	// give time to the runloop to process port messages
+	if (_keepChecking == YES)
+	{
+		[self performSelector:@selector(checkBuffers:)
+				   withObject:nil
+				   afterDelay:0.0]; 
 	}
 }
 

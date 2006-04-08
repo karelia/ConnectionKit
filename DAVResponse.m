@@ -69,12 +69,12 @@ static NSMutableDictionary *responseMap = nil;
 			// HTTP/1.1 CODE NAME
 			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
 			{
-				int responseCode = [[response objectAtIndex:1] intValue];
+				//int responseCode = [[response objectAtIndex:1] intValue];
 				NSMutableDictionary *headers = [NSMutableDictionary dictionary];
 				
 				if ([response count] >= 3)
 				{
-					NSString *msg = [[response subarrayWithRange:NSMakeRange(2, [response count] - 2)] componentsJoinedByString:@" "];
+					//NSString *msg = [[response subarrayWithRange:NSMakeRange(2, [response count] - 2)] componentsJoinedByString:@" "];
 				}
 				
 				// now enumerate over the headers which will be if the line is empty
@@ -138,8 +138,8 @@ static NSMutableDictionary *responseMap = nil;
 															   options:NSLiteralSearch 
 																 range:NSMakeRange(start, [packet length] - start)];
 							unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
-							NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
-							NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
+							//NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
+							//NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
 							
 							packetRange.location = 0;
 							packetRange.length = end;

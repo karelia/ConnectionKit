@@ -78,7 +78,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_port setDelegate:nil];
     [_port release];
 	
-	[self closeStreams];
 	[_port setDelegate:nil];
 	[_port release];
 	[_forwarder release];
@@ -232,6 +231,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			break;
 		case KILL_THREAD:
 		{
+			[self closeStreams];
 			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
 			break;
 		}

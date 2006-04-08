@@ -154,10 +154,17 @@ static NSArray *sftpErrors = nil;
 			[self closeStreams];
 			if (_flags.didDisconnect) 
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
+			break;
 		}
 		default:
 			[super handlePortMessage:message];
 	}
+}
+
+- (void)closeStreams
+{
+	[_sftp setDelegate:nil];
+	[super closeStreams];
 }
 
 - (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value 
@@ -166,9 +173,20 @@ static NSArray *sftpErrors = nil;
 		//we are only ever going to get a BOOL response to validate the connection
 		BOOL authorizeConnection = (BOOL)*((BOOL *)value);
 		if (authorizeConnection)
+		{
 			[self sendCommand:@"yes"];
+			[self setState:ConnectionAwaitingCurrentDirectoryState];
+			[self sendCommand:@"pwd"];
+			_flags.isConnected = YES;
+			if (_flags.didConnect)
+			{
+				[_forwarder connection:self didConnectToHost:[self host]];
+			}
+		}
 		else 
+		{
 			[self sendCommand:@"no"];
+		}
 	}
 }
 
@@ -189,6 +207,21 @@ static NSArray *sftpErrors = nil;
 		}
 	}
 	return NO;
+}
+
+- (NSRange)rangeInBufferMatchingAtLeastOneString:(NSArray *)strings
+{
+	NSEnumerator *promptEnumerator = [strings objectEnumerator];
+	NSString *prompt;
+	NSRange promptRange;
+	
+	while (prompt = [promptEnumerator nextObject]) {
+		promptRange = [_inputBuffer rangeOfString:prompt];
+		if (promptRange.location != NSNotFound) {
+			return promptRange;
+		}
+	}
+	return NSMakeRange(NSNotFound, 0);
 }
 
 - (BOOL)bufferContainsPasswordPrompt
@@ -404,7 +437,7 @@ static NSArray *sftpErrors = nil;
 				[self sendData:[[NSString stringWithFormat:@"%@\n", [self password]] dataUsingEncoding:NSUTF8StringEncoding]];
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:@"#####"
 																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
-			} else if ([self bufferMatchesAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", @"@@@", nil]]) {
+			} else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", @"@@@", nil]].location != NSNotFound) {
 				//need to authenticate the host. Should we really default to yes?
 				if ([AbstractConnection debugEnabled])
 					NSLog(@"Connecting to unknown host. Awaiting repsonse from delegate");
@@ -730,6 +763,7 @@ static NSArray *sftpErrors = nil;
 		}
 		case ConnectionSentQuitState:
 		{
+			[self closeStreams];
 			_flags.isConnected = NO;
 			if (_flags.didDisconnect)
 				[_forwarder connection:self didDisconnectFromHost:[self host]];

@@ -33,6 +33,7 @@
  */
 
 #import <Foundation/Foundation.h>
+
 @class RunLoopForwarder;
 @protocol InputStream, OutputStream;
 
@@ -41,6 +42,8 @@
 	NSArray				*_args;
 	int					_master;
 	pid_t				_sftppid;
+	BOOL				_keepChecking;
+	FILE				*_mf;
 	
 	id					_delegate;
 	RunLoopForwarder	*_forwarder;
