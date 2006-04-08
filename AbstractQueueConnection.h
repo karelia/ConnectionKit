@@ -152,8 +152,6 @@
 - (void)emptyFileCheckQueue;
 - (void)emptyAllQueues;
 
-- (void)releaseFile:(NSString *)remoteFile withOverwriteConfirmation:(BOOL)overwrite;
-
 // Testing
 - (NSString *)queueDescription;
 

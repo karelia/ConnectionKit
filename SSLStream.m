@@ -111,7 +111,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	//read the data, decrypt it and copy to the buffer.
 	UInt8 *encrypted = (UInt8 *)malloc(sizeof(UInt8) * len);
 	CFIndex bytesRead;
-	encrypted = CFReadStreamGetBuffer(_receiveStream,(CFIndex)len,&bytesRead);
+	encrypted = (UInt8 *)CFReadStreamGetBuffer(_receiveStream,(CFIndex)len,&bytesRead);
 	
 	UInt8 *decrypted;
 	memcpy(buffer,decrypted,bytesRead);

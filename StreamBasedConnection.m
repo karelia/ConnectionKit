@@ -624,7 +624,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	// we do nothing - just allow subclasses to know that something was sent
 }
 
-- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
 {
 	// we do nothing - just allow subclasses to know that something was read
 }
