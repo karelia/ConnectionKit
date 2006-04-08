@@ -122,6 +122,16 @@ static NSArray *sftpErrors = nil;
 	[self sendPortMessage:CONNECT];
 }
 
+- (void)disconnect
+{
+	[self sendPortMessage:DISCONNECT];
+}
+
+- (void)forceDisconnect
+{
+	[self sendPortMessage:FORCE_DISCONNECT];
+}
+
 - (void)handlePortMessage:(NSPortMessage *)message
 {
 	unsigned msg = [message msgid];
@@ -145,7 +155,7 @@ static NSArray *sftpErrors = nil;
 		case DISCONNECT: {
 			[self queueCommand:[ConnectionCommand command:@"quit"
 											   awaitState:ConnectionIdleState
-												sentState:ConnectionSentDisconnectState
+												sentState:ConnectionSentQuitState
 												dependant:nil
 												 userInfo:nil]];
 			[self checkQueue];
@@ -747,6 +757,8 @@ static NSArray *sftpErrors = nil;
 				if (_flags.deleteFile)
 					[_forwarder connection:self didDeleteFile:[self currentDeletion]];
 				[self dequeueDeletion];
+				[self emptyBuffer];
+				[_inputBuffer appendString:@"sftp> "];
 				[self setState:ConnectionIdleState];
 			}
 			break;
