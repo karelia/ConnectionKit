@@ -40,6 +40,13 @@ NSString *FileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
 enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };		// port messages
 
+@interface FileConnection (Private)
+- (void)processInvocations;
+- (void)fcUploadFile:(NSString *)f toFile:(NSString *)t;
+- (void)sendPortMessage:(int)message;
+
+@end
+
 @implementation FileConnection
 
 + (void)load
@@ -505,6 +512,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:localPath]];
+	[self queueInvocation:inv];
 }
 
 /*!	Copy the given file to the given directory
@@ -597,7 +605,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 */
 - (void)fcDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(NSNumber *)aFlag
 {
-	BOOL flag = [aFlag boolValue];
+	//BOOL flag = [aFlag boolValue];
 	[self setCurrentOperation:kDownloadFile];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *name = [remotePath lastPathComponent];

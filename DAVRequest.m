@@ -110,6 +110,8 @@
 		else
 		{
 			NSMutableArray *headers = [NSMutableArray arrayWithObject:header];
+			[headers addObject:val];
+			[myHeaders setObject:headers forKey:key];
 		}
 	}
 	else

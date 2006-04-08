@@ -114,6 +114,9 @@
 #pragma mark ----=actions=----
 - (IBAction) closePanel: (id) sender
 {
+	[[self connection] setDelegate:nil];
+	[self setConnection:nil];
+	
 	if ([sender tag] && 
 		([[directoryContents selectedObjects] count] == 1) && 
 		![[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue] &&
@@ -208,6 +211,7 @@
 	
 	if (connection != aConnection) {
 		[connection setDelegate: nil];
+		[connection forceDisconnect];
 		[connection release];
 		connection = [aConnection retain];
 		[connection setDelegate: self];
@@ -580,7 +584,7 @@
 #pragma mark ----=connection callback=----
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
 {
-	if (NSRunAlertPanel(@"Authorize Connection?", @"%@\nHost: %@", @"Yes", @"No", nil, message, host) == NSOKButton)
+	if (NSRunAlertPanel(@"Authorize Connection?", @"%@", @"Yes", @"No", nil, message) == NSOKButton)
 		return YES;
 	return NO;
 }
