@@ -366,7 +366,7 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 
 - (IBAction)permissions:(id)sender
 {
-	NSString *file = [remoteFiles objectAtIndex:[remoteTable selectedRow]];
+	NSMutableDictionary *file = [remoteFiles objectAtIndex:[remoteTable selectedRow]];
 	[[PermissionsController sharedPermissions] displayFile:file
 													 sheet:window
 												connection:con];
@@ -513,8 +513,6 @@ static NSImage *_folder = nil;
 	
 	[remoteTable reloadData];
 }
-
-static NSImage *_homeImage = nil;
 
 - (void)refreshLocal
 {

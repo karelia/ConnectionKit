@@ -524,6 +524,10 @@ NSDictionary *sDataAttributes;
 {
 }
 
+- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
+{	
+}
+
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
 {
 }
@@ -535,6 +539,11 @@ NSDictionary *sDataAttributes;
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 }
+
+- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
+{
+}
+
 - (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
 {
 }

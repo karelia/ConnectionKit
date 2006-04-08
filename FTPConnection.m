@@ -71,8 +71,8 @@ const double kDelegateNotificationTheshold = 0.5;
 
 @end
 
-static void AcceptConnection(CFSocketRef socket, CFSocketNativeHandle sock, CFStreamError* error, void* info);
-
+void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type, 
+							  CFDataRef address, const void *data, void *info);
 
 @implementation FTPConnection
 

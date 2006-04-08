@@ -83,18 +83,18 @@ typedef struct __flags {
 + (NSString *)name;
 
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
-			  username:(NSString *)username
-			  password:(NSString *)password;
++ (id <AbstractConnectionProtocol>)connectionToHost:(NSString *)host
+											   port:(NSString *)port
+										   username:(NSString *)username
+										   password:(NSString *)password;
 
-+ (id)connectionWithURL:(NSURL *)url;
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url;
 
-+ (id)connectionWithName:(NSString *)name
-					host:(NSString *)host
-					port:(NSString *)port
-				username:(NSString *)username
-				password:(NSString *)password;
++ (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
+												 host:(NSString *)host
+												 port:(NSString *)port
+											 username:(NSString *)username
+											 password:(NSString *)password;
 
 - (id)initWithHost:(NSString *)host
 			  port:(NSString *)port
