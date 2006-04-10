@@ -604,12 +604,19 @@
 
 - (void)connection:(AbstractConnection *)aConn didReceiveError:(NSError *)error
 {
-	NSAlert *a = [NSAlert alertWithMessageText:NSLocalizedString(@"A Connection Error Occurred", @"ConnectionOpenPanel")
-								 defaultButton:NSLocalizedString(@"OK", @"OK")
-							   alternateButton:nil
-								   otherButton:nil
-					 informativeTextWithFormat:[[error userInfo] objectForKey:NSLocalizedDescriptionKey]];
-	[a runModal];
+	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
+	{
+		[delegate connectionOpenPanel:self didReceiveError:error];
+	}
+	else
+	{
+		NSAlert *a = [NSAlert alertWithMessageText:NSLocalizedString(@"A Connection Error Occurred", @"ConnectionOpenPanel")
+									 defaultButton:NSLocalizedString(@"OK", @"OK")
+								   alternateButton:nil
+									   otherButton:nil
+						 informativeTextWithFormat:[[error userInfo] objectForKey:NSLocalizedDescriptionKey]];
+		[a runModal];
+	}
 	
 	if ([[self window] isSheet])
 		[[NSApplication sharedApplication] endSheet:[self window] returnCode: [error code]];
@@ -625,6 +632,11 @@
 		[[NSApplication sharedApplication] endSheet:[self window] returnCode: connectionBadPasswordUserName];
 	else
 		[[NSApplication sharedApplication] stopModalWithCode: connectionBadPasswordUserName];
+
+	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didSendBadPasswordToHost:)])
+	{
+		[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConn host]];
+	}
 	
 	[self close];
 }

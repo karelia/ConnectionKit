@@ -157,16 +157,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
 	if ([command isEqualToString:@"EPRT"]) {
-		NSLog(@"sendCommand: going active %@", command);
 		_serverSupport.isActiveDataConn = YES;
 		command = [self setupEPRTConnection];
 	} else if ([command isEqualToString:@"PORT"]) {
-		NSLog(@"sendCommand: going active %@", command);
 		_serverSupport.isActiveDataConn = YES;
 		command = [self setupActiveConnection];
 	} else if ([command isEqualToString:@"EPSV"] || [command isEqualToString:@"PASV"]) {
 		_serverSupport.isActiveDataConn = NO;
-		NSLog(@"sendCommand: going passive %@", command);
 	}
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", command];
 
@@ -1208,7 +1205,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			NSLog(@"received opened");
 			break;
 		}
 		case NSStreamEventErrorOccurred:
@@ -1517,7 +1513,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)closeDataConnection
 {
-	NSLog(@"closing data connection");
 	[self closeDataStreams];
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
