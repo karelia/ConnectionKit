@@ -36,7 +36,6 @@
 	NSMutableData	*myResponseBuffer;
 	NSString		*myCurrentDirectory;
 	NSString		*myAuthorization;
-	NSTimer			*_watchdog;
 	
 	struct __davflags {
 		unsigned needsReconnection: 1;

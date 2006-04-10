@@ -45,11 +45,11 @@
 		myHeaders = [[NSMutableDictionary dictionary] retain];
 		myContent = [[NSMutableData data] retain];
 		
-		//[self setHeader:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
+		[self setHeader:@"Mac OS X Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
 		[self setHeader:@"text/xml; charset=\"utf-8\"" forKey:@"Content-Type"];
 		[self setHeader:@"gzip" forKey:@"Accept-Encoding"];
 		[self setHeader:@"chunked" forKey:@"Transfer-Encoding"];
-		//[self setHeader:@"gzip" forKey:@"Content-Coding"];
+		[self setHeader:@"gzip" forKey:@"Content-Coding"];
 	}
 	return self;
 }
@@ -176,13 +176,21 @@
 	return [myContent length];
 }
 
+#define DAVChunkSize 1024
+
 - (NSData *)serialized
 {
 	NSMutableData *packet = [NSMutableData data];
 	
 	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, myURI];
 	[packet appendData:[request dataUsingEncoding:NSUTF8StringEncoding]];
+	//NSData *gzip = [myContent deflate];
 	
+//	if ([gzip length] < DAVChunkSize)
+	{
+		[myHeaders removeObjectForKey:@"Transfer-Encoding"];
+		[myHeaders removeObjectForKey:@"Content-Coding"];
+	}
 	//do the headers
 	NSEnumerator *e = [myHeaders keyEnumerator];
 	NSString *key;
@@ -203,41 +211,40 @@
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
-	//NSData *gzip = [myContent deflate];
 	//NSLog(@"%@", [gzip descriptionAsString]);
 	NSString *spacer = [NSString stringWithString:@"\r\n"];
 	
-	if ([myContent length] == 0)
+	//if ([gzip length] < DAVChunkSize)
 	{
-		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
+		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n\r\n", [myContent length]];
 		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
+		
+		[packet appendData:myContent];
+		
+		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
+		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	}
-	else
+/*	else
 	{
 		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 		//append the content
-#define DAVChunkSize 1024
 		NSRange chunkRange = NSMakeRange(0,MIN(DAVChunkSize,[myContent length]));
 		NSData *chunk;
 		
 		while (chunkRange.length > 0)
 		{
-			chunk = [myContent subdataWithRange:chunkRange];
+			chunk = [gzip subdataWithRange:chunkRange];
 			NSString *hexSize = [NSString stringWithFormat:@"%x\r\n", chunkRange.length];
+			//NSLog(@"%@", hexSize);
 			[packet appendData:[hexSize dataUsingEncoding:NSUTF8StringEncoding]];
 			[packet appendData:chunk];
 			[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 			chunkRange.location = chunkRange.location + chunkRange.length;
-			chunkRange.length = MIN(DAVChunkSize, [myContent length] - chunkRange.location);
+			chunkRange.length = MIN(DAVChunkSize, [gzip length] - chunkRange.location);
 		}
 		[packet appendData:[@"0\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-	}
-	
-	//[packet appendData:myContent];
-	
-	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
-	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
-	
+	}*/
+
 	return packet;
 }
 
