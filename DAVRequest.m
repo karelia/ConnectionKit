@@ -48,6 +48,7 @@
 		//[self setHeader:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
 		[self setHeader:@"text/xml; charset=\"utf-8\"" forKey:@"Content-Type"];
 		[self setHeader:@"gzip" forKey:@"Accept-Encoding"];
+		[self setHeader:@"chunked" forKey:@"Transfer-Encoding"];
 		//[self setHeader:@"gzip" forKey:@"Content-Coding"];
 	}
 	return self;
@@ -204,16 +205,35 @@
 	
 	//NSData *gzip = [myContent deflate];
 	//NSLog(@"%@", [gzip descriptionAsString]);
-	if ([myContent length] > 0)
+	NSString *spacer = [NSString stringWithString:@"\r\n"];
+	
+	if ([myContent length] == 0)
 	{
 		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
 		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
 	}
+	else
+	{
+		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
+		//append the content
+#define DAVChunkSize 1024
+		NSRange chunkRange = NSMakeRange(0,MIN(DAVChunkSize,[myContent length]));
+		NSData *chunk;
+		
+		while (chunkRange.length > 0)
+		{
+			chunk = [myContent subdataWithRange:chunkRange];
+			NSString *hexSize = [NSString stringWithFormat:@"%x\r\n", chunkRange.length];
+			[packet appendData:[hexSize dataUsingEncoding:NSUTF8StringEncoding]];
+			[packet appendData:chunk];
+			[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
+			chunkRange.location = chunkRange.location + chunkRange.length;
+			chunkRange.length = MIN(DAVChunkSize, [myContent length] - chunkRange.location);
+		}
+		[packet appendData:[@"0\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
+	}
 	
-	NSString *spacer = [NSString stringWithString:@"\r\n"];
-	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
-	//append the content
-	[packet appendData:myContent];
+	//[packet appendData:myContent];
 	
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
