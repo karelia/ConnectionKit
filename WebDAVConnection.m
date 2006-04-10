@@ -141,6 +141,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
 		[myResponseBuffer replaceBytesInRange:responseRange withBytes:NULL length:0];
 		
+		[myCurrentRequest release];
+		myCurrentRequest = nil;
+		
 		if ([AbstractConnection debugEnabled])
 		{
 			NSLog(@"WebDAV Received:\n%@", response);
@@ -439,7 +442,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"Keep-Alive, Persist" forKey:@"Connection"];
+		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
 		if (myAuthorization)
 		{
 			[req setHeader:myAuthorization forKey:@"Authorization"];
@@ -461,13 +464,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			return;
 		}
 		
+		NSData *packet = [req serialized];
+		
 		if ([self transcript])
 		{
 			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
 																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
 		}
 		
-		NSData *packet = [req serialized];
 		// if we are uploading or downloading set up the transfer sizes
 		if (GET_STATE == ConnectionUploadingFileState)
 		{
@@ -754,6 +758,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
+			if (myCurrentRequest)
+			{
+				[self sendCommand:myCurrentRequest];
+			}
+			
 			break;
 		}
 		case NSStreamEventOpenCompleted:
@@ -784,6 +793,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			NSLog(@"send closed");
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
+			if (myCurrentRequest)
+			{
+				[self sendCommand:myCurrentRequest];
+			}
 			break;
 		}
 		case NSStreamEventOpenCompleted:
