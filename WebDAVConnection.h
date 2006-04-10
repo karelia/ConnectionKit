@@ -36,11 +36,13 @@
 	NSMutableData	*myResponseBuffer;
 	NSString		*myCurrentDirectory;
 	NSString		*myAuthorization;
+	NSTimer			*_watchdog;
 	
 	struct __davflags {
 		unsigned needsReconnection: 1;
 		unsigned isInReconnection: 1;
-		unsigned unused: 30;
+		unsigned finishedReconnection: 1;
+		unsigned unused: 29;
 	} myDAVFlags;
 	
 	unsigned long long bytesTransferred;

@@ -349,7 +349,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 #warning Applying KVC hack
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
-	
 	[self closeStreams];		// make sure streams are closed before opening/allocating new ones
 	
 	[NSStream getStreamsToHost:host
@@ -470,7 +469,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				//NSLog(@"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+				NSLog(@"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
@@ -589,6 +588,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 			if (chunkLength > 0) {
 				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
+				NSLog(@"SBC << %s", bytes);
 				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 									   withBytes:NULL

@@ -40,7 +40,7 @@
 - (id)init
 {
 	if (self = [super init]) {
-		lock = [[NSRecursiveLock alloc] init];
+		lock = [[NSLock alloc] init];
 		createdOnThread = [NSThread currentThread];
 	}
 	return self;
