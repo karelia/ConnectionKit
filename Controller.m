@@ -743,6 +743,12 @@ static NSImage *_folder = nil;
 	[aConn directoryContents];
 }
 
+- (void)connection:(AbstractConnection *)aConn didDeleteDirectory:(NSString *)path
+{
+	[aConn directoryContents];
+}
+
+
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
 	[remoteFiles removeAllObjects];

@@ -40,4 +40,7 @@
 - (NSString *)base64Encoding;
 - (NSString *)descriptionAsString;
 
+- (NSData *) inflate;
+- (NSData *) deflate;
+
 @end

@@ -120,60 +120,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			{
 				[_forwarder connection:self didConnectToHost:[self host]];
 			}
-			_watchdog = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(watchDog:) userInfo:nil repeats:YES];
 			break;
 		}
 		case KILL_THREAD:
 		{
-			[_watchdog invalidate];
 			[super handlePortMessage:portMessage];
 			break;
 		}
 		default: [super handlePortMessage:portMessage];
-	}
-}
-
-- (void)watchDog:(NSTimer *)timer
-{
-	if (GET_STATE != ConnectionNotConnectedState)
-	{
-		// check to see if the streams are still valid
-		if (!_sendStream || !_receiveStream ||
-			[_sendStream streamStatus] == NSStreamStatusClosed || 
-			[_receiveStream streamStatus] == NSStreamStatusClosed)
-		{
-			NSLog(@"Watch Dog Activating");
-			if (myDAVFlags.needsReconnection)
-			{
-				myDAVFlags.needsReconnection = NO;
-				myDAVFlags.isInReconnection = YES;
-				myDAVFlags.finishedReconnection = NO;
-				[self closeStreams];
-				[self openStreamsToPort:[[self port] intValue]];
-				[self scheduleStreamsOnRunLoop];
-				
-				[self performSelector:@selector(watchDog:) withObject:timer afterDelay:0.2];
-				return;
-			}
-		}
-		
-		if (myDAVFlags.isInReconnection)
-		{
-			NSLog(@"Watch Dog Still Reactivating");
-			[self performSelector:@selector(watchDog:) withObject:timer afterDelay:0.2];
-			return;
-		}
-		
-		if (myDAVFlags.finishedReconnection)
-		{
-			myDAVFlags.finishedReconnection = NO;
-			// resend the last command
-			_state = ConnectionIdleState;
-			[self checkQueue];
-			/*ConnectionCommand *last = [self lastCommand];
-			_state = [last sentState];
-			[self sendCommand:[last command]];*/
-		}
 	}
 }
 
@@ -485,7 +439,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
+		[req setHeader:@"Keep-Alive, Persist" forKey:@"Connection"];
 		if (myAuthorization)
 		{
 			[req setHeader:myAuthorization forKey:@"Authorization"];
@@ -496,8 +450,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
 			return;
 		}
-		if (myDAVFlags.needsReconnection)
+		if (myDAVFlags.needsReconnection || _sendStream == nil || _receiveStream == nil)
 		{
+			myDAVFlags.needsReconnection = NO;
 			myDAVFlags.isInReconnection = YES;
 			[self openStreamsToPort:[[self port] intValue]];
 			[self scheduleStreamsOnRunLoop];
@@ -795,15 +750,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	{
 		case NSStreamEventEndEncountered: 
 		{
-			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			NSLog(@"receive closed");
+			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
 			break;
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			NSLog(@"receive opened");
 			if (!_flags.isConnected)
 			{
 				[super handleReceiveStreamEvent:theEvent];
@@ -826,15 +780,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	{
 		case NSStreamEventEndEncountered: 
 		{
-			NSLog(@"send closed");
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
+			NSLog(@"send closed");
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
 			break;
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			NSLog(@"send opened");
 			if (!_flags.isConnected)
 			{
 				[super handleSendStreamEvent:theEvent];

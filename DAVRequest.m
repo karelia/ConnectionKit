@@ -29,6 +29,7 @@
 
 #import "DAVRequest.h"
 #import "DAVResponse.h"
+#import "NSData+Connection.h"
 
 @implementation DAVRequest
 
@@ -46,6 +47,8 @@
 		
 		//[self setHeader:@"Connection Framework http://www.dlsxtreme.com/ConnectionFramework" forKey:@"User-Agent"];
 		[self setHeader:@"text/xml; charset=\"utf-8\"" forKey:@"Content-Type"];
+		[self setHeader:@"gzip" forKey:@"Accept-Encoding"];
+		//[self setHeader:@"gzip" forKey:@"Content-Coding"];
 	}
 	return self;
 }
@@ -198,6 +201,9 @@
 		header = [NSString stringWithFormat:@"%@: %@\r\n", key, header];
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
+	
+	//NSData *gzip = [myContent deflate];
+	//NSLog(@"%@", [gzip descriptionAsString]);
 	if ([myContent length] > 0)
 	{
 		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n", [myContent length]];
@@ -208,6 +214,7 @@
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	//append the content
 	[packet appendData:myContent];
+	
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
 	

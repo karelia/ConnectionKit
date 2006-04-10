@@ -148,7 +148,7 @@ static NSMutableDictionary *responseMap = nil;
 						{
 							// it must be just a response with just headers
 							packetRange.location = 0;
-							packetRange.length = start + 2; //2 extra for the \r\n 
+							packetRange.length = start + 4; //2 extra for the \r\n 
 						}
 					}
 					else
