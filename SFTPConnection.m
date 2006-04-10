@@ -775,10 +775,10 @@ static NSArray *sftpErrors = nil;
 		}
 		case ConnectionSentQuitState:
 		{
-			[self closeStreams];
 			_flags.isConnected = NO;
 			if (_flags.didDisconnect)
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
+			[self performSelector:@selector(closeStreams) withObject:nil afterDelay:0.1];
 			break;
 		}
 	}
