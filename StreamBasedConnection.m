@@ -572,7 +572,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventEndEncountered:
 		{
-			NSLog(@"send ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {

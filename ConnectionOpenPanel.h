@@ -100,7 +100,17 @@ enum {
 - (BOOL)isSelectionValid;
 - (void)setIsSelectionValid:(BOOL)flag;
 
-- (void)beginSheetForDirectory:(NSString *)path file:(NSString *)name modalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo;
-//- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
+- (void)beginSheetForDirectory:(NSString *)path 
+						  file:(NSString *)name 
+				modalForWindow:(NSWindow *)docWindow 
+				 modalDelegate:(id)modalDelegate 
+				didEndSelector:(SEL)didEndSelector 
+				   contextInfo:(void *)contextInfo;
 
 @end
+
+@interface NSObject (ConnectionOpenPanelDelegate)
+- (void)connectionOpenPanel:(ConnectionOpenPanel *)panel didSendBadPasswordToHost:(NSString *)host;
+- (void)connectionOpenPanel:(ConnectionOpenPanel *)panel didReceiveError:(NSError *)error;
+@end
+
