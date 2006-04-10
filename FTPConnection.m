@@ -545,6 +545,43 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionNotConnectedState && _serverSupport.loggedIn == NO)
 			{
+				// We need to absorb all the pre-login info message
+				NSMutableString *buffer = [NSMutableString string];
+				BOOL atEnd = NO;
+				NSRange r;
+				
+				if ((r = [_commandBuffer rangeOfString:@"220 "]).location != NSNotFound) {
+					buffer = [[_commandBuffer copy] autorelease];
+					//need to drop out of the commandBuffer up to the new line.
+					NSRange newLineRange;
+					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+					
+					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+															  options:NSCaseInsensitiveSearch 
+																range:toEnd]).location != NSNotFound
+						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+																 options:NSCaseInsensitiveSearch
+																   range:toEnd]).location != NSNotFound)
+						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+					atEnd = YES;
+				}
+				
+				while (atEnd == NO)
+				{
+					NSData *data = [self availableData];
+					
+					if ([data length] > 0)
+					{
+						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+						[buffer appendString:line];
+						
+						if ([line rangeOfString:@"220 "].location != NSNotFound)
+							atEnd = YES;
+						
+						[line release];
+					}
+				}
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection dataAttributes]] autorelease]];
 				[self sendCommand:@"FEAT"];
 				[self setState:ConnectionSentFeatureRequestState];
 			}
