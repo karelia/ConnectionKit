@@ -6,6 +6,7 @@
 #import "FTPConnection.h"
 #import "AbstractConnection.h"
 #import "FileTransfer.h"
+#import "KTLog.h"
 
 static NSString *AutoSelect = @"Auto Select";
 
@@ -67,6 +68,13 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 
 - (void)awakeFromNib
 {
+//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Queuing"];
+//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Transport"];
+	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Parser"];
+//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"State Machine"];
+	
+	KTLog(@"Application", KTLogInfo, @"FTPConnection Tester Started");
+	
 	NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
 	NSString *savedWindowRect = [ud objectForKey:[window frameAutosaveName]];
 	if (savedWindowRect)
@@ -75,8 +83,6 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 	if (showLog) {
 		[logDrawer open:self];
 	}
-	//[AbstractConnection setDebugEnabled:YES];
-	//[AbstractConnection setLogStateChanges:YES];
 	
 	remoteFiles = [[NSMutableArray array] retain];
 	localFiles = [[NSMutableArray array] retain];

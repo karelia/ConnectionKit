@@ -478,7 +478,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						[line release];
 					}
 				}
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection dataAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
 				if ([AbstractConnection debugEnabled])
 					NSLog(@"buffer = %@", buffer);
 				//parse features
@@ -546,7 +546,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == ConnectionNotConnectedState && _serverSupport.loggedIn == NO)
 			{
 				// We need to absorb all the pre-login info message
-				NSMutableString *buffer = [NSMutableString stringWithString:command];
+				NSMutableString *buffer = [NSMutableString string];
 				BOOL atEnd = NO;
 				NSRange r;
 				
@@ -585,7 +585,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					}
 				}
 				
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection dataAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
 				[self sendCommand:@"FEAT"];
 				[self setState:ConnectionSentFeatureRequestState];
 			}
@@ -746,7 +746,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					}
 				}
 				
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection dataAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
 								
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
 				[self queueCommand:[ConnectionCommand command:@"PWD"
@@ -973,10 +973,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted.", NSLocalizedDescriptionKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
-					[self setState:ConnectionSentQuitState];
-					[self sendCommand:@"QUIT"];
-					break;
 				}
+				[self setState:ConnectionSentQuitState];
+				[self sendCommand:@"QUIT"];
+				break;
 			}
 			if (GET_STATE == ConnectionSentFeatureRequestState)
 			{
@@ -1002,11 +1002,38 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];
 			break;
 		}
+		case 521:
+		{
+			if (GET_STATE == ConnectionCreateDirectoryState)
+			{
+				if (_flags.error)
+				{
+					NSString *error = @"Create directory operation failed";
+					NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+					if ([command rangeOfString:@"exists"].location != NSNotFound) 
+					{
+						[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+						if ([command rangeOfString:@":"].location != NSNotFound)
+						{
+							[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
+						}
+					}
+					[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain
+													   code:code
+												   userInfo:userInfo];
+					[_forwarder connection:self didReceiveError:err];
+				}
+				[self setState:ConnectionIdleState];
+			}
+			break;	
+		}
 		case 522:
 		{
 			_serverSupport.canUseEPRT = NO;
 			[self setState:FTPSettingActiveState];
 			[self sendCommand:@"PORT"];
+			break;
 		}
 		case 530:
 		{
@@ -2129,7 +2156,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	unsigned port = [self localPort] + 1;
 	if (![self setupActiveConnectionWithPort:port])
-		return nil;
+		return @"EPSV";
 	div_t portDiv = div(port,256);
 	NSString *ip = [[[[NSHost currentHost] ipv4Address] componentsSeparatedByString:@"."] componentsJoinedByString:@","];
 	return [NSString stringWithFormat:@"PORT %@,%d,%d", ip, portDiv.quot, portDiv.rem];

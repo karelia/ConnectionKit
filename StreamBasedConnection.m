@@ -35,6 +35,7 @@
 #import "StreamBasedConnection.h"
 #import "InterThreadMessaging.h"
 #import "RunLoopForwarder.h"
+#import "NSData+Connection.h"
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
@@ -180,7 +181,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 					NSLog(@"StreamBasedConnection couldn't send message %d", aMessage);
 			}
 		} @catch (NSException *ex) {
-			NSLog(@"%@", ex);
+			KTLog(TransportDomain, KTLogError, @"%@", ex);
 		} @finally {
 			[message release];
 		} 
@@ -271,8 +272,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
 {
-	if ([AbstractConnection logStateChanges]) 
-		NSLog(@"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
+	KTLog(StateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
 	
     [super setState:aState];
 	
@@ -288,8 +288,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)checkQueue
 {
-	if ([AbstractConnection logStateChanges])
-		NSLog(@"Checking Queue");
+	KTLog(StateMachineDomain, KTLogDebug, @"Checking Queue");
 	BOOL nextTry = 0 != [self numberOfCommands];
 	while (nextTry)
 	{
@@ -305,8 +304,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		else
 		{
-			if ([AbstractConnection logStateChanges])
-				NSLog(@"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
+			KTLog(StateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
 			nextTry = NO;		// don't try.  
 		}
 		[command release];
@@ -331,8 +329,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 {
 	NSHost *host = [NSHost hostWithName:_connectionHost];
 	if(!host){
-		if ([AbstractConnection debugEnabled])
-			NSLog(@"Cannot find the host: %@", _connectionHost);
+		KTLog(TransportDomain, KTLogError, @"Cannot find the host: %@", _connectionHost);
 		
         if (_flags.error) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
@@ -360,8 +357,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_sendStream retain];
 	
 	if(!_receiveStream || !_sendStream){
-		if ([AbstractConnection debugEnabled])
-			NSLog(@"Cannot create a stream to the host: %@", _connectionHost);
+		KTLog(TransportDomain, KTLogError, @"Cannot create a stream to the host: %@", _connectionHost);
 		
 		if (_flags.error) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
@@ -451,7 +447,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_sendBufferLock lock];
 		unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 		NSData *chunk = [_sendBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-		//NSLog(@"SBC << %@", [chunk descriptionAsString]);
+		KTLog(TransportDomain, KTLogDebug, @"SBC << %@", [chunk descriptionAsString]);
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							   withBytes:NULL
 								  length:0];
@@ -473,7 +469,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				//NSLog(@"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+				KTLog(TransportDomain, KTLogDebug, @"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
@@ -538,6 +534,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
+				KTLog(TransportDomain, KTLogDebug, @"SBC >> %@", [data descriptionAsString]);
 				[self processReceivedData:data];
 			}
 			free(buf);
@@ -592,7 +589,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 			if (chunkLength > 0) {
 				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
-				//NSLog(@"SBC << %s", bytes);
+				KTLog(TransportDomain, KTLogDebug, @"SBC << %s", bytes);
 				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 									   withBytes:NULL
@@ -604,8 +601,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		default:
 		{
-			if ([AbstractConnection debugEnabled])
-				NSLog(@"Composite Event Code!  Need to deal with this!");
+			KTLog(TransportDomain, KTLogError, @"Composite Event Code!  Need to deal with this!");
 			break;
 		}
 	}
@@ -618,7 +614,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	} else if (stream == (NSStream *)_receiveStream) {
 		[self handleReceiveStreamEvent:theEvent];
 	} else {
-		NSLog(@"StreamBasedConnection: unknown stream (%@)", stream);
+		KTLog(TransportDomain, KTLogError, @"StreamBasedConnection: unknown stream (%@)", stream);
 	}
 }
 

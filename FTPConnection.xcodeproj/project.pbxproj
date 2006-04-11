@@ -60,6 +60,8 @@
 		796833090943FB4300213256 /* AbstractQueueConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 796833070943FB4300213256 /* AbstractQueueConnection.h */; };
 		7968330A0943FB4300213256 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 796833080943FB4300213256 /* AbstractQueueConnection.m */; };
 		79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
+		79742BF409EB47F700F77F0B /* KTLog.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79742BF209EB47F700F77F0B /* KTLog.h */; };
+		79742BF509EB47F700F77F0B /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79742BF309EB47F700F77F0B /* KTLog.m */; };
 		797C0AE9093FEAB1004ABB69 /* SFTPStream.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 797C0AE7093FEAB1004ABB69 /* SFTPStream.h */; };
 		797C0AEA093FEAB1004ABB69 /* SFTPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 797C0AE8093FEAB1004ABB69 /* SFTPStream.m */; };
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
@@ -146,6 +148,7 @@
 				7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */,
 				7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */,
 				79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */,
+				79742BF409EB47F700F77F0B /* KTLog.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,6 +229,8 @@
 		796833070943FB4300213256 /* AbstractQueueConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractQueueConnection.h; sourceTree = "<group>"; };
 		796833080943FB4300213256 /* AbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractQueueConnection.m; sourceTree = "<group>"; };
 		79730F8809E61D1400B93CB1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		79742BF209EB47F700F77F0B /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
+		79742BF309EB47F700F77F0B /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
 		797C0AE7093FEAB1004ABB69 /* SFTPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPStream.h; sourceTree = "<group>"; };
 		797C0AE8093FEAB1004ABB69 /* SFTPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPStream.m; sourceTree = "<group>"; };
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
@@ -383,6 +388,8 @@
 			isa = PBXGroup;
 			children = (
 				CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */,
+				79742BF209EB47F700F77F0B /* KTLog.h */,
+				79742BF309EB47F700F77F0B /* KTLog.m */,
 				793997E7075FDACB00F713EB /* AbstractConnection.h */,
 				793997E8075FDACB00F713EB /* AbstractConnection.m */,
 				796833070943FB4300213256 /* AbstractQueueConnection.h */,
@@ -603,6 +610,7 @@
 				7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */,
 				7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */,
 				79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */,
+				79742BF509EB47F700F77F0B /* KTLog.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
