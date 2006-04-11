@@ -56,6 +56,12 @@ NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
 NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";
 NSString *ConnectionDirectoryExistsFilenameKey = @"ConnectionDirectoryExistsFilenameKey";
 
+// Logging Domains 
+NSString *TransportDomain = @"Transport";
+NSString *StateMachineDomain = @"State Machine";
+NSString *ParsingDomain = @"Parser";
+NSString *ProtocolDomain = @"Protocol";
+
 static BOOL _debug = NO;
 static BOOL _logState = NO;
 
@@ -913,12 +919,15 @@ int filenameSort(id obj1, id obj2, void *context)
 							[filenameBits addObject:bit];
 						}
 						
-						NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
+						NSArray *symBits = [words subarrayWithRange:NSMakeRange(++i, [words count] - i)];
 						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+						filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+						NSString *symTarget = [symBits componentsJoinedByString:@" "];
+						symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 						
 						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
 							  forKey:cxFilenameKey];
-						[d setObject:[self fixFilename:[symBits componentsJoinedByString:@" "] withAttributes:d]
+						[d setObject:[self fixFilename:symTarget withAttributes:d]
 							  forKey:cxSymbolicLinkTargetKey];
 					}
 					else
@@ -964,10 +973,13 @@ int filenameSort(id obj1, id obj2, void *context)
 						
 						NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
 						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+						filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+						NSString *symTarget = [symBits componentsJoinedByString:@" "];
+						symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 						
 						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
 							  forKey:cxFilenameKey];
-						[d setObject:[self fixFilename:[symBits componentsJoinedByString:@" "] withAttributes:d]  
+						[d setObject:[self fixFilename:symTarget withAttributes:d]  
 							  forKey:cxSymbolicLinkTargetKey];
 					}
 					else

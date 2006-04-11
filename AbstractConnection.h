@@ -34,6 +34,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import "AbstractConnectionProtocol.h"
+#import "KTLog.h"
 
 /*!	AbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
 Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
@@ -42,6 +43,11 @@ It also functions as a registry for automatic subclass detection.
 
 extern NSString *ConnectionErrorDomain;
 enum { ConnectionErrorParsingDirectoryListing = 6000, ConnectionStreamError, ConnectionErrorBadPassword };
+// Logging Domain Keys
+extern NSString *TransportDomain; // used in custom stream classes
+extern NSString *StateMachineDomain;
+extern NSString *ParsingDomain;
+extern NSString *ProtocolDomain;
 
 typedef enum {
 	ConnectionNotConnectedState = 0,

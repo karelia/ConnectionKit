@@ -696,7 +696,17 @@ static NSImage *symFile = nil;
 							forKey: @"fileName"];
 			[currentItem setObject: [NSMutableArray array] 
 							forKey: @"subItems"];
-			[currentItem setObject: [NSNumber numberWithBool: ![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory]]
+			BOOL isLeaf = NO;
+			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+			{
+				NSLog(@"%@", [cur objectForKey:cxSymbolicLinkTargetKey]);
+			}
+			if (![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory] || 
+				([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
+			{
+				isLeaf = YES;
+			}
+			[currentItem setObject: [NSNumber numberWithBool:isLeaf ]
 							forKey: @"isLeaf"];
 			[currentItem setObject: [dirPath stringByAppendingPathComponent: [cur objectForKey:cxFilenameKey]]
 							forKey: @"path"];

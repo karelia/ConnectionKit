@@ -43,6 +43,7 @@ NSString *QueueUploadRemoteFileKey = @"QueueUploadRemoteFileKey";
 NSString *QueueUploadOffsetKey = @"QueueUploadOffsetKey";
 NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentReceived";
 
+NSString *QueueDomain = @"Queuing";
 
 @implementation AbstractQueueConnection
 
@@ -105,6 +106,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 - (void)pushCommandOnHistoryQueue:(id)command
 {
+	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on History Queue: %@", command);
 	[_queueLock lock];
 	[_commandHistory insertObject:command atIndex:0];
 	[_queueLock unlock];
@@ -112,6 +114,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 - (void)pushCommandOnCommandQueue:(id)command
 {
+	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on Command Queue: %@", command);
 	[_queueLock lock];
 	[_commandQueue insertObject:command atIndex:0];
 	[_queueLock unlock];
@@ -148,38 +151,43 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 {
 	[_queueLock lock];
 	[_commandQueue addObject:command];
-	if ([AbstractConnection debugEnabled])
-		NSLog(@".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
+	KTLog(QueueDomain, KTLogDebug, @".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
 	[_queueLock unlock];
 }
 
 - (void)queueDownload:(id)download
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Download: %@", download);
 	ADD_TO_QUEUE(_downloadQueue, download)
 }
 
 - (void)queueUpload:(id)upload
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queueing Upload: %@", upload);
 	ADD_TO_QUEUE(_uploadQueue, upload)
 }
 
 - (void)queueDeletion:(id)deletion
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Deletion: %@", deletion);
 	ADD_TO_QUEUE(_fileDeletes, deletion)
 }
 
 - (void)queueRename:(id)name
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Rename: %@", name);
 	ADD_TO_QUEUE(_fileRenames, name)
 }
 
 - (void)queuePermissionChange:(id)perms
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Permission Change: %@", perms);
 	ADD_TO_QUEUE(_filePermissions, perms)
 }
 
 - (void)queueFileCheck:(id)file
 {
+	KTLog(QueueDomain, KTLogDebug, @"Queuing File Existence: %@", file);
 	ADD_TO_QUEUE(_fileCheckQueue, file);
 }
 
@@ -187,36 +195,43 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 - (void)dequeueCommand
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Command");
 	DEQUEUE(_commandQueue)
 }
 
 - (void)dequeueDownload
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Download");
 	DEQUEUE(_downloadQueue)
 }
 
 - (void)dequeueUpload
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Upload");
 	DEQUEUE(_uploadQueue)
 }
 
 - (void)dequeueDeletion
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Deletion");
 	DEQUEUE(_fileDeletes)
 }
 
 - (void)dequeueRename
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Rename");
 	DEQUEUE(_fileRenames)
 }
 
 - (void)dequeuePermissionChange
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing Permission Change");
 	DEQUEUE(_filePermissions)
 }
 
 - (void)dequeueFileCheck
 {
+	KTLog(QueueDomain, KTLogDebug, @"Dequeuing File Check");
 	DEQUEUE(_fileCheckQueue);
 }
 
@@ -310,41 +325,49 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 - (void)emptyCommandQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Command Queue");
 	MT_QUEUE(_commandQueue)
 }
 
 - (void)emptyDownloadQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Download Queue");
 	MT_QUEUE(_downloadQueue)
 }
 
 - (void)emptyUploadQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Upload Queue");
 	MT_QUEUE(_uploadQueue)
 }
 
 - (void)emptyDeletionQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Deletion Queue");
 	MT_QUEUE(_fileDeletes)
 }
 
 - (void)emptyRenameQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Rename Queue");
 	MT_QUEUE(_fileRenames)
 }
 
 - (void)emptyFileCheckQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying File Existence Queue");
 	MT_QUEUE(_fileCheckQueue);
 }
 
 - (void)emptyPermissionChangeQueue
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying Permission Change Queue");
 	MT_QUEUE(_filePermissions)
 }
 
 - (void)emptyAllQueues
 {
+	KTLog(QueueDomain, KTLogDebug, @"Emptying All Queues");
 	[_queueLock lock];
 	[_commandQueue removeAllObjects];
 	[_downloadQueue removeAllObjects];
@@ -407,6 +430,11 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 	[_userInfo release];
 	[_command release];
 	[super dealloc];
+}
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"%@", _command];
 }
 
 - (void)setCommand:(id)type
