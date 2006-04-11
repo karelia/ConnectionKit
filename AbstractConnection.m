@@ -739,21 +739,26 @@ int filenameSort(id obj1, id obj2, void *context)
 	return fname;
 }
 
-/* "-rw-r--r--   1 root     other        531 Jan 29 03:26 README" */
-/* "dr-xr-xr-x   2 root     other        512 Apr  8  1994 etc" */
-/* "dr-xr-xr-x   2 root     512 Apr  8  1994 etc" */
-/* "lrwxrwxrwx   1 root     other          7 Jan 25 00:17 bin -> usr/bin" */
-/* Also produced by Microsoft's FTP servers for Windows: */
-/* "----------   1 owner    group         1803128 Jul 10 10:18 ls-lR.Z" */
-/* "d---------   1 owner    group               0 May  9 19:45 Softlib" */
-/* Also WFTPD for MSDOS: */
-/* "-rwxrwxrwx   1 noone    nogroup      322 Aug 19  1996 message.ftp" */
-/* Also NetWare: */
-/* "d [R----F--] supervisor            512       Jan 16 18:53    login" */
-/* "- [R----F--] rhesus             214059       Oct 20 15:27    cx.exe" */
-/* Also NetPresenz for the Mac: */
-/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */
-/* "drwxrwxr-x               folder        2 May 10  1996 network" */
+/* 
+ "-rw-r--r--   1 root     other        531 Jan 29 03:26 README"
+ "dr-xr-xr-x   2 root     other        512 Apr  8  1994 etc"
+ "dr-xr-xr-x   2 root     512 Apr  8  1994 etc"
+ "lrwxrwxrwx   1 root     other          7 Jan 25 00:17 bin -> usr/bin"
+ Also produced by Microsofts FTP servers for Windows:
+ "----------   1 owner    group         1803128 Jul 10 10:18 ls-lR.Z"
+ "d---------   1 owner    group               0 May  9 19:45 Softlib"
+ Windows also produces this crap 
+ "10-20-05  05:19PM       <DIR>          fordgt/"
+ "10-21-05  08:14AM                 4927 index.html"
+ Also WFTPD for MSDOS: 
+ "-rwxrwxrwx   1 noone    nogroup      322 Aug 19  1996 message.ftp" 
+ Also NetWare:
+ "d [R----F--] supervisor            512       Jan 16 18:53    login" 
+ "- [R----F--] rhesus             214059       Oct 20 15:27    cx.exe"
+ Also NetPresenz for the Mac:
+ "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit"
+ "drwxrwxr-x               folder        2 May 10  1996 network"
+*/
 
 // I have made a LIST -F which puts a / at the end of folders. This helps to determine symlinked folders or files.
 //warning TODO GREG: this also puts "*" at the end of executables!  YOU HAVE TO SEE IF IT'S EXECUTABLE, AND REMOVE THE "*" AT THE  END.
@@ -912,14 +917,14 @@ int filenameSort(id obj1, id obj2, void *context)
 							NSString *bit = [words objectAtIndex:i];
 							NSRange r = [bit rangeOfString:@"->"];
 							if (r.location != NSNotFound) {
-								bit = [bit substringToIndex:r.location];
+								//bit = [bit substringToIndex:r.location];
 								//[filenameBits addObject:bit];
 								break;
 							}
 							[filenameBits addObject:bit];
 						}
 						
-						NSArray *symBits = [words subarrayWithRange:NSMakeRange(++i, [words count] - i)];
+						NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
 						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
 						filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
 						NSString *symTarget = [symBits componentsJoinedByString:@" "];

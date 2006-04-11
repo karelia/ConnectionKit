@@ -46,7 +46,9 @@ typedef enum {
 	FTPSettingActiveState,
 	FTPSettingEPRTState,
 	FTPAwaitingDataConnectionToOpen,
-	FTPModeChangeState
+	FTPModeChangeState,
+	FTPAwaitingRemoteSystemTypeState,
+	FTPChangeDirectoryListingStyle
 } FTPState;
 
 @interface FTPConnection : StreamBasedConnection
@@ -100,7 +102,8 @@ typedef enum {
 		unsigned hasMDTM: 1;
 		unsigned isActiveDataConn: 1;
 		unsigned loggedIn: 1;
-		unsigned unused: 16;
+		unsigned isMicrosoft: 1;
+		unsigned unused: 15;
 	} _serverSupport;
 	
 }
