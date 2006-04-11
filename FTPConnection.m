@@ -2277,7 +2277,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								   (CFSocketCallBack)&dealWithConnectionSocket,
 								   &ctx);
 	CFSocketSetSocketFlags(_activeSocket,kCFSocketCloseOnInvalidate);
-	//int on = 1;
+	int on = 1;
 	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
 	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
 	
