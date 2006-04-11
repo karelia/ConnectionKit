@@ -1159,9 +1159,9 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
             SInt64 contentLength = [aTransaction contentLength];
             SInt64 bytesTransferred = [aTransaction bytesTransferred];
 			bytesTransferred -= myLastTransferBytes;
-			myLastTransferBytes = bytesTransferred;
+			myLastTransferBytes = [aTransaction bytesTransferred];
 			
-            int percent = (int)(((double)bytesTransferred/(double)contentLength)*100);
+            int percent = (int)(((double)myLastTransferBytes/(double)contentLength)*100);
 
             if ( _flags.uploadPercent && (percent != myUploadPercent) )
             {
@@ -1192,9 +1192,9 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
             SInt64 contentLength = [aTransaction contentLength];
             SInt64 bytesTransferred = [aTransaction bytesTransferred];
 			bytesTransferred -= myLastTransferBytes;
-			myLastTransferBytes = bytesTransferred;
+			myLastTransferBytes = [aTransaction bytesTransferred];
 			
-            int percent = (int)(((double)bytesTransferred/(double)contentLength)*100);
+            int percent = (int)(((double)myLastTransferBytes/(double)contentLength)*100);
 
             if ( _flags.downloadPercent && (percent != myDownloadPercent) )
             {
