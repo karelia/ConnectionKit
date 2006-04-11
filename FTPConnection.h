@@ -83,6 +83,7 @@ typedef enum {
 	// Support for EPRT and PORT active connections
 	CFSocketRef			_activeSocket;
 	CFSocketNativeHandle _connectedActive;
+	unsigned			_lastActivePort;
 	
 	//cache the server abilities
 	struct __dataCon {

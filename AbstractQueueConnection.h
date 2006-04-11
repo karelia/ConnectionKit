@@ -87,6 +87,8 @@
 
 @end
 
+extern NSString *QueueDomain;
+
 @interface AbstractQueueConnection : AbstractConnection 
 {
 	NSRecursiveLock		*_queueLock;

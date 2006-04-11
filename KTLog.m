@@ -49,8 +49,8 @@ static NSString *KTLevelMap[] = {
 	@"INFO",
 	@"WARN",
 	@"ERROR",
-	@"DEBUG",
-	@"FATAL"
+	@"FATAL",
+	@"DEBUG"
 };
 
 @implementation KTLogger

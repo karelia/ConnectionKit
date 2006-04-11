@@ -69,9 +69,9 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 - (void)awakeFromNib
 {
 //	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Queuing"];
-//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Transport"];
+	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Transport"];
 	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Parser"];
-//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"State Machine"];
+	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"State Machine"];
 	
 	KTLog(@"Application", KTLogInfo, @"FTPConnection Tester Started");
 	
@@ -1092,7 +1092,11 @@ NSString *IconKey = @"Icon";
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName
 {
 	NSString *result = nil;
-	
+	if ([aServerName length] > 255 || [anAccountName length] > 255)
+	{
+		return result;
+	}
+		
 	Str255 serverPString, accountPString;
 	
 	c2pstrcpy(serverPString, [aServerName UTF8String]);
@@ -1129,6 +1133,11 @@ NSString *IconKey = @"Icon";
 + (BOOL) keychainSetPassword:(NSString *)inPassword forServer:(NSString *)aServer account:(NSString *)anAccount
 {
 	Str255 serverPString, accountPString;
+	
+	if ([aServer length] > 255 || [anAccount length] > 255)
+	{
+		return NO;
+	}
 	
 	c2pstrcpy(serverPString, [aServer UTF8String]);
 	c2pstrcpy(accountPString, [anAccount UTF8String]);
