@@ -429,7 +429,13 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 {
 	uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
 	int len = [_receiveStream read:buf maxLength:kStreamChunkSize];
-	NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:YES];
+	NSData *data = nil;
+	
+	if (len >= 0)
+	{
+		data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:YES];
+	}
+	
 	return data;
 }
 
