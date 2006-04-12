@@ -355,7 +355,7 @@ static NSMutableDictionary *responseMap = nil;
 													   error:&err];
 	if (err)
 	{
-		NSLog(@"Failed to create NSXMLDocument:\n%@", err);
+		NSLog(@"Failed to create NSXMLDocument: %@", err);
 	}
 	return [xml autorelease];
 }
