@@ -146,7 +146,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		
 		if ([AbstractConnection debugEnabled])
 		{
-			NSLog(@"WebDAV Received:\n%@", response);
+			NSLog(@"WebDAV Received: %@", response);
 		}
 		
 		if ([self transcript])
@@ -498,7 +498,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		if ([AbstractConnection debugEnabled])
 		{
-			NSLog(@"WebDAV Sending:\n%@", req);
+			NSLog(@"WebDAV Sending: %@", req);
 		}
 		[self sendData:packet];
 	}
