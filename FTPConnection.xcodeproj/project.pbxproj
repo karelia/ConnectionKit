@@ -9,39 +9,10 @@
 /* Begin PBXBuildFile section */
 		79158559076573880036D96E /* PermissionsController.h in Resources */ = {isa = PBXBuildFile; fileRef = 79158557076573880036D96E /* PermissionsController.h */; };
 		7915855A076573880036D96E /* PermissionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79158558076573880036D96E /* PermissionsController.m */; };
-		792017AB08B1630C00F652C9 /* WebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AA08B1630C00F652C9 /* WebDAVConnection.m */; };
-		792017B008B1632800F652C9 /* DotMacConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AD08B1632800F652C9 /* DotMacConnection.m */; };
-		792017B108B1632800F652C9 /* FileConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AF08B1632800F652C9 /* FileConnection.m */; };
-		7920195608B1A83E00F652C9 /* SFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920195508B1A83E00F652C9 /* SFTPConnection.m */; };
-		7920196E08B1C32A00F652C9 /* WebDAVSecureConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */; };
 		79204BCE07652BDE004798B1 /* Permissions.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79204BCC07652BDE004798B1 /* Permissions.nib */; };
-		79252DFE09E3630A00157A78 /* DAVDirectoryContentsRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252DFC09E3630A00157A78 /* DAVDirectoryContentsRequest.h */; };
-		79252DFF09E3630A00157A78 /* DAVDirectoryContentsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252DFD09E3630A00157A78 /* DAVDirectoryContentsRequest.m */; };
-		79252E1609E3637B00157A78 /* DAVCreateDirectoryRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E1409E3637B00157A78 /* DAVCreateDirectoryRequest.h */; };
-		79252E1709E3637B00157A78 /* DAVCreateDirectoryRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E1509E3637B00157A78 /* DAVCreateDirectoryRequest.m */; };
-		79252E2C09E363FC00157A78 /* DAVUploadFileRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E2A09E363FC00157A78 /* DAVUploadFileRequest.h */; };
-		79252E2D09E363FC00157A78 /* DAVUploadFileRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E2B09E363FC00157A78 /* DAVUploadFileRequest.m */; };
-		79252E7409E3657300157A78 /* DAVDirectoryContentsResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E7209E3657300157A78 /* DAVDirectoryContentsResponse.h */; };
-		79252E7509E3657300157A78 /* DAVDirectoryContentsResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7309E3657300157A78 /* DAVDirectoryContentsResponse.m */; };
-		79252E7E09E365E100157A78 /* DAVCreateDirectoryResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252E7C09E365E100157A78 /* DAVCreateDirectoryResponse.h */; };
-		79252E7F09E365E100157A78 /* DAVCreateDirectoryResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7D09E365E100157A78 /* DAVCreateDirectoryResponse.m */; };
-		79252EB009E3663B00157A78 /* DAVUploadFileResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79252EAE09E3663B00157A78 /* DAVUploadFileResponse.h */; };
-		79252EB109E3663B00157A78 /* DAVUploadFileResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252EAF09E3663B00157A78 /* DAVUploadFileResponse.m */; };
-		7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7925367D09E3819300157A78 /* DAVDeleteRequest.h */; };
-		7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925367E09E3819300157A78 /* DAVDeleteRequest.m */; };
-		7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7925368909E3828300157A78 /* DAVDeleteResponse.h */; };
-		7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925368A09E3828300157A78 /* DAVDeleteResponse.m */; };
 		7929B78109353D870002A18F /* FileTransfer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7929B77F09353D870002A18F /* FileTransfer.h */; };
 		7929B78209353D870002A18F /* FileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 7929B78009353D870002A18F /* FileTransfer.m */; };
 		792C29D609EA48570015766F /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 792C29D509EA48570015766F /* libz.dylib */; };
-		7931CB710940227B00740CA2 /* StreamBasedConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7931CB6F0940227B00740CA2 /* StreamBasedConnection.h */; };
-		7931CB720940227B00740CA2 /* StreamBasedConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7931CB700940227B00740CA2 /* StreamBasedConnection.m */; };
-		793997EF075FDACB00F713EB /* AbstractConnection.h in Resources */ = {isa = PBXBuildFile; fileRef = 793997E7075FDACB00F713EB /* AbstractConnection.h */; };
-		793997F0075FDACB00F713EB /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997E8075FDACB00F713EB /* AbstractConnection.m */; };
-		793997F3075FDACB00F713EB /* FTPConnection.h in Resources */ = {isa = PBXBuildFile; fileRef = 793997EB075FDACB00F713EB /* FTPConnection.h */; };
-		793997F4075FDACB00F713EB /* FTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997EC075FDACB00F713EB /* FTPConnection.m */; };
-		793997F5075FDACB00F713EB /* RunLoopForwarder.h in Resources */ = {isa = PBXBuildFile; fileRef = 793997ED075FDACB00F713EB /* RunLoopForwarder.h */; };
-		793997F6075FDACB00F713EB /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997EE075FDACB00F713EB /* RunLoopForwarder.m */; };
 		7939985E075FFFB400F713EB /* Controller.h in Resources */ = {isa = PBXBuildFile; fileRef = 7939985C075FFFB400F713EB /* Controller.h */; };
 		7939985F075FFFB500F713EB /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 7939985D075FFFB400F713EB /* Controller.m */; };
 		7939990707600A4E00F713EB /* delete.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7939990107600A4E00F713EB /* delete.tiff */; };
@@ -51,30 +22,57 @@
 		7939990B07600A4E00F713EB /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7939990507600A4E00F713EB /* Stop.tiff */; };
 		7939990C07600A4E00F713EB /* upload.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7939990607600A4E00F713EB /* upload.tif */; };
 		7939994D07600C9600F713EB /* home.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7939994C07600C9600F713EB /* home.tiff */; };
-		79640D710945B0D900A8789D /* NNTPConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79640D6F0945B0D900A8789D /* NNTPConnection.h */; };
-		79640D720945B0D900A8789D /* NNTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640D700945B0D900A8789D /* NNTPConnection.m */; };
-		79640E5F094671A000A8789D /* FTPOverSSLConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79640E5D094671A000A8789D /* FTPOverSSLConnection.h */; };
-		79640E60094671A000A8789D /* FTPOverSSLConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640E5E094671A000A8789D /* FTPOverSSLConnection.m */; };
-		79640E7F09469FD300A8789D /* SSLStream.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79640E7D09469FD300A8789D /* SSLStream.h */; };
-		79640E8009469FD300A8789D /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640E7E09469FD300A8789D /* SSLStream.m */; };
-		796833090943FB4300213256 /* AbstractQueueConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 796833070943FB4300213256 /* AbstractQueueConnection.h */; };
-		7968330A0943FB4300213256 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 796833080943FB4300213256 /* AbstractQueueConnection.m */; };
 		79722A5E09EE28B200519ED1 /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79722A5C09EE28B200519ED1 /* KTLog.nib */; };
+		79723B0709F0B72100519ED1 /* AbstractConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */; };
+		79723B0809F0B72100519ED1 /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79742BF209EB47F700F77F0B /* KTLog.h */; };
+		79723B0909F0B72100519ED1 /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 793997E7075FDACB00F713EB /* AbstractConnection.h */; };
+		79723B0A09F0B72100519ED1 /* AbstractQueueConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 796833070943FB4300213256 /* AbstractQueueConnection.h */; };
+		79723B0B09F0B72100519ED1 /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 793997ED075FDACB00F713EB /* RunLoopForwarder.h */; };
+		79723B0C09F0B72100519ED1 /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7931CB6F0940227B00740CA2 /* StreamBasedConnection.h */; };
+		79723B0D09F0B72100519ED1 /* InterThreadMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
+		79723B0E09F0B78300519ED1 /* WebDAVSecureConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920196D08B1C32A00F652C9 /* WebDAVSecureConnection.m */; };
+		79723B0F09F0B78500519ED1 /* WebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AA08B1630C00F652C9 /* WebDAVConnection.m */; };
+		79723B1009F0B78700519ED1 /* StreamBasedConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7931CB700940227B00740CA2 /* StreamBasedConnection.m */; };
+		79723B1209F0B78C00519ED1 /* SFTPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 797C0AE8093FEAB1004ABB69 /* SFTPStream.m */; };
+		79723B1309F0B79600519ED1 /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640E7E09469FD300A8789D /* SSLStream.m */; };
+		79723B1409F0B79B00519ED1 /* SFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7920195508B1A83E00F652C9 /* SFTPConnection.m */; };
+		79723B1509F0B79F00519ED1 /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997EE075FDACB00F713EB /* RunLoopForwarder.m */; };
+		79723B1609F0B7A500519ED1 /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FEE91109E11B6B009E1D59 /* NSData+Connection.m */; };
+		79723B1709F0B7A700519ED1 /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FEE91009E11B6B009E1D59 /* NSData+Connection.h */; };
+		79723B1809F0B7AC00519ED1 /* NNTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640D700945B0D900A8789D /* NNTPConnection.m */; };
+		79723B1909F0B7AF00519ED1 /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79742BF309EB47F700F77F0B /* KTLog.m */; };
+		79723B1A09F0B7B000519ED1 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
+		79723B1B09F0B7B600519ED1 /* FTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997EC075FDACB00F713EB /* FTPConnection.m */; };
+		79723B1C09F0B7BA00519ED1 /* FileConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AF08B1632800F652C9 /* FileConnection.m */; };
+		79723B1D09F0B7BC00519ED1 /* DotMacConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792017AD08B1632800F652C9 /* DotMacConnection.m */; };
+		79723B1E09F0B7C300519ED1 /* DAVUploadFileResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252EAF09E3663B00157A78 /* DAVUploadFileResponse.m */; };
+		79723B1F09F0B7C500519ED1 /* DAVUploadFileRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E2B09E363FC00157A78 /* DAVUploadFileRequest.m */; };
+		79723B2009F0B7C800519ED1 /* DAVResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CC0D8009DFBFA300F975D2 /* DAVResponse.m */; };
+		79723B2109F0B7CB00519ED1 /* DAVRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FDC96309DFBCDF00373F71 /* DAVRequest.m */; };
+		79723B2209F0B7CD00519ED1 /* DAVDirectoryContentsResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7309E3657300157A78 /* DAVDirectoryContentsResponse.m */; };
+		79723B2309F0B7CE00519ED1 /* DAVDirectoryContentsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252DFD09E3630A00157A78 /* DAVDirectoryContentsRequest.m */; };
+		79723B2409F0B7D200519ED1 /* DAVDeleteResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925368A09E3828300157A78 /* DAVDeleteResponse.m */; };
+		79723B2509F0B7D300519ED1 /* DAVDeleteRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7925367E09E3819300157A78 /* DAVDeleteRequest.m */; };
+		79723B2609F0B7D500519ED1 /* DAVCreateDirectoryResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E7D09E365E100157A78 /* DAVCreateDirectoryResponse.m */; };
+		79723B2709F0B7D600519ED1 /* DAVCreateDirectoryRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79252E1509E3637B00157A78 /* DAVCreateDirectoryRequest.m */; };
+		79723B2809F0B7D800519ED1 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 796833080943FB4300213256 /* AbstractQueueConnection.m */; };
+		79723C0A09F0B84800519ED1 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 792C29D509EA48570015766F /* libz.dylib */; };
+		79723C0B09F0B84800519ED1 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FEE8F709E11B10009E1D59 /* libcurl.dylib */; };
+		79723C0C09F0B84800519ED1 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
+		79723C0D09F0B84800519ED1 /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
+		79723C0E09F0B84800519ED1 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79EBC65E076AA23C001C7BF1 /* Carbon.framework */; };
+		79723C0F09F0B84800519ED1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		79723C1609F0B85A00519ED1 /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997E8075FDACB00F713EB /* AbstractConnection.m */; };
+		79723D4109F0B8C900519ED1 /* ConnectionOpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */; };
+		79723D4209F0B8CA00519ED1 /* ConnectionOpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */; };
+		79723D4809F0B91000519ED1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
+		79723D4909F0B91000519ED1 /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79722A5C09EE28B200519ED1 /* KTLog.nib */; };
+		79723D4B09F0B92D00519ED1 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79723B0009F0B6F200519ED1 /* Connection.framework */; };
 		79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
-		79742BF409EB47F700F77F0B /* KTLog.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79742BF209EB47F700F77F0B /* KTLog.h */; };
-		79742BF509EB47F700F77F0B /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79742BF309EB47F700F77F0B /* KTLog.m */; };
-		797C0AE9093FEAB1004ABB69 /* SFTPStream.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 797C0AE7093FEAB1004ABB69 /* SFTPStream.h */; };
-		797C0AEA093FEAB1004ABB69 /* SFTPStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 797C0AE8093FEAB1004ABB69 /* SFTPStream.m */; };
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
 		797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
-		798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 799F0AAC094ADC68006B8EA4 /* InterThreadMessaging.m */; };
-		79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */; };
-		79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */; };
-		799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 799F0AAB094ADC68006B8EA4 /* InterThreadMessaging.h */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
-		79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CC0D7F09DFBFA300F975D2 /* DAVResponse.h */; };
-		79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CC0D8009DFBFA300F975D2 /* DAVResponse.m */; };
 		79D1D76E07613A43003FA7BB /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76C07613A43003FA7BB /* InputDialog.nib */; };
 		79D1D77107613A4E003FA7BB /* InputDialog.h in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76F07613A4E003FA7BB /* InputDialog.h */; };
 		79D1D77207613A4E003FA7BB /* InputDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79D1D77007613A4E003FA7BB /* InputDialog.m */; };
@@ -86,16 +84,11 @@
 		79DF884D07606D680006D6DD /* ProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79DF884B07606D680006D6DD /* ProgressCell.m */; };
 		79E2DAF307656297007609C1 /* console.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79E2DAF207656297007609C1 /* console.tiff */; };
 		79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79EBC65E076AA23C001C7BF1 /* Carbon.framework */; };
-		79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79FDC96209DFBCDF00373F71 /* DAVRequest.h */; };
-		79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FDC96309DFBCDF00373F71 /* DAVRequest.m */; };
 		79FEE8F809E11B10009E1D59 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FEE8F709E11B10009E1D59 /* libcurl.dylib */; };
-		79FEE91209E11B6B009E1D59 /* NSData+Connection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79FEE91009E11B6B009E1D59 /* NSData+Connection.h */; };
-		79FEE91309E11B6B009E1D59 /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FEE91109E11B6B009E1D59 /* NSData+Connection.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		CE427E7607651D9000B4301B /* AbstractConnectionProtocol.h in Resources */ = {isa = PBXBuildFile; fileRef = CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXBuildStyle section */
@@ -122,6 +115,16 @@
 		};
 /* End PBXBuildStyle section */
 
+/* Begin PBXContainerItemProxy section */
+		79723D5209F0B94400519ED1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79723AFF09F0B6F200519ED1 /* Connection */;
+			remoteInfo = Connection;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		795ED25008B5639500DBFF1E /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -130,26 +133,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				7929B78109353D870002A18F /* FileTransfer.h in CopyFiles */,
-				797C0AE9093FEAB1004ABB69 /* SFTPStream.h in CopyFiles */,
-				7931CB710940227B00740CA2 /* StreamBasedConnection.h in CopyFiles */,
-				796833090943FB4300213256 /* AbstractQueueConnection.h in CopyFiles */,
-				79640D710945B0D900A8789D /* NNTPConnection.h in CopyFiles */,
-				79640E5F094671A000A8789D /* FTPOverSSLConnection.h in CopyFiles */,
-				79640E7F09469FD300A8789D /* SSLStream.h in CopyFiles */,
-				799F0AAD094ADC68006B8EA4 /* InterThreadMessaging.h in CopyFiles */,
-				79FDC96409DFBCDF00373F71 /* DAVRequest.h in CopyFiles */,
-				79CC0D8109DFBFA300F975D2 /* DAVResponse.h in CopyFiles */,
-				79FEE91209E11B6B009E1D59 /* NSData+Connection.h in CopyFiles */,
-				79252DFE09E3630A00157A78 /* DAVDirectoryContentsRequest.h in CopyFiles */,
-				79252E1609E3637B00157A78 /* DAVCreateDirectoryRequest.h in CopyFiles */,
-				79252E2C09E363FC00157A78 /* DAVUploadFileRequest.h in CopyFiles */,
-				79252E7409E3657300157A78 /* DAVDirectoryContentsResponse.h in CopyFiles */,
-				79252E7E09E365E100157A78 /* DAVCreateDirectoryResponse.h in CopyFiles */,
-				79252EB009E3663B00157A78 /* DAVUploadFileResponse.h in CopyFiles */,
-				7925367F09E3819300157A78 /* DAVDeleteRequest.h in CopyFiles */,
-				7925368B09E3828300157A78 /* DAVDeleteResponse.h in CopyFiles */,
-				79858FE609E3C4AC003EA241 /* ConnectionOpenPanel.h in CopyFiles */,
-				79742BF409EB47F700F77F0B /* KTLog.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -230,6 +213,8 @@
 		796833070943FB4300213256 /* AbstractQueueConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractQueueConnection.h; sourceTree = "<group>"; };
 		796833080943FB4300213256 /* AbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractQueueConnection.m; sourceTree = "<group>"; };
 		79722A5D09EE28B200519ED1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/KTLog.nib; sourceTree = "<group>"; };
+		79723B0009F0B6F200519ED1 /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		79723B0209F0B6F300519ED1 /* Connection-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Connection-Info.plist"; sourceTree = "<group>"; };
 		79730F8809E61D1400B93CB1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79742BF209EB47F700F77F0B /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
 		79742BF309EB47F700F77F0B /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
@@ -267,10 +252,24 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		79723AFE09F0B6F200519ED1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79723C0A09F0B84800519ED1 /* libz.dylib in Frameworks */,
+				79723C0B09F0B84800519ED1 /* libcurl.dylib in Frameworks */,
+				79723C0C09F0B84800519ED1 /* Security.framework in Frameworks */,
+				79723C0D09F0B84800519ED1 /* DotMacKit.framework in Frameworks */,
+				79723C0E09F0B84800519ED1 /* Carbon.framework in Frameworks */,
+				79723C0F09F0B84800519ED1 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072E0486CEB800E47090 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				79723D4B09F0B92D00519ED1 /* Connection.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */,
 				797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */,
@@ -325,6 +324,7 @@
 			isa = PBXGroup;
 			children = (
 				8D1107320486CEB800E47090 /* FTPConnection.app */,
+				79723B0009F0B6F200519ED1 /* Connection.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -338,6 +338,7 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				79723B0209F0B6F300519ED1 /* Connection-Info.plist */,
 			);
 			name = FTPConnection;
 			sourceTree = "<group>";
@@ -354,19 +355,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				79BCC31D09AEC831007EF4D1 /* icon.icns */,
-				79E2DAF207656297007609C1 /* console.tiff */,
-				79D1D88D0762D700003FA7BB /* symlink_file.tif */,
-				79D1D88E0762D700003FA7BB /* symlink_folder.tif */,
-				79DF883B07606AE80006D6DD /* connect.tiff */,
-				79DF883C07606AE80006D6DD /* lock.tiff */,
-				7939994C07600C9600F713EB /* home.tiff */,
-				7939990107600A4E00F713EB /* delete.tiff */,
-				7939990207600A4E00F713EB /* download.tif */,
-				7939990307600A4E00F713EB /* folder.png */,
-				7939990407600A4E00F713EB /* redo.tif */,
-				7939990507600A4E00F713EB /* Stop.tiff */,
-				7939990607600A4E00F713EB /* upload.tif */,
+				79723D4509F0B8E900519ED1 /* Images */,
 				8D1107310486CEB800E47090 /* Info.plist */,
 				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
@@ -436,6 +425,26 @@
 			name = "Support Classes";
 			sourceTree = "<group>";
 		};
+		79723D4509F0B8E900519ED1 /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				79BCC31D09AEC831007EF4D1 /* icon.icns */,
+				79E2DAF207656297007609C1 /* console.tiff */,
+				79D1D88D0762D700003FA7BB /* symlink_file.tif */,
+				79D1D88E0762D700003FA7BB /* symlink_folder.tif */,
+				79DF883B07606AE80006D6DD /* connect.tiff */,
+				79DF883C07606AE80006D6DD /* lock.tiff */,
+				7939994C07600C9600F713EB /* home.tiff */,
+				7939990107600A4E00F713EB /* delete.tiff */,
+				7939990207600A4E00F713EB /* download.tif */,
+				7939990307600A4E00F713EB /* folder.png */,
+				7939990407600A4E00F713EB /* redo.tif */,
+				7939990507600A4E00F713EB /* Stop.tiff */,
+				7939990607600A4E00F713EB /* upload.tif */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
 		797F987B096E1B730029D7DE /* Socket with SSL Capabitlities */ = {
 			isa = PBXGroup;
 			children = (
@@ -487,7 +496,85 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		79723AFB09F0B6F200519ED1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79723B0709F0B72100519ED1 /* AbstractConnectionProtocol.h in Headers */,
+				79723B0809F0B72100519ED1 /* KTLog.h in Headers */,
+				79723B0909F0B72100519ED1 /* AbstractConnection.h in Headers */,
+				79723B0A09F0B72100519ED1 /* AbstractQueueConnection.h in Headers */,
+				79723B0B09F0B72100519ED1 /* RunLoopForwarder.h in Headers */,
+				79723B0C09F0B72100519ED1 /* StreamBasedConnection.h in Headers */,
+				79723B0D09F0B72100519ED1 /* InterThreadMessaging.h in Headers */,
+				79723B1709F0B7A700519ED1 /* NSData+Connection.h in Headers */,
+				79723D4109F0B8C900519ED1 /* ConnectionOpenPanel.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
+		79723AFF09F0B6F200519ED1 /* Connection */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 79723B0309F0B6F400519ED1 /* Build configuration list for PBXNativeTarget "Connection" */;
+			buildPhases = (
+				79723AFB09F0B6F200519ED1 /* Headers */,
+				79723AFC09F0B6F200519ED1 /* Resources */,
+				79723AFD09F0B6F200519ED1 /* Sources */,
+				79723AFE09F0B6F200519ED1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Connection-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = YES;
+			};
+			dependencies = (
+			);
+			name = Connection;
+			productName = Connection;
+			productReference = 79723B0009F0B6F200519ED1 /* Connection.framework */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.Connection</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>FMWK</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.framework";
+		};
 		8D1107260486CEB800E47090 /* FTPConnection */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 796C440308AE0FD300C8A0F2 /* Build configuration list for PBXNativeTarget "FTPConnection" */;
@@ -510,6 +597,7 @@
 				WRAPPER_EXTENSION = app;
 			};
 			dependencies = (
+				79723D5309F0B94400519ED1 /* PBXTargetDependency */,
 			);
 			name = FTPConnection;
 			productInstallPath = "$(HOME)/Applications";
@@ -534,20 +622,27 @@
 			projectDirPath = "";
 			targets = (
 				8D1107260486CEB800E47090 /* FTPConnection */,
+				79723AFF09F0B6F200519ED1 /* Connection */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		79723AFC09F0B6F200519ED1 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79723D4809F0B91000519ED1 /* ConnectionOpenPanel.nib in Resources */,
+				79723D4909F0B91000519ED1 /* KTLog.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D1107290486CEB800E47090 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
 				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
-				793997EF075FDACB00F713EB /* AbstractConnection.h in Resources */,
-				793997F3075FDACB00F713EB /* FTPConnection.h in Resources */,
-				793997F5075FDACB00F713EB /* RunLoopForwarder.h in Resources */,
 				7939985E075FFFB400F713EB /* Controller.h in Resources */,
 				7939990707600A4E00F713EB /* delete.tiff in Resources */,
 				7939990807600A4E00F713EB /* download.tif in Resources */,
@@ -563,7 +658,6 @@
 				79D1D77107613A4E003FA7BB /* InputDialog.h in Resources */,
 				79D1D88F0762D700003FA7BB /* symlink_file.tif in Resources */,
 				79D1D8900762D700003FA7BB /* symlink_folder.tif in Resources */,
-				CE427E7607651D9000B4301B /* AbstractConnectionProtocol.h in Resources */,
 				79204BCE07652BDE004798B1 /* Permissions.nib in Resources */,
 				79E2DAF307656297007609C1 /* console.tiff in Resources */,
 				79158559076573880036D96E /* PermissionsController.h in Resources */,
@@ -577,48 +671,62 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		79723AFD09F0B6F200519ED1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79723B0E09F0B78300519ED1 /* WebDAVSecureConnection.m in Sources */,
+				79723B0F09F0B78500519ED1 /* WebDAVConnection.m in Sources */,
+				79723B1009F0B78700519ED1 /* StreamBasedConnection.m in Sources */,
+				79723B1209F0B78C00519ED1 /* SFTPStream.m in Sources */,
+				79723B1309F0B79600519ED1 /* SSLStream.m in Sources */,
+				79723B1409F0B79B00519ED1 /* SFTPConnection.m in Sources */,
+				79723B1509F0B79F00519ED1 /* RunLoopForwarder.m in Sources */,
+				79723B1609F0B7A500519ED1 /* NSData+Connection.m in Sources */,
+				79723B1809F0B7AC00519ED1 /* NNTPConnection.m in Sources */,
+				79723B1909F0B7AF00519ED1 /* KTLog.m in Sources */,
+				79723B1A09F0B7B000519ED1 /* InterThreadMessaging.m in Sources */,
+				79723B1B09F0B7B600519ED1 /* FTPConnection.m in Sources */,
+				79723B1C09F0B7BA00519ED1 /* FileConnection.m in Sources */,
+				79723B1D09F0B7BC00519ED1 /* DotMacConnection.m in Sources */,
+				79723B1E09F0B7C300519ED1 /* DAVUploadFileResponse.m in Sources */,
+				79723B1F09F0B7C500519ED1 /* DAVUploadFileRequest.m in Sources */,
+				79723B2009F0B7C800519ED1 /* DAVResponse.m in Sources */,
+				79723B2109F0B7CB00519ED1 /* DAVRequest.m in Sources */,
+				79723B2209F0B7CD00519ED1 /* DAVDirectoryContentsResponse.m in Sources */,
+				79723B2309F0B7CE00519ED1 /* DAVDirectoryContentsRequest.m in Sources */,
+				79723B2409F0B7D200519ED1 /* DAVDeleteResponse.m in Sources */,
+				79723B2509F0B7D300519ED1 /* DAVDeleteRequest.m in Sources */,
+				79723B2609F0B7D500519ED1 /* DAVCreateDirectoryResponse.m in Sources */,
+				79723B2709F0B7D600519ED1 /* DAVCreateDirectoryRequest.m in Sources */,
+				79723B2809F0B7D800519ED1 /* AbstractQueueConnection.m in Sources */,
+				79723C1609F0B85A00519ED1 /* AbstractConnection.m in Sources */,
+				79723D4209F0B8CA00519ED1 /* ConnectionOpenPanel.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		8D11072C0486CEB800E47090 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				793997F0075FDACB00F713EB /* AbstractConnection.m in Sources */,
-				793997F4075FDACB00F713EB /* FTPConnection.m in Sources */,
-				793997F6075FDACB00F713EB /* RunLoopForwarder.m in Sources */,
 				7939985F075FFFB500F713EB /* Controller.m in Sources */,
 				79DF884D07606D680006D6DD /* ProgressCell.m in Sources */,
 				79D1D77207613A4E003FA7BB /* InputDialog.m in Sources */,
 				7915855A076573880036D96E /* PermissionsController.m in Sources */,
-				792017AB08B1630C00F652C9 /* WebDAVConnection.m in Sources */,
-				792017B008B1632800F652C9 /* DotMacConnection.m in Sources */,
-				792017B108B1632800F652C9 /* FileConnection.m in Sources */,
-				7920195608B1A83E00F652C9 /* SFTPConnection.m in Sources */,
-				7920196E08B1C32A00F652C9 /* WebDAVSecureConnection.m in Sources */,
 				7929B78209353D870002A18F /* FileTransfer.m in Sources */,
-				797C0AEA093FEAB1004ABB69 /* SFTPStream.m in Sources */,
-				7931CB720940227B00740CA2 /* StreamBasedConnection.m in Sources */,
-				7968330A0943FB4300213256 /* AbstractQueueConnection.m in Sources */,
-				79640D720945B0D900A8789D /* NNTPConnection.m in Sources */,
-				79640E60094671A000A8789D /* FTPOverSSLConnection.m in Sources */,
-				79640E8009469FD300A8789D /* SSLStream.m in Sources */,
-				798309FE09982346007E8811 /* InterThreadMessaging.m in Sources */,
-				79FDC96509DFBCDF00373F71 /* DAVRequest.m in Sources */,
-				79CC0D8209DFBFA300F975D2 /* DAVResponse.m in Sources */,
-				79FEE91309E11B6B009E1D59 /* NSData+Connection.m in Sources */,
-				79252DFF09E3630A00157A78 /* DAVDirectoryContentsRequest.m in Sources */,
-				79252E1709E3637B00157A78 /* DAVCreateDirectoryRequest.m in Sources */,
-				79252E2D09E363FC00157A78 /* DAVUploadFileRequest.m in Sources */,
-				79252E7509E3657300157A78 /* DAVDirectoryContentsResponse.m in Sources */,
-				79252E7F09E365E100157A78 /* DAVCreateDirectoryResponse.m in Sources */,
-				79252EB109E3663B00157A78 /* DAVUploadFileResponse.m in Sources */,
-				7925368009E3819300157A78 /* DAVDeleteRequest.m in Sources */,
-				7925368C09E3828300157A78 /* DAVDeleteResponse.m in Sources */,
-				79858FE709E3C4AC003EA241 /* ConnectionOpenPanel.m in Sources */,
-				79742BF509EB47F700F77F0B /* KTLog.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		79723D5309F0B94400519ED1 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79723AFF09F0B6F200519ED1 /* Connection */;
+			targetProxy = 79723D5209F0B94400519ED1 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
@@ -774,6 +882,92 @@
 			};
 			name = Default;
 		};
+		79723B0409F0B6F400519ED1 /* Development */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				HEADER_SEARCH_PATHS = /usr/include;
+				INFOPLIST_FILE = "Connection-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = YES;
+			};
+			name = Development;
+		};
+		79723B0509F0B6F400519ED1 /* Deployment */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Connection-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = NO;
+			};
+			name = Deployment;
+		};
+		79723B0609F0B6F400519ED1 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Connection-Info.plist";
+				INSTALL_PATH = "$(HOME)/Library/Frameworks";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = YES;
+			};
+			name = Default;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -793,6 +987,16 @@
 				796C440808AE0FD300C8A0F2 /* Development */,
 				796C440908AE0FD300C8A0F2 /* Deployment */,
 				796C440A08AE0FD300C8A0F2 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		79723B0309F0B6F400519ED1 /* Build configuration list for PBXNativeTarget "Connection" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				79723B0409F0B6F400519ED1 /* Development */,
+				79723B0509F0B6F400519ED1 /* Deployment */,
+				79723B0609F0B6F400519ED1 /* Default */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Default;

@@ -51,8 +51,6 @@
 #import <util.h>
 #import "InterThreadMessaging.h"
 
-extern char	**environ;
-
 enum { START = 200, STOP };
 
 @interface NSArray(CreateArgv)
@@ -238,13 +236,26 @@ enum { START = 200, STOP };
     switch (( _sftppid = forkpty( &_master, ttyname, NULL, &win_size ))) 
 	{
 		case 0:
-			execve( execargs[ 0 ], ( char ** )execargs, environ );
+		{
+			NSDictionary *env = [[NSProcessInfo processInfo] environment];
+			char **newEnv = (char **)malloc(sizeof(char *) * ([[env allKeys] count] + 1));
+			memset(newEnv,0,[[env allKeys] count] + 1);
+			NSArray *keys = [env allKeys];
+			NSString *key;
+			int i;
+			for (i = 0; i < [keys count]; i++)
+			{
+				key = [keys objectAtIndex:i];
+				newEnv[i] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [env objectForKey:key]] UTF8String];
+			}
+			execve( execargs[ 0 ], ( char ** )execargs,  newEnv);
 			KTLog(TransportDomain, KTLogFatal, @"Couldn't launch sftp: %s", strerror( errno ));
-			_exit( 2 );						/* shouldn't get here */
-			
+			return;					/* shouldn't get here */			
+		}
+						
 		case -1:
 			KTLog(TransportDomain, KTLogError, @"forkpty failed: %s", strerror( errno ));
-			exit( 2 );
+			return;
 			
 		default:
 			break;
