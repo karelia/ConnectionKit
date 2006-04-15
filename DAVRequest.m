@@ -219,6 +219,8 @@
 		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n\r\n", [myContent length]];
 		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
 		
+		myHeaderLength = [packet length];
+		
 		[packet appendData:myContent];
 		
 		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
@@ -246,6 +248,11 @@
 	}*/
 
 	return packet;
+}
+
+- (unsigned)headerLength
+{
+	return myHeaderLength;
 }
 
 - (DAVResponse *)responseWithData:(NSData *)data

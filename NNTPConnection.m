@@ -94,8 +94,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)sendCommand:(NSString *)cmd
 {
-	if ([AbstractConnection logStateChanges])
-		NSLog(@">> %@", cmd);
+	KTLog(ProtocolDomain, KTLogDebug, @">> %@", cmd);
 	
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", cmd];
 	
@@ -116,8 +115,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
 															  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-	if ([AbstractConnection debugEnabled])
-		NSLog(@"<< %@", command);
+	KTLog(ProtocolDomain, KTLogDebug, @"<< %@", command);
 	
 	switch (code) {
 #pragma mark -
@@ -263,9 +261,11 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	[self queueCommand:[NSString stringWithFormat:@"GROUP %@", dirPath]
-			awaitState:ConnectionIdleState
-			 sentState:ConnectionChangedDirectoryState];
+	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"GROUP %@", dirPath]
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionChangedDirectoryState
+										dependant:nil
+										 userInfo:nil]];
 }
 
 - (NSString *)currentDirectory
@@ -420,16 +420,20 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)directoryContents
 {
-	[self queueCommand:@"LIST"
-			awaitState:ConnectionIdleState
-			 sentState:ConnectionAwaitingDirectoryContentsState];
+	[self queueCommand:[ConnectionCommand command:@"LIST"
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionAwaitingDirectoryContentsState
+										dependant:nil
+										 userInfo:nil]];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[self queueCommand:@"LIST"
-			awaitState:ConnectionIdleState
-			 sentState:ConnectionAwaitingDirectoryContentsState];
+	[self queueCommand:[ConnectionCommand command:@"LIST"
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionAwaitingDirectoryContentsState
+										dependant:nil
+										 userInfo:nil]];
 }
 
 #pragma mark -
@@ -460,8 +464,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 						[_inputBuffer deleteCharactersInRange:NSMakeRange(0,newLinePosition.location+newLinePosition.length)]; // delete the parsed part
 						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@", line]
 																				  attributes:[AbstractConnection dataAttributes]] autorelease]];
-						if ([AbstractConnection debugEnabled])
-							NSLog(@"%@", line);
+						KTLog(ProtocolDomain, KTLogError, @"%@", line);
 						if ([line rangeOfString:@"."].location == 0)
 							atEnd = YES;
 						else {
@@ -514,8 +517,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 												 code:ConnectionErrorParsingDirectoryListing
 											 userInfo:[NSDictionary dictionaryWithObject:@"Error parsing directory listing" forKey:NSLocalizedDescriptionKey]];
 			
-			if ([AbstractConnection debugEnabled])
-				NSLog(@"Could not determine line endings, try refreshing directory");
+			KTLog(ParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");
 			@throw error;
 			return nil;
 		}

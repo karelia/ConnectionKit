@@ -39,6 +39,7 @@
 	
 	NSMutableDictionary *myHeaders;
 	NSMutableData		*myContent;
+	unsigned			myHeaderLength;
 }
 
 + (id)requestWithMethod:(NSString *)method uri:(NSString *)uri;
@@ -65,6 +66,7 @@
 - (unsigned)contentLength;
 
 - (NSData *)serialized;
+- (unsigned)headerLength; //only will contain a valid value after serialized is called
 
 - (DAVResponse *)responseWithData:(NSData *)data;
 

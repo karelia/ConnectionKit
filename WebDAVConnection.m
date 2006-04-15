@@ -144,10 +144,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		[myCurrentRequest release];
 		myCurrentRequest = nil;
 		
-		if ([AbstractConnection debugEnabled])
-		{
-			NSLog(@"WebDAV Received: %@", response);
-		}
+		KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Received: %@", response);
 		
 		if ([self transcript])
 		{
@@ -475,7 +472,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		// if we are uploading or downloading set up the transfer sizes
 		if (GET_STATE == ConnectionUploadingFileState)
 		{
-			bytesToTransfer = [packet length];
+			bytesToTransfer = [packet length] - [req headerLength];
 			bytesTransferred = 0;
 			
 			if (_flags.didBeginUpload)
@@ -496,10 +493,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			
 		}
-		if ([AbstractConnection debugEnabled])
-		{
-			NSLog(@"WebDAV Sending: %@", req);
-		}
+		KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Sending: %@", req);
 		[self sendData:packet];
 	}
 	else 
@@ -754,7 +748,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	{
 		case NSStreamEventEndEncountered: 
 		{
-			NSLog(@"receive closed");
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
@@ -790,7 +783,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		case NSStreamEventEndEncountered: 
 		{
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
-			NSLog(@"send closed");
 			[self closeStreams];
 			myDAVFlags.needsReconnection = YES;
 			if (myCurrentRequest)

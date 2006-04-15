@@ -168,11 +168,10 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
 			if (!sent)
 			{
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"FileConnection couldn't send message %d", aMessage);
+				KTLog(ThreadingDomain, KTLogFatal, @"FileConnection couldn't send message %d", aMessage);
 			}
 		} @catch (NSException *ex) {
-			NSLog(@"%@", ex);
+			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
 		} @finally {
 			[message release];
 		} 

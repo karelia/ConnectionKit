@@ -61,9 +61,8 @@ NSString *TransportDomain = @"Transport";
 NSString *StateMachineDomain = @"State Machine";
 NSString *ParsingDomain = @"Parser";
 NSString *ProtocolDomain = @"Protocol";
-
-static BOOL _debug = NO;
-static BOOL _logState = NO;
+NSString *ConnectionDomain = @"Connection";
+NSString *ThreadingDomain = @"Threading";
 
 static NSMutableArray *_connectionTypes = nil;
 
@@ -185,8 +184,7 @@ NSDictionary *sDataAttributes;
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
 	
-	if ([AbstractConnection debugEnabled])
-		NSLog(@"Finding class for %@ port: %@", name, port);
+	KTLog(ConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
 	
 	if (!name) {
 		return [AbstractConnection connectionToHost:host
@@ -205,8 +203,7 @@ NSDictionary *sDataAttributes;
 		{
 			if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
 			{
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"Matched to class %@", NSStringFromClass(class));
+				KTLog(ConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
 				if (port == nil)
 					port = [AbstractConnection registeredPortForConnectionType:[class name]];
 				return [class connectionToHost:host
@@ -629,29 +626,6 @@ NSDictionary *sDataAttributes;
 {
 }
 
-#pragma mark -
-#pragma mark Logging Support
-
-+ (void)setDebugEnabled:(BOOL)flag
-{
-	_debug = flag;
-}
-
-+ (BOOL)debugEnabled
-{
-	return _debug;
-}
-
-+ (void)setLogStateChanges:(BOOL)flag
-{
-	_logState = flag;
-}
-
-+ (BOOL)logStateChanges
-{
-	return _logState;
-}
-
 @end
 
 @implementation NSString (AbstractConnectionExtras)
@@ -782,8 +756,7 @@ int filenameSort(id obj1, id obj2, void *context)
 												 code:ConnectionErrorParsingDirectoryListing
 											 userInfo:[NSDictionary dictionaryWithObject:@"Error parsing directory listing" forKey:NSLocalizedDescriptionKey]];
 			
-			if ([AbstractConnection debugEnabled])
-				NSLog(@"Could not determine line endings, try refreshing directory");
+			KTLog(ParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");
 			@throw error;
 			return nil;
 		}
@@ -1048,8 +1021,7 @@ int filenameSort(id obj1, id obj2, void *context)
 			break;
 		}
 		default:
-			if ([AbstractConnection debugEnabled])
-				NSLog(@"Unknown FTP Permission state");
+			KTLog(ParsingDomain, KTLogError, @"Unknown FTP Permission state");
 	}
 }
 

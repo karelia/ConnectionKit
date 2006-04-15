@@ -68,13 +68,6 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 
 - (void)awakeFromNib
 {
-//	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Queuing"];
-	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Transport"];
-	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"Parser"];
-	[KTLogger setLoggingLevel:KTLogDebug forDomain:@"State Machine"];
-	
-	KTLog(@"Application", KTLogInfo, @"FTPConnection Tester Started");
-	
 	NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
 	NSString *savedWindowRect = [ud objectForKey:[window frameAutosaveName]];
 	if (savedWindowRect)
@@ -358,6 +351,11 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 	InputDialog *input = [[InputDialog alloc] init];
 	[input setDialogTitle:@"Enter New Folder Name"];
 	[input beginSheetModalForWindow:window delegate:self selector:@selector(newFolderValue:)];
+}
+
+- (IBAction)logConfig:(id)sender
+{
+	[KTLogger configure:self];
 }
 
 - (void)newFolderValue:(NSString *)val

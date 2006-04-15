@@ -177,11 +177,10 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
 			if (!sent)
 			{
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"StreamBasedConnection couldn't send message %d", aMessage);
+				KTLog(ThreadingDomain, KTLogFatal, @"StreamBasedConnection couldn't send message %d", aMessage);
 			}
 		} @catch (NSException *ex) {
-			KTLog(TransportDomain, KTLogError, @"%@", ex);
+			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
 		} @finally {
 			[message release];
 		} 
@@ -478,7 +477,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			//NSLog(@"opened");
 			break;
 		}
 		case NSStreamEventErrorOccurred:
