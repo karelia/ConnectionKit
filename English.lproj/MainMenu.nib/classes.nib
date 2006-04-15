@@ -9,6 +9,7 @@
                 disconnect = id; 
                 localFileSelected = id; 
                 localPopupChanged = id; 
+                logConfig = id; 
                 newFolder = id; 
                 permissions = id; 
                 printQueueDescription = id; 

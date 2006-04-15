@@ -132,12 +132,11 @@ enum { START = 200, STOP };
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
 {
 	_status = NSStreamStatusWriting;
-	//if ([AbstractConnection logStateChanges])
-		//NSLog(@"sftp_stream <<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
+	KTLog(TransportDomain, KTLogDebug, @"sftp_stream <<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
 	
 	int wr = write( _master, buffer, len);
 	if (wr != len) {
-		NSLog(@"sftp buffer length mismatch. Wrote %d of %d bytes", wr, len);
+		KTLog(TransportDomain, KTLogError, @"sftp buffer length mismatch. Wrote %d of %d bytes", wr, len);
 	}
 	_status = NSStreamStatusOpen;
 	return wr;
@@ -199,7 +198,7 @@ enum { START = 200, STOP };
 		BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:5.0]];
 		if (!sent)
 		{
-			NSLog(@"SFTPStream failed to send port message: %d", aMessage);
+			KTLog(ThreadingDomain, KTLogFatal, @"SFTPStream failed to send port message: %d", aMessage);
 		}
 		[message release];
 	}
@@ -240,11 +239,11 @@ enum { START = 200, STOP };
 	{
 		case 0:
 			execve( execargs[ 0 ], ( char ** )execargs, environ );
-			NSLog( @"Couldn't launch sftp: %s", strerror( errno ));
+			KTLog(TransportDomain, KTLogFatal, @"Couldn't launch sftp: %s", strerror( errno ));
 			_exit( 2 );						/* shouldn't get here */
 			
 		case -1:
-			NSLog( @"forkpty failed: %s", strerror( errno ));
+			KTLog(TransportDomain, KTLogError, @"forkpty failed: %s", strerror( errno ));
 			exit( 2 );
 			
 		default:
@@ -253,11 +252,11 @@ enum { START = 200, STOP };
     
     if ( fcntl( _master, F_SETFL, O_NONBLOCK ) < 0 ) 
 	{	/* prevent master from blocking */
-        NSLog( @"fcntl non-block failed: %s", strerror( errno ));
+        KTLog(TransportDomain, KTLogError, @"fcntl non-block failed: %s", strerror( errno ));
     }
 
     if (( _mf = fdopen( _master, "r+" )) == NULL ) {
-        NSLog( @"failed to open file stream with fdopen: %s", strerror( errno ));
+        KTLog(TransportDomain, KTLogError, @"failed to open file stream with fdopen: %s", strerror( errno ));
         return;
     }
     setvbuf( _mf, NULL, _IONBF, 0 );
@@ -280,7 +279,7 @@ enum { START = 200, STOP };
 	{
 		case -1:
 		{
-			NSLog( @"select: %s", strerror( errno ));
+			KTLog(TransportDomain, KTLogError, @"select: %s", strerror( errno ));
 			break;
 		}
 		case 0:	

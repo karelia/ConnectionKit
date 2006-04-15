@@ -59,6 +59,7 @@
 		79640E8009469FD300A8789D /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 79640E7E09469FD300A8789D /* SSLStream.m */; };
 		796833090943FB4300213256 /* AbstractQueueConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 796833070943FB4300213256 /* AbstractQueueConnection.h */; };
 		7968330A0943FB4300213256 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 796833080943FB4300213256 /* AbstractQueueConnection.m */; };
+		79722A5E09EE28B200519ED1 /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79722A5C09EE28B200519ED1 /* KTLog.nib */; };
 		79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
 		79742BF409EB47F700F77F0B /* KTLog.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79742BF209EB47F700F77F0B /* KTLog.h */; };
 		79742BF509EB47F700F77F0B /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79742BF309EB47F700F77F0B /* KTLog.m */; };
@@ -228,6 +229,7 @@
 		79640E7E09469FD300A8789D /* SSLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSLStream.m; sourceTree = "<group>"; };
 		796833070943FB4300213256 /* AbstractQueueConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractQueueConnection.h; sourceTree = "<group>"; };
 		796833080943FB4300213256 /* AbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractQueueConnection.m; sourceTree = "<group>"; };
+		79722A5D09EE28B200519ED1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/KTLog.nib; sourceTree = "<group>"; };
 		79730F8809E61D1400B93CB1 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79742BF209EB47F700F77F0B /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
 		79742BF309EB47F700F77F0B /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
@@ -371,6 +373,7 @@
 				79D1D76C07613A43003FA7BB /* InputDialog.nib */,
 				79204BCC07652BDE004798B1 /* Permissions.nib */,
 				79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */,
+				79722A5C09EE28B200519ED1 /* KTLog.nib */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -567,6 +570,7 @@
 				797F9184096DFAD60029D7DE /* README in Resources */,
 				79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */,
 				79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */,
+				79722A5E09EE28B200519ED1 /* KTLog.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -639,6 +643,14 @@
 				79204BCD07652BDE004798B1 /* English */,
 			);
 			name = Permissions.nib;
+			sourceTree = "<group>";
+		};
+		79722A5C09EE28B200519ED1 /* KTLog.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				79722A5D09EE28B200519ED1 /* English */,
+			);
+			name = KTLog.nib;
 			sourceTree = "<group>";
 		};
 		79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */ = {

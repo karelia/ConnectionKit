@@ -334,7 +334,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionAwaitingDirectoryContentsState) 
 			{
-				NSLog(@"Getting Directory Contents");
+				KTLog(ProtocolDomain, KTLogDebug, @"Getting Directory Contents");
 				break;
 			}
 		}

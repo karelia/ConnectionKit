@@ -59,7 +59,11 @@ typedef enum {
 	NSLock			*myLock;
 	NSFileHandle	*myLog;
 	
-	NSMutableDictionary *myLoggingLevels;
+	NSMutableArray *myLoggingLevels;
+	
+	// Configuration Interface
+	IBOutlet NSPanel		*oPanel;
+	IBOutlet NSTableView	*oDomains;
 }
 
 // Default is to log to the console (stderr)
@@ -74,6 +78,12 @@ typedef enum {
 // Allow to be called back when something is logged - useful for in application display of the log in real time
 // we do retain the delegate
 + (void)setDelegate:(id)delegate;
+
++ (IBAction)configure:(id)sender;
+
+// Private Methods
+- (NSArray *)levelNames;
+- (NSArray *)domains;
 
 @end
 

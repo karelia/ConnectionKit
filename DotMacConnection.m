@@ -195,8 +195,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
 			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
 			if (!sent)
 			{
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"DotMacConnection couldn't send message %d", aMessage);
+				KTLog(ThreadingDomain, KTLogFatal, @"DotMacConnection couldn't send message %d", aMessage);
 			}
 		} @catch (NSException *ex) {
 			NSLog(@"%@", ex);
@@ -1031,8 +1030,7 @@ enum { CONNECT, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT };
     {
         if ( _flags.error )
         {
-			if ([AbstractConnection debugEnabled])
-				NSLog(@"transaction aborted, no error will be reported");
+			KTLog(ProtocolDomain, KTLogError, @"transaction aborted, no error will be reported");
             //NSLog(@"%@ transaction description: %@", [tDict description]);
         }
         [myPendingTransactions removeObject:tDict];

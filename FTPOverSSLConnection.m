@@ -76,7 +76,7 @@
 	
 	NSHost *host = [NSHost hostWithName:_connectionHost];
 	if(!host){
-		if ([AbstractConnection debugEnabled])
+		//if ([AbstractConnection debugEnabled])
 			NSLog(@"Cannot find the host: %@", _connectionHost);
 		
         if (_flags.error) {
@@ -93,7 +93,7 @@
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
-#warning This is a hack
+#warning Applying KVC Hack
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
 	
@@ -131,7 +131,7 @@
 	}
 	
 	if(!_receiveStream && _sendStream){
-		if ([AbstractConnection debugEnabled])
+		//if ([AbstractConnection debugEnabled])
 			NSLog(@"Cannot create a stream for the host: %@", _connectionHost);
 		
 		if (_flags.error) {

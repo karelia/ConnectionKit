@@ -44,10 +44,12 @@ It also functions as a registry for automatic subclass detection.
 extern NSString *ConnectionErrorDomain;
 enum { ConnectionErrorParsingDirectoryListing = 6000, ConnectionStreamError, ConnectionErrorBadPassword };
 // Logging Domain Keys
+extern NSString *ConnectionDomain;
 extern NSString *TransportDomain; // used in custom stream classes
 extern NSString *StateMachineDomain;
 extern NSString *ParsingDomain;
 extern NSString *ProtocolDomain;
+extern NSString *ThreadingDomain;
 
 typedef enum {
 	ConnectionNotConnectedState = 0,
@@ -141,14 +143,6 @@ typedef enum {
 + (NSDictionary *)sentAttributes;
 + (NSDictionary *)receivedAttributes;
 + (NSDictionary *)dataAttributes;
-
-// Enable framework wide debugging
-+ (void)setDebugEnabled:(BOOL)flag;
-+ (BOOL)debugEnabled;
-
-// Log State Changes in the connections
-+ (void)setLogStateChanges:(BOOL)flag;
-+ (BOOL)logStateChanges;
 
 @end
 

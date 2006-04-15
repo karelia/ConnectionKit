@@ -449,8 +449,7 @@ static NSArray *sftpErrors = nil;
 																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
 			} else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", @"@@@", nil]].location != NSNotFound) {
 				//need to authenticate the host. Should we really default to yes?
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"Connecting to unknown host. Awaiting repsonse from delegate");
+				KTLog(ProtocolDomain, KTLogDebug, @"Connecting to unknown host. Awaiting repsonse from delegate");
 				if (_flags.authorizeConnection) {
 					NSRange msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
 					while (msgRange.location == NSNotFound)
@@ -474,13 +473,12 @@ static NSArray *sftpErrors = nil;
 					[_forwarder connection:self didReceiveError:err];
 					[self forceDisconnect];
 				} else {
-					NSLog(@"Delegate does not implement connection:authorizeConnectionToHost:message: to authorize the connection"); 
+					KTLog(ProtocolDomain, KTLogInfo, @"Delegate does not implement connection:authorizeConnectionToHost:message: to authorize the connection"); 
 					[self forceDisconnect];
 				}
 			} else if ([self bufferContainsCommandPrompt]) {
 				//ssh authorized keys validated us
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"Validated via ssh's authorized_keys");
+				KTLog(ProtocolDomain, KTLogInfo, @"Validated via ssh's authorized_keys");
 				[self setState:ConnectionAwaitingCurrentDirectoryState];
 				[self sendCommand:@"pwd"];
 				_flags.isConnected = YES;
@@ -543,8 +541,7 @@ static NSArray *sftpErrors = nil;
 				
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:listing
 																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
-				if ([AbstractConnection debugEnabled])
-					NSLog(@"%@", listing);
+				KTLog(ParsingDomain, KTLogDebug, @"%@", listing);
 				
 				NSArray *files = [NSFileManager attributedFilesFromListing:listing];
 				
@@ -786,8 +783,7 @@ static NSArray *sftpErrors = nil;
 
 - (void)sendCommand:(NSString *)cmd
 {
-	if ([AbstractConnection logStateChanges])
-		NSLog(@">> %@", cmd);
+	KTLog(ProtocolDomain, KTLogDebug, @">> %@", cmd);
 	
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\n", cmd];
 	NSString *prompttedCommand = [NSString stringWithFormat:@"sftp> %@\n", cmd];
@@ -935,7 +931,7 @@ static NSArray *sftpErrors = nil;
 	NSString *tmpFile = [NSString stringWithFormat:@"/tmp/sftp_%@.tmp", uuidStr];
 	
 	if (![data writeToFile:tmpFile atomically:YES]) {
-		NSLog(@"Fatal Error: failed to write data to tmp file %@", tmpFile);
+		KTLog(ProtocolDomain, KTLogFatal, @"Failed to write data to tmp file %@", tmpFile);
 	}
 	
 	NSMutableDictionary *upload = [NSMutableDictionary dictionary];
