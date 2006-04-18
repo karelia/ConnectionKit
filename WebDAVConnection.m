@@ -131,6 +131,225 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	}
 }
 
+- (void)processResponse:(DAVResponse *)response
+{	
+	switch (GET_STATE)
+	{
+		case ConnectionAwaitingDirectoryContentsState:
+		{
+			DAVDirectoryContentsResponse *dav = (DAVDirectoryContentsResponse *)response;
+			NSString *err = nil;
+			switch ([dav code])
+			{
+				case 200:
+				case 207: //multi-status
+				{
+					if (_flags.directoryContents)
+					{
+						[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
+					}
+					break;
+				}
+				case 404:
+				{		
+					err = [NSString stringWithFormat: @"There is no WebDAV access to the directory: %@", [dav path]];
+				}
+				default: 
+				{
+					err = @"Unknown Error Occurred";
+				}
+			}
+			if (err)
+			{
+				if (_flags.error)
+				{
+					NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey];
+					[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
+														 code:[dav code]
+													 userInfo:ui];
+					[_forwarder connection:self didReceiveError:error];
+				}
+			}				
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case ConnectionCreateDirectoryState:
+		{
+			DAVCreateDirectoryResponse *dav = (DAVCreateDirectoryResponse *)response;
+			NSString *err = nil;
+			NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+			
+			switch ([dav code])
+			{
+				case 201: 
+				{
+					if (_flags.createDirectory)
+					{
+						[_forwarder connection:self didCreateDirectory:[dav directory]];
+					}
+					break;
+				}
+				case 403:
+				{		
+					err = @"The server does not allow the creation of directories at the current location";
+						//we fake the directory exists as this is usually the case if it is the root directory
+					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					break;
+				}
+				case 405:
+				{		
+					err = @"The directory already exists";
+					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					break;
+				}
+				case 409:
+				{
+					err = @"An intermediate directory does not exist and needs to be created before the current directory";
+					break;
+				}
+				case 415:
+				{
+					err = @"The body of the request is not supported";
+					break;
+				}
+				case 507:
+				{
+					err = @"Insufficient storage space available";
+					break;
+				}
+				default: 
+				{
+					err = @"An unknown error occured";
+					break;
+				}
+			}
+			if (err)
+			{
+				if (_flags.error)
+				{
+					[ui setObject:err forKey:NSLocalizedDescriptionKey];
+					[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+					[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+					[ui setObject:[dav directory] forKey:@"directory"];
+					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
+														 code:[dav code]
+													 userInfo:ui];
+					[_forwarder connection:self didReceiveError:error];
+				}
+			}
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case ConnectionUploadingFileState:
+		{
+			DAVUploadFileResponse *dav = (DAVUploadFileResponse *)response;
+			switch ([dav code])
+			{
+				case 200:
+				case 201:
+				case 204:
+				{
+					if (_flags.uploadFinished)
+					{
+						[_forwarder connection:self
+							   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+					}
+					break;
+				}
+				case 409:
+				{		
+					if (_flags.error)
+					{
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+						
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+														   code:[dav code]
+													   userInfo:ui];
+						[_forwarder connection:self didReceiveError:err];
+					}
+				}
+					break;
+			}
+			[self dequeueUpload];
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case ConnectionDeleteFileState:
+		{
+			DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
+			switch ([dav code])
+			{
+				case 200:
+				case 201:
+				case 204:
+				{
+					if (_flags.deleteFile)
+					{
+						[_forwarder connection:self didDeleteFile:[self currentDeletion]];
+					}
+					break;
+				}
+				default:
+				{
+					if (_flags.error)
+					{
+						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+						[ui setObject:[NSString stringWithFormat:@"Failed to delete file: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+						
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+														   code:[dav code]
+													   userInfo:ui];
+						[_forwarder connection:self didReceiveError:err];
+					}
+				}
+			}
+			[self dequeueDeletion];
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case ConnectionDeleteDirectoryState:
+		{
+			DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
+			switch ([dav code])
+			{
+				case 200:
+				case 201:
+				case 204:
+				{
+					if (_flags.deleteDirectory)
+					{
+						[_forwarder connection:self didDeleteDirectory:[self currentDeletion]];
+					}
+					break;
+				}
+				default:
+				{
+					if (_flags.error)
+					{
+						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+						[ui setObject:[NSString stringWithFormat:@"Failed to delete directory: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
+						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
+						
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+														   code:[dav code]
+													   userInfo:ui];
+						[_forwarder connection:self didReceiveError:err];
+					}
+				}
+			}
+			[self dequeueDeletion];
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		default: break;
+	}
+}
+
 - (void)processReceivedData:(NSData *)data
 {
 	[myResponseBuffer appendData:data];
@@ -210,222 +429,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 			}
 		}
-		
-		switch (GET_STATE)
-		{
-			case ConnectionAwaitingDirectoryContentsState:
-			{
-				DAVDirectoryContentsResponse *dav = (DAVDirectoryContentsResponse *)response;
-				NSString *err = nil;
-				switch ([dav code])
-				{
-					case 200:
-					case 207: //multi-status
-					{
-						if (_flags.directoryContents)
-						{
-							[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
-						}
-						break;
-					}
-					case 404:
-					{		
-						err = [NSString stringWithFormat: @"There is no WebDAV access to the directory: %@", [dav path]];
-					}
-					default: 
-					{
-						err = @"Unknown Error Occurred";
-					}
-				}
-				if (err)
-				{
-					if (_flags.error)
-					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey];
-						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
-															 code:[dav code]
-														 userInfo:ui];
-						[_forwarder connection:self didReceiveError:error];
-					}
-				}				
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			case ConnectionCreateDirectoryState:
-			{
-				DAVCreateDirectoryResponse *dav = (DAVCreateDirectoryResponse *)response;
-				NSString *err = nil;
-				NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-				
-				switch ([dav code])
-				{
-					case 201: 
-					{
-						if (_flags.createDirectory)
-						{
-							[_forwarder connection:self didCreateDirectory:[dav directory]];
-						}
-						break;
-					}
-					case 403:
-					{		
-						err = @"The server does not allow the creation of directories at the current location";
-						//we fake the directory exists as this is usually the case if it is the root directory
-						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-						break;
-					}
-					case 405:
-					{		
-						err = @"The directory already exists";
-						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-						break;
-					}
-					case 409:
-					{
-						err = @"An intermediate directory does not exist and needs to be created before the current directory";
-						break;
-					}
-					case 415:
-					{
-						err = @"The body of the request is not supported";
-						break;
-					}
-					case 507:
-					{
-						err = @"Insufficient storage space available";
-						break;
-					}
-					default: 
-					{
-						err = @"An unknown error occured";
-						break;
-					}
-				}
-				if (err)
-				{
-					if (_flags.error)
-					{
-						[ui setObject:err forKey:NSLocalizedDescriptionKey];
-						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-						[ui setObject:[dav directory] forKey:@"directory"];
-						NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
-															 code:[dav code]
-														 userInfo:ui];
-						[_forwarder connection:self didReceiveError:error];
-					}
-				}
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			case ConnectionUploadingFileState:
-			{
-				DAVUploadFileResponse *dav = (DAVUploadFileResponse *)response;
-				switch ([dav code])
-				{
-					case 200:
-					case 201:
-					case 204:
-					{
-						if (_flags.uploadFinished)
-						{
-							[_forwarder connection:self
-								   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
-						}
-						break;
-					}
-					case 409:
-					{		
-						if (_flags.error)
-						{
-							NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey];
-							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-
-							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-															   code:[dav code]
-														   userInfo:ui];
-							[_forwarder connection:self didReceiveError:err];
-						}
-					}
-					break;
-				}
-				[self dequeueUpload];
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			case ConnectionDeleteFileState:
-			{
-				DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
-				switch ([dav code])
-				{
-					case 200:
-					case 201:
-					case 204:
-					{
-						if (_flags.deleteFile)
-						{
-							[_forwarder connection:self didDeleteFile:[self currentDeletion]];
-						}
-						break;
-					}
-					default:
-					{
-						if (_flags.error)
-						{
-							NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-							[ui setObject:[NSString stringWithFormat:@"Failed to delete file: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
-							[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-							
-							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-															   code:[dav code]
-														   userInfo:ui];
-							[_forwarder connection:self didReceiveError:err];
-						}
-					}
-				}
-				[self dequeueDeletion];
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			case ConnectionDeleteDirectoryState:
-			{
-				DAVDeleteResponse *dav = (DAVDeleteResponse *)response;
-				switch ([dav code])
-				{
-					case 200:
-					case 201:
-					case 204:
-					{
-						if (_flags.deleteDirectory)
-						{
-							[_forwarder connection:self didDeleteDirectory:[self currentDeletion]];
-						}
-						break;
-					}
-					default:
-					{
-						if (_flags.error)
-						{
-							NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-							[ui setObject:[NSString stringWithFormat:@"Failed to delete directory: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
-							[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-							[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-							
-							NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-															   code:[dav code]
-														   userInfo:ui];
-							[_forwarder connection:self didReceiveError:err];
-						}
-					}
-				}
-				[self dequeueDeletion];
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			default: break;
-		}
+		[self processResponse:response];
 	}
 }
 
