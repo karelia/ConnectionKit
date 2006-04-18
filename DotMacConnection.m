@@ -434,6 +434,19 @@
 	[super changeToDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
 }
 
+- (void)davDidChangeToDirectory:(NSString *)dirPath
+{
+	[myCurrentDirectory autorelease];
+	myCurrentDirectory = [[dirPath stringByDeletingFirstPathComponent] copy];
+	if (_flags.changeDirectory)
+	{
+		[_forwarder connection:self didChangeToDirectory:myCurrentDirectory];
+	}
+	[myCurrentRequest release];
+	myCurrentRequest = nil;
+	[self setState:ConnectionIdleState];
+}
+
 - (NSString *)currentDirectory
 {
 	return [[super currentDirectory] stringByDeletingFirstPathComponent];
