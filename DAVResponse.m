@@ -137,7 +137,7 @@ static NSMutableDictionary *responseMap = nil;
 							NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
 															   options:NSLiteralSearch 
 																 range:NSMakeRange(start, [packet length] - start)];
-							unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
+							unsigned end = contentEnd.location != NSNotFound ? contentEnd.location + contentEnd.length : [packet length] - start;
 							//NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
 							//NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
 							
@@ -282,7 +282,7 @@ static NSMutableDictionary *responseMap = nil;
 							NSRange contentEnd = [packet rangeOfString:@"\r\n\r\n" 
 															   options:NSLiteralSearch 
 																 range:NSMakeRange(start, [packet length] - start)];
-							unsigned end = contentEnd.location != NSNotFound ? [packet length] - (contentEnd.location + contentEnd.length) : [packet length] - start;
+							unsigned end = contentEnd.location != NSNotFound ? contentEnd.location + contentEnd.length : [packet length] - start;
 							NSString *content = [packet substringWithRange:NSMakeRange(start, end)];
 							NSData *cd = [content dataUsingEncoding:NSUTF8StringEncoding];
 							

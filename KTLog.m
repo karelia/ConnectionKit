@@ -240,7 +240,7 @@ static NSString *KTLevelMap[] = {
 	}
 	
 	//we only log the current level or less.
-	if (currentLevel == KTLogOff || level >= currentLevel)
+	if (currentLevel == KTLogOff || level > currentLevel)
 	{
 		[myLock unlock];
 		return;

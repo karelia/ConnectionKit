@@ -31,7 +31,7 @@ NSString *UsernameKey = @"Username";
 NSString *ConnectionTypeKey = @"Connection";
 NSString *URLKey = @"URL";
 NSString *InitialDirectoryKey = @"InitialDirectory";
-
+NSString *ProtocolKey = @"Protocol";
 
 @interface Controller(PRivate)
 - (void)refreshLocal;
@@ -192,9 +192,15 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 		else
 			[initialDirectory setStringValue:@""];
 		
+		if ([host objectForKey:ProtocolKey])
+			[cTypePopup selectItemWithTitle:[host objectForKey:ProtocolKey]];
+		
 		NSString *pass = [Controller keychainPasswordForServer:[host objectForKey:HostKey] account:[host objectForKey:UsernameKey]];
 		if (pass)
 			[cPass setStringValue:pass];
+		else
+			[cPass setStringValue:@""];
+		
 		[connectWindow makeFirstResponder:cPass];
 	}
 }
@@ -208,6 +214,7 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 	NSString *p = [cPort stringValue];
 	NSString *url = [cURL stringValue];
 	NSString *dir = [initialDirectory stringValue];
+	NSString *protocol = [cTypePopup titleOfSelectedItem];
 	
 	if (h && u)
 	{
@@ -221,6 +228,8 @@ NSString *InitialDirectoryKey = @"InitialDirectory";
 			[Controller keychainSetPassword:pass forServer:h account:u];
 		if (dir)
 			[d setObject:dir forKey:InitialDirectoryKey];
+		if (![protocol isEqualToString:@"Auto Select"])
+			[d setObject:protocol forKey:ProtocolKey];
 		
 		[_savedHosts addObject:d];
 		[[NSUserDefaults standardUserDefaults] setObject:_savedHosts forKey:HostsKey];
@@ -755,6 +764,7 @@ static NSImage *_folder = nil;
 
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
+	NSLog(@"%@", dirPath);
 	[remoteFiles removeAllObjects];
 	NSEnumerator *e = [contents objectEnumerator];
 	NSDictionary *cur;
@@ -766,19 +776,6 @@ static NSImage *_folder = nil;
 	}
 	[self refreshRemoteUI];
 }
-
-/*- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
-{
-	NSEnumerator *e = [contents objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		if ([[cur objectForKey:cxFilenameKey] characterAtIndex:0] != '.')
-			[remoteFiles addObject:cur];
-	}
-	[self refreshRemoteUI];
-}*/
 
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)upload
 {
