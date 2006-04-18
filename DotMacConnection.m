@@ -89,31 +89,29 @@
 
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
-	NSString *server = @"idisk.mac.com";
-	KCItemRef item;
-	Str255 serverPString;
-	
-	c2pstrcpy(serverPString, [server UTF8String]);	
+	KCSearchRef search = nil;
+	KCItemRef item = nil;
+	OSStatus theStatus = noErr;
+	Str255 val = "6iTools";
+	val[0] = 6;
 	char buffer[256];
 	UInt32 actualLength;
-	OSStatus theStatus;
 	
-	theStatus = KCFindInternetPassword (serverPString,			// StringPtr serverName,
-										NULL,					// StringPtr securityDomain,
-										NULL,					// StringPtr accountName,
-										kAnyPort,				// UInt16 port,
-										kAnyProtocol,			// OSType protocol,
-										kAnyAuthType,			// OSType authType,
-										255,					// UInt32 maxLength,
-										buffer,					// void * passwordData,
-										&actualLength,			// UInt32 * actualLength,
-										&item					// KCItemRef * item
-										);
+	theStatus = KCFindGenericPassword(val,
+									  NULL,
+									  255,
+									  buffer,
+									  &actualLength,
+									  &item);
+	
 	if (noErr == theStatus && item)
 	{
 		buffer[actualLength] = '\0';		// make it a legal C string by appending 0
 		if (password)
 			*password = [NSString stringWithUTF8String:buffer];
+		else
+			*password = nil;
+		
 		KCAttribute attrib;
 		attrib.tag = kSecAccountItemAttr;
 		attrib.data = buffer;
@@ -125,6 +123,8 @@
 			buffer[actualLength] = '\0';
 			if (account)
 				*account = [NSString stringWithUTF8String:buffer];
+			else
+				*account = nil;
 		}
 		
 		return YES;
@@ -137,22 +137,20 @@
 		  username:(NSString *)user
 		  password:(NSString *)pass
 {
-	/*NSString *username = nil;
+	NSString *username = nil;
 	NSString *password = nil;
 
-	[self getDotMacAccountName:&username password:&password];
-	
-	if (!username || !password)
+	if (![self getDotMacAccountName:&username password:&password])
 	{
 		[self release];
 		@throw [NSException exceptionWithName:NSInvalidArgumentException
 									   reason:@"Failed to get .mac account name or password"
 									 userInfo:nil];
-	}*/
+	}
 	
-	if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass])
+	if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password])
 	{
-		
+		myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
 	}
 	return self;
 }
@@ -524,7 +522,7 @@
 	if ([comps count] > 0) {
 		[comps removeObjectAtIndex:0];
 	}
-	return [comps componentsJoinedByString:@"/"];
+	return [@"/" stringByAppendingString:[comps componentsJoinedByString:@"/"]];
 }
 
 @end

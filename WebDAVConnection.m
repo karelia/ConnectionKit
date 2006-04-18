@@ -358,7 +358,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	{
 		NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
 		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
-		[myResponseBuffer replaceBytesInRange:responseRange withBytes:NULL length:0];
+		[myResponseBuffer setLength:0];
 		
 		[myCurrentRequest release];
 		myCurrentRequest = nil;
