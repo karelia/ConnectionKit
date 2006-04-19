@@ -89,7 +89,6 @@
 
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
-	KCSearchRef search = nil;
 	KCItemRef item = nil;
 	OSStatus theStatus = noErr;
 	Str255 val = "6iTools";
