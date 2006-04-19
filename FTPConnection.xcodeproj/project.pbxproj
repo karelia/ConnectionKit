@@ -21,6 +21,10 @@
 		7939990B07600A4E00F713EB /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7939990507600A4E00F713EB /* Stop.tiff */; };
 		7939990C07600A4E00F713EB /* upload.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7939990607600A4E00F713EB /* upload.tif */; };
 		7939994D07600C9600F713EB /* home.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7939994C07600C9600F713EB /* home.tiff */; };
+		7953E06709F5C70D0083E6BA /* DAVFileDownloadRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 7953E06509F5C70D0083E6BA /* DAVFileDownloadRequest.h */; };
+		7953E06809F5C70D0083E6BA /* DAVFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7953E06609F5C70D0083E6BA /* DAVFileDownloadRequest.m */; };
+		7953E08109F5CAA00083E6BA /* DAVFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 7953E07F09F5CAA00083E6BA /* DAVFileDownloadResponse.h */; };
+		7953E08209F5CAA00083E6BA /* DAVFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 7953E08009F5CAA00083E6BA /* DAVFileDownloadResponse.m */; };
 		79722A5E09EE28B200519ED1 /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79722A5C09EE28B200519ED1 /* KTLog.nib */; };
 		79723B0709F0B72100519ED1 /* AbstractConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = CE427E7507651D9000B4301B /* AbstractConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79723B0809F0B72100519ED1 /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79742BF209EB47F700F77F0B /* KTLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -58,7 +62,6 @@
 		79723C0A09F0B84800519ED1 /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 792C29D509EA48570015766F /* libz.dylib */; };
 		79723C0B09F0B84800519ED1 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FEE8F709E11B10009E1D59 /* libcurl.dylib */; };
 		79723C0C09F0B84800519ED1 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
-		79723C0D09F0B84800519ED1 /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		79723C0E09F0B84800519ED1 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79EBC65E076AA23C001C7BF1 /* Carbon.framework */; };
 		79723C0F09F0B84800519ED1 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		79723C1609F0B85A00519ED1 /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 793997E8075FDACB00F713EB /* AbstractConnection.m */; };
@@ -70,7 +73,6 @@
 		7972445509F32E8F00519ED1 /* Connection.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79723B0009F0B6F200519ED1 /* Connection.framework */; };
 		79730F8D09E61D1400B93CB1 /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79730F8709E61D1400B93CB1 /* ConnectionOpenPanel.nib */; };
 		797F9184096DFAD60029D7DE /* README in Resources */ = {isa = PBXBuildFile; fileRef = 797F9183096DFAD60029D7DE /* README */; };
-		797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F96FC096DFD240029D7DE /* DotMacKit.framework */; };
 		797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 797F987F096E1BDF0029D7DE /* Security.framework */; };
 		79BCC31E09AEC831007EF4D1 /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79BCC31D09AEC831007EF4D1 /* icon.icns */; };
 		79D1D76E07613A43003FA7BB /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79D1D76C07613A43003FA7BB /* InputDialog.nib */; };
@@ -195,6 +197,10 @@
 		7939990507600A4E00F713EB /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
 		7939990607600A4E00F713EB /* upload.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = upload.tif; sourceTree = "<group>"; };
 		7939994C07600C9600F713EB /* home.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = home.tiff; sourceTree = "<group>"; };
+		7953E06509F5C70D0083E6BA /* DAVFileDownloadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVFileDownloadRequest.h; sourceTree = "<group>"; };
+		7953E06609F5C70D0083E6BA /* DAVFileDownloadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVFileDownloadRequest.m; sourceTree = "<group>"; };
+		7953E07F09F5CAA00083E6BA /* DAVFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVFileDownloadResponse.h; sourceTree = "<group>"; };
+		7953E08009F5CAA00083E6BA /* DAVFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVFileDownloadResponse.m; sourceTree = "<group>"; };
 		79640D6F0945B0D900A8789D /* NNTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNTPConnection.h; sourceTree = "<group>"; };
 		79640D700945B0D900A8789D /* NNTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNTPConnection.m; sourceTree = "<group>"; };
 		79640E5D094671A000A8789D /* FTPOverSSLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPOverSSLConnection.h; sourceTree = "<group>"; };
@@ -212,7 +218,6 @@
 		797C0AE7093FEAB1004ABB69 /* SFTPStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPStream.h; sourceTree = "<group>"; };
 		797C0AE8093FEAB1004ABB69 /* SFTPStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPStream.m; sourceTree = "<group>"; };
 		797F9183096DFAD60029D7DE /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		797F96FC096DFD240029D7DE /* DotMacKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = DotMacKit.framework; path = /Library/Frameworks/DotMacKit.framework; sourceTree = "<absolute>"; };
 		797F987F096E1BDF0029D7DE /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79858FE409E3C4AC003EA241 /* ConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionOpenPanel.h; sourceTree = "<group>"; };
 		79858FE509E3C4AC003EA241 /* ConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionOpenPanel.m; sourceTree = "<group>"; };
@@ -250,7 +255,6 @@
 				79723C0A09F0B84800519ED1 /* libz.dylib in Frameworks */,
 				79723C0B09F0B84800519ED1 /* libcurl.dylib in Frameworks */,
 				79723C0C09F0B84800519ED1 /* Security.framework in Frameworks */,
-				79723C0D09F0B84800519ED1 /* DotMacKit.framework in Frameworks */,
 				79723C0E09F0B84800519ED1 /* Carbon.framework in Frameworks */,
 				79723C0F09F0B84800519ED1 /* Cocoa.framework in Frameworks */,
 			);
@@ -263,7 +267,6 @@
 				79723D4B09F0B92D00519ED1 /* Connection.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 				79EBC65F076AA23C001C7BF1 /* Carbon.framework in Frameworks */,
-				797F9713096DFD240029D7DE /* DotMacKit.framework in Frameworks */,
 				797F98B4096E1BDF0029D7DE /* Security.framework in Frameworks */,
 				79FEE8F809E11B10009E1D59 /* libcurl.dylib in Frameworks */,
 				792C29D609EA48570015766F /* libz.dylib in Frameworks */,
@@ -295,7 +298,6 @@
 				792C29D509EA48570015766F /* libz.dylib */,
 				79FEE8F709E11B10009E1D59 /* libcurl.dylib */,
 				797F987F096E1BDF0029D7DE /* Security.framework */,
-				797F96FC096DFD240029D7DE /* DotMacKit.framework */,
 				79EBC65E076AA23C001C7BF1 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 			);
@@ -481,6 +483,10 @@
 				7925367E09E3819300157A78 /* DAVDeleteRequest.m */,
 				7925368909E3828300157A78 /* DAVDeleteResponse.h */,
 				7925368A09E3828300157A78 /* DAVDeleteResponse.m */,
+				7953E06509F5C70D0083E6BA /* DAVFileDownloadRequest.h */,
+				7953E06609F5C70D0083E6BA /* DAVFileDownloadRequest.m */,
+				7953E07F09F5CAA00083E6BA /* DAVFileDownloadResponse.h */,
+				7953E08009F5CAA00083E6BA /* DAVFileDownloadResponse.m */,
 			);
 			name = DAV;
 			sourceTree = "<group>";
@@ -501,6 +507,8 @@
 				79723B0D09F0B72100519ED1 /* InterThreadMessaging.h in Headers */,
 				79723B1709F0B7A700519ED1 /* NSData+Connection.h in Headers */,
 				79723D4109F0B8C900519ED1 /* ConnectionOpenPanel.h in Headers */,
+				7953E06709F5C70D0083E6BA /* DAVFileDownloadRequest.h in Headers */,
+				7953E08109F5CAA00083E6BA /* DAVFileDownloadResponse.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -692,6 +700,8 @@
 				79723B2809F0B7D800519ED1 /* AbstractQueueConnection.m in Sources */,
 				79723C1609F0B85A00519ED1 /* AbstractConnection.m in Sources */,
 				79723D4209F0B8CA00519ED1 /* ConnectionOpenPanel.m in Sources */,
+				7953E06809F5C70D0083E6BA /* DAVFileDownloadRequest.m in Sources */,
+				7953E08209F5CAA00083E6BA /* DAVFileDownloadResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

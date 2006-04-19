@@ -30,15 +30,13 @@
 #import <Foundation/Foundation.h>
 #import "DAVRequest.h"
 
-@interface DAVUploadFileRequest : DAVRequest
+@interface DAVFileDownloadRequest : DAVRequest
 {
-	NSString *myLocalFilename;
-	NSString *myFilename;
+	NSString *myDestination;
 }
 
-+ (id)uploadWithData:(NSData *)data filename:(NSString *)filename;
-+ (id)uploadWithFile:(NSString *)localFile filename:(NSString *)filename;
++ (id)downloadRemotePath:(NSString *)file to:(NSString *)localFile;
 
-- (NSString *)remoteFile;
+- (NSString *)destination;
+
 @end
-

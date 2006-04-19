@@ -46,6 +46,7 @@
 	
 	unsigned long long bytesTransferred;
 	unsigned long long bytesToTransfer;
+	NSFileHandle *myDownloadHandle;
 }
 
 @end

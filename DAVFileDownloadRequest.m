@@ -27,18 +27,33 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
-#import "DAVRequest.h"
+#import "DAVFileDownloadRequest.h"
 
-@interface DAVUploadFileRequest : DAVRequest
+@implementation DAVFileDownloadRequest
+
+- (id)initWithRemotePath:(NSString *)file to:(NSString *)localFile
 {
-	NSString *myLocalFilename;
-	NSString *myFilename;
+	if (self = [super initWithMethod:@"GET" uri:file])
+	{
+		myDestination = [localFile copy];
+	}
+	return self;
 }
 
-+ (id)uploadWithData:(NSData *)data filename:(NSString *)filename;
-+ (id)uploadWithFile:(NSString *)localFile filename:(NSString *)filename;
+- (void)dealloc
+{
+	[myDestination release];
+	[super dealloc];
+}
 
-- (NSString *)remoteFile;
++ (id)downloadRemotePath:(NSString *)file to:(NSString *)localFile
+{
+	return [[[DAVFileDownloadRequest alloc] initWithRemotePath:file to:localFile] autorelease];
+}
+
+- (NSString *)destination
+{
+	return myDestination;
+}
+
 @end
-

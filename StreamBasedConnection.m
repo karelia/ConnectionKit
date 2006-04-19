@@ -468,7 +468,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(TransportDomain, KTLogDebug, @"SBC >> %@", [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease]);
+				KTLog(TransportDomain, KTLogDebug, @"SBC %d >> %@", [data length], [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
@@ -532,7 +532,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(TransportDomain, KTLogDebug, @"SBC >> %@", [data descriptionAsString]);
+				KTLog(TransportDomain, KTLogDebug, @"SBC %6d >> %@", [data length], [data descriptionAsString]);
 				[self processReceivedData:data];
 			}
 			free(buf);

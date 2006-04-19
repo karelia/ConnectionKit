@@ -27,7 +27,7 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "DAVRequest.h"
 
 @interface DAVResponse : DAVRequest 
@@ -41,6 +41,7 @@
 
 // returns the range of data required to construct the response object
 + (NSRange)canConstructResponseWithData:(NSData *)data;
++ (NSDictionary *)headersWithData:(NSData *)data;
 
 //designated initializer - do not use initWithRequest:data:
 + (id)responseWithRequest:(DAVRequest *)request data:(NSData *)data;

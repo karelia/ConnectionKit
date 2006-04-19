@@ -34,11 +34,13 @@
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"
 #import "DAVDeleteRequest.h"
+#import "DAVFileDownloadRequest.h"
 #import "DAVResponse.h"
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVCreateDirectoryResponse.h"
 #import "DAVUploadFileResponse.h"
 #import "DAVDeleteResponse.h"
+#import "DAVFileDownloadResponse.h"
 #import "NSData+Connection.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
@@ -353,83 +355,173 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 - (void)processReceivedData:(NSData *)data
 {
 	[myResponseBuffer appendData:data];
-	NSRange responseRange = [DAVResponse canConstructResponseWithData:myResponseBuffer];
-	if (responseRange.location != NSNotFound)
+	if (GET_STATE == ConnectionDownloadingFileState)
 	{
-		NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
-		DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
-		[myResponseBuffer setLength:0];
-		
-		[myCurrentRequest release];
-		myCurrentRequest = nil;
-		
-		KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Received: %@", response);
-		
-		if ([self transcript])
+		if (bytesToTransfer == 0)
 		{
-			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
-																	  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
-																	  attributes:[AbstractConnection dataAttributes]] autorelease]];
-		}
-		
-		if ([response code] == 401)
-		{
-			if (myAuthorization != nil)
+			NSDictionary *headers = [DAVResponse headersWithData:myResponseBuffer];
+			NSString *length = [headers objectForKey:@"Content-Length"];
+			if (length)
 			{
-				// the user or password supplied is bad
-				if (_flags.badPassword)
-				{
-					[_forwarder connectionDidSendBadPassword:self];
-					[self setState:ConnectionNotConnectedState];
-					if (_flags.didDisconnect)
-					{
-						[_forwarder connection:self didDisconnectFromHost:[self host]];
-					}
-				}
-			}
-			else
-			{
+				NSScanner *scanner = [NSScanner scannerWithString:length];
+				[scanner scanLongLong:&bytesToTransfer];
+				
+				NSDictionary *download = [self currentDownload];
+				[[NSFileManager defaultManager] removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
+				[[NSFileManager defaultManager] createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
+														contents:nil
+													  attributes:nil];
+				[myDownloadHandle release];
+				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[download objectForKey:QueueDownloadDestinationFileKey]] retain];
+				
+				// file data starts after the header
+				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsString];
+				
 				if ([self transcript])
 				{
-					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
-																			  attributes:[AbstractConnection sentAttributes]] autorelease]];
+					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n\n", header] 
+																			  attributes:[AbstractConnection receivedAttributes]] autorelease]];
 				}
-				// need to append authorization
-				NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-				NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
-				NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
-				NSScanner *scanner = [NSScanner scannerWithString:auth];
-				NSString *authMethod = nil;
-				NSString *realm = nil;
-				[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
-				[scanner scanUpToString:@"Realm\"" intoString:nil];
-				[scanner scanUpToCharactersFromSet:quote intoString:&realm];
 				
-				if ([authMethod isEqualToString:@"Basic"])
+				unsigned start = headerRange.location + headerRange.length;
+				unsigned len = [myResponseBuffer length] - start;
+				[myDownloadHandle writeData:[myResponseBuffer subdataWithRange:NSMakeRange(start,len)]];
+				[myResponseBuffer setLength:0];
+				
+				bytesTransferred += len;
+				if (_flags.downloadPercent)
 				{
-					NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
-					NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
-					[myAuthorization autorelease];
-					myAuthorization = [[authData base64Encoding] retain];
-					//resend the request with auth
-					[self sendCommand:myCurrentRequest];
-					return;
+					int percent = (bytesTransferred * 100) / bytesToTransfer;
+					[_forwarder connection:self 
+								  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+							  progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				if (_flags.downloadProgressed)
+				{
+					[_forwarder connection:self
+								  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+					  receivedDataOfLength:len];
+				}
+			}
+		}
+		else
+		{
+			unsigned length = [data length];
+			[myDownloadHandle writeData:data];
+			[myResponseBuffer setLength:0]; 
+			
+			bytesTransferred += length;
+			if (_flags.downloadPercent)
+			{
+				int percent = (bytesTransferred * 100) / bytesToTransfer;
+				[_forwarder connection:self 
+							  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+						  progressedTo:[NSNumber numberWithInt:percent]];
+			}
+			if (_flags.downloadProgressed)
+			{
+				[_forwarder connection:self
+							  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
+				  receivedDataOfLength:length];
+			}
+			if (bytesTransferred == bytesToTransfer)
+			{
+				[myDownloadHandle closeFile];
+				[myDownloadHandle release];
+				myDownloadHandle = nil;
+				
+				if (_flags.downloadFinished)
+				{
+					[_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
+				}
+				[myCurrentRequest release];
+				myCurrentRequest = nil;
+				[self dequeueDownload];
+				[self setState:ConnectionIdleState];
+			}
+		}
+	}
+	else
+	{
+		NSRange responseRange = [DAVResponse canConstructResponseWithData:myResponseBuffer];
+		if (responseRange.location != NSNotFound)
+		{
+			NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
+			DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
+			[myResponseBuffer setLength:0];
+			
+			[myCurrentRequest release];
+			myCurrentRequest = nil;
+			
+			KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Received: %@", response);
+			
+			if ([self transcript])
+			{
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
+																		  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
+																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
+			}
+			
+			if ([response code] == 401)
+			{
+				if (myAuthorization != nil)
+				{
+					// the user or password supplied is bad
+					if (_flags.badPassword)
+					{
+						[_forwarder connectionDidSendBadPassword:self];
+						[self setState:ConnectionNotConnectedState];
+						if (_flags.didDisconnect)
+						{
+							[_forwarder connection:self didDisconnectFromHost:[self host]];
+						}
+					}
 				}
 				else
 				{
 					if ([self transcript])
 					{
-						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"WebDAVConnection only supports Basic Authentication!\n"] 
+						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
 																				  attributes:[AbstractConnection sentAttributes]] autorelease]];
 					}
-					@throw [NSException exceptionWithName:NSInternalInconsistencyException
-												   reason:@"Only Basic Authentication is supported at the moment"
-												 userInfo:nil];
+					// need to append authorization
+					NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+					NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+					NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+					NSScanner *scanner = [NSScanner scannerWithString:auth];
+					NSString *authMethod = nil;
+					NSString *realm = nil;
+					[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
+					[scanner scanUpToString:@"Realm\"" intoString:nil];
+					[scanner scanUpToCharactersFromSet:quote intoString:&realm];
+					
+					if ([authMethod isEqualToString:@"Basic"])
+					{
+						NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
+						NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+						[myAuthorization autorelease];
+						myAuthorization = [[authData base64Encoding] retain];
+						//resend the request with auth
+						[self sendCommand:myCurrentRequest];
+						return;
+					}
+					else
+					{
+						if ([self transcript])
+						{
+							[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"WebDAVConnection only supports Basic Authentication!\n"] 
+																					  attributes:[AbstractConnection sentAttributes]] autorelease]];
+						}
+						@throw [NSException exceptionWithName:NSInternalInconsistencyException
+													   reason:@"Only Basic Authentication is supported at the moment"
+													 userInfo:nil];
+					}
 				}
 			}
+			[self processResponse:response];
 		}
-		[self processResponse:response];
 	}
 }
 
@@ -487,7 +579,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		if (GET_STATE == ConnectionDownloadingFileState)
 		{
-			bytesToTransfer = [packet length];
+			bytesToTransfer = 0;
 			bytesTransferred = 0;
 			
 			if (_flags.didBeginDownload)
@@ -630,7 +722,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	//[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO];
 	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithFile:localPath filename:remotePath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -692,16 +783,22 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:@"WebDAV does not currently support downloading"
-								 userInfo:nil];
+	DAVFileDownloadRequest *r = [DAVFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
+	ConnectionCommand *cmd = [ConnectionCommand command:r
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDownloadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+	[attribs setObject:remotePath forKey:QueueDownloadRemoteFileKey];
+	[attribs setObject:dirPath forKey:QueueDownloadDestinationFileKey];
+	[self queueDownload:attribs];
+	[self queueCommand:cmd];
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
 {
-	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:@"WebDAV does not currently support downloading"
-								 userInfo:nil];
+	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }
 
 - (void)davDirectoryContents:(NSString *)dir
@@ -810,27 +907,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		default:
 			[super handleSendStreamEvent:theEvent];
-	}
-}
-
-- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
-{
-	if (GET_STATE == ConnectionDownloadingFileState)
-	{
-		bytesTransferred += length;
-		if (_flags.downloadPercent)
-		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			[_forwarder connection:self 
-						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-					  progressedTo:[NSNumber numberWithInt:percent]];
-		}
-		if (_flags.downloadProgressed)
-		{
-			[_forwarder connection:self
-						  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-			  receivedDataOfLength:length];
-		}
 	}
 }
 
