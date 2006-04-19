@@ -27,18 +27,30 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
-#import "DAVRequest.h"
+#import "DAVFileDownloadResponse.h"
+#import "DAVFileDownloadRequest.h"
 
-@interface DAVUploadFileRequest : DAVRequest
+@implementation DAVFileDownloadResponse
+
+- (NSString *)destination
 {
-	NSString *myLocalFilename;
-	NSString *myFilename;
+	if ([[self request] isKindOfClass:[DAVFileDownloadRequest class]])
+	{
+		return [(DAVFileDownloadRequest *)[self request] destination];
+	}
+	return nil;
 }
 
-+ (id)uploadWithData:(NSData *)data filename:(NSString *)filename;
-+ (id)uploadWithFile:(NSString *)localFile filename:(NSString *)filename;
+- (NSString *)formattedResponse
+{
+	if ([self code] == 201)
+	{
+		return [NSString stringWithFormat:@"Downloaded: %@ to: %@", [self uri], [self destination]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"Failed to download: %@", [self destination]];
+	}
+}
 
-- (NSString *)remoteFile;
 @end
-

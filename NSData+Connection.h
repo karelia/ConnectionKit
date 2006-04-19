@@ -1,8 +1,4 @@
 /*
- 
- DotMacConnection.h
- Marvel
- 
  Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -32,8 +28,7 @@
  
  */
 
-#import <Cocoa/Cocoa.h>
-
+#import <Foundation/Foundation.h>
 
 @interface NSData (Connection)
 
@@ -42,5 +37,7 @@
 
 - (NSData *) inflate;
 - (NSData *) deflate;
+
+- (NSRange)rangeOfData:(NSData *)data;
 
 @end

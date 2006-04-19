@@ -1,8 +1,4 @@
 /*
- 
- DotMacConnection.m
- Marvel
- 
  Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -39,11 +35,13 @@
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"
 #import "DAVDeleteRequest.h"
+#import "DAVFileDownloadRequest.h"
 #import "DAVResponse.h"
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVCreateDirectoryResponse.h"
 #import "DAVUploadFileResponse.h"
 #import "DAVDeleteResponse.h"
+#import "DAVFileDownloadResponse.h"
 #import "NSData+Connection.h"
 #import <Security/Security.h>
 

@@ -28,7 +28,7 @@
  */
 
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 #import "DAVResponse.h"
 
 @interface DAVCreateDirectoryResponse : DAVResponse

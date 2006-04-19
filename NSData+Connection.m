@@ -1,8 +1,4 @@
 /*
- 
- DotMacConnection.h
- Marvel
- 
  Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -135,6 +131,44 @@
 	
 	[compressed setLength: strm.total_out];
 	return [NSData dataWithData: compressed];
+}
+
+- (NSRange)rangeOfData:(NSData *)data
+{
+	NSRange r = NSMakeRange(NSNotFound, 0);
+	if (!data || [data length] == 0)
+		return r;
+	
+	uint8_t *find = (uint8_t *)[data bytes];
+	uint8_t *str = (uint8_t *)[self bytes];
+	unsigned i = 0, j = 1, start = 0, end = 0;
+	
+	while (i < [self length])
+	{
+		if (str[i] == find[0])
+		{
+			start = i;
+			j = 1;
+			while (j < [data length])
+			{
+				if (str[i+j] != find[j])
+				{
+					break;
+				}
+				j++;
+			}
+			end = j;
+			if (j == [data length])
+			{
+				r.location = start;
+				r.length = [data length];
+				break;
+			}
+		}
+		i++;
+	}
+	
+	return r;
 }
 
 @end

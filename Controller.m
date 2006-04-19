@@ -436,14 +436,14 @@ NSString *ProtocolKey = @"Protocol";
 		}
 		
 		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeRegular]) {
-			[self downloadFile:[attribs objectForKey:cxFilenameKey]
+			[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:[attribs objectForKey:cxFilenameKey]]
 							to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, [attribs objectForKey:cxFilenameKey]]];
 		}
 		else if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 		{
 			NSString *target = [attribs objectForKey:cxSymbolicLinkTargetKey];
 			if ([target characterAtIndex:[target length] - 1] != '/'  && [target characterAtIndex:[target length] - 1] != '\\')
-				[self downloadFile:[attribs objectForKey:cxFilenameKey]
+				[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:[attribs objectForKey:cxFilenameKey]]
 								to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, [attribs objectForKey:cxFilenameKey]]];
 		}
 		
@@ -667,7 +667,7 @@ static NSImage *_folder = nil;
 	FileTransfer *t = [FileTransfer downloadFile:remote to:local];
 	[transfers addObject:t];
 	[con downloadFile:remote
-		  toDirectory:currentLocalPath
+		  toDirectory:local
 			overwrite:YES];
 }
 
@@ -1027,7 +1027,7 @@ NSString *IconKey = @"Icon";
 		
 		while (cur = [e nextObject])
 		{
-			[self downloadFile:cur
+			[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:cur]
 							to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, cur]];
 		}
 		[transferTable reloadData];

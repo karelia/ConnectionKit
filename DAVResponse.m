@@ -35,6 +35,7 @@
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVCreateDirectoryResponse.h"
 #import "DAVUploadFileResponse.h"
+#import "NSData+Connection.h"
 
 #import "AbstractConnectionProtocol.h"
 
@@ -52,8 +53,76 @@ static NSMutableDictionary *responseMap = nil;
 	[responseMap setObject:@"DAVCreateDirectoryResponse" forKey:@"DAVCreateDirectoryRequest"];
 	[responseMap setObject:@"DAVUploadFileResponse" forKey:@"DAVUploadFileRequest"];
 	[responseMap setObject:@"DAVDeleteResponse" forKey:@"DAVDeleteRequest"];
+	[responseMap setObject:@"DAVFileDownloadResponse" forKey:@"DAVFileDownloadRequest"];
 	
 	[pool release];
+}
+
++ (NSDictionary *)headersWithData:(NSData *)data
+{
+	NSMutableDictionary *headers = [NSMutableDictionary dictionary];
+	
+	NSRange headerRange = [data rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+	if (headerRange.location == NSNotFound)
+		return headers;
+	
+	NSString *packet = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
+	NSArray *lines = [packet componentsSeparatedByString:@"\r\n"];
+	// we put in a try/catch to handle any unexpected/missing data
+	@try {
+		if ([lines count] > 1) // need the response line and at least a couple of blank lines
+		{
+			NSArray *response = [[lines objectAtIndex:0] componentsSeparatedByString:@" "];
+			// HTTP/1.1 CODE NAME
+			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
+			{
+				[headers setObject:response forKey:@"Server-Response"];
+				
+				// now enumerate over the headers which will be if the line is empty
+				int i, lineCount = [lines count];
+				for (i = 1; i < lineCount; i++)
+				{
+					NSString *line = [lines objectAtIndex:i];
+					if ([line isEqualToString:@""])
+					{
+						//we hit the end of the headers
+						i++;
+						break;
+					}
+					NSRange colon = [line rangeOfString:@":"];
+					if (colon.location != NSNotFound)
+					{
+						NSString *key = [line substringToIndex:colon.location];
+						NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
+						BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
+						
+						if (hasMultiValues)
+						{
+							NSArray *vals = [val componentsSeparatedByString:@";"];
+							NSMutableArray *mutableVals = [NSMutableArray array];
+							NSEnumerator *e = [vals objectEnumerator];
+							NSString *cur;
+							
+							while (cur = [e nextObject])
+							{
+								[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+							}
+							[headers setObject:mutableVals forKey:key];
+						}
+						else
+						{
+							[headers setObject:val forKey:key];
+						}
+					}
+				}
+			}
+		}
+	}
+	@catch (NSException *e) 
+	{
+		
+	}
+	return headers;
 }
 
 + (NSRange)canConstructResponseWithData:(NSData *)data
