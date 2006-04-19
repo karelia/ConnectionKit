@@ -434,10 +434,10 @@
 - (void)davDidChangeToDirectory:(NSString *)dirPath
 {
 	[myCurrentDirectory autorelease];
-	myCurrentDirectory = [[dirPath stringByDeletingFirstPathComponent] copy];
+	myCurrentDirectory = [dirPath copy];
 	if (_flags.changeDirectory)
 	{
-		[_forwarder connection:self didChangeToDirectory:myCurrentDirectory];
+		[_forwarder connection:self didChangeToDirectory:[dirPath stringByDeletingFirstPathComponent]];
 	}
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
