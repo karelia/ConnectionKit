@@ -29,7 +29,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "AbstractConnection.h"
+#import <Connection/AbstractConnection.h>
 
 extern NSString *FileConnectionErrorDomain;
 

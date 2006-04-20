@@ -28,7 +28,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "AbstractQueueConnection.h"
+#import <Connection/AbstractQueueConnection.h>
 
 /* 
 	A mutliple connection is where you can have different types of connections

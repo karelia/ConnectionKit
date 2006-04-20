@@ -33,7 +33,7 @@
 */
 
 #import <Foundation/Foundation.h>
-#import "AbstractQueueConnection.h"
+#import <Connection/AbstractQueueConnection.h>
 
 /*
  *	A Stream Based Connection runs the streams in a background thread and handles the

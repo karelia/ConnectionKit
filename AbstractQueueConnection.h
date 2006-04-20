@@ -29,7 +29,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "AbstractConnection.h"
+#import <Connection/AbstractConnection.h>
 
 /*
  *	The ConnectionCommand class is used to queue up related commands into chains in the commandQueue.
