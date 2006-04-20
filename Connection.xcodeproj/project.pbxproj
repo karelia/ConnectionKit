@@ -77,6 +77,8 @@
 		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -232,8 +234,9 @@
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
 		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
+		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,6 +247,7 @@
 				79CFD92E09F7080B00172CDD /* libcurl.dylib in Frameworks */,
 				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
 				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
+				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -251,6 +255,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */,
 				79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 			);
@@ -271,6 +276,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				79FB807109F74185006E7D11 /* Carbon.framework */,
 				79CFD93609F7084000172CDD /* Security.framework */,
 				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
 				79CFD92D09F7080B00172CDD /* libz.dylib */,
@@ -803,7 +809,7 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Connection;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
@@ -849,7 +855,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = Connection;
 				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
+				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
@@ -867,6 +873,7 @@
 				INSTALL_PATH = "$(HOME)/Applications";
 				PRODUCT_NAME = Connection;
 				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
 			};
 			name = Release;
 		};
