@@ -549,17 +549,17 @@
 	[[self connection] connect];
 }
 
-/*- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
+- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
 {
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
-	[[NSApplication sharedApplication] beginModalSessionForWindow: [self window]];
+	[[NSApplication sharedApplication] runModalForWindow: [self window]];
 	[self setInitialDirectory: directory];
 	
 	[self setIsLoading: YES];
 	[[self connection] connect];
-}*/
+}
 
 - (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (int)returnCode contextInfo:(void*) contextInfo
 {
