@@ -734,6 +734,7 @@ static NSImage *_folder = nil;
 - (NSString *)connection:(AbstractConnection *)aConn needsAccountForUsername:(NSString *)username
 {
 	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
+	return nil;
 }
 
 - (void)connection:(AbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
