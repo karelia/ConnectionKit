@@ -75,6 +75,7 @@
 		79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
 		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
+		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -512,6 +513,7 @@
 				79CFD87809F7048500172CDD /* MultipleConnection.h in Headers */,
 				79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */,
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
+				79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
