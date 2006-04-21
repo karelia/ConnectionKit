@@ -29,6 +29,9 @@
  */
 #import <Cocoa/Cocoa.h>
 
+#define LocalizedStringInThisBundle(key, comment) \
+[[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
+
 // Some shared Error Codes
 
 enum {

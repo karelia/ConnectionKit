@@ -322,7 +322,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain 
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys: @"FTP Service Unavailable", NSLocalizedDescriptionKey,
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys: LocalizedStringInThisBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
 														 _connectionHost, @"host", nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
@@ -692,7 +692,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_serverSupport.canUsePASV = NO;
 					if (_flags.error)
 					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available"), NSLocalizedDescriptionKey, nil]];
 						[_forwarder connection:self didReceiveError:err];
 					}
 					_state = ConnectionSentQuitState;
@@ -965,7 +965,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self closeDataStreams];
 				if (_flags.error)
 				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
 				}
 				_serverSupport.canUsePASV = NO;
@@ -996,7 +996,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:@"File in Use" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"File in Use", @"FTP file in use")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			[self setState:ConnectionIdleState];
@@ -1007,7 +1008,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:@"Action Aborted. Local Error" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Action Aborted. Local Error", @"FTP Abort")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 				
@@ -1021,7 +1023,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:@"No Storage Space Available" forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No Storage Space Available", @"FTP Error")
+																						  forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 				[self sendCommand:@"ABOR"];
@@ -1077,7 +1080,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				if (_flags.error)
 				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
 				}
 				_state = ConnectionSentQuitState;
@@ -1123,7 +1126,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				if (_flags.error)
 				{
-					NSString *error = @"Create directory operation failed";
+					NSString *error = LocalizedStringInThisBundle(@"Create directory operation failed", @"FTP Create directory error");
 					NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 					if ([command rangeOfString:@"exists"].location != NSNotFound) 
 					{
@@ -1164,7 +1167,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:@"Invalid Account name" forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Invalid Account name", @"FTP Error")
+																						  forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
@@ -1180,7 +1184,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:@"Not Logged In" forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Not Logged In", @"FTP Error")
+																						  forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
@@ -1195,7 +1200,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:@"You need an Account to Upload Files" forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"You need an Account to Upload Files", @"FTP Error")
+																						  forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 				[self setState:ConnectionIdleState];
@@ -1208,15 +1214,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			if (GET_STATE == ConnectionUploadingFileState)
 			{
-				error = [NSString stringWithFormat:@"You do not have access to write file %@", [[_uploadQueue objectAtIndex:0] objectForKey:QueueUploadRemoteFileKey]];
+				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"You do not have access to write file %@", @"FTP file upload error"), [[_uploadQueue objectAtIndex:0] objectForKey:QueueUploadRemoteFileKey]];
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
-				error = [NSString stringWithFormat:@"File %@ does not exist on server", [[_downloadQueue objectAtIndex:0] objectForKey:QueueDownloadRemoteFileKey]];
+				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"File %@ does not exist on server", @"FTP file download error"), [[_downloadQueue objectAtIndex:0] objectForKey:QueueDownloadRemoteFileKey]];
 			}
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{
-				error = @"Create directory operation failed";
+				error = LocalizedStringInThisBundle(@"Create directory operation failed", @"FTP Create directory error");
 				if ([command rangeOfString:@"exists"].location != NSNotFound) {
 					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
@@ -1224,7 +1230,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			else
 			{
-				error = @"File / Directory does not exist";
+				error = LocalizedStringInThisBundle(@"File / Directory does not exist", @"FTP error");
 			}
 			
 			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
@@ -1244,7 +1250,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:@"Request Aborted. Page Type Unknown" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Request Aborted. Page Type Unknown", @"FTP Error")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}		
 			[self setState:ConnectionIdleState];
@@ -1255,7 +1262,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:@"Cannot Upload File. Storage quota on server exceeded" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			[self setState:ConnectionIdleState];
@@ -1266,7 +1274,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:@"Filename not Allowed" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Filename not Allowed", @"FTP Upload error")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;
@@ -1451,7 +1460,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self closeDataStreams];
 				if (_flags.error)
 				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
 				}
 				_state = ConnectionSentQuitState;
@@ -1513,7 +1522,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_serverSupport.canUseActive = NO;
 					if (_flags.error)
 					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams availabel"), NSLocalizedDescriptionKey, nil]];
 						[_forwarder connection:self didReceiveError:err];
 					}
 					_state = ConnectionSentQuitState;
@@ -1611,7 +1620,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self closeDataStreams];
 				if (_flags.error)
 				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
 				}
 				_state = ConnectionSentQuitState;
@@ -1672,7 +1681,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_serverSupport.canUseActive = NO;
 					if (_flags.error)
 					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"All data connection modes have been exhausted. Check with the server administrator.", NSLocalizedDescriptionKey, nil]];
+						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
 						[_forwarder connection:self didReceiveError:err];
 					}
 					_state = ConnectionSentQuitState;
@@ -2022,7 +2031,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:FTPDownloadFileExists
-												 userInfo:[NSDictionary dictionaryWithObject:@"Local File already exists" forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Local File already exists", @"FTP download error")
+																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 		}
@@ -2223,7 +2233,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		if (_flags.error) {
 			NSError *err = [NSError errorWithDomain:FTPErrorDomain
 											   code:FTPErrorNoDataModes
-										   userInfo:[NSDictionary dictionaryWithObject:@"Exhausted all connection types to server. Please contact server administrator" forKey:NSLocalizedDescriptionKey]];
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available")
+																				forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 	}

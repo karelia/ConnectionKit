@@ -154,11 +154,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 404:
 				{		
-					err = [NSString stringWithFormat: @"There is no WebDAV access to the directory: %@", [dav path]];
+					err = [NSString stringWithFormat: @"%@: %@", LocalizedStringInThisBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
 				}
 				default: 
 				{
-					err = @"Unknown Error Occurred";
+					err = LocalizedStringInThisBundle(@"Unknown Error Occurred", @"WebDAV Error");
 				}
 			}
 			if (err)
@@ -194,35 +194,35 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 403:
 				{		
-					err = @"The server does not allow the creation of directories at the current location";
+					err = LocalizedStringInThisBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
 						//we fake the directory exists as this is usually the case if it is the root directory
 					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
 				}
 				case 405:
 				{		
-					err = @"The directory already exists";
+					err = LocalizedStringInThisBundle(@"The directory already exists", @"WebDAV Create Directory Error");
 					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
 				}
 				case 409:
 				{
-					err = @"An intermediate directory does not exist and needs to be created before the current directory";
+					err = LocalizedStringInThisBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
 					break;
 				}
 				case 415:
 				{
-					err = @"The body of the request is not supported";
+					err = LocalizedStringInThisBundle(@"The body of the request is not supported", @"WebDAV Create Directory Error");
 					break;
 				}
 				case 507:
 				{
-					err = @"Insufficient storage space available";
+					err = LocalizedStringInThisBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
 					break;
 				}
 				default: 
 				{
-					err = @"An unknown error occured";
+					err = LocalizedStringInThisBundle(@"An unknown error occured", @"WebDAV Create Directory Error");
 					break;
 				}
 			}
@@ -263,7 +263,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				{		
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:@"Parent Folder does not exist" forKey:NSLocalizedDescriptionKey];
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error")
+																					 forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
 						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
@@ -298,7 +299,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"Failed to delete file: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete file", @"WebDAV File Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -333,7 +334,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"Failed to delete directory: %@", [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete directory", @"WebDAV Directory Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
