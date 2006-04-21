@@ -234,6 +234,7 @@ static NSMutableDictionary *responseMap = nil;
 							
 							NSString *chunk = nil;
 							[scanner scanUpToString:@"\r\n" intoString:&chunk];
+#warning GREG -- I got an exception here because chunk was nil, I guess that wasn't found.
 							[content appendString:chunk];
 							[scanner scanString:@"\r\n" intoString:nil];
 							[scanner scanHexInt:&chunkLength];
