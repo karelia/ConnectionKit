@@ -1,11 +1,9 @@
 /*
- Copyright (c) 2005, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2005-2006, Greg Hulands <ghulands@framedphotographics.com>
  All rights reserved.
- 
  
  Redistribution and use in source and binary forms, with or without modification, 
  are permitted provided that the following conditions are met:
- 
  
  Redistributions of source code must retain the above copyright notice, this list 
  of conditions and the following disclaimer.
@@ -17,8 +15,6 @@
  Neither the name of Greg Hulands nor the names of its contributors may be used to 
  endorse or promote products derived from this software without specific prior 
  written permission.
- 
- 
  
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
  EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
@@ -33,7 +29,7 @@
  */
 
 #import <Foundation/Foundation.h>
-#import <Security/SecureTransport.h>
+#import <Security/Security.h>
 
 @class RunLoopForwarder;
 @protocol InputStream, OutputStream;
@@ -47,6 +43,7 @@ typedef enum {
 
 @interface SSLStream : NSStream <InputStream, OutputStream> 
 {
+	SecIdentityRef		_sslIdentity;
 	SSLContextRef		_sslContext;
 	SSLVersion			_requestedSSL;
 	SSLVersion			_negotiatedSSL;
@@ -54,18 +51,37 @@ typedef enum {
 	CFReadStreamRef		_receiveStream;
 	CFWriteStreamRef	_sendStream;
 	
+	id					_delegate;
+	NSPort				*_port;
+	RunLoopForwarder	*_forwarder;
+	NSLock				*_bufferLock;
+	NSThread			*_creationThread;
+	
 	NSMutableData		*_receiveBuffer;
+	NSMutableData		*_receiveBufferEncrypted; //direct from the socket
 	NSMutableData		*_sendBuffer;
+	NSMutableData		*_sendBufferEncrypted; // bytes to send to the socket
 	
 	NSMutableDictionary *_props;
-	id					_delegate;
 	NSStreamStatus		_status;
+	
+	struct __sslstreamflags {
+		unsigned sslEnabled: 1;
+		unsigned sslServerMode: 1;
+		unsigned streamFailedNegotiation: 1;
+		unsigned streamAcceptedConnection: 1;
+		unsigned streamActivatedSSL: 1;
+		
+		unsigned unused: 28;
+	} _flags;
 }
 
-- (id)initWithHost:(NSHost *)host port:(UInt32)port sslVersion:(SSLVersion)ssl;
+- (id)initWithHost:(NSHost *)host port:(UInt16)port sslVersion:(SSLVersion)ssl;
+- (id)initListeningOnPort:(UInt16)port sslVersion:(SSLVersion)ssl;
 
 - (void)setRequestedSSLVersion:(SSLVersion)ssl;
 - (SSLVersion)requestedSSLVersion;
+- (void)enableSSL;
 - (SSLVersion)negotiatedSSLVersion;
 
 - (void)open;
@@ -86,6 +102,12 @@ typedef enum {
 
 @interface NSObject (SSLStreamDelegate)
 
+/*
+	This delegate method is called if the certificate fails to validate or is self signed
+ */
 - (BOOL)streamFailedSSLNegotiation:(SSLStream *)stream message:(NSString *)msg forceConnectionToHost:(NSString *)host;
+
+- (void)stream:(SSLStream *)stream acceptedConnectionOnPort:(UInt16)port;
+- (void)streamActivatedSSLEncryption:(SSLStream *)stream;
 
 @end
