@@ -83,14 +83,14 @@
 	else if ([hosts count] == 2)
 	{
 		return [NSString stringWithFormat:@"%@ %@ %@", [[hosts objectAtIndex:0] host], 
-			NSLocalizedString(@"and", @"multiple connection joiner"), [[hosts objectAtIndex:1] host]];
+			LocalizedStringInThisBundle(@"and", @"multiple connection joiner"), [[hosts objectAtIndex:1] host]];
 	}
 	else
 	{
 		NSString *lastObject = [[[hosts lastObject] copy] autorelease];
 		[hosts removeLastObject];
 		NSString *joined = [hosts componentsJoinedByString:@", "];
-		return [NSString stringWithFormat:@"%@ %@ %@", joined, NSLocalizedString(@"and", @"multiple connection joiner"), lastObject];
+		return [NSString stringWithFormat:@"%@ %@ %@", joined, LocalizedStringInThisBundle(@"and", @"multiple connection joiner"), lastObject];
 	}
 }
 

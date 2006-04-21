@@ -366,7 +366,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 			BOOL exists;
 			[fm fileExistsAtPath:aName isDirectory:&exists];
 			NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:
-				@"Could not create directory",
+				LocalizedStringInThisBundle(@"Could not create directory", @"FileConnection create directory error"),
 				NSLocalizedDescriptionKey,
 				aName,
 				NSFilePathErrorKey,
@@ -420,7 +420,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-													  @"Could not change file permissions",
+													  LocalizedStringInThisBundle(@"Could not change file permissions", @"FileConnection set permissions error"),
 													  NSLocalizedDescriptionKey,
 													  path,
 													  NSFilePathErrorKey,
@@ -539,7 +539,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
 										   code:ConnectionErrorUploading 
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", @"Failed to upload file", NSLocalizedDescriptionKey, nil]];
+									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
 		[_delegate connection:self didReceiveError:err];
 	}
 }
@@ -636,7 +636,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 													   code:[self currentOperation]
 												   userInfo:
 					   [NSDictionary dictionaryWithObjectsAndKeys:
-						   @"Unable to store data in file",
+						   LocalizedStringInThisBundle(@"Unable to store data in file", @"FileConnection failed to copy file"),
 						   NSLocalizedDescriptionKey,
 						   remotePath,
 						   NSFilePathErrorKey,

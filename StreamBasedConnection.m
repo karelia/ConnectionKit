@@ -334,7 +334,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
-				[NSDictionary dictionaryWithObjectsAndKeys: @"Host Unavailable", NSLocalizedDescriptionKey,
+				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
 					_connectionHost, @"host", nil]];
             [_forwarder connection:self didReceiveError:error];
 		}
@@ -361,7 +361,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		if (_flags.error) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:@"Stream Unavailable"
+											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Stream Unavailable", @"Error creating stream")
 																				  forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:error];
 		}
@@ -481,19 +481,21 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			if (_flags.error) {
+			if (_flags.error) 
+			{
 				NSError *error = nil;
 				
 				if (GET_STATE == ConnectionNotConnectedState) {
 					error = [NSError errorWithDomain:ConnectionErrorDomain
 												code:ConnectionStreamError
-											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"Is the FTP service running on %@?", [self host]]
+											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
 																				 forKey:NSLocalizedDescriptionKey]];
 				}
 				else {
 					[NSError errorWithDomain:ConnectionErrorDomain
 										code:ConnectionStreamError
-									userInfo:[NSDictionary dictionaryWithObject:@"Receive Stream Error" forKey:NSLocalizedDescriptionKey]];
+									userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Receive Stream Error", @"Stream Error")
+																		 forKey:NSLocalizedDescriptionKey]];
 				}
 				
 				[_forwarder connection:self didReceiveError:error];
@@ -547,25 +549,25 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			if (_flags.error)
+			if (_flags.error) 
 			{
 				NSError *error = nil;
 				
 				if (GET_STATE == ConnectionNotConnectedState) {
 					error = [NSError errorWithDomain:ConnectionErrorDomain
 												code:ConnectionStreamError
-											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"Is the FTP service running on %@?", [self host]]
+											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
 																				 forKey:NSLocalizedDescriptionKey]];
 				}
 				else {
-					error = [NSError errorWithDomain:ConnectionErrorDomain
-												code:ConnectionStreamError
-											userInfo:[NSDictionary dictionaryWithObject:@"Receive Stream Error" forKey:NSLocalizedDescriptionKey]];
+					[NSError errorWithDomain:ConnectionErrorDomain
+										code:ConnectionStreamError
+									userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Send Stream Error", @"Stream Error")
+																		 forKey:NSLocalizedDescriptionKey]];
 				}
 				
 				[_forwarder connection:self didReceiveError:error];
 			}
-			
 			break;
 		}
 		case NSStreamEventEndEncountered:

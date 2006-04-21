@@ -750,7 +750,8 @@ int filenameSort(id obj1, id obj2, void *context)
 		{
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain
 												 code:ConnectionErrorParsingDirectoryListing
-											 userInfo:[NSDictionary dictionaryWithObject:@"Error parsing directory listing" forKey:NSLocalizedDescriptionKey]];
+											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Error parsing directory listing", @"Directory Parsing Error")
+																				  forKey:NSLocalizedDescriptionKey]];
 			
 			KTLog(ParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");
 			@throw error;

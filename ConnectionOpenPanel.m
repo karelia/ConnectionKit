@@ -610,8 +610,8 @@
 	}
 	else
 	{
-		NSAlert *a = [NSAlert alertWithMessageText:NSLocalizedString(@"A Connection Error Occurred", @"ConnectionOpenPanel")
-									 defaultButton:NSLocalizedString(@"OK", @"OK")
+		NSAlert *a = [NSAlert alertWithMessageText:LocalizedStringInThisBundle(@"A Connection Error Occurred", @"ConnectionOpenPanel")
+									 defaultButton:LocalizedStringInThisBundle(@"OK", @"OK")
 								   alternateButton:nil
 									   otherButton:nil
 						 informativeTextWithFormat:[[error userInfo] objectForKey:NSLocalizedDescriptionKey]];
