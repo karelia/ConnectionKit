@@ -47,20 +47,22 @@ typedef enum {
 	SSLContextRef		_sslContext;
 	SSLVersion			_requestedSSL;
 	SSLVersion			_negotiatedSSL;
+	NSMutableData		*_inputData;
+	NSMutableData		*_outputData;
 	
 	CFReadStreamRef		_receiveStream;
 	CFWriteStreamRef	_sendStream;
 	
-	id					_delegate;
+	id					_delegate; // not retained
 	NSPort				*_port;
 	RunLoopForwarder	*_forwarder;
 	NSLock				*_bufferLock;
 	NSThread			*_creationThread;
 	
 	NSMutableData		*_receiveBuffer;
-	NSMutableData		*_receiveBufferEncrypted; //direct from the socket
+	NSMutableData		*_receiveBufferEncrypted;
 	NSMutableData		*_sendBuffer;
-	NSMutableData		*_sendBufferEncrypted; // bytes to send to the socket
+	NSMutableData		*_sendBufferEncrypted;
 	
 	NSMutableDictionary *_props;
 	NSStreamStatus		_status;
@@ -68,11 +70,12 @@ typedef enum {
 	struct __sslstreamflags {
 		unsigned sslEnabled: 1;
 		unsigned sslServerMode: 1;
+		unsigned isHandshaking: 1;
 		unsigned streamFailedNegotiation: 1;
 		unsigned streamAcceptedConnection: 1;
 		unsigned streamActivatedSSL: 1;
 		
-		unsigned unused: 28;
+		unsigned unused: 26;
 	} _flags;
 }
 
