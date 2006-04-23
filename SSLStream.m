@@ -33,13 +33,20 @@
 #import "RunLoopForwarder.h"
 #import "InterThreadMessaging.h"
 
-enum { KILL_THREAD };
+// This file heavily based on ONBSocket, ONBSSLContext and ONBSSLIdentity
+// These classes were re-licensed from GPL to BSD for use in the Connection Framework project
+
+enum { START, STOP, TURN_ON_SSL };
 
 @interface SSLStream (Private)
 
-- (int)performHandshakeWithData:(NSData *)input unused:(NSData **)output;
+- (int)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output;
 - (OSStatus)handleSSLReadToData:(void *)data size:(size_t *)size;
 - (OSStatus)handleSSLWriteFromData:(const void *)data size:(size_t *)size;
+- (NSData *)encryptData:(NSData *)data inputData:(NSMutableData *)input;
+- (NSData *)decryptData:(NSMutableData *)data outputData:(NSMutableData *)output;
+
+- (void)sendPortMessage:(int)aMessage;
 
 @end
 
@@ -81,22 +88,20 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		}
 		
 		_receiveBuffer = [[NSMutableData data] retain];
-		_receiveBufferEncrypted = [[NSMutableData data] retain];
 		_sendBuffer = [[NSMutableData data] retain];
+		_receiveBufferEncrypted = [[NSMutableData data] retain];
 		_sendBufferEncrypted = [[NSMutableData data] retain];
+		_inputData = [[NSMutableData data] retain];
+		_outputData = [[NSMutableData data] retain];
 		
 		_props = [[NSMutableDictionary dictionary] retain];
 		_status = NSStreamStatusNotOpen;
 		
 		_creationThread = [NSThread currentThread];
 		_forwarder = [[RunLoopForwarder alloc] init];
-		_port = [[NSPort port] retain];
-		[_port setDelegate:self];
+		_bufferLock = [[NSLock alloc] init];
 		
 		[NSThread prepareForInterThreadMessages];
-		[NSThread detachNewThreadSelector:@selector(runSSLStreamBackgroundThread:)
-								 toTarget:self
-							   withObject:nil];
 	}
 	return self;
 }
@@ -135,12 +140,21 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 - (void)dealloc
 {
+	[self sendPortMessage:KILL_THREAD];
 	[_port setDelegate:nil];
+	[_port release];
+	[_bufferLock release];
+	[_forwarder release];
 	
 	[_sendBuffer release];
-	[_sendBufferEncrypted release];
 	[_receiveBuffer release];
+	[_sendBufferEncrypted release];
 	[_receiveBufferEncrypted release];
+	[_inputData release];
+	[_outputData release];
+	
+	CFRelease(_sslIdentity);
+	CFRelease(_sslContext);
 	
 	[super dealloc];
 }
@@ -186,9 +200,38 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 - (void)handlePortMessage:(NSPortMessage *)portMessage
 {
 	switch ([portMessage msgid]) {
-		case KILL_THREAD:
+		case START:
+			
+			break;
+		case STOP:
 			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
 			break;
+		case TURN_ON_SSL:
+		{
+			if (_flags.isHandshaking) 
+			{
+				KTLog(TransportDomain, KTLogDebug, @"SSL Tried to activate while handshake in progress");
+				return;
+			}
+			
+			_flags.isHandshaking = YES;
+			NSMutableData *output = [NSMutableData data];
+			[_receiveBufferEncrypted setData:_receiveBuffer];
+			int ret = [self performHandshakeWithData:_receiveBufferEncrypted unused:output];
+			if ([output length] > 0)
+			{
+				[_sendBufferEncrypted appendData:output];
+			}
+			if (ret < 0)
+			{
+				KTLog(TransportDomain, KTLogFatal, @"Failed to complete SSL Handshake");
+				return;
+			}
+			
+			_flags.sslEnabled = YES;
+			_flags.isHandshaking = NO;
+		}
+		break;
 	}
 }
 
@@ -212,7 +255,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 - (void)enableSSL
 {
-	
+	[self sendPortMessage:TURN_ON_SSL];
 }
 
 #pragma mark -
@@ -220,32 +263,31 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 - (void)open
 {
-	CFReadStreamOpen(_receiveStream);
-	CFWriteStreamOpen(_sendStream);
+	[self sendPortMessage:START];
 }
 
 - (void)close
 {
-	CFReadStreamClose(_receiveStream);
-	CFWriteStreamClose(_sendStream);
+	_status = NSStreamStatusNotOpen;
 }
 
 - (void)scheduleInRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
 {
-	CFRunLoopRef rl = (CFRunLoopRef)aRunLoop;
-	CFStringRef m = (CFStringRef)mode;
 	
-	CFReadStreamScheduleWithRunLoop(_receiveStream,rl,m);
-	CFWriteStreamScheduleWithRunLoop(_sendStream,rl,m);
+	if (_status != NSStreamStatusNotOpen)
+		return;
+	
+	_status = NSStreamStatusOpening;
+	_port = [[NSPort port] retain];
+	[_port setDelegate:self];
+	[NSThread detachNewThreadSelector:@selector(runSSLStreamBackgroundThread:)
+							 toTarget:self
+						   withObject:nil];
 }
 
 - (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
 {
-	CFRunLoopRef rl = (CFRunLoopRef)aRunLoop;
-	CFStringRef m = (CFStringRef)mode;
-	
-	CFReadStreamUnscheduleFromRunLoop(_receiveStream,rl,m);
-	CFWriteStreamUnscheduleFromRunLoop(_sendStream,rl,m);
+	[self sendPortMessage:STOP];
 }
 
 - (void)setDelegate:(id)delegate
@@ -281,53 +323,45 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 - (int)read:(uint8_t *)buffer maxLength:(unsigned int)len
 {
-	//read the data, decrypt it and copy to the buffer.
-	UInt8 *encrypted = (UInt8 *)malloc(sizeof(UInt8) * len);
-	CFIndex bytesRead;
-	encrypted = (UInt8 *)CFReadStreamGetBuffer(_receiveStream,(CFIndex)len,&bytesRead);
-	
-	UInt8 *decrypted;
-	memcpy(buffer,decrypted,bytesRead);
-	
+	int read = 0;
+	if (_flags.sslEnabled)
+	{
+		
+	}
+	else
+	{
+		
+	}
+	return read;
 }
 
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
 {
-	//encrypt the data, write it to the stream
-	
+	int wrote = 0;
+	if (_flags.sslEnabled)
+	{
+		
+	}
+	else
+	{
+		
+	}	
+	return wrote;
 }
 
 - (void)readStream:(CFReadStreamRef)stream handleEvent:(CFStreamEventType)event
 {
-	NSStreamEvent evt;
-	switch (event) {
-		case kCFStreamEventNone: evt = NSStreamEventNone; break;
-		case kCFStreamEventOpenCompleted: evt = NSStreamEventOpenCompleted; break;
-		case kCFStreamEventHasBytesAvailable: evt = NSStreamEventHasBytesAvailable; break;
-		case kCFStreamEventCanAcceptBytes: evt = NSStreamEventHasSpaceAvailable; break;
-		case kCFStreamEventErrorOccurred: evt = NSStreamEventErrorOccurred; break;
-		case kCFStreamEventEndEncountered: evt = NSStreamEventEndEncountered; break;
-	}
-	[_delegate stream:self handleEvent:evt];
+	
 }
 
 - (void)writeStream:(CFWriteStreamRef)stream handleEvent:(CFStreamEventType)event
 {
-	NSStreamEvent evt;
-	switch (event) {
-		case kCFStreamEventNone: evt = NSStreamEventNone; break;
-		case kCFStreamEventOpenCompleted: evt = NSStreamEventOpenCompleted; break;
-		case kCFStreamEventHasBytesAvailable: evt = NSStreamEventHasBytesAvailable; break;
-		case kCFStreamEventCanAcceptBytes: evt = NSStreamEventHasSpaceAvailable; break;
-		case kCFStreamEventErrorOccurred: evt = NSStreamEventErrorOccurred; break;
-		case kCFStreamEventEndEncountered: evt = NSStreamEventEndEncountered; break;
-	}
-	[_delegate stream:self handleEvent:evt];
+	
 }
 
 #pragma mark SSLContext stuff
 
-- (int)performHandshakeWithData:(NSData *)input unused:(NSData **)output
+- (int)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output
 {
 	int ret = 0;
 	if (!_sslContext)
@@ -364,6 +398,8 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 			KTLog(TransportDomain, KTLogDebug, @"Failed to set SSL Certificate");
 		}
 		
+		_inputData = input;
+		_outputData = output;		
 		ret = SSLHandshake(_sslContext);
 		
 		if (ret == errSSLWouldBlock)
@@ -380,16 +416,89 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	return ret;
 }
 
+- (NSData *)encryptData:(NSData *)data inputData:(NSMutableData *)input
+{
+	if (!data || [data length] == 0)
+	{
+		return [NSData data];
+	}
+		
+	_inputData = input;
+	_outputData = [NSMutableData dataWithCapacity:2*[data length]];
+	unsigned int inputLength = [data length];
+	unsigned int processed = 0;
+	const void *buffer = [data bytes];
+	
+	while (processed < inputLength)
+	{
+		size_t written = 0;
+		
+		int ret;
+		if (ret = SSLWrite(_sslContext, buffer + processed, inputLength - processed, &written))
+		{
+			KTLog(TransportDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
+			return nil;
+		}
+		processed += written;
+	}
+	
+	return [NSData dataWithData:_outputData];	
+}
+
+- (NSData *)decryptData:(NSMutableData *)data outputData:(NSMutableData *)output
+{
+	if (!data || [data length] == 0)
+	{
+		return [NSData data];
+	}
+	
+	_inputData = data;
+	_outputData = output;
+	NSMutableData *decryptedData = [NSMutableData dataWithCapacity:[data length]];
+	int ret = 0;
+	
+	while (! ret)
+	{
+		size_t read = 0;
+		char buf[1024];
+		
+		ret = SSLRead(_sslContext, buf, 1024, &read);
+		if (ret && (ret != errSSLWouldBlock) && (ret != errSSLClosedGraceful))
+		{
+			KTLog(TransportDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
+			return nil;
+		}
+		
+		[decryptedData appendBytes:buf length:read];
+	}
+	
+	return [NSData dataWithData:decryptedData];
+}
+
 - (OSStatus)handleSSLReadToData:(void *)data size:(size_t *)size
 {
+	size_t sizeWanted = *size;
+	*size = MIN(sizeWanted, [_inputData length]);
+	if (*size == 0)
+	{
+		return errSSLWouldBlock;
+	}
 	
+	NSRange byteRange = NSMakeRange(0, *size);
+	[_inputData getBytes:data range:byteRange];
+	[_inputData replaceBytesInRange:byteRange withBytes:NULL length:0];
+	
+	if (sizeWanted > *size)
+		return errSSLWouldBlock;
+	
+	return noErr;
 }
 
 - (OSStatus)handleSSLWriteFromData:(const void *)data size:(size_t *)size
 {
-	
+	[_outputData appendBytes:data length:*size];
+	return noErr;
 }
-
 
 @end
 
