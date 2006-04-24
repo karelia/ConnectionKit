@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
+		09D6603809FD37B70000BA00 /* LocalConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603309FD37B70000BA00 /* LocalConnectionTest.m */; };
+		09D6603909FD37B70000BA00 /* SFTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */; };
+		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		796DB32409F8BBAB0065897B /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 796DB21209F89DCB0065897B /* SSLStream.m */; };
 		796DB32509F8BBAE0065897B /* SSLStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 796DB21109F89DCB0065897B /* SSLStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -103,6 +107,20 @@
 /* End PBXBuildStyle section */
 
 /* Begin PBXContainerItemProxy section */
+		09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Connection */;
+			remoteInfo = Connection;
+		};
+		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79CFD12509F702BE00172CDD /* Framework */;
+			remoteInfo = Framework;
+		};
 		79CFD80A09F7040B00172CDD /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -127,6 +145,14 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = UnitTest.octest; path = build/Debug/UnitTest.octest; sourceTree = "<group>"; };
+		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
+		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
+		09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AbstractConnectionTest.m; sourceTree = "<group>"; };
+		09D6603209FD37B70000BA00 /* LocalConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = LocalConnectionTest.h; sourceTree = "<group>"; };
+		09D6603309FD37B70000BA00 /* LocalConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = LocalConnectionTest.m; sourceTree = "<group>"; };
+		09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SFTPConnectionTest.h; sourceTree = "<group>"; };
+		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -242,6 +268,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		09D6601A09FD37990000BA00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12409F702BE00172CDD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -276,6 +310,19 @@
 			name = Framework;
 			sourceTree = "<group>";
 		};
+		09D6602E09FD37B70000BA00 /* unit test */ = {
+			isa = PBXGroup;
+			children = (
+				09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */,
+				09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */,
+				09D6603209FD37B70000BA00 /* LocalConnectionTest.h */,
+				09D6603309FD37B70000BA00 /* LocalConnectionTest.m */,
+				09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */,
+				09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */,
+			);
+			path = "unit test";
+			sourceTree = "<group>";
+		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -304,6 +351,7 @@
 			children = (
 				8D1107320486CEB800E47090 /* Connection.app */,
 				79CFD12609F702BE00172CDD /* Connection.framework */,
+				09D6601D09FD37990000BA00 /* UnitTest.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -311,12 +359,14 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
+				09D6602E09FD37B70000BA00 /* unit test */,
 				080E96DDFE201D6D7F000001 /* Framework */,
 				79CFD11709F7020500172CDD /* Test Application */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -532,6 +582,66 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		09D6601C09FD37990000BA00 /* UnitTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */;
+			buildPhases = (
+				09D6601809FD37990000BA00 /* Resources */,
+				09D6601909FD37990000BA00 /* Sources */,
+				09D6601A09FD37990000BA00 /* Frameworks */,
+				09D6601B09FD37990000BA00 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			dependencies = (
+				09D6604509FD37DD0000BA00 /* PBXTargetDependency */,
+				09D6604709FD37DD0000BA00 /* PBXTargetDependency */,
+			);
+			name = UnitTest;
+			productName = UnitTest;
+			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
+			productSettingsXML = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>
+<!DOCTYPE plist PUBLIC \"-//Apple Computer//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">
+<plist version=\"1.0\">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>English</string>
+	<key>CFBundleExecutable</key>
+	<string>${EXECUTABLE_NAME}</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.yourcompany.UnitTest</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundlePackageType</key>
+	<string>BNDL</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>1.0</string>
+</dict>
+</plist>
+";
+			productType = "com.apple.product-type.bundle";
+		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
@@ -632,11 +742,19 @@
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
+				09D6601C09FD37990000BA00 /* UnitTest */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		09D6601809FD37990000BA00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12209F702BE00172CDD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -675,6 +793,19 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		09D6601B09FD37990000BA00 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
 		797CBBEB09F854B60063FF9B /* Generate Localizable.strings */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -692,6 +823,16 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		09D6601909FD37990000BA00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */,
+				09D6603809FD37B70000BA00 /* LocalConnectionTest.m in Sources */,
+				09D6603909FD37B70000BA00 /* SFTPConnectionTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12309F702BE00172CDD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -744,6 +885,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		09D6604509FD37DD0000BA00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* Connection */;
+			targetProxy = 09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
+		09D6604709FD37DD0000BA00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79CFD12509F702BE00172CDD /* Framework */;
+			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
 		79CFD80B09F7040B00172CDD /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
@@ -812,6 +963,58 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		09D6602709FD379A0000BA00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		09D6602809FD379A0000BA00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 		79CFD12909F702BF00172CDD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -934,6 +1137,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				09D6602709FD379A0000BA00 /* Debug */,
+				09D6602809FD379A0000BA00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
