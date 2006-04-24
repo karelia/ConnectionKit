@@ -140,7 +140,6 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 - (void)dealloc
 {
-	[self sendPortMessage:KILL_THREAD];
 	[_port setDelegate:nil];
 	[_port release];
 	[_bufferLock release];
