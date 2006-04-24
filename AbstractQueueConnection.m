@@ -41,6 +41,8 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 NSString *QueueDomain = @"Queuing";
 
+#define QUEUE_HISTORY_COMMAND_SIZE 3
+
 @implementation AbstractQueueConnection
 
 - (id)initWithHost:(NSString *)host
@@ -105,6 +107,10 @@ NSString *QueueDomain = @"Queuing";
 	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on History Queue: %@", command);
 	[_queueLock lock];
 	[_commandHistory insertObject:command atIndex:0];
+	if (QUEUE_HISTORY_COMMAND_SIZE != 0 && [_commandHistory count] > QUEUE_HISTORY_COMMAND_SIZE)
+	{
+		[_commandHistory removeLastObject];
+	}
 	[_queueLock unlock];
 }
 
