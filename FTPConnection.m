@@ -110,22 +110,30 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		  username:(NSString *)username
 		  password:(NSString *)password
 {
-	[super initWithHost:host port:port username:username password:password];
-
-	[self setState:ConnectionNotConnectedState];
+	if (!username || [username length] == 0)
+	{
+		[self release];
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"FTPConnection requires a username"
+									 userInfo:nil];
+	}
 	
-	// These are never replaced during the lifetime of this object so we don't bother with accessor methods
-	_dataBuffer = [[NSMutableData data] retain];
-	_commandBuffer = [[NSMutableString alloc] initWithString:@""];
-	
-	_serverSupport.canUseActive = YES;
-	_serverSupport.canUseEPRT = YES;
-	_serverSupport.canUsePASV = YES;
-	_serverSupport.canUseEPSV = YES;
-	
-	_serverSupport.hasSize = NO;
-	_flags.isConnected = NO;
-
+	if (self = [super initWithHost:host port:port username:username password:password])
+	{
+		[self setState:ConnectionNotConnectedState];
+		
+		// These are never replaced during the lifetime of this object so we don't bother with accessor methods
+		_dataBuffer = [[NSMutableData data] retain];
+		_commandBuffer = [[NSMutableString alloc] initWithString:@""];
+		
+		_serverSupport.canUseActive = YES;
+		_serverSupport.canUseEPRT = YES;
+		_serverSupport.canUsePASV = YES;
+		_serverSupport.canUseEPSV = YES;
+		
+		_serverSupport.hasSize = NO;
+		_flags.isConnected = NO;
+	}
 	return self;
 }
 
