@@ -46,7 +46,7 @@
 {
 	NSPort				*_port;
 	RunLoopForwarder	*_forwarder;
-	NSThread			*_mainThread;
+	NSThread			*_bgThread;
 	
 	id<OutputStream>	_sendStream;
 	id<InputStream>		_receiveStream;

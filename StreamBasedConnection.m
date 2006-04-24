@@ -59,7 +59,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	_port = [[NSPort port] retain];
 	_forwarder = [[RunLoopForwarder alloc] init];
 	[_forwarder setReturnValueDelegate:self];
-	_mainThread = [NSThread currentThread];
 	_sendBufferLock = [[NSLock alloc] init];
 	_sendBuffer = [[NSMutableData data] retain];
 	_fileCheckingLock = [[NSConditionLock alloc] init];
@@ -155,6 +154,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	[NSThread prepareForInterThreadMessages];
+	_bgThread = [NSThread currentThread];
 // NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 // But then again, we can't remove the thread, so it really doesn't mean much.
 	[[NSRunLoop currentRunLoop] addPort:_port forMode:(NSString *)kCFRunLoopCommonModes];
@@ -252,7 +252,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[super queueCommand:command];
 	
 	if (!_flags.inBulk) {
-		if ([NSThread currentThread] == _mainThread)
+		if ([NSThread currentThread] != _bgThread)
 		{
 			[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
 		}
@@ -275,7 +275,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	
     [super setState:aState];
 	
-	if ([NSThread currentThread] == _mainThread)
+	if ([NSThread currentThread] != _bgThread)
 	{
 		[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
 	}
@@ -295,7 +295,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		if (GET_STATE == [command awaitState])
 		{
 			_state = [command sentState];	// don't use setter; we don't want to recurse
-			[_commandHistory insertObject:command atIndex:0];
+			[self pushCommandOnHistoryQueue:command];
 			[self dequeueCommand];
 			nextTry = (0 != [_commandQueue count]);		// go to next one, there's something else to do
 			
