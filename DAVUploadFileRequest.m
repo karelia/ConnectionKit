@@ -29,7 +29,7 @@
 
 
 #import "DAVUploadFileRequest.h"
-
+#import <ApplicationServices/ApplicationServices.h>
 
 @implementation DAVUploadFileRequest
 
@@ -44,7 +44,15 @@
 	{
 		myFilename = [filename copy];
 		[self setContent:data];
-		[self setHeader:@"application/octet-stream" forKey:@"Content-Type"];
+		NSString *UTI = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+																		  (CFStringRef)[filename pathExtension],
+																		  NULL);
+		NSString *mime = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType);	
+		if (!mime || [mime length] == 0)
+		{
+			mime = @"application/octet-stream";
+		}
+		[self setHeader:mime forKey:@"Content-Type"];
 	}
 	return self;
 }
@@ -60,7 +68,16 @@
 	{
 		myLocalFilename = [local copy];
 		myFilename = [remote copy];
-		[self setHeader:@"application/octet-stream" forKey:@"Content-Type"];
+		//get the mime type from lauch services
+		NSString *UTI = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+																		  (CFStringRef)[remote pathExtension],
+																		  NULL);
+		NSString *mime = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType);	
+		if (!mime || [mime length] == 0)
+		{
+			mime = @"application/octet-stream";
+		}
+		[self setHeader:mime forKey:@"Content-Type"];
 	}
 	return self;
 }

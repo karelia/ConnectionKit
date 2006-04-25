@@ -82,6 +82,7 @@
 		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
 		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
@@ -111,14 +112,14 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090 /* Connection */;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
 			remoteInfo = Connection;
 		};
 		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 79CFD12509F702BE00172CDD /* Framework */;
+			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
 		79CFD80A09F7040B00172CDD /* PBXContainerItemProxy */ = {
@@ -145,7 +146,7 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; name = UnitTest.octest; path = build/Debug/UnitTest.octest; sourceTree = "<group>"; };
+		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
 		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
 		09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = AbstractConnectionTest.m; sourceTree = "<group>"; };
@@ -262,6 +263,7 @@
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
 		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
+		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -285,6 +287,7 @@
 				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
 				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
 				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
+				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,6 +329,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
 				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
 				79FB807109F74185006E7D11 /* Carbon.framework */,
 				79CFD93609F7084000172CDD /* Security.framework */,
