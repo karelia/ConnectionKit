@@ -50,6 +50,7 @@ const double kDelegateNotificationTheshold = 0.5;
 - (void)closeDataStreams;
 - (void)openDataStreamsToHost:(NSHost *)aHost port:(int)aPort;
 - (ConnectionCommand *)pushDataConnectionOnCommandQueue;
+- (ConnectionCommand *)nextAvailableDataConnectionType;
 - (void)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(long long)offset remotePath:(NSString *)remotePath;
 
 - (NSFileHandle *)writeHandle;
@@ -163,6 +164,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)sendCommand:(NSString *)command
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	if ([command isEqualToString:@"DATA_CON"])
+	{
+		ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+		[self pushCommandOnHistoryQueue:cmd];
+		command = [cmd command];
+		_state = [cmd sentState];
+	}
 	
 	if ([command isEqualToString:@"EPRT"]) 
 	{
@@ -932,53 +941,40 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 425:
 		{
-			if (GET_STATE == FTPSettingEPSVState)
+			// 425 can't open data connection
+			if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
 			{
-				_serverSupport.canUseEPSV = NO;
-				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingEPRTState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingEPRTState;
-				[self sendCommand:@"EPRT"];
-			}
-			else if (GET_STATE == FTPSettingEPRTState)
-			{
-				_serverSupport.canUseEPRT = NO;
-				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingActiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingActiveState;
-				[self sendCommand:@"PORT"];
-			}
-			else if (GET_STATE == FTPSettingActiveState)
-			{
-				_serverSupport.canUseActive = NO;
-				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingPassiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingPassiveState;
-				[self sendCommand:@"PASV"];
-			}
-			else if (GET_STATE == FTPSettingPassiveState)
-			{
-				[self closeDataStreams];
-				if (_flags.error)
+				ConnectionCommand *last = [self lastCommand];
+				ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
+				
+				if (lastState == FTPSettingEPSVState)
 				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
+					_serverSupport.canUseEPSV = NO;
+					[self closeDataStreams];
+					[self sendCommand:@"DATA_CON"];
+					[self pushCommandOnCommandQueue:last];
 				}
-				_serverSupport.canUsePASV = NO;
-				_state = ConnectionSentQuitState;
-				[self sendCommand:@"QUIT"];
+				else if (lastState == FTPSettingEPRTState)
+				{
+					_serverSupport.canUseEPRT = NO;
+					[self closeDataStreams];
+					[self sendCommand:@"DATA_CON"];
+					[self pushCommandOnCommandQueue:last];
+				}
+				else if (lastState == FTPSettingActiveState)
+				{
+					_serverSupport.canUseActive = NO;
+					[self closeDataStreams];
+					[self sendCommand:@"DATA_CON"];
+					[self pushCommandOnCommandQueue:last];
+				}
+				else if (lastState == FTPSettingPassiveState)
+				{
+					_serverSupport.canUsePASV = NO;
+					[self closeDataStreams];
+					[self sendCommand:@"DATA_CON"];
+					[self pushCommandOnCommandQueue:last];
+				}
 			}
 			else
 			{
@@ -1048,51 +1044,27 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				_serverSupport.canUseEPSV = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingEPRTState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingEPRTState;
-				[self sendCommand:@"EPRT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState)
 			{
 				_serverSupport.canUseEPRT = NO;
-				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingActiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingActiveState;
-
-				[self sendCommand:@"PORT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState)
 			{
 				_serverSupport.canUseActive = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingPassiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingPassiveState;
-				[self sendCommand:@"PASV"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState)
 			{
-				if (_flags.error)
-				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				_state = ConnectionSentQuitState;
-				[self sendCommand:@"QUIT"];
+				_serverSupport.canUsePASV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == ConnectionSentFeatureRequestState)
@@ -1157,8 +1129,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 522:
 		{
 			_serverSupport.canUseEPRT = NO;
-			[self setState:FTPSettingActiveState];
-			[self sendCommand:@"PORT"];
+			[self sendCommand:@"DATA_CON"];
 			break;
 		}
 		case 530:
@@ -1409,6 +1380,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data receive stream opened");
+			[_openStreamsTimeout invalidate];
+			[_openStreamsTimeout release];
+			_openStreamsTimeout = nil;
 			break;
 		}
 		case NSStreamEventErrorOccurred:
@@ -1428,51 +1403,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				_serverSupport.canUseEPSV = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingEPRTState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingEPRTState;
-				[self sendCommand:@"EPRT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState) 
 			{
 				_serverSupport.canUseEPRT = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingActiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingActiveState;
-				[self sendCommand:@"PORT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState) 
 			{
 				_serverSupport.canUseActive = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingPassiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingPassiveState;
-				[self sendCommand:@"PASV"];
+				[self sendCommand:@"DATA_CON"];
+				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState) 
 			{
 				_serverSupport.canUsePASV = NO;
 				[self closeDataStreams];
-				if (_flags.error)
-				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				_state = ConnectionSentQuitState;
-				[self sendCommand:@"QUIT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			
@@ -1492,49 +1444,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (lastState == FTPSettingEPSVState) 
 				{
 					_serverSupport.canUseEPSV = NO;
-					_state = FTPSettingEPRTState;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingEPRTState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					[self sendCommand:@"EPRT"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingEPRTState) 
 				{
 					_serverSupport.canUseEPRT = NO;
-					_state = FTPSettingActiveState;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingActiveState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					[self sendCommand:@"PORT"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingActiveState)
 				{
 					_serverSupport.canUseActive = NO;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingPassiveState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					_state = FTPSettingPassiveState;
-					[self sendCommand:@"PASV"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				}
 				else if (lastState == FTPSettingPassiveState) 
 				{
 					_serverSupport.canUseActive = NO;
-					if (_flags.error)
-					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams availabel"), NSLocalizedDescriptionKey, nil]];
-						[_forwarder connection:self didReceiveError:err];
-					}
-					_state = ConnectionSentQuitState;
-					[self sendCommand:@"QUIT"];
+					[self sendCommand:@"DATA_CON"];
 				}
 			}
 			else 
@@ -1546,6 +1474,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventEndEncountered:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data receive stream ended");
 			[self closeDataConnection];
 			break;
 		}
@@ -1570,6 +1499,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			[_openStreamsTimeout invalidate];
+			[_openStreamsTimeout release];
+			_openStreamsTimeout = nil;
+			
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream opened");
+			
 			if (!_serverSupport.isActiveDataConn)
 				[self setState:ConnectionIdleState];
 			break;
@@ -1588,51 +1523,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				_serverSupport.canUseEPSV = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingEPRTState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingEPRTState;
-				[self sendCommand:@"EPRT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState) 
 			{
 				_serverSupport.canUseEPRT = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingActiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingActiveState;
-				[self sendCommand:@"PORT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState) 
 			{
 				_serverSupport.canUseActive = NO;
 				[self closeDataStreams];
-				[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																awaitState:ConnectionIdleState
-																 sentState:FTPSettingPassiveState
-																 dependant:nil
-																  userInfo:nil]];
-				_state = FTPSettingPassiveState;
-				[self sendCommand:@"PASV"];
+				[self sendCommand:@"DATA_CON"];
+				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState) 
 			{
 				_serverSupport.canUsePASV = NO;
 				[self closeDataStreams];
-				if (_flags.error)
-				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				_state = ConnectionSentQuitState;
-				[self sendCommand:@"QUIT"];
+				[self sendCommand:@"DATA_CON"];
 				break;
 			}			
 			// if uploading, skip the transfer
@@ -1651,49 +1563,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (lastState == FTPSettingEPSVState) 
 				{
 					_serverSupport.canUseEPSV = NO;
-					_state = FTPSettingEPRTState;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingEPRTState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					[self sendCommand:@"EPRT"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingEPRTState) 
 				{
 					_serverSupport.canUseEPRT = NO;
-					_state = FTPSettingActiveState;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PORT"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingActiveState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					[self sendCommand:@"PORT"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingActiveState)
 				{
 					_serverSupport.canUseActive = NO;
-					_state = FTPSettingPassiveState;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"PASV"
-																	awaitState:FTPAwaitingDataConnectionToOpen
-																	 sentState:FTPSettingPassiveState
-																	 dependant:nil
-																	  userInfo:nil]]; 
-					[self sendCommand:@"PASV"];
+					[self sendCommand:@"DATA_CON"];
 					break;
 				}
 				else if (lastState == FTPSettingPassiveState) 
 				{
 					_serverSupport.canUseActive = NO;
-					if (_flags.error)
-					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data streams available"), NSLocalizedDescriptionKey, nil]];
-						[_forwarder connection:self didReceiveError:err];
-					}
-					_state = ConnectionSentQuitState;
-					[self sendCommand:@"QUIT"];
+					[self sendCommand:@"DATA_CON"];
 				}
 			}
 			else {
@@ -1707,6 +1595,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventEndEncountered:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream ended");
 			[self closeDataConnection];
 			break;
 		}
@@ -1864,22 +1753,58 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_dataReceiveStream open];
 	[_dataSendStream open];
 	
+	KTLog(TransportDomain, KTLogDebug, @"Setting data connection timeout to 5 seconds");
 	[_openStreamsTimeout invalidate];
-	_openStreamsTimeout = [[NSTimer timerWithTimeInterval:5 
-												   target:self
-												 selector:@selector(dataConnectionOpenTimedOut:) 
-												 userInfo:nil 
-												  repeats:NO] retain];
+	_openStreamsTimeout = [[NSTimer scheduledTimerWithTimeInterval:5
+															target:self
+														  selector:@selector(dataConnectionOpenTimedOut:) 
+														  userInfo:nil
+														   repeats:NO] retain];
 }
 
 - (void)dataConnectionOpenTimedOut:(NSTimer *)timer
 {
 	//do something
-	KTLog(ProtocolDomain, KTLogWarn, @"Timed out opening data connection");
+	KTLog(ProtocolDomain, KTLogError, @"Timed out opening data connection");
 
+	if ([self transcript])
+	{
+		NSString *timeout = [NSString stringWithString:LocalizedStringInThisBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")];
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", timeout] attributes:[AbstractConnection dataAttributes]] autorelease]];
+	}
+	
 	[timer invalidate];
 	[_openStreamsTimeout release];
 	_openStreamsTimeout = nil;
+	[self closeDataStreams];
+	
+	ConnectionCommand *last = [self lastCommand];
+	ConnectionState lastState = [last sentState];
+	
+	if (lastState == FTPSettingEPSVState) 
+	{
+		_serverSupport.canUseEPSV = NO;
+		[self closeDataStreams];
+		[self sendCommand:@"DATA_CON"];
+	}
+	else if (lastState == FTPSettingEPRTState) 
+	{
+		_serverSupport.canUseEPRT = NO;
+		[self closeDataStreams];
+		[self sendCommand:@"DATA_CON"];
+	}
+	else if (lastState == FTPSettingActiveState) 
+	{
+		_serverSupport.canUseActive = NO;
+		[self closeDataStreams];
+		[self sendCommand:@"DATA_CON"];
+	}
+	else if (lastState == FTPSettingPassiveState) 
+	{
+		_serverSupport.canUsePASV = NO;
+		[self closeDataStreams];
+		[self sendCommand:@"DATA_CON"];
+	}			
 }
 
 #pragma mark -
@@ -2204,7 +2129,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (ConnectionCommand *)pushDataConnectionOnCommandQueue
+- (ConnectionCommand *)nextAvailableDataConnectionType
 {
 	ConnectionCommand *cmd = nil;
 	if (_serverSupport.canUseEPSV) {
@@ -2237,7 +2162,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							   dependant:nil 
 								userInfo:nil];
 	}
-	else {
+	else
+	{
 		if (_flags.error) {
 			NSError *err = [NSError errorWithDomain:FTPErrorDomain
 											   code:FTPErrorNoDataModes
@@ -2245,8 +2171,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}
+		cmd = [ConnectionCommand command:@"QUIT"
+							  awaitState:ConnectionIdleState	
+							   sentState:ConnectionSentQuitState
+							   dependant:nil
+								userInfo:nil];
 	}
-	
+	return cmd;
+}
+
+- (ConnectionCommand *)pushDataConnectionOnCommandQueue
+{
+	ConnectionCommand *cmd = nil;
+	cmd = [ConnectionCommand command:@"DATA_CON"
+						  awaitState:ConnectionIdleState
+						   sentState:FTPDeterminingDataConnectionType
+						   dependant:nil
+							userInfo:nil];
 	return cmd;
 }
 

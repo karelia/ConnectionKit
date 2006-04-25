@@ -45,6 +45,7 @@ typedef enum {
 	FTPSettingEPSVState,
 	FTPSettingActiveState,
 	FTPSettingEPRTState,
+	FTPDeterminingDataConnectionType,
 	FTPAwaitingDataConnectionToOpen,
 	FTPModeChangeState,
 	FTPAwaitingRemoteSystemTypeState,

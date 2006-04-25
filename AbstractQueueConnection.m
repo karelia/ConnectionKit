@@ -41,7 +41,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 NSString *QueueDomain = @"Queuing";
 
-#define QUEUE_HISTORY_COMMAND_SIZE 3
+#define QUEUE_HISTORY_COMMAND_SIZE 10
 
 @implementation AbstractQueueConnection
 
