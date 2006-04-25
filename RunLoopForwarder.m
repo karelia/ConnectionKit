@@ -74,16 +74,11 @@
 	SEL aSelector = [anInvocation selector];
 	if ([myDelegate respondsToSelector:aSelector])
 	{
-		//NSLog(@"++++++ Sending delegate message %@", NSStringFromSelector(aSelector));
-		// Perform on the main thread ... we have to wait until it's actually taken care of so we don't release its data!
 		if ([[anInvocation methodSignature] methodReturnLength] == 0) {
 			[anInvocation retainArguments];
 			[anInvocation performSelector:@selector(invokeWithTarget:)
 							   withObject:myDelegate
 								 inThread:createdOnThread];
-			/*[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:) 
-										   withObject:myDelegate 
-										waitUntilDone:NO];*/
 		} else {
 			//we need to get the return value
 			unsigned int length = [[anInvocation methodSignature] methodReturnLength];
@@ -96,13 +91,6 @@
 			free (buffer);
 		}
 	}
-	// We probably don't want to call this bit just incase a connection class failed to test if the delegate responds to a selector
-	// It can enter here if something has called into here but another thread has set the delegate to nil, causing an exception to
-	// be thrown.
-/*	else
-	{
-		[self doesNotRecognizeSelector:aSelector];
-	}*/
 	[lock unlock];
 }
 
