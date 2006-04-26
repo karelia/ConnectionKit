@@ -76,11 +76,13 @@
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	DotMacConnection *c = [[self alloc] initWithHost:host
                                                 port:port
                                             username:username
-                                            password:password];
+                                            password:password
+											   error:error];
 	return [c autorelease];
 }
 
@@ -134,6 +136,7 @@
 			  port:(NSString *)port
 		  username:(NSString *)user
 		  password:(NSString *)pass
+			 error:(NSError **)error
 {
 	NSString *username = nil;
 	NSString *password = nil;
@@ -141,12 +144,18 @@
 	if (![self getDotMacAccountName:&username password:&password])
 	{
 		[self release];
-		@throw [NSException exceptionWithName:NSInvalidArgumentException
-									   reason:@"Failed to get .mac account name or password"
-									 userInfo:nil];
+		if (error)
+		{
+			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+											   code:ConnectionNoUsernameOrPassword
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
+																				forKey:NSLocalizedDescriptionKey]];
+			*error = err;
+		}
+		return nil;
 	}
 	
-	if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password])
+	if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
 	{
 		myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
 	}

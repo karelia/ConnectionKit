@@ -69,11 +69,13 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	WebDAVConnection *c = [[self alloc] initWithHost:host
                                                 port:port
                                             username:username
-                                            password:password];
+                                            password:password
+											   error:error];
 	return [c autorelease];
 }
 
@@ -81,11 +83,26 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
+	if (!username || [username length] == 0 || !password || [password length] == 0)
+	{
+		[self release];
+		if (error)
+		{
+			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+											   code:ConnectionNoUsernameOrPassword
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username and Password are required for WebDAV connections", @"No username or password")
+																				forKey:NSLocalizedDescriptionKey]];
+			*error = err;
+		}
+		return nil;
+	}
 	if (self = [super initWithHost:host
                               port:port
                           username:username
-                          password:password])
+                          password:password
+							 error:error])
 	{
 		myResponseBuffer = [[NSMutableData data] retain];
 		NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
@@ -365,7 +382,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			if (length)
 			{
 				NSScanner *scanner = [NSScanner scannerWithString:length];
-				[scanner scanLongLong:&bytesToTransfer];
+				long long daBytes = 0;
+				[scanner scanLongLong:&daBytes];
+				bytesToTransfer = daBytes;
 				
 				NSDictionary *download = [self currentDownload];
 				[[NSFileManager defaultManager] removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];

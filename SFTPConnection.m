@@ -81,19 +81,35 @@ static NSArray *sftpErrors = nil;
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	return [[[SFTPConnection alloc] initWithHost:host
 										   port:port
 									   username:username
-									   password:password] autorelease];
+									   password:password
+										   error:error] autorelease];
 }
 
 - (id)initWithHost:(NSString *)host
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
-	if (self = [super initWithHost:host port:port username:username password:password]) {
+	if (!username || [username length] == 0)
+	{
+		[self release];
+		if (error)
+		{
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain
+											   code:ConnectionNoUsernameOrPassword
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username is required for SFTP connections", @"No username or password")
+																				forKey:NSLocalizedDescriptionKey]];
+			*error = err;
+		}
+		return nil;
+	}
+	if (self = [super initWithHost:host port:port username:username password:password error:error]) {
 		_inputBuffer = [[NSMutableString alloc] init];
 		_sentTransferBegan = NO;
 	}

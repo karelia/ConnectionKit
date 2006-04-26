@@ -246,12 +246,21 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)runAutomatedScript
 {
+	NSError *err = nil;
 	con = [[AbstractConnection connectionWithName:@"FTP"
 											 host:@"localhost"
 											 port:@"21"
 										 username:@"ghulands"
-										 password:[Controller keychainPasswordForServer:@"localhost" account:@"ghulands"]] retain];
-	
+										 password:[Controller keychainPasswordForServer:@"localhost" account:@"ghulands"]
+											error:&err] retain];
+	if (!con)
+	{
+		if (err)
+		{
+			[NSApp presentError:err];
+		}
+		return;
+	}
 	
 	[con connect];
 	[con changeToDirectory:@"Sites/sandvox"];
@@ -272,15 +281,17 @@ NSString *ProtocolKey = @"Protocol";
 
 - (IBAction)connect:(id)sender
 {
+	NSError *err = nil;
 	if ([[cTypePopup titleOfSelectedItem] isEqualToString:AutoSelect])
 	{
 		if ([[cURL stringValue] length] > 0)
-			con = [[AbstractConnection connectionWithURL:[NSURL URLWithString:[cURL stringValue]]] retain];
+			con = [[AbstractConnection connectionWithURL:[NSURL URLWithString:[cURL stringValue]] error:&err] retain];
 		else
 			con = [[AbstractConnection connectionToHost:[cHost stringValue]
 												   port:[cPort stringValue]
 											   username:[cUser stringValue]
-											   password:[cPass stringValue]] retain];
+											   password:[cPass stringValue]
+												  error:&err] retain];
 	}
 	else
 	{
@@ -288,7 +299,17 @@ NSString *ProtocolKey = @"Protocol";
 												 host:[cHost stringValue]
 												 port:[cPort stringValue]
 											 username:[cUser stringValue]
-											 password:[cPass stringValue]] retain];
+											 password:[cPass stringValue]
+												error:&err] retain];
+	}
+	
+	if (!con)
+	{
+		if (err)
+		{
+			[NSApp presentError:err];
+		}
+		return;
 	}
 	
 	NSTextStorage *textStorage = [log textStorage];

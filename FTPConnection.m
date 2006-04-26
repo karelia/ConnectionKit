@@ -98,11 +98,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	FTPConnection *c = [[FTPConnection alloc] initWithHost:host
 													  port:port
 												  username:username
-												  password:password];
+												  password:password
+													 error:error];
 	return [c autorelease];
 }
 
@@ -110,16 +112,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
-	if (!username || [username length] == 0)
+	if (!username || [username length] == 0 || !password || [password length] == 0)
 	{
 		[self release];
-		@throw [NSException exceptionWithName:NSInvalidArgumentException
-									   reason:@"FTPConnection requires a username"
-									 userInfo:nil];
+		if (error)
+		{
+			NSError *err = [NSError errorWithDomain:FTPErrorDomain
+											   code:ConnectionNoUsernameOrPassword
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username and Password are required for FTP connections", @"No username or password")
+																				forKey:NSLocalizedDescriptionKey]];
+			*error = err;
+		}
+		return nil;
 	}
 	
-	if (self = [super initWithHost:host port:port username:username password:password])
+	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
 		[self setState:ConnectionNotConnectedState];
 		
