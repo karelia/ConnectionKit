@@ -29,17 +29,17 @@
 	OSStatus theStatus;
 	
 	theStatus = KCFindInternetPassword (
-										serverPString,			// StringPtr serverName,
-										NULL,					// StringPtr securityDomain,
-										accountPString,		// StringPtr accountName,
-										kAnyPort,				// UInt16 port,
-										kAnyProtocol,			// OSType protocol,
-										kAnyAuthType,			// OSType authType,
-										255,					// UInt32 maxLength,
-										passwordBuffer,		// void * passwordData,
-										&actualLength,			// UInt32 * actualLength,
-										nil					// KCItemRef * item
-										);
+                                      serverPString,			// StringPtr serverName,
+                                      NULL,					// StringPtr securityDomain,
+                                      accountPString,		// StringPtr accountName,
+                                      kAnyPort,				// UInt16 port,
+                                      kAnyProtocol,			// OSType protocol,
+                                      kAnyAuthType,			// OSType authType,
+                                      255,					// UInt32 maxLength,
+                                      passwordBuffer,		// void * passwordData,
+                                      &actualLength,			// UInt32 * actualLength,
+                                      nil					// KCItemRef * item
+                                      );
 	if (noErr == theStatus)
 	{
 		passwordBuffer[actualLength] = 0;		// make it a legal C string by appending 0
@@ -63,11 +63,11 @@
 	initialDirectory = NSHomeDirectory();
 	NSError *err = nil;
 	connection = [[AbstractConnection connectionWithName: connectionName
-													host: host
-													port: port
-												username: username
-												password: password
-												   error:&err] retain];
+                                                  host: host
+                                                  port: port
+                                              username: username
+                                              password: password
+                                                 error:&err] retain];
 	if (!connection)
 	{
 		if (err)
@@ -105,7 +105,7 @@
                                            handler: nil];
 }
 
-- (void) testUploadToFile
+- (void) testUploadToFileAndDelete
 {
   [connection connect];
   
@@ -126,6 +126,18 @@
   STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not upload file");
   
   //clean up
+  //
+  [connection deleteFile: @"AbstractConnectionTest.h"];
+  
+  didDelete = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+
+  STAssertFalse([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not delete the file");
+
+  //enforce clean up
+  //
   [[NSFileManager defaultManager] removeFileAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]
                                            handler: nil];
 }
@@ -185,7 +197,7 @@
   initialTime = [NSDate date];
   while (([connection isConnected])  && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-
+  
   
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on deconnection");
   STAssertFalse([connection isConnected], @"did not disconnect");
@@ -259,5 +271,11 @@
 {
   if (![con numberOfTransfers])
     didUpload = YES;
+}
+
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
+{
+  didDelete = YES;
 }
 @end
