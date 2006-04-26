@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
-		09D6603809FD37B70000BA00 /* LocalConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603309FD37B70000BA00 /* LocalConnectionTest.m */; };
-		09D6603909FD37B70000BA00 /* SFTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		796DB32409F8BBAB0065897B /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 796DB21209F89DCB0065897B /* SSLStream.m */; };
@@ -832,8 +830,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */,
-				09D6603809FD37B70000BA00 /* LocalConnectionTest.m in Sources */,
-				09D6603909FD37B70000BA00 /* SFTPConnectionTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
