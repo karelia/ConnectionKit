@@ -104,6 +104,15 @@
 	return myFilename;
 }
 
+- (void)didPushToHistoryQueue
+{
+	// release the file data from memory
+	if (myLocalFilename)
+	{
+		[self setContent:[NSData data]];
+	}
+}
+
 - (NSData *)serialized
 {
 	// load the file data at the latest possible time.
