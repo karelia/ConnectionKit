@@ -54,7 +54,13 @@
 
 - (void) setDelegate:(id)aDelegate
 {
-	[lock lock];
+	if (![lock tryLock])
+	{
+		[self performSelector:@selector(setDelegate:)
+				   withObject:aDelegate
+				   afterDelay:0.1];
+	}
+	//[lock lock];
 	myDelegate = aDelegate;
 	[lock unlock];
 }
