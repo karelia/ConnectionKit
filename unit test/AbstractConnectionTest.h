@@ -9,9 +9,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <Connection/Connection.h>
 
-#define ___SOURCEROOT___ @"/Users/olivier/Documents/Projects/source/connection-svn/trunk/unit test/"
 @interface FTPConnectionTest : SenTestCase {
-  AbstractQueueConnection *connection;
+  id <AbstractConnectionProtocol> connection;
   NSString *connectionName;
   NSString *username;
   NSString *password;
@@ -25,5 +24,7 @@
   BOOL receivedError;
   BOOL didUpload;
 }
+
++ (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
 
 @end
