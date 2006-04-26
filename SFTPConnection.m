@@ -98,7 +98,6 @@ static NSArray *sftpErrors = nil;
 {
 	if (!username || [username length] == 0)
 	{
-		[self release];
 		if (error)
 		{
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain
@@ -107,6 +106,7 @@ static NSArray *sftpErrors = nil;
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
+		[self release];
 		return nil;
 	}
 	if (self = [super initWithHost:host port:port username:username password:password error:error]) {

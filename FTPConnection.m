@@ -116,7 +116,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	if (!username || [username length] == 0 || !password || [password length] == 0)
 	{
-		[self release];
 		if (error)
 		{
 			NSError *err = [NSError errorWithDomain:FTPErrorDomain
@@ -125,6 +124,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
+		[self release];
 		return nil;
 	}
 	

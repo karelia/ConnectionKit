@@ -87,7 +87,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	if (!username || [username length] == 0 || !password || [password length] == 0)
 	{
-		[self release];
 		if (error)
 		{
 			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
@@ -96,6 +95,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
+		[self release];
 		return nil;
 	}
 	if (self = [super initWithHost:host
