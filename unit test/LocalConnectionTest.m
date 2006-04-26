@@ -17,12 +17,23 @@
   
   //set info for your ftp server here
   //
-  localPath = @"/Users/olivier";
-  connection = [[AbstractQueueConnection connectionWithName: connectionName
-                                                       host: host
-                                                       port: port
-                                                   username: username
-                                                   password: password] retain];
+	localPath = NSHomeDirectory();
+	initialDirectory = NSHomeDirectory();
+	NSError *err = nil;
+	connection = [[AbstractConnection connectionWithName: connectionName
+													host: host
+													port: port
+												username: username
+												password: password
+												   error:&err] retain];
+	if (!connection)
+	{
+		if (err)
+		{
+			NSLog(@"%@", err);
+		}
+	}
+	
   [connection setDelegate: self];
   
   didUpload = isConnected = receivedError = NO;
