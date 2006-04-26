@@ -23,6 +23,7 @@
   BOOL isConnected;
   BOOL receivedError;
   BOOL didUpload;
+  BOOL didDelete;
 }
 
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
