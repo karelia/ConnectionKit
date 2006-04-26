@@ -143,7 +143,6 @@
 
 	if (![self getDotMacAccountName:&username password:&password])
 	{
-		[self release];
 		if (error)
 		{
 			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
@@ -152,6 +151,7 @@
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
+		[self release];
 		return nil;
 	}
 	
