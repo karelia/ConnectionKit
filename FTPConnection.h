@@ -110,17 +110,6 @@ typedef enum {
 	
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
-			  username:(NSString *)username
-			  password:(NSString *)password;
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
-		  username:(NSString *)username
-		  password:(NSString *)password;
-
-
 // TESTING
 - (NSString *)scanBetweenQuotes:(NSString *)aString;
 

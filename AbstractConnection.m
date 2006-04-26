@@ -30,6 +30,21 @@
 
 #import "AbstractConnection.h"
 
+@interface AbstractConnection (Deprecated)
++ (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
+												 host:(NSString *)host
+												 port:(NSString *)port
+											 username:(NSString *)username
+											 password:(NSString *)password;
++ (id <AbstractConnectionProtocol>)connectionToHost:(NSString *)host
+											   port:(NSString *)port
+										   username:(NSString *)username
+										   password:(NSString *)password;
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url;
+@end
+
+
+
 NSString *ACClassKey = @"Class";
 NSString *ACTypesKey = @"Types";
 NSString *ACTypeKey = @"ACTypeKey";
@@ -171,6 +186,9 @@ NSDictionary *sDataAttributes;
 	return nil;
 }
 
+#pragma mark -
+#pragma mark Protocol Class Methods
+
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
 												 host:(NSString *)host
 												 port:(NSString *)port
@@ -209,6 +227,61 @@ NSDictionary *sDataAttributes;
 			}
 		}
 	}
+	return nil;
+}
+
++ (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
+												 host:(NSString *)host
+												 port:(NSString *)port
+											 username:(NSString *)username
+											 password:(NSString *)password
+												error:(NSError **)error
+{
+	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
+	NSDictionary *cur;
+	
+	KTLog(ConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
+	
+	if (!name) {
+		return [AbstractConnection connectionToHost:host
+											   port:port
+										   username:username
+										   password:password
+											  error:error];
+	}
+	
+	while (cur = [e nextObject])
+	{
+		Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+		NSString *n = [[class name] lowercaseString];
+		NSString *searchName = [name lowercaseString];
+		
+		if ([n isEqualToString:searchName])
+		{
+			if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
+			{
+				KTLog(ConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
+				if (port == nil)
+					port = [AbstractConnection registeredPortForConnectionType:[class name]];
+				
+				return [class connectionToHost:host
+										  port:port
+									  username:username
+									  password:password
+										 error:error];
+			}
+		}
+	}
+	
+	if (error)
+	{
+		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
+										   code:ConnectionNoConnectionsAvailable
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested connection type", @"failed to find a connection class")
+																			forKey:NSLocalizedDescriptionKey]];
+		*error = err;
+	}
+	
 	return nil;
 }
 
@@ -260,6 +333,63 @@ NSDictionary *sDataAttributes;
 	return nil;
 }
 
++ (id <AbstractConnectionProtocol>)connectionToHost:(NSString *)host
+											   port:(NSString *)port
+										   username:(NSString *)username
+										   password:(NSString *)password
+											  error:(NSError **)error
+{
+	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
+	NSDictionary *cur;
+	
+	while (cur = [e nextObject])
+	{
+		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
+		NSDictionary *type;
+		
+		while (type = [f nextObject])
+		{
+			NSString *connType = [type objectForKey:ACTypeKey];
+			if ([connType isEqualToString:ACPortTypeKey])
+			{
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				{
+					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+					return [class connectionToHost:host
+											  port:port
+										  username:username
+										  password:password
+											 error:error];
+				}
+			}
+			else if ([connType isEqualToString:ACURLTypeKey])
+			{
+				NSRange r;
+				if ((r = [host rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
+				{
+					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
+					return [class connectionToHost:hostWithOutSpecifier
+											  port:port
+										  username:username
+										  password:password
+											 error:error];
+				}
+			}
+		}
+	}
+	if (error)
+	{
+		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
+										   code:ConnectionNoConnectionsAvailable
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested port", @"failed to find a connection class")
+																			forKey:NSLocalizedDescriptionKey]];
+		*error = err;
+	}
+	
+	return nil;
+}
+
 + (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url
 {
 	NSString *resourceSpec = [url resourceSpecifier];
@@ -308,6 +438,64 @@ NSDictionary *sDataAttributes;
 	return nil;
 }
 
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url error:(NSError **)error
+{
+	NSString *resourceSpec = [url resourceSpecifier];
+	NSString *host = [url host];
+	NSString *user = [url user];
+	NSString *pass = [url password];
+	NSString *port = [NSString stringWithFormat:@"%@",[url port]];
+	
+	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
+	NSDictionary *cur;
+	
+	while (cur = [e nextObject])
+	{
+		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
+		NSDictionary *type;
+		
+		while (type = [f nextObject])
+		{
+			NSString *connType = [type objectForKey:ACTypeKey];
+			if ([connType isEqualToString:ACPortTypeKey])
+			{
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				{
+					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+					return [class connectionToHost:host
+											  port:port
+										  username:user
+										  password:pass
+											 error:error];
+				}
+			}
+			else if ([connType isEqualToString:ACURLTypeKey])
+			{
+				NSRange r;
+				if ((r = [resourceSpec rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
+				{
+					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
+					return [class connectionToHost:hostWithOutSpecifier
+											  port:port
+										  username:user
+										  password:pass
+											 error:error];
+				}
+			}
+		}
+	}
+	if (error)
+	{
+		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
+										   code:ConnectionNoConnectionsAvailable
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested protocol", @"failed to find a connection class")
+																			forKey:NSLocalizedDescriptionKey]];
+		*error = err;
+	}
+	return nil;
+}
+
 #pragma mark -
 #pragma mark Inheritable methods
 
@@ -315,6 +503,7 @@ NSDictionary *sDataAttributes;
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
 	if (self = [super init])
 	{
@@ -322,6 +511,10 @@ NSDictionary *sDataAttributes;
 		[self setPort:port];
 		[self setUsername:username];
 		[self setPassword:password];
+		if (error)
+		{
+			*error = nil;
+		}
 	}
 	return self;
 }

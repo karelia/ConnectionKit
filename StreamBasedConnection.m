@@ -53,21 +53,23 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
-	[super initWithHost:host port:port username:username password:password];
-	
-	_port = [[NSPort port] retain];
-	_forwarder = [[RunLoopForwarder alloc] init];
-	[_forwarder setReturnValueDelegate:self];
-	_sendBufferLock = [[NSLock alloc] init];
-	_sendBuffer = [[NSMutableData data] retain];
-	_fileCheckingLock = [[NSConditionLock alloc] init];
-	
-	[_port setDelegate:self];
-	[NSThread prepareForInterThreadMessages];
-	[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
-							 toTarget:self
-						   withObject:nil];
+	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	{
+		_port = [[NSPort port] retain];
+		_forwarder = [[RunLoopForwarder alloc] init];
+		[_forwarder setReturnValueDelegate:self];
+		_sendBufferLock = [[NSLock alloc] init];
+		_sendBuffer = [[NSMutableData data] retain];
+		_fileCheckingLock = [[NSConditionLock alloc] init];
+		
+		[_port setDelegate:self];
+		[NSThread prepareForInterThreadMessages];
+		[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
+								 toTarget:self
+							   withObject:nil];
+	}
 	
 	return self;
 }
@@ -637,7 +639,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		_fileCheckingConnection = [[[self class] alloc] initWithHost:[self host]
 																port:[self port]
 															username:[self username]
-															password:[self password]];
+															password:[self password]
+															   error:nil];
 		[_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection connect];
 	}

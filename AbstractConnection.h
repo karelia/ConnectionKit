@@ -38,7 +38,13 @@ It also functions as a registry for automatic subclass detection.
 */
 
 extern NSString *ConnectionErrorDomain;
-enum { ConnectionErrorParsingDirectoryListing = 6000, ConnectionStreamError, ConnectionErrorBadPassword };
+enum { 
+	ConnectionErrorParsingDirectoryListing = 6000, 
+	ConnectionStreamError, 
+	ConnectionErrorBadPassword, 
+	ConnectionNoConnectionsAvailable,
+	ConnectionNoUsernameOrPassword,
+};
 // Logging Domain Keys
 extern NSString *ConnectionDomain;
 extern NSString *TransportDomain; // used in custom stream classes
@@ -95,16 +101,18 @@ typedef enum {
 												 host:(NSString *)host
 												 port:(NSString *)port
 											 username:(NSString *)username
-											 password:(NSString *)password;
+											 password:(NSString *)password
+												error:(NSError **)error;
 
-+ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url;
++ (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url error:(NSError **)error;
 
 // Convenience Superclass methods for basic getting & setting
 
 - (id)initWithHost:(NSString *)host
 			  port:(NSString *)port
 		  username:(NSString *)username
-		  password:(NSString *)password;
+		  password:(NSString *)password
+			 error:(NSError **)error;
 
 - (void)setHost:(NSString *)host;
 - (void)setPort:(NSString *)port;

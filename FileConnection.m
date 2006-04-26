@@ -79,7 +79,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 - (id)init
 {
-	[self initWithHost:@"the File System" port:@"ignored" username:@"ignored" password:@"ignored"];
+	[self initWithHost:@"the File System" port:@"ignored" username:@"ignored" password:@"ignored" error:nil];
 	return self;
 }
 
@@ -92,11 +92,13 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	FileConnection *c = [[FileConnection alloc] initWithHost:host
 														port:port
 													username:username
-													password:password];
+													password:password
+													   error:error];
 	return [c autorelease];
 }
 
@@ -106,8 +108,9 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 			  port:(NSString *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
-	if (self = [super initWithHost:host port:port username:username password:password])
+	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
 		myPendingInvocations = [[NSMutableArray array] retain];
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
