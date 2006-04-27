@@ -43,6 +43,10 @@ NSString *QueueDomain = @"Queuing";
 
 #define QUEUE_HISTORY_COMMAND_SIZE 10
 
+@interface NSObject (HistoryQueueSupport)
+- (void)didPushToHistoryQueue;
+@end
+
 @implementation AbstractQueueConnection
 
 - (id)initWithHost:(NSString *)host
