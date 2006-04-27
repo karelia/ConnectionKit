@@ -166,6 +166,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	while (_runThread)
 	{
 		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+		[NSThread sleepUntilDate:[NSDate distantPast]];
 	}
 	_bgThread = nil;
 	

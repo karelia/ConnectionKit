@@ -201,13 +201,6 @@ static NSArray *sftpErrors = nil;
 		if (authorizeConnection)
 		{
 			[self sendCommand:@"yes"];
-			[self setState:ConnectionAwaitingCurrentDirectoryState];
-			[self sendCommand:@"pwd"];
-			_flags.isConnected = YES;
-			if (_flags.didConnect)
-			{
-				[_forwarder connection:self didConnectToHost:[self host]];
-			}
 		}
 		else 
 		{
@@ -479,6 +472,7 @@ static NSArray *sftpErrors = nil;
 						msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
 					}
 					NSString *message = [_inputBuffer substringToIndex:msgRange.location];
+					[_inputBuffer deleteCharactersInRange:NSMakeRange(0, msgRange.location + msgRange.length)];
 					[_forwarder connection:self 
 				 authorizeConnectionToHost:[self host] 
 								   message:[NSString stringWithFormat:@"%@\nDo you wish to authorize the connection?", message]];
@@ -803,8 +797,12 @@ static NSArray *sftpErrors = nil;
 	
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\n", cmd];
 	NSString *prompttedCommand = [NSString stringWithFormat:@"sftp> %@\n", cmd];
-	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:prompttedCommand
-															  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:prompttedCommand
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 	
 	[self sendData:[formattedCommand dataUsingEncoding:NSUTF8StringEncoding]];
 }
