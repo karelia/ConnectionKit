@@ -955,7 +955,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 425:
 		{
 			// 425 can't open data connection
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
+			if (GET_STATE == ConnectionAwaitingDirectoryContentsState ||
+				GET_STATE == ConnectionUploadingFileState)
 			{
 				ConnectionCommand *last = [self lastCommand];
 				ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
