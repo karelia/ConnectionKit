@@ -52,6 +52,7 @@ extern NSString *StateMachineDomain;
 extern NSString *ParsingDomain;
 extern NSString *ProtocolDomain;
 extern NSString *ThreadingDomain;
+extern NSString *StreamDomain;
 
 typedef enum {
 	ConnectionNotConnectedState = 0,
