@@ -479,6 +479,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"Command receive stream opened");
 			break;
 		}
 		case NSStreamEventErrorOccurred:
@@ -506,6 +507,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventEndEncountered:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"Command receive stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
@@ -544,6 +546,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"Command send stream opened");
 		//	if ([(NSInputStream *)_receiveStream hasBytesAvailable]) {
 		//		[self stream:_receiveStream handleEvent:NSStreamEventHasBytesAvailable];
 		//	}
@@ -574,6 +577,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventEndEncountered:
 		{
+			KTLog(TransportDomain, KTLogDebug, @"Command send stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
