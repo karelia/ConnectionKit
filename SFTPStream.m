@@ -192,6 +192,7 @@ enum { START = 200, STOP };
 	while (_runThread)
 	{
 		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+		[NSThread sleepUntilDate:[NSDate distantPast]];
 	}
 	_bgThread = nil;
 	[pool release];
@@ -293,6 +294,7 @@ enum { START = 200, STOP };
 
 - (void)checkBuffers:(id)notused 
 {
+	NSLog(@"Checking Buffers");
 	char *buf[ MAXPATHLEN ];
 	fd_set readmask;
 	FD_ZERO(&readmask);
@@ -315,7 +317,8 @@ enum { START = 200, STOP };
 			{
 				[self performSelector:@selector(checkBuffers:)
 						   withObject:nil
-						   afterDelay:0.1]; 
+							 inThread:[NSThread currentThread]
+						   beforeDate:[NSDate distantFuture]];
 			}
 			return;
 		}	
@@ -346,7 +349,8 @@ enum { START = 200, STOP };
 	{
 		[self performSelector:@selector(checkBuffers:)
 				   withObject:nil
-				   afterDelay:0.1]; 
+					 inThread:[NSThread currentThread]
+				   beforeDate:[NSDate distantFuture]];
 	}
 }
 
