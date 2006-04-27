@@ -895,6 +895,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.createDirectory)
 				{
 					NSString *path = [self scanBetweenQuotes:command];
+					if (!path || [path length] == 0)
+					{
+						path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+					}
 					[_forwarder connection:self didCreateDirectory:path];
 				}
 				[self setState:ConnectionIdleState];
