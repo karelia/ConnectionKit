@@ -338,6 +338,7 @@ static NSString *KTLevelMap[] = {
 	{
 		[NSBundle loadNibNamed:@"KTLog" owner:self];
 	}
+	[oDomains reloadData];
 	[oPanel makeKeyAndOrderFront:self];
 }
 
