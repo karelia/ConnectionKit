@@ -141,11 +141,11 @@ enum { START = 200, STOP };
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
 {
 	_status = NSStreamStatusWriting;
-	KTLog(TransportDomain, KTLogDebug, @"sftp_stream <<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
+	KTLog(StreamDomain, KTLogDebug, @"<<: %@", [[[NSString alloc] initWithBytes:buffer length:len encoding:NSUTF8StringEncoding] autorelease]);
 	
 	int wr = write( _master, buffer, len);
 	if (wr != len) {
-		KTLog(TransportDomain, KTLogError, @"sftp buffer length mismatch. Wrote %d of %d bytes", wr, len);
+		KTLog(StreamDomain, KTLogError, @"sftp buffer length mismatch. Wrote %d of %d bytes", wr, len);
 	}
 	_status = NSStreamStatusOpen;
 	return wr;
@@ -269,12 +269,12 @@ enum { START = 200, STOP };
 				newEnv[i] = (char *)[[NSString stringWithFormat:@"%@=%@", key, [env objectForKey:key]] UTF8String];
 			}
 			execve( execargs[ 0 ], ( char ** )execargs,  newEnv);
-			KTLog(TransportDomain, KTLogFatal, @"Couldn't launch sftp: %s", strerror( errno ));
+			KTLog(StreamDomain, KTLogFatal, @"Couldn't launch sftp: %s", strerror( errno ));
 			return;					/* shouldn't get here */			
 		}
 						
 		case -1:
-			KTLog(TransportDomain, KTLogError, @"forkpty failed: %s", strerror( errno ));
+			KTLog(StreamDomain, KTLogError, @"forkpty failed: %s", strerror( errno ));
 			return;
 			
 		default:
@@ -283,11 +283,11 @@ enum { START = 200, STOP };
     
     if ( fcntl( _master, F_SETFL, O_NONBLOCK ) < 0 ) 
 	{	/* prevent master from blocking */
-        KTLog(TransportDomain, KTLogError, @"fcntl non-block failed: %s", strerror( errno ));
+        KTLog(StreamDomain, KTLogError, @"fcntl non-block failed: %s", strerror( errno ));
     }
 
     if (( _mf = fdopen( _master, "r+" )) == NULL ) {
-        KTLog(TransportDomain, KTLogError, @"failed to open file stream with fdopen: %s", strerror( errno ));
+        KTLog(StreamDomain, KTLogError, @"failed to open file stream with fdopen: %s", strerror( errno ));
         return;
     }
     setvbuf( _mf, NULL, _IONBF, 0 );
@@ -310,7 +310,7 @@ enum { START = 200, STOP };
 	{
 		case -1:
 		{
-			KTLog(TransportDomain, KTLogError, @"select: %s", strerror( errno ));
+			KTLog(StreamDomain, KTLogError, @"select: %s", strerror( errno ));
 			break;
 		}
 		case 0:	

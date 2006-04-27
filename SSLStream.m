@@ -209,7 +209,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		{
 			if (_flags.isHandshaking) 
 			{
-				KTLog(TransportDomain, KTLogDebug, @"SSL Tried to activate while handshake in progress");
+				KTLog(StreamDomain, KTLogDebug, @"SSL Tried to activate while handshake in progress");
 				return;
 			}
 			
@@ -223,7 +223,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 			}
 			if (ret < 0)
 			{
-				KTLog(TransportDomain, KTLogFatal, @"Failed to complete SSL Handshake");
+				KTLog(StreamDomain, KTLogFatal, @"Failed to complete SSL Handshake");
 				return;
 			}
 			
@@ -367,24 +367,24 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	{
 		if (ret = SSLNewContext((Boolean)_flags.sslServerMode, &_sslContext))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to create SSL Context");
+			KTLog(StreamDomain, KTLogFatal, @"Failed to create SSL Context");
 		}
 		
 		if (ret = SSLSetConnection(_sslContext, self))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to set SSL connection reference");
+			KTLog(StreamDomain, KTLogFatal, @"Failed to set SSL connection reference");
 			return ret;
 		}
 		
 		if (ret = SSLSetIOFuncs(_sslContext, SSLReadFunction, SSLWriteFunction))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to set SSL IO Functions");
+			KTLog(StreamDomain, KTLogFatal, @"Failed to set SSL IO Functions");
 			return ret;
 		}
 		
 		if (ret = SSLSetEnableCertVerify(_sslContext, true))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to set verify certificates");
+			KTLog(StreamDomain, KTLogFatal, @"Failed to set verify certificates");
 			return ret;
 		}
 		
@@ -394,7 +394,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		
 		if (ret)
 		{
-			KTLog(TransportDomain, KTLogDebug, @"Failed to set SSL Certificate");
+			KTLog(StreamDomain, KTLogDebug, @"Failed to set SSL Certificate");
 		}
 		
 		_inputData = input;
@@ -403,7 +403,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		
 		if (ret == errSSLWouldBlock)
 		{
-			KTLog(TransportDomain, KTLogDebug, @"SSL Handshake would block");
+			KTLog(StreamDomain, KTLogDebug, @"SSL Handshake would block");
 			return 0;
 		}
 		
@@ -435,7 +435,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		int ret;
 		if (ret = SSLWrite(_sslContext, buffer + processed, inputLength - processed, &written))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
+			KTLog(StreamDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
 			return nil;
 		}
 		processed += written;
@@ -464,7 +464,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		ret = SSLRead(_sslContext, buf, 1024, &read);
 		if (ret && (ret != errSSLWouldBlock) && (ret != errSSLClosedGraceful))
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
+			KTLog(StreamDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
 			return nil;
 		}
 		

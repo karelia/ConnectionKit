@@ -74,6 +74,7 @@ NSString *ParsingDomain = @"Parser";
 NSString *ProtocolDomain = @"Protocol";
 NSString *ConnectionDomain = @"Connection";
 NSString *ThreadingDomain = @"Threading";
+NSString *StreamDomain = @"Stream";
 
 static NSMutableArray *_connectionTypes = nil;
 
