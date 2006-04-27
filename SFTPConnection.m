@@ -44,6 +44,8 @@ NSString *SFTPRenameFromKey = @"from";
 NSString *SFTPRenameToKey = @"to";
 NSString *SFTPTransferSizeKey = @"size";
 
+NSString *SFTPServerKeyChangedMessage = @"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\r\n@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @\r\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
+
 const unsigned int kSFTPBufferSize = 2048;
 
 @interface SFTPConnection (Private)
@@ -119,7 +121,6 @@ static NSArray *sftpErrors = nil;
 - (void)dealloc
 {
 	[_inputBuffer release];
-	[_sftp release];
 	[_currentDir release];
 	[super dealloc];
 }
@@ -158,14 +159,16 @@ static NSArray *sftpErrors = nil;
 			[args addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
 			[self closeStreams];
 			
-			_sftp = [[SFTPStream alloc] initWithArguments:args];
+			SFTPStream *sftp = [[SFTPStream alloc] initWithArguments:args];
 			
-			[self setSendStream:_sftp];
-			[self setReceiveStream:_sftp];
+			[self setSendStream:sftp];
+			[self setReceiveStream:sftp];
 			
-			[_sftp setDelegate:self];			
-			[_sftp scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-			[_sftp open];
+			[sftp release];
+			
+			[sftp setDelegate:self];			
+			[sftp scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+			[sftp open];
 		}
 		break;
 		case DISCONNECT: {
@@ -189,7 +192,8 @@ static NSArray *sftpErrors = nil;
 
 - (void)closeStreams
 {
-	[_sftp setDelegate:nil];
+	[[self receiveStream] setDelegate:nil];
+	[[self sendStream] setDelegate:nil];
 	[super closeStreams];
 }
 
@@ -444,9 +448,13 @@ static NSArray *sftpErrors = nil;
 	
 	if (GET_STATE != ConnectionUploadingFileState &&
 		GET_STATE != ConnectionDownloadingFileState &&
-		GET_STATE != ConnectionAwaitingDirectoryContentsState) 
+		GET_STATE != ConnectionAwaitingDirectoryContentsState &&
+		[self transcript]) 
+	{
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:str
 																  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+	}
+		
 	
 	switch (GET_STATE) {
 		case ConnectionNotConnectedState: {
@@ -456,7 +464,7 @@ static NSArray *sftpErrors = nil;
 				[self sendData:[[NSString stringWithFormat:@"%@\n", [self password]] dataUsingEncoding:NSUTF8StringEncoding]];
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:@"#####"
 																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
-			} else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", @"@@@", nil]].location != NSNotFound) {
+			} else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", nil]].location != NSNotFound) {
 				//need to authenticate the host. Should we really default to yes?
 				KTLog(ProtocolDomain, KTLogDebug, @"Connecting to unknown host. Awaiting repsonse from delegate");
 				if (_flags.authorizeConnection) {
@@ -486,7 +494,48 @@ static NSArray *sftpErrors = nil;
 					KTLog(ProtocolDomain, KTLogInfo, @"Delegate does not implement connection:authorizeConnectionToHost:message: to authorize the connection"); 
 					[self forceDisconnect];
 				}
-			} else if ([self bufferContainsCommandPrompt]) {
+			} 
+			else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObject:SFTPServerKeyChangedMessage]].location != NSNotFound)
+			{
+				//read until the end
+				[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
+				int attempt = 5;
+				
+				while (attempt >= 0)
+				{
+					NSData *bufData = [self availableData];
+					if ([bufData length] > 0) {
+						NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
+						[_inputBuffer appendString:buf];
+					} 
+					else
+					{
+						attempt--;
+					}
+					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.10]];
+				}
+				//replace the \r\r\n to \n
+				[_inputBuffer replaceOccurrencesOfString:@"\r\r\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, [_inputBuffer length])];
+				
+				NSString *msg = [NSString stringWithString:_inputBuffer];
+				if ([self transcript])
+				{
+					[[self transcript] deleteCharactersInRange:NSMakeRange(0, [[self transcript] length])];
+					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:msg
+																			  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+				}
+				if (_flags.error)
+				{
+					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
+													   code:SFTPError
+												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];
+					[_forwarder connection:self didReceiveError:err];
+					[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
+				}
+				[self forceDisconnect];
+				return;
+			} 
+			else if ([self bufferContainsCommandPrompt]) {
 				//ssh authorized keys validated us
 				KTLog(ProtocolDomain, KTLogInfo, @"Validated via ssh's authorized_keys");
 				[self setState:ConnectionAwaitingCurrentDirectoryState];
@@ -515,6 +564,7 @@ static NSArray *sftpErrors = nil;
 			} else if ([self bufferContainsPasswordPrompt]) {
 				if (_flags.badPassword) {
 					[_forwarder connectionDidSendBadPassword:self];
+					[self forceDisconnect];
 				}
 			} else if ([self bufferContainsError]){
 				if (_flags.error) {
