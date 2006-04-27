@@ -79,10 +79,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 {
 	[self closeStreams];
 	[self sendPortMessage:KILL_THREAD];
-	while (_bgThread)
-	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-	}
 	[_port setDelegate:nil];
     [_port release];
 	[_forwarder release];
@@ -188,10 +184,17 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[message setMsgid:aMessage];
 		
 		@try {
-			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
-			if (!sent)
+			if ([NSThread currentThread] != _bgThread)
 			{
-				KTLog(ThreadingDomain, KTLogFatal, @"StreamBasedConnection couldn't send message %d", aMessage);
+				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
+				if (!sent)
+				{
+					KTLog(ThreadingDomain, KTLogFatal, @"StreamBasedConnection couldn't send message %d", aMessage);
+				}
+			}
+			else
+			{
+				[self handlePortMessage:message];
 			}
 		} @catch (NSException *ex) {
 			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
@@ -461,7 +464,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_sendBufferLock lock];
 		unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 		NSData *chunk = [_sendBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-		KTLog(TransportDomain, KTLogDebug, @"SBC << %@", [chunk descriptionAsString]);
+		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk descriptionAsString]);
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							   withBytes:NULL
 								  length:0];
@@ -483,7 +486,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @">> %@", [data length], [data descriptionAsString]);
+				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
@@ -551,7 +554,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @">> %@", [data length], [data descriptionAsString]);
+				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
 				[self processReceivedData:data];
 			}
 			free(buf);

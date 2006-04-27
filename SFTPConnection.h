@@ -42,7 +42,6 @@ enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTP
 
 @interface SFTPConnection : StreamBasedConnection 
 {
-	SFTPStream			*_sftp;
 	NSMutableString		*_inputBuffer;
 	NSString			*_currentDir;
 	
