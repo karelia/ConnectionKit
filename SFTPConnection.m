@@ -551,8 +551,6 @@ static NSArray *sftpErrors = nil;
 					[_forwarder connection:self didReceiveError:err];
 					[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
 				}
-			} else {
-				[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
 			}
 		} break;
 		case ConnectionSentPasswordState: {
