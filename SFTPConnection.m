@@ -489,9 +489,13 @@ static NSArray *sftpErrors = nil;
 													   code:SFTPErrorPermissionDenied
 												   userInfo:[NSDictionary dictionaryWithObject:@"Failed to Authorize Connection" forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:err];
+					//pause before forcing the disconnect
+					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
 					[self forceDisconnect];
 				} else {
 					KTLog(ProtocolDomain, KTLogInfo, @"Delegate does not implement connection:authorizeConnectionToHost:message: to authorize the connection"); 
+					//pause before forcing the disconnect
+					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
 					[self forceDisconnect];
 				}
 			} 
@@ -532,6 +536,8 @@ static NSArray *sftpErrors = nil;
 					[_forwarder connection:self didReceiveError:err];
 					[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
 				}
+				//pause before forcing the disconnect
+				[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
 				[self forceDisconnect];
 				return;
 			} 
@@ -562,6 +568,8 @@ static NSArray *sftpErrors = nil;
 			} else if ([self bufferContainsPasswordPrompt]) {
 				if (_flags.badPassword) {
 					[_forwarder connectionDidSendBadPassword:self];
+					//pause before forcing the disconnect
+					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
 					[self forceDisconnect];
 				}
 			} else if ([self bufferContainsError]){
