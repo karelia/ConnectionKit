@@ -189,10 +189,14 @@ enum { START = 200, STOP };
 	_bgThread = [NSThread currentThread];
 	[NSThread prepareForInterThreadMessages];
 	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
+	NSAutoreleasePool *loop;
+	
 	while (_runThread)
 	{
-		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+		loop = [[NSAutoreleasePool alloc] init];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 		[NSThread sleepUntilDate:[NSDate distantPast]];
+		[loop release];
 	}
 	_bgThread = nil;
 	[pool release];
@@ -294,7 +298,6 @@ enum { START = 200, STOP };
 
 - (void)checkBuffers:(id)notused 
 {
-	NSLog(@"Checking Buffers");
 	char *buf[ MAXPATHLEN ];
 	fd_set readmask;
 	FD_ZERO(&readmask);
