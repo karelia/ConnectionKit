@@ -170,9 +170,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 /*!	Called from the background thread.
 */
-- (void)sendCommand:(NSString *)command
+- (void)sendCommand:(id)command
 {
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+	
+	if ([command isKindOfClass:[NSInvocation class]])
+	{
+		[command invoke];
+		return;
+	}
 	
 	if ([command isEqualToString:@"DATA_CON"])
 	{
@@ -551,6 +557,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_serverSupport.hasMDTM = YES;
 				else
 					_serverSupport.hasMDTM = NO;
+				if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
+					_serverSupport.hasSITE = YES;
+				else
+					_serverSupport.hasSITE = NO;
 				if (_serverSupport.loggedIn == NO) {
 					[self sendCommand:[NSString stringWithFormat:@"USER %@", _username]];
 					[self setState:ConnectionSentUsernameState];
@@ -1216,10 +1226,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{
 				error = LocalizedStringInThisBundle(@"Create directory operation failed", @"FTP Create directory error");
-				if ([command rangeOfString:@"exists"].location != NSNotFound) {
+				//Some servers won't say that the directory exists. Once I get peer connections going, I will be able to ask the
+				//peer if the dir exists for confirmation until then we will make the assumption that it exists.
+				//if ([command rangeOfString:@"exists"].location != NSNotFound) {
 					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-					[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
-				}
+					[userInfo setObject:[[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]
+								 forKey:ConnectionDirectoryExistsFilenameKey];
+					//[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
+				//}
 			}
 			else
 			{
@@ -1861,9 +1875,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:cmd];
 }
 
+- (void)threadedSetPermissions:(NSNumber *)perms forFile:(NSString *)path
+{
+	if (_serverSupport.hasSITE)
+	{
+		unsigned long permissions = [perms unsignedLongValue];
+		NSString *cmd = [NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path];
+		[self sendCommand:cmd];
+	}
+	else
+	{
+		// do we send an error or silenty fail????
+		[self dequeuePermissionChange];
+		[self setState:ConnectionIdleState];
+	}
+}
+
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
-	ConnectionCommand *chmod = [ConnectionCommand command:[NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, dirPath]
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
+													  target:self
+												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
+	ConnectionCommand *chmod = [ConnectionCommand command:inv
 											   awaitState:ConnectionIdleState 
 												sentState:ConnectionSettingPermissionsState
 												dependant:nil
@@ -1880,8 +1913,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
+													  target:self
+												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], path, nil]];
 	[self queuePermissionChange:path];
-	ConnectionCommand *chmod = [ConnectionCommand command:[NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path]
+	ConnectionCommand *chmod = [ConnectionCommand command:inv
 											   awaitState:ConnectionIdleState 
 												sentState:ConnectionSettingPermissionsState
 												dependant:nil
@@ -2146,7 +2182,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (ConnectionCommand *)nextAvailableDataConnectionType
 {
 	ConnectionCommand *cmd = nil;
-	if (_serverSupport.canUseEPSV) {
+	if (_serverSupport.canUsePASV) {
+		cmd = [ConnectionCommand command:@"PASV" 
+							  awaitState:ConnectionIdleState
+							   sentState:FTPSettingPassiveState
+							   dependant:nil 
+								userInfo:nil];
+	}
+	else if (_serverSupport.canUseEPSV) {
 		cmd = [ConnectionCommand command:@"EPSV" 
 							  awaitState:ConnectionIdleState
 							   sentState:FTPSettingEPSVState
@@ -2166,13 +2209,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		cmd = [ConnectionCommand command:@"PORT" 
 							  awaitState:ConnectionIdleState
 							   sentState:FTPSettingActiveState
-							   dependant:nil 
-								userInfo:nil];
-	}
-	else if (_serverSupport.canUsePASV) {
-		cmd = [ConnectionCommand command:@"PASV" 
-							  awaitState:ConnectionIdleState
-							   sentState:FTPSettingPassiveState
 							   dependant:nil 
 								userInfo:nil];
 	}
