@@ -163,10 +163,14 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.	
 	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
+	NSAutoreleasePool *loop;
+	
 	while (_runThread)
 	{
-		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+		loop = [[NSAutoreleasePool alloc] init];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 		[NSThread sleepUntilDate:[NSDate distantPast]];
+		[loop release];
 	}
 	_bgThread = nil;
 	
