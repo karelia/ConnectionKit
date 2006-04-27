@@ -102,10 +102,11 @@ typedef enum {
 		unsigned hasPBSZ: 1;
 		unsigned hasPROT: 1;
 		unsigned hasMDTM: 1;
+		unsigned hasSITE: 1;
 		unsigned isActiveDataConn: 1;
 		unsigned loggedIn: 1;
 		unsigned isMicrosoft: 1;
-		unsigned unused: 15;
+		unsigned unused: 14;
 	} _serverSupport;
 	
 }
