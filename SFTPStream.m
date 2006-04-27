@@ -106,7 +106,7 @@ enum { START = 200, STOP };
 
 - (void)close
 {
-	_status = NSStreamStatusNotOpen;
+	_status = NSStreamStatusClosed;
 }
 
 - (void)scheduleInRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
@@ -115,6 +115,7 @@ enum { START = 200, STOP };
 		return;
 	
 	_status = NSStreamStatusOpening;
+	_runThread = YES;
 	_port = [[NSPort port] retain];
 	[_port setDelegate:self];
 	[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
@@ -124,7 +125,17 @@ enum { START = 200, STOP };
 
 - (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
 {
+	if (_status == NSStreamStatusNotOpen)
+		return;
 	[self sendPortMessage:STOP];
+	while (_bgThread)
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
+	[_port setDelegate:nil];
+	[_port release];
+	_port = nil;
+	_status = NSStreamStatusNotOpen;
 }
 
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
@@ -175,11 +186,14 @@ enum { START = 200, STOP };
 	
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
+	_bgThread = [NSThread currentThread];
 	[NSThread prepareForInterThreadMessages];
-	[[NSRunLoop currentRunLoop] addPort:_port forMode:(NSString *)kCFRunLoopCommonModes];
-	
-	[[NSRunLoop currentRunLoop] run];
-	
+	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
+	while (_runThread)
+	{
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+	}
+	_bgThread = nil;
 	[pool release];
 }
 
@@ -213,8 +227,9 @@ enum { START = 200, STOP };
 		case STOP:
 			_keepChecking = NO;
 			close(_master);
-			[SFTPStream cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkBuffers:) object:nil];
-			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
+			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkBuffers:) object:nil];
+			[[NSRunLoop currentRunLoop]removePort:_port forMode:NSDefaultRunLoopMode];
+			_runThread = NO;
 			break;
 	}
 }

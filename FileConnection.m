@@ -121,6 +121,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 		[myPort setDelegate:self];
 		
 		[NSThread prepareForInterThreadMessages];
+		_runThread = YES;
 		[NSThread detachNewThreadSelector:@selector(runFileConnectionBackgroundThread:) toTarget:self withObject:nil];
 	}
 	return self;
@@ -148,8 +149,11 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[NSThread prepareForInterThreadMessages];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
-	[[NSRunLoop currentRunLoop] addPort:myPort forMode:(NSString *)kCFRunLoopCommonModes];
-	[[NSRunLoop currentRunLoop] run];
+	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
+	while (_runThread)
+	{
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+	}
 	
 	[pool release];
 }
@@ -232,7 +236,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 		break;
 		case KILL_THREAD:
 		{
-			[[NSRunLoop currentRunLoop] removePort:myPort forMode:(NSString *)kCFRunLoopCommonModes];
+			[[NSRunLoop currentRunLoop] removePort:myPort forMode:NSDefaultRunLoopMode];
+			_runThread = NO;
 			break;
 		}
 	}

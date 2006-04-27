@@ -25,8 +25,8 @@
  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
  SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-														   TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-														   BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
@@ -66,6 +66,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		
 		[_port setDelegate:self];
 		[NSThread prepareForInterThreadMessages];
+		_runThread = YES;
 		[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
 								 toTarget:self
 							   withObject:nil];
@@ -76,12 +77,14 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 
 - (void)dealloc
 {
+	[self closeStreams];
 	[self sendPortMessage:KILL_THREAD];
+	while (_bgThread)
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
 	[_port setDelegate:nil];
     [_port release];
-	
-	[_port setDelegate:nil];
-	[_port release];
 	[_forwarder release];
 	[_sendStream release];
 	[_receiveStream release];
@@ -157,10 +160,14 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	[NSThread prepareForInterThreadMessages];
 	_bgThread = [NSThread currentThread];
-// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
-// But then again, we can't remove the thread, so it really doesn't mean much.
-	[[NSRunLoop currentRunLoop] addPort:_port forMode:(NSString *)kCFRunLoopCommonModes];
-	[[NSRunLoop currentRunLoop] run];
+	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
+	// But then again, we can't remove the thread, so it really doesn't mean much.	
+	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
+	while (_runThread)
+	{
+		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+	}
+	_bgThread = nil;
 	
 	[pool release];
 }
@@ -234,7 +241,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		case KILL_THREAD:
 		{
 			[self closeStreams];
-			[[NSRunLoop currentRunLoop] removePort:_port forMode:(NSString *)kCFRunLoopCommonModes];
+			[[NSRunLoop currentRunLoop] removePort:_port forMode:NSDefaultRunLoopMode];
+			_runThread = NO;
 			break;
 		}
 	}

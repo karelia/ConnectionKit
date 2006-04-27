@@ -43,13 +43,14 @@
 	int					_master;
 	pid_t				_sftppid;
 	BOOL				_keepChecking;
+	BOOL				_runThread;
 	FILE				*_mf;
 	
 	id					_delegate;
 	RunLoopForwarder	*_forwarder;
 	NSMutableData		*_buffer;
 	NSLock				*_bufferLock;
-	NSThread			*_creationThread;
+	NSThread			*_bgThread;
 	
 	NSStreamStatus		_status;
 	NSMutableDictionary	*_props;

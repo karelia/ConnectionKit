@@ -737,6 +737,9 @@ static NSImage *_folder = nil;
 	[remotePopup setHidden:YES];
 	[btnNewFolder setEnabled:NO];
 	[remoteTable setHidden:YES];
+	
+	[con release];
+	con = nil;
 }
 
 - (void)connection:(AbstractConnection *)aConn didReceiveError:(NSError *)error
