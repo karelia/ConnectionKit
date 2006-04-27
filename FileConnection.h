@@ -59,6 +59,7 @@ enum { kChangeToDirectory = 7000,
 	NSPort			*myPort;
 	NSLock			*myLock;
 	RunLoopForwarder*myForwarder;
+	BOOL			_runThread;
 }
 
 - (int)currentOperation;

@@ -57,6 +57,8 @@
 	// This is a peer connection that is used to check if files exist
 	AbstractConnection	*_fileCheckingConnection;
 	NSConditionLock		*_fileCheckingLock;
+	
+	BOOL				_runThread;
 }
 
 - (void)openStreamsToPort:(unsigned)port;
