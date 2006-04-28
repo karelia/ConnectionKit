@@ -152,7 +152,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
 	while (_runThread)
 	{
-		[[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantPast]];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 	}
 	
 	[pool release];
