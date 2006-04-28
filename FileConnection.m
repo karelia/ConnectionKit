@@ -323,7 +323,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	BOOL success = [fm changeCurrentDirectoryPath:aDirectory];
 	if (success && _flags.changeDirectory)
 	{
-		[_delegate connection:self didChangeToDirectory:aDirectory];
+		[myForwarder connection:self didChangeToDirectory:aDirectory];
 	}
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [aDirectory copy];
@@ -364,7 +364,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		if (_flags.createDirectory)
 		{
-			[_delegate connection:self didCreateDirectory:aName];
+			[myForwarder connection:self didCreateDirectory:aName];
 		}
 	}
 	else
@@ -383,7 +383,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 				aName,
 				ConnectionDirectoryExistsFilenameKey,
 				nil];
-			[_delegate connection:self
+			[myForwarder connection:self
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:ui]];
@@ -417,14 +417,14 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		if (_flags.permissions)
 		{
-			[_delegate connection:self didSetPermissionsForFile:path];
+			[myForwarder connection:self didSetPermissionsForFile:path];
 		}
 	}
 	else
 	{
 		if (_flags.error)
 		{
-			[_delegate connection:self
+			[myForwarder connection:self
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
@@ -452,7 +452,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	BOOL success = [fm movePath:fromPath toPath:toPath handler:self];
 	if (success && _flags.rename)
 	{
-		[_delegate connection:self didRename:fromPath to:toPath];
+		[myForwarder connection:self didRename:fromPath to:toPath];
 	}
 }
 
@@ -471,7 +471,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	BOOL success = [fm removeFileAtPath:path handler:self];
 	if (success && _flags.deleteFile)
 	{
-		[_delegate connection:self didDeleteFile:path];
+		[myForwarder connection:self didDeleteFile:path];
 	}
 }
 
@@ -490,7 +490,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	BOOL success = [fm removeFileAtPath:dirPath handler:self];
 	if (success && _flags.deleteDirectory)
 	{
-		[_delegate connection:self didDeleteDirectory:dirPath];
+		[myForwarder connection:self didDeleteDirectory:dirPath];
 	}
 }
 
@@ -526,29 +526,29 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	NSFileManager *fm = [NSFileManager defaultManager];
 	if (_flags.didBeginUpload)
 	{
-		[_delegate connection:self uploadDidBegin:remotePath];
+		[myForwarder connection:self uploadDidBegin:remotePath];
 	}
 	BOOL success = [fm copyPath:localPath toPath:remotePath handler:self];
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) 
 	{
 		NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:localPath];
-		[_delegate connection:self upload:remotePath sentDataOfLength:[fh seekToEndOfFile]];
+		[myForwarder connection:self upload:remotePath sentDataOfLength:[fh seekToEndOfFile]];
 	} 
 	if (_flags.uploadPercent) 
 	{
-		[_delegate connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
+		[myForwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
 	}
 	if (success && _flags.uploadFinished)
 	{
-		[_delegate connection:self uploadDidFinish:remotePath];
+		[myForwarder connection:self uploadDidFinish:remotePath];
 	}
 	if (!success && _flags.error)
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
 										   code:ConnectionErrorUploading 
 									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
-		[_delegate connection:self didReceiveError:err];
+		[myForwarder connection:self didReceiveError:err];
 	}
 }
 
@@ -573,20 +573,20 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	NSFileManager *fm = [NSFileManager defaultManager];
 	if (_flags.didBeginUpload)
 	{
-		[_delegate connection:self uploadDidBegin:remotePath];
+		[myForwarder connection:self uploadDidBegin:remotePath];
 	}
 	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[fm currentDirectoryPath] stringByAppendingPathComponent:remotePath];
 	BOOL success = [fm createFileAtPath:fullPath contents:data attributes:nil];
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) {
-		[_delegate connection:self upload:remotePath sentDataOfLength:[data length]];
+		[myForwarder connection:self upload:remotePath sentDataOfLength:[data length]];
 	} 
 	if (_flags.uploadPercent) {
-		[_delegate connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
+		[myForwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
 	}
 	if (success && _flags.uploadFinished)
 	{
-		[_delegate connection:self uploadDidFinish:remotePath];
+		[myForwarder connection:self uploadDidFinish:remotePath];
 	}
 }
 
@@ -614,7 +614,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	NSString *name = [remotePath lastPathComponent];
 	if (_flags.didBeginDownload)
 	{
-		[_delegate connection:self downloadDidBegin:name];
+		[myForwarder connection:self downloadDidBegin:name];
 	}
 	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
@@ -625,21 +625,21 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 		//need to send the amount of bytes transferred.
 		if (_flags.downloadProgressed) {
 			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
-			[_delegate connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
+			[myForwarder connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
 		} 
 		if (_flags.downloadPercent) {
-			[_delegate connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
+			[myForwarder connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
 		}
 		if (_flags.downloadFinished)
 		{
-			[_delegate connection:self downloadDidFinish:name];
+			[myForwarder connection:self downloadDidFinish:name];
 		}
 	}
 	else	// no handler, so we send error message 'manually'
 	{
 		if (_flags.error)
 		{
-			[_delegate connection:self
+			[myForwarder connection:self
 				   didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													   code:[self currentOperation]
 												   userInfo:
@@ -678,40 +678,9 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[self sendPortMessage:CANCEL_ALL];
 }
 
-- (void)fcDirectoryContents
-{
-	[self setCurrentOperation:kDirectoryContents];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSArray *array = [fm directoryContentsAtPath:myCurrentDirectory];
-	NSMutableArray *packaged = [NSMutableArray arrayWithCapacity:[array count]];
-	NSEnumerator *e = [array objectEnumerator];
-	NSString *cur;
-	
-	while (cur = [e nextObject]) {
-		NSString *file = [NSString stringWithFormat:@"%@/%@", myCurrentDirectory, cur];
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[fm fileAttributesAtPath:file
-																								 traverseLink:NO]];
-		[attribs setObject:cur forKey:cxFilenameKey];
-		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
-			NSString *target = [file stringByResolvingSymlinksInPath];
-			[attribs setObject:target forKey:cxSymbolicLinkTargetKey];
-		}
-			
-		[packaged addObject:attribs];
-	}
-	
-	if (_flags.directoryContents)
-	{
-		[_delegate connection:self didReceiveContents:packaged ofDirectory:[fm currentDirectoryPath]];
-	}
-}
-
 - (void)directoryContents
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDirectoryContents)
-													  target:self
-												   arguments:[NSArray array]];
-	[self queueInvocation:inv];
+  [self contentsOfDirectory: [self currentDirectory]];
 }
 
 - (void)fcContentsOfDirectory:(NSString *)dirPath
@@ -738,7 +707,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	}
 	if (_flags.directoryContents)
 	{
-		[_delegate connection:self didReceiveContents:packaged ofDirectory:dirPath];
+		[myForwarder connection:self didReceiveContents:packaged ofDirectory:dirPath];
 	}
 }
 
@@ -750,7 +719,6 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[self queueInvocation:inv];
 }
 
-
 - (void)fcCheckExistenceOfPath:(NSString *)path
 {
   
@@ -761,22 +729,9 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 	if (_flags.fileCheck)
 	{
-    //we pass a bool so we need to create the invocation ourselves:-(
-    //    
-    NSInvocation *inv = [NSInvocation invocationWithMethodSignature: [[self delegate] methodSignatureForSelector: @selector(connection:checkedExistenceOfPath:pathExists:)]];
-    
-    [inv setTarget: self];
-    [inv setArgument: &self  
-             atIndex: 2];
-    [inv setArgument: &path  
-             atIndex: 3];
-    [inv setArgument: &fileExists  
-             atIndex: 4];
-    [inv setSelector:  @selector(connection:checkedExistenceOfPath:pathExists:)];
-    
-    [inv performSelectorOnMainThread: @selector(invokeWithTarget:)
-                          withObject: [self delegate]
-                       waitUntilDone: YES];
+    [myForwarder connection: self 
+     checkedExistenceOfPath: path
+                 pathExists: fileExists];
 	}
 }
 
@@ -787,6 +742,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
                                                  arguments:[NSArray arrayWithObject:path]];
 	[self queueInvocation:inv];
 }
+
 
 #pragma mark -
 #pragma mark Delegate Methods
@@ -799,7 +755,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 	if (_flags.error)
 	{
-		[_delegate connection:self
+		[myForwarder connection:self
 			   didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 												   code:[self currentOperation]
 											   userInfo:
