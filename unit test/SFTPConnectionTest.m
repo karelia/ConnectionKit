@@ -20,9 +20,8 @@
 	host = @"localhost";
 	port = @"21";
 	username = NSUserName();
-	password = [FTPConnectionTest keychainPasswordForServer:host account:username];
+	password = [AbstractConnectionTest keychainPasswordForServer:host account:username];
 	
-	localPath = NSHomeDirectory();
 	initialDirectory = NSHomeDirectory();
 	NSError *err = nil;
 	connection = [[AbstractConnection connectionWithName: connectionName

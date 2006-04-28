@@ -9,7 +9,22 @@
 #import "AbstractConnectionTest.h"
 
 
-@implementation FTPConnectionTest
+@implementation AbstractConnectionTest
+- (unsigned int)testCaseCount {
+  unsigned int count = 0;
+  
+  if ([[self class] isKindOfClass:[AbstractConnectionTest class]] == NO) {
+    count = [super testCaseCount];
+  }
+  
+  return count;
+}
+
+- (void)performTest:(SenTestRun *)testRun {
+  if ([[self class] isKindOfClass:[AbstractConnectionTest class]] == NO) {
+    [super performTest:testRun];
+  }
+}
 
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName
 {
@@ -48,38 +63,6 @@
 	return result;
 }
 
-- (void) setUp
-{
-	connectionName = @"FTP";
-	
-	//set info for your ftp server here
-	//
-	host = @"localhost";
-	port = @"21";
-	username = NSUserName();
-	password = [FTPConnectionTest keychainPasswordForServer:host account:username];
-	
-	localPath = NSHomeDirectory();
-	initialDirectory = NSHomeDirectory();
-	NSError *err = nil;
-	connection = [[AbstractConnection connectionWithName: connectionName
-                                                  host: host
-                                                  port: port
-                                              username: username
-                                              password: password
-                                                 error:&err] retain];
-	if (!connection)
-	{
-		if (err)
-		{
-			NSLog(@"%@", err);
-		}
-	}
-	[connection setDelegate: self];
-	
-	didUpload = isConnected = receivedError = NO;
-}
-
 - (void) testUpload
 {
   [connection connect];
@@ -98,11 +81,24 @@
   
   STAssertFalse(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
-  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not upload file");
+  
+  //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
+  //
+  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
   
   //clean up
-  [[NSFileManager defaultManager] removeFileAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]
-                                           handler: nil];
+  //
+  [connection deleteFile: @"AbstractConnectionTest.h"];
+  
+  didDelete = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  //check that the file was removed
+  //
+  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
+  
 }
 
 - (void) testUploadToFileAndDelete
@@ -123,7 +119,10 @@
   
   STAssertFalse(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
-  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not upload file");
+  
+  //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
+  //
+  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
   
   //clean up
   //
@@ -134,12 +133,9 @@
   while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
 
-  STAssertFalse([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not delete the file");
-
-  //enforce clean up
+  //Check that the file was removed
   //
-  [[NSFileManager defaultManager] removeFileAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]
-                                           handler: nil];
+  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
 }
 
 - (void) testUploadMultipleFiles
@@ -161,14 +157,27 @@
   
   STAssertFalse(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
-  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]], @"did not upload file");
-  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.m"]], @"did not upload file");
+  
+  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.m"];
   
   //clean up
-  [[NSFileManager defaultManager] removeFileAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.h"]
-                                           handler: nil];
-  [[NSFileManager defaultManager] removeFileAtPath: [localPath stringByAppendingPathComponent: @"AbstractConnectionTest.m"]
-                                           handler: nil];
+  [connection deleteFile: @"AbstractConnectionTest.h"];
+  
+  didDelete = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  [connection deleteFile: @"AbstractConnectionTest.m"];
+  
+  didDelete = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
 }
 
 - (void) testConnect
@@ -277,5 +286,43 @@
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
 {
   didDelete = YES;
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists
+{
+  fileExists = exists;
+  returnedFromFileExists = YES;
+}
+
+- (void) checkThatFileExistsAtPath: (NSString*) inPath
+{
+  //check that the file was removed
+  //
+  [connection checkExistenceOfPath: inPath];
+  
+  fileExists = returnedFromFileExists = receivedError = NO;
+  NSDate *initialTime = [NSDate date];
+  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse(receivedError, @"did receive an error while checking for file existance");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
+  STAssertTrue(fileExists, @"file was not uploaded or method fails");
+}
+
+- (void) checkThatFileDoesNotExistsAtPath: (NSString*) inPath
+{
+  //check that the file was removed
+  //
+  [connection checkExistenceOfPath: inPath];
+  
+  fileExists = returnedFromFileExists = receivedError = NO;
+  NSDate *initialTime = [NSDate date];
+  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse(receivedError, @"did receive an error while checking for file existance");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
+  STAssertFalse(fileExists, @"file was not uploaded or method fails");
 }
 @end

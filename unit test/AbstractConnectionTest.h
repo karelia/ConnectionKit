@@ -9,7 +9,7 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <Connection/Connection.h>
 
-@interface FTPConnectionTest : SenTestCase {
+@interface AbstractConnectionTest : SenTestCase {
   id <AbstractConnectionProtocol> connection;
   NSString *connectionName;
   NSString *username;
@@ -18,12 +18,12 @@
   NSString *host;
   NSString *initialDirectory;
   
-  NSString *localPath;
-  
   BOOL isConnected;
   BOOL receivedError;
   BOOL didUpload;
   BOOL didDelete;
+  BOOL fileExists;
+  BOOL returnedFromFileExists;
 }
 
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
