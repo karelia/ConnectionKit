@@ -7,13 +7,13 @@
 //
 
 #import "AbstractConnectionTest.h"
-
+ 
 
 @implementation AbstractConnectionTest
 - (unsigned int)testCaseCount {
   unsigned int count = 0;
   
-  if ([[self class] isKindOfClass:[AbstractConnectionTest class]] == NO) {
+  if ([self isMemberOfClass:[AbstractConnectionTest class]] == NO) {
     count = [super testCaseCount];
   }
   
@@ -21,7 +21,8 @@
 }
 
 - (void)performTest:(SenTestRun *)testRun {
-  if ([[self class] isKindOfClass:[AbstractConnectionTest class]] == NO) {
+  if ([self isMemberOfClass: [AbstractConnectionTest class]] == NO) 
+  {
     [super performTest:testRun];
   }
 }
@@ -61,6 +62,16 @@
 		result = [NSString stringWithUTF8String:passwordBuffer];
 	}
 	return result;
+}
+
+- (void) testFileExitence
+{
+  [self checkThatFileExistsAtPath: fileNameExistingOnServer];  
+}
+
+- (void) testFileNonExistence
+{
+  [self checkThatFileDoesNotExistsAtPath: @"Windows95 was the best OS ever"];
 }
 
 - (void) testUpload
@@ -307,7 +318,7 @@
   
   STAssertFalse(receivedError, @"did receive an error while checking for file existance");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
-  STAssertTrue(fileExists, @"file was not uploaded or method fails");
+  STAssertTrue(fileExists, @"file  does not exists");
 }
 
 - (void) checkThatFileDoesNotExistsAtPath: (NSString*) inPath
@@ -323,6 +334,6 @@
   
   STAssertFalse(receivedError, @"did receive an error while checking for file existance");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
-  STAssertFalse(fileExists, @"file was not uploaded or method fails");
+  STAssertFalse(fileExists, @"file exists");
 }
 @end
