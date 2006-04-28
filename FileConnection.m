@@ -428,7 +428,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-													  LocalizedStringInThisBundle(@"Could not change file permissions", @"FileConnection set permissions error"),
+													  [NSString stringWithFormat:@"%@ %@", LocalizedStringInThisBundle(@"Could not change file permissions for", @"FileConnection set permissions error"), path],
 													  NSLocalizedDescriptionKey,
 													  path,
 													  NSFilePathErrorKey,
@@ -755,10 +755,12 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo
 {
+	NSLog(@"%@", errorInfo);
 	NSString *path = [errorInfo objectForKey:@"Path"];
 	NSString *toPath = [errorInfo objectForKey:@"ToPath"];
 	NSString *error = [errorInfo objectForKey:@"Error"];
 
+	error = [NSString stringWithFormat:@"%@: %@", error, path];
 	if (_flags.error)
 	{
 		[_delegate connection:self
