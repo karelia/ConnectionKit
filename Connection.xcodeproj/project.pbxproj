@@ -7,7 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
+		09B5F7650A01D1BF001F8961 /* FTPtest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09B5F7060A01CB85001F8961 /* FTPtest.m */; };
+		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
+		09B5F7670A01D1C0001F8961 /* LocalConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603309FD37B70000BA00 /* LocalConnectionTest.m */; };
+		09B5F7680A01D1C1001F8961 /* SFTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		796DB32409F8BBAB0065897B /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 796DB21209F89DCB0065897B /* SSLStream.m */; };
@@ -144,6 +147,8 @@
 
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		09B5F7050A01CB85001F8961 /* FTPtest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPtest.h; sourceTree = "<group>"; };
+		09B5F7060A01CB85001F8961 /* FTPtest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTPtest.m; sourceTree = "<group>"; };
 		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
 		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
@@ -314,6 +319,8 @@
 		09D6602E09FD37B70000BA00 /* unit test */ = {
 			isa = PBXGroup;
 			children = (
+				09B5F7050A01CB85001F8961 /* FTPtest.h */,
+				09B5F7060A01CB85001F8961 /* FTPtest.m */,
 				09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */,
 				09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */,
 				09D6603209FD37B70000BA00 /* LocalConnectionTest.h */,
@@ -829,7 +836,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09D6603709FD37B70000BA00 /* AbstractConnectionTest.m in Sources */,
+				09B5F7650A01D1BF001F8961 /* FTPtest.m in Sources */,
+				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
+				09B5F7670A01D1C0001F8961 /* LocalConnectionTest.m in Sources */,
+				09B5F7680A01D1C1001F8961 /* SFTPConnectionTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

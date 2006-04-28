@@ -9,7 +9,7 @@
 #import "AbstractConnectionTest.h"
 
 
-@interface SFTPConnectionTest : FTPConnectionTest 
+@interface SFTPConnectionTest : AbstractConnectionTest 
 {
 
 }

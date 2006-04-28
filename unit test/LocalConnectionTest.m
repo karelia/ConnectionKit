@@ -17,7 +17,6 @@
   
   //set info for your ftp server here
   //
-	localPath = NSHomeDirectory();
 	initialDirectory = NSHomeDirectory();
 	NSError *err = nil;
 	connection = [[AbstractConnection connectionWithName: connectionName
