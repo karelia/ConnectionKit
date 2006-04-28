@@ -17,6 +17,7 @@
   NSString *port;
   NSString *host;
   NSString *initialDirectory;
+  NSString *fileNameExistingOnServer;       //used to check that checkForFileExistance calls work, this file has to already exist on the server
   
   BOOL isConnected;
   BOOL receivedError;
@@ -25,7 +26,7 @@
   BOOL fileExists;
   BOOL returnedFromFileExists;
 }
-
+ 
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
 
 @end

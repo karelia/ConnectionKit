@@ -428,7 +428,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-													  [NSString stringWithFormat:@"%@ %@", LocalizedStringInThisBundle(@"Could not change file permissions for", @"FileConnection set permissions error"), path],
+													  LocalizedStringInThisBundle(@"Could not change file permissions", @"FileConnection set permissions error"),
 													  NSLocalizedDescriptionKey,
 													  path,
 													  NSFilePathErrorKey,
@@ -750,17 +750,53 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[self queueInvocation:inv];
 }
 
+
+- (void)fcCheckExistenceOfPath:(NSString *)path
+{
+  
+	[self setCurrentOperation:kDirectoryContents];
+	NSFileManager *fm = [NSFileManager defaultManager];
+  BOOL fileExists = [fm fileExistsAtPath: [[self currentDirectory] stringByAppendingPathComponent: path]];
+  
+
+	if (_flags.fileCheck)
+	{
+    //we pass a bool so we need to create the invocation ourselves:-(
+    //    
+    NSInvocation *inv = [NSInvocation invocationWithMethodSignature: [[self delegate] methodSignatureForSelector: @selector(connection:checkedExistenceOfPath:pathExists:)]];
+    
+    [inv setTarget: self];
+    [inv setArgument: &self  
+             atIndex: 2];
+    [inv setArgument: &path  
+             atIndex: 3];
+    [inv setArgument: &fileExists  
+             atIndex: 4];
+    [inv setSelector:  @selector(connection:checkedExistenceOfPath:pathExists:)];
+    
+    [inv performSelectorOnMainThread: @selector(invokeWithTarget:)
+                          withObject: [self delegate]
+                       waitUntilDone: YES];
+	}
+}
+
+- (void)checkExistenceOfPath:(NSString *)path
+{
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCheckExistenceOfPath:)
+                                                    target:self
+                                                 arguments:[NSArray arrayWithObject:path]];
+	[self queueInvocation:inv];
+}
+
 #pragma mark -
 #pragma mark Delegate Methods
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo
 {
-	NSLog(@"%@", errorInfo);
 	NSString *path = [errorInfo objectForKey:@"Path"];
 	NSString *toPath = [errorInfo objectForKey:@"ToPath"];
 	NSString *error = [errorInfo objectForKey:@"Error"];
 
-	error = [NSString stringWithFormat:@"%@: %@", error, path];
 	if (_flags.error)
 	{
 		[_delegate connection:self
