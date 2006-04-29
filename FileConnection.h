@@ -60,6 +60,8 @@ enum { kChangeToDirectory = 7000,
 	NSLock			*myLock;
 	RunLoopForwarder*myForwarder;
 	BOOL			_runThread;
+	
+	NSFileManager *myFileManager;
 }
 
 - (int)currentOperation;

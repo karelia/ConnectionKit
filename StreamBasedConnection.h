@@ -56,7 +56,7 @@
 	
 	// This is a peer connection that is used to check if files exist
 	AbstractConnection	*_fileCheckingConnection;
-	NSConditionLock		*_fileCheckingLock;
+	NSString			*_fileCheckInFlight;
 	
 	BOOL				_runThread;
 }
