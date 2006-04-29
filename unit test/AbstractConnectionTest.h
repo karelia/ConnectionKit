@@ -25,6 +25,9 @@
   BOOL didDelete;
   BOOL fileExists;
   BOOL returnedFromFileExists;
+  BOOL didSetPermission;
+
+  NSArray *directoryContents;
 }
  
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;

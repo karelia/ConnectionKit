@@ -21,6 +21,7 @@
 	port = @"21";
 	username = NSUserName();
 	password = [AbstractConnectionTest keychainPasswordForServer:host account:username];
+  fileNameExistingOnServer = @"presentation.ppt"; 
 	
 	initialDirectory = NSHomeDirectory();
 	NSError *err = nil;
