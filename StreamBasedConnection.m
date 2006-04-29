@@ -500,6 +500,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventErrorOccurred:
 		{
+			KTLog(StreamDomain, KTLogError, @"receive stream error: %@", [_receiveStream streamError]);
 			if (_flags.error) 
 			{
 				NSError *error = nil;
@@ -570,6 +571,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		}
 		case NSStreamEventErrorOccurred:
 		{
+			KTLog(StreamDomain, KTLogError, @"send stream error: %@", [_receiveStream streamError]);
 			if (_flags.error) 
 			{
 				NSError *error = nil;
