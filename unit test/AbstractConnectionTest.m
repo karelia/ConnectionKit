@@ -8,8 +8,15 @@
 
 #import "AbstractConnectionTest.h"
  
+@interface AbstractConnectionTest (Private)
+
+- (void) checkThatFileExistsAtPath: (NSString*) inPath;
+- (void) checkThatFileDoesNotExistsAtPath: (NSString*) inPath;
+
+@end
 
 @implementation AbstractConnectionTest
+
 - (unsigned int)testCaseCount {
   unsigned int count = 0;
   
@@ -309,6 +316,7 @@
 {
   //check that the file was removed
   //
+	NSLog(@"Checking for file: %@", inPath);
   [connection checkExistenceOfPath: inPath];
   
   fileExists = returnedFromFileExists = receivedError = NO;
@@ -316,9 +324,9 @@
   while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertFalse(receivedError, @"did receive an error while checking for file existance");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
-  STAssertTrue(fileExists, @"file  does not exists");
+  STAssertFalse(receivedError, @"did receive an error while checking for file existence");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existence");
+  STAssertTrue(fileExists, @"file  does not exist");
 }
 
 - (void) checkThatFileDoesNotExistsAtPath: (NSString*) inPath
@@ -332,8 +340,8 @@
   while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertFalse(receivedError, @"did receive an error while checking for file existance");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existance");
+  STAssertFalse(receivedError, @"did receive an error while checking for file existence");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existence");
   STAssertFalse(fileExists, @"file exists");
 }
 @end
