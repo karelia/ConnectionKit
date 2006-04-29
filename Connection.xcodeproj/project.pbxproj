@@ -319,10 +319,10 @@
 		09D6602E09FD37B70000BA00 /* unit test */ = {
 			isa = PBXGroup;
 			children = (
-				09B5F7050A01CB85001F8961 /* FTPtest.h */,
-				09B5F7060A01CB85001F8961 /* FTPtest.m */,
 				09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */,
 				09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */,
+				09B5F7050A01CB85001F8961 /* FTPtest.h */,
+				09B5F7060A01CB85001F8961 /* FTPtest.m */,
 				09D6603209FD37B70000BA00 /* LocalConnectionTest.h */,
 				09D6603309FD37B70000BA00 /* LocalConnectionTest.m */,
 				09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */,
@@ -1042,6 +1042,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-falign-loops=16";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
@@ -1071,6 +1072,7 @@
 				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
 				INFOPLIST_FILE = "Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				OTHER_CFLAGS = "-falign-loops=16";
 				OTHER_LDFLAGS = (
 					"-framework",
 					Foundation,
