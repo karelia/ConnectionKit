@@ -532,7 +532,19 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		[myFileManager removeFileAtPath:remotePath handler:self];
 	}
-	BOOL success = [myFileManager copyPath:localPath toPath:remotePath handler:self];
+	NSTask *cp = [[NSTask alloc] init];
+	[cp setLaunchPath:@"/bin/cp"];
+	[cp setArguments:[NSArray arrayWithObjects:localPath, remotePath, nil]];
+	[cp setCurrentDirectoryPath:[self currentDirectory]];
+	[cp launch];
+	[cp waitUntilExit];
+	BOOL success = YES;
+	if ([cp terminationStatus] != 0)
+	{
+		success = NO;
+	}
+	[cp release];
+	 //[myFileManager copyPath:localPath toPath:remotePath handler:self];
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) 
 	{
@@ -684,21 +696,23 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 - (void)directoryContents
 {
-  [self contentsOfDirectory: [self currentDirectory]];
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDirectoryContents)
+													  target:self
+												   arguments:[NSArray array]];
+	[self queueInvocation:inv];
 }
 
 - (void)fcContentsOfDirectory:(NSString *)dirPath
 {
 	[self setCurrentOperation:kDirectoryContents];
 	
-	NSString *folder = [myFileManager currentDirectoryPath];
-	NSArray *array = [myFileManager directoryContentsAtPath:folder];
+	NSArray *array = [myFileManager directoryContentsAtPath:dirPath];
 	NSMutableArray *packaged = [NSMutableArray arrayWithCapacity:[array count]];
 	NSEnumerator *e = [array objectEnumerator];
 	NSString *cur;
 	
 	while (cur = [e nextObject]) {
-		NSString *file = [NSString stringWithFormat:@"%@/%@", folder, cur];
+		NSString *file = [NSString stringWithFormat:@"%@/%@", dirPath, cur];
 		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[myFileManager fileAttributesAtPath:file
 																								 traverseLink:NO]];
 		[attribs setObject:cur forKey:cxFilenameKey];
@@ -713,6 +727,11 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		[myForwarder connection:self didReceiveContents:packaged ofDirectory:dirPath];
 	}
+}
+
+- (void)fcDirectoryContents
+{
+	[self fcContentsOfDirectory:[self currentDirectory]];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
@@ -733,9 +752,9 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 
 	if (_flags.fileCheck)
 	{
-    [myForwarder connection: self 
-     checkedExistenceOfPath: path
-                 pathExists: fileExists];
+		[myForwarder connection: self 
+		 checkedExistenceOfPath: path
+					 pathExists: fileExists];
 	}
 }
 
