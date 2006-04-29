@@ -372,10 +372,14 @@
 {
 	NSArray *selectedFiles = [directoryContents selectedObjects];
 	
-	if (![selectedFiles count])
-		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: [[self connection] currentDirectory]
+	if ([selectedFiles count] == 0)
+	{
+		NSString *path = [[self connection] currentDirectory];
+		if (!path) path = @"";
+		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: path
 																			  forKey: @"path"]];
-	
+	}
+		
 	NSEnumerator *theEnum = [selectedFiles objectEnumerator];
 	NSDictionary* currentItem;
 	NSMutableArray *returnValue = [NSMutableArray array];
@@ -383,13 +387,15 @@
 	while (currentItem = [theEnum nextObject])
 	{  
 		if ([[self connection] rootDirectory] &&
-			([[currentItem objectForKey: @"path"] rangeOfString: [[self connection] rootDirectory]].location == 0) &&
-			(![[currentItem objectForKey: @"path"] isEqualToString: [currentItem objectForKey: @"path"]])
-			)
+			[[currentItem objectForKey: @"path"] rangeOfString: [[self connection] rootDirectory]].location == 0 &&
+			![[currentItem objectForKey: @"path"] isEqualToString: [currentItem objectForKey: @"path"]])
+		{
 			[returnValue addObject: [[currentItem objectForKey: @"path"] substringFromIndex: [[[self connection] rootDirectory] length] + 1]];  
+		}
 		else
+		{
 			[returnValue addObject: [currentItem objectForKey: @"path"]];  
-		
+		}
 	}
 	
 	return [[returnValue copy] autorelease]; 
