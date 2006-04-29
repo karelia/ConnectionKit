@@ -467,11 +467,18 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	[self setCurrentOperation:kDeleteFile];
 	
-	BOOL success = [myFileManager removeFileAtPath:path handler:self];
+	NSTask *rm = [[NSTask alloc] init];
+	[rm setLaunchPath:@"/bin/rm"];
+	[rm setArguments:[NSArray arrayWithObjects:@"-f", path, nil]];
+	[rm launch];
+	[rm waitUntilExit];
+	
+	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteFile)
 	{
 		[myForwarder connection:self didDeleteFile:path];
 	}
+	[rm release];
 }
 
 - (void)deleteFile:(NSString *)path
@@ -486,11 +493,18 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	[self setCurrentOperation:kDeleteDirectory];
 	
-	BOOL success = [myFileManager removeFileAtPath:dirPath handler:self];
+	NSTask *rm = [[NSTask alloc] init];
+	[rm setLaunchPath:@"/bin/rm"];
+	[rm setArguments:[NSArray arrayWithObjects:@"-rf", dirPath, nil]];
+	[rm launch];
+	[rm waitUntilExit];
+	
+	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteDirectory)
 	{
 		[myForwarder connection:self didDeleteDirectory:dirPath];
 	}
+	[rm release];
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
@@ -527,14 +541,10 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		[myForwarder connection:self uploadDidBegin:remotePath];
 	}
-	//try to delete the existing file first
-	if ([myFileManager fileExistsAtPath:remotePath])
-	{
-		[myFileManager removeFileAtPath:remotePath handler:self];
-	}
+
 	NSTask *cp = [[NSTask alloc] init];
 	[cp setLaunchPath:@"/bin/cp"];
-	[cp setArguments:[NSArray arrayWithObjects:localPath, remotePath, nil]];
+	[cp setArguments:[NSArray arrayWithObjects:@"-rf", localPath, remotePath, nil]];
 	[cp setCurrentDirectoryPath:[self currentDirectory]];
 	[cp launch];
 	[cp waitUntilExit];
