@@ -364,11 +364,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 125: // Windows ftp server returns this code for starting a directory contents.
 		{
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState) 
+			/*if (GET_STATE == ConnectionAwaitingDirectoryContentsState) 
 			{
 				KTLog(ProtocolDomain, KTLogDebug, @"Getting Directory Contents");
 				break;
 			}
+			break;*/
 		}
 		case 150: //con about to open
 		{
@@ -679,35 +680,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_serverSupport.isActiveDataConn == YES) {
 				[self closeDataConnection];
 			}
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
-			{
-				
-				break;
-			}
-			else if (GET_STATE == ConnectionDownloadingFileState) //download complete
-			{
-				//we cannot rely on the 226 to be sent before all the data is sent
-				break;
-			}
-			else if (GET_STATE == ConnectionUploadingFileState) //upload complete
-			{
-				NSDictionary *d = [self currentUpload];
-				
-				if (_flags.uploadProgressed && _delegateSizeBuffer != 0) {
-					[_forwarder connection:self 
-									upload:[d objectForKey:QueueUploadRemoteFileKey]
-						  sentDataOfLength:_delegateSizeBuffer];
-					_delegateSizeBuffer = 0;
-				}
-				if (_flags.uploadFinished) {
-					[_forwarder connection:self uploadDidFinish:[d objectForKey:QueueUploadRemoteFileKey]];
-				}
-					
-				[_readHandle closeFile];
-				[self setReadHandle:nil];
-				[self dequeueUpload];
-				[self setState:ConnectionIdleState];
-			}
+			//[self setState:ConnectionIdleState];
 			break;
 		}
 		case 227:
