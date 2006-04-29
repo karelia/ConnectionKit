@@ -7,10 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		09B5F7650A01D1BF001F8961 /* FTPtest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09B5F7060A01CB85001F8961 /* FTPtest.m */; };
+		0956E2420A032FE800EDC342 /* SFTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */; };
+		0956E2570A0330DA00EDC342 /* FTPtest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09B5F7060A01CB85001F8961 /* FTPtest.m */; };
+		0956E2580A0330DA00EDC342 /* LocalConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603309FD37B70000BA00 /* LocalConnectionTest.m */; };
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
-		09B5F7670A01D1C0001F8961 /* LocalConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603309FD37B70000BA00 /* LocalConnectionTest.m */; };
-		09B5F7680A01D1C1001F8961 /* SFTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		796DB32409F8BBAB0065897B /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 796DB21209F89DCB0065897B /* SSLStream.m */; };
@@ -836,10 +836,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09B5F7650A01D1BF001F8961 /* FTPtest.m in Sources */,
 				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
-				09B5F7670A01D1C0001F8961 /* LocalConnectionTest.m in Sources */,
-				09B5F7680A01D1C1001F8961 /* SFTPConnectionTest.m in Sources */,
+				0956E2420A032FE800EDC342 /* SFTPConnectionTest.m in Sources */,
+				0956E2570A0330DA00EDC342 /* FTPtest.m in Sources */,
+				0956E2580A0330DA00EDC342 /* LocalConnectionTest.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

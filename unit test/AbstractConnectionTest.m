@@ -81,6 +81,91 @@
   [self checkThatFileDoesNotExistsAtPath: @"Windows95 was the best OS ever"];
 }
 
+- (void) testGetSetPermission
+{
+  [connection connect];
+  
+  NSDate *initialTime = [NSDate date];
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  //get the directory content to save the permission
+  //
+  receivedError = NO;  
+  [connection directoryContents];
+  
+  initialTime = [NSDate date];
+  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse (receivedError, @"received error on get directory content");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on directory content");
+  STAssertNotNil (directoryContents, @"did not receive directory content");
+  
+  NSEnumerator *theDirectoryEnum = [directoryContents objectEnumerator];
+  NSDictionary *currentFile;
+  int savedPermission;
+  while (currentFile = [theDirectoryEnum nextObject])
+  {
+    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: fileNameExistingOnServer])
+    {
+      savedPermission = [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue];
+      
+      break;
+    }
+  }
+  
+  //now actually set the permission
+  //
+  receivedError = NO;
+  [connection setPermissions: 660 forFile: fileNameExistingOnServer]; //read write by owner and group only
+  
+  
+  initialTime = [NSDate date];
+  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse (receivedError, @"received error on set permission");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on set permission");
+  STAssertTrue (didSetPermission, @"did not set the permission");
+  
+  
+  //now check that the permission are set
+  //
+  receivedError = NO;  
+  directoryContents = nil;
+  [connection directoryContents];
+  
+  initialTime = [NSDate date];
+  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse (receivedError, @"received error on get directory content");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on directory content");
+  STAssertNotNil (directoryContents, @"did not receive directory content");
+  
+  theDirectoryEnum = [directoryContents objectEnumerator];
+  while (currentFile = [theDirectoryEnum nextObject])
+  {
+    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: fileNameExistingOnServer])
+    {
+      STAssertEquals(600, [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue], @"did not set the remote permission");
+      
+      break;
+    }
+  }
+  
+  //set the permission back, don't care about the result that much
+  //
+  receivedError = NO;
+  [connection setPermissions: savedPermission forFile: fileNameExistingOnServer]; //read write by owner only
+  
+  
+  initialTime = [NSDate date];
+  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+}
+
 - (void) testUpload
 {
   [connection connect];
@@ -310,6 +395,17 @@
 {
   fileExists = exists;
   returnedFromFileExists = YES;
+}
+
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
+{
+  directoryContents = [contents retain];
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path
+{
+  didSetPermission = YES;
 }
 
 - (void) checkThatFileExistsAtPath: (NSString*) inPath

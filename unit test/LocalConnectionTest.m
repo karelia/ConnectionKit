@@ -14,6 +14,7 @@
 {
   
   connectionName = @"File";
+  fileNameExistingOnServer = @"presentation.ppt";
   
   //set info for your ftp server here
   //
