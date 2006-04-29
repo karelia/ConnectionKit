@@ -289,11 +289,12 @@
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
-  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
+  NSString *file = [[connection currentDirectory] stringByAppendingPathComponent:[fileNameExistingOnServer lastPathComponent]];
+  [self checkThatFileExistsAtPath: file];
   
   //clean up
   //
-  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
+  [connection deleteFile: file];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
@@ -302,7 +303,7 @@
 
   //Check that the file was removed
   //
-  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
+  [self checkThatFileDoesNotExistsAtPath: file];
 }
 
 /*- (void) testUploadMultipleFiles
@@ -476,7 +477,6 @@
 {
   //check that the file was removed
   //
-	NSLog(@"Checking for file: %@", inPath);
   [connection checkExistenceOfPath: inPath];
   
   fileExists = returnedFromFileExists = receivedError = NO;
