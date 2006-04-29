@@ -814,6 +814,9 @@ NSDictionary *sDataAttributes;
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+								   reason:@"AbstractConnection does not implement checkExistanceOfPath:"
+								 userInfo:nil];
 }
 
 @end

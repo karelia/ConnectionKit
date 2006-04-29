@@ -524,7 +524,9 @@ static NSArray *sftpErrors = nil;
 				NSString *msg = [NSString stringWithString:_inputBuffer];
 				if ([self transcript])
 				{
-					[[self transcript] deleteCharactersInRange:NSMakeRange(0, [[self transcript] length])];
+					[[self transcript] performSelectorOnMainThread:@selector(deleteCharactersInRange:)
+														withObject:[NSValue valueWithRange:NSMakeRange(0, [[self transcript] length])]
+													 waitUntilDone:NO];
 					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:msg
 																			  attributes:[AbstractConnection receivedAttributes]] autorelease]];
 				}
