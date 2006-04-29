@@ -10,33 +10,10 @@
 
 
 @implementation fileConnectionTest
-- (void) setUp
+
+- (NSString *)connectionName
 {
-  
-  connectionName = @"File";
-  fileNameExistingOnServer = @"presentation.ppt";
-  
-  //set info for your ftp server here
-  //
-	initialDirectory = NSHomeDirectory();
-	NSError *err = nil;
-	connection = [[AbstractConnection connectionWithName: connectionName
-													host: host
-													port: port
-												username: username
-												password: password
-												   error:&err] retain];
-	if (!connection)
-	{
-		if (err)
-		{
-			NSLog(@"%@", err);
-		}
-	}
-	
-  [connection setDelegate: self];
-  
-  didUpload = isConnected = receivedError = NO;
+	return @"File";
 }
 
 - (void) testConnectWithBadHost

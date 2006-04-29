@@ -146,6 +146,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	_bgThread = [NSThread currentThread];
+	myFileManager = [[NSFileManager alloc] init];
+	
 	[NSThread prepareForInterThreadMessages];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
@@ -154,6 +156,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 	}
+	[myFileManager release];
 	
 	[pool release];
 }
@@ -267,6 +270,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 			[invocation invoke];
 			[invocation release];
 		}
+		[NSThread sleepUntilDate:[NSDate distantPast]];
 	}
 	[myLock unlock];
 }
@@ -317,10 +321,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcChangeToDirectory:(NSString *)aDirectory
 {
 	[self setCurrentOperation:kChangeToDirectory];
-	
-	NSFileManager *fm = [NSFileManager defaultManager];
-	
-	BOOL success = [fm changeCurrentDirectoryPath:aDirectory];
+		
+	BOOL success = [myFileManager changeCurrentDirectoryPath:aDirectory];
 	if (success && _flags.changeDirectory)
 	{
 		[myForwarder connection:self didChangeToDirectory:aDirectory];
@@ -357,8 +359,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	{
 		fmDictionary = [NSDictionary dictionaryWithObject:[NSNumber numberWithLong:aPermissions] forKey:NSFilePosixPermissions];
 	}
-	NSFileManager *fm = [NSFileManager defaultManager];
-	BOOL success = [fm createDirectoryAtPath:aName attributes:fmDictionary];
+	BOOL success = [myFileManager createDirectoryAtPath:aName attributes:fmDictionary];
 	
 	if (success)
 	{
@@ -372,7 +373,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 		if (_flags.error)
 		{
 			BOOL exists;
-			[fm fileExistsAtPath:aName isDirectory:&exists];
+			[myFileManager fileExistsAtPath:aName isDirectory:&exists];
 			NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:
 				LocalizedStringInThisBundle(@"Could not create directory", @"FileConnection create directory error"),
 				NSLocalizedDescriptionKey,
@@ -403,15 +404,13 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	[self setCurrentOperation:kSetPermissions];
 	unsigned long permissions = [perms unsignedLongValue];
-	
-	NSFileManager *fm = [NSFileManager defaultManager];
-	
-	NSDictionary *attributes = [fm fileAttributesAtPath:path traverseLink:YES];	// TODO: verify link is OK
+		
+	NSDictionary *attributes = [myFileManager fileAttributesAtPath:path traverseLink:YES];	// TODO: verify link is OK
 	
 	NSMutableDictionary *newAttr = [NSMutableDictionary dictionaryWithDictionary:attributes];
 	
 	[newAttr setObject:[NSNumber numberWithUnsignedLong:permissions] forKey:NSFilePosixPermissions];
-	BOOL success = [fm changeFileAttributes:newAttr atPath:path];
+	BOOL success = [myFileManager changeFileAttributes:newAttr atPath:path];
 	
 	if (success)
 	{
@@ -448,8 +447,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcRename:(NSString *)fromPath to:(NSString *)toPath
 {
 	[self setCurrentOperation:kRename];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	BOOL success = [fm movePath:fromPath toPath:toPath handler:self];
+	
+	BOOL success = [myFileManager movePath:fromPath toPath:toPath handler:self];
 	if (success && _flags.rename)
 	{
 		[myForwarder connection:self didRename:fromPath to:toPath];
@@ -467,8 +466,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcDeleteFile:(NSString *)path
 {
 	[self setCurrentOperation:kDeleteFile];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	BOOL success = [fm removeFileAtPath:path handler:self];
+	
+	BOOL success = [myFileManager removeFileAtPath:path handler:self];
 	if (success && _flags.deleteFile)
 	{
 		[myForwarder connection:self didDeleteFile:path];
@@ -486,8 +485,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcDeleteDirectory:(NSString *)dirPath
 {
 	[self setCurrentOperation:kDeleteDirectory];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	BOOL success = [fm removeFileAtPath:dirPath handler:self];
+	
+	BOOL success = [myFileManager removeFileAtPath:dirPath handler:self];
 	if (success && _flags.deleteDirectory)
 	{
 		[myForwarder connection:self didDeleteDirectory:dirPath];
@@ -523,12 +522,17 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcUploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	[self setCurrentOperation:kUploadFile];
-	NSFileManager *fm = [NSFileManager defaultManager];
+	
 	if (_flags.didBeginUpload)
 	{
 		[myForwarder connection:self uploadDidBegin:remotePath];
 	}
-	BOOL success = [fm copyPath:localPath toPath:remotePath handler:self];
+	//try to delete the existing file first
+	if ([myFileManager fileExistsAtPath:remotePath])
+	{
+		[myFileManager removeFileAtPath:remotePath handler:self];
+	}
+	BOOL success = [myFileManager copyPath:localPath toPath:remotePath handler:self];
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) 
 	{
@@ -570,13 +574,13 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcUploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	[self setCurrentOperation:kUploadFromData];
-	NSFileManager *fm = [NSFileManager defaultManager];
+	
 	if (_flags.didBeginUpload)
 	{
 		[myForwarder connection:self uploadDidBegin:remotePath];
 	}
-	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[fm currentDirectoryPath] stringByAppendingPathComponent:remotePath];
-	BOOL success = [fm createFileAtPath:fullPath contents:data attributes:nil];
+	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[myFileManager currentDirectoryPath] stringByAppendingPathComponent:remotePath];
+	BOOL success = [myFileManager createFileAtPath:fullPath contents:data attributes:nil];
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) {
 		[myForwarder connection:self upload:remotePath sentDataOfLength:[data length]];
@@ -610,7 +614,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	//BOOL flag = [aFlag boolValue];
 	[self setCurrentOperation:kDownloadFile];
-	NSFileManager *fm = [NSFileManager defaultManager];
+	
 	NSString *name = [remotePath lastPathComponent];
 	if (_flags.didBeginDownload)
 	{
@@ -619,7 +623,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
 	}
-	BOOL success = [fm copyPath:remotePath toPath:[NSString stringWithFormat:@"%@/%@", dirPath, name] handler:self];
+	BOOL success = [myFileManager copyPath:remotePath toPath:[NSString stringWithFormat:@"%@/%@", dirPath, name] handler:self];
 	if (success)
 	{
 		//need to send the amount of bytes transferred.
@@ -686,16 +690,16 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 - (void)fcContentsOfDirectory:(NSString *)dirPath
 {
 	[self setCurrentOperation:kDirectoryContents];
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *folder = [fm currentDirectoryPath];
-	NSArray *array = [fm directoryContentsAtPath:folder];
+	
+	NSString *folder = [myFileManager currentDirectoryPath];
+	NSArray *array = [myFileManager directoryContentsAtPath:folder];
 	NSMutableArray *packaged = [NSMutableArray arrayWithCapacity:[array count]];
 	NSEnumerator *e = [array objectEnumerator];
 	NSString *cur;
 	
 	while (cur = [e nextObject]) {
 		NSString *file = [NSString stringWithFormat:@"%@/%@", folder, cur];
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[fm fileAttributesAtPath:file
+		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[myFileManager fileAttributesAtPath:file
 																								 traverseLink:NO]];
 		[attribs setObject:cur forKey:cxFilenameKey];
 		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
@@ -723,8 +727,8 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
   
 	[self setCurrentOperation:kDirectoryContents];
-	NSFileManager *fm = [NSFileManager defaultManager];
-  BOOL fileExists = [fm fileExistsAtPath: [[self currentDirectory] stringByAppendingPathComponent: path]];
+	
+	BOOL fileExists = [myFileManager fileExistsAtPath: path];
   
 
 	if (_flags.fileCheck)

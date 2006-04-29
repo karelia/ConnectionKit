@@ -11,11 +11,6 @@
 
 @interface AbstractConnectionTest : SenTestCase {
   id <AbstractConnectionProtocol> connection;
-  NSString *connectionName;
-  NSString *username;
-  NSString *password;
-  NSString *port;
-  NSString *host;
   NSString *initialDirectory;
   NSString *fileNameExistingOnServer;       //used to check that checkForFileExistance calls work, this file has to already exist on the server
   
@@ -31,5 +26,12 @@
 }
  
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
+
+
+- (NSString *)connectionName;
+- (NSString *)host;
+- (NSString *)port;
+- (NSString *)username;
+- (NSString *)password;
 
 @end

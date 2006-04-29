@@ -62,7 +62,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_forwarder setReturnValueDelegate:self];
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
-		_fileCheckingLock = [[NSConditionLock alloc] init];
 		
 		[_port setDelegate:self];
 		[NSThread prepareForInterThreadMessages];
@@ -86,8 +85,10 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	[_receiveStream release];
 	[_sendBufferLock release];
 	[_sendBuffer release];
+	[_fileCheckingConnection setDelegate:nil];
+	[_fileCheckingConnection forceDisconnect];
 	[_fileCheckingConnection release];
-	[_fileCheckingLock release];
+	[_fileCheckInFlight release];
 	
 	[super dealloc];
 }
@@ -325,10 +326,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			nextTry = NO;		// don't try.  
 		}
 		[command release];
-	}
-	if ([self numberOfFileChecks] > 0) {
-		NSString *fileToCheck = [self currentFileCheck];
-		[_fileCheckingConnection contentsOfDirectory:[fileToCheck stringByDeletingLastPathComponent]];
 	}
 }	
 
@@ -655,7 +652,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 #pragma mark -
 #pragma mark File Checking
 
-- (void)checkExistenceOfPath:(NSString *)path
+- (void)processFileCheckingQueue
 {
 	if (!_fileCheckingConnection) {
 		_fileCheckingConnection = [[[self class] alloc] initWithHost:[self host]
@@ -666,41 +663,43 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 		[_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection connect];
 	}
+	if (!_fileCheckInFlight)
+	{
+		[_fileCheckingConnection changeToDirectory:[[self currentFileCheck] stringByDeletingLastPathComponent]];
+		_fileCheckInFlight = [[self currentFileCheck] copy];
+	}
+}
+
+- (void)checkExistenceOfPath:(NSString *)path
+{
 	[self queueFileCheck:path];
-	[self sendPortMessage:COMMAND];
+	[self processFileCheckingQueue];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
 	if (_flags.fileCheck) {
-		NSString *fileToCheck = [self currentFileCheck];
-		NSString *name = [fileToCheck lastPathComponent];
-		BOOL isDir = [fileToCheck pathExtension] == nil;
-		NSEnumerator *e = [contents objectEnumerator];
-		NSDictionary *cur;
-		
-		while (cur = [e nextObject]) {
-			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) {
-				if (isDir) {
-					if ([[cur objectForKey:NSFileType] isEqualToString:NSDirectoryFileType]) {
-						[_forwarder connection:self
-						checkedExistenceOfPath:fileToCheck
-									pathExists:YES];
-						[self dequeueFileCheck];
-						return;
-					}
-				} else {
-					if (![[cur objectForKey:NSFileType] isEqualToString:NSDirectoryFileType]) {
-						[_forwarder connection:self
-						checkedExistenceOfPath:fileToCheck
-									pathExists:YES];
-						[self dequeueFileCheck];
-						return;
-					}
+		//we could get the dir contents for the root directory
+		if ([dirPath isEqualToString:[_fileCheckInFlight stringByDeletingLastPathComponent]])
+		{
+			NSString *fileToCheck = [self currentFileCheck];
+			NSString *name = [[fileToCheck lastPathComponent] lastPathComponent];
+			NSEnumerator *e = [contents objectEnumerator];
+			NSDictionary *cur;
+			
+			while (cur = [e nextObject]) {
+				if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+				{
+					[_forwarder connection:self checkedExistenceOfPath:fileToCheck pathExists:YES];
+					[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
+					return;
 				}
 			}
+			[_forwarder connection:self checkedExistenceOfPath:fileToCheck pathExists:NO];
+			[_fileCheckInFlight autorelease];
+			_fileCheckInFlight = nil;
+			[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
 		}
-		[_forwarder connection:self checkedExistenceOfPath:fileToCheck pathExists:NO];
 	}
 }
 @end

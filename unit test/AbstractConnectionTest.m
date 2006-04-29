@@ -17,6 +17,57 @@
 
 @implementation AbstractConnectionTest
 
+- (NSString *)connectionName
+{
+	return @"AbstractConnection";
+}
+
+- (NSString *)host
+{
+	return @"localhost";
+}
+
+- (NSString *)port
+{
+	return nil;
+}
+
+- (NSString *)username
+{
+	return NSUserName();
+}
+
+- (NSString *)password
+{
+	return [AbstractConnectionTest keychainPasswordForServer:[self host] account:[self username]];
+}
+
+- (void) setUp
+{
+	//set info for your ftp server here
+	//	
+	fileNameExistingOnServer = @"unit test/09 moustik.mp3"; 
+	
+	initialDirectory = NSHomeDirectory();
+	NSError *err = nil;
+	connection = [[AbstractConnection connectionWithName: [self connectionName]
+													host: [self host]
+													port: [self port]
+												username: [self username]
+												password: [self password]
+												   error: &err] retain];
+	if (!connection)
+	{
+		if (err)
+		{
+			NSLog(@"%@", err);
+		}
+	}
+	[connection setDelegate: self];
+	
+	didUpload = isConnected = receivedError = NO;
+}
+
 - (unsigned int)testCaseCount {
   unsigned int count = 0;
   
@@ -73,12 +124,16 @@
 
 - (void) testFileExitence
 {
-  [self checkThatFileExistsAtPath: fileNameExistingOnServer];  
+	NSDictionary *env = [[NSProcessInfo processInfo] environment];
+	NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
+	[self checkThatFileExistsAtPath: file];  
 }
 
 - (void) testFileNonExistence
 {
-  [self checkThatFileDoesNotExistsAtPath: @"Windows95 was the best OS ever"];
+	NSDictionary *env = [[NSProcessInfo processInfo] environment];
+	NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"Windows95 was the best OS ever.txt"];
+	[self checkThatFileDoesNotExistsAtPath:file];
 }
 
 - (void) testGetSetPermission
@@ -118,7 +173,7 @@
   //now actually set the permission
   //
   receivedError = NO;
-  [connection setPermissions: 660 forFile: fileNameExistingOnServer]; //read write by owner and group only
+  [connection setPermissions:0660 forFile: fileNameExistingOnServer]; //read write by owner and group only
   
   
   initialTime = [NSDate date];
@@ -149,7 +204,7 @@
   {
     if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: fileNameExistingOnServer])
     {
-      STAssertEquals(600, [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue], @"did not set the remote permission");
+      STAssertEquals(0600, [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue], @"did not set the remote permission");
       
       break;
     }
@@ -175,7 +230,7 @@
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.h"]];
+  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer]];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -187,11 +242,11 @@
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
-  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   
   //clean up
   //
-  [connection deleteFile: @"AbstractConnectionTest.h"];
+  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
@@ -200,7 +255,7 @@
   
   //check that the file was removed
   //
-  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   
 }
 
@@ -213,7 +268,8 @@
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.h"] toFile:  @"AbstractConnectionTest.h"];
+  [connection uploadFile:[[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer] 
+				  toFile:[fileNameExistingOnServer lastPathComponent]];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -225,11 +281,11 @@
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
-  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   
   //clean up
   //
-  [connection deleteFile: @"AbstractConnectionTest.h"];
+  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
@@ -238,7 +294,7 @@
 
   //Check that the file was removed
   //
-  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
 }
 
 - (void) testUploadMultipleFiles
@@ -422,7 +478,7 @@
   
   STAssertFalse(receivedError, @"did receive an error while checking for file existence");
   STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existence");
-  STAssertTrue(fileExists, @"file  does not exist");
+  STAssertTrue(fileExists, @"file does not exist");
 }
 
 - (void) checkThatFileDoesNotExistsAtPath: (NSString*) inPath
