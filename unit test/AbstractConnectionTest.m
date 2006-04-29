@@ -147,7 +147,9 @@
   //get the directory content to save the permission
   //
   receivedError = NO;  
-  [connection directoryContents];
+  NSDictionary *env = [[NSProcessInfo processInfo] environment];
+  NSString *dir = [[[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer] stringByDeletingLastPathComponent];
+  [connection contentsOfDirectory:dir];
   
   initialTime = [NSDate date];
   while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
@@ -159,21 +161,23 @@
   
   NSEnumerator *theDirectoryEnum = [directoryContents objectEnumerator];
   NSDictionary *currentFile;
-  int savedPermission;
+  unsigned long savedPermission = 0644;
+  BOOL didFindFile = NO;
   while (currentFile = [theDirectoryEnum nextObject])
   {
-    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: fileNameExistingOnServer])
+    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
     {
-      savedPermission = [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue];
-      
+		savedPermission = [[currentFile objectForKey: @"NSFilePosixPermissions"] unsignedLongValue];
+		didFindFile = YES;
       break;
     }
   }
+  STAssertTrue(didFindFile, @"Failed to find test file", fileNameExistingOnServer);
   
   //now actually set the permission
   //
   receivedError = NO;
-  [connection setPermissions:0660 forFile: fileNameExistingOnServer]; //read write by owner and group only
+  [connection setPermissions:660 forFile: fileNameExistingOnServer]; //read write by owner and group only
   
   
   initialTime = [NSDate date];
@@ -189,7 +193,7 @@
   //
   receivedError = NO;  
   directoryContents = nil;
-  [connection directoryContents];
+  [connection contentsOfDirectory:dir];
   
   initialTime = [NSDate date];
   while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
@@ -200,15 +204,18 @@
   STAssertNotNil (directoryContents, @"did not receive directory content");
   
   theDirectoryEnum = [directoryContents objectEnumerator];
+  BOOL didCheckFile = NO;
   while (currentFile = [theDirectoryEnum nextObject])
   {
-    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: fileNameExistingOnServer])
+    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
     {
-      STAssertEquals(0600, [[currentFile objectForKey: @"NSFilePosixPermissions"] intValue], @"did not set the remote permission");
-      
-      break;
+		STAssertTrue(660 == [[currentFile objectForKey:NSFilePosixPermissions] unsignedLongValue], @"did not set the remote permission");
+		didCheckFile = YES;
+		break;
     }
   }
+  
+  STAssertTrue(didCheckFile, @"Failed to check file permissions for file");
   
   //set the permission back, don't care about the result that much
   //
@@ -242,7 +249,8 @@
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
-  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
+  NSString *dir = [connection currentDirectory];
+  [self checkThatFileExistsAtPath: [dir stringByAppendingPathComponent:[fileNameExistingOnServer lastPathComponent]]];
   
   //clean up
   //
@@ -297,7 +305,7 @@
   [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
 }
 
-- (void) testUploadMultipleFiles
+/*- (void) testUploadMultipleFiles
 {
   [connection connect];
   
@@ -338,7 +346,7 @@
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
 }
-
+*/
 - (void) testConnect
 {
   [connection connect];
