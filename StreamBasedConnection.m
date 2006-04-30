@@ -41,10 +41,11 @@
 #import <netinet/in.h>
 
 const unsigned int kStreamChunkSize = 2048;
-NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
-;
+NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
+
 @interface StreamBasedConnection (Private)
 - (void)checkQueue;
+- (void)processFileCheckingQueue;
 @end
 
 @implementation StreamBasedConnection
@@ -246,6 +247,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			break;
 			
 		case FORCE_DISCONNECT:
+			break;
+		case CHECK_FILE_QUEUE:
+			[self processFileCheckingQueue];
 			break;
 		case KILL_THREAD:
 		{
@@ -661,26 +665,43 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 															password:[self password]
 															   error:nil];
 		[_fileCheckingConnection setDelegate:self];
+		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
 		[_fileCheckingConnection connect];
 	}
 	if (!_fileCheckInFlight)
 	{
-		[_fileCheckingConnection changeToDirectory:[[self currentFileCheck] stringByDeletingLastPathComponent]];
-		[_fileCheckingConnection directoryContents];
 		_fileCheckInFlight = [[self currentFileCheck] copy];
+		NSString *dir = [[self currentFileCheck] stringByDeletingLastPathComponent];
+		[_fileCheckingConnection changeToDirectory:dir];
+		[_fileCheckingConnection directoryContents];
 	}
 }
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
+	NSString *dir = [path stringByDeletingLastPathComponent];
+	if (!dir && [dir length] == 0)
+	{
+		path = [[self currentDirectory] stringByAppendingPathComponent:path];
+	}
+		
 	[self queueFileCheck:path];
-	[self processFileCheckingQueue];
+	if ([NSThread currentThread] != _bgThread)
+	{
+		[self sendPortMessage:CHECK_FILE_QUEUE];
+	}
+	else
+	{
+		[self processFileCheckingQueue];
+	}
+	
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
 	if (_flags.fileCheck) {
 		//we could get the dir contents for the root directory
+		NSLog(@"%@ ? %@", dirPath, [_fileCheckInFlight stringByDeletingLastPathComponent]);
 		if ([dirPath isEqualToString:[_fileCheckInFlight stringByDeletingLastPathComponent]])
 		{
 			NSString *fileToCheck = [self currentFileCheck];
@@ -702,5 +723,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 			[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
 		}
 	}
+	[self dequeueFileCheck];
 }
 @end

@@ -38,6 +38,10 @@
 /*
  *	A Stream Based Connection runs the streams in a background thread and handles the
  *	delegate notifications of the streams.
+ *
+ *	Properties used:
+ *		FileCheckingTranscript
+ *
  */
 
 @class RunLoopForwarder;
@@ -96,5 +100,5 @@ enum { StreamErrorFailedSocketCreation = 7000 };
 
 extern const unsigned int kStreamChunkSize;
 
-enum { CONNECT = 0, COMMAND, ABORT, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };		// port messages
+enum { CONNECT = 0, COMMAND, ABORT, DISCONNECT, FORCE_DISCONNECT, CHECK_FILE_QUEUE, KILL_THREAD };		// port messages
 
