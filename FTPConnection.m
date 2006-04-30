@@ -814,12 +814,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 									atIndex:0];
 				// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 				// we are starting in.
-				
-				if (_flags.didConnect) {
-					[_forwarder connection:self didConnectToHost:_connectionHost];
-				}
-					
-				_flags.isConnected = YES;
 
 				[self setState:ConnectionIdleState];
 			}
@@ -863,10 +857,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == ConnectionAwaitingCurrentDirectoryState) //scan for the directory
 			{
 				NSString *path = [self scanBetweenQuotes:command];
+				if (!path || [path length] == 0)
+				{
+					path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+				}
 				[self setCurrentPath:path];
 				
 				if (_rootPath == nil) 
 					_rootPath = [[NSString stringWithString:path] retain];
+				
+				if (!_flags.isConnected)
+				{
+					if (_flags.didConnect) {
+						[_forwarder connection:self didConnectToHost:_connectionHost];
+					}
+					
+					_flags.isConnected = YES;
+				}
 				
 				if (_flags.changeDirectory) {
 					[_forwarder connection:self didChangeToDirectory:_currentPath];
@@ -1082,6 +1089,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			if (GET_STATE == FTPChangeDirectoryListingStyle)
 			{
+				[self setState:ConnectionIdleState];
+				break;
+			}
+			if (GET_STATE == ConnectionChangingDirectoryState)
+			{
+				if (_flags.error)
+				{
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain
+													   code:ConnectionErrorChangingDirectory
+												   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to change to directory", @"Bad ftp command")
+																						forKey:NSLocalizedDescriptionKey]];
+					[_forwarder connection:self didReceiveError:err];
+				}
+				
 				[self setState:ConnectionIdleState];
 				break;
 			}
@@ -1340,7 +1361,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			if (len >= 0)
 			{			
-				KTLog(TransportDomain, KTLogDebug, @"FTPD << %@", [[[NSString alloc] initWithBytes:buf length:len encoding:NSUTF8StringEncoding] autorelease]);
+				KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [[[NSString alloc] initWithBytes:buf length:len encoding:NSUTF8StringEncoding] autorelease]);
 
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
@@ -1381,7 +1402,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			KTLog(TransportDomain, KTLogDebug, @"FTP Data receive stream opened");
+			KTLog(StreamDomain, KTLogDebug, @"FTP Data receive stream opened");
 			[_openStreamsTimeout invalidate];
 			[_openStreamsTimeout release];
 			_openStreamsTimeout = nil;
@@ -1396,7 +1417,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			
 
-			KTLog(TransportDomain, KTLogError, @"receive error %@", [_receiveStream streamError]);
+			KTLog(StreamDomain, KTLogError, @"receive error %@", [_receiveStream streamError]);
 			KTLog(ProtocolDomain, KTLogDebug, @"error state received = %@", [self stateName:GET_STATE]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
 			/* Some servers when trying to test PASV can crap out and throw an error */
@@ -1468,14 +1489,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			else 
 			{
-				KTLog(ProtocolDomain, KTLogDebug, @"NSStreamEventErrorOccurred: %@", [_dataReceiveStream streamError]);
+				KTLog(StreamDomain, KTLogDebug, @"NSStreamEventErrorOccurred: %@", [_dataReceiveStream streamError]);
 			}
 			
 			break;
 		}
 		case NSStreamEventEndEncountered:
 		{
-			KTLog(TransportDomain, KTLogDebug, @"FTP Data receive stream ended");
+			KTLog(StreamDomain, KTLogDebug, @"FTP Data receive stream ended");
 			[self closeDataConnection];
 			break;
 		}
@@ -1504,7 +1525,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[_openStreamsTimeout release];
 			_openStreamsTimeout = nil;
 			
-			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream opened");
+			KTLog(StreamDomain, KTLogDebug, @"FTP Data send stream opened");
 			
 			if (!_serverSupport.isActiveDataConn)
 				[self setState:ConnectionIdleState];
@@ -1517,7 +1538,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Send Stream Error: %@\n", [_receiveStream streamError]] 
 																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
 			}
-			KTLog(TransportDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
+			KTLog(StreamDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
 			/* Some servers when trying to test PASV can crap out and throw an error */
 			if (GET_STATE == FTPSettingEPSVState) 
@@ -1586,7 +1607,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				}
 			}
 			else {
-				KTLog(TransportDomain, KTLogDebug, @"NSStreamEventErrorOccurred: %@", [_dataReceiveStream streamError]);
+				KTLog(StreamDomain, KTLogDebug, @"NSStreamEventErrorOccurred: %@", [_dataReceiveStream streamError]);
 				if (_flags.error) {
 					[_forwarder connection:self didReceiveError:[_dataReceiveStream streamError]];	
 				}
@@ -1596,7 +1617,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventEndEncountered:
 		{
-			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream ended");
+			KTLog(StreamDomain, KTLogDebug, @"FTP Data send stream ended");
 			[self closeDataConnection];
 			break;
 		}
@@ -1661,7 +1682,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		default:
 		{
-			KTLog(TransportDomain, KTLogDebug, @"Composite Event Code!  Need to deal with this!");
+			KTLog(StreamDomain, KTLogDebug, @"Composite Event Code!  Need to deal with this!");
 			break;
 		}
 	}
@@ -1701,11 +1722,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
 																  attributes:[AbstractConnection dataAttributes]] autorelease]];
 
-		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@: %@", _currentPath, results);
+		NSArray *contents = [self parseLines:results];
+		
+		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, contents);
 		
 		if (_flags.directoryContents)
 		{
-			[_forwarder connection:self didReceiveContents:[self parseLines:results] ofDirectory:_currentPath];
+			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
 		}
 		[results release];
 		[_dataBuffer setLength:0];
@@ -2120,17 +2143,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:ls];
 }
 
+- (void)threadedContentsOfDirectory:(NSString *)dirPath
+{
+	NSString *currentDir = [[[self currentDirectory] copy] autorelease];
+	[self changeToDirectory:dirPath];
+	[self directoryContents];
+	[self changeToDirectory:currentDir];
+}
+
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	ConnectionCommand *ls = [ConnectionCommand command:[NSString stringWithFormat:@"LIST -F %@", dirPath]
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:)
+													  target:self
+												   arguments:[NSArray arrayWithObject:dirPath]];
+	ConnectionCommand *ls = [ConnectionCommand command:inv
 											awaitState:ConnectionIdleState 
 											 sentState:ConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
 											  userInfo:nil];
-	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	[dataCmd addDependantCommand:ls];
-	
-	[self queueCommand:dataCmd];
 	[self queueCommand:ls];
 }
 

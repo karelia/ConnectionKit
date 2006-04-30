@@ -668,10 +668,12 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
 		[_fileCheckingConnection connect];
 	}
-	if (!_fileCheckInFlight)
+	if (!_fileCheckInFlight && [self numberOfFileChecks] > 0)
 	{
 		_fileCheckInFlight = [[self currentFileCheck] copy];
-		NSString *dir = [[self currentFileCheck] stringByDeletingLastPathComponent];
+		NSString *dir = [_fileCheckInFlight stringByDeletingLastPathComponent];
+		if (!dir)
+			NSLog(@"%@", _fileCheckInFlight);
 		[_fileCheckingConnection changeToDirectory:dir];
 		[_fileCheckingConnection directoryContents];
 	}
@@ -701,28 +703,31 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 {
 	if (_flags.fileCheck) {
 		//we could get the dir contents for the root directory
-		NSLog(@"%@ ? %@", dirPath, [_fileCheckInFlight stringByDeletingLastPathComponent]);
 		if ([dirPath isEqualToString:[_fileCheckInFlight stringByDeletingLastPathComponent]])
 		{
-			NSString *fileToCheck = [self currentFileCheck];
-			NSString *name = [[fileToCheck lastPathComponent] lastPathComponent];
+			NSString *name = [_fileCheckInFlight lastPathComponent];
 			NSEnumerator *e = [contents objectEnumerator];
 			NSDictionary *cur;
+			BOOL foundFile = NO;
 			
-			while (cur = [e nextObject]) {
+			while (cur = [e nextObject]) 
+			{
 				if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
 				{
-					[_forwarder connection:self checkedExistenceOfPath:fileToCheck pathExists:YES];
-					[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
-					return;
+					[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
+					foundFile = YES;
+					break;
 				}
 			}
-			[_forwarder connection:self checkedExistenceOfPath:fileToCheck pathExists:NO];
-			[_fileCheckInFlight autorelease];
-			_fileCheckInFlight = nil;
-			[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
+			if (!foundFile)
+			{
+				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
+			}
 		}
 	}
 	[self dequeueFileCheck];
+	[_fileCheckInFlight autorelease];
+	_fileCheckInFlight = nil;
+	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
 }
 @end

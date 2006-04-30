@@ -37,7 +37,8 @@
 enum {
 	ConnectionErrorUploading = 49101,
 	ConnectionErrorDownloading,
-	ConnectionErrorCreatingDirectory
+	ConnectionErrorCreatingDirectory,
+	ConnectionErrorChangingDirectory
 };
 
 typedef struct __flags {
