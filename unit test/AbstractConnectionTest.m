@@ -148,7 +148,8 @@
   //
   receivedError = NO;  
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  NSString *dir = [[[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer] stringByDeletingLastPathComponent];
+  NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
+  NSString *dir = [[file stringByDeletingLastPathComponent] stringByAppendingString:@"/"];
   [connection contentsOfDirectory:dir];
   
   initialTime = [NSDate date];
@@ -172,12 +173,12 @@
       break;
     }
   }
-  STAssertTrue(didFindFile, @"Failed to find test file", fileNameExistingOnServer);
+  STAssertTrue(didFindFile, @"Failed to find test file %@", [fileNameExistingOnServer lastPathComponent]);
   
   //now actually set the permission
   //
   receivedError = NO;
-  [connection setPermissions:660 forFile: fileNameExistingOnServer]; //read write by owner and group only
+  [connection setPermissions:660 forFile: file]; //read write by owner and group only
   
   
   initialTime = [NSDate date];
@@ -220,7 +221,7 @@
   //set the permission back, don't care about the result that much
   //
   receivedError = NO;
-  [connection setPermissions: savedPermission forFile: fileNameExistingOnServer]; //read write by owner only
+  [connection setPermissions: savedPermission forFile: file]; //read write by owner only
   
   
   initialTime = [NSDate date];
@@ -372,12 +373,12 @@
   
   [connection disconnect];
   initialTime = [NSDate date];
-  while (([connection isConnected])  && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while (isConnected  && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on deconnection");
-  STAssertFalse([connection isConnected], @"did not disconnect");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on disconnection");
+  STAssertFalse(isConnected, @"did not disconnect");
 }
 
 - (void) testConnectWithBadUserName
@@ -429,7 +430,7 @@
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
-  receivedError = YES;
+	isConnected = NO;
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
@@ -465,6 +466,8 @@
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
+	NSLog(@"received contents: %@", dirPath);
+	
   directoryContents = [contents retain];
 }
 
@@ -477,6 +480,7 @@
 {
   //check that the file was removed
   //
+	//NSLog(@"checking for file: %@", inPath);
   [connection checkExistenceOfPath: inPath];
   
   fileExists = returnedFromFileExists = receivedError = NO;
@@ -493,6 +497,7 @@
 {
   //check that the file was removed
   //
+	//NSLog(@"checking file doesn't exist: %@", inPath);
   [connection checkExistenceOfPath: inPath];
   
   fileExists = returnedFromFileExists = receivedError = NO;
