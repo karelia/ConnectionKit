@@ -161,6 +161,11 @@ typedef struct __flags {
 - (void)directoryContents;
 - (void)contentsOfDirectory:(NSString *)dirPath;
 
+- (void)setProperty:(id)property forKey:(NSString *)key;
+- (id)propertyForKey:(NSString *)key;
+
+- (void)setTranscript:(NSTextStorage *)transcript;
+
 - (long long)transferSpeed; // bytes/second
 
 - (void)checkExistenceOfPath:(NSString *)path;

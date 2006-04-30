@@ -512,6 +512,8 @@ NSDictionary *sDataAttributes;
 		[self setPort:port];
 		[self setUsername:username];
 		[self setPassword:password];
+		_properties = [[NSMutableDictionary dictionary] retain];
+		
 		if (error)
 		{
 			*error = nil;
@@ -527,6 +529,8 @@ NSDictionary *sDataAttributes;
 	[_username release];
 	[_password release];
 	[_transcript release];
+	[_properties release];
+	
 	[super dealloc];
 }
 
@@ -651,6 +655,16 @@ NSDictionary *sDataAttributes;
 - (id)delegate
 {
 	return _delegate;
+}
+
+- (void)setProperty:(id)property forKey:(NSString *)key
+{
+	[_properties setObject:property forKey:key];
+}
+
+- (id)propertyForKey:(NSString *)key
+{
+	return [_properties objectForKey:key];
 }
 
 #pragma mark -
