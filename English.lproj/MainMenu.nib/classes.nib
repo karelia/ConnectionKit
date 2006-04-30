@@ -3,6 +3,7 @@
         {
             ACTIONS = {
                 cancelConnect = id; 
+                checkForFile = id; 
                 connect = id; 
                 connectionTypeChanged = id; 
                 deleteFile = id; 
@@ -41,6 +42,7 @@
                 cURL = NSTextField; 
                 cUser = NSTextField; 
                 connectWindow = NSPanel; 
+                fileCheckLog = NSTextView; 
                 initialDirectory = NSTextField; 
                 localPopup = NSPopUpButton; 
                 localTable = NSTableView; 

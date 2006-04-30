@@ -2,7 +2,8 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class AbstractConnection;
+@class InputDialog;
+@protocol AbstractConnectionProtocol;
 
 @interface Controller : NSObject
 {
@@ -33,8 +34,9 @@
 	IBOutlet NSPopUpButton *savedHosts;
 	IBOutlet NSButton *btnDisconnect;
 	IBOutlet NSTextField *initialDirectory;
+	IBOutlet NSTextView *fileCheckLog;
 	
-	AbstractConnection *con;
+	id <AbstractConnectionProtocol> con;
 	NSMutableArray *remoteFiles;
 	NSMutableArray *localFiles;
 	NSMutableArray *transfers;
@@ -46,6 +48,7 @@
 	BOOL isConnected;
 	
 	NSMutableArray *_savedHosts;
+	InputDialog *check;
 }
 - (IBAction)cancelConnect:(id)sender;
 - (IBAction)connect:(id)sender;
