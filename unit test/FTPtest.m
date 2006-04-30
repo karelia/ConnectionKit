@@ -16,4 +16,9 @@
 	return @"FTP";
 }
 
+- (void) testConnectWithBadUserName
+{
+	
+}
+
 @end
