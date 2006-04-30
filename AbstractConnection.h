@@ -96,6 +96,8 @@ typedef enum {
 	id _delegate;
 
 	connectionFlags _flags;
+	
+	NSMutableDictionary *_properties;
 }
 
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -133,6 +135,9 @@ typedef enum {
 
 - (void)setDelegate:(id)delegate;	//we do not retain the delegate
 - (id)delegate;
+
+- (void)setProperty:(id)property forKey:(NSString *)key;
+- (id)propertyForKey:(NSString *)key;
 
 // Subclass registration
 + (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types;
