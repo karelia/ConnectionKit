@@ -131,6 +131,24 @@ NSString *ProtocolKey = @"Protocol";
 	//[self runAutomatedScript];
 }
 
+- (void)checkForFile:(id)sender
+{
+	if (!check)
+	{
+		check = [[InputDialog alloc] init];
+		[check setDialogTitle:@"Find File"];
+	}
+	[check beginSheetModalForWindow:window delegate:self selector:@selector(fileCheck:receivedValue:)];
+}
+
+- (void)fileCheck:(InputDialog *)input receivedValue:(NSString *)val
+{
+	if (val)
+	{
+		[con checkExistenceOfPath:val];
+	}
+}
+
 - (void)connectionTypeChanged:(id)sender
 {
 	[cPort setStringValue:[AbstractConnection registeredPortForConnectionType:[sender titleOfSelectedItem]]];
@@ -315,6 +333,9 @@ NSString *ProtocolKey = @"Protocol";
 	NSTextStorage *textStorage = [log textStorage];
 	[textStorage setDelegate:self];		// get notified when text changes
 	[con setTranscript:textStorage];
+	[[fileCheckLog textStorage] setDelegate:self];
+	[con setProperty:[fileCheckLog textStorage] forKey:@"FileCheckingTranscript"];
+	
 	[con setDelegate:self];
 	[status setStringValue:[NSString stringWithFormat:@"Connecting to: %@", [cHost stringValue]]];
 	[con connect];
@@ -846,6 +867,18 @@ static NSImage *_folder = nil;
 	[self refreshLocal];
 }
 
+- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists
+{
+	if (exists)
+	{
+		NSRunAlertPanel(@"File Exists", @"Found path: %@", @"OK", nil, nil, path);
+	}
+	else
+	{
+		NSRunAlertPanel(@"File Not Found", @"Could not find path: %@", @"OK", nil, nil, path);
+	}
+}
+
 #pragma mark -
 #pragma mark NSTableView DataSource Methods
 
@@ -1093,13 +1126,16 @@ NSString *IconKey = @"Icon";
 */
 - (void)textStorageDidProcessEditing:(NSNotification *)aNotification
 {
-	[self performSelector:@selector(scrollToVisible:) withObject:nil afterDelay:0.0];
+	if ([aNotification object] == [log textStorage])
+		[self performSelector:@selector(scrollToVisible:) withObject:log afterDelay:0.0];
+	else
+		[self performSelector:@selector(scrollToVisible:) withObject:fileCheckLog afterDelay:0.0];
 	// Don't scroll now, do it in a moment. Doing it now causes error messgaes.
 }
 
-- (void) scrollToVisible:(id)unused
+- (void) scrollToVisible:(id)whichLog
 {
-	[log scrollRangeToVisible:NSMakeRange([[log textStorage] length], 0)];
+	[whichLog scrollRangeToVisible:NSMakeRange([[whichLog textStorage] length], 0)];
 }
 
 #pragma mark -
