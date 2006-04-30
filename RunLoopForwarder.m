@@ -42,6 +42,7 @@
 	if (self = [super init]) {
 		lock = [[NSLock alloc] init];
 		createdOnThread = [NSThread currentThread];
+		[NSThread prepareForInterThreadMessages];
 	}
 	return self;
 }
