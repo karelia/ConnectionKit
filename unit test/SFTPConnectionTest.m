@@ -16,4 +16,8 @@
 	return @"SFTP";
 }
 
+- (void) testConnectWithBadUserName
+{	
+}
+
 @end
