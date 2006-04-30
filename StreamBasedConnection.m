@@ -666,6 +666,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain"
 	if (!_fileCheckInFlight)
 	{
 		[_fileCheckingConnection changeToDirectory:[[self currentFileCheck] stringByDeletingLastPathComponent]];
+		[_fileCheckingConnection directoryContents];
 		_fileCheckInFlight = [[self currentFileCheck] copy];
 	}
 }
