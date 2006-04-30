@@ -404,13 +404,15 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 {
 	[self setCurrentOperation:kSetPermissions];
 	unsigned long permissions = [perms unsignedLongValue];
-		
-	NSDictionary *attributes = [myFileManager fileAttributesAtPath:path traverseLink:YES];	// TODO: verify link is OK
 	
-	NSMutableDictionary *newAttr = [NSMutableDictionary dictionaryWithDictionary:attributes];
+	NSTask *chmod = [[NSTask alloc] init];
+	[chmod setLaunchPath:@"/bin/chmod"];
+	[chmod setArguments:[NSArray arrayWithObjects:[NSString stringWithFormat:@"%lo", permissions], path, nil]];
+	[chmod launch];
+	[chmod waitUntilExit];
 	
-	[newAttr setObject:[NSNumber numberWithUnsignedLong:permissions] forKey:NSFilePosixPermissions];
-	BOOL success = [myFileManager changeFileAttributes:newAttr atPath:path];
+	BOOL success = [chmod terminationStatus] == 0;
+	[chmod release];
 	
 	if (success)
 	{
