@@ -7,6 +7,8 @@
 //
 
 #import "AbstractConnectionTest.h"
+
+const NSTimeInterval kTestTimeout = -5.0;
  
 @interface AbstractConnectionTest (Private)
 
@@ -46,9 +48,9 @@
 {
 	//set info for your ftp server here
 	//	
-	fileNameExistingOnServer = @"unit test/09 moustik.mp3"; 
+	fileNameExistingOnServer = [[NSString stringWithString:@"unit test/09 moustik.mp3"] retain];
 	
-	initialDirectory = NSHomeDirectory();
+	initialDirectory = [[NSString stringWithString:NSHomeDirectory()] retain];
 	NSError *err = nil;
 	connection = [[AbstractConnection connectionWithName: [self connectionName]
 													host: [self host]
@@ -66,6 +68,17 @@
 	[connection setDelegate: self];
 	
 	didUpload = isConnected = receivedError = NO;
+	directoryContents = nil;
+}
+
+- (void) tearDown
+{
+	[fileNameExistingOnServer release];
+	[initialDirectory release];
+	[directoryContents release];
+	[connection setDelegate:nil];
+	[connection release];
+	connection = nil;
 }
 
 - (unsigned int)testCaseCount {
@@ -141,23 +154,24 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
+  STAssertTrue([connection isConnected], @"Connection didn't connect");
   //get the directory content to save the permission
   //
   receivedError = NO;  
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
   NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
-  NSString *dir = [[file stringByDeletingLastPathComponent] stringByAppendingString:@"/"];
+  NSString *dir = [file stringByDeletingLastPathComponent];
   [connection contentsOfDirectory:dir];
   
   initialTime = [NSDate date];
-  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse (receivedError, @"received error on get directory content");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on directory content");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on directory content");
   STAssertNotNil (directoryContents, @"did not receive directory content");
   
   NSEnumerator *theDirectoryEnum = [directoryContents objectEnumerator];
@@ -166,7 +180,7 @@
   BOOL didFindFile = NO;
   while (currentFile = [theDirectoryEnum nextObject])
   {
-    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
+    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [file lastPathComponent]])
     {
 		savedPermission = [[currentFile objectForKey: @"NSFilePosixPermissions"] unsignedLongValue];
 		didFindFile = YES;
@@ -182,26 +196,26 @@
   
   
   initialTime = [NSDate date];
-  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse (receivedError, @"received error on set permission");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on set permission");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on set permission");
   STAssertTrue (didSetPermission, @"did not set the permission");
-  
   
   //now check that the permission are set
   //
   receivedError = NO;  
+  [directoryContents release];
   directoryContents = nil;
   [connection contentsOfDirectory:dir];
   
   initialTime = [NSDate date];
-  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!directoryContents) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse (receivedError, @"received error on get directory content");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on directory content");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on directory content");
   STAssertNotNil (directoryContents, @"did not receive directory content");
   
   theDirectoryEnum = [directoryContents objectEnumerator];
@@ -225,7 +239,7 @@
   
   
   initialTime = [NSDate date];
-  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didSetPermission) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
 }
 
@@ -234,7 +248,7 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
@@ -242,11 +256,11 @@
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse(receivedError, @"received error on upload");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
@@ -259,7 +273,7 @@
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   //check that the file was removed
@@ -273,7 +287,7 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
@@ -282,11 +296,11 @@
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse(receivedError, @"received error on upload");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
@@ -299,7 +313,7 @@
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
 
   //Check that the file was removed
@@ -312,7 +326,7 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
@@ -321,11 +335,11 @@
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse(receivedError, @"received error on upload");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on upload");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
   
   [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
   [self checkThatFileExistsAtPath: @"AbstractConnectionTest.m"];
@@ -335,14 +349,14 @@
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   [connection deleteFile: @"AbstractConnectionTest.m"];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
@@ -354,10 +368,10 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on connection");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on connection");
   STAssertTrue([connection isConnected], @"did not connect");
   STAssertFalse(receivedError, @"error while connecting");
   STAssertEqualObjects(initialDirectory, [connection currentDirectory], @"invalid current directory");
@@ -368,16 +382,16 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   [connection disconnect];
   initialTime = [NSDate date];
-  while (isConnected  && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while (isConnected  && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timed out on disconnection");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on disconnection");
   STAssertFalse(isConnected, @"did not disconnect");
 }
 
@@ -387,10 +401,10 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertTrue([initialTime timeIntervalSinceNow] > -15, @"timed out on connection");
+  STAssertTrue([initialTime timeIntervalSinceNow] > kTestTimeout, @"timed out on connection");
   STAssertFalse([connection isConnected], @"did not connect");
   STAssertTrue(receivedError, @"error while connecting");
 }
@@ -401,10 +415,10 @@
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertTrue([initialTime timeIntervalSinceNow] > -15, @"timed out on connection");
+  STAssertTrue([initialTime timeIntervalSinceNow] > kTestTimeout, @"timed out on connection");
   STAssertFalse([connection isConnected], @"did not connect");
   STAssertTrue(receivedError, @"error while connecting");
 }
@@ -466,7 +480,7 @@
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
-	NSLog(@"received contents: %@", dirPath);
+	//NSLog(@"received contents: %@", dirPath);
 	
   directoryContents = [contents retain];
 }
@@ -485,11 +499,11 @@
   
   fileExists = returnedFromFileExists = receivedError = NO;
   NSDate *initialTime = [NSDate date];
-  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse(receivedError, @"did receive an error while checking for file existence");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existence");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on check file existence");
   STAssertTrue(fileExists, @"file does not exist");
 }
 
@@ -502,11 +516,11 @@
   
   fileExists = returnedFromFileExists = receivedError = NO;
   NSDate *initialTime = [NSDate date];
-  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > -15))  //wait for connection or 30 sec
+  while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertFalse(receivedError, @"did receive an error while checking for file existence");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > -15), @"timeout on check file existence");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on check file existence");
   STAssertFalse(fileExists, @"file exists");
 }
 @end
