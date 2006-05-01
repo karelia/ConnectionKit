@@ -6,10 +6,10 @@
 //  Copyright 2006 Olivier Destrebecq. All rights reserved.
 //
 
-#import "LocalConnectionTest.h"
+#import "FileConnectionTest.h"
 
 
-@implementation fileConnectionTest
+@implementation FileConnectionTest
 
 - (NSString *)connectionName
 {

@@ -1,17 +1,18 @@
 //
-//  FTPtest.h
+//  LocalConnectionTest.h
 //  Connection
 //
-//  Created by olivier on 4/27/06.
+//  Created by olivier on 4/24/06.
 //  Copyright 2006 Olivier Destrebecq. All rights reserved.
 //
 
 #import "AbstractConnectionTest.h"
 
 
-@interface FTPtest : AbstractConnectionTest 
-{
+@interface FileConnectionTest : AbstractConnectionTest 
 
+{
+  
 }
 
 @end

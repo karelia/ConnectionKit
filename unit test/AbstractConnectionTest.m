@@ -449,7 +449,7 @@ const NSTimeInterval kTestTimeout = -5.0;
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
 {
-  NSLog (@"%@\n%@", NSStringFromSelector(_cmd), error);
+  //NSLog (@"%@\n%@", NSStringFromSelector(_cmd), error);
   receivedError = YES;
 }
 

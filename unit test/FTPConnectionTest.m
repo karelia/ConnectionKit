@@ -6,10 +6,10 @@
 //  Copyright 2006 Olivier Destrebecq. All rights reserved.
 //
 
-#import "FTPtest.h"
+#import "FTPConnectionTest.h"
 
 
-@implementation FTPtest
+@implementation FTPConnectionTest
 
 - (NSString *)connectionName
 {
