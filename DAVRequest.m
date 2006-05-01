@@ -31,6 +31,10 @@
 #import "DAVResponse.h"
 #import "NSData+Connection.h"
 
+@interface NSString (Connection)
+- (NSString *)encodeLegally;
+@end
+
 @implementation DAVRequest
 
 + (id)requestWithMethod:(NSString *)method uri:(NSString *)uri
@@ -182,7 +186,7 @@
 {
 	NSMutableData *packet = [NSMutableData data];
 	
-	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, myURI];
+	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, [myURI encodeLegally]];
 	[packet appendData:[request dataUsingEncoding:NSUTF8StringEncoding]];
 	//NSData *gzip = [myContent deflate];
 	

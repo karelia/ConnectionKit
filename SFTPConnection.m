@@ -548,9 +548,7 @@ static NSArray *sftpErrors = nil;
 				KTLog(ProtocolDomain, KTLogInfo, @"Validated via ssh's authorized_keys");
 				[self setState:ConnectionAwaitingCurrentDirectoryState];
 				[self sendCommand:@"pwd"];
-				_flags.isConnected = YES;
-				if (_flags.didConnect)
-					[_forwarder connection:self didConnectToHost:[self host]];
+				
 			} else if ([self bufferContainsError]){
 				if (_flags.error) {
 					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
@@ -634,6 +632,16 @@ static NSArray *sftpErrors = nil;
 				_currentDir = [dir copy];
 				[self emptyBuffer];
 				//[_inputBuffer appendString:@"sftp> "];
+				
+				if (!_flags.isConnected)
+				{
+					_flags.isConnected = YES;
+					if (_flags.didConnect)
+						[_forwarder connection:self didConnectToHost:[self host]];
+					[self setState:ConnectionIdleState];
+					break;
+				}
+				
 				if (_flags.changeDirectory)
 					[_forwarder connection:self didChangeToDirectory:_currentDir];
 				[self setState:ConnectionIdleState];
