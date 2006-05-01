@@ -66,8 +66,7 @@ const NSTimeInterval kTestTimeout = -5.0;
 		}
 	}
 	[connection setDelegate: self];
-	
-	didUpload = isConnected = receivedError = NO;
+	didUpload = isConnected = receivedError = didSetPermission = didDelete = fileExists = returnedFromFileExists = NO;
 	directoryContents = nil;
 }
 
@@ -192,7 +191,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   //now actually set the permission
   //
   receivedError = NO;
-  [connection setPermissions:660 forFile: file]; //read write by owner and group only
+  [connection setPermissions:0660 forFile: file]; //read write by owner and group only
   
   
   initialTime = [NSDate date];
@@ -224,7 +223,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   {
     if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
     {
-		STAssertTrue(660 == [[currentFile objectForKey:NSFilePosixPermissions] unsignedLongValue], @"did not set the remote permission");
+		STAssertTrue(0660 == [[currentFile objectForKey:NSFilePosixPermissions] unsignedLongValue], @"did not set the remote permission");
 		didCheckFile = YES;
 		break;
     }
@@ -252,7 +251,8 @@ const NSTimeInterval kTestTimeout = -5.0;
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer]];
+  NSString *localFile = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
+  [connection uploadFile: localFile];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -269,7 +269,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   
   //clean up
   //
-  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
+  [connection deleteFile: [dir stringByAppendingPathComponent:[fileNameExistingOnServer lastPathComponent]]];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
@@ -519,8 +519,8 @@ const NSTimeInterval kTestTimeout = -5.0;
   while ((!returnedFromFileExists) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertFalse(receivedError, @"did receive an error while checking for file existence");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on check file existence");
+  STAssertFalse(receivedError, @"did receive an error while checking for file non-existence");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on check file non-existence");
   STAssertFalse(fileExists, @"file exists");
 }
 @end
