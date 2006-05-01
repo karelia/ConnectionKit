@@ -317,6 +317,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		ConnectionCommand *command = [[self currentCommand] retain];
 		if (GET_STATE == [command awaitState])
 		{
+			KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
 			_state = [command sentState];	// don't use setter; we don't want to recurse
 			[self pushCommandOnHistoryQueue:command];
 			[self dequeueCommand];
@@ -702,27 +703,23 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
 	if (_flags.fileCheck) {
-		//we could get the dir contents for the root directory
-		if ([dirPath isEqualToString:[_fileCheckInFlight stringByDeletingLastPathComponent]])
+		NSString *name = [_fileCheckInFlight lastPathComponent];
+		NSEnumerator *e = [contents objectEnumerator];
+		NSDictionary *cur;
+		BOOL foundFile = NO;
+		
+		while (cur = [e nextObject]) 
 		{
-			NSString *name = [_fileCheckInFlight lastPathComponent];
-			NSEnumerator *e = [contents objectEnumerator];
-			NSDictionary *cur;
-			BOOL foundFile = NO;
-			
-			while (cur = [e nextObject]) 
+			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
 			{
-				if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
-				{
-					[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
-					foundFile = YES;
-					break;
-				}
+				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
+				foundFile = YES;
+				break;
 			}
-			if (!foundFile)
-			{
-				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
-			}
+		}
+		if (!foundFile)
+		{
+			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
 		}
 	}
 	[self dequeueFileCheck];

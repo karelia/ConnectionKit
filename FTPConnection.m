@@ -1229,6 +1229,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					//[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
 				//}
 			}
+			else if (GET_STATE == ConnectionDeleteFileState)
+			{
+				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+				[self dequeueDeletion];
+			}
+			else if (GET_STATE == ConnectionDeleteDirectoryState)
+			{
+				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+				[self dequeueDeletion];
+			}
 			else
 			{
 				error = LocalizedStringInThisBundle(@"File / Directory does not exist", @"FTP error");
@@ -1873,10 +1883,26 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)threadedSetPermissions:(NSNumber *)perms forFile:(NSString *)path
 {
-	if (_serverSupport.hasSITE)
+	unsigned long permissions = [perms unsignedLongValue];
+	NSString *cmd = [NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path];
+	ConnectionCommand *com = [ConnectionCommand command:cmd
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSettingPermissionsState
+											  dependant:nil
+											   userInfo:nil];
+	[self pushCommandOnHistoryQueue:com];
+	[self sendCommand:cmd];
+	// Not all servers return SITE in the FEAT request.
+	/*if (_serverSupport.hasSITE)
 	{
 		unsigned long permissions = [perms unsignedLongValue];
 		NSString *cmd = [NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path];
+		ConnectionCommand *com = [ConnectionCommand command:cmd
+												 awaitState:ConnectionIdleState
+												  sentState:ConnectionSettingPermissionsState
+												  dependant:nil
+												   userInfo:nil];
+		[self pushCommandOnHistoryQueue:com];
 		[self sendCommand:cmd];
 	}
 	else
@@ -1884,7 +1910,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		// do we send an error or silenty fail????
 		[self dequeuePermissionChange];
 		[self setState:ConnectionIdleState];
-	}
+	}*/
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
@@ -2146,9 +2172,42 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)threadedContentsOfDirectory:(NSString *)dirPath
 {
 	NSString *currentDir = [[[self currentDirectory] copy] autorelease];
-	[self changeToDirectory:dirPath];
-	[self directoryContents];
-	[self changeToDirectory:currentDir];
+	
+	ConnectionCommand *pwd2 = [ConnectionCommand command:@"PWD"
+											  awaitState:ConnectionIdleState 
+											   sentState:ConnectionAwaitingCurrentDirectoryState
+											   dependant:nil
+												userInfo:nil];
+	ConnectionCommand *cwd2 = [ConnectionCommand command:[NSString stringWithFormat:@"CWD %@", currentDir]
+											  awaitState:ConnectionIdleState 
+											   sentState:ConnectionChangingDirectoryState
+											   dependant:pwd2
+												userInfo:nil];
+	
+	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
+	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -F" 
+											awaitState:ConnectionIdleState 
+											 sentState:ConnectionAwaitingDirectoryContentsState 
+											 dependant:dataCmd 
+											  userInfo:nil];
+	
+	ConnectionCommand *pwd = [ConnectionCommand command:@"PWD"
+											 awaitState:ConnectionIdleState 
+											  sentState:ConnectionAwaitingCurrentDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	ConnectionCommand *cwd = [ConnectionCommand command:[NSString stringWithFormat:@"CWD %@", dirPath]
+											 awaitState:ConnectionIdleState 
+											  sentState:ConnectionChangingDirectoryState
+											  dependant:pwd
+											   userInfo:nil];
+	[_commandQueue insertObject:pwd2 atIndex:0];
+	[_commandQueue insertObject:cwd2 atIndex:0];
+	[_commandQueue insertObject:ls atIndex:0];
+	[_commandQueue insertObject:dataCmd atIndex:0];
+	[_commandQueue insertObject:pwd atIndex:0];
+	[_commandQueue insertObject:cwd atIndex:0];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath
@@ -2398,6 +2457,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(long long)offset remotePath:(NSString *)remotePath
 {
+	if (nil == localPath)
+	{
+		localPath = [remotePath lastPathComponent];
+	}
+	if (nil == remotePath)
+	{
+		remotePath = [[self currentDirectory] stringByAppendingPathComponent:[localPath lastPathComponent]];
+	}
+	
 	KTLog(QueueDomain, KTLogDebug, @"Queueing Upload: localPath = %@ data = %d bytes offset = %lld remotePath = %@", localPath, [data length], offset, remotePath);
 	
 	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A"
@@ -2428,14 +2496,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		[dict setObject:data forKey:QueueUploadLocalDataKey];
 	}
-	if (nil == localPath)
-	{
-		localPath = [remotePath lastPathComponent];
-	}
-	if (nil == remotePath)
-	{
-		remotePath = [localPath lastPathComponent];
-	}
+	
 	[dict setObject:localPath forKey:QueueUploadLocalFileKey];
 	[dict setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	[self queueUpload:dict];
