@@ -563,8 +563,6 @@ static NSArray *sftpErrors = nil;
 			if ([self bufferContainsCommandPrompt]) {
 				[self setState:ConnectionAwaitingCurrentDirectoryState];
 				[self sendCommand:@"pwd"];
-				if (_flags.didConnect)
-					[_forwarder connection:self didConnectToHost:[self host]];
 			} else if ([self bufferContainsPasswordPrompt]) {
 				if (_flags.badPassword) {
 					[_forwarder connectionDidSendBadPassword:self];
