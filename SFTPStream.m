@@ -263,6 +263,7 @@ enum { START = 200, STOP };
 			NSArray *keys = [env allKeys];
 			NSString *key;
 			int i;
+			NSLog(@"%d env vars", [keys count]);
 			for (i = 0; i < [keys count]; i++)
 			{
 				key = [keys objectAtIndex:i];

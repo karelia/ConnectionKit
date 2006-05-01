@@ -873,6 +873,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					}
 					
 					_flags.isConnected = YES;
+					[self setState:ConnectionIdleState];
+					break;
 				}
 				
 				if (_flags.changeDirectory) {
