@@ -59,6 +59,12 @@
 	NSMutableData		*_sendBuffer;
 	NSLock				*_sendBufferLock;
 	
+	// speed support
+	NSDate				*_lastChunkSent;
+	NSDate				*_lastChunkReceived;
+	double				_uploadSpeed;
+	double				_downloadSpeed;
+	
 	// This is a peer connection that is used to check if files exist
 	AbstractConnection	*_fileCheckingConnection;
 	NSString			*_fileCheckInFlight;

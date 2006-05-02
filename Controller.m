@@ -1,12 +1,9 @@
 #import "Controller.h"
-#import "AbstractConnection.h"
 #import "ProgressCell.h"
 #import "InputDialog.h"
 #import "PermissionsController.h"
-#import "FTPConnection.h"
-#import "AbstractConnection.h"
 #import "FileTransfer.h"
-#import "KTLog.h"
+#import <Connection/Connection.h>
 
 static NSString *AutoSelect = @"Auto Select";
 
@@ -337,9 +334,41 @@ NSString *ProtocolKey = @"Protocol";
 	[con setProperty:[fileCheckLog textStorage] forKey:@"FileCheckingTranscript"];
 	
 	[con setDelegate:self];
-	[status setStringValue:[NSString stringWithFormat:@"Connecting to: %@", [cHost stringValue]]];
-	[con connect];
 	[self cancelConnect:sender];
+	
+	if ([btnBrowseHost state] == NSOnState)
+	{
+		ConnectionOpenPanel *browse = [ConnectionOpenPanel connectionOpenPanel:con];
+		[browse setCanCreateDirectories:YES];
+		[browse setCanChooseDirectories:YES];
+		[browse setCanChooseFiles:YES];
+		[browse setAllowsMultipleSelection:YES];
+		
+		[browse beginSheetForDirectory:[initialDirectory stringValue]
+								  file:nil
+						modalForWindow:window
+						 modalDelegate:self
+						didEndSelector:@selector(browse:returnCode:contextInfo:)
+						   contextInfo:nil];
+		[con release];
+	}
+	else
+	{
+		[status setStringValue:[NSString stringWithFormat:@"Connecting to: %@", [cHost stringValue]]];
+		[con connect];
+	}
+}
+
+- (void)browse:(ConnectionOpenPanel *)panel returnCode:(int)returnCode contextInfo:(id)ui
+{
+	if (returnCode == NSOKButton)
+	{
+		NSRunAlertPanel (@"Files Selected", [[panel filenames] description], @"OK", nil, nil);
+	}
+	else
+	{
+		NSRunAlertPanel(@"Open Panel Cancelled",@"The panel was cancelled by the user",@"OK",nil,nil);
+	}
 }
 
 - (IBAction)deleteFile:(id)sender

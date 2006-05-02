@@ -35,6 +35,7 @@
 	IBOutlet NSButton *btnDisconnect;
 	IBOutlet NSTextField *initialDirectory;
 	IBOutlet NSTextView *fileCheckLog;
+	IBOutlet NSButton *btnBrowseHost;
 	
 	id <AbstractConnectionProtocol> con;
 	NSMutableArray *remoteFiles;

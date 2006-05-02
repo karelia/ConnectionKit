@@ -781,6 +781,16 @@ NSDictionary *sDataAttributes;
 	return 0;
 }
 
+- (double)uploadSpeed
+{
+	return 0;
+}
+
+- (double)downloadSpeed
+{
+	return 0;
+}
+
 - (void)directoryContents
 {
 }
