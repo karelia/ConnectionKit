@@ -2502,6 +2502,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[dict setObject:localPath forKey:QueueUploadLocalFileKey];
 	[dict setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	[self queueUpload:dict];
+	[store setUserInfo:dict];
 	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
 	[dataCmd addDependantCommand:offset != 0 ? rest : store];

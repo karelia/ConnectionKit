@@ -395,6 +395,10 @@ NSString *QueueDomain = @"Queuing";
 
 @end
 
+@interface ConnectionCommand (Private)
+- (void)setParentCommand:(ConnectionCommand *)cmd;
+@end
+
 @implementation ConnectionCommand
 
 + (id)command:(id)type 
@@ -434,6 +438,7 @@ NSString *QueueDomain = @"Queuing";
 		_awaitState = await;
 		_sentState = sent;
 		_dependants = [[NSMutableArray arrayWithArray:deps] retain];
+		[_dependants makeObjectsPerformSelector:@selector(setParentCommand:) withObject:self];
 		_userInfo = [ui retain];
 	}
 	return self;
@@ -441,6 +446,7 @@ NSString *QueueDomain = @"Queuing";
 
 - (void)dealloc
 {
+	[_dependants makeObjectsPerformSelector:@selector(setParentCommand:) withObject:nil];
 	[_dependants release];
 	[_userInfo release];
 	[_command release];
@@ -496,17 +502,59 @@ NSString *QueueDomain = @"Queuing";
 
 - (void)addDependantCommand:(ConnectionCommand *)command
 {
+	[command setParentCommand:self];
 	[_dependants addObject:command];
 }
 
 - (void)removeDependantCommand:(ConnectionCommand *)command
 {
+	[command setParentCommand:nil];
 	[_dependants removeObject:command];
 }
 
 - (NSArray *)dependantCommands
 {
 	return [NSArray arrayWithArray:_dependants];
+}
+
+- (void)setParentCommand:(ConnectionCommand *)cmd
+{
+	_parent = cmd;
+}
+
+- (ConnectionCommand *)parentCommand
+{
+	return _parent;
+}
+
+- (ConnectionCommand *)firstCommandInChain
+{
+	if (_parent)
+		return [_parent firstCommandInChain];
+	return self;
+}
+
+- (void)recursivelyAddedSequencedCommand:(ConnectionCommand *)cmd toSequence:(NSMutableArray *)sequence
+{
+	[sequence addObject:cmd];
+	NSEnumerator *e = [[cmd dependantCommands] objectEnumerator];
+	ConnectionCommand *cur;
+	
+	while (cur = [e nextObject])
+	{
+		[self recursivelyAddedSequencedCommand:cur toSequence:sequence];
+	}
+}
+
+- (NSArray *)sequencedChain
+{
+	NSMutableArray *sequence = [NSMutableArray array];
+	
+	ConnectionCommand *first = [self firstCommandInChain];
+	
+	[self recursivelyAddedSequencedCommand:first toSequence:sequence];
+	
+	return sequence;
 }
 
 @end
