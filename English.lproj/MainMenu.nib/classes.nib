@@ -26,6 +26,7 @@
             CLASS = Controller; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                btnBrowseHost = NSButton; 
                 btnConnect = NSButton; 
                 btnDelete = NSButton; 
                 btnDisconnect = NSButton; 

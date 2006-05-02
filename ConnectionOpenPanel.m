@@ -560,11 +560,13 @@
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
-	[[NSApplication sharedApplication] runModalForWindow: [self window]];
+	int ret = [[NSApplication sharedApplication] runModalForWindow: [self window]];
 	[self setInitialDirectory: directory];
 	
 	[self setIsLoading: YES];
 	[[self connection] connect];
+	
+	return ret;
 }
 
 - (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (int)returnCode contextInfo:(void*) contextInfo
@@ -582,7 +584,8 @@
 								atIndex: 4];
 		[callBackInvocation setSelector: [self delegateSelector]];
 		
-		[callBackInvocation invoke];
+		[callBackInvocation retainArguments];
+		[callBackInvocation performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
 	}
 	[self autorelease];
 }

@@ -46,6 +46,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 @interface StreamBasedConnection (Private)
 - (void)checkQueue;
 - (void)processFileCheckingQueue;
+- (void)recalcUploadSpeedWithBytesSent:(unsigned)length;
+- (void)recalcDownloadSpeedWithBytesSent:(unsigned)length;
 @end
 
 @implementation StreamBasedConnection
@@ -91,6 +93,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	[_fileCheckingConnection forceDisconnect];
 	[_fileCheckingConnection release];
 	[_fileCheckInFlight release];
+	[_lastChunkSent release];
+	[_lastChunkReceived release];
 	
 	[super dealloc];
 }
@@ -423,6 +427,24 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 #pragma mark -
 #pragma mark Stream Delegate Methods
 
+- (void)recalcUploadSpeedWithBytesSent:(unsigned)length
+{
+	NSDate *now = [NSDate date];
+	NSTimeInterval diff = [_lastChunkSent timeIntervalSinceDate:now];
+	_uploadSpeed = length / diff;
+	[_lastChunkSent autorelease];
+	_lastChunkSent = [now retain];
+}
+
+- (void)recalcDownloadSpeedWithBytesSent:(unsigned)length
+{
+	NSDate *now = [NSDate date];
+	NSTimeInterval diff = [_lastChunkReceived timeIntervalSinceDate:now];
+	_downloadSpeed = length / diff;
+	[_lastChunkReceived autorelease];
+	_lastChunkReceived = [now retain];
+}
+
 - (void)closeStreams
 {
 	[_receiveStream close];
@@ -473,6 +495,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 								  length:0];
 		[_sendBufferLock unlock];
 		uint8_t *bytes = (uint8_t *)[chunk bytes];
+		[_lastChunkSent autorelease];
+		_lastChunkSent = [[NSDate date] retain];
 		[_sendStream write:bytes maxLength:chunkLength];
 		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
@@ -491,6 +515,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
 				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
+				[self recalcDownloadSpeedWithBytesSent:len];
 				[self processReceivedData:data];
 			}
 			free(buf);
@@ -590,6 +615,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
 				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
+				[self recalcDownloadSpeedWithBytesSent:len];
+				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
 			}
 			free(buf);
@@ -680,6 +707,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
 				KTLog(StreamDomain, KTLogDebug, @"<< %s", bytes);
 				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
+				[self recalcUploadSpeedWithBytesSent:chunkLength];
+				[self stream:_sendStream sentBytesOfLength:chunkLength];
 				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 									   withBytes:NULL
 										  length:0];

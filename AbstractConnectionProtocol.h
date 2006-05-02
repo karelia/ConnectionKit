@@ -155,6 +155,8 @@ typedef struct __flags {
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag;
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset;
 
+- (void)checkExistenceOfPath:(NSString *)path;
+
 - (unsigned)numberOfTransfers;
 - (void)cancelTransfer;
 - (void)cancelAll;
@@ -167,9 +169,9 @@ typedef struct __flags {
 
 - (void)setTranscript:(NSTextStorage *)transcript;
 
-- (long long)transferSpeed; // bytes/second
-
-- (void)checkExistenceOfPath:(NSString *)path;
+- (long long)transferSpeed; // bytes/second -- this is deprecated using uploadSpeed or downloadSpeed
+- (double)uploadSpeed;
+- (double)downloadSpeed;
 
 @end
 
