@@ -63,6 +63,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		[_forwarder setReturnValueDelegate:self];
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
+		_createdThread = [NSThread currentThread];
 		
 		[_port setDelegate:self];
 		[NSThread prepareForInterThreadMessages];
@@ -514,10 +515,41 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 																				 forKey:NSLocalizedDescriptionKey]];
 				}
 				else {
-					[NSError errorWithDomain:ConnectionErrorDomain
-										code:ConnectionStreamError
-									userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Receive Stream Error", @"Stream Error")
-																		 forKey:NSLocalizedDescriptionKey]];
+					// we want to catch the connection reset by peer error
+					error = [_receiveStream streamError];
+					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == ECONNRESET)
+					{
+						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer, attempting to reconnect.", [_receiveStream streamError]);
+						error = nil;
+						
+						// resetup connection again
+						[self closeStreams];
+						[self setState:ConnectionNotConnectedState];
+						// roll back to the first command in this chain of commands
+						NSArray *cmds = [[self lastCommand] sequencedChain];
+						NSEnumerator *e = [cmds reverseObjectEnumerator];
+						ConnectionCommand *cur;
+						
+						while (cur = [e nextObject])
+						{
+							[self pushCommandOnCommandQueue:cur];
+						}
+						
+						NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
+																		  target:self
+																	   arguments:[NSArray array]];
+						int port = [[self port] intValue];
+						[inv setArgument:&port atIndex:2];
+						[inv performSelector:@selector(invoke) inThread:_createdThread];
+						
+						while (_sendStream == nil || _receiveStream == nil)
+						{
+							[NSThread sleepUntilDate:[NSDate distantPast]];
+						}
+						
+						[self scheduleStreamsOnRunLoop];
+						break;
+					}
 				}
 				
 				[_forwarder connection:self didReceiveError:error];
@@ -585,12 +617,43 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 																				 forKey:NSLocalizedDescriptionKey]];
 				}
 				else {
-					[NSError errorWithDomain:ConnectionErrorDomain
-										code:ConnectionStreamError
-									userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Send Stream Error", @"Stream Error")
-																		 forKey:NSLocalizedDescriptionKey]];
+					// we want to catch the connection reset by peer error
+					error = [_sendStream streamError];
+					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == ECONNRESET)
+					{
+						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer, attempting to reconnect.", [_sendStream streamError]);
+						error = nil;
+						
+						// resetup connection again
+						[self closeStreams];
+						[self setState:ConnectionNotConnectedState];
+						
+						// roll back to the first command in this chain of commands
+						NSArray *cmds = [[self lastCommand] sequencedChain];
+						NSEnumerator *e = [cmds reverseObjectEnumerator];
+						ConnectionCommand *cur;
+						
+						while (cur = [e nextObject])
+						{
+							[self pushCommandOnCommandQueue:cur];
+						}
+						
+						NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
+																		  target:self
+																	   arguments:[NSArray array]];
+						int port = [[self port] intValue];
+						[inv setArgument:&port atIndex:2];
+						[inv performSelector:@selector(invoke) inThread:_createdThread];
+						
+						while (_sendStream == nil || _receiveStream == nil)
+						{
+							[NSThread sleepUntilDate:[NSDate distantPast]];
+						}
+						
+						[self scheduleStreamsOnRunLoop];
+						break;
+					}
 				}
-				
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;

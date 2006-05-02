@@ -48,6 +48,7 @@
 	ConnectionState _awaitState;
 	ConnectionState _sentState;
 	id				_userInfo;
+	ConnectionCommand *_parent;
 }
 
 + (id)command:(id)type 
@@ -80,6 +81,9 @@
 - (void)addDependantCommand:(ConnectionCommand *)command;
 - (void)removeDependantCommand:(ConnectionCommand *)command;
 - (NSArray *)dependantCommands;
+
+// returns the sequence of execution of commands
+- (NSArray *)sequencedChain;
 
 @end
 
