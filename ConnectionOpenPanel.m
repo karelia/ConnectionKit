@@ -80,35 +80,55 @@
 {
 	//if something is selected, then it should say open, else it should say select
 	//
-	[self setIsSelectionValid: YES];
-	
-	if (([[directoryContents selectedObjects] count] == 1) && 
-		![[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])
-	{
-		//one folder selected
-		//
-		[self setIsSelectionValid: [self canChooseDirectories]];
+		[self setIsSelectionValid: NO];
+  
+  if ([[directoryContents selectedObjects] count] == 1)
+  {
+    if ([[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])  //file
+      [self setIsSelectionValid: [self canChooseFiles]];
+    else      //folder
+      [self setIsSelectionValid: [self canChooseDirectories]];
+    
 		if ([self canChooseDirectories])
 			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"select"
-																					  value: @"Select"
-																					  table: @"localizable"]];
+                                                                                value: @"Select"
+                                                                                table: @"localizable"]];
 		else
 			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
-																					  value: @"Open"
-																					  table: @"localizable"]];
-	}
-	else if (([[directoryContents selectedObjects] count] == 0) &&
-			 [self canChooseDirectories])
-	{
-		[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"select"
-																				  value: @"Select"
-																				  table: @"localizable"]];
-		[self setIsSelectionValid: [self canChooseDirectories]];
-	}
-	else
-	{
-		[self setIsSelectionValid: NO];
-	}
+                                                                                value: @"Open"
+                                                                                table: @"localizable"]];
+  }
+  else if ([[directoryContents selectedObjects] count] == 0)
+  {
+    [self setIsSelectionValid: [self canChooseDirectories]];
+    
+		if ([self canChooseDirectories])
+			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"select"
+                                                                                value: @"Select"
+                                                                                table: @"localizable"]];
+		else
+			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
+                                                                                value: @"Open"
+                                                                                table: @"localizable"]];
+    
+  }
+  else //multiple items
+  {
+    //this can only happen if the table view was set to allow it, which means that we allow multiple selection
+    //simply check that everyitems are selectable
+    //
+    NSEnumerator *theEnum = [[directoryContents selectedObjects] objectEnumerator];
+    NSDictionary *currentItem;
+    BOOL wholeSelectionIsValid = YES;
+    while ((currentItem = [theEnum nextObject]) && wholeSelectionIsValid)
+    {
+      if ([[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])
+        wholeSelectionIsValid = [self canChooseFiles];
+      else
+        wholeSelectionIsValid = [self canChooseDirectories];        
+    }
+    [self setIsSelectionValid: wholeSelectionIsValid];
+  }
 }
 
 #pragma mark ----=actions=----
@@ -537,6 +557,10 @@
 #pragma mark ----=running the dialog=----
 - (void)beginSheetForDirectory:(NSString *)path file:(NSString *)name modalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo
 {
+  //force the window to be loaded, to be sure tableView is set
+  //
+  [self window];
+  
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
@@ -545,10 +569,10 @@
 	[self retain];
 	
 	[[NSApplication sharedApplication] beginSheet: [self window]
-								   modalForWindow: docWindow
-									modalDelegate: self
-								   didEndSelector: @selector(directorySheetDidEnd:returnCode:contextInfo:)
-									  contextInfo: contextInfo];
+                                 modalForWindow: docWindow
+                                  modalDelegate: self
+                                 didEndSelector: @selector(directorySheetDidEnd:returnCode:contextInfo:)
+                                    contextInfo: contextInfo];
 	[self setInitialDirectory: path];
 	
 	[self setIsLoading: YES];
@@ -557,6 +581,10 @@
 
 - (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
 {
+  //force the window to be loaded, to be sure tableView is set
+  //
+  [self window];
+  
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
