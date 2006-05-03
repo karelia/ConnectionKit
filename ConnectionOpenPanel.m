@@ -42,6 +42,7 @@
 	
 	if (self)
 	{
+		[self setTimeout:30];
 		[self setConnection: inConnection];
 		[self setAllowsMultipleSelection: NO];
 		[self setCanChooseFiles: YES];
@@ -538,6 +539,21 @@
 	delegateSelector = aDelegateSelector;
 }
 
+- (void)setTimeout:(NSTimeInterval)to
+{
+	timeout = to;
+}
+
+- (NSTimeInterval)timeout
+{
+	return timeout;
+}
+
+- (void)timedOut:(NSTimer *)timer
+{
+	[self closePanel:self];
+}
+
 //=========================================================== 
 // dealloc
 //=========================================================== 
@@ -576,6 +592,11 @@
 	[self setInitialDirectory: path];
 	
 	[self setIsLoading: YES];
+	timer = [NSTimer scheduledTimerWithTimeInterval:timeout
+											 target:self
+										   selector:@selector(timedOut:)
+										   userInfo:nil
+											repeats:NO];
 	[[self connection] connect];
 }
 
@@ -592,6 +613,11 @@
 	[self setInitialDirectory: directory];
 	
 	[self setIsLoading: YES];
+	timer = [NSTimer scheduledTimerWithTimeInterval:timeout
+											 target:self
+										   selector:@selector(timedOut:)
+										   userInfo:nil
+											repeats:NO];
 	[[self connection] connect];
 	
 	return ret;
@@ -621,6 +647,8 @@
 #pragma mark ----=connection callback=----
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
 {
+	[timer invalidate];
+	timer = nil;
 	if (NSRunAlertPanel(@"Authorize Connection?", @"%@", @"Yes", @"No", nil, message) == NSOKButton)
 		return YES;
 	return NO;
@@ -628,6 +656,8 @@
 	
 - (void)connection:(AbstractConnection *)aConn didConnectToHost:(NSString *)host
 {
+	[timer invalidate];
+	timer = nil;
 	NSString *dir = [self initialDirectory];
 	if (dir && [dir length] > 0) 
 		[aConn changeToDirectory: dir];

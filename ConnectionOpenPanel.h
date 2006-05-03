@@ -61,6 +61,8 @@ enum {
 	id delegate;
 	SEL delegateSelector;
 	BOOL isSelectionValid;
+	NSTimeInterval timeout;
+	NSTimer *timer;
 }
 
 - (id)initWithConnection:(id <AbstractConnectionProtocol>) inConnection;
@@ -99,6 +101,9 @@ enum {
 - (void)setDelegateSelector:(SEL)aDelegateSelector;
 - (BOOL)isSelectionValid;
 - (void)setIsSelectionValid:(BOOL)flag;
+
+- (void)setTimeout:(NSTimeInterval)to;
+- (NSTimeInterval)timeout;
 
 - (void)beginSheetForDirectory:(NSString *)path 
 						  file:(NSString *)name 
