@@ -54,6 +54,7 @@ enum { kChangeToDirectory = 7000,
 	int				myCurrentOperation;
 	NSMutableArray  *myPendingInvocations;
 	NSString		*myCurrentDirectory;
+	NSInvocation	*myInflightInvocation;
 	
 	NSThread		*_bgThread;
 	NSPort			*myPort;
