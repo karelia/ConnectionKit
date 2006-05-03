@@ -62,7 +62,8 @@ typedef enum {
 	NSTimer				*_openStreamsTimeout;
 	NSInputStream		*_dataReceiveStream;
 	NSOutputStream		*_dataSendStream;
-
+	BOOL				_received226;
+	
 	long long			_transferSize;
 	long long			_transferSent;
 	long long			_transferCursor;
