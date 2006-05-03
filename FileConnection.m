@@ -34,7 +34,7 @@
 
 NSString *FileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
-enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };		// port messages
+enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KILL_THREAD };		// port messages
 
 @interface FileConnection (Private)
 - (void)processInvocations;
@@ -115,7 +115,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 		myPendingInvocations = [[NSMutableArray array] retain];
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
 		
-		myLock = [[NSLock alloc] init];
+		myLock = [[NSRecursiveLock alloc] init];
 		myForwarder = [[RunLoopForwarder alloc] init];
 		myPort = [[NSPort port] retain];
 		[myPort setDelegate:self];
@@ -134,6 +134,7 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[myPort release];
 	[myLock release];
 	[myForwarder release];
+	[myInflightInvocation release];
 	
 	[myPendingInvocations release];
 	[myCurrentDirectory release];
@@ -260,15 +261,16 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	NSAssert([NSThread currentThread] == _bgThread, @"Processing Invocations from wrong thread");
 	
 	[myLock lock];
-    while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) )
+    while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
 	{
-		NSInvocation *invocation = [myPendingInvocations objectAtIndex:0];
-		if ( nil != invocation )
+		myInflightInvocation = [myPendingInvocations objectAtIndex:0];
+		if ( nil != myInflightInvocation )
 		{
-			[invocation retain];
+			[myInflightInvocation retain];
 			[myPendingInvocations removeObjectAtIndex:0];
-			[invocation invoke];
-			[invocation release];
+			[myInflightInvocation invoke];
+			[myInflightInvocation release];
+			myInflightInvocation = nil;
 		}
 		[NSThread sleepUntilDate:[NSDate distantPast]];
 	}
@@ -280,7 +282,14 @@ enum { CONNECT = 0, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT, KI
 	[myLock lock];
 	[myPendingInvocations addObject:inv];
 	[myLock unlock];
-	[self sendPortMessage:COMMAND];
+	if ([NSThread currentThread] != _bgThread)
+	{
+		[self sendPortMessage:COMMAND];
+	}
+	else
+	{
+		[self processInvocations];
+	}
 }
 
 #pragma mark -
