@@ -267,7 +267,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	int code;
 	[scanner scanInt:&code];
 
-	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] attributes:[AbstractConnection receivedAttributes]] autorelease]];
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] attributes:[AbstractConnection receivedAttributes]] autorelease]];
+	}
+	
 	KTLog(ProtocolDomain, KTLogDebug, @"<< %@", command);
 	
 	switch (code)
@@ -677,6 +681,53 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//skip 225 (no transfer to ABOR)
 		case 226:
 		{
+			// some ftp servers are returning 
+			// 226-File successfully transferred
+			// 226 0.427 seconds (measured here), 7.40 Kbytes per second
+			NSMutableString *buffer = [NSMutableString string];
+			BOOL atEnd = NO;
+			NSRange r;
+			
+			if (![command hasPrefix:@"226 "])
+			{
+				if ((r = [_commandBuffer rangeOfString:@"226 "]).location != NSNotFound) {
+					[buffer appendString:_commandBuffer];
+					//need to drop out of the commandBuffer up to the new line.
+					NSRange newLineRange;
+					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+					
+					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+															  options:NSCaseInsensitiveSearch 
+																range:toEnd]).location != NSNotFound
+						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+																 options:NSCaseInsensitiveSearch
+																   range:toEnd]).location != NSNotFound)
+						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+					atEnd = YES;
+				}
+				
+				while (atEnd == NO)
+				{
+					NSData *data = [self availableData];
+					
+					if ([data length] > 0)
+					{
+						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+						[buffer appendString:line];
+						
+						if ([line rangeOfString:@"226 "].location != NSNotFound)
+							atEnd = YES;
+						
+						[line release];
+					}
+				}
+			}
+			
+			if ([self transcript])
+			{
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
+			}
+			
 			_received226 = YES;
 			if (_serverSupport.isActiveDataConn == YES) {
 				[self closeDataConnection];
