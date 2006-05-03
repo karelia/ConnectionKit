@@ -513,7 +513,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
+				KTLog(StreamDomain, KTLogDebug, @"%d >> %@", len, [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self recalcDownloadSpeedWithBytesSent:len];
 				[self processReceivedData:data];

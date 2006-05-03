@@ -677,10 +677,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//skip 225 (no transfer to ABOR)
 		case 226:
 		{
+			_received226 = YES;
 			if (_serverSupport.isActiveDataConn == YES) {
 				[self closeDataConnection];
 			}
-			//[self setState:ConnectionIdleState];
+			if (_dataSendStream == nil || _dataReceiveStream == nil)
+			{
+				[self setState:ConnectionIdleState];
+			}
 			break;
 		}
 		case 227:
@@ -1713,7 +1717,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[_writeHandle closeFile];
 		[self setWriteHandle:nil];
 		[self dequeueDownload];
-		[self setState:ConnectionIdleState];
+		if (_received226)
+		{
+			[self setState:ConnectionIdleState];
+		}
 	}
 	else if (GET_STATE == ConnectionUploadingFileState)
 	{
@@ -1725,7 +1732,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self setReadHandle:nil];
 		_transferSize = 0;
 		[self dequeueUpload];
-		[self setState:ConnectionIdleState];
+		if (_received226)
+		{
+			[self setState:ConnectionIdleState];
+		}
 	}
 	else if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
 	{
@@ -1744,7 +1754,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		[results release];
 		[_dataBuffer setLength:0];
-		[self setState:ConnectionIdleState];
+		if (_received226)
+		{
+			[self setState:ConnectionIdleState];
+		}
 	}
 }
 
@@ -2291,6 +2304,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							   dependant:nil
 								userInfo:nil];
 	}
+	_received226 = NO;
 	return cmd;
 }
 
