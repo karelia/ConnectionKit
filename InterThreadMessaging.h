@@ -10,7 +10,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface NSThread (InterThreadMessaging)
+@interface NSThread (ConnectionInterThreadMessaging)
 
 /* The inter-thread messaging category methods use NSPorts to deliver messages
    between threads.  In order to receive an inter-thread message, the receiver
@@ -23,7 +23,7 @@
    these messages.  In order to process a message from another thread, the
    receiving thread must, of course, be running its run loop. */
 
-+ (void) prepareForInterThreadMessages; // in NSDefaultRunLoopMode
++ (void) prepareForConnectionInterThreadMessages; // in NSDefaultRunLoopMode
 
 @end
 
@@ -31,7 +31,7 @@
 
 /* Invoke in the specified thread a method on an object.  The target
    thread must have been readied for inter-thread messages by invoking
-   +prepareForInterThreadMessages.  It must be running its run loop in
+   +prepareForConnectionInterThreadMessages.  It must be running its run loop in
    order to receive the messages.
 
    In some situations, a sender may be able to blast messages to an object
@@ -54,7 +54,7 @@
    allocated in.  (In general, you don't need to worry about simple/immutable
    objects, such as NSString, NSData, etc.) */
 
-@interface NSObject (InterThreadMessaging)
+@interface NSObject (ConnectionInterThreadMessaging)
 
 - (void) performSelector:(SEL)selector
          inThread:(NSThread *)thread;	// before date [NSDate distantFuture]
@@ -90,7 +90,7 @@
 
 /* Post a notification in the specified thread.  The target thread must
    have been readied for inter-thread messages by sending itself the
-   +prepareForInterThreadMessages.  It must be running its run loop in
+   +prepareForConnectionInterThreadMessages.  It must be running its run loop in
    order to receive the messages.
 
    In some situations, a sender may be able to blast messages to an object
@@ -114,7 +114,7 @@
    don't need to worry about simple/immutable objects, such as NSString,
    NSData, etc.) */
 
-@interface NSNotificationCenter (InterThreadMessaging)
+@interface NSNotificationCenter (ConnectionInterThreadMessaging)
 
 - (void) postNotification:(NSNotification *)notification
          inThread:(NSThread *)thread;	// before date [NSDate distantFuture]

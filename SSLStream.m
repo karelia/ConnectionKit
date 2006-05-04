@@ -101,7 +101,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		_forwarder = [[RunLoopForwarder alloc] init];
 		_bufferLock = [[NSLock alloc] init];
 		
-		[NSThread prepareForInterThreadMessages];
+		[NSThread prepareForConnectionInterThreadMessages];
 	}
 	return self;
 }
@@ -167,7 +167,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
 	
 	[[NSRunLoop currentRunLoop] run];

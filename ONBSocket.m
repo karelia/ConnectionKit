@@ -290,7 +290,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	ONB_receiveSpeed = 0.0;
 	
 	// Start up the socket thread and wait for it to set up.
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	ONB_mainThread = [[NSThread currentThread] retain];
 	ONB_socketThread = nil;
 	
@@ -628,7 +628,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	ONB_bytesWrittenSinceLastWriteSpeedReport = 0;
 
 	// Get ready to accept inter-thread messages and then indicate that we are set up.
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	ONB_socketThread = [[NSThread currentThread] retain];
 	
 	// Run the run loop until we are told to shut down.

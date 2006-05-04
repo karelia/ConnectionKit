@@ -68,7 +68,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		_createdThread = [NSThread currentThread];
 		
 		[_port setDelegate:self];
-		[NSThread prepareForInterThreadMessages];
+		[NSThread prepareForConnectionInterThreadMessages];
 		_runThread = YES;
 		[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
 								 toTarget:self
@@ -161,7 +161,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 - (void)runBackgroundThread:(id)notUsed
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	_bgThread = [NSThread currentThread];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.	
