@@ -120,7 +120,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 		myPort = [[NSPort port] retain];
 		[myPort setDelegate:self];
 		
-		[NSThread prepareForInterThreadMessages];
+		[NSThread prepareForConnectionInterThreadMessages];
 		_runThread = YES;
 		[NSThread detachNewThreadSelector:@selector(runFileConnectionBackgroundThread:) toTarget:self withObject:nil];
 	}
@@ -149,7 +149,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	_bgThread = [NSThread currentThread];
 	myFileManager = [[NSFileManager alloc] init];
 	
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
 	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];

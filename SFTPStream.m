@@ -187,7 +187,7 @@ enum { START = 200, STOP };
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
 	_bgThread = [NSThread currentThread];
-	[NSThread prepareForInterThreadMessages];
+	[NSThread prepareForConnectionInterThreadMessages];
 	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
 	NSAutoreleasePool *loop;
 	

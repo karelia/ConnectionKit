@@ -18,8 +18,8 @@
    performSelector:withObject:.  So I think I must disambiguate between
    them all.) */
 
-typedef enum InterThreadMessageType InterThreadMessageType;
-enum InterThreadMessageType
+typedef enum ConnectionInterThreadMessageType ConnectionInterThreadMessageType;
+enum ConnectionInterThreadMessageType
 {
     kITMPostNotification = 1,
     kITMPerformSelector0Args,
@@ -34,10 +34,10 @@ enum InterThreadMessageType
    contains a single NSData argument, which is a wrapper around the pointer to
    this struct. */
 
-typedef struct InterThreadMessage InterThreadMessage;
-struct InterThreadMessage
+typedef struct ConnectionInterThreadMessage ConnectionInterThreadMessage;
+struct ConnectionInterThreadMessage
 {
-    InterThreadMessageType type;
+    ConnectionInterThreadMessageType type;
     union {
         NSNotification *notification;
         struct {
@@ -49,7 +49,9 @@ struct InterThreadMessage
     } data;
 };
 
-
+@interface NSThread (ConnectionSecretStuff)
+- (NSRunLoop *) runLoop;
+@end
 
 /* Each thread is associated with an NSPort.  This port is used to deliver
    messages to the target thread. */
@@ -57,18 +59,22 @@ struct InterThreadMessage
 static NSMapTable *pThreadMessagePorts = NULL;
 static pthread_mutex_t pGate = { 0 };
 
-@interface InterThreadManager : NSObject
+@interface ConnectionInterThreadManager : NSObject
 + (void) threadDied:(NSNotification *)notification;
 + (void) handlePortMessage:(NSPortMessage *)msg;
 @end
 
 static void
-createMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
+ConnectionCreateMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
 {
     NSPort *port;
 
     assert(nil != thread);
     assert(nil != runLoop);
+	if (!pThreadMessagePorts)
+	{
+		[ConnectionInterThreadManager class];
+	}
     assert(NULL != pThreadMessagePorts);
 
     pthread_mutex_lock(&pGate);
@@ -76,7 +82,7 @@ createMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
     port = NSMapGet(pThreadMessagePorts, thread);
     if (nil == port) {
         port = [[NSPort allocWithZone:NULL] init];
-        [port setDelegate:[InterThreadManager class]];
+        [port setDelegate:[ConnectionInterThreadManager class]];
         [port scheduleInRunLoop:runLoop forMode:NSDefaultRunLoopMode];
         NSMapInsertKnownAbsent(pThreadMessagePorts, thread, port);
 
@@ -88,33 +94,50 @@ createMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
 }
 
 static NSPort *
-messagePortForThread (NSThread *thread)
+ConnectionMessagePortForThread (NSThread *thread)
 {
     NSPort *port;
 
     assert(nil != thread);
+	if (!pThreadMessagePorts)
+	{
+		[ConnectionInterThreadManager class];
+	}
     assert(NULL != pThreadMessagePorts);
 
     pthread_mutex_lock(&pGate);
     port = NSMapGet(pThreadMessagePorts, thread);
     pthread_mutex_unlock(&pGate);
 
+	if (nil == port)
+	{
+		ConnectionCreateMessagePortForThread(thread,
+											 [thread runLoop]);
+		pthread_mutex_lock(&pGate);
+		port = NSMapGet(pThreadMessagePorts, thread);
+		pthread_mutex_unlock(&pGate);
+	}
+	
     if (nil == port) {
         [NSException raise:NSInvalidArgumentException
                      format:@"Thread %@ is not prepared to receive "
                             @"inter-thread messages.  You must invoke "
-                            @"+prepareForInterThreadMessages first.", thread];
+                            @"+prepareForConnectionInterThreadMessages first.", thread];
     }
 
     return port;
 }
 
 static void
-removeMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
+ConnectionRemoveMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
 {
     NSPort *port;
 
     assert(nil != thread);
+	if (!pThreadMessagePorts)
+	{
+		[ConnectionInterThreadManager class];
+	}
     assert(NULL != pThreadMessagePorts);
 
     pthread_mutex_lock(&pGate);
@@ -128,30 +151,20 @@ removeMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
     pthread_mutex_unlock(&pGate);
 }
 
+@implementation NSThread (ConnectionInterThreadMessaging)
 
-
-
-@implementation NSThread (InterThreadMessaging)
-
-+ (void) prepareForInterThreadMessages
++ (void) prepareForConnectionInterThreadMessages
 {
     /* Force the class initialization. */
-    [InterThreadManager class];
+    [ConnectionInterThreadManager class];
 
-    createMessagePortForThread([NSThread currentThread],
+    ConnectionCreateMessagePortForThread([NSThread currentThread],
                                [NSRunLoop currentRunLoop]);
 }
 
 @end
 
-
-
-
-@interface NSThread (SecretStuff)
-- (NSRunLoop *) runLoop;
-@end
-
-@implementation InterThreadManager
+@implementation ConnectionInterThreadManager
 
 + (void) initialize
 {
@@ -181,13 +194,13 @@ removeMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
     thread = [notification object];
     runLoop = [thread runLoop];
     if (nil != runLoop) {
-        removeMessagePortForThread(thread, [thread runLoop]);
+        ConnectionRemoveMessagePortForThread(thread, [thread runLoop]);
     }
 }
 
 + (void) handlePortMessage:(NSPortMessage *)portMessage
 {
-    InterThreadMessage *msg;
+    ConnectionInterThreadMessage *msg;
     NSArray *components;
     NSData *data;
 
@@ -195,7 +208,7 @@ removeMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
     assert(1 == [components count]);
 
     data = [components objectAtIndex:0];
-    msg = *((InterThreadMessage **) [data bytes]);
+    msg = *((ConnectionInterThreadMessage **) [data bytes]);
     
     switch (msg->type)
     {
@@ -240,7 +253,7 @@ removeMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
 
 
 static void
-postMessage (InterThreadMessage *message, NSThread *thread, NSDate *limitDate)
+ConnectionPostMessage (ConnectionInterThreadMessage *message, NSThread *thread, NSDate *limitDate)
 {
     NSPortMessage *portMessage;
     NSMutableArray *components;
@@ -249,7 +262,7 @@ postMessage (InterThreadMessage *message, NSThread *thread, NSDate *limitDate)
     BOOL retval;
 
     if (nil == thread) { thread = [NSThread currentThread]; }
-    port = messagePortForThread(thread);
+    port = ConnectionMessagePortForThread(thread);
     assert(nil != port);
 
     data = [[NSData alloc] initWithBytes:&message length:sizeof(void *)];
@@ -272,40 +285,40 @@ postMessage (InterThreadMessage *message, NSThread *thread, NSDate *limitDate)
 }
 
 static void
-performSelector (InterThreadMessageType type, SEL selector, id receiver,
+ConnectionPerformSelector (ConnectionInterThreadMessageType type, SEL selector, id receiver,
                  id object1, id object2, NSThread *thread, NSDate *limitDate)
 {
-    InterThreadMessage *msg;
+    ConnectionInterThreadMessage *msg;
 
     assert(NULL != selector);
     
     if (nil != receiver) {
-        msg = (InterThreadMessage *) malloc(sizeof(struct InterThreadMessage));
-        bzero(msg, sizeof(struct InterThreadMessage));
+        msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
+        bzero(msg, sizeof(struct ConnectionInterThreadMessage));
         msg->type = type;
         msg->data.sel.selector = selector;
         msg->data.sel.receiver = [receiver retain];
         msg->data.sel.arg1 = [object1 retain];
         msg->data.sel.arg2 = [object2 retain];
 
-        postMessage(msg, thread, limitDate);
+        ConnectionPostMessage(msg, thread, limitDate);
     }
 }
 
 static void
-postNotification (NSNotification *notification, NSThread *thread,
+ConnectionPostNotification (NSNotification *notification, NSThread *thread,
                   NSDate *limitDate)
 {
-    InterThreadMessage *msg;
+    ConnectionInterThreadMessage *msg;
 
     assert(nil != notification);
     
-    msg = (InterThreadMessage *) malloc(sizeof(struct InterThreadMessage));
-    bzero(msg, sizeof(struct InterThreadMessage));
+    msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
+    bzero(msg, sizeof(struct ConnectionInterThreadMessage));
     msg->type = kITMPostNotification;
     msg->data.notification = [notification retain];
 
-    postMessage(msg, thread, limitDate);
+    ConnectionPostMessage(msg, thread, limitDate);
 }
 
 
@@ -313,12 +326,12 @@ postNotification (NSNotification *notification, NSThread *thread,
 
 
 
-@implementation NSObject (InterThreadMessaging)
+@implementation NSObject (ConnectionInterThreadMessaging)
 
 - (void) performSelector:(SEL)selector
          inThread:(NSThread *)thread
 {
-    performSelector(kITMPerformSelector0Args, selector, self, nil, nil,
+    ConnectionPerformSelector(kITMPerformSelector0Args, selector, self, nil, nil,
                     thread, nil);
 }
 
@@ -326,7 +339,7 @@ postNotification (NSNotification *notification, NSThread *thread,
          inThread:(NSThread *)thread
          beforeDate:(NSDate *)limitDate
 {
-    performSelector(kITMPerformSelector0Args, selector, self, nil, nil,
+    ConnectionPerformSelector(kITMPerformSelector0Args, selector, self, nil, nil,
                     thread, limitDate);
 }
 
@@ -334,7 +347,7 @@ postNotification (NSNotification *notification, NSThread *thread,
          withObject:(id)object
          inThread:(NSThread *)thread
 {
-    performSelector(kITMPerformSelector1Args, selector, self, object, nil,
+    ConnectionPerformSelector(kITMPerformSelector1Args, selector, self, object, nil,
                     thread, nil);
 }
 
@@ -343,7 +356,7 @@ postNotification (NSNotification *notification, NSThread *thread,
          inThread:(NSThread *)thread
          beforeDate:(NSDate *)limitDate
 {
-    performSelector(kITMPerformSelector1Args, selector, self, object, nil,
+    ConnectionPerformSelector(kITMPerformSelector1Args, selector, self, object, nil,
                     thread, limitDate);
 }
 
@@ -352,7 +365,7 @@ postNotification (NSNotification *notification, NSThread *thread,
          withObject:(id)object2
          inThread:(NSThread *)thread
 {
-    performSelector(kITMPerformSelector2Args, selector, self, object1, object2,
+    ConnectionPerformSelector(kITMPerformSelector2Args, selector, self, object1, object2,
                     thread, nil);
 }
 
@@ -362,7 +375,7 @@ postNotification (NSNotification *notification, NSThread *thread,
          inThread:(NSThread *)thread
          beforeDate:(NSDate *)limitDate
 {
-    performSelector(kITMPerformSelector2Args, selector, self, object1, object2,
+    ConnectionPerformSelector(kITMPerformSelector2Args, selector, self, object1, object2,
                     thread, limitDate);
 }
 
@@ -370,19 +383,19 @@ postNotification (NSNotification *notification, NSThread *thread,
 
 
 
-@implementation NSNotificationCenter (InterThreadMessaging)
+@implementation NSNotificationCenter (ConnectionInterThreadMessaging)
 
 - (void) postNotification:(NSNotification *)notification
          inThread:(NSThread *)thread
 {
-    postNotification(notification, thread, nil);
+    ConnectionPostNotification(notification, thread, nil);
 }
 
 - (void) postNotification:(NSNotification *)notification
          inThread:(NSThread *)thread
          beforeDate:(NSDate *)limitDate
 {
-    postNotification(notification, thread, limitDate);
+    ConnectionPostNotification(notification, thread, limitDate);
 }
 
 - (void) postNotificationName:(NSString *)name
@@ -394,7 +407,7 @@ postNotification (NSNotification *notification, NSThread *thread,
     notification = [NSNotification notificationWithName:name
                                    object:object
                                    userInfo:nil];
-    postNotification(notification, thread, nil);
+    ConnectionPostNotification(notification, thread, nil);
 }
 
 - (void) postNotificationName:(NSString *)name
@@ -407,7 +420,7 @@ postNotification (NSNotification *notification, NSThread *thread,
     notification = [NSNotification notificationWithName:name
                                    object:object
                                    userInfo:nil];
-    postNotification(notification, thread, limitDate);
+    ConnectionPostNotification(notification, thread, limitDate);
 }
 
 - (void) postNotificationName:(NSString *)name
@@ -420,7 +433,7 @@ postNotification (NSNotification *notification, NSThread *thread,
     notification = [NSNotification notificationWithName:name
                                    object:object
                                    userInfo:userInfo];
-    postNotification(notification, thread, nil);
+    ConnectionPostNotification(notification, thread, nil);
 }
 
 - (void) postNotificationName:(NSString *)name
@@ -434,7 +447,7 @@ postNotification (NSNotification *notification, NSThread *thread,
     notification = [NSNotification notificationWithName:name
                                    object:object
                                    userInfo:userInfo];
-    postNotification(notification, thread, limitDate);
+    ConnectionPostNotification(notification, thread, limitDate);
 }
 
 @end
