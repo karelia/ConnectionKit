@@ -881,11 +881,11 @@ static NSImage *symFile = nil;
 		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
 		if (enabled)
 		{
-			[attribs setObject:[NSColor blackColor] forKey:NSForegroundColorAttributeName];
+			[attribs setObject:[NSColor textColor] forKey:NSForegroundColorAttributeName];
 		}
 		else
 		{
-			[attribs setObject:[NSColor lightGrayColor] forKey:NSForegroundColorAttributeName];
+			[attribs setObject:[NSColor disabledControlTextColor] forKey:NSForegroundColorAttributeName];
 		}
 		NSMutableAttributedString *str = [[NSMutableAttributedString alloc] initWithAttributedString:[aCell attributedStringValue]];
 		[str addAttributes:attribs range:NSMakeRange(0,[str length])];
