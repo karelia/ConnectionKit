@@ -321,7 +321,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   [self checkThatFileDoesNotExistsAtPath: file];
 }
 
-/*- (void) testUploadMultipleFiles
+- (void) testUploadMultipleFiles
 {
   [connection connect];
   
@@ -330,8 +330,8 @@ const NSTimeInterval kTestTimeout = -5.0;
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.h"] toFile:  @"AbstractConnectionTest.h"];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.m"] toFile:  @"AbstractConnectionTest.m"];
+  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.h"]];
+  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.m"]];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -362,7 +362,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
 }
-*/
+
 - (void) testConnect
 {
   [connection connect];

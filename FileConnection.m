@@ -148,7 +148,11 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	_bgThread = [NSThread currentThread];
 	myFileManager = [[NSFileManager alloc] init];
-	
+  
+  //initial path for NSFileManager is working directory, set it to what we expect it to be, the home directory
+  //
+  [myFileManager changeCurrentDirectoryPath: [@"~/" stringByExpandingTildeInPath]];
+  
 	[NSThread prepareForConnectionInterThreadMessages];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.
