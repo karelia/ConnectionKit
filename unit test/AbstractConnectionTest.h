@@ -21,6 +21,7 @@
   BOOL fileExists;
   BOOL returnedFromFileExists;
   BOOL didSetPermission;
+  BOOL didChangeDirectory;
 
   NSArray *directoryContents;
 }
