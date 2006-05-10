@@ -775,7 +775,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 - (void)checkExistenceOfPath:(NSString *)path
 {
 	NSString *dir = [path stringByDeletingLastPathComponent];
-	if (!dir && [dir length] == 0)
+  
+  //if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
+  //according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
+  //
+	if (!dir || [dir length] == 0)
 	{
 		path = [[self currentDirectory] stringByAppendingPathComponent:path];
 	}

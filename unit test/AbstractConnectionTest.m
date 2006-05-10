@@ -8,7 +8,7 @@
 
 #import "AbstractConnectionTest.h"
 
-const NSTimeInterval kTestTimeout = -5.0;
+const NSTimeInterval kTestTimeout = -15.0;
  
 @interface AbstractConnectionTest (Private)
 
@@ -321,7 +321,7 @@ const NSTimeInterval kTestTimeout = -5.0;
   [self checkThatFileDoesNotExistsAtPath: file];
 }
 
-- (void) testUploadMultipleFiles
+- (void) testUploadMultipleFilesWithDirectoryChange
 {
   [connection connect];
   
@@ -329,8 +329,17 @@ const NSTimeInterval kTestTimeout = -5.0;
   while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
+  //change directory
+  //
+  receivedError = NO;
+  [connection changeToDirectory: @"Sites/podcast"];
+  initialTime = [NSDate date];
+  while ((!didChangeDirectory) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  
   NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.h"]];
+  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer]];
   [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.m"]];
   
   didUpload = receivedError = NO;
@@ -341,17 +350,10 @@ const NSTimeInterval kTestTimeout = -5.0;
   STAssertFalse(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
   
-  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.h"];
+  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   [self checkThatFileExistsAtPath: @"AbstractConnectionTest.m"];
   
   //clean up
-  [connection deleteFile: @"AbstractConnectionTest.h"];
-  
-  didDelete = receivedError = NO;
-  initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
   [connection deleteFile: @"AbstractConnectionTest.m"];
   
   didDelete = receivedError = NO;
@@ -359,7 +361,14 @@ const NSTimeInterval kTestTimeout = -5.0;
   while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.h"];
+  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
+  
+  didDelete = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
 }
 
@@ -411,7 +420,7 @@ const NSTimeInterval kTestTimeout = -5.0;
 
 - (void) testConnectWithBadpassword
 {
-  [connection setPassword: @""];
+  [connection setPassword: @"mbnv"];
   [connection connect];
   
   NSDate *initialTime = [NSDate date];
@@ -419,7 +428,7 @@ const NSTimeInterval kTestTimeout = -5.0;
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
   STAssertTrue([initialTime timeIntervalSinceNow] > kTestTimeout, @"timed out on connection");
-  STAssertFalse([connection isConnected], @"did not connect");
+  STAssertFalse([connection isConnected], @"did connect");
   STAssertTrue(receivedError, @"error while connecting");
 }
 
@@ -488,6 +497,11 @@ const NSTimeInterval kTestTimeout = -5.0;
 - (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path
 {
   didSetPermission = YES;
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath
+{
+  didChangeDirectory = YES;
 }
 
 - (void) checkThatFileExistsAtPath: (NSString*) inPath
