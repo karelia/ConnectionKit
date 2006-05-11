@@ -321,6 +321,26 @@ const NSTimeInterval kTestTimeout = -15.0;
   [self checkThatFileDoesNotExistsAtPath: file];
 }
 
+- (void) testUploadInvalidPath
+{
+  [connection connect];
+  
+  NSDate *initialTime = [NSDate date];
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  NSDictionary *env = [[NSProcessInfo processInfo] environment];
+  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"my super duper missing file"]];
+
+  didUpload = receivedError = NO;
+  initialTime = [NSDate date];
+  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertFalse(receivedError, @"received error on upload");
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
+}
+
 - (void) testUploadMultipleFilesWithDirectoryChange
 {
   [connection connect];
@@ -370,6 +390,16 @@ const NSTimeInterval kTestTimeout = -15.0;
   
   [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
+  
+  //disconnect
+  //
+  [connection disconnect];
+  initialTime = [NSDate date];
+  while (isConnected  && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on disconnection");
+  STAssertFalse(isConnected, @"did not disconnect");
 }
 
 - (void) testConnect
