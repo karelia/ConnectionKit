@@ -542,9 +542,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 				else {
 					// we want to catch the connection reset by peer error
 					error = [_receiveStream streamError];
-					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == ECONNRESET)
+					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
 					{
-						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer, attempting to reconnect.", [_receiveStream streamError]);
+						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_receiveStream streamError]);
 						error = nil;
 						
 						// resetup connection again
@@ -646,9 +646,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 				else {
 					// we want to catch the connection reset by peer error
 					error = [_sendStream streamError];
-					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == ECONNRESET)
+					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
 					{
-						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer, attempting to reconnect.", [_sendStream streamError]);
+						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_sendStream streamError]);
 						error = nil;
 						
 						// resetup connection again
