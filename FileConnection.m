@@ -331,6 +331,11 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[self sendPortMessage:FORCE_DISCONNECT];
 }
 
+- (void) cleanupConnection
+{
+	[self sendPortMessage:KILL_THREAD];
+}
+
 - (void)fcChangeToDirectory:(NSString *)aDirectory
 {
 	[self setCurrentOperation:kChangeToDirectory];

@@ -124,6 +124,7 @@ typedef struct __flags {
    will terminate at the next available opportunity. */
 - (void)disconnect;
 - (void)forceDisconnect;
+- (void) cleanupConnection;
 
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;

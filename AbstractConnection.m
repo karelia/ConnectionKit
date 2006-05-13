@@ -689,6 +689,12 @@ NSDictionary *sDataAttributes;
 {
 }
 
+
+- (void) cleanupConnection
+{
+  NSLog (@"base class clean up, do we have to clean anything?");
+}
+
 - (void)changeToDirectory:(NSString *)dirPath
 {
     
