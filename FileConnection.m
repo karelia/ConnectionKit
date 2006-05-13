@@ -341,7 +341,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 		[myForwarder connection:self didChangeToDirectory:aDirectory];
 	}
 	[myCurrentDirectory autorelease];
-	myCurrentDirectory = [aDirectory copy];
+	myCurrentDirectory = [[myFileManager currentDirectoryPath] copy];
 }
 
 - (void)changeToDirectory:(NSString *)aDirectory	// an absolute directory
@@ -558,6 +558,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	}
 
 	NSTask *cp = [[NSTask alloc] init];
+  [cp setStandardError: [NSPipe pipe]]; //this will get the unit test to pass, else we get an error in the log, and since we already return an error...
 	[cp setLaunchPath:@"/bin/cp"];
 	[cp setArguments:[NSArray arrayWithObjects:@"-rf", localPath, remotePath, nil]];
 	[cp setCurrentDirectoryPath:[self currentDirectory]];
