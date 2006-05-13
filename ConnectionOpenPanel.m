@@ -233,6 +233,7 @@
 	if (connection != aConnection) {
 		[connection setDelegate: nil];
 		[connection forceDisconnect];
+    [connection cleanupConnection];
 		[connection release];
 		connection = [aConnection retain];
 		[connection setDelegate: self];
