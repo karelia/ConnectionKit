@@ -135,6 +135,11 @@
 #pragma mark ----=actions=----
 - (IBAction) closePanel: (id) sender
 {
+  //invalidate the timer in case the user dismiss the panel before the connection happened
+  //
+	[timer invalidate];
+	timer = nil;
+  
 	[[self connection] setDelegate:nil];
 	[self setConnection:nil];
 	
@@ -552,7 +557,7 @@
 
 - (void)timedOut:(NSTimer *)timer
 {
-	[self closePanel:self];
+	[self closePanel: nil];
 }
 
 //=========================================================== 
