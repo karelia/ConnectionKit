@@ -51,6 +51,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 	fileNameExistingOnServer = [[NSString stringWithString:@"unit test/09 moustik.mp3"] retain];
 	
 	initialDirectory = [[NSString stringWithString:NSHomeDirectory()] retain];
+  existingFolder = @"Sites";
 	NSError *err = nil;
 	connection = [[AbstractConnection connectionWithName: [self connectionName]
 													host: [self host]
@@ -337,69 +338,8 @@ const NSTimeInterval kTestTimeout = -15.0;
   while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  STAssertFalse(receivedError, @"received error on upload");
+  STAssertTrue(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
-}
-
-- (void) testUploadMultipleFilesWithDirectoryChange
-{
-  [connection connect];
-  
-  NSDate *initialTime = [NSDate date];
-  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  //change directory
-  //
-  receivedError = NO;
-  [connection changeToDirectory: @"Sites/podcast"];
-  initialTime = [NSDate date];
-  while ((!didChangeDirectory) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  
-  NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer]];
-  [connection uploadFile: [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: @"unit test/AbstractConnectionTest.m"]];
-  
-  didUpload = receivedError = NO;
-  initialTime = [NSDate date];
-  while ((!didUpload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  STAssertFalse(receivedError, @"received error on upload");
-  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
-  
-  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
-  [self checkThatFileExistsAtPath: @"AbstractConnectionTest.m"];
-  
-  //clean up
-  [connection deleteFile: @"AbstractConnectionTest.m"];
-  
-  didDelete = receivedError = NO;
-  initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
-  
-  didDelete = receivedError = NO;
-  initialTime = [NSDate date];
-  while ((!didDelete) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
-  [self checkThatFileDoesNotExistsAtPath: @"AbstractConnectionTest.m"];
-  
-  //disconnect
-  //
-  [connection disconnect];
-  initialTime = [NSDate date];
-  while (isConnected  && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
-    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timed out on disconnection");
-  STAssertFalse(isConnected, @"did not disconnect");
 }
 
 - (void) testConnect
@@ -414,6 +354,22 @@ const NSTimeInterval kTestTimeout = -15.0;
   STAssertTrue([connection isConnected], @"did not connect");
   STAssertFalse(receivedError, @"error while connecting");
   STAssertEqualObjects(initialDirectory, [connection currentDirectory], @"invalid current directory");
+}
+
+- (void) testChangeRelativeDirectory
+{
+  [connection connect];
+  
+  NSDate *initialTime = [NSDate date];
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  [connection changeToDirectory: existingFolder];
+  initialTime = [NSDate date];
+  while ((!didChangeDirectory) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  STAssertEqualObjects([initialDirectory stringByAppendingPathComponent: existingFolder], [connection currentDirectory], @"did not change directory");
 }
 
 - (void) testDisconnect
