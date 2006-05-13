@@ -424,6 +424,12 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	[_fileCheckingConnection forceDisconnect];
 }
 
+- (void) cleanupConnection
+{
+	[self sendPortMessage:KILL_THREAD];
+	[_fileCheckingConnection cleanupConnection];
+}
+
 #pragma mark -
 #pragma mark Stream Delegate Methods
 

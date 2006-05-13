@@ -237,6 +237,11 @@
 	[_connections makeObjectsPerformSelector:@selector(forceDisconnect)];
 }
 
+- (void) cleanupConnection
+{
+	[_connections makeObjectsPerformSelector:@selector(cleanupConnection)];
+}
+
 - (void)changeToDirectory:(NSString *)dirPath
 {
 	[_connections makeObjectsPerformSelector:@selector(changeToDirectory:) withObject:dirPath];
