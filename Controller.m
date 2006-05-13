@@ -351,6 +351,7 @@ NSString *ProtocolKey = @"Protocol";
 						didEndSelector:@selector(browse:returnCode:contextInfo:)
 						   contextInfo:nil];
 		[con release];
+    con = nil;  //we are not responsible for it, the open connection panel will release it.
 	}
 	else
 	{
@@ -789,6 +790,7 @@ static NSImage *_folder = nil;
 	[remoteTable setHidden:YES];
 	
 	[con release];
+  [con cleanupConnection];
 	con = nil;
 }
 
