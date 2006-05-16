@@ -90,43 +90,30 @@
 
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
-	KCItemRef item = nil;
+	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
+	SecKeychainItemRef item = nil;
 	OSStatus theStatus = noErr;
-	Str255 val = "6iTools";
-	val[0] = 6;
-	char buffer[256];
-	UInt32 actualLength;
+	char *buffer;
+	UInt32 passwordLen;
 	
-	theStatus = KCFindGenericPassword(val,
-									  NULL,
-									  255,
-									  buffer,
-									  &actualLength,
-									  &item);
+	theStatus = SecKeychainFindGenericPassword(NULL,
+											   6,
+											   "iTools",
+											   [accountName length],
+											   [accountName UTF8String],
+											   &passwordLen,
+											   &buffer,
+											   &item);
 	
-	if (noErr == theStatus && item)
+	if (noErr == theStatus)
 	{
-		buffer[actualLength] = '\0';		// make it a legal C string by appending 0
+		buffer[passwordLen] = '\0';		// make it a legal C string by appending 0
 		if (password)
 			*password = [NSString stringWithUTF8String:buffer];
 		else
 			*password = nil;
 		
-		KCAttribute attrib;
-		attrib.tag = kSecAccountItemAttr;
-		attrib.data = buffer;
-		attrib.length = 255;
-		
-		theStatus = KCGetAttribute(item,&attrib,&actualLength);
-		if (theStatus == noErr)
-		{
-			buffer[actualLength] = '\0';
-			if (account)
-				*account = [NSString stringWithUTF8String:buffer];
-			else
-				*account = nil;
-		}
-		
+		*account = accountName;
 		return YES;
 	}
 	return NO;
