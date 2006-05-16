@@ -235,10 +235,17 @@
 {
 	//NSLog(@"in -setConnection:, old value of connection: %@, changed to: %@", connection, aConnection);
 	
+	if (aConnection == nil)
+	{
+		//store last directory
+		[lastDirectory autorelease];
+		lastDirectory = [[connection currentDirectory] copy];
+	}
+	
 	if (connection != aConnection) {
 		[connection setDelegate: nil];
 		[connection forceDisconnect];
-    [connection cleanupConnection];
+		[connection cleanupConnection];
 		[connection release];
 		connection = [aConnection retain];
 		[connection setDelegate: self];
@@ -401,9 +408,8 @@
 	
 	if ([selectedFiles count] == 0)
 	{
-		NSString *path = [[self connection] currentDirectory];
-		if (!path) path = @"";
-		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: path
+		if (!lastDirectory) lastDirectory = [[NSString alloc] initWithString:@""];
+		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: lastDirectory
 																			  forKey: @"path"]];
 	}
 		
@@ -565,6 +571,8 @@
 //=========================================================== 
 - (void)dealloc
 {
+	[timer invalidate];
+	timer = nil;
 	[tableView setDelegate: nil];
 	[self setDelegate:nil];
 	[self setNewFolderName:nil];
@@ -572,6 +580,7 @@
 	[self setPrompt:nil];
 	[self setAllowedFileTypes:nil];
 	[self setConnection:nil];
+	[lastDirectory release];
 	
 	[super dealloc];
 }
