@@ -63,6 +63,8 @@ enum {
 	BOOL isSelectionValid;
 	NSTimeInterval timeout;
 	NSTimer *timer;
+	
+	NSString *lastDirectory;
 }
 
 - (id)initWithConnection:(id <AbstractConnectionProtocol>) inConnection;
