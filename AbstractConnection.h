@@ -140,7 +140,7 @@ typedef enum {
 - (id)propertyForKey:(NSString *)key;
 
 // Subclass registration
-+ (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types;
++ (void)registerConnectionClass:(Class)inClass forTypes:(NSArray *)types;
 + (NSArray *)registeredConnectionTypes;
 + (NSMutableArray *)connectionTypes;
 + (NSString *)registeredPortForConnectionType:(NSString *)type;
