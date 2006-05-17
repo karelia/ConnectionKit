@@ -102,7 +102,7 @@ NSString *ProtocolKey = @"Protocol";
 	
 	//drag and drop
 	[localTable registerForDraggedTypes:[NSArray arrayWithObject:cxRemoteFilePBoardType]]; //
-	[remoteTable registerForDraggedTypes:[NSArray arrayWithObject:cxLocalFilePBoardType]]; //
+	[remoteTable registerForDraggedTypes:[NSArray arrayWithObjects:cxLocalFilePBoardType, NSFilenamesPboardType, nil]]; //
 	
 	[remoteTable setHidden:YES];
 	
@@ -750,6 +750,43 @@ static NSImage *_folder = nil;
 	[con uploadFile:local toFile:remote];
 }
 
+- (void)recursivelyUploadContentsAtPath:(NSString *)aFolderPath serverPath:(NSString *)aServerPath
+{
+	NSFileManager *fileManager = [NSFileManager defaultManager];
+    NSEnumerator *directoryEnum = [[fileManager directoryContentsAtPath:aFolderPath] objectEnumerator];
+    NSString *nextFile = nil;
+	
+	[con createDirectory:aServerPath];
+	
+    while (nextFile = [directoryEnum nextObject])
+    {
+        NSString *fullLocalPath = [aFolderPath stringByAppendingPathComponent:nextFile];
+        NSString *fullServerPath = [aServerPath stringByAppendingPathComponent:nextFile];
+        BOOL isDir;
+		
+        if ([nextFile hasPrefix:@"."])
+        {
+            continue;
+        }
+        
+        if ([fileManager fileExistsAtPath:fullLocalPath isDirectory:&isDir] && isDir)
+        {            
+            [self recursivelyUploadContentsAtPath:fullLocalPath serverPath:fullServerPath];
+        }
+        else
+        {
+            [self uploadFile:fullLocalPath to:fullServerPath];
+        }
+    }
+}
+
+- (void)uploadFolderContentsAtPath:(NSString *)aFolderPath
+{
+	NSString *serverCurrentDirectory = [[con currentDirectory] stringByAppendingPathComponent:[aFolderPath lastPathComponent]];
+	[self recursivelyUploadContentsAtPath:aFolderPath serverPath:serverCurrentDirectory];
+	[transferTable reloadData];
+}
+
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
@@ -1124,17 +1161,45 @@ NSString *IconKey = @"Icon";
 	}
 	else if (tableView == remoteTable) //do an upload
 	{
-		NSArray *files = [pb propertyListForType:cxLocalFilePBoardType];
-		NSEnumerator *e = [files objectEnumerator];
-		NSString *cur;
-		
-		while (cur = [e nextObject])
+		if ([[pb types] containsObject:cxLocalFilePBoardType])
 		{
-			[self uploadFile:cur to:[[con currentDirectory] stringByAppendingPathComponent:[cur lastPathComponent]]];
+			NSArray *files = [pb propertyListForType:cxLocalFilePBoardType];
+			NSEnumerator *e = [files objectEnumerator];
+			NSString *cur;
+			
+			while (cur = [e nextObject])
+			{
+				[self uploadFile:cur to:[[con currentDirectory] stringByAppendingPathComponent:[cur lastPathComponent]]];
+			}
+			[transferTable reloadData];
+			
+			return YES;
 		}
-		[transferTable reloadData];
-		
-		return YES;
+		else if ([[pb types] containsObject:NSFilenamesPboardType])
+		{
+			NSFileManager *fm = [NSFileManager defaultManager];
+			NSArray *files = [pb propertyListForType:NSFilenamesPboardType];
+			NSEnumerator *e = [files objectEnumerator];
+			NSString *cur;
+			BOOL isDir;
+			
+			NSString *curRemoteDir = [[con currentDirectory] copy];
+			
+			while (cur = [e nextObject])
+			{
+				if ([fm fileExistsAtPath:cur isDirectory:&isDir] && isDir)
+				{
+					[self uploadFolderContentsAtPath:cur];
+				}
+				else
+				{
+					[self uploadFile:cur to:[curRemoteDir stringByAppendingPathComponent:[cur lastPathComponent]]];
+				}
+			}
+			[curRemoteDir release];
+			[transferTable reloadData];
+			return YES;
+		}
 	}
 	return NO;
 }
