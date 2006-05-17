@@ -1170,10 +1170,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			//This is an internal error in the syntax of the commands and arguments sent.
 			//We should never get to this state as we should construct commands correctly.
 			if (GET_STATE != ConnectionSentFeatureRequestState)
+			{
 				KTLog(ProtocolDomain, KTLogError, @"FTP Internal Error: %@", command);
-			// We should just see if we can process the next command
-			[self setState:ConnectionIdleState];
-			break;
+				// We should just see if we can process the next command
+				[self setState:ConnectionIdleState];
+				break;
+			}
+			else
+			{
+				[self setState:ConnectionSentUsernameState];
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+				break;
+			}
 		}
 		case 521:
 		{
