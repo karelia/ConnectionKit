@@ -518,6 +518,57 @@
 	[super contentsOfDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
 }
 
+- (void)checkExistenceOfPath:(NSString *)path
+{
+	NSString *dir = [[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]];
+	
+	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
+	//according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
+	
+	if (!dir || [dir length] == 0)
+	{
+		path = [[self currentDirectory] stringByAppendingPathComponent:path];
+	}
+	
+	[self queueFileCheck:path];
+	if ([NSThread currentThread] != _bgThread)
+	{
+		[self sendPortMessage:CHECK_FILE_QUEUE];
+	}
+	else
+	{
+		[self processFileCheckingQueue];
+	}	
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
+{
+	if (_flags.fileCheck) {
+		NSString *name = [_fileCheckInFlight lastPathComponent];
+		NSEnumerator *e = [contents objectEnumerator];
+		NSDictionary *cur;
+		BOOL foundFile = NO;
+		
+		while (cur = [e nextObject]) 
+		{
+			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+			{
+				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
+				foundFile = YES;
+				break;
+			}
+		}
+		if (!foundFile)
+		{
+			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
+		}
+	}
+	[self dequeueFileCheck];
+	[_fileCheckInFlight autorelease];
+	_fileCheckInFlight = nil;
+	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
+}
+
 @end
 
 @implementation NSString (DotMac)
