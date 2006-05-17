@@ -404,7 +404,23 @@
 {
 	if (GET_STATE == ConnectionUploadingFileState)
 	{
-		bytesTransferred += length;
+		if (transferHeaderLength > 0)
+		{
+			if (length <= transferHeaderLength)
+			{
+				transferHeaderLength -= length;
+			}
+			else
+			{
+				transferHeaderLength = 0;
+				length -= transferHeaderLength;
+			}
+		}
+		else
+		{
+			bytesTransferred += length;
+		}
+		
 		NSString *upload = [[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent];
 		if (_flags.uploadPercent)
 		{

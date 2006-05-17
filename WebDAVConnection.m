@@ -263,6 +263,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		case ConnectionUploadingFileState:
 		{
 			DAVUploadFileResponse *dav = (DAVUploadFileResponse *)response;
+			bytesTransferred = 0;
+			bytesToTransfer = 0;
+			transferHeaderLength = 0;
+			
 			switch ([dav code])
 			{
 				case 200:
@@ -589,9 +593,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		// if we are uploading or downloading set up the transfer sizes
 		if (GET_STATE == ConnectionUploadingFileState)
 		{
-			bytesToTransfer = [packet length] - [req headerLength];
+			transferHeaderLength = [req headerLength];
+			bytesToTransfer = [packet length] - transferHeaderLength;
 			bytesTransferred = 0;
-			
 			if (_flags.didBeginUpload)
 			{
 				[_forwarder connection:self
@@ -619,6 +623,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		NSInvocation *inv = (NSInvocation *)command;
 		[inv invoke];
 	}
+}
+
+- (void)closeStreams
+{
+	bytesTransferred = 0;
+	[super closeStreams];
 }
 
 #pragma mark -
@@ -935,10 +945,26 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	if (GET_STATE == ConnectionUploadingFileState)
 	{
-		bytesTransferred += length;
+		if (transferHeaderLength > 0)
+		{
+			if (length <= transferHeaderLength)
+			{
+				transferHeaderLength -= length;
+			}
+			else
+			{
+				transferHeaderLength = 0;
+				length -= transferHeaderLength;
+			}
+		}
+		else
+		{
+			bytesTransferred += length;
+		}
+			
 		if (_flags.uploadPercent)
 		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			int percent = (100 * bytesTransferred) / bytesToTransfer;
 			[_forwarder connection:self 
 							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
 					  progressedTo:[NSNumber numberWithInt:percent]];

@@ -720,7 +720,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 										  length:0];
 			}
 			[_sendBufferLock unlock];
-			[self stream:_sendStream sentBytesOfLength:chunkLength];
 			break;
 		}
 		default:
