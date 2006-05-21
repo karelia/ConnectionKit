@@ -661,14 +661,41 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	NSString *name = [remotePath lastPathComponent];
 	if (_flags.didBeginDownload)
 	{
-		[myForwarder connection:self downloadDidBegin:name];
+		[myForwarder connection:self downloadDidBegin: remotePath];
 	}
 	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
 	}
-	BOOL success = [myFileManager copyPath:remotePath toPath:[NSString stringWithFormat:@"%@/%@", dirPath, name] handler:self];
+  
+  NSString *destinationPath = [NSString stringWithFormat:@"%@/%@", dirPath, name];
+  NSString *tempPath = nil;
+  if ([aFlag boolValue])
+  {
+    //we were asked to overwrite, we'll do it atomically because we are nice:-)
+    //
+    if ([[NSFileManager defaultManager] fileExistsAtPath: destinationPath])
+    {
+      tempPath = [dirPath stringByAppendingPathComponent: [[NSProcessInfo processInfo] globallyUniqueString]];
+      
+      if (![[NSFileManager defaultManager] movePath: destinationPath
+                                            toPath: tempPath
+                                           handler: nil])
+      {
+        //we failed to move it, we'll fail to copy...
+        //
+        tempPath = nil;
+      }
+    }
+  }
+  
+	BOOL success = [myFileManager copyPath:remotePath toPath: destinationPath handler:self];
 	if (success)
 	{
+    //we can delete the old file if one was present
+    //
+    if (tempPath)
+      [myFileManager removeFileAtPath: tempPath handler: nil];
+    
 		//need to send the amount of bytes transferred.
 		if (_flags.downloadProgressed) {
 			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
@@ -679,11 +706,20 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 		}
 		if (_flags.downloadFinished)
 		{
-			[myForwarder connection:self downloadDidFinish:name];
+			[myForwarder connection:self downloadDidFinish: remotePath];
 		}
 	}
 	else	// no handler, so we send error message 'manually'
 	{
+    if (tempPath)
+    {
+      //restore the file, hopefully this will work:-)
+      //
+      [[NSFileManager defaultManager] movePath: tempPath
+                                        toPath: destinationPath
+                                       handler: nil];
+    }
+    
 		if (_flags.error)
 		{
 			[myForwarder connection:self
