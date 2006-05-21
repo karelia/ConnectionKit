@@ -35,7 +35,7 @@ NSString *ProtocolKey = @"Protocol";
 + (BOOL) keychainSetPassword:(NSString *)inPassword forServer:(NSString *)aServer account:(NSString *)anAccount;
 + (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
 - (void)refreshHosts;
-- (void)downloadFile:(NSString *)remote to:(NSString *)local;
+- (void)downloadFile:(NSString *)remote toFolder:(NSString *)local;
 - (void)uploadFile:(NSString *)local to:(NSString *)remote;
 @end
 @interface NSString (FileSizeFormatting)
@@ -509,14 +509,14 @@ NSString *ProtocolKey = @"Protocol";
 		
 		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeRegular]) {
 			[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:[attribs objectForKey:cxFilenameKey]]
-							to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, [attribs objectForKey:cxFilenameKey]]];
+							toFolder:currentLocalPath];
 		}
 		else if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 		{
 			NSString *target = [attribs objectForKey:cxSymbolicLinkTargetKey];
 			if ([target characterAtIndex:[target length] - 1] != '/'  && [target characterAtIndex:[target length] - 1] != '\\')
 				[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:[attribs objectForKey:cxFilenameKey]]
-								to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, [attribs objectForKey:cxFilenameKey]]];
+								toFolder: currentLocalPath];
 		}
 		
 		[transferTable reloadData];
@@ -734,7 +734,7 @@ static NSImage *_folder = nil;
 	return nil;
 }
 
-- (void)downloadFile:(NSString *)remote to:(NSString *)local
+- (void)downloadFile:(NSString *)remote toFolder:(NSString *)local
 {
 	FileTransfer *t = [FileTransfer downloadFile:remote to:local];
 	[transfers addObject:t];
@@ -1154,7 +1154,7 @@ NSString *IconKey = @"Icon";
 		while (cur = [e nextObject])
 		{
 			[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:cur]
-							to:[NSString stringWithFormat:@"%@/%@", currentLocalPath, cur]];
+							toFolder: currentLocalPath];
 		}
 		[transferTable reloadData];
 		return YES;
