@@ -23,7 +23,9 @@
   BOOL returnedFromFileExists;
   BOOL didSetPermission;
   BOOL didChangeDirectory;
-
+  BOOL didDownload;
+  NSString *remoteDownloadedPath;
+  
   NSArray *directoryContents;
 }
  

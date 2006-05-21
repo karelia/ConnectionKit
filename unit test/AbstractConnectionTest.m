@@ -48,8 +48,8 @@ const NSTimeInterval kTestTimeout = -15.0;
 {
 	//set info for your ftp server here
 	//	
-	fileNameExistingOnServer = [[NSString stringWithString:@"unit test/09 moustik.mp3"] retain];
-	
+	NSDictionary *env = [[NSProcessInfo processInfo] environment];
+	fileNameExistingOnServer = [[[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: [NSString stringWithString:@"unit test/09 moustik.mp3"]] retain];
 	initialDirectory = [[NSString stringWithString:NSHomeDirectory()] retain];
   existingFolder = @"Sites";
 	NSError *err = nil;
@@ -68,7 +68,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 	}
 	[connection setDelegate: self];
 	didUpload = isConnected = receivedError = didSetPermission = didDelete = fileExists = returnedFromFileExists = NO;
-	directoryContents = nil;
+	directoryContents = remoteDownloadedPath = nil;
 }
 
 - (void) tearDown
@@ -137,9 +137,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 
 - (void) testFileExitence
 {
-	NSDictionary *env = [[NSProcessInfo processInfo] environment];
-	NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
-	[self checkThatFileExistsAtPath: file];  
+	[self checkThatFileExistsAtPath: fileNameExistingOnServer];  
 }
 
 - (void) testFileNonExistence
@@ -161,8 +159,7 @@ const NSTimeInterval kTestTimeout = -15.0;
   //get the directory content to save the permission
   //
   receivedError = NO;  
-  NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  NSString *file = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
+  NSString *file = fileNameExistingOnServer;
   NSString *dir = [file stringByDeletingLastPathComponent];
   [connection contentsOfDirectory:dir];
   
@@ -251,9 +248,7 @@ const NSTimeInterval kTestTimeout = -15.0;
   while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
   
-  NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  NSString *localFile = [[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer];
-  [connection uploadFile: localFile];
+  [connection uploadFile: fileNameExistingOnServer];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -290,10 +285,9 @@ const NSTimeInterval kTestTimeout = -15.0;
   NSDate *initialTime = [NSDate date];
   while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
     [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
-  
-  NSDictionary *env = [[NSProcessInfo processInfo] environment];
-  [connection uploadFile:[[env objectForKey:@"SRCROOT"] stringByAppendingPathComponent: fileNameExistingOnServer] 
-				  toFile:[fileNameExistingOnServer lastPathComponent]];
+
+  [connection uploadFile: fileNameExistingOnServer 
+                  toFile:[fileNameExistingOnServer lastPathComponent]];
   
   didUpload = receivedError = NO;
   initialTime = [NSDate date];
@@ -305,12 +299,11 @@ const NSTimeInterval kTestTimeout = -15.0;
   
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
-  NSString *file = [[connection currentDirectory] stringByAppendingPathComponent:[fileNameExistingOnServer lastPathComponent]];
-  [self checkThatFileExistsAtPath: file];
+  [self checkThatFileExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
   
   //clean up
   //
-  [connection deleteFile: file];
+  [connection deleteFile: [fileNameExistingOnServer lastPathComponent]];
   
   didDelete = receivedError = NO;
   initialTime = [NSDate date];
@@ -319,7 +312,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 
   //Check that the file was removed
   //
-  [self checkThatFileDoesNotExistsAtPath: file];
+  [self checkThatFileDoesNotExistsAtPath: [fileNameExistingOnServer lastPathComponent]];
 }
 
 - (void) testUploadInvalidPath
@@ -432,6 +425,74 @@ const NSTimeInterval kTestTimeout = -15.0;
   STAssertTrue(receivedError, @"error while connecting");
 }
 
+- (void) testADownload
+{
+  [connection connect];
+  
+  NSDate *initialTime = [NSDate date];
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  //download a file
+  //
+  receivedError = NO;
+  [connection downloadFile: fileNameExistingOnServer
+               toDirectory: NSTemporaryDirectory()
+                 overwrite: YES];
+  
+  initialTime = [NSDate date];
+  while ((!didDownload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  
+  STAssertTrue([initialTime timeIntervalSinceNow] > kTestTimeout, @"timed out on download");
+  STAssertFalse(receivedError, @"error while downloading");
+  STAssertEqualObjects(remoteDownloadedPath, fileNameExistingOnServer, @"did not return an absolute path");
+  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [NSTemporaryDirectory() stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]]], @"did not download file");
+  
+  //clean up
+  [[NSFileManager defaultManager] removeFileAtPath: [NSTemporaryDirectory() stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]]
+                                           handler: nil];
+}
+
+- (void) testDownloadOverwrite
+{
+  [connection connect];
+  
+  NSDate *initialTime = [NSDate date];
+  while ((!isConnected) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  //download a file
+  //
+  receivedError = NO;
+  [[NSDictionary dictionary] writeToFile: [NSTemporaryDirectory() stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]]
+                              atomically: NO];
+  [connection downloadFile: fileNameExistingOnServer
+               toDirectory: NSTemporaryDirectory()
+                 overwrite: YES];
+  
+  initialTime = [NSDate date];
+  while ((!didDownload) && (!receivedError) && ([initialTime timeIntervalSinceNow] > kTestTimeout))  //wait for connection or 30 sec
+    [[NSRunLoop currentRunLoop] runUntilDate: [NSDate dateWithTimeIntervalSinceNow: 0.1]];
+  
+  
+  STAssertTrue([initialTime timeIntervalSinceNow] > -30, @"timed out on download");
+  STAssertFalse(receivedError, @"error while downloading");
+  STAssertEqualObjects(remoteDownloadedPath, fileNameExistingOnServer, @"did not return an absolute path");
+  STAssertTrue([[NSFileManager defaultManager] fileExistsAtPath: [NSTemporaryDirectory() stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]]], @"did not download file");
+  
+  //clean up
+  [[NSFileManager defaultManager] removeFileAtPath: [NSTemporaryDirectory() stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]]
+                                           handler: nil];
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+{
+  remoteDownloadedPath = [remotePath retain];
+  didDownload = YES;
+}
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
 {
   isConnected = YES;
@@ -445,6 +506,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
 {
   //NSLog (@"%@\n%@", NSStringFromSelector(_cmd), error);
+  NSLog (@"error: %@", error);
   receivedError = YES;
 }
 
