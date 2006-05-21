@@ -638,7 +638,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						if ([data length] > 0)
 						{
 							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-							[buffer appendString:line];
+							
+							if (line)
+								[buffer appendString:line];
 							
 							if ([line rangeOfString:@"220 "].location != NSNotFound)
 								atEnd = YES;
@@ -713,7 +715,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					if ([data length] > 0)
 					{
 						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-						[buffer appendString:line];
+						if (line)
+							[buffer appendString:line];
 						
 						if ([line rangeOfString:@"226 "].location != NSNotFound)
 							atEnd = YES;
@@ -842,7 +845,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						if ([data length] > 0)
 						{
 							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-							[buffer appendString:line];
+							if (line)
+								[buffer appendString:line];
 							
 							if ([line rangeOfString:@"230 "].location != NSNotFound)
 								atEnd = YES;
