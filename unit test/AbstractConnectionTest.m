@@ -257,7 +257,7 @@ const NSTimeInterval kTestTimeout = -15.0;
   
   STAssertFalse(receivedError, @"received error on upload");
   STAssertTrue(([initialTime timeIntervalSinceNow] > kTestTimeout), @"timeout on upload");
-  
+  STAssertEqualObjects(remoteDownloadedPath, [initialDirectory stringByAppendingPathComponent: [fileNameExistingOnServer lastPathComponent]], @"did not absolute full path");
   //check that the file exists (using the connectino framework, so maybe not the best check, but at least will work with every connection
   //
   NSString *dir = [connection currentDirectory];
@@ -425,7 +425,7 @@ const NSTimeInterval kTestTimeout = -15.0;
   STAssertTrue(receivedError, @"error while connecting");
 }
 
-- (void) testADownload
+- (void) testDownload
 {
   [connection connect];
   
@@ -520,6 +520,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 {
   if (![con numberOfTransfers])
     didUpload = YES;
+  remoteDownloadedPath = [remotePath retain];
 }
 
 
