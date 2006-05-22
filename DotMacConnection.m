@@ -380,16 +380,20 @@
 
 - (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
 {
+	if (length == 0) return;
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
 		NSString *download = [[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] stringByDeletingFirstPathComponent];
 		bytesTransferred += length;
 		if (_flags.downloadPercent)
 		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			[_forwarder connection:self 
-						  download:download
-					  progressedTo:[NSNumber numberWithInt:percent]];
+			if (bytesToTransfer > 0) // intel gives a crash for div by 0
+			{
+				int percent = (bytesTransferred * 100) / bytesToTransfer;
+				[_forwarder connection:self 
+							  download:download
+						  progressedTo:[NSNumber numberWithInt:percent]];
+			}
 		}
 		if (_flags.downloadProgressed)
 		{
@@ -402,6 +406,7 @@
 
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
+	if (length == 0) return;
 	if (GET_STATE == ConnectionUploadingFileState)
 	{
 		if (transferHeaderLength > 0)
@@ -424,10 +429,13 @@
 		NSString *upload = [[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent];
 		if (_flags.uploadPercent)
 		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			[_forwarder connection:self 
-							upload:upload
-					  progressedTo:[NSNumber numberWithInt:percent]];
+			if (bytesToTransfer > 0) // intel gives a crash for div by 0
+			{
+				int percent = (bytesTransferred * 100) / bytesToTransfer;
+				[_forwarder connection:self 
+								upload:upload
+						  progressedTo:[NSNumber numberWithInt:percent]];
+			}
 		}
 		if (_flags.uploadProgressed)
 		{
