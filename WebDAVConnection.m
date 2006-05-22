@@ -943,6 +943,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
+	if (length == 0) return;
 	if (GET_STATE == ConnectionUploadingFileState)
 	{
 		if (transferHeaderLength > 0)
@@ -964,10 +965,13 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			
 		if (_flags.uploadPercent)
 		{
-			int percent = (100 * bytesTransferred) / bytesToTransfer;
-			[_forwarder connection:self 
-							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
-					  progressedTo:[NSNumber numberWithInt:percent]];
+			if (bytesToTransfer > 0)
+			{
+				int percent = (100 * bytesTransferred) / bytesToTransfer;
+				[_forwarder connection:self 
+								upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+						  progressedTo:[NSNumber numberWithInt:percent]];
+			}
 		}
 		if (_flags.uploadProgressed)
 		{
