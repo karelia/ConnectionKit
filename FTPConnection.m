@@ -1463,7 +1463,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[_lastTransfer autorelease];
 					_lastTransfer = [now retain];
 					
-					if ([self isAboveNotificationTimeThreshold:[NSDate date]]) {
+					//if ([self isAboveNotificationTimeThreshold:[NSDate date]]) 
+					{
 						if (_transferSize > 0 && _flags.downloadPercent)
 						{
 							int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
