@@ -449,6 +449,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
 					_transferSent = len;
 				}
+				//need to get the transfer size
+				// 150 Opening connection (1652084 bytes)
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
+				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
+				[sizeScanner scanLongLong:&_transferSize];
+				
 				free(buf);
 			}
 			else
