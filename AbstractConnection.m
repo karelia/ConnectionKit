@@ -1038,7 +1038,8 @@ int filenameSort(id obj1, id obj2, void *context)
 				[attributedLines addObject:d];
 			}
 			else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] &&
-					 [[words objectAtIndex:5] intValue] >= 0 && [[words objectAtIndex:7] intValue] <= 31 && [[words objectAtIndex:7] intValue] > 0) 
+					 [[words objectAtIndex:4] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:4] intValue]] stringValue]] &&
+					 [[words objectAtIndex:5] intValue] >= 0 && [[words objectAtIndex:6] intValue] <= 31 && [[words objectAtIndex:6] intValue] > 0)
 			{
 				/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */
 				NSMutableDictionary *d = [NSMutableDictionary dictionary];
