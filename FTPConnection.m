@@ -454,15 +454,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
 				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
 				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
+				[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
 				[sizeScanner scanLongLong:&_transferSize];
-				if (_transferSize == 0)
-				{
-					int size;
-					sizeScanner = [NSScanner scannerWithString:command];
-					[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-					[sizeScanner scanInt:&size];
-					_transferSize = size;
-				}
 				
 				free(buf);
 			}
