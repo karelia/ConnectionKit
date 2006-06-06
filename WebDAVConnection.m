@@ -391,10 +391,15 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				bytesToTransfer = daBytes;
 				
 				NSDictionary *download = [self currentDownload];
-				[[NSFileManager defaultManager] removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
-				[[NSFileManager defaultManager] createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
-														contents:nil
-													  attributes:nil];
+				NSFileManager *fm = [NSFileManager defaultManager];
+				BOOL isDir;
+				if ([fm fileExistsAtPath:[download objectForKey:QueueDownloadDestinationFileKey] isDirectory:&isDir] && !isDir)
+				{
+					[fm removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
+				}
+				[fm createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
+							contents:nil
+						  attributes:nil];
 				[myDownloadHandle release];
 				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[download objectForKey:QueueDownloadDestinationFileKey]] retain];
 				
@@ -412,21 +417,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				unsigned len = [myResponseBuffer length] - start;
 				[myDownloadHandle writeData:[myResponseBuffer subdataWithRange:NSMakeRange(start,len)]];
 				[myResponseBuffer setLength:0];
-				
-				bytesTransferred += len;
-				if (_flags.downloadPercent)
-				{
-					int percent = (bytesTransferred * 100) / bytesToTransfer;
-					[_forwarder connection:self 
-								  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-							  progressedTo:[NSNumber numberWithInt:percent]];
-				}
-				if (_flags.downloadProgressed)
-				{
-					[_forwarder connection:self
-								  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-					  receivedDataOfLength:len];
-				}
 			}
 		}
 		else
@@ -435,20 +425,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[myDownloadHandle writeData:data];
 			[myResponseBuffer setLength:0]; 
 			
-			bytesTransferred += length;
-			if (_flags.downloadPercent)
-			{
-				int percent = (bytesTransferred * 100) / bytesToTransfer;
-				[_forwarder connection:self 
-							  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-						  progressedTo:[NSNumber numberWithInt:percent]];
-			}
-			if (_flags.downloadProgressed)
-			{
-				[_forwarder connection:self
-							  download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]
-				  receivedDataOfLength:length];
-			}
 			if (bytesTransferred == bytesToTransfer)
 			{
 				[myDownloadHandle closeFile];
@@ -822,7 +798,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 											   userInfo:nil];
 	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
 	[attribs setObject:remotePath forKey:QueueDownloadRemoteFileKey];
-	[attribs setObject:dirPath forKey:QueueDownloadDestinationFileKey];
+	[attribs setObject:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:QueueDownloadDestinationFileKey];
 	[self queueDownload:attribs];
 	[self queueCommand:cmd];
 }
