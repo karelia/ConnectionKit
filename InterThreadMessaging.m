@@ -34,8 +34,7 @@ enum ConnectionInterThreadMessageType
    contains a single NSData argument, which is a wrapper around the pointer to
    this struct. */
 
-typedef struct ConnectionInterThreadMessage ConnectionInterThreadMessage;
-struct ConnectionInterThreadMessage
+typedef struct ConnectionInterThreadMessage
 {
     ConnectionInterThreadMessageType type;
     union {
@@ -47,16 +46,18 @@ struct ConnectionInterThreadMessage
             id arg2;
         } sel;
     } data;
-};
+} ConnectionInterThreadMessage;
 
 @interface NSThread (ConnectionSecretStuff)
 - (NSRunLoop *) runLoop;
+- (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread;
 @end
 
 /* Each thread is associated with an NSPort.  This port is used to deliver
    messages to the target thread. */
 
 static NSMapTable *pThreadMessagePorts = NULL;
+static NSMapTable *pThreadMessageLocks = NULL;
 static pthread_mutex_t pGate = { 0 };
 
 @interface ConnectionInterThreadManager : NSObject
@@ -84,13 +85,26 @@ ConnectionCreateMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
         port = [[NSPort allocWithZone:NULL] init];
         [port setDelegate:[ConnectionInterThreadManager class]];
         [port scheduleInRunLoop:runLoop forMode:NSDefaultRunLoopMode];
+		NSLock *lock = [[NSRecursiveLock alloc] init];
         NSMapInsertKnownAbsent(pThreadMessagePorts, thread, port);
-
+		NSMapInsertKnownAbsent(pThreadMessageLocks, thread, lock);
         /* Transfer ownership of this port to the map table. */
         [port release];
+		[lock release];
     }
 
     pthread_mutex_unlock(&pGate);
+}
+
+static NSLock * ConnectionMessageLockForThread (NSThread *thread)
+{
+	assert (thread != nil);
+	assert (pThreadMessageLocks != nil);
+	NSLock *lock = nil;
+	pthread_mutex_lock(&pGate);
+    lock = NSMapGet(pThreadMessageLocks, thread);
+    pthread_mutex_unlock(&pGate);
+	return lock;
 }
 
 static NSPort *
@@ -177,6 +191,8 @@ ConnectionRemoveMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
         pThreadMessagePorts =
             NSCreateMapTable(NSNonRetainedObjectMapKeyCallBacks,
                              NSObjectMapValueCallBacks, 0);
+		pThreadMessageLocks = NSCreateMapTable(NSNonRetainedObjectMapKeyCallBacks,
+											   NSObjectMapValueCallBacks, 0);
 
         [[NSNotificationCenter defaultCenter]
             addObserver:[self class]
@@ -257,22 +273,44 @@ ConnectionPostMessage (ConnectionInterThreadMessage *message, NSThread *thread, 
 {
     NSPortMessage *portMessage;
     NSMutableArray *components;
-    NSPort *port;
+    NSPort *port, *replyPort;
     NSData *data;
     BOOL retval;
 
     if (nil == thread) { thread = [NSThread currentThread]; }
     port = ConnectionMessagePortForThread(thread);
+	replyPort = ConnectionMessagePortForThread([NSThread currentThread]);
     assert(nil != port);
 
     data = [[NSData alloc] initWithBytes:&message length:sizeof(void *)];
     components = [[NSMutableArray alloc] initWithObjects:&data count:1];
     portMessage = [[NSPortMessage alloc] initWithSendPort:port
-                                         receivePort:nil
+                                         receivePort:replyPort
                                          components:components];
 
     if (nil == limitDate) { limitDate = [NSDate distantFuture]; }
+	NSLock *ourLock = ConnectionMessageLockForThread([NSThread currentThread]);
+	NSLock *receiverLock = ConnectionMessageLockForThread(thread);
+	if (![ourLock tryLock])
+	{
+		[[NSThread currentThread] delayPostingMessage:message thread:thread];
+		[portMessage release];
+		[components release];
+		[data release];
+		return;
+	}
+	if (![receiverLock tryLock])
+	{
+		[ourLock unlock];
+		[[NSThread currentThread] delayPostingMessage:message thread:thread];
+		[portMessage release];
+		[components release];
+		[data release];
+		return;
+	}
     retval = [portMessage sendBeforeDate:limitDate];
+	[ourLock unlock];
+	[receiverLock unlock];
     [portMessage release];
     [components release];
     [data release];
@@ -321,12 +359,77 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
     ConnectionPostMessage(msg, thread, limitDate);
 }
 
-
-
-
-
-
 @implementation NSObject (ConnectionInterThreadMessaging)
+
+- (void)postDelayedMessage:(NSNumber *)type 
+					thread:(NSThread *)thread
+			  notification:(NSNotification *)notification
+				  selector:(SEL)selector
+				  receiver:(id)receiver
+					  arg1:(id)arg1
+					  arg2:(id)arg2
+{
+	ConnectionInterThreadMessage *msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
+	bzero(msg, sizeof(struct ConnectionInterThreadMessage));
+	// we have already retained our args from the initial creation of the msg
+	switch([type unsignedIntValue])
+	{
+		case kITMPostNotification:
+			msg->type = kITMPostNotification;
+			msg->data.notification = notification;
+			break;
+		case kITMPerformSelector0Args:
+			msg->type = kITMPerformSelector0Args;
+			msg->data.sel.receiver = receiver;
+			msg->data.sel.selector = selector;
+			msg->data.sel.arg1 = nil;
+			msg->data.sel.arg2 = nil;
+			break;
+		case kITMPerformSelector1Args:
+			msg->type = kITMPerformSelector1Args;
+			msg->data.sel.receiver = receiver;
+			msg->data.sel.selector = selector;
+			msg->data.sel.arg1 = arg1;
+			msg->data.sel.arg2 = nil;
+			break;
+		case kITMPerformSelector2Args:
+			msg->type = kITMPerformSelector2Args;
+			msg->data.sel.receiver = receiver;
+			msg->data.sel.selector = selector;
+			msg->data.sel.arg1 = arg1;
+			msg->data.sel.arg2 = arg2;
+			break;
+		default:
+			assert(0);
+	}
+	ConnectionPostMessage(msg, thread, nil);
+}
+
+- (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread
+{
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
+													  target:self
+												   arguments:[NSArray array]];
+	NSNumber *type = [NSNumber numberWithUnsignedInt:msg->type];
+	[inv setArgument:&type atIndex:2];
+	[inv setArgument:&thread atIndex:3];
+	if (msg->type == kITMPostNotification)
+	{
+		[inv setArgument:&msg->data.notification atIndex:4];
+	}
+	else
+	{
+		[inv setArgument:&msg->data.sel.selector atIndex:5];
+		[inv setArgument:&msg->data.sel.receiver atIndex:6];
+		if (msg->data.sel.arg1)
+			[inv setArgument:&msg->data.sel.arg1 atIndex:7];
+		if (msg->data.sel.arg2)
+			[inv setArgument:&msg->data.sel.arg2 atIndex:8];
+	}
+	[inv performSelector:@selector(invoke) withObject:nil afterDelay:0.1];
+	[inv retainArguments];
+	free(msg);
+}
 
 - (void) performSelector:(SEL)selector
          inThread:(NSThread *)thread
