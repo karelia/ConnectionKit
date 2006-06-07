@@ -161,6 +161,7 @@ ConnectionRemoveMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
         [port removeFromRunLoop:runLoop forMode:NSDefaultRunLoopMode];
         NSMapRemove(pThreadMessagePorts, thread);
     }
+	NSMapRemove(pThreadMessageLocks, thread);
 
     pthread_mutex_unlock(&pGate);
 }
