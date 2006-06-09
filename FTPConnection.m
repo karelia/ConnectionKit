@@ -210,6 +210,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		command = @"LIST";
 	}
+
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", command];
 
 	if ([self transcript])
@@ -475,10 +476,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0]];
 				}
 				[self dequeuePermissionChange];
-			} else if (GET_STATE == FTPSettingEPRTState) {
-				[self setState:ConnectionIdleState];
-				break;
-			}
+			} 
 			[self setState:ConnectionIdleState];
 			break;
 		}
@@ -2140,8 +2138,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	[self startBulkCommands];
 	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A"
-											   awaitState:ConnectionIdleState 
-												sentState:ConnectionIdleState
+											   awaitState:ConnectionIdleState
+												sentState:FTPModeChangeState
 												dependant:nil
 												 userInfo:nil];
 	NSMutableDictionary *download = [NSMutableDictionary dictionaryWithObjectsAndKeys:remotePath, QueueDownloadRemoteFileKey, 
