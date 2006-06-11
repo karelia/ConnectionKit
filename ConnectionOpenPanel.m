@@ -204,6 +204,9 @@
 	[[parentDirectories arrangedObjects] count];
 	NSString *newPath = [[[[[[self connection] currentDirectory] pathComponents] subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))] componentsJoinedByString: @"/"] substringFromIndex: 1];
 	
+  if ([newPath isEqualToString: @""])
+    newPath = @"/";
+  
 	[self setIsLoading: YES];
 	[[self connection] changeToDirectory: newPath];
 	[[self connection] directoryContents];
