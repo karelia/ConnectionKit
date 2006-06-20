@@ -1281,7 +1281,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 550: //directory or file does not exist
 		{
-			NSString *error;
+			NSString *error = nil;
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			
 			if (GET_STATE == ConnectionUploadingFileState)
@@ -1313,6 +1313,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
 				[self dequeueDeletion];
+			}
+			else if (GET_STATE == FTPChangeDirectoryListingStyle || ConnectionSettingPermissionsState)
+			{
+				[self setState:ConnectionIdleState];
+				break;
 			}
 			else
 			{
