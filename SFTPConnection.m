@@ -732,6 +732,25 @@ static NSArray *sftpErrors = nil;
 						[[NSFileManager defaultManager] removeFileAtPath:[[self currentUpload] objectForKey:SFTPTemporaryDataUploadFileKey]
 																 handler:nil];
 					}
+					
+					// we could get 2 lots of 100% done so we need to consume any left over input
+					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
+					int attempt = 3;
+					
+					while (attempt >= 0)
+					{
+						NSData *bufData = [self availableData];
+						if ([bufData length] > 0) {
+							NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
+							[_inputBuffer appendString:buf];
+						} 
+						else
+						{
+							attempt--;
+						}
+						[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.10]];
+					}
+					[self removeCommandPromptFromBuffer];
 					[self dequeueUpload];
 					[self setState:ConnectionIdleState];
 				}
