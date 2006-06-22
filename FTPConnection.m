@@ -1043,7 +1043,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self closeDataStreams];
 			_flags.isConnected = NO;
 			
-			if (_flags.error) {
+			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
 			}
 			[self setState:ConnectionNotConnectedState]; 
