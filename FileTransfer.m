@@ -13,9 +13,14 @@
 
 + (id)uploadFile:(NSString *)local to:(NSString *)remote
 {
-	return [[[FileTransfer alloc] initWithType:UploadType
+	FileTransfer *transfer =  [[[FileTransfer alloc] initWithType:UploadType
 									 localFile:local
 									remoteFile:remote] autorelease];
+  
+  [transfer setSize: [NSNumber numberWithUnsignedLongLong: [[[NSFileManager defaultManager] fileAttributesAtPath: local
+                                                                                                    traverseLink: NO] fileSize]]];
+  
+  return transfer;
 }
 
 + (id)downloadFile:(NSString *)remote to:(NSString *)local
