@@ -674,8 +674,48 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 221:
 		{
-			if (GET_STATE == ConnectionSentQuitState)
+			if (GET_STATE == ConnectionSentQuitState || GET_STATE == ConnectionSentDisconnectState)
 			{
+				// consume any extra lines
+				NSMutableString *buffer = [NSMutableString string];
+				BOOL atEnd = NO;
+				NSRange r;
+				
+				if (![command hasPrefix:@"221 "])
+				{
+					if ((r = [_commandBuffer rangeOfString:@"221 "]).location != NSNotFound) {
+						[buffer appendString:_commandBuffer];
+						//need to drop out of the commandBuffer up to the new line.
+						NSRange newLineRange;
+						NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+						
+						if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+																  options:NSCaseInsensitiveSearch 
+																	range:toEnd]).location != NSNotFound
+							|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+																	 options:NSCaseInsensitiveSearch
+																	   range:toEnd]).location != NSNotFound)
+							[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+						atEnd = YES;
+					}
+					
+					while (atEnd == NO)
+					{
+						NSData *data = [self availableData];
+						
+						if ([data length] > 0)
+						{
+							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+							if (line)
+								[buffer appendString:line];
+							
+							if ([line rangeOfString:@"221 "].location != NSNotFound)
+								atEnd = YES;
+							
+							[line release];
+						}
+					}
+				}
 				[self closeStreams];
 				
 				[self setState:ConnectionNotConnectedState];
