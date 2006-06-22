@@ -455,8 +455,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
 				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
 				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-				[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-				[sizeScanner scanLongLong:&_transferSize];
+				if ( [sizeScanner scanLocation] < [command length] )
+				{
+					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+					[sizeScanner scanLongLong:&_transferSize];
+				}
+				else
+				{
+					_transferSize = LONG_MAX;
+				}
 				
 				free(buf);
 			}
@@ -956,6 +963,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			[self setState:ConnectionIdleState];
 			break;
+		}
+		case 253:
+		{		
+			if (GET_STATE == ConnectionSettingPermissionsState)
+			{
+				[self setState:ConnectionIdleState];
+				break;
+			}
 		}
 		case 257:
 		{
