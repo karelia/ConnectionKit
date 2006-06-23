@@ -1078,6 +1078,52 @@ int filenameSort(id obj1, id obj2, void *context)
 					  forKey:cxFilenameKey];
 				[attributedLines addObject:d];
 			}
+			else if ([[words objectAtIndex:1] isEqualToString:@"FTP"] && [[words objectAtIndex:2] isEqualToString:@"User"]) // Trellix FTP Server
+			{
+				NSMutableDictionary *d = [NSMutableDictionary dictionary];
+				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+				[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
+				[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
+				
+				//if it is a sym link we want to break up the name and target
+				int filenameStartIndex = 7;
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+				{
+					NSMutableArray *filenameBits = [NSMutableArray array];
+					int i;
+					
+					for ( i = filenameStartIndex; i < [words count]; i++) {
+						NSString *bit = [words objectAtIndex:i];
+						NSRange r = [bit rangeOfString:@"->"];
+						if (r.location != NSNotFound) {
+							//bit = [bit substringToIndex:r.location];
+							//[filenameBits addObject:bit];
+							break;
+						}
+						[filenameBits addObject:bit];
+					}
+					
+					NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
+					NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+					filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+					NSString *symTarget = [symBits componentsJoinedByString:@" "];
+					symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+					
+					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
+						  forKey:cxFilenameKey];
+					[d setObject:[self fixFilename:symTarget withAttributes:d]
+						  forKey:cxSymbolicLinkTargetKey];
+				}
+				else
+				{
+					NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
+					NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+					
+					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
+						  forKey:cxFilenameKey];
+				}
+				[attributedLines addObject:d];
+			}
 			else
 			{
 				NSString *groupSize = [words objectAtIndex:3];
