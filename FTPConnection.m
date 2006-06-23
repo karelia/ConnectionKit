@@ -1166,6 +1166,47 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 501: //Syntax Error in arguments
 		case 502: //Command not implemented
 		{
+			// We need to absorb all the login info message
+			NSMutableString *buffer = [NSMutableString string];
+			BOOL atEnd = NO;
+			NSRange r;
+			NSString *strCode = [NSString stringWithFormat:@"%d ", code];
+			
+			if (![command hasPrefix:strCode])
+			{
+				if ((r = [_commandBuffer rangeOfString:strCode]).location != NSNotFound) {
+					[buffer appendString:_commandBuffer];
+					//need to drop out of the commandBuffer up to the new line.
+					NSRange newLineRange;
+					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+					
+					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+															  options:NSCaseInsensitiveSearch 
+																range:toEnd]).location != NSNotFound
+						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+																 options:NSCaseInsensitiveSearch
+																   range:toEnd]).location != NSNotFound)
+						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+					atEnd = YES;
+				}
+				
+				while (atEnd == NO)
+				{
+					NSData *data = [self availableData];
+					
+					if ([data length] > 0)
+					{
+						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+						if (line)
+							[buffer appendString:line];
+						
+						if ([line rangeOfString:strCode].location != NSNotFound)
+							atEnd = YES;
+						
+						[line release];
+					}
+				}
+			}
 			if (GET_STATE == FTPSettingEPSVState)
 			{
 				_serverSupport.canUseEPSV = NO;
@@ -1932,9 +1973,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_dataReceiveStream open];
 	[_dataSendStream open];
 	
-	KTLog(TransportDomain, KTLogDebug, @"Setting data connection timeout to 5 seconds");
+	KTLog(TransportDomain, KTLogDebug, @"Setting data connection timeout to 10 seconds");
 	[_openStreamsTimeout invalidate];
-	_openStreamsTimeout = [[NSTimer scheduledTimerWithTimeInterval:5
+	_openStreamsTimeout = [[NSTimer scheduledTimerWithTimeInterval:10
 															target:self
 														  selector:@selector(dataConnectionOpenTimedOut:) 
 														  userInfo:nil
