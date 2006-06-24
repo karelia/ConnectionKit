@@ -267,10 +267,52 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSScanner *scanner = [NSScanner scannerWithString:command];
 	int code;
 	[scanner scanInt:&code];
+	
+	// we need to consume everything until 'xxx '
+	NSMutableString *buffer = [NSMutableString stringWithFormat:@"%@\n", command];
+	BOOL atEnd = NO;
+	NSRange r;
+	NSString *strCode = [NSString stringWithFormat:@"%d ", code];
+	
+	if (![command hasPrefix:strCode])
+	{
+		if ((r = [_commandBuffer rangeOfString:strCode]).location != NSNotFound) {
+			[buffer appendString:_commandBuffer];
+			//need to drop out of the commandBuffer up to the new line.
+			NSRange newLineRange;
+			NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+			
+			if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+													  options:NSCaseInsensitiveSearch 
+														range:toEnd]).location != NSNotFound
+				|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+														 options:NSCaseInsensitiveSearch
+														   range:toEnd]).location != NSNotFound)
+				[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+			atEnd = YES;
+		}
+		
+		while (atEnd == NO)
+		{
+			NSData *data = [self availableData];
+			
+			if ([data length] > 0)
+			{
+				NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+				if (line)
+					[buffer appendString:line];
+				
+				if ([line rangeOfString:strCode].location != NSNotFound)
+					atEnd = YES;
+				
+				[line release];
+			}
+		}
+	}
 
 	if ([self transcript])
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] attributes:[AbstractConnection receivedAttributes]] autorelease]];
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer] attributes:[AbstractConnection receivedAttributes]] autorelease]];
 	}
 	
 	KTLog(ProtocolDomain, KTLogDebug, @"<< %@", command);
@@ -497,43 +539,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_state == ConnectionSentFeatureRequestState)
 			{
-				NSMutableString *buffer = [NSMutableString string];
-				BOOL atEnd = NO;
-				NSRange r;
-				
-				if ((r = [_commandBuffer rangeOfString:@"211"]).location != NSNotFound) {
-					buffer = [[_commandBuffer copy] autorelease];
-					//need to drop out of the commandBuffer up to the new line.
-					NSRange newLineRange;
-					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-					
-					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-															  options:NSCaseInsensitiveSearch 
-																range:toEnd]).location != NSNotFound
-						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																 options:NSCaseInsensitiveSearch
-																   range:toEnd]).location != NSNotFound)
-						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-					atEnd = YES;
-				}
-				
-				while (atEnd == NO)
-				{
-					NSData *data = [self availableData];
-					
-					if ([data length] > 0)
-					{
-						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-						[buffer appendString:line];
-						
-						if ([line rangeOfString:@"211"].location != NSNotFound)
-							atEnd = YES;
-						
-						[line release];
-					}
-				}
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
-				
 				//parse features
 				if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
 					_serverSupport.hasSize = YES;
@@ -620,49 +625,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 220:
 		{
 			if (GET_STATE == ConnectionNotConnectedState && _serverSupport.loggedIn == NO)
-			{
-				// We need to absorb all the pre-login info message
-				NSMutableString *buffer = [NSMutableString string];
-				BOOL atEnd = NO;
-				NSRange r;
-				
-				if (![command hasPrefix:@"220 "])
-				{
-					if ((r = [_commandBuffer rangeOfString:@"220 "]).location != NSNotFound) {
-						[buffer appendString:_commandBuffer];
-						//need to drop out of the commandBuffer up to the new line.
-						NSRange newLineRange;
-						NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-						
-						if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-																  options:NSCaseInsensitiveSearch 
-																	range:toEnd]).location != NSNotFound
-							|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																	 options:NSCaseInsensitiveSearch
-																	   range:toEnd]).location != NSNotFound)
-							[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-						atEnd = YES;
-					}
-					
-					while (atEnd == NO)
-					{
-						NSData *data = [self availableData];
-						
-						if ([data length] > 0)
-						{
-							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-							
-							if (line)
-								[buffer appendString:line];
-							
-							if ([line rangeOfString:@"220 "].location != NSNotFound)
-								atEnd = YES;
-							
-							[line release];
-						}
-					}
-				}
-				
+			{				
 				if ([command rangeOfString:@"Microsoft FTP Service"].location != NSNotFound ||
 					[buffer rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
 				{
@@ -672,8 +635,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					_serverSupport.isMicrosoft = NO;
 				}
-				
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
 				[self sendCommand:@"FEAT"];
 				[self setState:ConnectionSentFeatureRequestState];
 			}
@@ -683,46 +644,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentQuitState || GET_STATE == ConnectionSentDisconnectState)
 			{
-				// consume any extra lines
-				NSMutableString *buffer = [NSMutableString string];
-				BOOL atEnd = NO;
-				NSRange r;
-				
-				if (![command hasPrefix:@"221 "])
-				{
-					if ((r = [_commandBuffer rangeOfString:@"221 "]).location != NSNotFound) {
-						[buffer appendString:_commandBuffer];
-						//need to drop out of the commandBuffer up to the new line.
-						NSRange newLineRange;
-						NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-						
-						if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-																  options:NSCaseInsensitiveSearch 
-																	range:toEnd]).location != NSNotFound
-							|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																	 options:NSCaseInsensitiveSearch
-																	   range:toEnd]).location != NSNotFound)
-							[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-						atEnd = YES;
-					}
-					
-					while (atEnd == NO)
-					{
-						NSData *data = [self availableData];
-						
-						if ([data length] > 0)
-						{
-							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-							if (line)
-								[buffer appendString:line];
-							
-							if ([line rangeOfString:@"221 "].location != NSNotFound)
-								atEnd = YES;
-							
-							[line release];
-						}
-					}
-				}
 				[self closeStreams];
 				
 				[self setState:ConnectionNotConnectedState];
@@ -736,54 +657,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//skip 225 (no transfer to ABOR)
 		case 226:
 		{
-			// some ftp servers are returning 
-			// 226-File successfully transferred
-			// 226 0.427 seconds (measured here), 7.40 Kbytes per second
-			NSMutableString *buffer = [NSMutableString string];
-			BOOL atEnd = NO;
-			NSRange r;
-			
-			if (![command hasPrefix:@"226 "])
-			{
-				if ((r = [_commandBuffer rangeOfString:@"226 "]).location != NSNotFound) {
-					[buffer appendString:_commandBuffer];
-					//need to drop out of the commandBuffer up to the new line.
-					NSRange newLineRange;
-					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-					
-					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-															  options:NSCaseInsensitiveSearch 
-																range:toEnd]).location != NSNotFound
-						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																 options:NSCaseInsensitiveSearch
-																   range:toEnd]).location != NSNotFound)
-						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-					atEnd = YES;
-				}
-				
-				while (atEnd == NO)
-				{
-					NSData *data = [self availableData];
-					
-					if ([data length] > 0)
-					{
-						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-						if (line)
-							[buffer appendString:line];
-						
-						if ([line rangeOfString:@"226 "].location != NSNotFound)
-							atEnd = YES;
-						
-						[line release];
-					}
-				}
-			}
-			
-			if ([self transcript])
-			{
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
-			}
-			
 			_received226 = YES;
 			if (_serverSupport.isActiveDataConn == YES) {
 				[self closeDataConnection];
@@ -868,49 +741,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
 			{	
-				// We need to absorb all the login info message
-				NSMutableString *buffer = [NSMutableString string];
-				BOOL atEnd = NO;
-				NSRange r;
-				
-				if (![command hasPrefix:@"230 "])
-				{
-					if ((r = [_commandBuffer rangeOfString:@"230 "]).location != NSNotFound) {
-						[buffer appendString:_commandBuffer];
-						//need to drop out of the commandBuffer up to the new line.
-						NSRange newLineRange;
-						NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-						
-						if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-																  options:NSCaseInsensitiveSearch 
-																	range:toEnd]).location != NSNotFound
-							|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																	 options:NSCaseInsensitiveSearch
-																	   range:toEnd]).location != NSNotFound)
-							[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-						atEnd = YES;
-					}
-					
-					while (atEnd == NO)
-					{
-						NSData *data = [self availableData];
-						
-						if ([data length] > 0)
-						{
-							NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-							if (line)
-								[buffer appendString:line];
-							
-							if ([line rangeOfString:@"230 "].location != NSNotFound)
-								atEnd = YES;
-							
-							[line release];
-						}
-					}
-				}
-				
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:buffer attributes:[AbstractConnection receivedAttributes]] autorelease]];
-								
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
 				[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
 															awaitState:ConnectionIdleState
@@ -1166,47 +996,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 501: //Syntax Error in arguments
 		case 502: //Command not implemented
 		{
-			// We need to absorb all the login info message
-			NSMutableString *buffer = [NSMutableString string];
-			BOOL atEnd = NO;
-			NSRange r;
-			NSString *strCode = [NSString stringWithFormat:@"%d ", code];
-			
-			if (![command hasPrefix:strCode])
-			{
-				if ((r = [_commandBuffer rangeOfString:strCode]).location != NSNotFound) {
-					[buffer appendString:_commandBuffer];
-					//need to drop out of the commandBuffer up to the new line.
-					NSRange newLineRange;
-					NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
-					
-					if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
-															  options:NSCaseInsensitiveSearch 
-																range:toEnd]).location != NSNotFound
-						|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
-																 options:NSCaseInsensitiveSearch
-																   range:toEnd]).location != NSNotFound)
-						[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
-					atEnd = YES;
-				}
-				
-				while (atEnd == NO)
-				{
-					NSData *data = [self availableData];
-					
-					if ([data length] > 0)
-					{
-						NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-						if (line)
-							[buffer appendString:line];
-						
-						if ([line rangeOfString:strCode].location != NSNotFound)
-							atEnd = YES;
-						
-						[line release];
-					}
-				}
-			}
 			if (GET_STATE == FTPSettingEPSVState)
 			{
 				_serverSupport.canUseEPSV = NO;
