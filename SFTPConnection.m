@@ -111,6 +111,11 @@ static NSArray *sftpErrors = nil;
 		[self release];
 		return nil;
 	}
+  //enforce default port for sftp
+  //
+  if (![port length])
+    port = @"22";
+  
 	if (self = [super initWithHost:host port:port username:username password:password error:error]) {
 		_inputBuffer = [[NSMutableString alloc] init];
 		_sentTransferBegan = NO;
