@@ -161,6 +161,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	{
 		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 	}
+	[[NSRunLoop currentRunLoop] removePort:myPort forMode:NSDefaultRunLoopMode];
 	[myFileManager release];
 	
 	[pool release];
