@@ -716,7 +716,7 @@
 	else
 		[[NSApplication sharedApplication] stopModalWithCode: [error code]];
 	
-	[self closePanel:self];
+	[self closePanel: nil];
 }
 
 - (void)connectionDidSendBadPassword:(AbstractConnection *)aConn
