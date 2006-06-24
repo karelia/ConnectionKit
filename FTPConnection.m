@@ -291,9 +291,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
 			atEnd = YES;
 		}
+		else
+		{
+			[buffer appendString:_commandBuffer];
+			[_commandBuffer deleteCharactersInRange:NSMakeRange(0, [_commandBuffer length])];
+		}
 		
 		while (atEnd == NO)
 		{
+			[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
 			NSData *data = [self availableData];
 			
 			if ([data length] > 0)
