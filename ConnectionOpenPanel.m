@@ -735,7 +735,7 @@
 		[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConn host]];
 	}
 	
-	[self close];
+	[self closePanel:nil];
 }
 
 /*- (NSString *)connection:(AbstractConnection *)aConn needsAccountForUsername:(NSString *)username
