@@ -186,6 +186,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self pushCommandOnHistoryQueue:cmd];
 		command = [cmd command];
 		_state = [cmd sentState];
+		[self closeDataConnection];
 	}
 	
 	if ([command isEqualToString:@"EPRT"]) 
@@ -1342,7 +1343,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			if (len >= 0)
 			{			
-				KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [[[NSString alloc] initWithBytes:buf length:len encoding:NSUTF8StringEncoding] autorelease]);
+				KTLog(StreamDomain, KTLogDebug, @"FTPD << %d bytes", len);
 
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
@@ -1672,6 +1673,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)closeDataConnection
 {
+	KTLog(StreamDomain, KTLogDebug, @"closeDataConnection");
 	[self closeDataStreams];
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
@@ -1729,6 +1731,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)closeDataStreams
 {
+	[_dataReceiveStream setDelegate:nil];
+	[_dataSendStream setDelegate:nil];
 	[_dataReceiveStream close];
 	[_dataSendStream close];
 	[_dataReceiveStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
