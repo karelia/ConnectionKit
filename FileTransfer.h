@@ -12,7 +12,8 @@
 
 typedef enum {
 	UploadType = 0,
-	DownloadType
+	DownloadType,
+  DeleteType
 } TransferType;
 
 @interface FileTransfer : NSObject 
@@ -28,6 +29,7 @@ typedef enum {
 
 + (id)uploadFile:(NSString *)local to:(NSString *)remote;
 + (id)downloadFile:(NSString *)remote to:(NSString *)local;
++ (id)deleteFile:(NSString *)remote;
 
 - (id)initWithType:(TransferType)type localFile:(NSString *)local remoteFile:(NSString *)remote;
 

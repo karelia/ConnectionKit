@@ -30,12 +30,20 @@
 									remoteFile:remote] autorelease];
 }
 
++ (id)deleteFile:(NSString *)remote
+{
+	return [[[FileTransfer alloc] initWithType: DeleteType
+                                   localFile: nil
+                                  remoteFile: remote] autorelease];
+}
+
 - (id)initWithType:(TransferType)type localFile:(NSString *)local remoteFile:(NSString *)remote
 {
 	[super init];
 	_type = type;
 	_local = [local copy];
 	_remote = [remote copy];
+  _transferred = [NSNumber numberWithInt: 0];
 	return self;
 }
 
@@ -131,10 +139,17 @@
 	NSMutableString *d = [NSMutableString stringWithString:@"File Transfer\n"];
 	[d appendFormat:@"Local File: %@\n", _local];
 	[d appendFormat:@"Remote File: %@\n", _remote];
+  
 	if (_type == DownloadType)
 		[d appendString:@"is Download"];
-	else
+	else if (_type == UploadType)
 		[d appendString:@"is Upload"];
+	else
+		[d appendString:@"is Delete"];
+  
+	[d appendFormat:@" transfered: %@\n", [self amountTransferred]];
+
+  
 	return d;
 }
 @end
