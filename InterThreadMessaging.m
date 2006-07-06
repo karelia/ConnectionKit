@@ -253,13 +253,14 @@ ConnectionRemoveMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
             break;
 
         case kITMPerformSelector0Args:
-            [msg->data.sel.receiver performSelector:msg->data.sel.selector];
+            [msg->data.sel.receiver performSelector:msg->data.sel.selector withObject:nil afterDelay:0.0];
             [msg->data.sel.receiver release];
             break;
 
         case kITMPerformSelector1Args:
             [msg->data.sel.receiver performSelector:msg->data.sel.selector
-                                    withObject:msg->data.sel.arg1];
+                                    withObject:msg->data.sel.arg1
+										 afterDelay:0.0];
             [msg->data.sel.receiver release];
             [msg->data.sel.arg1 release];
             break;
@@ -387,6 +388,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 					  arg1:(id)arg1
 					  arg2:(id)arg2
 {
+	NSLog(@"resending delayed message");
 	ConnectionInterThreadMessage *msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
 	bzero(msg, sizeof(struct ConnectionInterThreadMessage));
 	// we have already retained our args from the initial creation of the msg
@@ -425,6 +427,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 
 - (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread
 {
+	NSLog(@"delaying message");
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
 													  target:self
 												   arguments:[NSArray array]];
@@ -444,7 +447,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 		if (msg->data.sel.arg2)
 			[inv setArgument:&msg->data.sel.arg2 atIndex:8];
 	}
-	[inv performSelector:@selector(invoke) withObject:nil afterDelay:0.1];
+	[inv performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
 	[inv retainArguments];
 	free(msg);
 }

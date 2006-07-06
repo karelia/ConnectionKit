@@ -50,6 +50,7 @@
 #import <sys/time.h>
 #import <util.h>
 #import "InterThreadMessaging.h"
+#import "ConnectionThreadManager.h"
 
 enum { START = 200, STOP };
 
@@ -59,9 +60,10 @@ enum { START = 200, STOP };
 
 @interface SFTPStream (Private)
 
-- (void)sendPortMessage:(int)msg;
 - (oneway void)connectToServerWithParams:( NSArray * )params;
 - (void)checkBuffers:(id)notused;
+- (void)startSFTP;
+- (void)stopSFTP;
 
 @end
 
@@ -76,7 +78,6 @@ enum { START = 200, STOP };
 	_status = NSStreamStatusNotOpen;
 	_buffer = [[NSMutableData data] retain];
 	_bufferLock = [[NSLock alloc] init];
-	_forwarder = [[RunLoopForwarder alloc] init];
 	_props = [[NSMutableDictionary dictionary] retain];
 	
 	return self;
@@ -84,13 +85,10 @@ enum { START = 200, STOP };
 
 - (void)dealloc
 {
-	[self sendPortMessage:STOP];
-	[_port setDelegate:nil];
-	[_port release];
 	[_args release];
-	[_buffer release];
+	[_buffer release]; 
 	[_bufferLock release];
-	[_forwarder release];
+	[_delegate release];
 	[_props release];
 	
 	[super dealloc];
@@ -101,7 +99,7 @@ enum { START = 200, STOP };
 
 - (void)open
 {
-	[self sendPortMessage:START];
+	
 }
 
 - (void)close
@@ -116,25 +114,14 @@ enum { START = 200, STOP };
 	
 	_status = NSStreamStatusOpening;
 	_runThread = YES;
-	_port = [[NSPort port] retain];
-	[_port setDelegate:self];
-	[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
-							 toTarget:self
-						   withObject:nil];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] startSFTP];
 }
 
 - (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode
 {
 	if (_status == NSStreamStatusNotOpen)
 		return;
-	[self sendPortMessage:STOP];
-	while (_bgThread)
-	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-	}
-	[_port setDelegate:nil];
-	[_port release];
-	_port = nil;
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] stopSFTP];
 	_status = NSStreamStatusNotOpen;
 }
 
@@ -167,7 +154,6 @@ enum { START = 200, STOP };
 - (void)setDelegate:(id)delegate
 {
 	_delegate = delegate;
-	[_forwarder setDelegate:delegate];	// note that its delegate it not retained.
 }
 
 - (id)delegate { return _delegate; }
@@ -180,63 +166,18 @@ enum { START = 200, STOP };
 #pragma mark -
 #pragma mark Client Process Communication
 
-- (void)runBackgroundThread:(id)unused
+- (void)startSFTP
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
-	// But then again, we can't remove the thread, so it really doesn't mean much.
-	_bgThread = [NSThread currentThread];
-	[NSThread prepareForConnectionInterThreadMessages];
-	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
-	NSAutoreleasePool *loop;
-	
-	while (_runThread)
-	{
-		loop = [[NSAutoreleasePool alloc] init];
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-		[loop release];
-	}
-	_bgThread = nil;
-	[pool release];
+	_keepChecking = YES;
+	[self connectToServerWithParams:_args];
 }
 
-/*!	Send a message from the main thread to the port, to communicate with the background thread.
-*/
-- (void)sendPortMessage:(int)aMessage
+- (void)stopSFTP
 {
-	if (nil != _port)
-	{
-		NSPortMessage *message
-		= [[NSPortMessage alloc] initWithSendPort:_port
-									  receivePort:_port components:nil];
-		[message setMsgid:aMessage];
-		BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:5.0]];
-		if (!sent)
-		{
-			KTLog(ThreadingDomain, KTLogFatal, @"SFTPStream failed to send port message: %d", aMessage);
-		}
-		[message release];
-	}
-}
-
-/*" NSPortDelegate method gets called in the background thread.
-"*/
-- (void)handlePortMessage:(NSPortMessage *)portMessage
-{
-	switch ([portMessage msgid]) {
-		case START:
-			[self connectToServerWithParams:_args];
-			break;
-		case STOP:
-			_keepChecking = NO;
-			close(_master);
-			[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkBuffers:) object:nil];
-			[[NSRunLoop currentRunLoop]removePort:_port forMode:NSDefaultRunLoopMode];
-			_runThread = NO;
-			break;
-	}
+	_keepChecking = NO;
+	close(_master);
+	_master = 0;
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(checkBuffers:) object:nil];
 }
 
 - (oneway void)connectToServerWithParams:( NSArray * )params
@@ -321,14 +262,15 @@ enum { START = 200, STOP };
 			{
 				[self performSelector:@selector(checkBuffers:)
 						   withObject:nil
-							 inThread:[NSThread currentThread]
-						   beforeDate:[NSDate distantFuture]];
+							 inThread:[NSThread currentThread]];
 			}
 			return;
 		}	
 		default:
 			break;
 	}
+	
+	if (!_keepChecking) return;
 	
 	if (FD_ISSET( _master, &readmask )) 
 	{
@@ -343,7 +285,7 @@ enum { START = 200, STOP };
 			
 			if ([self delegate])
 			{
-				[_forwarder stream:self handleEvent:NSStreamEventHasBytesAvailable];
+				[_delegate stream:self handleEvent:NSStreamEventHasBytesAvailable];
 			}
 		}
 	}
@@ -353,8 +295,7 @@ enum { START = 200, STOP };
 	{
 		[self performSelector:@selector(checkBuffers:)
 				   withObject:nil
-					 inThread:[NSThread currentThread]
-				   beforeDate:[NSDate distantFuture]];
+					 inThread:[NSThread currentThread]];
 	}
 }
 

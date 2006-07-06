@@ -48,9 +48,7 @@
 
 @interface StreamBasedConnection : AbstractQueueConnection 
 {
-	NSPort				*_port;
 	RunLoopForwarder	*_forwarder;
-	NSThread			*_bgThread;
 	NSThread			*_createdThread;
 	
 	id<OutputStream>	_sendStream;
@@ -89,15 +87,17 @@
 // Get the local command port
 - (unsigned)localPort;
 
-- (void)sendPortMessage:(int)message;
-- (void)handlePortMessage:(NSPortMessage *)message;
-
 // Subclass needs to override these methods
 - (void)processReceivedData:(NSData *)data;
 - (void)sendCommand:(id)command;
 
 - (void)sendData:(NSData *)data;
 - (NSData *)availableData;
+
+// These are called on the background thread
+- (void)threadedConnect;
+- (void)threadedDisconnect;
+- (void)threadedForceDisconnect;
 
 @end
 

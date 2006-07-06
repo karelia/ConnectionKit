@@ -32,6 +32,8 @@
  
 #import "FTPConnection.h"
 #import "RunLoopForwarder.h"
+#import "ConnectionThreadManager.h"
+
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
@@ -1270,28 +1272,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 #pragma mark Stream Handling
 
-- (void)handlePortMessage:(NSPortMessage *)message
+- (void)threadedDisconnect
 {
-	unsigned msg = [message msgid];
-	
-	switch (msg) {
-		case ABORT:
-			[self sendCommand:@"ABOR"];
-			break;
-			
-		case DISCONNECT:
-			[self queueCommand:[ConnectionCommand command:@"QUIT"
-											   awaitState:ConnectionIdleState
-												sentState:ConnectionSentDisconnectState
-												dependant:nil
-												 userInfo:nil]];
-			break;
-			
-		case FORCE_DISCONNECT:
-			[self sendCommand:@"QUIT"];
-			break;
-		default: [super handlePortMessage:message];
-	}
+	[self queueCommand:[ConnectionCommand command:@"QUIT"
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionSentDisconnectState
+										dependant:nil
+										 userInfo:nil]];
+}
+
+- (void)threadedAbort
+{
+	[self sendCommand:@"ABOR"];
 }
 
 /*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object’s thread."
@@ -2129,7 +2121,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)cancelTransfer
 {
-	[self sendPortMessage:ABORT];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedAbort];
 }
 
 - (void)cancelAll

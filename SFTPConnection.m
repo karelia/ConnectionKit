@@ -138,68 +138,29 @@ static NSArray *sftpErrors = nil;
 	return _transferSpeed;
 }
 
-- (void)connect
-{		
-	[self emptyCommandQueue];
-	[self sendPortMessage:CONNECT];
+- (void)threadedConnect
+{
+	NSMutableArray *args = [NSMutableArray arrayWithCapacity:2];
+	[args addObject:[NSString stringWithFormat:@"-oPort=%@", [self port]]];
+	[args addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
+	
+	SFTPStream *sftp = [[SFTPStream alloc] initWithArguments:args];
+	
+	[self setSendStream:sftp];
+	[self setReceiveStream:sftp];
+	
+	[sftp release];
+	
+	[super threadedConnect];
 }
 
-- (void)disconnect
+- (void)threadedDisconnect
 {
-	[self sendPortMessage:DISCONNECT];
-}
-
-- (void)forceDisconnect
-{
-	[self sendPortMessage:FORCE_DISCONNECT];
-}
-
-- (void)handlePortMessage:(NSPortMessage *)message
-{
-	unsigned msg = [message msgid];
-	switch (msg) {
-		case CONNECT: {
-			NSMutableArray *args = [NSMutableArray arrayWithCapacity:2];
-			[args addObject:[NSString stringWithFormat:@"-oPort=%@", [self port]]];
-			[args addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
-			[self closeStreams];
-			
-			SFTPStream *sftp = [[SFTPStream alloc] initWithArguments:args];
-			
-			[self setSendStream:sftp];
-			[self setReceiveStream:sftp];
-			
-			[sftp release];
-			
-			[sftp setDelegate:self];			
-			[sftp scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-			[sftp open];
-		}
-		break;
-		case DISCONNECT: {
-			[self queueCommand:[ConnectionCommand command:@"quit"
-											   awaitState:ConnectionIdleState
-												sentState:ConnectionSentQuitState
-												dependant:nil
-												 userInfo:nil]];
-			[self checkQueue];
-		} break;
-		case FORCE_DISCONNECT: {
-			[self closeStreams];
-			if (_flags.didDisconnect) 
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			break;
-		}
-		default:
-			[super handlePortMessage:message];
-	}
-}
-
-- (void)closeStreams
-{
-	[[self receiveStream] setDelegate:nil];
-	[[self sendStream] setDelegate:nil];
-	[super closeStreams];
+	[self queueCommand:[ConnectionCommand command:@"quit"
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionSentQuitState
+										dependant:nil
+										 userInfo:nil]];
 }
 
 - (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value 
@@ -437,7 +398,7 @@ static NSArray *sftpErrors = nil;
 	NSString *str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];	
 	[_inputBuffer appendString:str];
 	
-	int trys = 5;
+	int trys = 2;
 	
 	//we wait 5 times of no data
 	while (trys >= 0) {
@@ -740,9 +701,9 @@ static NSArray *sftpErrors = nil;
 					
 					// we could get 2 lots of 100% done so we need to consume any left over input
 					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
-					int attempt = 3;
+					int tries = 5;
 					
-					while (attempt >= 0)
+					while (![self bufferContainsCommandPrompt] && tries >= 0)
 					{
 						NSData *bufData = [self availableData];
 						if ([bufData length] > 0) {
@@ -751,7 +712,7 @@ static NSArray *sftpErrors = nil;
 						} 
 						else
 						{
-							attempt--;
+							tries--;
 						}
 						[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.10]];
 					}

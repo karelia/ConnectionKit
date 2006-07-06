@@ -36,6 +36,8 @@
 #import "InterThreadMessaging.h"
 #import "RunLoopForwarder.h"
 #import "NSData+Connection.h"
+#import "ConnectionThreadManager.h"
+
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
@@ -60,19 +62,13 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 {
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
-		_port = [[NSPort port] retain];
 		_forwarder = [[RunLoopForwarder alloc] init];
 		[_forwarder setReturnValueDelegate:self];
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
 		_createdThread = [NSThread currentThread];
 		
-		[_port setDelegate:self];
 		[NSThread prepareForConnectionInterThreadMessages];
-		_runThread = YES;
-		[NSThread detachNewThreadSelector:@selector(runBackgroundThread:)
-								 toTarget:self
-							   withObject:nil];
 	}
 	
 	return self;
@@ -80,10 +76,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 
 - (void)dealloc
 {
-	[self closeStreams];
-	[self sendPortMessage:KILL_THREAD];
-	[_port setDelegate:nil];
-    [_port release];
 	[_forwarder release];
 	[_sendStream release];
 	[_receiveStream release];
@@ -156,61 +148,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	//by default we do nothing, subclasses are implementation specific based on their current state
 }
 
-/*!	The main background thread loop.  It runs continuously whether connected or not.
-*/
-- (void)runBackgroundThread:(id)notUsed
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[NSThread prepareForConnectionInterThreadMessages];
-	_bgThread = [NSThread currentThread];
-	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
-	// But then again, we can't remove the thread, so it really doesn't mean much.	
-	[[NSRunLoop currentRunLoop] addPort:_port forMode:NSDefaultRunLoopMode];
-	NSAutoreleasePool *loop;
-	
-	while (_runThread)
-	{
-		loop = [[NSAutoreleasePool alloc] init];
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-		[loop release];
-	}
-	_bgThread = nil;
-	
-	[pool release];
-}
-
-- (void)sendPortMessage:(int)aMessage
-{
-	//NSAssert([NSThread currentThread] == _mainThread, @"must be called from the main thread");
-	if (nil != _port)
-	{
-		NSPortMessage *message
-		= [[NSPortMessage alloc] initWithSendPort:_port
-									  receivePort:_port components:nil];
-		[message setMsgid:aMessage];
-		
-		@try {
-			if ([NSThread currentThread] != _bgThread)
-			{
-				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
-				if (!sent)
-				{
-					KTLog(ThreadingDomain, KTLogFatal, @"StreamBasedConnection couldn't send message %d", aMessage);
-				}
-			}
-			else
-			{
-				[self handlePortMessage:message];
-			}
-		} @catch (NSException *ex) {
-			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
-		} @finally {
-			[message release];
-		} 
-	}
-}
-
 - (void)scheduleStreamsOnRunLoop
 {
 	[_receiveStream setDelegate:self];
@@ -223,56 +160,13 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	[_sendStream open];
 }
 
-/*" NSPortDelegate method gets called in the background thread.
-"*/
-- (void)handlePortMessage:(NSPortMessage *)portMessage
-{
-    int message = [portMessage msgid];
-	
-	switch (message)
-	{
-		case CONNECT:
-		{
-			[self scheduleStreamsOnRunLoop];
-			break;
-		}
-		case COMMAND:
-		{
-			[self checkQueue];
-			break;
-		}
-		case ABORT:
-			break;
-			
-		case DISCONNECT:
-			if (_flags.didDisconnect)
-			{
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			}
-			break;
-			
-		case FORCE_DISCONNECT:
-			break;
-		case CHECK_FILE_QUEUE:
-			[self processFileCheckingQueue];
-			break;
-		case KILL_THREAD:
-		{
-			[self closeStreams];
-			[[NSRunLoop currentRunLoop] removePort:_port forMode:NSDefaultRunLoopMode];
-			_runThread = NO;
-			break;
-		}
-	}
-}
-
 #pragma mark -
 #pragma mark Queue Support
 
 - (void)endBulkCommands
 {
 	[super endBulkCommands];
-	[self sendPortMessage:COMMAND];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 }
 
 - (void)queueCommand:(id)command
@@ -280,17 +174,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	[super queueCommand:command];
 	
 	if (!_flags.inBulk) {
-		if ([NSThread currentThread] != _bgThread)
-		{
-			[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
-		}
-		else
-		{
-			[self checkQueue];	// in background thread, just check the queue now for anything to do
-		}
+		[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 	}
 }
-
 
 - (void)sendCommand:(id)command
 {
@@ -303,14 +189,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	
     [super setState:aState];
 	
-	if ([NSThread currentThread] != _bgThread)
-	{
-		[self sendPortMessage:COMMAND];		// State has changed, check if we can handle message.
-	}
-	else
-	{
-		[self checkQueue];	// in background thread, just check the queue now for anything to do
-	}
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 }
 
 - (void)checkQueue
@@ -394,6 +273,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	}
 }
 
+- (void)threadedConnect
+{
+	[self scheduleStreamsOnRunLoop];
+}
+
 - (void)connect
 {
 	// do we really need to do this?
@@ -407,26 +291,38 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	
 	[self openStreamsToPort:connectionPort];
 	
-	[self sendPortMessage:CONNECT];	// finish the job -- scheduling in the runloop -- in the background thread
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
 }
 
 /*!	Disconnect from host.  Called by foreground thread.
 */
 - (void)disconnect
 {
-	[self sendPortMessage:DISCONNECT];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
 	[_fileCheckingConnection disconnect];
+}
+
+- (void)threadedDisconnect
+{
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
+}
+
+- (void)threadedForceDisconnect
+{
+	[self closeStreams];
 }
 
 - (void)forceDisconnect
 {
-	[self sendPortMessage:FORCE_DISCONNECT];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 	[_fileCheckingConnection forceDisconnect];
 }
 
 - (void) cleanupConnection
 {
-	[self sendPortMessage:KILL_THREAD];
 	[_fileCheckingConnection cleanupConnection];
 }
 
@@ -790,15 +686,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	}
 		
 	[self queueFileCheck:path];
-	if ([NSThread currentThread] != _bgThread)
-	{
-		[self sendPortMessage:CHECK_FILE_QUEUE];
-	}
-	else
-	{
-		[self processFileCheckingQueue];
-	}
-	
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;

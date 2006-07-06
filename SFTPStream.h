@@ -47,14 +47,11 @@
 	FILE				*_mf;
 	
 	id					_delegate;
-	RunLoopForwarder	*_forwarder;
 	NSMutableData		*_buffer;
 	NSLock				*_bufferLock;
-	NSThread			*_bgThread;
 	
 	NSStreamStatus		_status;
 	NSMutableDictionary	*_props;
-	NSPort				*_port;
 }
 
 - (id)initWithArguments:(NSArray *)args;
