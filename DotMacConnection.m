@@ -45,6 +45,7 @@
 #import "DAVFileDownloadResponse.h"
 #import "NSData+Connection.h"
 #import <Security/Security.h>
+#import "ConnectionThreadManager.h"
 
 @interface NSString (DotMac)
 - (NSString *)stringByDeletingFirstPathComponent;
@@ -555,14 +556,7 @@
 	}
 	
 	[self queueFileCheck:path];
-	if ([NSThread currentThread] != _bgThread)
-	{
-		[self sendPortMessage:CHECK_FILE_QUEUE];
-	}
-	else
-	{
-		[self processFileCheckingQueue];
-	}	
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;

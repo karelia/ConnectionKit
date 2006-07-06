@@ -114,7 +114,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)dealloc
 {
-	[self sendPortMessage:KILL_THREAD];
 	[myCurrentRequest release];
 	[myCurrentDirectory release];
 	[myResponseBuffer release];
@@ -124,29 +123,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark -
 #pragma mark Stream Overrides
 
-- (void)handlePortMessage:(NSPortMessage *)portMessage
+- (void)threadedConnect
 {
-    int message = [portMessage msgid];
-	
-	switch (message)
+	[super threadedConnect];
+	_flags.isConnected = YES;
+	[self setState:ConnectionIdleState];
+	if (_flags.didConnect)
 	{
-		case CONNECT:
-		{
-			[super handlePortMessage:portMessage];
-			_flags.isConnected = YES;
-			[self setState:ConnectionIdleState];
-			if (_flags.didConnect)
-			{
-				[_forwarder connection:self didConnectToHost:[self host]];
-			}
-			break;
-		}
-		case KILL_THREAD:
-		{
-			[super handlePortMessage:portMessage];
-			break;
-		}
-		default: [super handlePortMessage:portMessage];
+		[_forwarder connection:self didConnectToHost:[self host]];
 	}
 }
 

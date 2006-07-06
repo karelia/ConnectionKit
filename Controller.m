@@ -167,7 +167,7 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)disconnect:(id)sender
 {
-	[con disconnect];
+	[con forceDisconnect];
 }
 
 - (void)refreshHosts
@@ -827,7 +827,6 @@ static NSImage *_folder = nil;
 	[remoteTable setHidden:YES];
 	
 	[con release];
-  [con cleanupConnection];
 	con = nil;
 }
 
@@ -893,7 +892,6 @@ static NSImage *_folder = nil;
 
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)upload
 {
-	NSLog(@"Uploading Beginning: %@", upload);
 	[[self uploadForRemoteFile:upload] setPercentTransferred:[NSNumber numberWithInt:0]];
 	[transferTable reloadData];
 }
@@ -907,7 +905,6 @@ static NSImage *_folder = nil;
 
 - (void)connection:(id <AbstractConnectionProtocol>)conn uploadDidFinish:(NSString *)remotePath
 {	
-	NSLog(@"Upload Finished: %@", remotePath);
 	[[self uploadForRemoteFile:remotePath] setCompleted:YES];
 	[con directoryContents];
 	[transferTable reloadData];
