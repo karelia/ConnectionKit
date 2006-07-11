@@ -167,18 +167,6 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
-		3C2D8EC90A63FF99008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/MainMenu.nib; sourceTree = "<group>"; };
-		3C2D8ECA0A63FF9E008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/MainMenu.nib; sourceTree = "<group>"; };
-		3C2D8ECB0A63FFA2008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/MainMenu.nib; sourceTree = "<group>"; };
-		3C2D8ECC0A63FFB6008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/InputDialog.nib; sourceTree = "<group>"; };
-		3C2D8ECD0A63FFBA008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/InputDialog.nib; sourceTree = "<group>"; };
-		3C2D8ECE0A63FFBD008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/InputDialog.nib; sourceTree = "<group>"; };
-		3C2D8ECF0A63FFCE008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Permissions.nib; sourceTree = "<group>"; };
-		3C2D8ED00A63FFD2008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Permissions.nib; sourceTree = "<group>"; };
-		3C2D8ED10A63FFD7008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/Permissions.nib; sourceTree = "<group>"; };
-		3C2D8ED20A63FFE4008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		3C2D8ED30A63FFEE008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		3C2D8ED40A63FFF2008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionThreadManager.h; sourceTree = "<group>"; };
 		794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionThreadManager.m; sourceTree = "<group>"; };
 		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -312,7 +300,9 @@
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CEA9AFD10A64223000855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CEA9AFD30A64224100855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Japanese; path = Japanese.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEDE18DE0A5C69BE0055352C /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -933,9 +923,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C165DFE840E0CC02AAC07 /* English */,
-				3C2D8ED20A63FFE4008FE1B0 /* zh_TW */,
-				3C2D8ED30A63FFEE008FE1B0 /* French */,
-				3C2D8ED40A63FFF2008FE1B0 /* Danish */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -944,9 +931,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				29B97319FDCFA39411CA2CEA /* English */,
-				3C2D8EC90A63FF99008FE1B0 /* zh_TW */,
-				3C2D8ECA0A63FF9E008FE1B0 /* French */,
-				3C2D8ECB0A63FFA2008FE1B0 /* Danish */,
 			);
 			name = MainMenu.nib;
 			sourceTree = "<group>";
@@ -958,6 +942,7 @@
 				3C2D8EC10A63FF31008FE1B0 /* zh_TW */,
 				3C2D8EC20A63FF3B008FE1B0 /* French */,
 				3C2D8EC30A63FF41008FE1B0 /* Danish */,
+				CEA9AFD30A64224100855897 /* Japanese */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -969,6 +954,7 @@
 				79CFD8C909F706B000172CDD /* French */,
 				CEDE18DD0A5C69BC0055352C /* zh_TW */,
 				CEDE18DE0A5C69BE0055352C /* Danish */,
+				CEA9AFD10A64223000855897 /* Japanese */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = SOURCE_ROOT;
@@ -985,9 +971,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				79CFD8DD09F7071400172CDD /* English */,
-				3C2D8ECC0A63FFB6008FE1B0 /* zh_TW */,
-				3C2D8ECD0A63FFBA008FE1B0 /* French */,
-				3C2D8ECE0A63FFBD008FE1B0 /* Danish */,
 			);
 			name = InputDialog.nib;
 			sourceTree = "<group>";
@@ -996,9 +979,6 @@
 			isa = PBXVariantGroup;
 			children = (
 				79CFD8DF09F7071400172CDD /* English */,
-				3C2D8ECF0A63FFCE008FE1B0 /* zh_TW */,
-				3C2D8ED00A63FFD2008FE1B0 /* French */,
-				3C2D8ED10A63FFD7008FE1B0 /* Danish */,
 			);
 			name = Permissions.nib;
 			sourceTree = "<group>";
