@@ -238,7 +238,7 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (id)propertyForKey:(NSString *)key;
 - (NSError *)streamError;
 - (NSStreamStatus)streamStatus;
-
+- (BOOL)hasBytesAvailable;
 - (int)read:(uint8_t *)buffer maxLength:(unsigned int)len;
 @end
 

@@ -86,6 +86,46 @@ static LIBSSH2_REALLOC_FUNC(libssh2_default_realloc)
 }
 /* }}} */
 
+/* {{{ libssh2_default_write
+ */
+static LIBSSH2_WRITE_FUNC(libssh2_default_write)
+{
+	return send(session->socket_fd, buffer, length, LIBSSH2_SOCKET_SEND_FLAGS(session));
+}
+
+static LIBSSH2_READ_FUNC(libssh2_default_read)
+{
+	return recv(session->socket_fd, buffer, length, LIBSSH2_SOCKET_RECV_FLAGS(session));
+}
+
+
+/* {{{ libssh2_session_set_user_info 
+ * ui is passed into the custom read / write functions
+*/
+LIBSSH2_API void libssh2_session_set_user_info(LIBSSH2_SESSION *session, void *ui)
+{
+	session->userInfo = ui;
+}
+/* }}} */
+
+/* {{{ libssh2_session_set_write 
+* Set a custom function to handle the writing to the socket/stream
+*/
+LIBSSH2_API void libssh2_session_set_write(LIBSSH2_SESSION *session, void *my_write)
+{
+	session->ssh_write = my_write;
+}
+/* }}} */
+
+/* {{{ libssh2_session_set_read 
+* Set a custom function to handle the reading from the socket/stream
+*/
+LIBSSH2_API void libssh2_session_set_read(LIBSSH2_SESSION *session, void *my_read)
+{
+	session->ssh_read = my_read;
+}
+/* }}} */
+
 /* {{{ libssh2_banner_receive
  * Wait for a hello from the remote host
  * Allocate a buffer and store the banner in session->remote.banner
@@ -101,7 +141,7 @@ static int libssh2_banner_receive(LIBSSH2_SESSION *session)
 		char c = '\0';
 		int ret;
 
-		ret = recv(session->socket_fd, &c, 1, LIBSSH2_SOCKET_RECV_FLAGS(session));
+		ret = LIBSSH2_READ(session, &c, 1);
 
 		if (ret < 0) {
 #ifdef WIN32
@@ -183,8 +223,7 @@ static int libssh2_banner_send(LIBSSH2_SESSION *session)
 	_libssh2_debug(session, LIBSSH2_DBG_TRANS, "Sending Banner: %s", banner_dup);
 }
 #endif
-
-	return (send(session->socket_fd, banner, banner_len, LIBSSH2_SOCKET_SEND_FLAGS(session)) == banner_len) ? 0 : 1;
+	return (LIBSSH2_WRITE(session, banner, banner_len) == banner_len) ? 0 : 1;
 }
 /* }}} */
 
@@ -238,6 +277,8 @@ LIBSSH2_API LIBSSH2_SESSION *libssh2_session_init_ex(
 	LIBSSH2_ALLOC_FUNC((*local_alloc))		= libssh2_default_alloc;
 	LIBSSH2_FREE_FUNC((*local_free))		= libssh2_default_free;
 	LIBSSH2_REALLOC_FUNC((*local_realloc))	= libssh2_default_realloc;
+	LIBSSH2_WRITE_FUNC((*local_write))		= libssh2_default_write;
+	LIBSSH2_READ_FUNC((*local_read))		= libssh2_default_read;
 	LIBSSH2_SESSION *session;
 
 	if (my_alloc)	local_alloc		= my_alloc;
@@ -250,6 +291,8 @@ LIBSSH2_API LIBSSH2_SESSION *libssh2_session_init_ex(
 	session->free		= local_free;
 	session->realloc	= local_realloc;
 	session->abstract	= abstract;
+	session->ssh_write	= local_write;
+	session->ssh_read	= local_read;
 #ifdef LIBSSH2_DEBUG_TRANSPORT
 	_libssh2_debug(session, LIBSSH2_DBG_TRANS, "New session resource allocated");
 #endif

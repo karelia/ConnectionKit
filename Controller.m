@@ -167,7 +167,7 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)disconnect:(id)sender
 {
-	[con forceDisconnect];
+	[con disconnect];
 }
 
 - (void)refreshHosts

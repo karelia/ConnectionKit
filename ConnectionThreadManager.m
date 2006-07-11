@@ -74,10 +74,11 @@ static NSLock *_initLock = nil;
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.	
 	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
+	NSDate *backToTheFuture = [NSDate distantFuture];
 	
 	while (1)
 	{		
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:backToTheFuture];
 	}
 	
 	[pool release];
@@ -182,7 +183,7 @@ static NSLock *_initLock = nil;
 	myTarget = nil;
 	[myLock unlock];
 	
-	[self scheduleInvocation:inv];
+	[self performSelector:@selector(scheduleInvocation:) withObject:inv afterDelay:0.0];
 }
 
 @end

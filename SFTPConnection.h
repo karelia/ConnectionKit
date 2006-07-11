@@ -33,22 +33,29 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "FTPConnection.h"
 #import "StreamBasedConnection.h"
+#import "FTPConnection.h"
+#import "libssh2.h"
+#import "libssh2_sftp.h"
 
 @class RunLoopForwarder, SFTPStream;
 
-enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied };
+enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric };
 
 @interface SFTPConnection : StreamBasedConnection 
 {
-	NSMutableString		*_inputBuffer;
-	NSString			*_currentDir;
+	LIBSSH2_SESSION *mySession;
+	LIBSSH2_SFTP *mySFTPChannel;
 	
-	long long			_transferSpeed;
-	BOOL				_sentTransferBegan;
-	unsigned long long	_transferSize;
-	unsigned long long	_progressiveTransfer;
+	LIBSSH2_SFTP_HANDLE *myTransferHandle;
+	unsigned long long myTransferSize;
+	unsigned long long myBytesTransferred;
+	
+	struct __sftpflags {
+		unsigned unused: 32;
+	} mySFTPFlags;
+	
+	NSString *_currentDir;
 }
 
 @end

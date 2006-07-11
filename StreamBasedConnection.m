@@ -67,6 +67,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
 		_createdThread = [NSThread currentThread];
+		myStreamFlags.sendOpen = NO;
+		myStreamFlags.readOpen = NO;
 		
 		[NSThread prepareForConnectionInterThreadMessages];
 	}
@@ -120,7 +122,34 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	return _receiveStream;
 }
 
+- (BOOL)sendStreamOpen
+{
+	return myStreamFlags.sendOpen;
+}
+
+- (BOOL)receiveStreamOpen
+{
+	return myStreamFlags.readOpen;
+}
+
+- (void)sendStreamDidOpen {}
+- (void)sendStreamDidClose {}
+- (void)receiveStreamDidOpen {}
+- (void)receiveStreamDidClose {}
+
 - (unsigned)localPort
+{
+	struct sockaddr sock;
+	socklen_t len = sizeof(sock);
+	
+	if (getsockname([self socket], &sock, &len) >= 0) {
+		return ntohs(((struct sockaddr_in *)&sock)->sin_port);
+	}
+	
+	return 0;
+}
+
+- (CFSocketNativeHandle)socket
 {
 	CFSocketNativeHandle native;
 	CFDataRef nativeProp = CFReadStreamCopyProperty ((CFReadStreamRef)_receiveStream, kCFStreamPropertySocketNativeHandle);
@@ -130,13 +159,6 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	}
 	CFDataGetBytes (nativeProp, CFRangeMake(0, CFDataGetLength(nativeProp)), (UInt8 *)&native);
 	CFRelease (nativeProp);
-	struct sockaddr sock;
-	socklen_t len = sizeof(sock);
-	
-	if (getsockname(native, &sock, &len) >= 0) {
-		return ntohs(((struct sockaddr_in *)&sock)->sin_port);
-	}
-	
 	return native;
 }
 
@@ -298,21 +320,32 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 */
 - (void)disconnect
 {
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
+	ConnectionCommand *con = [ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDisconnect) target:self arguments:[NSArray array]]
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSentDisconnectState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:con];
 	[_fileCheckingConnection disconnect];
 }
 
 - (void)threadedDisconnect
 {
+	_state = ConnectionNotConnectedState;
 	if (_flags.didDisconnect)
 	{
 		[_forwarder connection:self didDisconnectFromHost:[self host]];
 	}
+	[self closeStreams];
 }
 
 - (void)threadedForceDisconnect
 {
 	[self closeStreams];
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
 }
 
 - (void)forceDisconnect
@@ -353,11 +386,15 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	[_sendStream close];
 	[_receiveStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
 	[_sendStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+	[_receiveStream setDelegate:nil];
+	[_sendStream setDelegate:nil];
 	[_receiveStream release];
 	[_sendStream release];
 	_receiveStream = nil;
 	_sendStream = nil;
 	[_sendBuffer setLength:0];
+	myStreamFlags.sendOpen = NO;
+	myStreamFlags.readOpen = NO;
 }
 
 - (void)processReceivedData:(NSData *)data
@@ -367,16 +404,37 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 
 - (NSData *)availableData
 {
-	uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
-	int len = [_receiveStream read:buf maxLength:kStreamChunkSize];
 	NSData *data = nil;
-	
-	if (len >= 0)
-	{
-		data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:YES];
-	}
-	
+	int size = [self availableData:&data ofLength:kStreamChunkSize];
 	return data;
+}
+
+- (int)availableData:(NSData **)dataOut ofLength:(int)length
+{
+	if ([_receiveStream hasBytesAvailable])
+	{
+		uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * length);
+		int len = [_receiveStream read:buf maxLength:length];
+		NSData *data = nil;
+		
+		if (len >= 0)
+		{
+			data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:YES];
+		}
+		
+		*dataOut = data;
+		return len;
+	}
+	else
+	{
+		*dataOut = nil;
+		return 0;
+	}
+}
+
+- (BOOL)shouldChunkData
+{
+	return YES;
 }
 
 - (void)sendData:(NSData *)data
@@ -389,7 +447,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	if (bufferEmpty) {
 		// prime the sending
 		[_sendBufferLock lock];
-		unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
+		unsigned chunkLength = [_sendBuffer length];
+		if ([self shouldChunkData])
+		{
+			chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
+		}
 		NSData *chunk = [_sendBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
 		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk descriptionAsString]);
 		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
@@ -425,6 +487,8 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			myStreamFlags.readOpen = YES;
+			[self receiveStreamDidOpen];
 			KTLog(StreamDomain, KTLogDebug, @"Command receive stream opened");
 			break;
 		}
@@ -485,12 +549,14 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		}
 		case NSStreamEventEndEncountered:
 		{
+			myStreamFlags.readOpen = NO;
 			KTLog(StreamDomain, KTLogDebug, @"Command receive stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:_connectionHost];
 			}
+			[self receiveStreamDidClose];
 			break;
 		}
 		case NSStreamEventNone:
@@ -526,6 +592,9 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
+			myStreamFlags.sendOpen = YES;
+			[self sendStreamDidOpen];
+			
 			KTLog(StreamDomain, KTLogDebug, @"Command send stream opened");
 		//	if ([(NSInputStream *)_receiveStream hasBytesAvailable]) {
 		//		[self stream:_receiveStream handleEvent:NSStreamEventHasBytesAvailable];
@@ -589,12 +658,14 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		}
 		case NSStreamEventEndEncountered:
 		{
+			myStreamFlags.sendOpen = NO;
 			KTLog(StreamDomain, KTLogDebug, @"Command send stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:_connectionHost];
 			}
+			[self sendStreamDidClose];
 			break;
 		}
 		case NSStreamEventNone:
