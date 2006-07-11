@@ -34,7 +34,8 @@
 
 #import "SFTPConnection.h"
 #import "RunLoopForwarder.h"
-#import "SFTPStream.h"
+#import <dirent.h>
+#import <sys/types.h>
 
 NSString *SFTPException = @"SFTPException";
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
@@ -44,20 +45,19 @@ NSString *SFTPRenameFromKey = @"from";
 NSString *SFTPRenameToKey = @"to";
 NSString *SFTPTransferSizeKey = @"size";
 
-NSString *SFTPServerKeyChangedMessage = @"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\r\n@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @\r\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@";
-
-const unsigned int kSFTPBufferSize = 2048;
+const unsigned int kSFTPBufferSize = 32768;
 
 @interface SFTPConnection (Private)
 
 + (NSString *)escapedPathStringWithString:(NSString *)str;
-- (void)sendCommand:(NSString *)cmd;
-- (void)parseResponse:(NSString *)cmd;
+- (void)sendCommand:(id)cmd;
+- (NSString *)error;
 
 @end
 
-static NSArray *sftpPrompts = nil;
-static NSArray *sftpErrors = nil;
+
+int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
+int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 @implementation SFTPConnection
 
@@ -68,9 +68,6 @@ static NSArray *sftpErrors = nil;
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"sftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"ssh://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[AbstractConnection registerConnectionClass:[SFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, nil]];
-	
-	sftpPrompts = [[NSArray alloc] initWithObjects:@"sftp> ", nil];
-	sftpErrors = [[NSArray alloc] initWithObjects:@"Permission denied", @"Couldn't ", @"Secure connection ", @"No address associated with", @"Connection refused", @"Request for subsystem", @"Cannot download", @"ssh_exchange_identification", @"Operation timed out", @"no address associated with", @"REMOTE HOST IDENTIFICATION HAS CHANGED", nil];
 	[pool release];
 }
 
@@ -117,50 +114,99 @@ static NSArray *sftpErrors = nil;
     port = @"22";
   
 	if (self = [super initWithHost:host port:port username:username password:password error:error]) {
-		_inputBuffer = [[NSMutableString alloc] init];
-		_sentTransferBegan = NO;
+		
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[_inputBuffer release];
-	[_currentDir release];
+	
 	[super dealloc];
 }
 
 #pragma mark -
 #pragma mark Connection Overrides
 
-- (long long)transferSpeed
+- (void)negotiateSSH
+{	
+	if (libssh2_session_startup(mySession, [self socket])) 
+	{
+		NSLog(@"%@", [self error]);
+	}
+	const char *fingerprint = libssh2_hostkey_hash(mySession, LIBSSH2_HOSTKEY_HASH_MD5);
+	
+	if ([self password]) {
+		/* We could authenticate via password */
+		if (libssh2_userauth_password(mySession, [[self username] UTF8String], [[self password] UTF8String])) {
+			printf("Authentication by password failed.\n");
+			//goto shutdown;
+		}
+		else {
+			NSLog(@"Authentication successful");
+		}
+
+	} /*else {
+		// Or by public key 
+		if (libssh2_userauth_publickey_fromfile(session, [[self username] UTF8String], [[NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_rsa.pub"] UTF8String], [[NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_rsa"] UTF8String], "pasphrase")) {
+			printf("\tAuthentication by public key failed\n");
+		}
+	}*/
+	
+	//find out the home directory
+	LIBSSH2_CHANNEL *pwd = libssh2_channel_open_session(mySession);
+	int ret = libssh2_channel_exec(pwd, "/bin/pwd");
+	char dir[1024];
+	ret = libssh2_channel_read(pwd, dir, 1024);
+	if (dir[ret-1] == '\n') ret--;
+	_currentDir = [[NSString alloc] initWithCString:dir length:ret];
+	ret = libssh2_channel_close(pwd);
+	
+	mySFTPChannel = libssh2_sftp_init(mySession);
+	if (mySFTPChannel == NULL)
+	{
+		NSLog(@"failed to init sftp");
+	}
+	
+	[self setState:ConnectionIdleState];
+	if (_flags.didConnect)
+	{
+		[_forwarder connection:self didConnectToHost:[self host]];
+	}
+}
+
+- (void)sendStreamDidOpen
 {
-	return _transferSpeed;
+	if ([self sendStreamOpen] && [self receiveStreamOpen])
+	{
+		[self performSelector:@selector(negotiateSSH) withObject:nil afterDelay:0.0];
+	}
+}
+
+- (void)receiveStreamDidOpen
+{
+	if ([self sendStreamOpen] && [self receiveStreamOpen])
+	{
+		[self performSelector:@selector(negotiateSSH) withObject:nil afterDelay:0.0];
+	}
 }
 
 - (void)threadedConnect
-{
-	NSMutableArray *args = [NSMutableArray arrayWithCapacity:2];
-	[args addObject:[NSString stringWithFormat:@"-oPort=%@", [self port]]];
-	[args addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
-	
-	SFTPStream *sftp = [[SFTPStream alloc] initWithArguments:args];
-	
-	[self setSendStream:sftp];
-	[self setReceiveStream:sftp];
-	
-	[sftp release];
+{	
+	mySession = libssh2_session_init();
+	libssh2_session_set_user_info(mySession,self);
+	libssh2_session_set_read(mySession,ssh_read);
+	libssh2_session_set_write(mySession,ssh_write);
 	
 	[super threadedConnect];
 }
 
 - (void)threadedDisconnect
 {
-	[self queueCommand:[ConnectionCommand command:@"quit"
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionSentQuitState
-										dependant:nil
-										 userInfo:nil]];
+	int ret = libssh2_sftp_shutdown(mySFTPChannel); mySFTPChannel = NULL;
+	ret = libssh2_session_disconnect(mySession, "bye bye");
+	libssh2_session_free(mySession); mySession = NULL;
+	[super threadedDisconnect];
 }
 
 - (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value 
@@ -180,699 +226,106 @@ static NSArray *sftpErrors = nil;
 }
 
 #pragma mark -
-#pragma mark Buffer Utilities
+#pragma mark Stream Overrides
 
-- (BOOL)bufferMatchesAtLeastOneString:(NSArray *)strings
+- (BOOL)shouldChunkData
 {
-	NSEnumerator *promptEnumerator = [strings objectEnumerator];
-	NSString *prompt;
-	NSRange promptRange;
-	
-	while (prompt = [promptEnumerator nextObject]) {
-		promptRange = [_inputBuffer rangeOfString:prompt];
-		if (promptRange.location != NSNotFound) {
-			[_inputBuffer deleteCharactersInRange:NSMakeRange(0, promptRange.location + promptRange.length)];
-			return YES;
-		}
-	}
 	return NO;
-}
-
-- (NSRange)rangeInBufferMatchingAtLeastOneString:(NSArray *)strings
-{
-	NSEnumerator *promptEnumerator = [strings objectEnumerator];
-	NSString *prompt;
-	NSRange promptRange;
-	
-	while (prompt = [promptEnumerator nextObject]) {
-		promptRange = [_inputBuffer rangeOfString:prompt];
-		if (promptRange.location != NSNotFound) {
-			return promptRange;
-		}
-	}
-	return NSMakeRange(NSNotFound, 0);
-}
-
-- (BOOL)bufferContainsPasswordPrompt
-{
-	NSArray *possiblePrompts = [NSArray arrayWithObjects:@"Password:", @"password:", nil];
-	return [self bufferMatchesAtLeastOneString:possiblePrompts];
-}
-
-- (BOOL)bufferContainsCommandPrompt
-{
-	NSEnumerator *promptEnumerator = [sftpPrompts objectEnumerator];
-	NSString *prompt;
-	NSRange promptRange;
-	
-	while (prompt = [promptEnumerator nextObject]) {
-		promptRange = [_inputBuffer rangeOfString:prompt];
-		if (promptRange.location != NSNotFound) {
-			return YES;
-		}
-	}
-	return NO;
-}
-
-- (BOOL)bufferContainsError
-{
-	NSEnumerator *errorEnumerator = [sftpErrors objectEnumerator];
-	NSString *error;
-	NSRange errorRange;
-	
-	while (error = [errorEnumerator nextObject]) 
-	{
-		errorRange = [_inputBuffer rangeOfString:error];
-		if (errorRange.location != NSNotFound) 
-		{
-			// now delete the error from the buffer to the next sftp prompt
-			NSRange promptLoc =[_inputBuffer rangeOfString:[sftpPrompts objectAtIndex:0] 
-												   options:NSLiteralSearch 
-													 range:NSMakeRange(errorRange.location, [_inputBuffer length] - errorRange.location)];
-			if (promptLoc.location != NSNotFound)
-			{
-				[_inputBuffer deleteCharactersInRange:NSMakeRange(0,promptLoc.location - 1)];
-			}
-			return YES;
-		}
-	}
-	return NO;
-}
-
-- (void)removeCommandPromptFromBuffer
-{
-	NSEnumerator *promptEnumerator = [sftpPrompts objectEnumerator];
-	NSString *prompt;
-	NSRange promptRange;
-	
-	while (prompt = [promptEnumerator nextObject]) {
-		promptRange = [_inputBuffer rangeOfString:prompt];
-		if (promptRange.location != NSNotFound) {
-			[_inputBuffer deleteCharactersInRange:NSMakeRange(0, promptRange.location + promptRange.length)];
-			return;
-		}
-	}
-	return;
-}
-
-- (NSRange)locationOfCommandPromptInBuffer
-{
-	NSEnumerator *promptEnumerator = [sftpPrompts objectEnumerator];
-	NSString *prompt;
-	NSRange promptRange;
-	
-	while (prompt = [promptEnumerator nextObject]) {
-		promptRange = [_inputBuffer rangeOfString:prompt];
-		if (promptRange.location != NSNotFound) {
-			return promptRange;
-		}
-	}
-	return NSMakeRange(NSNotFound,0);
-}
-
-- (void)emptyBuffer
-{
-	[_inputBuffer deleteCharactersInRange:NSMakeRange(0, [_inputBuffer length])];
-}
-
-- (void)getProgress:(int *)progress transferred:(long long*)bytes speed:(long long*)speed eta:(long*)eta
-{
-	//the buffer could contain the transfer message part so we need to go line by line to find the status
-	NSRange newLinePosition = NSMakeRange(0, MIN(511, [_inputBuffer length]));
-	int prog = 0; 
-	long long spd = 0, amount = 0;
-	long time = 0;
-		
-	NSString *line = [NSString stringWithString:[_inputBuffer substringWithRange:newLinePosition]];
-	while ([line length] == 0) {
-		[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]]; //give the process a breather
-		NSData *myData = [self availableData];
-		
-		[_inputBuffer appendString:[[[NSString alloc] initWithData:myData
-														  encoding:NSASCIIStringEncoding] autorelease]];
-		newLinePosition = NSMakeRange(0, MIN(511, [_inputBuffer length]));
-		line = [NSString stringWithString:[_inputBuffer substringWithRange:newLinePosition]];
-	}
-	[_inputBuffer deleteCharactersInRange:newLinePosition];
-	NSRange progressLoc = [line rangeOfString:@":"]; //we use the : because that is not allowed in the path name and will only appear in the eta
-	//NSLog(@"line %d: %@", [line length], line);
-	if (progressLoc.location != NSNotFound) {
-		NSArray *bits = [line componentsSeparatedByString:@" "];
-		NSEnumerator *e = [bits objectEnumerator];
-		NSString *cur;
-		NSMutableArray *worthWhileData = [NSMutableArray array];
-		
-		while(cur = [e nextObject]) {
-			if (![cur isEqualToString:@""] && isdigit([cur characterAtIndex:0]))
-				[worthWhileData addObject:cur];
-		}
-		e = [worthWhileData objectEnumerator];
-		//NSLog(@"%@", worthWhileData);
-		while (cur = [e nextObject]) {
-			NSScanner *scanner = [NSScanner scannerWithString:cur];
-			
-			if ([cur rangeOfString:@"%"].location != NSNotFound) {
-				//percent
-				float pc = 0.0;
-				[scanner scanFloat:&pc];
-				prog = (int)floorf(pc);
-				
-			} else if ([cur rangeOfString:@"/s"].location != NSNotFound) {
-				//speed
-				float sp = 0.0;
-				NSString *formatter;
-				[scanner scanFloat:&sp];
-				[scanner scanUpToString:@" " intoString:&formatter];
-				long long multiplier = 1;
-				char power = [formatter characterAtIndex:0];
-				if (power == 'K') multiplier = 1024;
-				if (power == 'M') multiplier = 1024 * 1024;
-				if (power == 'G') multiplier = 1024 * 1024 * 1024;
-				spd = sp * multiplier;
-			} else if ([cur rangeOfString:@":"].location != NSNotFound) {
-				//eta
-				NSArray *ts = [cur componentsSeparatedByString:@":"];
-				int hrs = 0, mins = 0, secs = 0;
-				if ([ts count] == 3) {
-					hrs = [[ts objectAtIndex:0] intValue];
-					mins = [[ts objectAtIndex:1] intValue];
-					secs = [[ts objectAtIndex:2] intValue];
-				} else if ([ts count] == 2) {
-					mins = [[ts objectAtIndex:0] intValue];
-					secs = [[ts objectAtIndex:1] intValue];
-				} 
-				time = (hrs * 3600) + (mins * 60) + secs;
-				
-			} else {
-				//size transferred.
-				int s = 0;
-				NSString *formatter = nil;
-				[scanner scanInt:&s];
-				if (![scanner isAtEnd])
-					[scanner scanUpToString:@" " intoString:&formatter];
-				long long multiplier = 1;
-				
-				if (s > 0 && formatter != nil && [formatter length] > 0) {
-					char power = [formatter characterAtIndex:0];
-					if (power == 'K') multiplier = 1024;
-					if (power == 'M') multiplier = 1024 * 1024;
-					if (power == 'G') multiplier = 1024 * 1024 * 1024;
-				}
-				
-				amount = s * multiplier;
-			}
-		}
-	}
-		
-	if (progress != NULL) *progress = prog;
-	if (bytes != NULL) *bytes = amount;
-	if (speed != NULL) *speed = spd;
-	if (eta != NULL) *eta = time;
 }
 
 #pragma mark -
 #pragma mark State Machine
 
-- (void)processReceivedData:(NSData *)data
+- (NSString *)sftpError
 {
-	NSString *str = [[[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] autorelease];	
-	[_inputBuffer appendString:str];
-	
-	int trys = 2;
-	
-	//we wait 5 times of no data
-	while (trys >= 0) {
-		NSData *bufData = [self availableData];
-		if ([bufData length] > 0) {
-			NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
-			[_inputBuffer appendString:buf];
-		} else {
-			trys--;
-		}
-		[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.05]];
-	}
-	
-	if (GET_STATE != ConnectionUploadingFileState &&
-		GET_STATE != ConnectionDownloadingFileState &&
-		GET_STATE != ConnectionAwaitingDirectoryContentsState &&
-		[self transcript]) 
+	unsigned long err = libssh2_sftp_last_error(mySFTPChannel);
+	switch (err)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:str
-																  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+		case LIBSSH2_FX_OK: return LocalizedStringInThisBundle(@"", @"sftp last error");
+		case LIBSSH2_FX_EOF: return LocalizedStringInThisBundle(@"End of File", @"sftp last error");
+		case LIBSSH2_FX_NO_SUCH_FILE: return LocalizedStringInThisBundle(@"No such file", @"sftp last error");
+		case LIBSSH2_FX_PERMISSION_DENIED: return LocalizedStringInThisBundle(@"Permission Denied", @"sftp last error");
+		case LIBSSH2_FX_FAILURE: return LocalizedStringInThisBundle(@"Failure", @"sftp last error");
+		case LIBSSH2_FX_BAD_MESSAGE: return LocalizedStringInThisBundle(@"Bad Message", @"sftp last error");
+		case LIBSSH2_FX_NO_CONNECTION: return LocalizedStringInThisBundle(@"No Connection", @"sftp last error");
+		case LIBSSH2_FX_CONNECTION_LOST: return LocalizedStringInThisBundle(@"Connection Lost", @"sftp last error");
+		case LIBSSH2_FX_OP_UNSUPPORTED: return LocalizedStringInThisBundle(@"Operation Unsupported", @"sftp last error");
+		case LIBSSH2_FX_INVALID_HANDLE: return LocalizedStringInThisBundle(@"Invalid Handle", @"sftp last error");
+		case LIBSSH2_FX_NO_SUCH_PATH: return LocalizedStringInThisBundle(@"No such path", @"sftp last error");
+		case LIBSSH2_FX_FILE_ALREADY_EXISTS: return LocalizedStringInThisBundle(@"File already exists", @"sftp last error");
+		case LIBSSH2_FX_WRITE_PROTECT: return LocalizedStringInThisBundle(@"Write Protected", @"sftp last error");
+		case LIBSSH2_FX_NO_MEDIA: return LocalizedStringInThisBundle(@"No Media", @"sftp last error");
+		case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM: return LocalizedStringInThisBundle(@"No space left on remote machine", @"sftp last error");
+		case LIBSSH2_FX_QUOTA_EXCEEDED: return LocalizedStringInThisBundle(@"Quota exceeded", @"sftp last error");
+		case LIBSSH2_FX_UNKNOWN_PRINCIPLE: return LocalizedStringInThisBundle(@"Unknown Principle", @"sftp last error");
+		case LIBSSH2_FX_LOCK_CONFlICT: return LocalizedStringInThisBundle(@"Lock Conflict", @"sftp last error");
+		case LIBSSH2_FX_DIR_NOT_EMPTY: return LocalizedStringInThisBundle(@"Directory not empty", @"sftp last error");
+		case LIBSSH2_FX_NOT_A_DIRECTORY: return LocalizedStringInThisBundle(@"Not a directory", @"sftp last error");
+		case LIBSSH2_FX_INVALID_FILENAME: return LocalizedStringInThisBundle(@"Invalid filename", @"sftp last error");
+		case LIBSSH2_FX_LINK_LOOP: return LocalizedStringInThisBundle(@"Link Loop", @"sftp last error");
+		case LIBSSH2_ERROR_REQUEST_DENIED: return LocalizedStringInThisBundle(@"Request Denied", @"sftp last error");
+		case LIBSSH2_ERROR_METHOD_NOT_SUPPORTED: return LocalizedStringInThisBundle(@"Method not Supported", @"sftp last error");
+		case LIBSSH2_ERROR_INVAL: return LocalizedStringInThisBundle(@"Error INVAL", @"sftp last error");
 	}
-		
-	
-	switch (GET_STATE) {
-		case ConnectionNotConnectedState: {
-			if ([self bufferContainsPasswordPrompt]) {
-				[self setState:ConnectionSentPasswordState];
-				//we don't want to display the password
-				[self sendData:[[NSString stringWithFormat:@"%@\n", [self password]] dataUsingEncoding:NSUTF8StringEncoding]];
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:@"#####"
-																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
-			} else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObjects:@"Are you sure you want to continue connecting (yes/no)?", nil]].location != NSNotFound) {
-				//need to authenticate the host. Should we really default to yes?
-				KTLog(ProtocolDomain, KTLogDebug, @"Connecting to unknown host. Awaiting repsonse from delegate");
-				if (_flags.authorizeConnection) {
-					NSRange msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
-					while (msgRange.location == NSNotFound)
-					{
-						[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
-						NSData *bufData = [self availableData];
-						if ([bufData length] > 0) {
-							NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
-							[_inputBuffer appendString:buf];
-						} 
-						msgRange = [_inputBuffer rangeOfString:@"Are you sure you want to continue connecting (yes/no)?"];
-					}
-					NSString *message = [_inputBuffer substringToIndex:msgRange.location];
-					[_inputBuffer deleteCharactersInRange:NSMakeRange(0, msgRange.location + msgRange.length)];
-					[_forwarder connection:self 
-				 authorizeConnectionToHost:[self host] 
-								   message:[NSString stringWithFormat:@"%@\nDo you wish to authorize the connection?", message]];
-				} else if (_flags.error) {
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPErrorPermissionDenied
-												   userInfo:[NSDictionary dictionaryWithObject:@"Failed to Authorize Connection" forKey:NSLocalizedDescriptionKey]];
-					[_forwarder connection:self didReceiveError:err];
-					//pause before forcing the disconnect
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-					[self forceDisconnect];
-				} else {
-					KTLog(ProtocolDomain, KTLogInfo, @"Delegate does not implement connection:authorizeConnectionToHost:message: to authorize the connection"); 
-					//pause before forcing the disconnect
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-					[self forceDisconnect];
-				}
-			} 
-			else if ([self rangeInBufferMatchingAtLeastOneString:[NSArray arrayWithObject:SFTPServerKeyChangedMessage]].location != NSNotFound)
-			{
-				//read until the end
-				[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
-				int attempt = 5;
-				
-				while (attempt >= 0)
-				{
-					NSData *bufData = [self availableData];
-					if ([bufData length] > 0) {
-						NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
-						[_inputBuffer appendString:buf];
-					} 
-					else
-					{
-						attempt--;
-					}
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.10]];
-				}
-				//replace the \r\r\n to \n
-				[_inputBuffer replaceOccurrencesOfString:@"\r\r\n" withString:@"\n" options:NSLiteralSearch range:NSMakeRange(0, [_inputBuffer length])];
-				
-				NSString *msg = [NSString stringWithString:_inputBuffer];
-				if ([self transcript])
-				{
-					[[self transcript] performSelectorOnMainThread:@selector(deleteCharactersInRange:)
-														withObject:[NSValue valueWithRange:NSMakeRange(0, [[self transcript] length])]
-													 waitUntilDone:NO];
-					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:msg
-																			  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-				}
-				if (_flags.error)
-				{
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPError
-												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-					[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
-				}
-				//pause before forcing the disconnect
-				[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-				[self forceDisconnect];
-				return;
-			} 
-			else if ([self bufferContainsCommandPrompt]) {
-				//ssh authorized keys validated us
-				KTLog(ProtocolDomain, KTLogInfo, @"Validated via ssh's authorized_keys");
-				[self setState:ConnectionAwaitingCurrentDirectoryState];
-				[self sendCommand:@"pwd"];
-				
-			} else if ([self bufferContainsError]){
-				if (_flags.error) {
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPError
-												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Unable to connect to host", NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-					[_inputBuffer deleteCharactersInRange:NSMakeRange(0,[_inputBuffer length])];
-				}
-			}
-		} break;
-		case ConnectionSentPasswordState: {
-			if ([self bufferContainsCommandPrompt]) {
-				[self setState:ConnectionAwaitingCurrentDirectoryState];
-				[self sendCommand:@"pwd"];
-			} else if ([self bufferContainsPasswordPrompt]) {
-				if (_flags.badPassword) {
-					[_forwarder connectionDidSendBadPassword:self];
-					//pause before forcing the disconnect
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:1]];
-					[self forceDisconnect];
-				}
-			} else if ([self bufferContainsError]){
-				if (_flags.error) {
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPErrorBadPassword
-												   userInfo:nil];
-					[_forwarder connection:self didReceiveError:err];
-				}
-			}
-			break;
-		}
-		case ConnectionAwaitingDirectoryContentsState: {
-			if ([self bufferContainsError]){
-				if (_flags.error) {
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPErrorDirectoryContents
-												   userInfo:nil];
-					[_forwarder connection:self didReceiveError:err];
-				}
-			} else if ([self bufferContainsCommandPrompt]) {
-				NSRange promptLoc = [self locationOfCommandPromptInBuffer];
-				//delete the first prompt then wait for the last one after the listing
-				//[_inputBuffer deleteCharactersInRange:NSMakeRange(0, promptLoc.location + promptLoc.length)];
-				
-				[_inputBuffer appendString:[[[NSString alloc] initWithData:[self availableData]
-																  encoding:NSASCIIStringEncoding] autorelease]];
-				
-				while ((promptLoc = [self locationOfCommandPromptInBuffer]).location == NSNotFound) {
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.5]];
-					[_inputBuffer appendString:[[[NSString alloc] initWithData:[self availableData]
-																	  encoding:NSASCIIStringEncoding] autorelease]];
-				}
-				NSString *listing = [_inputBuffer substringWithRange:NSMakeRange(0, promptLoc.location)];
-				
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:listing
-																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
-				KTLog(ParsingDomain, KTLogDebug, @"%@", listing);
-				
-				NSArray *files = [NSFileManager attributedFilesFromListing:listing];
-				
-				if (_flags.directoryContents)
-					[_forwarder connection:self
-						didReceiveContents:files
-							   ofDirectory:[self currentDirectory]];
-				[self emptyBuffer];
-				//[_inputBuffer appendString:@"sftp> "];
-				[self setState:ConnectionIdleState];
-			} 
-			break;
-		}
-		case ConnectionAwaitingCurrentDirectoryState: {
-			NSRange remoteDirLoc = [_inputBuffer rangeOfString:@"Remote working directory: "];
-			if (remoteDirLoc.location != NSNotFound) {
-				NSRange eol = [_inputBuffer rangeOfString:@"\r\n" options:NSLiteralSearch range:NSMakeRange(remoteDirLoc.location, [_inputBuffer length] - remoteDirLoc.location)];
-				if (eol.location != NSNotFound)
-					eol = [_inputBuffer rangeOfString:@"\n" options:NSLiteralSearch range:NSMakeRange(remoteDirLoc.location, [_inputBuffer length] - remoteDirLoc.location)];
-				NSString *dir = [_inputBuffer substringWithRange:NSMakeRange(remoteDirLoc.location + remoteDirLoc.length, eol.location - (remoteDirLoc.location + remoteDirLoc.length) - 1)];
-				[_currentDir autorelease];
-				_currentDir = [dir copy];
-				[self emptyBuffer];
-				//[_inputBuffer appendString:@"sftp> "];
-				
-				if (!_flags.isConnected)
-				{
-					_flags.isConnected = YES;
-					if (_flags.didConnect)
-						[_forwarder connection:self didConnectToHost:[self host]];
-					[self setState:ConnectionIdleState];
-					break;
-				}
-				
-				if (_flags.changeDirectory)
-					[_forwarder connection:self didChangeToDirectory:_currentDir];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionChangingDirectoryState:
-		{
-			if ([self bufferContainsError]){
-				if (_flags.error) {
-					//NSLog(@"buffer = %@", _inputBuffer);
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPErrorPermissionDenied
-												   userInfo:nil];
-					[_forwarder connection:self didReceiveError:err];
-				}
-			} else if ([self bufferContainsCommandPrompt]) {
-				[self setState:ConnectionIdleState];
-			}
-				
-			break;
-		}
-		case ConnectionUploadingFileState:
-		{
-			if ([self bufferContainsError]) 
-			{
-				if (_flags.error) 
-				{
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain 
-													   code:ConnectionErrorUploading 
-												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey], @"upload", @"Failed to upload file", NSLocalizedDescriptionKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				/*
-					We don't simulate the uploading finishing as the UI will need to handle the failure in the error delegate method
-				 */
-				
-				// continue with the queue
-				[self dequeueUpload];
-				[self setState:ConnectionIdleState];
-			}
-			else
-			{
-				int percent = 0;
-				long long amount;
-				long eta;
-				
-				[self getProgress:&percent transferred:&amount speed:&_transferSpeed eta:&eta];
-				if (percent == 0 && !_sentTransferBegan) {
-					_transferSize = [[[self currentUpload] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
-					if (_flags.didBeginUpload)
-						[_forwarder connection:self uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
-					_progressiveTransfer = 0;
-					_sentTransferBegan = YES;
-				}
-				//NSLog(@"%3d %%", percent);
-				// we can't be guaranteed that it is exact to the byte count so work it out off the percent.
-				unsigned long long bytes = (percent/100.0) * _transferSize;
-				unsigned long long diff = bytes - _progressiveTransfer;
-				_progressiveTransfer = amount;
-				if (percent > 0 && _flags.uploadPercent)
-					[_forwarder connection:self 
-									upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
-							  progressedTo:[NSNumber numberWithInt:percent]];
-				if (_flags.uploadProgressed)
-					[_forwarder connection:self 
-									upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
-						  sentDataOfLength:diff];
-				
-				if (percent == 100) {
-					if (_progressiveTransfer != _transferSize) {
-						// fix up an difference
-						diff = bytes - _progressiveTransfer;
-						if (_flags.uploadProgressed)
-						{
-							[_forwarder connection:self 
-											upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] 
-								  sentDataOfLength:diff];
-						}
-					}
-					//reset the values
-					_transferSize = 0;
-					_progressiveTransfer = 0;
-					_sentTransferBegan = NO;
-					
-					if (_flags.uploadFinished)
-						[_forwarder connection:self uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
-					//delete the temp data file if we uploaded a blob of data
-					if ([[self currentUpload] objectForKey:SFTPTemporaryDataUploadFileKey]) {
-						[[NSFileManager defaultManager] removeFileAtPath:[[self currentUpload] objectForKey:SFTPTemporaryDataUploadFileKey]
-																 handler:nil];
-					}
-					
-					// we could get 2 lots of 100% done so we need to consume any left over input
-					[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]];
-					int tries = 5;
-					
-					while (![self bufferContainsCommandPrompt] && tries >= 0)
-					{
-						NSData *bufData = [self availableData];
-						if ([bufData length] > 0) {
-							NSString *buf = [[[NSString alloc] initWithData:bufData encoding:NSUTF8StringEncoding] autorelease];
-							[_inputBuffer appendString:buf];
-						} 
-						else
-						{
-							tries--;
-						}
-						[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.10]];
-					}
-					[self removeCommandPromptFromBuffer];
-					[self dequeueUpload];
-					[self setState:ConnectionIdleState];
-				}
-			}
-			break;
-		}
-		case ConnectionDownloadingFileState:
-		{
-			int percent;
-			long long amount;
-			long eta;
-			[self getProgress:&percent transferred:&amount speed:&_transferSpeed eta:&eta];
-			NSDictionary *download = [self currentDownload];
-			
-			if (percent == 0) {
-				if (_flags.didBeginDownload)
-					[_forwarder connection:self downloadDidBegin:[download objectForKey:QueueDownloadRemoteFileKey]];
-				_progressiveTransfer = 0;
-			} 
-			
-			NSString *tmpDiff = [NSString stringWithFormat:@"%lld", amount - _progressiveTransfer];
-			int diff = [tmpDiff intValue];
-			
-			_progressiveTransfer = amount;
-			
-			if (_flags.downloadPercent)
-				[_forwarder connection:self 
-							  download:[download objectForKey:QueueDownloadRemoteFileKey]
-						  progressedTo:[NSNumber numberWithInt:percent]];
-			if (_flags.downloadProgressed)
-				[_forwarder connection:self
-							  download:[download objectForKey:QueueDownloadRemoteFileKey]
-				  receivedDataOfLength:(int)diff];
-			
-			if (percent == 100) {
-				if (_flags.downloadFinished)
-					[_forwarder connection:self downloadDidFinish:[download objectForKey:QueueDownloadRemoteFileKey]];
-				[self dequeueDownload];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionSettingPermissionsState:
-		{
-			if ([self bufferContainsCommandPrompt]) {
-				if (_flags.permissions)
-					[_forwarder connection:self didSetPermissionsForFile:[self currentPermissionChange]];
-				[self dequeuePermissionChange];
-				
-				[self removeCommandPromptFromBuffer];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionCreateDirectoryState:
-		{
-			//get the command from the history - it will be mkdir
-			NSString *cmd = [[self lastCommand] command];
-			NSString *folderName = [cmd substringFromIndex:6]; // "mkdir "
-			if ([self bufferContainsError]){
-				if (_flags.error) {
-					// This is most likely because the directory exists. Not sure what the message would be if it was permission denied
-					NSError *err = [NSError errorWithDomain:SFTPErrorDomain
-													   code:SFTPErrorPermissionDenied
-												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithBool:YES], ConnectionDirectoryExistsKey, folderName, ConnectionDirectoryExistsFilenameKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-			}
-			[self emptyBuffer];
-			if (_flags.createDirectory)
-			{
-				[_forwarder connection:self didCreateDirectory:folderName];
-			}
-				
-			//[_inputBuffer appendString:@"sftp> "];
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case ConnectionAwaitingRenameState:
-		{
-			if ([self bufferContainsCommandPrompt]) {
-				if (_flags.rename) {
-					NSDictionary *rename = [self currentRename];
-					[_forwarder connection:self didRename:[rename objectForKey:SFTPRenameFromKey] to:[rename objectForKey:SFTPRenameToKey]];
-				}
-				[self dequeueRename];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionDeleteFileState:
-		{
-			if ([self bufferContainsCommandPrompt]) {
-				if (_flags.deleteFile)
-					[_forwarder connection:self didDeleteFile:[self currentDeletion]];
-				[self dequeueDeletion];
-				[self emptyBuffer];
-				[_inputBuffer appendString:@"sftp> "];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionDeleteDirectoryState:
-		{
-			if ([self bufferContainsCommandPrompt]) {
-				if (_flags.deleteDirectory)
-					[_forwarder connection:self didDeleteDirectory:[self currentDeletion]];
-				[self dequeueDeletion];
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case ConnectionSentQuitState:
-		{
-			_flags.isConnected = NO;
-			if (_flags.didDisconnect)
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			[self performSelector:@selector(closeStreams) withObject:nil afterDelay:0.1];
-			break;
-		}
-	}
+	return @"";
 }
 
-- (void)sendCommand:(NSString *)cmd
+- (NSString *)error
 {
-	KTLog(ProtocolDomain, KTLogDebug, @">> %@", cmd);
-	
-	NSString *formattedCommand = [NSString stringWithFormat:@"%@\n", cmd];
-	NSString *prompttedCommand = [NSString stringWithFormat:@"sftp> %@\n", cmd];
-	
-	if ([self transcript])
+	char *errmsg;
+	int len;
+	int err = libssh2_session_last_error(mySession,&errmsg,&len,0);
+	if (err == LIBSSH2_ERROR_SFTP_PROTOCOL)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:prompttedCommand
-																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+		return [self sftpError];
 	}
-	
-	[self sendData:[formattedCommand dataUsingEncoding:NSUTF8StringEncoding]];
+	return [NSString stringWithCString:errmsg length:len];
+}
+
+- (void)sendCommand:(id)cmd
+{
+	if ([cmd isKindOfClass:[NSInvocation class]])
+	{
+		[cmd invoke];
+	}
 }
 
 #pragma mark -
 #pragma mark Connection Commands 
 
+- (void)threadedChangeToDirectory:(NSString *)dirPath
+{
+	LIBSSH2_SFTP_HANDLE *dir = libssh2_sftp_opendir(mySFTPChannel, [dirPath UTF8String]);
+	
+	if (dir == NULL)
+	{
+		if (_flags.error)
+		{
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"The directory does not exist", @"sftp bad directory") forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+	}
+	else
+	{
+		[_currentDir autorelease];
+		_currentDir = [dirPath copy];
+		if (_flags.changeDirectory)
+		{
+			[_forwarder connection:self didChangeToDirectory:_currentDir];
+		}
+	}
+	if (dir) libssh2_sftp_close_handle(dir);
+	[self setState:ConnectionIdleState];
+}
+
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	ConnectionCommand *pwd = [ConnectionCommand command:@"pwd"
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionAwaitingCurrentDirectoryState
-											  dependant:nil
-											   userInfo:nil];
-	ConnectionCommand *cd = [ConnectionCommand command:[NSString stringWithFormat:@"cd %@", [SFTPConnection escapedPathStringWithString:dirPath]]
+	ConnectionCommand *cd = [ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedChangeToDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 											awaitState:ConnectionIdleState
 											 sentState:ConnectionChangingDirectoryState
-											 dependant:pwd
+											 dependant:nil
 											  userInfo:nil];
 	[self queueCommand:cd];
-	[self queueCommand:pwd];
 }
 
 - (NSString *)currentDirectory
@@ -885,9 +338,41 @@ static NSArray *sftpErrors = nil;
 	return nil;
 }
 
+- (void)threadedCreateDirectory:(NSString *)dirPath
+{
+	if (libssh2_sftp_mkdir(mySFTPChannel, [dirPath UTF8String], 040755))
+	{
+		if (_flags.error)
+		{
+			int msglen;
+			char *msg;
+			int errcode = libssh2_session_last_error(mySession,&msg,&msglen,0);
+			NSMutableDictionary *ui = [NSMutableDictionary dictionary];
+			[ui setObject:[NSString stringWithCString:msg length:msglen] forKey:NSUnderlyingErrorKey];
+			[ui setObject:LocalizedStringInThisBundle(@"Failed to create directory", @"sftp failure to create dir") forKey:NSLocalizedDescriptionKey];
+			if (errcode == LIBSSH2_ERROR_SFTP_PROTOCOL)
+			{
+				[ui setObject:[self sftpError] forKey:NSLocalizedDescriptionKey];
+			}
+			[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+			[ui setObject:dirPath forKey:ConnectionDirectoryExistsFilenameKey];
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorGeneric userInfo:ui];
+			[_forwarder connection:self didReceiveError:err];
+		}
+	}
+	else
+	{
+		if (_flags.createDirectory)
+		{
+			[_forwarder connection:self didCreateDirectory:dirPath];
+		}
+	}
+	[self setState:ConnectionIdleState];
+}
+
 - (void)createDirectory:(NSString *)dirPath
 {
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"mkdir %@", [SFTPConnection escapedPathStringWithString:dirPath]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedCreateDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionCreateDirectoryState
 										dependant:nil
@@ -896,25 +381,25 @@ static NSArray *sftpErrors = nil;
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
-	ConnectionCommand *chmod = [ConnectionCommand command:[NSString stringWithFormat:@"chmod %lo %@", permissions, [SFTPConnection escapedPathStringWithString:dirPath]]
-											   awaitState:ConnectionIdleState
-												sentState:ConnectionSettingPermissionsState
-												dependant:nil
-												 userInfo:nil];
-	ConnectionCommand *mkdir = [ConnectionCommand command:[NSString stringWithFormat:@"mkdir %@", [SFTPConnection escapedPathStringWithString:dirPath]]
-											   awaitState:ConnectionIdleState
-												sentState:ConnectionCreateDirectoryState
-												dependant:chmod
-												 userInfo:nil];
-	[self queuePermissionChange:dirPath];
-	[self queueCommand:mkdir];
-	[self queueCommand:chmod];
+	[self createDirectory:dirPath];
+	[self setPermissions:permissions forFile:dirPath];
+}
+
+- (void)threadedSetPermissions:(NSNumber *)perms forFile:(NSString *)path
+{
+	unsigned long permissions = [perms unsignedLongValue];
+	LIBSSH2_SFTP_ATTRIBUTES attribs;
+	int ret = libssh2_sftp_stat_ex(mySFTPChannel, (char *)[path UTF8String], [path length], 0, &attribs);
+	unsigned long newPerms = attribs.permissions | permissions;
+	attribs.permissions = newPerms;
+	ret = libssh2_sftp_stat_ex(mySFTPChannel, (char *)[path UTF8String], [path length], 1, &attribs);
+	[self setState:ConnectionIdleState];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	[self queuePermissionChange:path];
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"chmod %lo %@", permissions, [SFTPConnection escapedPathStringWithString:path]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:) target:self arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionSettingPermissionsState
 										dependant:nil
@@ -931,10 +416,25 @@ static NSArray *sftpErrors = nil;
 										 userInfo:nil]];
 }
 
+- (void)threadedDeleteFile:(NSString *)path
+{
+	if (libssh2_sftp_unlink(mySFTPChannel, (char *)[path UTF8String]))
+	{
+		//report error
+	}
+	else
+	{
+		if (_flags.deleteFile)
+		{
+			[_forwarder connection:self didDeleteFile:path];
+		}
+	}
+	[self setState:ConnectionIdleState];
+}
+
 - (void)deleteFile:(NSString *)path
 {
-	[self queueDeletion:path];
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"rm %@", [SFTPConnection escapedPathStringWithString:path]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDeleteFile:) target:self arguments:[NSArray arrayWithObject:path]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionDeleteFileState
 										dependant:nil
@@ -943,6 +443,7 @@ static NSArray *sftpErrors = nil;
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"need to upate to new sftp library" userInfo:nil];
 	[self queueDeletion:dirPath];
 	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"rmdir %@", [SFTPConnection escapedPathStringWithString:dirPath]]
 									   awaitState:ConnectionIdleState
@@ -956,6 +457,59 @@ static NSArray *sftpErrors = nil;
 	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
 }
 
+- (void)threadedRunloopUploadFile:(NSFileHandle *)file
+{
+	NSDictionary *upload = [self currentUpload];
+	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	NSData *data = [file readDataOfLength:kSFTPBufferSize];
+	size_t chunksent = libssh2_sftp_write(myTransferHandle,[data bytes],[data length]);
+	if (_flags.uploadProgressed)
+	{
+		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
+	}
+	if (chunksent != [data length])
+	{
+		//we have a problem
+	}
+	myBytesTransferred += chunksent;
+	if (_flags.uploadPercent)
+	{
+		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
+		[_forwarder connection:self upload:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	if (myBytesTransferred == myTransferSize)
+	{
+		if (_flags.uploadFinished)
+		{
+			[_forwarder connection:self uploadDidFinish:remote];
+		}
+		[self dequeueUpload];
+		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
+		[self setState:ConnectionIdleState];
+	}
+	else 
+	{
+		[self performSelector:@selector(threadedRunloopUploadFile:) withObject:file afterDelay:0.0];
+	}
+}
+
+- (void)threadedUploadFile
+{
+	NSDictionary *upload = [self currentUpload];
+	NSString *local = [upload objectForKey:QueueUploadLocalFileKey];
+	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
+	myBytesTransferred = 0;
+	
+	NSFileHandle *file = [NSFileHandle fileHandleForReadingAtPath:local];
+	if (_flags.didBeginUpload)
+	{
+		[_forwarder connection:self uploadDidBegin:remote];
+	}
+	[self performSelector:@selector(threadedRunloopUploadFile:) withObject:file afterDelay:0.0];
+}
+
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	NSMutableDictionary *upload = [NSMutableDictionary dictionary];
@@ -965,7 +519,7 @@ static NSArray *sftpErrors = nil;
 	[upload setObject:[NSNumber numberWithUnsignedLongLong:[fh seekToEndOfFile]] forKey:SFTPTransferSizeKey];
 	[self queueUpload:upload];
 	
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"put %@ %@", [SFTPConnection escapedPathStringWithString:localPath], [SFTPConnection escapedPathStringWithString:remotePath]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedUploadFile) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionUploadingFileState
 										dependant:nil
@@ -984,28 +538,72 @@ static NSArray *sftpErrors = nil;
 	[self uploadFile:localPath toFile:remotePath];
 }
 
+- (void)threadedRunloopUploadData:(NSData *)data
+{
+	NSDictionary *upload = [self currentUpload];
+	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	NSRange byteRange = NSMakeRange(myBytesTransferred, kSFTPBufferSize);
+	if (NSMaxRange(byteRange) > [data length])
+	{
+		byteRange.length = myTransferSize - myBytesTransferred;
+	}
+	NSData *chunk = [data subdataWithRange:byteRange];
+	size_t chunksent = libssh2_sftp_write(myTransferHandle,[chunk bytes],[chunk length]);
+	if (_flags.uploadProgressed)
+	{
+		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
+	}
+	if (chunksent != [chunk length])
+	{
+		//we have a problem
+	}
+	myBytesTransferred += chunksent;
+	if (_flags.uploadPercent)
+	{
+		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
+		[_forwarder connection:self upload:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	if (myBytesTransferred == myTransferSize)
+	{
+		if (_flags.uploadFinished)
+		{
+			[_forwarder connection:self uploadDidFinish:remote];
+		}
+		[self dequeueUpload];
+		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
+		[self setState:ConnectionIdleState];
+	}
+	else 
+	{
+		[self performSelector:@selector(threadedRunloopUploadData:) withObject:data afterDelay:0.0];
+	}
+}
+
+- (void)threadedUploadData
+{
+	NSDictionary *upload = [self currentUpload];
+	NSData *data = [upload objectForKey:QueueUploadLocalDataKey];
+	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
+	myBytesTransferred = 0;
+	
+	if (_flags.didBeginUpload)
+	{
+		[_forwarder connection:self uploadDidBegin:remote];
+	}
+	[self performSelector:@selector(threadedRunloopUploadData:) withObject:data afterDelay:0.0];
+}
+
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	//write the data to a temp file and upload to remote path
-	CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
-	CFStringRef uuidStr = CFUUIDCreateString(kCFAllocatorDefault, uuid);
-	CFRelease(uuid);
-	[(NSString *)uuidStr autorelease];
-	NSString *tmpFile = [NSString stringWithFormat:@"/tmp/sftp_%@.tmp", uuidStr];
-	
-	if (![data writeToFile:tmpFile atomically:YES]) {
-		KTLog(ProtocolDomain, KTLogFatal, @"Failed to write data to tmp file %@", tmpFile);
-	}
-	
 	NSMutableDictionary *upload = [NSMutableDictionary dictionary];
-	[upload setObject:tmpFile forKey:QueueUploadLocalFileKey];
+	[upload setObject:data forKey:QueueUploadLocalDataKey];
 	[upload setObject:remotePath forKey:QueueUploadRemoteFileKey];
-	[upload setObject:tmpFile forKey:SFTPTemporaryDataUploadFileKey];
 	[upload setObject:[NSNumber numberWithUnsignedInt:[data length]] forKey:SFTPTransferSizeKey];
 	[self queueUpload:upload];
 	
-	
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"put %@ %@", [SFTPConnection escapedPathStringWithString:tmpFile], [SFTPConnection escapedPathStringWithString:remotePath]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedUploadData) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionUploadingFileState
 										dependant:nil
@@ -1020,6 +618,8 @@ static NSArray *sftpErrors = nil;
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
+	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"need to upate to new sftp library" userInfo:nil];
+	
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localFile = [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName];
 	if (!flag)
@@ -1062,9 +662,102 @@ static NSArray *sftpErrors = nil;
 	
 }
 
+- (void)threadedContentsOfDirectory:(NSString *)directory
+{
+	char *dirbuf = (char *)malloc(sizeof(char) * kSFTPBufferSize);
+	LIBSSH2_SFTP_HANDLE *dir = libssh2_sftp_opendir(mySFTPChannel, [directory UTF8String]);
+	
+	if (dir == NULL)
+	{
+		if (_flags.error)
+		{
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"The directory does not exist", @"sftp bad directory") forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+	}
+	else
+	{
+		if (_flags.directoryContents)
+		{
+			LIBSSH2_SFTP_ATTRIBUTES attribs;
+			NSMutableArray *contents = [NSMutableArray array];
+			int c;
+			while ((c = libssh2_sftp_readdir(dir,dirbuf,kSFTPBufferSize,&attribs)) > 0)
+			{
+				NSMutableDictionary *at = [NSMutableDictionary dictionary];
+				NSString *filename = [NSString stringWithCString:dirbuf length:c];
+				[at setObject:filename forKey:cxFilenameKey];
+				if (attribs.flags & LIBSSH2_SFTP_ATTR_SIZE) 
+				{
+					[at setObject:[NSNumber numberWithUnsignedLong:attribs.filesize] forKey:NSFileSize];
+				}
+				if (attribs.flags & LIBSSH2_SFTP_ATTR_UIDGID)
+				{
+					[at setObject:[NSNumber numberWithUnsignedLong:attribs.gid] forKey:NSFileGroupOwnerAccountID];
+					[at setObject:[NSNumber numberWithUnsignedLong:attribs.uid] forKey:NSFileOwnerAccountID];
+				}
+				if (attribs.flags & LIBSSH2_SFTP_ATTR_PERMISSIONS)
+				{
+					[at setObject:[NSNumber numberWithUnsignedLong:attribs.permissions] forKey:NSFilePosixPermissions];
+				}
+				if (attribs.flags & LIBSSH2_SFTP_ATTR_ACMODTIME)
+				{
+					[at setObject:[NSDate dateWithTimeIntervalSince1970:attribs.mtime] forKey:NSFileModificationDate];
+				}
+				
+				if (attribs.permissions & S_IFDIR)
+				{
+					[at setObject:NSFileTypeDirectory forKey:NSFileType];
+				}
+				else if (attribs.permissions & S_IFIFO)
+				{
+					[at setObject:NSFileTypeUnknown forKey:NSFileType];
+				}
+				else if (attribs.permissions & S_IFCHR)
+				{
+					[at setObject:NSFileTypeCharacterSpecial forKey:NSFileType];
+				}
+				else if (attribs.permissions & S_IFBLK)
+				{
+					[at setObject:NSFileTypeBlockSpecial forKey:NSFileType];
+				}
+				else if (attribs.permissions & S_IFREG)
+				{
+					[at setObject:NSFileTypeRegular forKey:NSFileType];
+				}
+				else if (attribs.permissions & S_IFLNK)
+				{
+					[at setObject:NSFileTypeSymbolicLink forKey:NSFileType];
+					//need to get the target
+				}
+				else if (attribs.permissions & S_IFSOCK)
+				{
+					[at setObject:NSFileTypeSocket forKey:NSFileType];
+				}
+				else 
+				{
+					[at setObject:NSFileTypeUnknown forKey:NSFileTypeUnknown];
+				}
+
+				[contents addObject:at];
+			}
+			free(dirbuf);
+			[_forwarder connection:self didReceiveContents:contents ofDirectory:directory];
+		}
+	}
+
+	if (dir) libssh2_sftp_close_handle(dir);
+	[self setState:ConnectionIdleState];
+}
+
+- (void)threadedDirectoryContents
+{
+	[self threadedContentsOfDirectory:_currentDir];
+}
+
 - (void)directoryContents
 {
-	[self queueCommand:[ConnectionCommand command:@"ls -l"
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDirectoryContents) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
@@ -1073,7 +766,7 @@ static NSArray *sftpErrors = nil;
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"ls -l %@", [SFTPConnection escapedPathStringWithString:dirPath]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(contentsOfDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
@@ -1089,4 +782,21 @@ static NSArray *sftpErrors = nil;
 @end
 
 
+int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
+{
+	SFTPConnection *con = (SFTPConnection *)info;
+	NSData *data = [NSData dataWithBytes:buffer length:length];
+	[con sendData:data];
+	
+	return [data length];
+}
+
+int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
+{
+	SFTPConnection *con = (SFTPConnection *)info;
+	NSData *data = nil;
+	int size = [con availableData:&data ofLength:length];
+	[data getBytes:buffer];
+	return size;
+}
 

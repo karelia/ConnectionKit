@@ -67,7 +67,11 @@
 	AbstractConnection	*_fileCheckingConnection;
 	NSString			*_fileCheckInFlight;
 	
-	BOOL				_runThread;
+	struct __streamflags {
+		unsigned sendOpen : 1;
+		unsigned readOpen : 1;
+		unsigned unused : 30;
+	} myStreamFlags;
 }
 
 - (void)openStreamsToPort:(unsigned)port;
@@ -79,12 +83,22 @@
 - (NSStream *)receiveStream;
 - (void)closeStreams;
 
+- (BOOL)sendStreamOpen;
+- (BOOL)receiveStreamOpen;
+
+// subclasses can override
+- (void)sendStreamDidOpen;
+- (void)sendStreamDidClose;
+- (void)receiveStreamDidOpen;
+- (void)receiveStreamDidClose;
+
 - (void)handleSendStreamEvent:(NSStreamEvent)theEvent;
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent;
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length;
 - (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length;
 
 // Get the local command port
+- (CFSocketNativeHandle)socket;
 - (unsigned)localPort;
 
 // Subclass needs to override these methods
@@ -93,6 +107,7 @@
 
 - (void)sendData:(NSData *)data;
 - (NSData *)availableData;
+- (int)availableData:(NSData **)data ofLength:(int)length;
 
 // These are called on the background thread
 - (void)threadedConnect;

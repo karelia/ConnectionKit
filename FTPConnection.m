@@ -1274,11 +1274,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)threadedDisconnect
 {
-	[self queueCommand:[ConnectionCommand command:@"QUIT"
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionSentDisconnectState
-										dependant:nil
-										 userInfo:nil]];
+	_state = ConnectionSentDisconnectState;
+	[self sendCommand:@"QUIT"];
 }
 
 - (void)threadedAbort
@@ -2117,7 +2114,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self endBulkCommands];
 }
 
-/*!	Send the abort message immediately; it operates independently of the command queue.  Called by foreground thread.
+/*!	Send the abort message immediately
 */
 - (void)cancelTransfer
 {

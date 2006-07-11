@@ -72,6 +72,9 @@
 
 #define LIBSSH2_CHANNEL_CLOSE(session, channel)						channel->close_cb((session), &(session)->abstract, (channel), &(channel)->abstract)
 
+#define LIBSSH2_WRITE(session, buffer, length)						session->ssh_write(buffer, length, session, session->userInfo)
+#define LIBSSH2_READ(session, buffer, length)						session->ssh_read(buffer, length, session, session->userInfo)
+
 typedef struct _LIBSSH2_KEX_METHOD			LIBSSH2_KEX_METHOD;
 typedef struct _LIBSSH2_HOSTKEY_METHOD		LIBSSH2_HOSTKEY_METHOD;
 typedef struct _LIBSSH2_MAC_METHOD			LIBSSH2_MAC_METHOD;
@@ -182,7 +185,12 @@ struct _LIBSSH2_SESSION {
 	LIBSSH2_ALLOC_FUNC((*alloc));
 	LIBSSH2_REALLOC_FUNC((*realloc));
 	LIBSSH2_FREE_FUNC((*free));
-
+	
+	/* Read/Write callbacks */
+	LIBSSH2_WRITE_FUNC((*ssh_write));
+	LIBSSH2_READ_FUNC((*ssh_read));
+	void *userInfo;
+	
 	/* Other callbacks */
 	LIBSSH2_IGNORE_FUNC((*ssh_msg_ignore));
 	LIBSSH2_DEBUG_FUNC((*ssh_msg_debug));

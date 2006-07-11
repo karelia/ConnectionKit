@@ -127,6 +127,10 @@ typedef struct _LIBSSH2_USERAUTH_KBDINT_RESPONSE
 /* 'keyboard-interactive' authentication callback */
 #define LIBSSH2_USERAUTH_KBDINT_RESPONSE_FUNC(name_) void name_(const char* name, int name_len, const char* instruction, int instruction_len, int num_prompts, const LIBSSH2_USERAUTH_KBDINT_PROMPT* prompts, LIBSSH2_USERAUTH_KBDINT_RESPONSE* responses, void **abstract)
 
+/* Callbacks for reading and writing to a custom stream */
+#define LIBSSH2_WRITE_FUNC(name)							int name(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *userInfo)
+#define LIBSSH2_READ_FUNC(name)								int name(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *userInfo)
+
 /* Callbacks for special SSH packets */
 #define LIBSSH2_IGNORE_FUNC(name)					void name(LIBSSH2_SESSION *session, const char *message, int message_len, void **abstract)
 #define LIBSSH2_DEBUG_FUNC(name)					void name(LIBSSH2_SESSION *session, int always_display, const char *message, int message_len, const char *language, int language_len,void **abstract)
@@ -259,6 +263,10 @@ typedef struct _LIBSSH2_POLLFD {
 LIBSSH2_API LIBSSH2_SESSION *libssh2_session_init_ex(LIBSSH2_ALLOC_FUNC((*my_alloc)), LIBSSH2_FREE_FUNC((*my_free)), LIBSSH2_REALLOC_FUNC((*my_realloc)), void *abstract);
 #define libssh2_session_init()						libssh2_session_init_ex(NULL, NULL, NULL, NULL)
 LIBSSH2_API void **libssh2_session_abstract(LIBSSH2_SESSION *session);
+/* Custom Read/Write functors */
+LIBSSH2_API void libssh2_session_set_user_info(LIBSSH2_SESSION *session, void *ui);
+LIBSSH2_API void libssh2_session_set_write(LIBSSH2_SESSION *session, void *callback);
+LIBSSH2_API void libssh2_session_set_read(LIBSSH2_SESSION *session, void *callback);
 
 LIBSSH2_API void *libssh2_session_callback_set(LIBSSH2_SESSION *session, int cbtype, void *callback);
 LIBSSH2_API int libssh2_banner_set(LIBSSH2_SESSION *session, const char *banner);
