@@ -40,7 +40,7 @@
 
 @class RunLoopForwarder, SFTPStream;
 
-enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric };
+enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric, SFTPBadHostFingerprint };
 
 @interface SFTPConnection : StreamBasedConnection 
 {
@@ -52,10 +52,12 @@ enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTP
 	unsigned long long myBytesTransferred;
 	
 	struct __sftpflags {
-		unsigned unused: 32;
+		unsigned authorized: 1;
+		unsigned unused: 31;
 	} mySFTPFlags;
 	
 	NSString *_currentDir;
+	NSString *myKeychainFingerPrint;
 }
 
 @end

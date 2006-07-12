@@ -405,7 +405,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		else
 		{
-			unsigned length = [data length];
+			//unsigned length = [data length];
 			[myDownloadHandle writeData:data];
 			[myResponseBuffer setLength:0]; 
 			

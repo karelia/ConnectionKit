@@ -100,6 +100,7 @@
 // Get the local command port
 - (CFSocketNativeHandle)socket;
 - (unsigned)localPort;
+- (NSString *)remoteIPAddress;
 
 // Subclass needs to override these methods
 - (void)processReceivedData:(NSData *)data;

@@ -41,6 +41,9 @@
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
+#import <sys/types.h>
+#import <sys/socket.h>
+#import <arpa/inet.h>
 
 const unsigned int kStreamChunkSize = 2048;
 NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
@@ -136,6 +139,18 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 - (void)sendStreamDidClose {}
 - (void)receiveStreamDidOpen {}
 - (void)receiveStreamDidClose {}
+
+- (NSString *)remoteIPAddress
+{
+	struct sockaddr sock;
+	socklen_t len = sizeof(sock);
+	
+	if (getsockname([self socket], &sock, &len) >= 0) {
+		char *addr = inet_ntoa(((struct sockaddr_in *)&sock)->sin_addr);
+		return [NSString stringWithCString:addr];
+	}
+	return nil;
+}
 
 - (unsigned)localPort
 {
@@ -405,7 +420,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 - (NSData *)availableData
 {
 	NSData *data = nil;
-	int size = [self availableData:&data ofLength:kStreamChunkSize];
+	[self availableData:&data ofLength:kStreamChunkSize];
 	return data;
 }
 

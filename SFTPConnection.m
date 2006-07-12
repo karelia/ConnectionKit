@@ -36,6 +36,8 @@
 #import "RunLoopForwarder.h"
 #import <dirent.h>
 #import <sys/types.h>
+#import <Carbon/Carbon.h>
+#import <Security/Security.h>
 
 NSString *SFTPException = @"SFTPException";
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
@@ -128,6 +130,90 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 #pragma mark -
 #pragma mark Connection Overrides
 
+- (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value
+{
+	BOOL authorizeConnection = (BOOL)*((BOOL *)value);
+	mySFTPFlags.authorized = authorizeConnection;
+}
+
+- (void)keychainFingerPrint
+{
+	NSDictionary *map = [NSDictionary dictionaryWithContentsOfFile:[NSHomeDirectory() stringByAppendingPathComponent:@".ssh_hosts"]];
+	[myKeychainFingerPrint autorelease];
+	myKeychainFingerPrint = [[map objectForKey:[self host]] retain];
+}
+
+- (void)setFingerprint:(NSString *)fp
+{
+	NSString *file = [NSHomeDirectory() stringByAppendingPathComponent:@".ssh_hosts"];
+	NSMutableDictionary *map = [NSMutableDictionary dictionaryWithContentsOfFile:file];
+	if (!map) map = [NSMutableDictionary dictionary];
+	
+	[map setObject:fp forKey:[self host]];
+	[map writeToFile:file atomically:YES];
+}
+
+- (BOOL)checkFingerPrint:(NSString *)fp
+{
+	[self keychainFingerPrint];
+	BOOL needsAuthorization = YES;
+	
+	if ([fp length] > 0)
+	{
+		if ([myKeychainFingerPrint isEqualToString:fp])
+		{
+			needsAuthorization = NO;
+		}
+		else
+		{
+			if (_flags.authorizeConnection)
+			{
+				NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%@'s fingerprint does not match the one on record. If the server has changed its key, then this is to be expected. If not then you should check with the system administrator before proceeding.\nThe new fingerprint is %@.\nDo you wish to connect to the server?", @"ssh host key changed"), [self host], fp];
+				mySFTPFlags.authorized = NO;
+				[_forwarder connection:self authorizeConnectionToHost:[self host] message:localised];
+				if (mySFTPFlags.authorized)
+				{
+					//add the fingerprint to the keychain item
+					[self setFingerprint:fp];
+					return YES;
+				}
+				else
+				{
+					return NO;
+				}
+			}
+			return NO;
+		}
+	}
+	
+	if (needsAuthorization)
+	{
+		if (_flags.authorizeConnection)
+		{
+			mySFTPFlags.authorized = NO;
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?", @"ssh authorise remote host fingerprint"), [self host], fp];
+			[_forwarder connection:self authorizeConnectionToHost:[self host] message:localised];
+			if (mySFTPFlags.authorized)
+			{
+				return YES;
+			}
+			else
+			{
+				return NO;
+			}
+		}
+		else
+		{
+			NSLog(@"delegate does not implement connection:authorizeConnectionToHost:");
+			return NO;
+		}
+	}
+	else 
+	{
+		return YES;
+	}
+}
+
 - (void)negotiateSSH
 {	
 	if (libssh2_session_startup(mySession, [self socket])) 
@@ -135,11 +221,21 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		NSLog(@"%@", [self error]);
 	}
 	const char *fingerprint = libssh2_hostkey_hash(mySession, LIBSSH2_HOSTKEY_HASH_MD5);
+	NSMutableString *fp = [NSMutableString stringWithString:@""];
+	int i;
+	for(i = 0; i < 16; i++) {
+		[fp appendFormat:@"%02X", (unsigned char)fingerprint[i]];
+	}
+	if (![self checkFingerPrint:fp])
+	{
+		[self threadedForceDisconnect];
+		return;
+	}
 	
 	if ([self password]) {
 		/* We could authenticate via password */
 		if (libssh2_userauth_password(mySession, [[self username] UTF8String], [[self password] UTF8String])) {
-			printf("Authentication by password failed.\n");
+			NSLog(@"Authentication by password failed.\n");
 			//goto shutdown;
 		}
 		else {
@@ -207,22 +303,6 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	ret = libssh2_session_disconnect(mySession, "bye bye");
 	libssh2_session_free(mySession); mySession = NULL;
 	[super threadedDisconnect];
-}
-
-- (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value 
-{
-	if (GET_STATE == ConnectionNotConnectedState) {
-		//we are only ever going to get a BOOL response to validate the connection
-		BOOL authorizeConnection = (BOOL)*((BOOL *)value);
-		if (authorizeConnection)
-		{
-			[self sendCommand:@"yes"];
-		}
-		else 
-		{
-			[self sendCommand:@"no"];
-		}
-	}
 }
 
 #pragma mark -
@@ -301,7 +381,8 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"The directory does not exist", @"sftp bad directory") forKey:NSLocalizedDescriptionKey]];
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The directory (%@) does not exist", @"sftp bad directory"), dirPath];
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 	}
@@ -671,7 +752,8 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"The directory does not exist", @"sftp bad directory") forKey:NSLocalizedDescriptionKey]];
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The directory (%@) does not exist", @"sftp bad directory"), directory];
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 	}
