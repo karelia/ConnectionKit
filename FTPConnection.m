@@ -1283,7 +1283,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self sendCommand:@"ABOR"];
 }
 
-/*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object’s thread."
+/*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object‚Äôs thread."
 */
 - (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
 {	
