@@ -33,6 +33,7 @@
  */
 
 #import "SFTPConnection.h"
+#import "SSHPassphrase.h"
 #import "RunLoopForwarder.h"
 #import <dirent.h>
 #import <sys/types.h>
@@ -214,6 +215,15 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	}
 }
 
+- (void)mainThreadPassphrase:(NSString *)publicKey
+{
+	SSHPassphrase *pass = [[SSHPassphrase alloc] init];
+	NSString *passphrase = [pass passphraseForPublicKey:publicKey account:[self username]];
+	[myKeychainFingerPrint autorelease];
+	myKeychainFingerPrint = [passphrase copy];
+	[pass release];
+}
+
 - (void)negotiateSSH
 {	
 	if (libssh2_session_startup(mySession, [self socket])) 
@@ -232,27 +242,65 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		return;
 	}
 	
-	if ([self password]) {
+	if ([self password] && [[self password] length] > 0) {
 		/* We could authenticate via password */
 		if (libssh2_userauth_password(mySession, [[self username] UTF8String], [[self password] UTF8String])) {
-			NSLog(@"Authentication by password failed.\n");
-			//goto shutdown;
+			if (_flags.badPassword)
+			{
+				[_forwarder connectionDidSendBadPassword:self];
+			}
+			[self threadedForceDisconnect];
+			return;
 		}
-		else {
-			NSLog(@"Authentication successful");
-		}
-
-	} /*else {
+	} 
+	else 
+	{
 		// Or by public key 
-		if (libssh2_userauth_publickey_fromfile(session, [[self username] UTF8String], [[NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_rsa.pub"] UTF8String], [[NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_rsa"] UTF8String], "pasphrase")) {
-			printf("\tAuthentication by public key failed\n");
+		NSString *publicKey = [[NSUserDefaults standardUserDefaults] objectForKey:@"SSHPublicKey"];
+		if (!publicKey)
+		{
+			publicKey = [NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_dsa.pub"];
 		}
-	}*/
+		NSFileManager *fm = [NSFileManager defaultManager];
+		if (![fm fileExistsAtPath:publicKey])
+		{
+			publicKey = [NSHomeDirectory() stringByAppendingPathComponent:@".ssh/id_rsa.pub"];
+		}
+		NSString *privateKey = [publicKey stringByDeletingPathExtension];
+		
+		
+		if (![fm fileExistsAtPath:publicKey])
+		{
+			if (_flags.error)
+			{
+				NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey.", @"failed to find the id_dsa.pub"), publicKey];
+				NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
+				[_forwarder connection:self didReceiveError:err];
+			}
+			[self threadedForceDisconnect];
+			return;
+		}
+		//need to see if the password is stored in the keychain
+		[self performSelectorOnMainThread:@selector(mainThreadPassphrase:) withObject:publicKey waitUntilDone:YES];
+		
+		if (libssh2_userauth_publickey_fromfile(mySession, [[self username] UTF8String], [publicKey UTF8String], [privateKey UTF8String], [myKeychainFingerPrint UTF8String])) {
+			if (_flags.error)
+			{
+				NSString *localised = LocalizedStringInThisBundle(@"Authentication by Public Key Failed", @"failed pk authentication for ssh");
+				NSString *error = [self error];
+				NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
+				[_forwarder connection:self didReceiveError:err];
+			}
+			[self threadedForceDisconnect];
+			return;
+		}
+	}
 	
 	//find out the home directory
 	LIBSSH2_CHANNEL *pwd = libssh2_channel_open_session(mySession);
 	int ret = libssh2_channel_exec(pwd, "/bin/pwd");
 	char dir[1024];
+	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]]; //give it time to have something to read
 	ret = libssh2_channel_read(pwd, dir, 1024);
 	if (dir[ret-1] == '\n') ret--;
 	_currentDir = [[NSString alloc] initWithCString:dir length:ret];
@@ -697,10 +745,71 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	[self uploadFromData:data toFile:remotePath];
 }
 
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
+- (void)threadedRunloopDownload:(NSFileHandle *)file
 {
-	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"need to upate to new sftp library" userInfo:nil];
+	NSDictionary *download = [self currentDownload];
+	NSString *remote = [download objectForKey:QueueDownloadRemoteFileKey];
+	NSMutableData *data = [NSMutableData dataWithLength:kSFTPBufferSize];
+	size_t read = libssh2_sftp_read(myTransferHandle,[data mutableBytes],kSFTPBufferSize);
 	
+	if (_flags.downloadProgressed)
+	{
+		[_forwarder connection:self download:remote receivedDataOfLength:read];
+	}
+	[file writeData:data];
+	myBytesTransferred += read;
+	if (_flags.downloadPercent)
+	{
+		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
+		[_forwarder connection:self download:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	
+	if (myBytesTransferred == myTransferSize)
+	{
+		if (_flags.uploadFinished)
+		{
+			[_forwarder connection:self downloadDidFinish:remote];
+		}
+		[self dequeueDownload];
+		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
+		[self setState:ConnectionIdleState];
+	}
+	else 
+	{
+		[self performSelector:@selector(threadedRunloopDownload:) withObject:file afterDelay:0.0];
+	}
+}
+
+- (void)threadedDownload
+{
+	NSDictionary *download = [self currentDownload];
+	NSString *remoteFile = [download objectForKey:QueueDownloadRemoteFileKey];
+	NSString *localFile = [download objectForKey:QueueDownloadDestinationFileKey];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	if (![fm fileExistsAtPath:localFile])
+	{
+		[fm createFileAtPath:localFile contents:[NSData data] attributes:nil];
+	}
+	NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:localFile];
+	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remoteFile UTF8String], LIBSSH2_FXF_READ, 0);
+	LIBSSH2_SFTP_ATTRIBUTES attrs;
+	
+	if (libssh2_sftp_fstat(myTransferHandle, &attrs))
+	{
+		//err
+	}
+	myTransferSize = attrs.filesize;
+	myBytesTransferred = 0;
+	
+	if (_flags.didBeginDownload)
+	{
+		[_forwarder connection:self downloadDidBegin:remoteFile];
+	}
+	[self performSelector:@selector(threadedRunloopDownload:) withObject:handle afterDelay:0.0];
+}
+
+- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
+{	
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localFile = [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName];
 	if (!flag)
@@ -720,7 +829,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	[download setObject:localFile forKey:QueueDownloadDestinationFileKey];
 	[self queueDownload:download];
 	
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"get %@ %@", [SFTPConnection escapedPathStringWithString:remotePath], [SFTPConnection escapedPathStringWithString:localFile]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDownload) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionDownloadingFileState
 										dependant:nil

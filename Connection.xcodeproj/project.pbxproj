@@ -102,6 +102,9 @@
 		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
 		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79E17A0C0A659C1E009CA013 /* Passphrase.nib */; };
+		79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E17A130A659CEC009CA013 /* SSHPassphrase.m */; };
+		79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E17A140A659CEC009CA013 /* SSHPassphrase.h */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
@@ -297,6 +300,9 @@
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
 		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
+		79E17A0D0A659C1E009CA013 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		79E17A130A659CEC009CA013 /* SSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = SSHPassphrase.m; sourceTree = "<group>"; };
+		79E17A140A659CEC009CA013 /* SSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = SSHPassphrase.h; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -458,6 +464,9 @@
 		794DF0E40A5CD087007157BE /* SSH */ = {
 			isa = PBXGroup;
 			children = (
+				79E17A140A659CEC009CA013 /* SSHPassphrase.h */,
+				79E17A130A659CEC009CA013 /* SSHPassphrase.m */,
+				79E17A0C0A659C1E009CA013 /* Passphrase.nib */,
 				794EFE140A5CE58E00913151 /* channel.c */,
 				794EFE150A5CE58E00913151 /* comp.c */,
 				794EFE160A5CE58E00913151 /* crypt.c */,
@@ -661,6 +670,7 @@
 				794EFDDE0A5CDD3200913151 /* libssh2_publickey.h in Headers */,
 				794EFDDF0A5CDD3200913151 /* libssh2_sftp.h in Headers */,
 				794EFDE00A5CDD3200913151 /* libssh2.h in Headers */,
+				79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -766,6 +776,7 @@
 				79CFD8C809F7069100172CDD /* ConnectionOpenPanel.nib in Resources */,
 				79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */,
 				797CC8C709F861770063FF9B /* Localizable.strings in Resources */,
+				79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -882,6 +893,7 @@
 				794EFE2B0A5CE58E00913151 /* session.c in Sources */,
 				794EFE2C0A5CE58E00913151 /* sftp.c in Sources */,
 				794EFE2D0A5CE58E00913151 /* userauth.c in Sources */,
+				79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -981,6 +993,14 @@
 				79CFD8DF09F7071400172CDD /* English */,
 			);
 			name = Permissions.nib;
+			sourceTree = "<group>";
+		};
+		79E17A0C0A659C1E009CA013 /* Passphrase.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				79E17A0D0A659C1E009CA013 /* English */,
+			);
+			name = Passphrase.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
