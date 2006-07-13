@@ -138,6 +138,7 @@ static NSLock *_initLock = nil;
 	while (cur = [e nextObject])
 	{
 		[cur invoke];
+		[[cur target] release];
 	}
 	
 }
@@ -179,7 +180,6 @@ static NSLock *_initLock = nil;
 - (void)forwardInvocation:(NSInvocation *)inv
 {
 	[inv setTarget:myTarget];
-	[myTarget release];
 	myTarget = nil;
 	[myLock unlock];
 	
