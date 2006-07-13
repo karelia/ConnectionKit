@@ -40,7 +40,7 @@
 
 @class RunLoopForwarder, SFTPStream;
 
-enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric, SFTPBadHostFingerprint };
+enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric, SFTPErrorAuthentication };
 
 @interface SFTPConnection : StreamBasedConnection 
 {

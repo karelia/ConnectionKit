@@ -806,7 +806,7 @@ static NSImage *_folder = nil;
 	[btnNewFolder setEnabled:YES];
 	[remoteTable setHidden:NO];
 	[btnDisconnect setEnabled:YES];
-	NSString *dir = [initialDirectory stringValue];
+	NSString *dir = [[initialDirectory stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	if (dir && [dir length] > 0)
 		[con changeToDirectory:[initialDirectory stringValue]];
 	[con directoryContents];
