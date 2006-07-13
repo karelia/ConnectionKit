@@ -369,7 +369,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	unsigned long err = libssh2_sftp_last_error(mySFTPChannel);
 	switch (err)
 	{
-		case LIBSSH2_FX_OK: return LocalizedStringInThisBundle(@"", @"sftp last error");
+		case LIBSSH2_FX_OK: return LocalizedStringInThisBundle(@"OK", @"sftp last error");
 		case LIBSSH2_FX_EOF: return LocalizedStringInThisBundle(@"End of File", @"sftp last error");
 		case LIBSSH2_FX_NO_SUCH_FILE: return LocalizedStringInThisBundle(@"No such file", @"sftp last error");
 		case LIBSSH2_FX_PERMISSION_DENIED: return LocalizedStringInThisBundle(@"Permission Denied", @"sftp last error");
