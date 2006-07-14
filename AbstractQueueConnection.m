@@ -41,7 +41,7 @@ NSString *QueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentR
 
 NSString *QueueDomain = @"Queuing";
 
-#define QUEUE_HISTORY_COMMAND_SIZE 10
+#define QUEUE_HISTORY_COMMAND_SIZE 5
 
 @interface NSObject (HistoryQueueSupport)
 - (void)didPushToHistoryQueue;
