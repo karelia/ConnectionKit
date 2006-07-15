@@ -31,6 +31,7 @@
 #import "FileConnection.h"
 #import "RunLoopForwarder.h"
 #import "InterThreadMessaging.h"
+#import "ConnectionThreadManager.h"
 
 NSString *FileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
@@ -114,141 +115,66 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	{
 		myPendingInvocations = [[NSMutableArray array] retain];
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
-		
-		myLock = [[NSRecursiveLock alloc] init];
 		myForwarder = [[RunLoopForwarder alloc] init];
-		myPort = [[NSPort port] retain];
-		[myPort setDelegate:self];
-		
-		[NSThread prepareForConnectionInterThreadMessages];
-		_runThread = YES;
-		[NSThread detachNewThreadSelector:@selector(runFileConnectionBackgroundThread:) toTarget:self withObject:nil];
+		myLock = [[NSLock alloc] init];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[self sendPortMessage:KILL_THREAD];
-	[myPort setDelegate:nil];
-	[myPort release];
-	[myLock release];
-	[myForwarder release];
 	[myInflightInvocation release];
-	
+	[myForwarder release];
+	[myLock release];
 	[myPendingInvocations release];
 	[myCurrentDirectory release];
 	[super dealloc];
 }
-#pragma mark -
-#pragma mark Threading Support
 
-- (void)runFileConnectionBackgroundThread:(id)notUsed
+- (void)threadedConnect
 {
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	_bgThread = [NSThread currentThread];
 	myFileManager = [[NSFileManager alloc] init];
-  
-  //initial path for NSFileManager is working directory, set it to what we expect it to be, the home directory
-  //
-  [myFileManager changeCurrentDirectoryPath: [@"~/" stringByExpandingTildeInPath]];
-  
-	[NSThread prepareForConnectionInterThreadMessages];
-	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
-	// But then again, we can't remove the thread, so it really doesn't mean much.
-	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
-	while (_runThread)
+	if ( _flags.didConnect )
 	{
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		[myForwarder connection:self didConnectToHost:_connectionHost];
 	}
-	[[NSRunLoop currentRunLoop] removePort:myPort forMode:NSDefaultRunLoopMode];
-	[myFileManager release];
-	
-	[pool release];
+	_flags.isConnected = YES;
 }
 
-- (void)sendPortMessage:(int)aMessage
+- (void)threadedAbort
 {
-	if (nil != myPort)
+	if ( _flags.cancel )
 	{
-		NSPortMessage *message
-		= [[NSPortMessage alloc] initWithSendPort:myPort
-									  receivePort:myPort components:nil];
-		[message setMsgid:aMessage];
-		
-		@try {
-			BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
-			if (!sent)
-			{
-				KTLog(ThreadingDomain, KTLogFatal, @"FileConnection couldn't send message %d", aMessage);
-			}
-		} @catch (NSException *ex) {
-			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
-		} @finally {
-			[message release];
-		} 
+		[myForwarder connectionDidCancelTransfer:self];
+	}
+	[self processInvocations];
+}
+
+- (void)threadedCancelAll
+{
+	[myLock lock];
+	[myPendingInvocations removeAllObjects];
+	[myLock unlock];
+	if ( _flags.cancel )
+	{
+		[myForwarder connectionDidCancelTransfer:self];
 	}
 }
 
-- (void)handlePortMessage:(NSPortMessage *)portMessage
+- (void)threadedDisconnect
 {
-	int message = [portMessage msgid];
+	[myLock lock];
+	[myPendingInvocations removeAllObjects];
+	[myLock unlock];
 	
-	switch (message)
+	if ( _flags.cancel )
 	{
-		case CONNECT:
-		{
-			if ( _flags.didConnect )
-			{
-				[myForwarder connection:self didConnectToHost:_connectionHost];
-			}
-			_flags.isConnected = YES;
-			break;
-		}
-		case COMMAND:
-		{
-			[self processInvocations];
-			break;
-		}
-		case ABORT:
-			if ( _flags.cancel )
-			{
-				[myForwarder connectionDidCancelTransfer:self];
-			}
-			[self processInvocations];
-			break;
-			
-		case CANCEL_ALL:
-			[myLock lock];
-			[myPendingInvocations removeAllObjects];
-			[myLock unlock];
-			if ( _flags.cancel )
-			{
-				[myForwarder connectionDidCancelTransfer:self];
-			}
-			break;
-		case FORCE_DISCONNECT:
-		{
-			[myLock lock];
-			[myPendingInvocations removeAllObjects];
-			[myLock unlock];
-			if ( _flags.cancel )
-			{
-				[myForwarder connectionDidCancelTransfer:self];
-			}
-			_flags.isConnected = NO;
-			if (_flags.didDisconnect)
-			{
-				[myForwarder connection:self didDisconnectFromHost:[self host]];
-			}
-		}
-		break;
-		case KILL_THREAD:
-		{
-			[[NSRunLoop currentRunLoop] removePort:myPort forMode:NSDefaultRunLoopMode];
-			_runThread = NO;
-			break;
-		}
+		[myForwarder connectionDidCancelTransfer:self];
+	}
+	_flags.isConnected = NO;
+	if (_flags.didDisconnect)
+	{
+		[myForwarder connection:self didDisconnectFromHost:[self host]];
 	}
 }
 
@@ -262,9 +188,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 #pragma mark Invocation Queue
 
 - (void)processInvocations
-{
-	NSAssert([NSThread currentThread] == _bgThread, @"Processing Invocations from wrong thread");
-	
+{	
 	[myLock lock];
     while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
 	{
@@ -287,14 +211,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[myLock lock];
 	[myPendingInvocations addObject:inv];
 	[myLock unlock];
-	if ([NSThread currentThread] != _bgThread)
-	{
-		[self sendPortMessage:COMMAND];
-	}
-	else
-	{
-		[self processInvocations];
-	}
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processInvocations];
 }
 
 #pragma mark -
@@ -304,7 +221,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 */
 - (void)connect
 {
-	[self sendPortMessage:CONNECT];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
 }
 
 /*!	Basically a no-op, just send the completion method.
@@ -329,12 +246,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 
 - (void)forceDisconnect
 {
-	[self sendPortMessage:FORCE_DISCONNECT];
-}
-
-- (void) cleanupConnection
-{
-	[self sendPortMessage:KILL_THREAD];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
 }
 
 - (void)fcChangeToDirectory:(NSString *)aDirectory

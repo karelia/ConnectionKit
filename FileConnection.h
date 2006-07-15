@@ -56,11 +56,8 @@ enum { kChangeToDirectory = 7000,
 	NSString		*myCurrentDirectory;
 	NSInvocation	*myInflightInvocation;
 	
-	NSThread		*_bgThread;
-	NSPort			*myPort;
-	NSLock			*myLock;
 	RunLoopForwarder*myForwarder;
-	BOOL			_runThread;
+	NSLock			*myLock;
 	
 	NSFileManager *myFileManager;
 }
