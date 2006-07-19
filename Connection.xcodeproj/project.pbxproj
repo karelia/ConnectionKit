@@ -312,6 +312,10 @@
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE3032E50A6DF53200C31C75 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE3032E60A6DF53700C31C75 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE3032E70A6DF53A00C31C75 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE3032E80A6DF53D00C31C75 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Japanese; path = Japanese.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -1009,6 +1013,10 @@
 			isa = PBXVariantGroup;
 			children = (
 				79E17A0D0A659C1E009CA013 /* English */,
+				CE3032E50A6DF53200C31C75 /* French */,
+				CE3032E60A6DF53700C31C75 /* zh_TW */,
+				CE3032E70A6DF53A00C31C75 /* Japanese */,
+				CE3032E80A6DF53D00C31C75 /* Danish */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
