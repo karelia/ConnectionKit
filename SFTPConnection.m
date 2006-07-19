@@ -353,6 +353,16 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	[super threadedDisconnect];
 }
 
+- (void)threadedForceDisconnect
+{
+	ConnectionCommand *cmd = [ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDisconnect) target:self arguments:[NSArray array]]
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSentDisconnectState
+											  dependant:nil
+											   userInfo:nil];
+	[self pushCommandOnCommandQueue:cmd];
+}
+
 #pragma mark -
 #pragma mark Stream Overrides
 
