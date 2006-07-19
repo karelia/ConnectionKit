@@ -26,8 +26,8 @@
 
 - (NSString *)passphraseFromKeychainWithPublicKey:(NSString *)pkPath account:(NSString *)username
 {
-	SecKeychainSearchRef search;
-    SecKeychainItemRef item;
+	SecKeychainSearchRef search = nil;
+    SecKeychainItemRef item = nil;
     SecKeychainAttributeList list;
     SecKeychainAttribute attributes[3];
     OSErr result;
@@ -83,8 +83,8 @@
 			password = [NSString stringWithCString:pass length:length];
 		}
 	}
-	CFRelease(item);
-	CFRelease (search);
+	if (item) CFRelease(item);
+	if (search) CFRelease (search);
 	
 	return password;
 }
