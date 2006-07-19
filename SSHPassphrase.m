@@ -105,10 +105,12 @@
 		[oPanel makeKeyAndOrderFront:self];
 		int rc = [NSApp runModalForWindow:oPanel];
 		[oPanel orderOut:self];
+		passphrase = @"";
 		
 		if (rc == NSOKButton)
 		{
 			passphrase = [[[oPassword stringValue] copy] autorelease];
+			if (!passphrase) passphrase = @"";
 			
 			if ([oSave state] == NSOnState)
 			{
