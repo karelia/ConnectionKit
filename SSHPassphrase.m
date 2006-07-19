@@ -29,7 +29,7 @@
 	SecKeychainSearchRef search = nil;
     SecKeychainItemRef item = nil;
     SecKeychainAttributeList list;
-    SecKeychainAttribute attributes[3];
+    SecKeychainAttribute attributes[4];
     OSErr result;
     char *desc = "SSH Public Key Password";
 				
@@ -51,7 +51,7 @@
 	attributes[3].data = (void *)[label UTF8String];
 	attributes[3].length = [label length];
 	
-    list.count = 3;
+    list.count = 4;
     list.attr = &attributes;
 	
     result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
