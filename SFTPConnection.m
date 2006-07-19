@@ -875,8 +875,9 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 			int c;
 			while ((c = libssh2_sftp_readdir(dir,dirbuf,kSFTPBufferSize,&attribs)) > 0)
 			{
+				dirbuf[c] = '\0';
 				NSMutableDictionary *at = [NSMutableDictionary dictionary];
-				NSString *filename = [NSString stringWithCString:dirbuf length:c];
+				NSString *filename = [NSString stringWithUTF8String:dirbuf];
 				[at setObject:filename forKey:cxFilenameKey];
 				if (attribs.flags & LIBSSH2_SFTP_ATTR_SIZE) 
 				{
