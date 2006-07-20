@@ -120,6 +120,10 @@ struct _LIBSSH2_SFTP_HANDLE {
  */
 static int libssh2_sftp_packet_add(LIBSSH2_SFTP *sftp, unsigned char *data, unsigned long data_len)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_SESSION *session = sftp->channel->session;
 	LIBSSH2_PACKET *packet;
 
@@ -155,6 +159,10 @@ static int libssh2_sftp_packet_add(LIBSSH2_SFTP *sftp, unsigned char *data, unsi
  */
 static int libssh2_sftp_packet_read(LIBSSH2_SFTP *sftp, int should_block)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned char buffer[4]; /* To store the packet length */
@@ -223,6 +231,10 @@ static int libssh2_sftp_packet_read(LIBSSH2_SFTP *sftp, int should_block)
  */
 static int libssh2_sftp_packet_ask(LIBSSH2_SFTP *sftp, unsigned char packet_type, unsigned long request_id, unsigned char **data, unsigned long *data_len, int poll_channel)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_SESSION *session = sftp->channel->session;
 	LIBSSH2_PACKET *packet = sftp->packets.head;
 	unsigned char match_buf[5];
@@ -277,6 +289,10 @@ static int libssh2_sftp_packet_ask(LIBSSH2_SFTP *sftp, unsigned char packet_type
  */
 static int libssh2_sftp_packet_require(LIBSSH2_SFTP *sftp, unsigned char packet_type, unsigned long request_id, unsigned char **data, unsigned long *data_len)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_SESSION *session = sftp->channel->session;
 
 #ifdef LIBSSH2_DEBUG_SFTP
@@ -310,6 +326,10 @@ static int libssh2_sftp_packet_require(LIBSSH2_SFTP *sftp, unsigned char packet_
  */
 static int libssh2_sftp_packet_requirev(LIBSSH2_SFTP *sftp, int num_valid_responses, unsigned char *valid_responses, unsigned long request_id, unsigned char **data, unsigned long *data_len)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	int i;
 
 	/* Flush */
@@ -338,6 +358,10 @@ static int libssh2_sftp_packet_requirev(LIBSSH2_SFTP *sftp, int num_valid_respon
  */
 static int libssh2_sftp_attrsize(LIBSSH2_SFTP_ATTRIBUTES *attrs)
 {
+	if (!attrs)
+	{
+		return -1;
+	}
 	int attrsize = 4; /* flags(4) */
 
 	if (!attrs) {
@@ -358,6 +382,10 @@ static int libssh2_sftp_attrsize(LIBSSH2_SFTP_ATTRIBUTES *attrs)
  */
 static int libssh2_sftp_attr2bin(unsigned char *p, LIBSSH2_SFTP_ATTRIBUTES *attrs)
 {
+	if (!attrs)
+	{
+		return -1;
+	}
 	unsigned char *s = p;
 	unsigned long flag_mask = LIBSSH2_SFTP_ATTR_SIZE | LIBSSH2_SFTP_ATTR_UIDGID | LIBSSH2_SFTP_ATTR_PERMISSIONS | LIBSSH2_SFTP_ATTR_ACMODTIME;
 
@@ -396,6 +424,10 @@ static int libssh2_sftp_attr2bin(unsigned char *p, LIBSSH2_SFTP_ATTRIBUTES *attr
  */
 static int libssh2_sftp_bin2attr(LIBSSH2_SFTP_ATTRIBUTES *attrs, unsigned char *p)
 {
+	if (!attrs)
+	{
+		return -1;
+	}
 	unsigned char *s = p;
 
 	memset(attrs, 0, sizeof(LIBSSH2_SFTP_ATTRIBUTES));
@@ -447,6 +479,10 @@ LIBSSH2_CHANNEL_CLOSE_FUNC(libssh2_sftp_dtor) {
  */
 LIBSSH2_API LIBSSH2_SFTP *libssh2_sftp_init(LIBSSH2_SESSION *session)
 {
+	if (!session)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP *sftp;
 	LIBSSH2_CHANNEL *channel;
 	unsigned char *data, *s, buffer[9]; /* sftp_header(5){excludes request_id} + version_id(4) */
@@ -544,6 +580,10 @@ LIBSSH2_API LIBSSH2_SFTP *libssh2_sftp_init(LIBSSH2_SESSION *session)
  * Shutsdown the SFTP subsystem
  */
 LIBSSH2_API int libssh2_sftp_shutdown(LIBSSH2_SFTP *sftp) {
+	if (!sftp)
+	{
+		return -1;
+	}
 	return libssh2_channel_free(sftp->channel);
 }
 /* }}} */
@@ -557,6 +597,10 @@ LIBSSH2_API int libssh2_sftp_shutdown(LIBSSH2_SFTP *sftp) {
  */
 LIBSSH2_API LIBSSH2_SFTP_HANDLE *libssh2_sftp_open_ex(LIBSSH2_SFTP *sftp, char *filename, int filename_len, unsigned long flags, long mode, int open_type)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	LIBSSH2_SFTP_HANDLE *fp;
@@ -653,6 +697,10 @@ LIBSSH2_API LIBSSH2_SFTP_HANDLE *libssh2_sftp_open_ex(LIBSSH2_SFTP *sftp, char *
  */
 LIBSSH2_API size_t libssh2_sftp_read(LIBSSH2_SFTP_HANDLE *handle, char *buffer, size_t buffer_maxlen) 
 {
+	if (!handle)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP	*sftp	 = handle->sftp;
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -721,6 +769,10 @@ LIBSSH2_API size_t libssh2_sftp_read(LIBSSH2_SFTP_HANDLE *handle, char *buffer, 
  */
 LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, size_t buffer_maxlen, LIBSSH2_SFTP_ATTRIBUTES *attrs) 
 {
+	if (!handle)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP	*sftp	 = handle->sftp;
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -842,6 +894,10 @@ LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, 
  */
 LIBSSH2_API size_t libssh2_sftp_write(LIBSSH2_SFTP_HANDLE *handle, const char *buffer, size_t count)
 {
+	if (!handle)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP	*sftp	 = handle->sftp;
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -899,6 +955,10 @@ LIBSSH2_API size_t libssh2_sftp_write(LIBSSH2_SFTP_HANDLE *handle, const char *b
  */
 LIBSSH2_API int libssh2_sftp_fstat_ex(LIBSSH2_SFTP_HANDLE *handle, LIBSSH2_SFTP_ATTRIBUTES *attrs, int setstat)
 {
+	if (!handle)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP	*sftp	 = handle->sftp;
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -964,7 +1024,8 @@ LIBSSH2_API int libssh2_sftp_fstat_ex(LIBSSH2_SFTP_HANDLE *handle, LIBSSH2_SFTP_
  */
 LIBSSH2_API void libssh2_sftp_seek(LIBSSH2_SFTP_HANDLE *handle, size_t offset)
 {
-	handle->u.file.offset = offset;
+	if (handle)
+		handle->u.file.offset = offset;
 }
 /* }}} */
 
@@ -973,7 +1034,8 @@ LIBSSH2_API void libssh2_sftp_seek(LIBSSH2_SFTP_HANDLE *handle, size_t offset)
  */
 LIBSSH2_API size_t libssh2_sftp_tell(LIBSSH2_SFTP_HANDLE *handle)
 {
-	return handle->u.file.offset;
+	if (handle)
+		return handle->u.file.offset;
 }
 /* }}} */
 
@@ -984,6 +1046,10 @@ LIBSSH2_API size_t libssh2_sftp_tell(LIBSSH2_SFTP_HANDLE *handle)
  */
 LIBSSH2_API int libssh2_sftp_close_handle(LIBSSH2_SFTP_HANDLE *handle)
 {
+	if (!handle)
+	{
+		return -1;
+	}
 	LIBSSH2_SFTP	*sftp	 = handle->sftp;
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -1056,6 +1122,10 @@ LIBSSH2_API int libssh2_sftp_close_handle(LIBSSH2_SFTP_HANDLE *handle)
  */
 LIBSSH2_API int libssh2_sftp_unlink_ex(LIBSSH2_SFTP *sftp, char *filename, int filename_len)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned long data_len, retcode, request_id;
@@ -1110,6 +1180,10 @@ LIBSSH2_API int libssh2_sftp_rename_ex(LIBSSH2_SFTP *sftp,  char *source_filenam
 															char *dest_filename,	int dest_filename_len,
 															long flags)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned long data_len, retcode = -1, request_id;
@@ -1189,6 +1263,10 @@ LIBSSH2_API int libssh2_sftp_rename_ex(LIBSSH2_SFTP *sftp,  char *source_filenam
  */
 LIBSSH2_API int libssh2_sftp_mkdir_ex(LIBSSH2_SFTP *sftp, char *path, int path_len, long mode)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
     LIBSSH2_SFTP_ATTRIBUTES attrs = { LIBSSH2_SFTP_ATTR_PERMISSIONS };
@@ -1246,6 +1324,10 @@ LIBSSH2_API int libssh2_sftp_mkdir_ex(LIBSSH2_SFTP *sftp, char *path, int path_l
  */
 LIBSSH2_API int libssh2_sftp_rmdir_ex(LIBSSH2_SFTP *sftp, char *path, int path_len)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned long data_len, retcode, request_id;
@@ -1298,6 +1380,10 @@ LIBSSH2_API int libssh2_sftp_rmdir_ex(LIBSSH2_SFTP *sftp, char *path, int path_l
  */
 LIBSSH2_API int libssh2_sftp_stat_ex(LIBSSH2_SFTP *sftp, char *path, int path_len, int stat_type, LIBSSH2_SFTP_ATTRIBUTES *attrs)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned long data_len, request_id;
@@ -1374,6 +1460,10 @@ LIBSSH2_API int libssh2_sftp_stat_ex(LIBSSH2_SFTP *sftp, char *path, int path_le
  */
 LIBSSH2_API int libssh2_sftp_symlink_ex(LIBSSH2_SFTP *sftp, const char *path, int path_len, char *target, int target_len, int link_type)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned long data_len, request_id, link_len;
@@ -1468,6 +1558,10 @@ LIBSSH2_API int libssh2_sftp_symlink_ex(LIBSSH2_SFTP *sftp, const char *path, in
  */
 LIBSSH2_API unsigned long libssh2_sftp_last_error(LIBSSH2_SFTP *sftp)
 {
+	if (!sftp)
+	{
+		return -1;
+	}
 	return sftp->last_errno;
 }
 /* }}} */

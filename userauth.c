@@ -109,7 +109,7 @@ LIBSSH2_API char *libssh2_userauth_list(LIBSSH2_SESSION *session, const char *us
  */
 LIBSSH2_API int libssh2_userauth_authenticated(LIBSSH2_SESSION *session)
 {
-	return session->state & LIBSSH2_STATE_AUTHENTICATED;
+	return (session != NULL) && (session->state & LIBSSH2_STATE_AUTHENTICATED);
 }
 /* }}} */
 
