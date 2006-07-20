@@ -296,6 +296,19 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		}
 	}
 	
+	if (!libssh2_userauth_authenticated(mySFTPChannel))
+	{
+		if (_flags.error)
+		{
+			NSString *localised = LocalizedStringInThisBundle(@"Authentication Failed. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
+			NSString *error = [self error];
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+		[self threadedForceDisconnect];
+		return;
+	}
+	
 	//find out the home directory
 	LIBSSH2_CHANNEL *pwd = libssh2_channel_open_session(mySession);
 	int ret = libssh2_channel_exec(pwd, "/bin/pwd");
