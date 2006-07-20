@@ -296,7 +296,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		}
 	}
 	
-	if (!libssh2_userauth_authenticated(mySFTPChannel))
+	if (!mySession || !libssh2_userauth_authenticated(mySession))
 	{
 		if (_flags.error)
 		{
@@ -322,7 +322,14 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	mySFTPChannel = libssh2_sftp_init(mySession);
 	if (mySFTPChannel == NULL)
 	{
-		NSLog(@"failed to init sftp");
+		if (_flags.error)
+		{
+			NSString *localised = LocalizedStringInThisBundle(@"Failed to initialize SFTP Subsystem. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
+			NSString *error = [self error];
+			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+		[self threadForceDisconnect];
 	}
 	
 	[self setState:ConnectionIdleState];
