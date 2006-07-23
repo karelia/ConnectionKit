@@ -340,7 +340,10 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[chmod setLaunchPath:@"/bin/chmod"];
 	[chmod setArguments:[NSArray arrayWithObjects:[NSString stringWithFormat:@"%lo", permissions], path, nil]];
 	[chmod launch];
-	[chmod waitUntilExit];
+	while ([chmod isRunning])
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
 	
 	BOOL success = [chmod terminationStatus] == 0;
 	[chmod release];
@@ -404,7 +407,10 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[rm setLaunchPath:@"/bin/rm"];
 	[rm setArguments:[NSArray arrayWithObjects:@"-f", path, nil]];
 	[rm launch];
-	[rm waitUntilExit];
+	while ([rm isRunning])
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
 	
 	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteFile)
@@ -430,7 +436,10 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[rm setLaunchPath:@"/bin/rm"];
 	[rm setArguments:[NSArray arrayWithObjects:@"-rf", dirPath, nil]];
 	[rm launch];
-	[rm waitUntilExit];
+	while ([rm isRunning])
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
 	
 	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteDirectory)
@@ -476,12 +485,15 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	}
 
 	NSTask *cp = [[NSTask alloc] init];
-  [cp setStandardError: [NSPipe pipe]]; //this will get the unit test to pass, else we get an error in the log, and since we already return an error...
+	[cp setStandardError: [NSPipe pipe]]; //this will get the unit test to pass, else we get an error in the log, and since we already return an error...
 	[cp setLaunchPath:@"/bin/cp"];
 	[cp setArguments:[NSArray arrayWithObjects:@"-rf", localPath, remotePath, nil]];
 	[cp setCurrentDirectoryPath:[self currentDirectory]];
 	[cp launch];
-	[cp waitUntilExit];
+	while ([cp isRunning])
+	{
+		[NSThread sleepUntilDate:[NSDate distantPast]];
+	}
 	BOOL success = YES;
 	if ([cp terminationStatus] != 0)
 	{
