@@ -318,6 +318,9 @@
 		CE3032E80A6DF53D00C31C75 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Japanese; path = Japanese.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEB563840A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CEB563850A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEB563860A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEDE18DE0A5C69BE0055352C /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -969,6 +972,7 @@
 				3C2D8EC20A63FF3B008FE1B0 /* French */,
 				3C2D8EC30A63FF41008FE1B0 /* Danish */,
 				CEA9AFD30A64224100855897 /* Japanese */,
+				CEB563850A7AB7070081179A /* German */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -981,6 +985,7 @@
 				CEDE18DD0A5C69BC0055352C /* zh_TW */,
 				CEDE18DE0A5C69BE0055352C /* Danish */,
 				CEA9AFD10A64223000855897 /* Japanese */,
+				CEB563840A7AB7070081179A /* German */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = SOURCE_ROOT;
@@ -1017,6 +1022,7 @@
 				CE3032E60A6DF53700C31C75 /* zh_TW */,
 				CE3032E70A6DF53A00C31C75 /* Japanese */,
 				CE3032E80A6DF53D00C31C75 /* Danish */,
+				CEB563860A7AB7070081179A /* German */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
