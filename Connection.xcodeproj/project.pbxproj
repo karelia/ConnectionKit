@@ -312,6 +312,9 @@
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE1AD3DE0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CE1AD3DF0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Italian; path = Italian.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE1AD3E00A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E50A6DF53200C31C75 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E60A6DF53700C31C75 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E70A6DF53A00C31C75 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/Passphrase.nib; sourceTree = "<group>"; };
@@ -767,6 +770,7 @@
 				German,
 				zh_TW,
 				Danish,
+				Italian,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
@@ -973,6 +977,7 @@
 				3C2D8EC30A63FF41008FE1B0 /* Danish */,
 				CEA9AFD30A64224100855897 /* Japanese */,
 				CEB563850A7AB7070081179A /* German */,
+				CE1AD3DF0A7E845A0083C01E /* Italian */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -986,6 +991,7 @@
 				CEDE18DE0A5C69BE0055352C /* Danish */,
 				CEA9AFD10A64223000855897 /* Japanese */,
 				CEB563840A7AB7070081179A /* German */,
+				CE1AD3DE0A7E845A0083C01E /* Italian */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = SOURCE_ROOT;
@@ -1023,6 +1029,7 @@
 				CE3032E70A6DF53A00C31C75 /* Japanese */,
 				CE3032E80A6DF53D00C31C75 /* Danish */,
 				CEB563860A7AB7070081179A /* German */,
+				CE1AD3E00A7E845A0083C01E /* Italian */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
