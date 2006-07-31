@@ -473,6 +473,28 @@
 	return [[super currentDirectory] stringByDeletingFirstPathComponent];
 }
 
+- (NSDictionary *)currentDownload
+{
+  NSMutableDictionary *returnValue = [NSMutableDictionary dictionaryWithDictionary: [super currentDownload]];
+  
+  if ([returnValue objectForKey: QueueDownloadRemoteFileKey])
+    [returnValue setObject: [[returnValue objectForKey: QueueDownloadRemoteFileKey] stringByDeletingFirstPathComponent]
+                    forKey: QueueDownloadRemoteFileKey];
+  
+  return [NSDictionary dictionaryWithDictionary: returnValue];
+}
+
+- (NSDictionary *)currentUpload
+{
+  NSMutableDictionary *returnValue = [NSMutableDictionary dictionaryWithDictionary: [super currentUpload]];
+  
+  if ([returnValue objectForKey: QueueUploadRemoteFileKey])
+    [returnValue setObject: [[returnValue objectForKey: QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent]
+                    forKey: QueueUploadRemoteFileKey];
+  
+  return [NSDictionary dictionaryWithDictionary: returnValue];
+}
+
 - (NSString *)rootDirectory
 {
 	return [[super rootDirectory] stringByDeletingFirstPathComponent];
