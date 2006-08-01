@@ -194,7 +194,7 @@ static int libssh2_publickey_response_id(unsigned char **pdata, int data_len)
 
 	while (codes->name) {
 		if (codes->name_len == response_len &&
-			strncmp(codes->name, data, response_len) == 0) {
+			strncmp(codes->name, (const char *)data, response_len) == 0) {
 			*pdata = data + response_len;
 			return codes->code;
 		}
@@ -427,7 +427,7 @@ LIBSSH2_API int libssh2_publickey_add_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned
 			/* Search for a comment attribute */
 			if (attrs[i].name_len == (sizeof("comment") - 1) &&
 				strncmp(attrs[i].name, "comment", sizeof("comment") - 1) == 0) {
-				comment = attrs[i].value;
+				comment = (unsigned char *)attrs[i].value;
 				comment_len = attrs[i].value_len;
 				break;
 			}
@@ -633,7 +633,7 @@ LIBSSH2_API int libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned l
 						}
 						list[keys].attrs[0].name = "comment";
 						list[keys].attrs[0].name_len = sizeof("comment") - 1;
-						list[keys].attrs[0].value = s;
+						list[keys].attrs[0].value = (char *)s;
 						list[keys].attrs[0].value_len = comment_len;
 						list[keys].attrs[0].mandatory = 0;
 
@@ -661,9 +661,9 @@ LIBSSH2_API int libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned l
 						}
 						for(i = 0; i < list[keys].num_attrs; i++) {
 							list[keys].attrs[i].name_len = libssh2_ntohu32(s);			s += 4;
-							list[keys].attrs[i].name = s;								s += list[keys].attrs[i].name_len;
+							list[keys].attrs[i].name = (char *)s;								s += list[keys].attrs[i].name_len;
 							list[keys].attrs[i].value_len = libssh2_ntohu32(s);			s += 4;
-							list[keys].attrs[i].value = s;								s += list[keys].attrs[i].value_len;
+							list[keys].attrs[i].value = (char *)s;								s += list[keys].attrs[i].value_len;
 							list[keys].attrs[i].mandatory = 0;	/* actually an ignored value */
 						}
 					} else {

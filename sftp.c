@@ -258,7 +258,7 @@ static int libssh2_sftp_packet_ask(LIBSSH2_SFTP *sftp, unsigned char packet_type
 	}
 
 	while (packet) {
-		if (strncmp(packet->data, match_buf, match_len) == 0) {
+		if (strncmp((const char *)packet->data, (const char *)match_buf, match_len) == 0) {
 			*data = packet->data;
 			*data_len = packet->data_len;
 
@@ -481,7 +481,7 @@ LIBSSH2_API LIBSSH2_SFTP *libssh2_sftp_init(LIBSSH2_SESSION *session)
 {
 	if (!session)
 	{
-		return -1;
+		return NULL;
 	}
 	LIBSSH2_SFTP *sftp;
 	LIBSSH2_CHANNEL *channel;
@@ -559,10 +559,10 @@ LIBSSH2_API LIBSSH2_SFTP *libssh2_sftp_init(LIBSSH2_SESSION *session)
 		unsigned long extname_len, extdata_len;
 
 		extname_len = libssh2_ntohu32(s);				s += 4;
-		extension_name = s;								s += extname_len;
+		extension_name = (char *)s;								s += extname_len;
 
 		extdata_len = libssh2_ntohu32(s);				s += 4;
-		extension_data = s;								s += extdata_len;
+		extension_data = (char *)s;								s += extdata_len;
 
 		/* TODO: Actually process extensions */
 	}
@@ -599,7 +599,7 @@ LIBSSH2_API LIBSSH2_SFTP_HANDLE *libssh2_sftp_open_ex(LIBSSH2_SFTP *sftp, char *
 {
 	if (!sftp)
 	{
-		return -1;
+		return NULL;
 	}
 	LIBSSH2_CHANNEL *channel = sftp->channel;
 	LIBSSH2_SESSION *session = channel->session;
@@ -784,7 +784,7 @@ LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, 
 
 	if (handle->u.dir.names_left) {
 		/* A prior request returned more than one directory entry, feed it back from the buffer */
-		unsigned char *s = handle->u.dir.next_name;
+		unsigned char *s = (unsigned char *)handle->u.dir.next_name;
 		unsigned long real_filename_len = libssh2_ntohu32(s);
 
 		filename_len = real_filename_len;			s += 4;
@@ -801,7 +801,7 @@ LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, 
 		}
 		s += libssh2_sftp_bin2attr(attrs ? attrs : &attrs_dummy, s);
 
-		handle->u.dir.next_name = s;
+		handle->u.dir.next_name = (char *)s;
 		if ((--handle->u.dir.names_left) == 0) {
 			LIBSSH2_FREE(session, handle->u.dir.names_packet);
 		}
@@ -882,7 +882,7 @@ LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, 
 
 	handle->u.dir.names_left = num_names;
 	handle->u.dir.names_packet = data;
-	handle->u.dir.next_name = data + 9;
+	handle->u.dir.next_name = (char *)data + 9;
 
 	/* Be lazy, just use the name popping mechanism from the start of the function */
 	return libssh2_sftp_readdir(handle, buffer, buffer_maxlen, attrs);
@@ -1036,6 +1036,7 @@ LIBSSH2_API size_t libssh2_sftp_tell(LIBSSH2_SFTP_HANDLE *handle)
 {
 	if (handle)
 		return handle->u.file.offset;
+	return -1;
 }
 /* }}} */
 

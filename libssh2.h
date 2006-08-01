@@ -356,7 +356,7 @@ LIBSSH2_API int libssh2_channel_process_startup(LIBSSH2_CHANNEL *channel, const 
 #define libssh2_channel_subsystem(channel, subsystem)	libssh2_channel_process_startup((channel), "subsystem", sizeof("subsystem") - 1, (subsystem), strlen(subsystem))
 
 LIBSSH2_API int libssh2_channel_read_ex(LIBSSH2_CHANNEL *channel, int stream_id, char *buf, size_t buflen);
-#define libssh2_channel_read(channel, buf, buflen)					libssh2_channel_read_ex((channel), 0, (buf), (buflen))
+#define libssh2_channel_read(channel, buf, buflen)					libssh2_channel_read_ex((channel), 0, (char *)(buf), (buflen))
 #define libssh2_channel_read_stderr(channel, buf, buflen)			libssh2_channel_read_ex((channel), SSH_EXTENDED_DATA_STDERR, (buf), (buflen))
 
 LIBSSH2_API int libssh2_poll_channel_read(LIBSSH2_CHANNEL *channel, int extended);
@@ -367,8 +367,8 @@ LIBSSH2_API unsigned long libssh2_channel_window_read_ex(LIBSSH2_CHANNEL *channe
 LIBSSH2_API unsigned long libssh2_channel_receive_window_adjust(LIBSSH2_CHANNEL *channel, unsigned long adjustment, unsigned char force);
 
 LIBSSH2_API int libssh2_channel_write_ex(LIBSSH2_CHANNEL *channel, int stream_id, const char *buf, size_t buflen);
-#define libssh2_channel_write(channel, buf, buflen)					libssh2_channel_write_ex((channel), 0, (buf), (buflen))
-#define libssh2_channel_write_stderr(channel, buf, buflen)			libssh2_channel_write_ex((channel), SSH_EXTENDED_DATA_STDERR, (buf), (buflen))
+#define libssh2_channel_write(channel, buf, buflen)					libssh2_channel_write_ex((channel), 0, (const char *)(buf), (buflen))
+#define libssh2_channel_write_stderr(channel, buf, buflen)			libssh2_channel_write_ex((channel), SSH_EXTENDED_DATA_STDERR, (const char *)(buf), (buflen))
 
 LIBSSH2_API unsigned long libssh2_channel_window_write_ex(LIBSSH2_CHANNEL *channel, unsigned long *window_size_initial);
 #define libssh2_channel_window_write(channel)			libssh2_channel_window_write_ex((channel), NULL)

@@ -204,8 +204,8 @@ static int libssh2_banner_send(LIBSSH2_SESSION *session)
 
 	if (session->local.banner) {
 		/* setopt_string will have given us our \r\n characters */
-		banner_len = strlen(session->local.banner);
-		banner = session->local.banner;
+		banner_len = strlen((const char *)session->local.banner);
+		banner = (char *)session->local.banner;
 	}
 #ifdef LIBSSH2_DEBUG_TRANSPORT
 {
@@ -403,7 +403,7 @@ LIBSSH2_API int libssh2_session_startup(LIBSSH2_SESSION *session, int socket)
 	service_length = libssh2_ntohu32(data + 1);
 
 	if ((service_length != (sizeof("ssh-userauth") - 1)) ||
-		strncmp("ssh-userauth", data + 5, service_length)) {
+		strncmp("ssh-userauth", (const char *)data + 5, service_length)) {
 		LIBSSH2_FREE(session, data);
 		libssh2_error(session, LIBSSH2_ERROR_PROTO, "Invalid response received from server", 0);
 		return LIBSSH2_ERROR_PROTO;

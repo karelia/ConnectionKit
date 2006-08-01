@@ -99,7 +99,7 @@ LIBSSH2_API char *libssh2_userauth_list(LIBSSH2_SESSION *session, const char *us
 #ifdef LIBSSH2_DEBUG_USERAUTH
 	_libssh2_debug(session, LIBSSH2_DBG_AUTH, "Permitted auth methods: %s", data);
 #endif
-	return data;
+	return (char *)data;
 }
 /* }}} */
 
@@ -288,7 +288,7 @@ static int libssh2_file_read_publickey(LIBSSH2_SESSION *session, unsigned char *
 	/* Wasting some bytes here (okay, more than some),
 	 * but since it's likely to be freed soon anyway, 
 	 * we'll just avoid the extra free/alloc and call it a wash */
-	*method = pubkey;
+	*method = (unsigned char *)pubkey;
 	*method_len = sp1 - pubkey;
 
 	sp1++;
@@ -303,7 +303,7 @@ static int libssh2_file_read_publickey(LIBSSH2_SESSION *session, unsigned char *
 		LIBSSH2_FREE(session, pubkey);
 		return -1;
 	}
-	*pubkeydata = tmp;
+	*pubkeydata = (unsigned char *)tmp;
 	*pubkeydata_len = tmp_len;
 
 	return 0;
@@ -337,7 +337,7 @@ static int libssh2_file_read_privatekey(LIBSSH2_SESSION *session,	LIBSSH2_HOSTKE
 		return -1;
 	}
 
-	if ((*hostkey_method)->initPEM(session, privkeyfile, passphrase, hostkey_abstract)) {
+	if ((*hostkey_method)->initPEM(session, (unsigned const char *)privkeyfile, (unsigned const char *)passphrase, hostkey_abstract)) {
 		libssh2_error(session, LIBSSH2_ERROR_FILE, "Unable to initialize private key from file", 0);
 		return -1;
 	}
@@ -397,7 +397,7 @@ LIBSSH2_API int libssh2_userauth_hostbased_fromfile_ex(LIBSSH2_SESSION *session,
 	libssh2_htonu32(s, local_username_len);			s += 4;
 	memcpy(s, local_username, local_username_len);	s += local_username_len;
 
-	if (libssh2_file_read_privatekey(session, &privkeyobj, &abstract, method, method_len, privatekey, passphrase)) {
+	if (libssh2_file_read_privatekey(session, &privkeyobj, &abstract, (const char *)method, method_len, privatekey, passphrase)) {
 		LIBSSH2_FREE(session, method);
 		LIBSSH2_FREE(session, packet);
 		return -1;
@@ -568,7 +568,7 @@ LIBSSH2_API int libssh2_userauth_publickey_fromfile_ex(LIBSSH2_SESSION *session,
 	LIBSSH2_FREE(session, data);
 	LIBSSH2_FREE(session, pubkeydata);
 
-	if (libssh2_file_read_privatekey(session, &privkeyobj, &abstract, method, method_len, privatekey, passphrase)) {
+	if (libssh2_file_read_privatekey(session, &privkeyobj, &abstract, (const char *)method, method_len, privatekey, passphrase)) {
 		LIBSSH2_FREE(session, method);
 		LIBSSH2_FREE(session, packet);
 		return -1;

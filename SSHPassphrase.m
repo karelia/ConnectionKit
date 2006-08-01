@@ -52,7 +52,7 @@
 	attributes[3].length = [label length];
 	
     list.count = 4;
-    list.attr = &attributes;
+    list.attr = &attributes[0];
 	
     result = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
 	

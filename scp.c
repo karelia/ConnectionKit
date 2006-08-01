@@ -82,7 +82,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 	libssh2_channel_set_blocking(channel, 1);
 
 	/* Request SCP for the desired file */
-	if (libssh2_channel_process_startup(channel, "exec", sizeof("exec") - 1, command, command_len)) {
+	if (libssh2_channel_process_startup(channel, "exec", sizeof("exec") - 1, (const char *)command, command_len)) {
 		LIBSSH2_FREE(session, command);
 		libssh2_channel_free(channel);
 		return NULL;
@@ -152,7 +152,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 
 		s = response + 1;
 
-		p = strchr(s, ' ');
+		p = (unsigned char *)strchr((const char *)s, ' ');
 		if (!p || ((p - s) <= 0)) {
 			/* No spaces or space in the wrong spot */
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, malformed mtime", 0);
@@ -163,13 +163,13 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 		*(p++) = '\0';
 		/* Make sure we don't get fooled by leftover values */
 		errno = 0;
-		mtime = strtol(s, NULL, 10);
+		mtime = (long)strtol((const char *)s, NULL, 10);
 		if (errno) {
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, invalid mtime", 0);
 			libssh2_channel_free(channel);
 			return NULL;
 		}
-		s = strchr(p, ' ');
+		s = (unsigned char *)strchr((const char *)p, ' ');
 		if (!s || ((s - p) <= 0)) {
 			/* No spaces or space in the wrong spot */
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, malformed mtime.usec", 0);
@@ -179,7 +179,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 
 		/* Ignore mtime.usec */
 		s++;
-		p = strchr(s, ' ');
+		p = (unsigned char *)strchr((const char *)s, ' ');
 		if (!p || ((p - s) <= 0)) {
 			/* No spaces or space in the wrong spot */
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, too short or malformed", 0);
@@ -190,7 +190,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 		*(p++) = '\0';
 		/* Make sure we don't get fooled by leftover values */
 		errno = 0;
-		atime = strtol(s, NULL, 10);
+		atime = (long)strtol((const char *)s, NULL, 10);
 		if (errno) {
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, invalid atime", 0);
 			libssh2_channel_free(channel);
@@ -260,9 +260,9 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 			return NULL;
 		}
 
-		s = response + 1;
+		s = (char *)response + 1;
 		
-		p = strchr(s, ' ');
+		p = strchr((const char *)s, ' ');
 		if (!p || ((p - s) <= 0)) {
 			/* No spaces or space in the wrong spot */
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, malformed mode", 0);
@@ -370,7 +370,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_send_ex(LIBSSH2_SESSION *session, const
 	libssh2_channel_set_blocking(channel, 1);
 
 	/* Request SCP for the desired file */
-	if (libssh2_channel_process_startup(channel, "exec", sizeof("exec") - 1, command, command_len)) {
+	if (libssh2_channel_process_startup(channel, "exec", sizeof("exec") - 1, (const char *)command, command_len)) {
 	        /* previous call set libssh2_session_last_error(), pass it through */
 		LIBSSH2_FREE(session, command);
 		libssh2_channel_free(channel);
@@ -387,7 +387,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_send_ex(LIBSSH2_SESSION *session, const
 
 	/* Send mtime and atime to be used for file */
 	if (mtime || atime) {
-		response_len = snprintf(response, LIBSSH2_SCP_RESPONSE_BUFLEN, "T%ld 0 %ld 0\n", mtime, atime);
+		response_len = snprintf((char *)response, LIBSSH2_SCP_RESPONSE_BUFLEN, "T%ld 0 %ld 0\n", mtime, atime);
 #ifdef LIBSSH2_DEBUG_SCP
 		_libssh2_debug(session, LIBSSH2_DBG_SCP, "Sent %s", response);
 #endif
@@ -405,14 +405,14 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_send_ex(LIBSSH2_SESSION *session, const
 	}
 
 	/* Send mode, size, and basename */
-	base = strrchr(path, '/');
+	base = (unsigned char *)strrchr(path, '/');
 	if (base) {
 		base++;
 	} else {
-		base = path;
+		base = (unsigned char *)path;
 	}
 
-	response_len = snprintf(response, LIBSSH2_SCP_RESPONSE_BUFLEN, "C0%o %lu %s\n", mode, (unsigned long)size, base);
+	response_len = snprintf((char *)response, LIBSSH2_SCP_RESPONSE_BUFLEN, "C0%o %lu %s\n", mode, (unsigned long)size, base);
 #ifdef LIBSSH2_DEBUG_SCP
 	_libssh2_debug(session, LIBSSH2_DBG_SCP, "Sent %s", response);
 #endif
