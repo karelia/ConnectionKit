@@ -53,6 +53,7 @@
 
 @interface WebDAVConnection (DotMac)
 - (void)processResponse:(DAVResponse *)response;
+- (void)processFileCheckingQueue;
 @end
 
 @implementation DotMacConnection
@@ -103,7 +104,7 @@
 											   [accountName length],
 											   [accountName UTF8String],
 											   &passwordLen,
-											   &buffer,
+											   (void *)&buffer,
 											   &item);
 	
 	if (noErr == theStatus)
