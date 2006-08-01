@@ -321,7 +321,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 #endif
 	if (macstate == LIBSSH2_MAC_INVALID) {
 		if (session->macerror) {
-			if (LIBSSH2_MACERROR(session, data, datalen) == 0) {
+			if (LIBSSH2_MACERROR(session, (char *)data, datalen) == 0) {
 				/* Calling app has given the OK, Process it anyway */
 				macstate = LIBSSH2_MAC_CONFIRMED;
 			} else {
@@ -349,7 +349,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 
 			reason = libssh2_ntohu32(data + 1);
 			message_len = libssh2_ntohu32(data + 5);
-			message = data + 9; /* packet_type(1) + reason(4) + message_len(4) */
+			message = (char *)data + 9; /* packet_type(1) + reason(4) + message_len(4) */
 			language_len = libssh2_ntohu32(data + 9 + message_len);
 			/* This is where we hack on the data a little,
 			 * Use the MSB of language_len to to a terminating NULL (In all liklihood it is already)
@@ -358,7 +358,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 			 * With the lengths passed this isn't *REALLY* necessary, but it's "kind"
 			 */
 			message[message_len] = '\0';
-			language = data + 9 + message_len + 3;
+			language = (char *)data + 9 + message_len + 3;
 			if (language_len) {
 				memcpy(language, language + 1, language_len);
 			}
@@ -380,7 +380,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 			memcpy(data + 4, data + 5, datalen - 5);
 			data[datalen] = '\0';
 			if (session->ssh_msg_ignore) {
-				LIBSSH2_IGNORE(session, data + 4, datalen - 5);
+				LIBSSH2_IGNORE(session, (char *)data + 4, datalen - 5);
 			}
 			LIBSSH2_FREE(session, data);
 			return 0;
@@ -392,7 +392,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 			int message_len, language_len;
 
 			message_len = libssh2_ntohu32(data + 2);
-			message = data + 6; /* packet_type(1) + display(1) + message_len(4) */
+			message = (char *)data + 6; /* packet_type(1) + display(1) + message_len(4) */
 			language_len = libssh2_ntohu32(data + 6 + message_len);
 			/* This is where we hack on the data a little,
 			 * Use the MSB of language_len to to a terminating NULL (In all liklihood it is already)
@@ -401,7 +401,7 @@ static int libssh2_packet_add(LIBSSH2_SESSION *session, unsigned char *data, siz
 			 * With the lengths passed this isn't *REALLY* necessary, but it's "kind"
 			 */
 			message[message_len] = '\0';
-			language = data + 6 + message_len + 3;
+			language = (char *)data + 6 + message_len + 3;
 			if (language_len) {
 				memcpy(language, language + 1, language_len);
 			}
@@ -815,7 +815,7 @@ int libssh2_packet_read(LIBSSH2_SESSION *session, int should_block)
 		/* Calculate MAC hash */
  		session->remote.mac->hash(session, block + session->remote.mac->mac_len, session->remote.seqno, tmp, 5, payload, payload_len, &session->remote.mac_abstract);
 
-		macstate =  (strncmp(block, block + session->remote.mac->mac_len, session->remote.mac->mac_len) == 0) ? LIBSSH2_MAC_CONFIRMED : LIBSSH2_MAC_INVALID;
+		macstate =  (strncmp((const char *)block, (const char *)block + session->remote.mac->mac_len, session->remote.mac->mac_len) == 0) ? LIBSSH2_MAC_CONFIRMED : LIBSSH2_MAC_INVALID;
 
 		session->remote.seqno++;
 
@@ -972,7 +972,7 @@ int libssh2_packet_ask_ex(LIBSSH2_SESSION *session, unsigned char packet_type, u
 int libssh2_packet_askv_ex(LIBSSH2_SESSION *session, unsigned char *packet_types, unsigned char **data, unsigned long *data_len,
 													 unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len, int poll_socket)
 {
-	int i, packet_types_len = strlen(packet_types);
+	int i, packet_types_len = strlen((const char *)packet_types);
 
 	for(i = 0; i < packet_types_len; i++) {
 		if (0 == libssh2_packet_ask_ex(session, packet_types[i], data, data_len, match_ofs, match_buf, match_len, i ? 0 : poll_socket)) {
@@ -1029,7 +1029,7 @@ int libssh2_packet_burn(LIBSSH2_SESSION *session)
 	int i;
 	for(i = 1; i < 256; i++) all_packets[i - 1] = i;
 
-	if (libssh2_packet_askv_ex(session, all_packets, &data, &data_len, 0, NULL, 0, 0) == 0) {
+	if (libssh2_packet_askv_ex(session, (unsigned char *)all_packets, &data, &data_len, 0, NULL, 0, 0) == 0) {
 		i = data[0];
 		/* A packet was available in the packet brigade, burn it */
 		LIBSSH2_FREE(session, data);
@@ -1081,7 +1081,7 @@ int libssh2_packet_requirev_ex(LIBSSH2_SESSION *session, unsigned char *packet_t
 			continue;
 		}
 
-		if (strchr(packet_types, ret)) {
+		if (strchr((const char *)packet_types, ret)) {
 			/* Be lazy, let packet_ask pull it out of the brigade */
 			return libssh2_packet_askv_ex(session, packet_types, data, data_len, match_ofs, match_buf, match_len, 0);
 		}

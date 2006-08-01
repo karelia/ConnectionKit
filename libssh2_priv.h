@@ -68,12 +68,12 @@
 				session->ssh_msg_disconnect((session), (reason), (message), (message_len), (language), (language_len), &(session)->abstract)
 
 #define LIBSSH2_MACERROR(session, data, datalen)					session->macerror((session), (data), (datalen), &(session)->abstract)
-#define LIBSSH2_X11_OPEN(channel, shost, sport)						channel->session->x11(((channel)->session), (channel), (shost), (sport), (&(channel)->session->abstract))
+#define LIBSSH2_X11_OPEN(channel, shost, sport)						channel->session->x11(((channel)->session), (channel), (char *)(shost), (int)(sport), (&(channel)->session->abstract))
 
 #define LIBSSH2_CHANNEL_CLOSE(session, channel)						channel->close_cb((session), &(session)->abstract, (channel), &(channel)->abstract)
 
-#define LIBSSH2_WRITE(session, buffer, length)						session->ssh_write(buffer, length, session, session->userInfo)
-#define LIBSSH2_READ(session, buffer, length)						session->ssh_read(buffer, length, session, session->userInfo)
+#define LIBSSH2_WRITE(session, buffer, length)						session->ssh_write((uint8_t *)buffer, length, session, session->userInfo)
+#define LIBSSH2_READ(session, buffer, length)						session->ssh_read((uint8_t *)buffer, length, session, session->userInfo)
 
 typedef struct _LIBSSH2_KEX_METHOD			LIBSSH2_KEX_METHOD;
 typedef struct _LIBSSH2_HOSTKEY_METHOD		LIBSSH2_HOSTKEY_METHOD;

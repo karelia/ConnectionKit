@@ -148,9 +148,10 @@ static int libssh2_comp_method_zlib_comp(LIBSSH2_SESSION *session, int compress,
 		out_maxlen = payload_limit;
 	}
 
-	strm->next_in = (char *)src;
+	strm->next_in = (unsigned char *)src;
 	strm->avail_in = src_len;
-	out = strm->next_out = LIBSSH2_ALLOC(session, out_maxlen);
+	strm->next_out = (Bytef *)LIBSSH2_ALLOC(session, out_maxlen);
+	out = (char *)strm->next_out;
 	strm->avail_out = out_maxlen;
 	if (!strm->next_out) {
 		libssh2_error(session, LIBSSH2_ERROR_ALLOC, "Unable to allocate compression/decompression buffer", 0);
@@ -185,7 +186,7 @@ static int libssh2_comp_method_zlib_comp(LIBSSH2_SESSION *session, int compress,
 				libssh2_error(session, LIBSSH2_ERROR_ALLOC, "Unable to expand compress/decompression buffer", 0);
 				return -1;
 			}
-			strm->next_out = out + out_ofs;
+			strm->next_out = (unsigned char *)out + out_ofs;
 			strm->avail_out += compress ? (strm->avail_in + 4) : (2 * strm->avail_in);
 		} else while (!strm->avail_out) {
 			/* Done with input, might be a byte or two in internal buffer during compress
@@ -211,7 +212,7 @@ static int libssh2_comp_method_zlib_comp(LIBSSH2_SESSION *session, int compress,
 				libssh2_error(session, LIBSSH2_ERROR_ALLOC, "Unable to expand final compress/decompress buffer", 0);
 				return -1;
 			}
-			strm->next_out = out + out_maxlen - grow_size;
+			strm->next_out = (unsigned char *)out + out_maxlen - grow_size;
 
 			if (compress) {
 				status = deflate(strm, Z_PARTIAL_FLUSH);
@@ -226,7 +227,7 @@ static int libssh2_comp_method_zlib_comp(LIBSSH2_SESSION *session, int compress,
 		}
 	}
 
-	*dest = out;
+	*dest = (unsigned char *)out;
 	*dest_len = out_maxlen - strm->avail_out;
 	*free_dest = 1;
 
