@@ -329,7 +329,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
 		}
-		[self threadForceDisconnect];
+		[self threadedForceDisconnect];
 	}
 	
 	[self setState:ConnectionIdleState];
