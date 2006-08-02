@@ -782,6 +782,10 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	NSMutableData *data = [NSMutableData dataWithLength:kSFTPBufferSize];
 	size_t read = libssh2_sftp_read(myTransferHandle,[data mutableBytes],kSFTPBufferSize);
 	
+  //if we read less than the size of the buffer we need to write only what was read to the file
+  //
+  data = [data subdataWithRange: NSMakeRange( 0 , read)];
+  
 	if (_flags.downloadProgressed)
 	{
 		[_forwarder connection:self download:remote receivedDataOfLength:read];
