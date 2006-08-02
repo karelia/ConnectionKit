@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2006, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -28,17 +28,46 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnectionProtocol.h>
-#import <Connection/KTLog.h>
-#import <Connection/AbstractConnection.h>
-#import <Connection/AbstractQueueConnection.h>
-#import <Connection/StreamBasedConnection.h>
-#import <Connection/ConnectionOpenPanel.h>
-#import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
-#import <Connection/MultipleConnection.h>
-#import <Connection/NSData+Connection.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPResponse.h>
+@class CKHTTPRequest, CKHTTPResponse;
+
+@interface CKHTTPConnection : NSObject 
+{
+	CFReadStreamRef _readStream;
+	CFWriteStreamRef _writeStream;
+	
+	CKHTTPRequest *_request;
+	CKHTTPResponse *_response;
+	
+	NSData *_sendData;
+	NSRange _sendRange;
+	
+	id _delegate;
+	
+	struct __httpconflags {
+		unsigned didFailWithError:1;
+		unsigned didReceiveData:1;
+		unsigned didReceiveResponse:1;
+		unsigned didFinishLoading:1;
+		unsigned didSendDataOfLength:1;
+	} _flags;
+}
+
+- (id)initWithDelegate:(id)delegate;
+
+- (void)sendRequest:(CKHTTPRequest *)request;
+- (CKHTTPRequest *)request;
+
+- (void)cancel;
+
+@end
+
+@interface NSObject (CKHTTPConnectionDelegate)
+
+- (void)connection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error;
+- (void)connection:(CKHTTPConnection *)connection didReceiveDataOfLength:(int)length;
+- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
+- (void)connectionDidFinishLoading:(CKHTTPConnection *)connection;
+- (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
+
+@end

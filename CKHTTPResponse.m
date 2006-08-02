@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2006, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -27,18 +27,77 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnectionProtocol.h>
-#import <Connection/KTLog.h>
-#import <Connection/AbstractConnection.h>
-#import <Connection/AbstractQueueConnection.h>
-#import <Connection/StreamBasedConnection.h>
-#import <Connection/ConnectionOpenPanel.h>
-#import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
-#import <Connection/MultipleConnection.h>
-#import <Connection/NSData+Connection.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPResponse.h>
+#import "CKHTTPResponse.h"
+
+
+@implementation CKHTTPResponse
+
+- (id)init
+{
+	[super init];
+	_response = CFHTTPMessageCreateEmpty(kCFAllocatorDefault,FALSE);
+	return self;
+}
+
+- (void)dealloc
+{
+	CFRelease(_response);
+	[super dealloc];
+}
+
+- (unsigned)code
+{
+	return CFHTTPMessageGetResponseStatusCode(_response);
+}
+
+- (void)appendData:(NSData *)data
+{
+	CFHTTPMessageAppendBytes(_response,(UInt8 *)[data bytes],[data length]);
+}
+
+- (NSString *)valueForHeaderField:(NSString *)header
+{
+	return [(NSString *)CFHTTPMessageCopyHeaderFieldValue(_response,(CFStringRef)header) autorelease];
+}
+
+- (BOOL)headersComplete
+{
+	return CFHTTPMessageIsHeaderComplete(_response);
+}
+
+- (NSDictionary *)headers
+{
+	return [(NSDictionary *)CFHTTPMessageCopyAllHeaderFields(_response) autorelease];
+}
+
+- (void)setHeaders:(NSDictionary *)headers
+{
+	NSEnumerator *e = [headers keyEnumerator];
+	NSString *key;
+	
+	while (key = [e nextObject]) 
+		CFHTTPMessageSetHeaderFieldValue(_response, (CFStringRef)key, (CFStringRef)[headers objectForKey:key]);
+}
+
+- (NSString *)method
+{
+	return [(NSString *)CFHTTPMessageCopyRequestMethod(_response) autorelease];
+}
+
+- (NSString *)version
+{
+	return [(NSString *)CFHTTPMessageCopyVersion(_response) autorelease];
+}
+
+- (NSData *)body
+{
+	return [(NSData *)CFHTTPMessageCopyBody(_response) autorelease];
+}
+
+- (void)setBody:(NSData *)body
+{
+	CFHTTPMessageSetBody(_response, (CFDataRef)body);
+}
+
+@end

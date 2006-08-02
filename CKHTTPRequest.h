@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2006, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -28,17 +28,38 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnectionProtocol.h>
-#import <Connection/KTLog.h>
-#import <Connection/AbstractConnection.h>
-#import <Connection/AbstractQueueConnection.h>
-#import <Connection/StreamBasedConnection.h>
-#import <Connection/ConnectionOpenPanel.h>
-#import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
-#import <Connection/MultipleConnection.h>
-#import <Connection/NSData+Connection.h>
+#import <CoreFoundation/CoreFoundation.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPResponse.h>
+@interface CKHTTPRequest : NSObject 
+{
+	CFHTTPMessageRef _request;
+	NSMutableDictionary *_post;
+	NSMutableDictionary *_uploads;
+}
+
+- (id)initWithURL:(NSURL *)url method:(NSString *)method httpVersion:(CFStringRef)version;
+
+- (void)setHeaderField:(NSString *)header value:(NSString *)value;
+- (NSString *)valueForHeaderField:(NSString *)header;
+
+- (void)setPostValue:(id)value forKey:(NSString *)key;
+- (void)uploadFile:(NSString *)path forKey:(NSString *)key;
+- (void)uploadData:(NSData *)data withFilename:(NSString *)name forKey:(NSString *)key;
+
+- (BOOL)headersComplete;
+- (void)setBody:(NSData *)body;
+- (NSData *)body;
+
+- (NSString *)method;
+- (NSString *)version;
+- (NSURL *)url;
+
+- (NSData *)serializedRequest;
+
+@end
+
+@interface CKHTTPRequest (Private)
+
+- (CFHTTPMessageRef)message;
+
+@end

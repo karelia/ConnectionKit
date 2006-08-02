@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2006, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -28,17 +28,28 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnectionProtocol.h>
-#import <Connection/KTLog.h>
-#import <Connection/AbstractConnection.h>
-#import <Connection/AbstractQueueConnection.h>
-#import <Connection/StreamBasedConnection.h>
-#import <Connection/ConnectionOpenPanel.h>
-#import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
-#import <Connection/MultipleConnection.h>
-#import <Connection/NSData+Connection.h>
+#import <CoreFoundation/CoreFoundation.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPResponse.h>
+@interface CKHTTPResponse : NSObject 
+{	
+	CFHTTPMessageRef _response;
+}
+
+- (id)init;
+
+- (void)appendData:(NSData *)data;
+- (unsigned)code;
+
+- (BOOL)headersComplete;
+- (NSString *)valueForHeaderField:(NSString *)header;
+- (NSDictionary *)headers;
+- (void)setHeaders:(NSDictionary *)headers;
+
+- (NSString *)method;
+- (NSString *)version;
+
+- (NSData *)body;
+- (void)setBody:(NSData *)body;
+
+
+@end

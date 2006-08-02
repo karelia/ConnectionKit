@@ -15,6 +15,12 @@
 		3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* WebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* FTPConnection.h */; };
 		3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* SFTPConnection.h */; };
+		792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB20A806145001A00C6 /* CKHTTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB30A806145001A00C6 /* CKHTTPConnection.m */; };
+		792CFCBA0A806145001A00C6 /* CKHTTPRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB40A806145001A00C6 /* CKHTTPRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB50A806145001A00C6 /* CKHTTPRequest.m */; };
+		792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB60A806145001A00C6 /* CKHTTPResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
 		794DC3270A5A0EDC007157BE /* ConnectionThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */; };
 		794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */; };
 		794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD10A5CD6CA00913151 /* libcrypto.dylib */; };
@@ -175,6 +181,12 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
+		792CFCB20A806145001A00C6 /* CKHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPConnection.h; sourceTree = "<group>"; };
+		792CFCB30A806145001A00C6 /* CKHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPConnection.m; sourceTree = "<group>"; };
+		792CFCB40A806145001A00C6 /* CKHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPRequest.h; sourceTree = "<group>"; };
+		792CFCB50A806145001A00C6 /* CKHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPRequest.m; sourceTree = "<group>"; };
+		792CFCB60A806145001A00C6 /* CKHTTPResponse.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPResponse.h; sourceTree = "<group>"; };
+		792CFCB70A806145001A00C6 /* CKHTTPResponse.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPResponse.m; sourceTree = "<group>"; };
 		794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionThreadManager.h; sourceTree = "<group>"; };
 		794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionThreadManager.m; sourceTree = "<group>"; };
 		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -476,6 +488,19 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		792CFCA70A806108001A00C6 /* HTTP */ = {
+			isa = PBXGroup;
+			children = (
+				792CFCB20A806145001A00C6 /* CKHTTPConnection.h */,
+				792CFCB30A806145001A00C6 /* CKHTTPConnection.m */,
+				792CFCB40A806145001A00C6 /* CKHTTPRequest.h */,
+				792CFCB50A806145001A00C6 /* CKHTTPRequest.m */,
+				792CFCB60A806145001A00C6 /* CKHTTPResponse.h */,
+				792CFCB70A806145001A00C6 /* CKHTTPResponse.m */,
+			);
+			name = HTTP;
+			sourceTree = "<group>";
+		};
 		794DF0E40A5CD087007157BE /* SSH */ = {
 			isa = PBXGroup;
 			children = (
@@ -524,6 +549,7 @@
 		79CFD11A09F7022900172CDD /* Connections */ = {
 			isa = PBXGroup;
 			children = (
+				792CFCA70A806108001A00C6 /* HTTP */,
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */,
@@ -691,6 +717,9 @@
 				3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */,
 				3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */,
 				3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */,
+				792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */,
+				792CFCBA0A806145001A00C6 /* CKHTTPRequest.h in Headers */,
+				792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -915,6 +944,9 @@
 				794EFE2C0A5CE58E00913151 /* sftp.c in Sources */,
 				794EFE2D0A5CE58E00913151 /* userauth.c in Sources */,
 				79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */,
+				792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */,
+				792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */,
+				792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
