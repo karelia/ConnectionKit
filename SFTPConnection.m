@@ -284,7 +284,6 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		[self performSelectorOnMainThread:@selector(mainThreadPassphrase:) withObject:publicKey waitUntilDone:YES];
 		if (!myKeychainFingerPrint)
 		{
-#warning GREG -- user cancelled the Public Key Passphrase.  Does this merit an error callback?  Not sure if cancellation does...
 			[self threadedForceDisconnect];
 			return;		// no fingerprint retrieved -- cancel connection.
 			
@@ -790,9 +789,8 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	NSMutableData *data = [NSMutableData dataWithLength:kSFTPBufferSize];
 	size_t read = libssh2_sftp_read(myTransferHandle,[data mutableBytes],kSFTPBufferSize);
 	
-  //if we read less than the size of the buffer we need to write only what was read to the file
-  //
-  data = [data subdataWithRange: NSMakeRange( 0 , read)];
+	//if we read less than the size of the buffer we need to write only what was read to the file
+	data = (NSMutableData *)[data subdataWithRange: NSMakeRange(0, read)];
   
 	if (_flags.downloadProgressed)
 	{
