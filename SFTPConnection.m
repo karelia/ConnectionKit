@@ -220,7 +220,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	SSHPassphrase *pass = [[SSHPassphrase alloc] init];
 	NSString *passphrase = [pass passphraseForPublicKey:publicKey account:[self username]];
 	[myKeychainFingerPrint autorelease];
-	myKeychainFingerPrint = [passphrase copy];
+	myKeychainFingerPrint = [passphrase copy];		// will be nil if passphrase not given (cancel button)
 	[pass release];
 }
 
@@ -282,8 +282,15 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		}
 		//need to see if the password is stored in the keychain
 		[self performSelectorOnMainThread:@selector(mainThreadPassphrase:) withObject:publicKey waitUntilDone:YES];
-		
-		if (libssh2_userauth_publickey_fromfile(mySession, [[self username] UTF8String], [publicKey UTF8String], [privateKey UTF8String], [myKeychainFingerPrint UTF8String])) {
+		if (!myKeychainFingerPrint)
+		{
+#warning GREG -- user cancelled the Public Key Passphrase.  Does this merit an error callback?  Not sure if cancellation does...
+			[self threadedForceDisconnect];
+			return;		// no fingerprint retrieved -- cancel connection.
+			
+		}
+		if (libssh2_userauth_publickey_fromfile(mySession, [[self username] UTF8String], [publicKey UTF8String], [privateKey UTF8String], [myKeychainFingerPrint UTF8String]))
+		{
 			if (_flags.error)
 			{
 				NSString *localised = LocalizedStringInThisBundle(@"Authentication by Public Key Failed", @"failed pk authentication for ssh");
@@ -548,10 +555,11 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 {
 	unsigned long permissions = [perms unsignedLongValue];
 	LIBSSH2_SFTP_ATTRIBUTES attribs;
-	int ret = libssh2_sftp_stat_ex(mySFTPChannel, (char *)[path UTF8String], [path length], 0, &attribs);
+	char *utf8 = (char *)[path UTF8String];
+	int ret = libssh2_sftp_stat_ex(mySFTPChannel, utf8, strlen(utf8), 0, &attribs);
 	unsigned long newPerms = attribs.permissions | permissions;
 	attribs.permissions = newPerms;
-	ret = libssh2_sftp_stat_ex(mySFTPChannel, (char *)[path UTF8String], [path length], 1, &attribs);
+	ret = libssh2_sftp_stat_ex(mySFTPChannel, utf8, strlen(utf8), 1, &attribs);
 	[self setState:ConnectionIdleState];
 }
 

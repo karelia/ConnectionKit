@@ -35,11 +35,11 @@
 				
 	attributes[0].tag = kSecAccountItemAttr;
 	attributes[0].data = (void *)[username UTF8String];
-	attributes[0].length = [username length];
+	attributes[0].length = strlen(attributes[0].data);
 				
 	attributes[1].tag = kSecCommentItemAttr;
 	attributes[1].data = (void *)[pkPath UTF8String];
-	attributes[1].length = [pkPath length];
+	attributes[1].length = strlen(attributes[1].data);
 				
 	attributes[2].tag = kSecDescriptionItemAttr;
 	attributes[2].data = (void *)desc;
@@ -49,7 +49,7 @@
 				
 	attributes[3].tag = kSecLabelItemAttr;
 	attributes[3].data = (void *)[label UTF8String];
-	attributes[3].length = [label length];
+	attributes[3].length = strlen(attributes[3].data);
 	
     list.count = 4;
     list.attr = &attributes[0];
@@ -78,10 +78,9 @@
 		
 		status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
 		
-		if (length > 0)
-		{
-			password = [NSString stringWithCString:pass length:length];
-		}
+		// length  may be zero, it just means a zero-length password
+		password = [NSString stringWithCString:pass length:length];
+
 	}
 	if (item) CFRelease(item);
 	if (search) CFRelease (search);
@@ -91,7 +90,7 @@
 
 - (NSString *)passphraseForPublicKey:(NSString *)pkPath account:(NSString *)username
 {
-	NSString *passphrase = nil;
+	NSString *passphrase = nil;		// if passphrase not found or entered, we return nil to cancel the operation
 	
 	passphrase = [self passphraseFromKeychainWithPublicKey:pkPath account:username];
 	
@@ -105,7 +104,6 @@
 		[oPanel makeKeyAndOrderFront:self];
 		int rc = [NSApp runModalForWindow:oPanel];
 		[oPanel orderOut:self];
-		passphrase = @"";
 		
 		if (rc == NSOKButton)
 		{
@@ -123,11 +121,11 @@
 				
 				attributes[0].tag = kSecAccountItemAttr;
 				attributes[0].data = (void *)[username UTF8String];
-				attributes[0].length = [username length];
+				attributes[0].length = strlen(attributes[0].data);
 				
 				attributes[1].tag = kSecCommentItemAttr;
 				attributes[1].data = (void *)[pkPath UTF8String];
-				attributes[1].length = [pkPath length];
+				attributes[1].length = strlen(attributes[1].data);
 				
 				attributes[2].tag = kSecDescriptionItemAttr;
 				attributes[2].data = (void *)desc;
@@ -137,17 +135,20 @@
 				
 				attributes[3].tag = kSecLabelItemAttr;
 				attributes[3].data = (void *)[label UTF8String];
-				attributes[3].length = [label length];
+				attributes[3].length = strlen(attributes[3].data);
 				
 				list.count = 4;
 				list.attr = attributes;
 				
-				status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, &list, [passphrase length], [passphrase UTF8String], NULL,NULL,&item);
+				char *passphraseUTF8 = [passphrase UTF8String];
+				status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
 				if (status != 0) {
 					NSLog(@"Error creating new item: %d\n", (int)status);
 				}
 			}
 		}
+		
+		// Cancel will result in a nil passphrase
 	}
 	
 	return passphrase;

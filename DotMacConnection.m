@@ -98,11 +98,12 @@
 	char *buffer;
 	UInt32 passwordLen;
 	
+	char *utf8 = [accountName UTF8String];
 	theStatus = SecKeychainFindGenericPassword(NULL,
 											   6,
 											   "iTools",
-											   [accountName length],
-											   [accountName UTF8String],
+											   strlen(utf8),
+											   utf8,
 											   &passwordLen,
 											   (void *)&buffer,
 											   &item);
