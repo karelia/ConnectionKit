@@ -280,7 +280,7 @@
 					if (_flags.uploadFinished)
 					{
 						[_forwarder connection:self
-							   uploadDidFinish:[[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent]];
+							   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
 					}
 					break;
 				}
@@ -429,7 +429,7 @@
 			bytesTransferred += length;
 		}
 		
-		NSString *upload = [[[self currentUpload] objectForKey:QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent];
+		NSString *upload = [[self currentUpload] objectForKey:QueueUploadRemoteFileKey];
 		if (_flags.uploadPercent)
 		{
 			if (bytesToTransfer > 0) // intel gives a crash for div by 0
@@ -534,6 +534,12 @@
 - (void)deleteDirectory:(NSString *)dirPath
 {
 	[super deleteDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
+}
+
+- (void)uploadFile:(NSString *)localPath
+{
+	[super uploadFile: localPath
+             toFile: [myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
