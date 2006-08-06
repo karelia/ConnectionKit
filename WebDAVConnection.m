@@ -403,28 +403,30 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				[myResponseBuffer setLength:0];
 			}
 		}
-		else
-		{
-			//unsigned length = [data length];
+		else  //add the data at the end of the file
+    {
 			[myDownloadHandle writeData:data];
 			[myResponseBuffer setLength:0]; 
-			
-			if (bytesTransferred == bytesToTransfer)
-			{
-				[myDownloadHandle closeFile];
-				[myDownloadHandle release];
-				myDownloadHandle = nil;
-				
-				if (_flags.downloadFinished)
-				{
-					[_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
-				}
-				[myCurrentRequest release];
-				myCurrentRequest = nil;
-				[self dequeueDownload];
-				[self setState:ConnectionIdleState];
-			}
-		}
+    }
+    
+    //check for completion, if the file is really small, then the transfer might be complete on the first pass
+    //through this method, so check for completion everytime
+    //
+    if (bytesTransferred >= bytesToTransfer)  //sometimes more data is received than required (i assume on small size file)
+    {
+      [myDownloadHandle closeFile];
+      [myDownloadHandle release];
+      myDownloadHandle = nil;
+      
+      if (_flags.downloadFinished)
+      {
+        [_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
+      }
+      [myCurrentRequest release];
+      myCurrentRequest = nil;
+      [self dequeueDownload];
+      [self setState:ConnectionIdleState];
+    }
 	}
 	else
 	{
