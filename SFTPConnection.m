@@ -369,6 +369,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	libssh2_session_set_write(mySession,ssh_write);
 	
 	[super threadedConnect];
+  _flags.isConnected = YES;
 }
 
 - (void)threadedDisconnect
@@ -620,7 +621,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)uploadFile:(NSString *)localPath
 {
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
+	[self uploadFile:localPath toFile:[[self currentDirectory] stringByAppendingPathComponent: [localPath lastPathComponent]]];
 }
 
 - (void)threadedRunloopUploadFile:(NSFileHandle *)file
@@ -751,7 +752,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	NSData *data = [upload objectForKey:QueueUploadLocalDataKey];
 	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
 	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
-	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
+	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [[remote lastPathComponent] UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
 	if (_flags.didBeginUpload)
