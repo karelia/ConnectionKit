@@ -123,32 +123,42 @@
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
-		  username:(NSString *)user
-		  password:(NSString *)pass
-			 error:(NSError **)error
+              port:(NSString *)port
+          username:(NSString *)user
+          password:(NSString *)pass
+             error:(NSError **)error
 {
 	NSString *username = nil;
 	NSString *password = nil;
+  if (!user)
+  {
+    if (![self getDotMacAccountName:&username password:&password])
+    {
+      if (error)
+      {
+        NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+                                           code:ConnectionNoUsernameOrPassword
+                                       userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
+                                                                            forKey:NSLocalizedDescriptionKey]];
+        *error = err;
+      }
+      [self release];
+      return nil;
+    }
+    
+    if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
+    {
+      myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
+    }
+  }
+  else
+  {
+    if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
+    {
+      myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
+    }
+  }
 
-	if (![self getDotMacAccountName:&username password:&password])
-	{
-		if (error)
-		{
-			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-											   code:ConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
-																				forKey:NSLocalizedDescriptionKey]];
-			*error = err;
-		}
-		[self release];
-		return nil;
-	}
-	
-	if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
-	{
-		myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
-	}
 	return self;
 }
 
