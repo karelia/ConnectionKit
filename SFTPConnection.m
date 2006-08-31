@@ -229,6 +229,13 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	if (libssh2_session_startup(mySession, [self socket])) 
 	{
 		NSLog(@"%@", [self error]);
+    if (_flags.error)
+    {
+      NSError *error = [NSError errorWithDomain: SFTPErrorDomain
+                                           code: [self error]
+                                       userInfo: [NSDictionary dictionaryWithObject:[self error] forKey:NSLocalizedDescriptionKey]];
+      [_forwarder connection:self didReceiveError: error];
+    }
 	}
 	const char *fingerprint = libssh2_hostkey_hash(mySession, LIBSSH2_HOSTKEY_HASH_MD5);
 	NSMutableString *fp = [NSMutableString stringWithString:@""];
