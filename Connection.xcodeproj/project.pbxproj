@@ -44,8 +44,6 @@
 		794EFE2C0A5CE58E00913151 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1F0A5CE58E00913151 /* sftp.c */; };
 		794EFE2D0A5CE58E00913151 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE200A5CE58E00913151 /* userauth.c */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
-		796DB32409F8BBAB0065897B /* SSLStream.m in Sources */ = {isa = PBXBuildFile; fileRef = 796DB21209F89DCB0065897B /* SSLStream.m */; };
-		796DB32509F8BBAE0065897B /* SSLStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 796DB21109F89DCB0065897B /* SSLStream.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD84E09F7048500172CDD /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD80D09F7048400172CDD /* AbstractConnection.m */; };
@@ -589,6 +587,10 @@
 		79CFD11D09F7023D00172CDD /* DAV */ = {
 			isa = PBXGroup;
 			children = (
+				79CFD82309F7048400172CDD /* DAVRequest.h */,
+				79CFD82409F7048400172CDD /* DAVRequest.m */,
+				79CFD82509F7048400172CDD /* DAVResponse.h */,
+				79CFD82609F7048400172CDD /* DAVResponse.m */,
 				79CFD81309F7048400172CDD /* DAVCreateDirectoryRequest.h */,
 				79CFD81409F7048400172CDD /* DAVCreateDirectoryRequest.m */,
 				79CFD81509F7048400172CDD /* DAVCreateDirectoryResponse.h */,
@@ -605,10 +607,6 @@
 				79CFD82009F7048400172CDD /* DAVFileDownloadRequest.m */,
 				79CFD82109F7048400172CDD /* DAVFileDownloadResponse.h */,
 				79CFD82209F7048400172CDD /* DAVFileDownloadResponse.m */,
-				79CFD82309F7048400172CDD /* DAVRequest.h */,
-				79CFD82409F7048400172CDD /* DAVRequest.m */,
-				79CFD82509F7048400172CDD /* DAVResponse.h */,
-				79CFD82609F7048400172CDD /* DAVResponse.m */,
 				79CFD82709F7048400172CDD /* DAVUploadFileRequest.h */,
 				79CFD82809F7048400172CDD /* DAVUploadFileRequest.m */,
 				79CFD82909F7048400172CDD /* DAVUploadFileResponse.h */,
@@ -704,7 +702,6 @@
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
 				79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */,
 				79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */,
-				796DB32509F8BBAE0065897B /* SSLStream.h in Headers */,
 				794DC3270A5A0EDC007157BE /* ConnectionThreadManager.h in Headers */,
 				794EFDDC0A5CDD3200913151 /* libssh2_config.h in Headers */,
 				794EFDDD0A5CDD3200913151 /* libssh2_priv.h in Headers */,
@@ -928,7 +925,6 @@
 				79CFD88B09F7048500172CDD /* WebDAVConnection.m in Sources */,
 				79CFD88D09F7048500172CDD /* WebDAVSecureConnection.m in Sources */,
 				79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */,
-				796DB32409F8BBAB0065897B /* SSLStream.m in Sources */,
 				794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */,
 				794EFE210A5CE58E00913151 /* channel.c in Sources */,
 				794EFE220A5CE58E00913151 /* comp.c in Sources */,

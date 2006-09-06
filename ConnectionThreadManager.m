@@ -180,6 +180,7 @@ static NSLock *_initLock = nil;
 - (void)forwardInvocation:(NSInvocation *)inv
 {
 	[inv setTarget:myTarget];
+	[inv retainArguments];
 	myTarget = nil;
 	[myLock unlock];
 	

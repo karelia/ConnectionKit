@@ -307,7 +307,7 @@ ConnectionPostMessage (ConnectionInterThreadMessage *message, NSThread *thread, 
                                          receivePort:replyPort
                                          components:components];
 
-    if (nil == limitDate) { limitDate = [NSDate distantFuture]; }
+    if (nil == limitDate) { limitDate = [NSDate dateWithTimeIntervalSinceNow:1.5]; }
 	NSLock *ourLock = ConnectionMessageLockForThread([NSThread currentThread]);
 	NSLock *receiverLock = ConnectionMessageLockForThread(thread);
 	if (![ourLock tryLock])
@@ -327,18 +327,23 @@ ConnectionPostMessage (ConnectionInterThreadMessage *message, NSThread *thread, 
 		[data release];
 		return;
 	}
-    retval = [portMessage sendBeforeDate:limitDate];
-	[ourLock unlock];
-	[receiverLock unlock];
-    [portMessage release];
-    [components release];
-    [data release];
-
-    if (!retval) {
-        [NSException raise:NSPortTimeoutException
-                     format:@"Can't send message to thread %@: timeout "
-                            @"before date %@", thread, limitDate];
-    }
+	@try {
+		retval = [portMessage sendBeforeDate:limitDate];
+	}
+    @catch (NSException *ex) {
+		
+	}
+	@finally {
+		if (!retval)
+		{
+			[[NSThread currentThread] delayPostingMessage:message thread:thread];
+		}
+		[ourLock unlock];
+		[receiverLock unlock];
+		[portMessage release];
+		[components release];
+		[data release];
+	}
 }
 
 static void
@@ -388,7 +393,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 					  arg1:(id)arg1
 					  arg2:(id)arg2
 {
-	NSLog(@"resending delayed message");
+	NSLog(@"resending delayed message: %@ to %@", NSStringFromSelector([receiver selector]), [receiver target]);
 	ConnectionInterThreadMessage *msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
 	bzero(msg, sizeof(struct ConnectionInterThreadMessage));
 	// we have already retained our args from the initial creation of the msg
@@ -427,7 +432,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 
 - (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread
 {
-	NSLog(@"delaying message");
+	NSLog(@"delaying message: %@ to %@", NSStringFromSelector([msg->data.sel.receiver selector]), [msg->data.sel.receiver target]);
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
 													  target:self
 												   arguments:[NSArray array]];
@@ -447,8 +452,9 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 		if (msg->data.sel.arg2)
 			[inv setArgument:&msg->data.sel.arg2 atIndex:8];
 	}
-	[inv performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
 	[inv retainArguments];
+	[inv performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
+	
 	free(msg);
 }
 
