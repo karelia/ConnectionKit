@@ -66,10 +66,6 @@
 
 - (void)setPostValue:(id)value forKey:(NSString *)key
 {
-	if ([value isKindOfClass:[NSString class]])
-	{
-		value = [value dataUsingEncoding:NSUTF8StringEncoding];
-	}
 	[_post setObject:value forKey:key];
 }
 
@@ -132,12 +128,18 @@
 		
 		NSEnumerator *e = [_post keyEnumerator];
 		NSString *key;
+		id value;
 		
 		while (key = [e nextObject])
 		{
 			[body appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
 			[body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
-			[body appendData:[_post objectForKey:key]];
+			value = [_post objectForKey:key];
+			if (![value isKindOfClass:[NSData class]])
+			{
+				value = [[value description] dataUsingEncoding:NSUTF8StringEncoding];
+			}
+			[body appendData:value];
 			[body appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
 		}
 		
@@ -158,10 +160,11 @@
 				mime = @"application/octet-stream";
 			}
 			[body appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-			[body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\";\r\n\r\n", key, filename] dataUsingEncoding:NSUTF8StringEncoding]];
+			[body appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\nContent-Type: \"%@\"\r\n\r\n", key, filename, mime] dataUsingEncoding:NSUTF8StringEncoding]];
 			[body appendData:data];
 			[body appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
 		}
+		[body appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
 		[self setBody:body];
 	}
 	return [(NSData *)CFHTTPMessageCopySerializedMessage(_request) autorelease];

@@ -31,6 +31,8 @@
 #import "CKHTTPConnection.h"
 #import "CKHTTPResponse.h"
 #import "CKHTTPRequest.h"
+#import "ConnectionThreadManager.h"
+#import "DAVResponse.h"
 
 NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
@@ -65,6 +67,7 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 
 - (void)closeStreams
 {
+	NSLog(@"closing streams");
 	[_response autorelease];
 	_response = nil;
 	
@@ -100,7 +103,7 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 	[self closeStreams];
 }
 
-- (void)sendRequest:(CKHTTPRequest *)request
+- (void)sendThreadedRequest:(CKHTTPRequest *)request
 {
 	if (_readStream || _writeStream)
 		[self closeStreams];
@@ -163,6 +166,11 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 	}
 }
 
+- (void)sendRequest:(CKHTTPRequest *)request
+{
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendThreadedRequest:request];
+}
+
 - (CKHTTPRequest *)request
 {
 	return _request;
@@ -174,18 +182,26 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 	{
 		case kCFStreamEventOpenCompleted:
 		{
-			[_response autorelease];
-			_response = [[CKHTTPResponse alloc] init];
+			[_receivedData autorelease];
+			_receivedData = [[NSMutableData alloc] init];
 		}break;
 		case kCFStreamEventHasBytesAvailable:
 		{
 			UInt8 buffer[4096];
 			CFIndex bytesRead = CFReadStreamRead(_readStream,buffer,sizeof(buffer));
+			NSLog(@"read %d bytes", bytesRead);
 			
-			NSData *data = [NSData dataWithBytes:buffer length:bytesRead];
-			[_response appendData:data];
+			[_receivedData appendBytes:buffer length:bytesRead];
 			if (_flags.didReceiveData)
 				[_delegate connection:self didReceiveDataOfLength:bytesRead];
+			
+			if ([DAVResponse canConstructResponseWithData:_receivedData].location != NSNotFound)
+			{
+				[_response autorelease];
+				_response = [[DAVResponse responseWithRequest:nil data:_receivedData] retain];
+				if (_flags.didReceiveResponse)
+					[_delegate connection:self didReceiveResponse:_response];
+			}
 		} break;
 		case kCFStreamEventEndEncountered:
 		{
@@ -194,8 +210,6 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 			CFReadStreamClose(_readStream);
 			CFRelease(_readStream);
 			_readStream = NULL;
-			if (_flags.didReceiveResponse)
-				[_delegate connection:self didReceiveResponse:_response];
 			if (_flags.didFinishLoading)
 				[_delegate connectionDidFinishLoading:self];
 		}break;
@@ -225,7 +239,6 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 			
 			NSData *toSend = [_sendData subdataWithRange:_sendRange];
 			CFWriteStreamWrite(_writeStream,(UInt8 *)[toSend bytes],[toSend length]);
-			
 			if (_flags.didSendDataOfLength)
 				[_delegate connection:self didSendDataOfLength:[toSend length]];
 			

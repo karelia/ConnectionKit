@@ -29,7 +29,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class CKHTTPRequest, CKHTTPResponse;
+@class CKHTTPRequest, DAVResponse;
 
 @interface CKHTTPConnection : NSObject 
 {
@@ -37,10 +37,12 @@
 	CFWriteStreamRef _writeStream;
 	
 	CKHTTPRequest *_request;
-	CKHTTPResponse *_response;
+	DAVResponse *_response;
 	
 	NSData *_sendData;
 	NSRange _sendRange;
+	
+	NSMutableData *_receivedData;
 	
 	id _delegate;
 	
@@ -66,7 +68,7 @@
 
 - (void)connection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error;
 - (void)connection:(CKHTTPConnection *)connection didReceiveDataOfLength:(int)length;
-- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
+- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(DAVResponse *)response;
 - (void)connectionDidFinishLoading:(CKHTTPConnection *)connection;
 - (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
 
