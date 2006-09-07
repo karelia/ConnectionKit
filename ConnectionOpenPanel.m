@@ -796,7 +796,7 @@ static NSImage *symFile = nil;
 			BOOL isLeaf = NO;
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 			{
-				NSLog(@"%@", [cur objectForKey:cxSymbolicLinkTargetKey]);
+				NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
 			}
 			if (![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory] || 
 				([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))

@@ -63,7 +63,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 	{
 		if (err)
 		{
-			NSLog(@"%@", err);
+			NSLog(@"%@: %@", NSStringFromSelector(_cmd), err);
 		}
 	}
 	[connection setDelegate: self];

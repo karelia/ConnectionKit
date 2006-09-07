@@ -23,7 +23,7 @@ static PermissionsController *_shared = nil;
 	_con = con;
 	
 	NSNumber *posix = [file objectForKey:NSFilePosixPermissions];
-	NSLog(@"%@", posix);
+	NSLog(@"%@: %@", NSStringFromSelector(_cmd), posix);
 	
 	[NSApp beginSheet:window
 	   modalForWindow:win
