@@ -753,7 +753,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		_fileCheckInFlight = [[self currentFileCheck] copy];
 		NSString *dir = [_fileCheckInFlight stringByDeletingLastPathComponent];
 		if (!dir)
-			NSLog(@"%@", _fileCheckInFlight);
+			NSLog(@"%@: %@", NSStringFromSelector(_cmd), _fileCheckInFlight);
 		[_fileCheckingConnection changeToDirectory:dir];
 		[_fileCheckingConnection directoryContents];
 	}

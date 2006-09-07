@@ -832,7 +832,7 @@ static NSImage *_folder = nil;
 
 - (void)connection:(AbstractConnection *)aConn didReceiveError:(NSError *)error
 {
-	NSLog(@"%@", error);
+	NSLog(@"%@: %@", NSStringFromSelector(_cmd), error);
 	NSRunAlertPanel(@"Error",@"Connection returned an error: %@",@"OK",nil
 					,nil, [error localizedDescription]);
 }
@@ -877,7 +877,7 @@ static NSImage *_folder = nil;
 
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
-	NSLog(@"%@", dirPath);
+	NSLog(@"%@: %@", NSStringFromSelector(_cmd), dirPath);
 	[remoteFiles removeAllObjects];
 	NSEnumerator *e = [contents objectEnumerator];
 	NSDictionary *cur;

@@ -228,7 +228,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 {	
 	if (libssh2_session_startup(mySession, [self socket])) 
 	{
-		NSLog(@"%@", [self error]);
+		NSLog(@"%@: %@", NSStringFromSelector(_cmd), [self error]);
     if (_flags.error)
     {
       NSError *error = [NSError errorWithDomain: SFTPErrorDomain
