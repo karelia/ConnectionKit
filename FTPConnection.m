@@ -1259,8 +1259,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Filename not Allowed", @"FTP Upload error")
-																					  forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Filename not Allowed", @"FTP Upload error"),
+																					  NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey,
+													 nil]];
+
+#warning TODO: it would be nice to include more additional keys, like I did here, to help with diagnosis of error codes.  Here I include the entire command so I can see what file was illegal.
+
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;

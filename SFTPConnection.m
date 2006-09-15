@@ -231,6 +231,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		NSLog(@"%@: %@", NSStringFromSelector(_cmd), [self error]);
     if (_flags.error)
     {
+#warning [self error] returns a string, but code: below is expecting an integer!
       NSError *error = [NSError errorWithDomain: SFTPErrorDomain
                                            code: [self error]
                                        userInfo: [NSDictionary dictionaryWithObject:[self error] forKey:NSLocalizedDescriptionKey]];
