@@ -89,31 +89,31 @@ NSDictionary *sDataAttributes;
 #pragma mark -
 #pragma mark Registry
 
-+ (void)initialize
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-	NSFont *plainFont = [NSFont fontWithName:@"Courier" size:11];
-	NSFont *boldFont = [[NSFontManager sharedFontManager] convertFont:plainFont toHaveTrait:NSBoldFontMask];
-	
-	sReceivedAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			boldFont, NSFontAttributeName,
-			[NSColor blackColor], NSForegroundColorAttributeName,
-			nil];
-	sSentAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			plainFont, NSFontAttributeName,
-			[NSColor redColor], NSForegroundColorAttributeName,
-			nil];
-	sDataAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			plainFont, NSFontAttributeName,
-			[NSColor blueColor], NSForegroundColorAttributeName,
-			nil];
-	
-	[pool release];
-}
+//+ (void)initialize
+//{
+//	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+//
+//	NSFont *plainFont = [NSFont fontWithName:@"Courier" size:11];
+//	NSFont *boldFont = [[NSFontManager sharedFontManager] convertFont:plainFont toHaveTrait:NSBoldFontMask];
+//	
+//	sReceivedAttributes
+//		= [[NSDictionary alloc] initWithObjectsAndKeys:
+//			boldFont, NSFontAttributeName,
+//			[NSColor blackColor], NSForegroundColorAttributeName,
+//			nil];
+//	sSentAttributes
+//		= [[NSDictionary alloc] initWithObjectsAndKeys:
+//			plainFont, NSFontAttributeName,
+//			[NSColor redColor], NSForegroundColorAttributeName,
+//			nil];
+//	sDataAttributes
+//		= [[NSDictionary alloc] initWithObjectsAndKeys:
+//			plainFont, NSFontAttributeName,
+//			[NSColor blueColor], NSForegroundColorAttributeName,
+//			nil];
+//	
+//	[pool release];
+//}
 
 + (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types
 {
