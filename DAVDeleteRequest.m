@@ -28,10 +28,8 @@
  */
 
 #import "DAVDeleteRequest.h"
+#import "NSString+Connection.h"
 
-@interface NSString (Connection)
-- (NSString *)encodeLegally;
-@end
 
 @implementation DAVDeleteRequest
 
@@ -60,16 +58,3 @@
 }
 
 @end
-
-@implementation NSString (Connection)
-
-- (NSString *)encodeLegally
-{
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef) self, (CFStringRef) @"%+#", NULL,
-																			CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-	return result;
-}
-
-@end
-

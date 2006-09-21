@@ -140,7 +140,7 @@
 				list.count = 4;
 				list.attr = attributes;
 				
-				char *passphraseUTF8 = [passphrase UTF8String];
+				char *passphraseUTF8 = (char *)[passphrase UTF8String];
 				status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
 				if (status != 0) {
 					NSLog(@"Error creating new item: %d\n", (int)status);

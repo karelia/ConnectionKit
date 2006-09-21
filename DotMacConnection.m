@@ -31,7 +31,6 @@
 #import "DotMacConnection.h"
 #import "AbstractConnection.h"
 #import "AbstractConnectionProtocol.h"
-#import "DAVRequest.h"
 #import "DAVDirectoryContentsRequest.h"
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"
@@ -47,9 +46,6 @@
 #import <Security/Security.h>
 #import "ConnectionThreadManager.h"
 
-@interface NSString (DotMac)
-- (NSString *)stringByDeletingFirstPathComponent;
-@end
 
 @interface WebDAVConnection (DotMac)
 - (void)processResponse:(DAVResponse *)response;
@@ -98,7 +94,7 @@
 	char *buffer;
 	UInt32 passwordLen;
 	
-	char *utf8 = [accountName UTF8String];
+	char *utf8 = (char *)[accountName UTF8String];
 	theStatus = SecKeychainFindGenericPassword(NULL,
 											   6,
 											   "iTools",
@@ -130,34 +126,35 @@
 {
 	NSString *username = nil;
 	NSString *password = nil;
-  if (!user)
-  {
-    if (![self getDotMacAccountName:&username password:&password])
-    {
-      if (error)
-      {
-        NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-                                           code:ConnectionNoUsernameOrPassword
-                                       userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
-                                                                            forKey:NSLocalizedDescriptionKey]];
-        *error = err;
-      }
-      [self release];
-      return nil;
-    }
-    
-    if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
-    {
-      myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
-    }
-  }
-  else
-  {
-    if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
-    {
-      myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
-    }
-  }
+	
+	if (user == nil || [user isEqualToString:@""])
+	{
+		if (![self getDotMacAccountName:&username password:&password])
+		{
+			if (error)
+			{
+				NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
+												   code:ConnectionNoUsernameOrPassword
+											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
+																					forKey:NSLocalizedDescriptionKey]];
+				*error = err;
+			}
+			[self release];
+			return nil;
+		}
+		
+		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
+		{
+			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
+		}
+	}
+	else
+	{
+		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
+		{
+			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
+		}
+	}
 
 	return self;
 }
@@ -629,18 +626,3 @@
 
 @end
 
-@implementation NSString (DotMac)
-
-- (NSString *)stringByDeletingFirstPathComponent
-{
-	NSString *str = self;
-	if ([str hasPrefix:@"/"])
-		str = [str substringFromIndex:1];
-	NSMutableArray *comps = [NSMutableArray arrayWithArray:[str componentsSeparatedByString:@"/"]];
-	if ([comps count] > 0) {
-		[comps removeObjectAtIndex:0];
-	}
-	return [@"/" stringByAppendingString:[comps componentsJoinedByString:@"/"]];
-}
-
-@end

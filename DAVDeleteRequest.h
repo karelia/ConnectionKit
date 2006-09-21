@@ -28,9 +28,9 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "DAVRequest.h"
+#import "CKHTTPRequest.h"
 
-@interface DAVDeleteRequest : DAVRequest
+@interface DAVDeleteRequest : CKHTTPRequest
 {
 }
 

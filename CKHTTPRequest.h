@@ -27,39 +27,56 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import <CoreFoundation/CoreFoundation.h>
+#import <Foundation/Foundation.h>
+
+@class CKHTTPResponse;
 
 @interface CKHTTPRequest : NSObject 
 {
-	CFHTTPMessageRef _request;
-	NSMutableDictionary *_post;
-	NSMutableDictionary *_uploads;
+	NSString			*myMethod;
+	NSString			*myURI;
+	id					myUserInfo;
+	
+	NSMutableDictionary *myHeaders;
+	NSMutableData		*myContent;
+	unsigned			myHeaderLength;
+	
+	NSMutableDictionary *myPost;
+	NSMutableDictionary *myUploads;
 }
 
-- (id)initWithURL:(NSURL *)url method:(NSString *)method httpVersion:(CFStringRef)version;
++ (id)requestWithMethod:(NSString *)method uri:(NSString *)uri;
 
-- (void)setHeaderField:(NSString *)header value:(NSString *)value;
-- (NSString *)valueForHeaderField:(NSString *)header;
+- (id)initWithMethod:(NSString *)method uri:(NSString *)uri;
+
+- (void)setHeader:(NSString *)val forKey:(NSString *)key;
+- (void)addHeader:(NSString *)val forKey:(NSString *)key;
+- (id)headerForKey:(NSString *)key;
+- (NSDictionary *)headers;
+
+- (void)setUserInfo:(id)ui;
+- (id)userInfo;
 
 - (void)setPostValue:(id)value forKey:(NSString *)key;
 - (void)uploadFile:(NSString *)path forKey:(NSString *)key;
 - (void)uploadData:(NSData *)data withFilename:(NSString *)name forKey:(NSString *)key;
 
-- (BOOL)headersComplete;
-- (void)setBody:(NSData *)body;
-- (NSData *)body;
+- (void)appendContent:(NSData *)data;
+- (void)appendContentString:(NSString *)str;
+- (void)setContent:(NSData *)data;
+- (void)setContentString:(NSString *)str;
 
+- (NSData *)content;
+- (NSString *)contentString;
 - (NSString *)method;
-- (NSString *)version;
-- (NSURL *)url;
+- (NSString *)uri;
 
-- (NSData *)serializedRequest;
+- (unsigned)contentLength;
 
-@end
+- (void)serializeContentWithPacket:(NSMutableData *)packet; // subclasses override. packet is still in the header section at this point. only append your own headers if required, not your content
+- (NSData *)serialized;
+- (unsigned)headerLength; //only will contain a valid value after serialized is called
 
-@interface CKHTTPRequest (Private)
-
-- (CFHTTPMessageRef)message;
+- (CKHTTPResponse *)responseWithData:(NSData *)data;
 
 @end

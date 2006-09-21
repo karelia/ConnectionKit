@@ -29,19 +29,18 @@
 
 #import "WebDAVConnection.h"
 #import "AbstractConnection.h"
-#import "DAVRequest.h"
 #import "DAVDirectoryContentsRequest.h"
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"
 #import "DAVDeleteRequest.h"
-#import "DAVFileDownloadRequest.h"
 #import "DAVResponse.h"
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVCreateDirectoryResponse.h"
 #import "DAVUploadFileResponse.h"
 #import "DAVDeleteResponse.h"
-#import "DAVFileDownloadResponse.h"
 #import "NSData+Connection.h"
+#import "CKHTTPFileDownloadRequest.h"
+#import "CKHTTPFileDownloadResponse.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
@@ -53,7 +52,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"80", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"http://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
+	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"webdav://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[AbstractConnection registerConnectionClass:[WebDAVConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
 }
@@ -104,37 +103,22 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
                           password:password
 							 error:error])
 	{
-		myResponseBuffer = [[NSMutableData data] retain];
-		NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
-		myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
-		myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
+		
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[myCurrentRequest release];
 	[myCurrentDirectory release];
-	[myResponseBuffer release];
+	[myDownloadHandle release];
 	[super dealloc];
 }
 
 #pragma mark -
 #pragma mark Stream Overrides
 
-- (void)threadedConnect
-{
-	[super threadedConnect];
-	_flags.isConnected = YES;
-	[self setState:ConnectionIdleState];
-	if (_flags.didConnect)
-	{
-		[_forwarder connection:self didConnectToHost:[self host]];
-	}
-}
-
-- (void)processResponse:(DAVResponse *)response
+- (void)processResponse:(CKHTTPResponse *)response
 {	
 	switch (GET_STATE)
 	{
@@ -358,9 +342,35 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	}
 }
 
-- (void)processReceivedData:(NSData *)data
+- (void)initiatingNewRequest:(CKHTTPRequest *)req withPacket:(NSData *)packet
 {
-	[myResponseBuffer appendData:data];
+	// if we are uploading or downloading set up the transfer sizes
+	if (GET_STATE == ConnectionUploadingFileState)
+	{
+		transferHeaderLength = [req headerLength];
+		bytesToTransfer = [packet length] - transferHeaderLength;
+		bytesTransferred = 0;
+		if (_flags.didBeginUpload)
+		{
+			[_forwarder connection:self
+					uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+		}
+	}
+	if (GET_STATE == ConnectionDownloadingFileState)
+	{
+		bytesToTransfer = 0;
+		bytesTransferred = 0;
+		
+		if (_flags.didBeginDownload)
+		{
+			[_forwarder connection:self
+				  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+		}
+	}
+}
+
+- (BOOL)processBufferWithNewData:(NSData *)data
+{
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
 		if (bytesToTransfer == 0)
@@ -399,192 +409,64 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				unsigned start = headerRange.location + headerRange.length;
 				unsigned len = [myResponseBuffer length] - start;
-				[myDownloadHandle writeData:[myResponseBuffer subdataWithRange:NSMakeRange(start,len)]];
+				NSData *fileData = [myResponseBuffer subdataWithRange:NSMakeRange(start,len)];
+				[myDownloadHandle writeData:fileData];
 				[myResponseBuffer setLength:0];
+				
+				bytesTransferred += [fileData length];
+				
+				if (_flags.downloadProgressed)
+				{
+					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[fileData length]];
+				}
+				
+				if (_flags.downloadPercent)
+				{
+					int percent = (100 * bytesTransferred) / bytesToTransfer;
+					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+				}
 			}
 		}
 		else  //add the data at the end of the file
-    {
+		{
 			[myDownloadHandle writeData:data];
 			[myResponseBuffer setLength:0]; 
-    }
-    
-    //check for completion, if the file is really small, then the transfer might be complete on the first pass
-    //through this method, so check for completion everytime
-    //
-    if (bytesTransferred >= bytesToTransfer)  //sometimes more data is received than required (i assume on small size file)
-    {
-      [myDownloadHandle closeFile];
-      [myDownloadHandle release];
-      myDownloadHandle = nil;
-      
-      if (_flags.downloadFinished)
-      {
-        [_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
-      }
-      [myCurrentRequest release];
-      myCurrentRequest = nil;
-      [self dequeueDownload];
-      [self setState:ConnectionIdleState];
-    }
-	}
-	else
-	{
-		NSRange responseRange = [DAVResponse canConstructResponseWithData:myResponseBuffer];
-		if (responseRange.location != NSNotFound)
-		{
-			NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
-			DAVResponse *response = [DAVResponse responseWithRequest:myCurrentRequest data:packetData];
-			[myResponseBuffer setLength:0];
-			[self closeStreams];
+			bytesTransferred += [data length];
 			
+			if (_flags.downloadProgressed)
+			{
+				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
+			}
+			
+			if (_flags.downloadPercent)
+			{
+				int percent = (100 * bytesTransferred) / bytesToTransfer;
+				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+			}
+		}
+		
+		
+		//check for completion, if the file is really small, then the transfer might be complete on the first pass
+		//through this method, so check for completion everytime
+		//
+		if (bytesTransferred >= bytesToTransfer)  //sometimes more data is received than required (i assume on small size file)
+		{
+			[myDownloadHandle closeFile];
+			[myDownloadHandle release];
+			myDownloadHandle = nil;
+			
+			if (_flags.downloadFinished)
+			{
+				[_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
+			}
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
-			
-			KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Received: %@", response);
-			
-			if ([self transcript])
-			{
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
-																		  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
-																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
-			}
-			
-			if ([response code] == 401)
-			{
-				if (myAuthorization != nil)
-				{
-					// the user or password supplied is bad
-					if (_flags.badPassword)
-					{
-						[_forwarder connectionDidSendBadPassword:self];
-						[self setState:ConnectionNotConnectedState];
-						if (_flags.didDisconnect)
-						{
-							[_forwarder connection:self didDisconnectFromHost:[self host]];
-						}
-					}
-				}
-				else
-				{
-					if ([self transcript])
-					{
-						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
-																				  attributes:[AbstractConnection sentAttributes]] autorelease]];
-					}
-					// need to append authorization
-					NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-					NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
-					NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
-					NSScanner *scanner = [NSScanner scannerWithString:auth];
-					NSString *authMethod = nil;
-					NSString *realm = nil;
-					[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
-					[scanner scanUpToString:@"Realm\"" intoString:nil];
-					[scanner scanUpToCharactersFromSet:quote intoString:&realm];
-					
-					if ([authMethod isEqualToString:@"Basic"])
-					{
-						NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
-						NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
-						[myAuthorization autorelease];
-						myAuthorization = [[authData base64Encoding] retain];
-						//resend the request with auth
-						[self sendCommand:myCurrentRequest];
-						return;
-					}
-					else
-					{
-						if ([self transcript])
-						{
-							[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"WebDAVConnection only supports Basic Authentication!\n"] 
-																					  attributes:[AbstractConnection sentAttributes]] autorelease]];
-						}
-						@throw [NSException exceptionWithName:NSInternalInconsistencyException
-													   reason:@"Only Basic Authentication is supported at the moment"
-													 userInfo:nil];
-					}
-				}
-			}
-			[self processResponse:response];
+			[self dequeueDownload];
+			[self setState:ConnectionIdleState];
 		}
+		return NO;
 	}
-}
-
-- (void)sendCommand:(id)command
-{
-	if ([command isKindOfClass:[DAVRequest class]])
-	{
-		DAVRequest *req = [(DAVRequest *)command retain];
-		[myCurrentRequest release];
-		myCurrentRequest = req;
-		
-		//make sure we set the host name and set anything else which is needed
-		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
-		if (myAuthorization)
-		{
-			[req setHeader:myAuthorization forKey:@"Authorization"];
-		}
-		
-		if (myDAVFlags.isInReconnection)
-		{
-			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
-			return;
-		}
-		if (myDAVFlags.needsReconnection || _sendStream == nil || _receiveStream == nil)
-		{
-			myDAVFlags.needsReconnection = NO;
-			myDAVFlags.isInReconnection = YES;
-			[self openStreamsToPort:[[self port] intValue]];
-			[self scheduleStreamsOnRunLoop];
-			
-			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
-			return;
-		}
-		
-		NSData *packet = [req serialized];
-		
-		if ([self transcript])
-		{
-			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
-																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
-		}
-		
-		// if we are uploading or downloading set up the transfer sizes
-		if (GET_STATE == ConnectionUploadingFileState)
-		{
-			transferHeaderLength = [req headerLength];
-			bytesToTransfer = [packet length] - transferHeaderLength;
-			bytesTransferred = 0;
-			if (_flags.didBeginUpload)
-			{
-				[_forwarder connection:self
-						uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
-			}
-		}
-		if (GET_STATE == ConnectionDownloadingFileState)
-		{
-			bytesToTransfer = 0;
-			bytesTransferred = 0;
-			
-			if (_flags.didBeginDownload)
-			{
-				[_forwarder connection:self
-					  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
-			}
-			
-		}
-		KTLog(ProtocolDomain, KTLogDebug, @"WebDAV Sending: %@", req);
-		[self sendData:packet];
-	}
-	else 
-	{
-		//we are an invocation
-		NSInvocation *inv = (NSInvocation *)command;
-		[inv invoke];
-	}
+	return YES;
 }
 
 - (void)closeStreams
@@ -595,29 +477,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 #pragma mark -
 #pragma mark Abstract Connection Protocol
-
-- (void)davDisconnect
-{
-	[self closeStreams];
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
-	[self setState:ConnectionNotConnectedState];
-}
-
-- (void)disconnect
-{
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDisconnect)
-													  target:self
-												   arguments:[NSArray array]];
-	ConnectionCommand *cmd = [ConnectionCommand command:inv
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionSentQuitState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
-}
 
 - (void)davDidChangeToDirectory:(NSString *)dirPath
 {
@@ -776,7 +635,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	DAVFileDownloadRequest *r = [DAVFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
+	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:r
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDownloadingFileState
@@ -796,7 +655,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)davDirectoryContents:(NSString *)dir
 {
-	DAVRequest *r = [DAVDirectoryContentsRequest directoryContentsForPath:dir != nil ? dir : myCurrentDirectory];
+	CKHTTPRequest *r = [DAVDirectoryContentsRequest directoryContentsForPath:dir != nil ? dir : myCurrentDirectory];
 	[myCurrentRequest autorelease];
 	myCurrentRequest = [r retain];
 	[self sendCommand:r];
@@ -836,75 +695,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark -
 #pragma mark Stream Overrides
 
-- (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
-{
-	switch (theEvent) 
-	{
-		case NSStreamEventEndEncountered: 
-		{
-			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
-			[self closeStreams];
-			myDAVFlags.needsReconnection = YES;
-			if (myCurrentRequest)
-			{
-				[self sendCommand:myCurrentRequest];
-			}
-			
-			break;
-		}
-		case NSStreamEventOpenCompleted:
-		{
-			if (!_flags.isConnected)
-			{
-				[super handleReceiveStreamEvent:theEvent];
-			}
-			else
-			{
-				myDAVFlags.isInReconnection = NO;
-				myDAVFlags.finishedReconnection = YES;
-			}
-			break;
-		}
-		default:
-			[super handleReceiveStreamEvent:theEvent];
-	}
-}
-
-- (void)handleSendStreamEvent:(NSStreamEvent)theEvent
-{
-	switch (theEvent) 
-	{
-		case NSStreamEventEndEncountered: 
-		{
-			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
-			[self closeStreams];
-			myDAVFlags.needsReconnection = YES;
-			if (myCurrentRequest)
-			{
-				[self sendCommand:myCurrentRequest];
-			}
-			break;
-		}
-		case NSStreamEventOpenCompleted:
-		{
-			if (!_flags.isConnected)
-			{
-				[super handleSendStreamEvent:theEvent];
-			}
-			else
-			{
-				myDAVFlags.isInReconnection = NO;
-				myDAVFlags.finishedReconnection = YES;
-			}
-			break;
-		}
-		default:
-			[super handleSendStreamEvent:theEvent];
-	}
-}
 
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
+	[super stream:stream sentBytesOfLength:length]; // call http
 	if (length == 0) return;
 	if (GET_STATE == ConnectionUploadingFileState)
 	{

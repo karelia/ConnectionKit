@@ -28,9 +28,9 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "DAVRequest.h"
+#import "CKHTTPRequest.h"
 
-@interface DAVDirectoryContentsRequest : DAVRequest
+@interface DAVDirectoryContentsRequest : CKHTTPRequest
 {
 	NSString *myPath;
 }

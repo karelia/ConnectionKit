@@ -33,60 +33,55 @@
 #import "CKHTTPRequest.h"
 #import "ConnectionThreadManager.h"
 #import "DAVResponse.h"
+#import "NSData+Connection.h"
+
+enum {
+	HTTPSentGenericRequestState = 32012
+};
 
 NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
-@interface CKHTTPConnection (Private)
-- (void)handleReadStreamEvent:(CFStreamEventType)type;
-- (void)handleWriteStreamEvent:(CFStreamEventType)type;
-@end
-
-static void ReadStreamClientCallBack(CFReadStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
-    [((CKHTTPConnection *)clientCallBackInfo) handleReadStreamEvent: type];
-}
-
-static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType type, void *clientCallBackInfo) {
-    [((CKHTTPConnection *)clientCallBackInfo) handleWriteStreamEvent: type];
-}
-
 @implementation CKHTTPConnection
 
-- (id)initWithDelegate:(id)delegate
++ (id)connectionToHost:(NSString *)host
+				  port:(NSString *)port
+			  username:(NSString *)username
+			  password:(NSString *)password
+				 error:(NSError **)error
 {
-	[super init];
-	_delegate = delegate;
-	
-	_flags.didFailWithError = [delegate respondsToSelector:@selector(connection:didFailWithError:)];
-	_flags.didFinishLoading = [delegate respondsToSelector:@selector(connectionDidFinishLoading:)];
-	_flags.didReceiveData = [delegate respondsToSelector:@selector(connection:didReceiveData:)];
-	_flags.didReceiveResponse = [delegate respondsToSelector:@selector(connection:didReceiveResponse:)];
-	_flags.didSendDataOfLength = [delegate respondsToSelector:@selector(connection:didSendDataOfLength:)];
+	CKHTTPConnection *c = [[self alloc] initWithHost:host
+                                                port:port
+                                            username:username
+                                            password:password
+											   error:error];
+	return [c autorelease];
+}
 
+- (id)initWithHost:(NSString *)host
+			  port:(NSString *)port
+		  username:(NSString *)username
+		  password:(NSString *)password
+			 error:(NSError **)error
+{
+	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	{
+		myResponseBuffer = [[NSMutableData data] retain];
+		if (username && password)
+		{
+			NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
+			myAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
+		}
+	}
 	return self;
 }
 
-- (void)closeStreams
+- (void)dealloc
 {
-	NSLog(@"closing streams");
-	[_response autorelease];
-	_response = nil;
+	[myCurrentRequest release];
+	[myResponseBuffer release];
+	[myAuthorization release];
 	
-	if (_readStream != NULL)
-	{
-		CFReadStreamSetClient(_readStream,0,NULL,NULL);
-		CFReadStreamUnscheduleFromRunLoop(_readStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-		CFReadStreamClose(_readStream);
-		CFRelease(_readStream);
-		_readStream = NULL;
-	}
-	if (_writeStream != NULL)
-	{
-		CFWriteStreamSetClient(_writeStream,0,NULL,NULL);
-		CFWriteStreamUnscheduleFromRunLoop(_writeStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-		CFWriteStreamClose(_writeStream);
-		CFRelease(_writeStream);
-		_writeStream = NULL;
-	}
+	[super dealloc];
 }
 
 - (void)sendError:(NSString *)error code:(int)code
@@ -94,171 +89,324 @@ static void WriteStreamClientCallBack(CFWriteStreamRef stream, CFStreamEventType
 	NSError *err = [NSError errorWithDomain:CKHTTPConnectionErrorDomain 
 									   code:code 
 								   userInfo:[NSDictionary dictionaryWithObject:error forKey:NSLocalizedDescriptionKey]];
-	if (_flags.didFailWithError)
-		[_delegate connection:self didFailWithError:err];
-}
-
-- (void)cancel
-{
-	[self closeStreams];
-}
-
-- (void)sendThreadedRequest:(CKHTTPRequest *)request
-{
-	if (_readStream || _writeStream)
-		[self closeStreams];
-	
-	[_request autorelease];
-	_request = [request retain];
-		
-	if ([[[[request url] scheme] lowercaseString] isEqualToString:@"https"])
+	if (_flags.error)
 	{
-		CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault,(CFStringRef)[[request url] host],443,&_readStream,&_writeStream);
-		//turn on ssl
-		CFWriteStreamSetProperty(_writeStream,kCFStreamPropertySocketSecurityLevel,kCFStreamSocketSecurityLevelNegotiatedSSL);
-		CFReadStreamSetProperty(_readStream,kCFStreamPropertySocketSecurityLevel,kCFStreamSocketSecurityLevelNegotiatedSSL);
-	}
-	else
-	{
-		CFStreamCreatePairWithSocketToHost(kCFAllocatorDefault,(CFStringRef)[[request url] host],80,&_readStream,&_writeStream);
-	}
-	
-	//set callbacks
-	CFStreamClientContext ctxt = {0, self, NULL, NULL, NULL};
-	BOOL val;
-	
-	val = CFWriteStreamSetClient(_writeStream,
-						   kCFStreamEventOpenCompleted | kCFStreamEventCanAcceptBytes | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered,
-						   WriteStreamClientCallBack,
-						   &ctxt);
-	if (!val)
-	{
-		[self closeStreams];
-		[self sendError:@"Failed to create stream client" code:0];
-		return;
-	}
-	val = CFReadStreamSetClient(_readStream,
-						  kCFStreamEventOpenCompleted | kCFStreamEventHasBytesAvailable | kCFStreamEventErrorOccurred | kCFStreamEventEndEncountered,
-						  ReadStreamClientCallBack,
-						  &ctxt);
-	if (!val)
-	{
-		[self closeStreams];
-		[self sendError:@"Failed to create stream client" code:0];
-		return;
-	}	
-	CFWriteStreamScheduleWithRunLoop(_writeStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-	CFReadStreamScheduleWithRunLoop(_readStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-		
-	//open the read stream before the write stream
-	if (!CFReadStreamOpen(_readStream))
-	{
-		[self closeStreams];
-		[self sendError:@"Failed to open read stream" code:0];
-		return;
-	}
-	
-	if (!CFWriteStreamOpen(_writeStream))
-	{
-		[self closeStreams];
-		[self sendError:@"Failed to open write stream" code:0];
-		return;
+		[_forwarder connection:self didReceiveError:err];
 	}
 }
 
 - (void)sendRequest:(CKHTTPRequest *)request
 {
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendThreadedRequest:request];
+	ConnectionCommand *cmd = [ConnectionCommand command:request 
+											 awaitState:ConnectionIdleState 
+											  sentState:HTTPSentGenericRequestState 
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
-- (CKHTTPRequest *)request
+#pragma mark -
+#pragma mark Stream Overrides
+
+- (void)setDelegate:(id)delegate
 {
-	return _request;
+	myHTTPFlags.didReceiveData = [delegate respondsToSelector:@selector(connection:didReceiveData:)];
+	myHTTPFlags.didReceiveResponse = [delegate respondsToSelector:@selector(connection:didReceiveResponse:)];
+	myHTTPFlags.didSendDataOfLength = [delegate respondsToSelector:@selector(connection:didSendDataOfLength:)];
+	
+	[super setDelegate:delegate];
 }
 
-- (void)handleReadStreamEvent:(CFStreamEventType)type
+- (void)threadedConnect
 {
-	switch (type)
+	[super threadedConnect];
+	_flags.isConnected = YES;
+	[self setState:ConnectionIdleState];
+	if (_flags.didConnect)
 	{
-		case kCFStreamEventOpenCompleted:
-		{
-			[_receivedData autorelease];
-			_receivedData = [[NSMutableData alloc] init];
-		}break;
-		case kCFStreamEventHasBytesAvailable:
-		{
-			UInt8 buffer[4096];
-			CFIndex bytesRead = CFReadStreamRead(_readStream,buffer,sizeof(buffer));
-			NSLog(@"read %d bytes", bytesRead);
-			
-			[_receivedData appendBytes:buffer length:bytesRead];
-			if (_flags.didReceiveData)
-				[_delegate connection:self didReceiveDataOfLength:bytesRead];
-			
-			if ([DAVResponse canConstructResponseWithData:_receivedData].location != NSNotFound)
-			{
-				[_response autorelease];
-				_response = [[DAVResponse responseWithRequest:nil data:_receivedData] retain];
-				if (_flags.didReceiveResponse)
-					[_delegate connection:self didReceiveResponse:_response];
-			}
-		} break;
-		case kCFStreamEventEndEncountered:
-		{
-			CFReadStreamSetClient(_readStream,0,NULL,NULL);
-			CFReadStreamUnscheduleFromRunLoop(_readStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-			CFReadStreamClose(_readStream);
-			CFRelease(_readStream);
-			_readStream = NULL;
-			if (_flags.didFinishLoading)
-				[_delegate connectionDidFinishLoading:self];
-		}break;
-		case kCFStreamEventErrorOccurred:
-		{
-			[self sendError:@"Read stream error occured" code:CFReadStreamGetStatus(_readStream)];
-		}break;
-		default:break;
+		[_forwarder connection:self didConnectToHost:[self host]];
 	}
 }
 
-- (void)handleWriteStreamEvent:(CFStreamEventType)type
-{
-	switch (type)
+- (void)processReceivedData:(NSData *)data
+{	
+	[myResponseBuffer appendData:data];
+	if ([self processBufferWithNewData:data])
 	{
-		case kCFStreamEventOpenCompleted:
+		NSRange responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
+		if (responseRange.location != NSNotFound)
 		{
-			[_sendData autorelease];
-			_sendData = [[_request serializedRequest] retain];
-			_sendRange = NSMakeRange(0, 0);
-		}break;
-		case kCFStreamEventCanAcceptBytes:
+			NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
+			CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
+			[myResponseBuffer setLength:0];
+			[self closeStreams];
+			
+			[myCurrentRequest release];
+			myCurrentRequest = nil;
+			
+			KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", response);
+			
+			if ([self transcript])
+			{
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
+																		  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
+																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
+			}
+			
+			if ([response code] == 401)
+			{
+				if (myAuthorization != nil)
+				{
+					// the user or password supplied is bad
+					if (_flags.badPassword)
+					{
+						[_forwarder connectionDidSendBadPassword:self];
+						[self setState:ConnectionNotConnectedState];
+						if (_flags.didDisconnect)
+						{
+							[_forwarder connection:self didDisconnectFromHost:[self host]];
+						}
+					}
+				}
+				else
+				{
+					if ([self transcript])
+					{
+						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
+																				  attributes:[AbstractConnection sentAttributes]] autorelease]];
+					}
+					// need to append authorization
+					NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+					NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+					NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+					NSScanner *scanner = [NSScanner scannerWithString:auth];
+					NSString *authMethod = nil;
+					NSString *realm = nil;
+					[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
+					[scanner scanUpToString:@"Realm\"" intoString:nil];
+					[scanner scanUpToCharactersFromSet:quote intoString:&realm];
+					
+					if ([authMethod isEqualToString:@"Basic"])
+					{
+						NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
+						NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+						[myAuthorization autorelease];
+						myAuthorization = [[authData base64Encoding] retain];
+						//resend the request with auth
+						[self sendCommand:myCurrentRequest];
+						return;
+					}
+					else
+					{
+						if ([self transcript])
+						{
+							[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection only supports Basic Authentication!\n"] 
+																					  attributes:[AbstractConnection sentAttributes]] autorelease]];
+						}
+						@throw [NSException exceptionWithName:NSInternalInconsistencyException
+													   reason:@"Only Basic Authentication is supported at the moment"
+													 userInfo:nil];
+					}
+				}
+			}
+			[self processResponse:response];
+		}
+	}
+}
+
+- (BOOL)processBufferWithNewData:(NSData *)data
+{
+	return YES;
+}
+
+- (void)processResponse:(CKHTTPResponse *)response
+{
+	[myCurrentRequest autorelease];
+	myCurrentRequest = nil;
+	
+	if (myHTTPFlags.didReceiveResponse)
+	{
+		[_forwarder connection:self didReceiveResponse:response];
+	}
+	[self setState:ConnectionIdleState];
+}
+
+- (void)sendCommand:(id)command
+{
+	if ([command isKindOfClass:[CKHTTPRequest class]])
+	{
+		CKHTTPRequest *req = [(CKHTTPRequest *)command retain];
+		[myCurrentRequest release];
+		myCurrentRequest = req;
+		
+		if (myHTTPFlags.isInReconnection)
 		{
-			_sendRange = NSMakeRange(_sendRange.location + _sendRange.length, 4096);
-			if (_sendRange.location + _sendRange.length > [_sendData length])
-				_sendRange.length = [_sendData length] - _sendRange.location;
-			
-			NSData *toSend = [_sendData subdataWithRange:_sendRange];
-			CFWriteStreamWrite(_writeStream,(UInt8 *)[toSend bytes],[toSend length]);
-			if (_flags.didSendDataOfLength)
-				[_delegate connection:self didSendDataOfLength:[toSend length]];
-			
-		}break;
-		case kCFStreamEventErrorOccurred:
+			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
+			return;
+		}
+		if (myHTTPFlags.needsReconnection || _sendStream == nil || _receiveStream == nil)
 		{
-			CFStreamError err = CFWriteStreamGetError(_writeStream);
+			myHTTPFlags.needsReconnection = NO;
+			myHTTPFlags.isInReconnection = YES;
+			[self openStreamsToPort:[[self port] intValue]];
+			[self scheduleStreamsOnRunLoop];
 			
-			[self sendError:@"Write stream error occured" code:err.error];
-		}break;
-		case kCFStreamEventEndEncountered:
+			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];
+			return;
+		}
+		
+		//make sure we set the host name and set anything else which is needed
+		[req setHeader:[self host] forKey:@"Host"];
+		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
+		
+		[self setAuthenticationWithRequest:req];
+		
+		NSData *packet = [req serialized];
+		
+		if ([self transcript])
 		{
-			CFWriteStreamSetClient(_writeStream,0,NULL,NULL);
-			CFWriteStreamUnscheduleFromRunLoop(_writeStream,CFRunLoopGetCurrent(),kCFRunLoopCommonModes);
-			CFWriteStreamClose(_writeStream);
-			CFRelease(_writeStream);
-			_writeStream = NULL;
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
+																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
+		}
+		
+		[self initiatingNewRequest:req withPacket:packet];
+		
+		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsString]);
+		[self sendData:packet];
+	}
+	else 
+	{
+		//we are an invocation
+		NSInvocation *inv = (NSInvocation *)command;
+		[inv invoke];
+	}
+}
+
+- (void)initiatingNewRequest:(CKHTTPRequest *)request withPacket:(NSData *)packet
+{
+	
+}
+
+- (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
+{
+	if (myAuthorization)
+	{
+		[request setHeader:myAuthorization forKey:@"Authorization"];
+	}
+}
+
+#pragma mark -
+#pragma mark Abstract Connection Protocol
+
+- (void)httpDisconnect
+{
+	[self closeStreams];
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
+	[self setState:ConnectionNotConnectedState];
+}
+
+- (void)disconnect
+{
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(httpDisconnect)
+													  target:self
+												   arguments:[NSArray array]];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSentQuitState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
+}
+
+#pragma mark -
+#pragma mark Stream Overrides
+
+- (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
+{
+	switch (theEvent) 
+	{
+		case NSStreamEventEndEncountered: 
+		{
+			KTLog(InputStreamDomain, KTLogDebug, @"Stream Closed");
+			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
+			[self closeStreams];
+			myHTTPFlags.needsReconnection = YES;
+			if (myCurrentRequest && [_sendBuffer length] > 0)
+			{
+				[self sendCommand:myCurrentRequest];
+			}
 			
-		}break;
-		default: break;
+			break;
+		}
+		case NSStreamEventOpenCompleted:
+		{
+			if (!_flags.isConnected)
+			{
+				[super handleReceiveStreamEvent:theEvent];
+			}
+			else
+			{
+				myHTTPFlags.isInReconnection = NO;
+				myHTTPFlags.finishedReconnection = YES;
+			}
+			break;
+		}
+		default:
+			[super handleReceiveStreamEvent:theEvent];
+	}
+}
+
+- (void)handleSendStreamEvent:(NSStreamEvent)theEvent
+{
+	switch (theEvent) 
+	{
+		case NSStreamEventEndEncountered: 
+		{
+			KTLog(OutputStreamDomain, KTLogDebug, @"Stream Closed");
+			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
+			[self closeStreams];
+			myHTTPFlags.needsReconnection = YES;
+			if (myCurrentRequest && [_sendBuffer length] > 0)
+			{
+				[self sendCommand:myCurrentRequest];
+			}
+			break;
+		}
+		case NSStreamEventOpenCompleted:
+		{
+			if (!_flags.isConnected)
+			{
+				[super handleSendStreamEvent:theEvent];
+			}
+			else
+			{
+				myHTTPFlags.isInReconnection = NO;
+				myHTTPFlags.finishedReconnection = YES;
+			}
+			break;
+		}
+		default:
+			[super handleSendStreamEvent:theEvent];
+	}
+}
+
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+{
+	if (myHTTPFlags.didSendDataOfLength)
+	{
+		[_forwarder connection:self didSendDataOfLength:length];
+	}
+}
+
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
+{
+	if (myHTTPFlags.didReceiveData)
+	{
+		[_forwarder connection:self didReceiveDataOfLength:length];
 	}
 }
 

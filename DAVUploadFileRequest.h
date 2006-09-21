@@ -28,9 +28,9 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "DAVRequest.h"
+#import "CKHTTPRequest.h"
 
-@interface DAVUploadFileRequest : DAVRequest
+@interface DAVUploadFileRequest : CKHTTPRequest
 {
 	NSString *myLocalFilename;
 	NSString *myFilename;

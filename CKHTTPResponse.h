@@ -27,29 +27,32 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
-#import <CoreFoundation/CoreFoundation.h>
+#import "CKHTTPRequest.h"
 
-@interface CKHTTPResponse : NSObject 
+@interface CKHTTPResponse : CKHTTPRequest 
 {	
-	CFHTTPMessageRef _response;
+	CKHTTPRequest		*myRequest;
+	int					myResponseCode;
+	NSString			*myResponse;
 }
 
-- (id)init;
++ (void)registerCustomResponseClass:(NSString *)response forRequestClass:(NSString *)request;
 
-- (void)appendData:(NSData *)data;
-- (unsigned)code;
+// returns the range of data required to construct the response object
++ (NSRange)canConstructResponseWithData:(NSData *)data;
++ (NSDictionary *)headersWithData:(NSData *)data;
 
-- (BOOL)headersComplete;
-- (NSString *)valueForHeaderField:(NSString *)header;
-- (NSDictionary *)headers;
-- (void)setHeaders:(NSDictionary *)headers;
+//designated initializer - do not use initWithRequest:data:
++ (id)responseWithRequest:(CKHTTPRequest *)request data:(NSData *)data;
+- (id)initWithRequest:(CKHTTPRequest *)request data:(NSData *)data;
 
-- (NSString *)method;
-- (NSString *)version;
+- (int)code;
+- (NSString *)response; //eg Multi Status
+- (NSString *)formattedResponse; // sublcasses override to format their contents
 
-- (NSData *)body;
-- (void)setBody:(NSData *)body;
-
+- (CKHTTPRequest *)request;
 
 @end
+
+
+

@@ -28,19 +28,30 @@
  
  */
 #import "NSData+Connection.h"
-#include <zlib.h>
+#import <zlib.h>
+#import <openssl/ssl.h>
+#import <openssl/hmac.h>
 
 @implementation NSData (Connection)
 
 - (NSString *)base64Encoding
 {
-	const char *buffer = (const char *)[self bytes];
-	size_t size = [self length];
-	char *dest = nil;
+	BIO * mem = BIO_new(BIO_s_mem());
+	BIO * b64 = BIO_new(BIO_f_base64());
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    mem = BIO_push(b64, mem);
 	
-	size_t new_size = Curl_base64_encode(buffer, size, &dest);
-	NSString *result = [[[NSString alloc] initWithBytesNoCopy:dest length:new_size encoding:NSASCIIStringEncoding freeWhenDone:YES] autorelease];
-	return result;
+	BIO_write(mem, [self bytes], [self length]);
+    BIO_flush(mem);
+	
+	char * base64Pointer;
+    long base64Length = BIO_get_mem_data(mem, &base64Pointer);
+	
+	NSString * base64String = [NSString stringWithCString:base64Pointer
+												   length:base64Length];
+	
+	BIO_free_all(mem);
+    return base64String;
 }
 
 - (NSString *)descriptionAsString
@@ -135,6 +146,11 @@
 
 - (NSRange)rangeOfData:(NSData *)data
 {
+	return [self rangeOfData:data range:NSMakeRange(0, [self length])];
+}
+
+- (NSRange)rangeOfData:(NSData *)data range:(NSRange)range
+{
 	NSRange r = NSMakeRange(NSNotFound, 0);
 	if (!data || [data length] == 0)
 		return r;
@@ -143,15 +159,18 @@
 	uint8_t *str = (uint8_t *)[self bytes];
 	unsigned i = 0, j = 1, start = 0, end = 0;
 	
-	while (i < [self length])
+	//wind it forward to the start of the range
+	unsigned offset = range.location;
+	
+	while (i + offset < [self length])
 	{
-		if (str[i] == find[0])
+		if (str[i + offset] == find[0])
 		{
 			start = i;
 			j = 1;
-			while (j < [data length])
+			while (j < [data length] && i + offset + j < [self length])
 			{
-				if (str[i+j] != find[j])
+				if (str[i + offset + j] != find[j])
 				{
 					break;
 				}
@@ -160,7 +179,7 @@
 			end = j;
 			if (j == [data length])
 			{
-				r.location = start;
+				r.location = start + offset;
 				r.length = [data length];
 				break;
 			}
@@ -170,5 +189,47 @@
 	
 	return r;
 }
+
+// these are from http://people.no-distance.net/ol/software/s3/ BSD Licensed
+
+- (NSData *)md5Digest
+{
+	EVP_MD_CTX mdctx;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	unsigned int md_len;
+	EVP_DigestInit(&mdctx, EVP_md5());
+	EVP_DigestUpdate(&mdctx, [self bytes], [self length]);
+	EVP_DigestFinal(&mdctx, md_value, &md_len);
+	return [NSData dataWithBytes:md_value length:md_len];
+}
+
+- (NSData *)sha1Digest
+{
+	EVP_MD_CTX mdctx;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	unsigned int md_len;
+	EVP_DigestInit(&mdctx, EVP_sha1());
+	EVP_DigestUpdate(&mdctx, [self bytes], [self length]);
+	EVP_DigestFinal(&mdctx, md_value, &md_len);
+	return [NSData dataWithBytes:md_value length:md_len];
+}
+
+- (NSData *)sha1HMacWithKey:(NSString*)key
+{
+	HMAC_CTX mdctx;
+	unsigned char md_value[EVP_MAX_MD_SIZE];
+	unsigned int md_len;
+	const char* k = [key cStringUsingEncoding:NSUTF8StringEncoding];
+	const unsigned char *data = [self bytes];
+	int len = [self length];
+	
+	HMAC_CTX_init(&mdctx);
+	HMAC_Init(&mdctx,k,strlen(k),EVP_sha1());
+	HMAC_Update(&mdctx,data, len);
+	HMAC_Final(&mdctx, md_value, &md_len);
+	HMAC_CTX_cleanup(&mdctx);
+	return [NSData dataWithBytes:md_value length:md_len];
+}
+
 
 @end

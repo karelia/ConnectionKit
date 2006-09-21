@@ -29,75 +29,380 @@
 
 
 #import "CKHTTPResponse.h"
+#import "NSData+Connection.h"
+#import "NSString+Connection.h"
 
+static NSMutableDictionary *responseMap = nil;
 
 @implementation CKHTTPResponse
 
-- (id)init
++ (void)load
 {
-	[super init];
-	_response = CFHTTPMessageCreateEmpty(kCFAllocatorDefault,FALSE);
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	responseMap = [[NSMutableDictionary dictionary] retain];
+	
+	[pool release];
+}
+
++ (void)registerCustomResponseClass:(NSString *)response forRequestClass:(NSString *)request
+{
+	[responseMap setObject:response forKey:request];
+}
+
++ (NSDictionary *)headersWithData:(NSData *)data
+{
+	NSMutableDictionary *headers = [NSMutableDictionary dictionary];
+	
+	NSRange headerRange = [data rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+	if (headerRange.location == NSNotFound)
+		return headers;
+	
+	NSString *packet = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
+	NSArray *lines = [packet componentsSeparatedByString:@"\r\n"];
+	// we put in a try/catch to handle any unexpected/missing data
+	@try {
+		if ([lines count] > 1) // need the response line and at least a couple of blank lines
+		{
+			NSArray *response = [[lines objectAtIndex:0] componentsSeparatedByString:@" "];
+			// HTTP/1.1 CODE NAME
+			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
+			{
+				[headers setObject:response forKey:@"Server-Response"];
+				
+				// now enumerate over the headers which will be if the line is empty
+				int i, lineCount = [lines count];
+				for (i = 1; i < lineCount; i++)
+				{
+					NSString *line = [lines objectAtIndex:i];
+					if ([line isEqualToString:@""])
+					{
+						//we hit the end of the headers
+						i++;
+						break;
+					}
+					NSRange colon = [line rangeOfString:@":"];
+					if (colon.location != NSNotFound)
+					{
+						NSString *key = [line substringToIndex:colon.location];
+						NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
+						BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
+						
+						if (hasMultiValues)
+						{
+							NSArray *vals = [val componentsSeparatedByString:@";"];
+							NSMutableArray *mutableVals = [NSMutableArray array];
+							NSEnumerator *e = [vals objectEnumerator];
+							NSString *cur;
+							
+							while (cur = [e nextObject])
+							{
+								[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+							}
+							[headers setObject:mutableVals forKey:key];
+						}
+						else
+						{
+							[headers setObject:val forKey:key];
+						}
+					}
+				}
+			}
+		}
+	}
+	@catch (NSException *e) 
+	{
+		
+	}
+	return headers;
+}
+
++ (NSRange)canConstructResponseWithData:(NSData *)data
+{
+	NSRange packetRange = NSMakeRange(NSNotFound, 0);
+	NSRange headerRange = [data rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+	
+	if (headerRange.location == NSNotFound)
+	{
+		return packetRange;
+	}
+	
+	NSString *headerString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
+	NSArray *headerLines = [headerString componentsSeparatedByString:@"\r\n"];
+	NSMutableDictionary *headers = [NSMutableDictionary dictionary];
+	
+	// we put in a try/catch to handle any unexpected/missing data
+	@try {
+		NSArray *response = [[headerLines objectAtIndex:0] componentsSeparatedByString:@" "];
+		// HTTP/1.1 CODE NAME
+		if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
+		{
+			//int responseCode = [[response objectAtIndex:1] intValue];
+			
+			if ([response count] >= 3)
+			{
+				//NSString *msg = [[response subarrayWithRange:NSMakeRange(2, [response count] - 2)] componentsJoinedByString:@" "];
+			}
+			
+			// now enumerate over the headers which will be if the line is empty
+			int i, lineCount = [headerLines count];
+			for (i = 1; i < lineCount; i++)
+			{
+				NSString *line = [headerLines objectAtIndex:i];
+				if ([line isEqualToString:@""])
+				{
+					//we hit the end of the headers
+					i++;
+					break;
+				}
+				NSRange colon = [line rangeOfString:@":"];
+				if (colon.location != NSNotFound)
+				{
+					NSString *key = [line substringToIndex:colon.location];
+					NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
+					BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
+					
+					if (hasMultiValues)
+					{
+						NSArray *vals = [val componentsSeparatedByString:@";"];
+						NSMutableArray *mutableVals = [NSMutableArray array];
+						NSEnumerator *e = [vals objectEnumerator];
+						NSString *cur;
+						
+						while (cur = [e nextObject])
+						{
+							[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+						}
+						[headers setObject:mutableVals forKey:key];
+					}
+					else
+					{
+						[headers setObject:val forKey:key];
+					}
+				}
+			}
+		}
+		BOOL isChunkedTransfer = NO;
+		if ([headers objectForKey:@"Transfer-Encoding"])
+		{
+			if ([[[headers objectForKey:@"Transfer-Encoding"] lowercaseString] isEqualToString:@"chunked"])
+			{
+				isChunkedTransfer = YES;
+			}
+		}
+		// now get the data range for the content
+		unsigned start = NSMaxRange(headerRange);
+		if (!isChunkedTransfer)
+		{
+			unsigned contentLength = [[headers objectForKey:@"Content-Length"] intValue];
+			if (contentLength > 0)
+			{
+				unsigned end = start + contentLength;
+				
+				if (end <= [data length]) //only update the packet range if it is all there
+				{
+					packetRange.location = 0;
+					packetRange.length = end;
+				}
+			}
+			else
+			{
+				// it must be just a response with just headers
+				packetRange.location = 0;
+				packetRange.length = start;
+			}
+		}
+		else
+		{
+			NSCharacterSet *hexSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"];
+			NSRange lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
+											  range:NSMakeRange(start, [data length] - start)];
+			NSString *lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
+			NSScanner *scanner = [NSScanner scannerWithString:lengthString];
+			unsigned chunkLength = 0;
+			[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
+			[scanner scanHexInt:&chunkLength];
+			
+			while (chunkLength > 0)
+			{
+				//[self appendContent:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
+				
+				lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
+										  range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
+				lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
+				scanner = [NSScanner scannerWithString:lengthString];
+				[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
+				[scanner scanHexInt:&chunkLength];
+			}
+			
+			// the end of range will be 0\r\n\r\n
+			//NSRange end = [packet rangeOfString:@"0\r\n\r\n"];
+			packetRange.location = 0;
+			packetRange.length = NSMaxRange(lengthRange);
+		}
+	} 
+	@catch (NSException *e) {
+		// do nothing - we cannot parse properly
+	}
+	@finally {
+		
+	}
+	return packetRange;
+}
+
++ (id)responseWithRequest:(CKHTTPRequest *)request data:(NSData *)data
+{
+	//see if we map a certain request to a specific response
+	NSString *clsStr = [responseMap objectForKey:NSStringFromClass([request class])];
+	
+	if (clsStr)
+	{
+		//	NSLog(@"Matched Request: %@ to %@", [request className], clsStr);
+		return [[[NSClassFromString(clsStr) alloc] initWithRequest:request data:data] autorelease];
+	}
+	return [[[CKHTTPResponse alloc] initWithRequest:request data:data] autorelease];
+}
+
+- (id)initWithRequest:(CKHTTPRequest *)request data:(NSData *)data
+{
+	if (self = [super init])
+	{
+		myRequest = [request retain];
+		NSRange headerRange = [data rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
+		NSString *headerString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
+		NSArray *headerLines = [headerString componentsSeparatedByString:@"\r\n"];
+		
+		NSArray *response = [[headerLines objectAtIndex:0] componentsSeparatedByString:@" "]; // HTTP/1.1 CODE NAME
+		myResponseCode = [[response objectAtIndex:1] intValue];
+		if ([response count] >= 3)
+		{
+			NSString *msg = [[response subarrayWithRange:NSMakeRange(2, [response count] - 2)] componentsJoinedByString:@" "];
+			myResponse = [msg copy];
+		}
+		
+		// now enumerate over the headers which will be if the line is empty
+		int i, lineCount = [headerLines count];
+		for (i = 1; i < lineCount; i++)
+		{
+			NSString *line = [headerLines objectAtIndex:i];
+			if ([line isEqualToString:@""])
+			{
+				//we hit the end of the headers
+				i++;
+				break;
+			}
+			NSRange colon = [line rangeOfString:@":"];
+			if (colon.location != NSNotFound)
+			{
+				NSString *key = [line substringToIndex:colon.location];
+				NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
+				BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
+				
+				if (hasMultiValues)
+				{
+					NSArray *vals = [val componentsSeparatedByString:@";"];
+					NSMutableArray *mutableVals = [NSMutableArray array];
+					NSEnumerator *e = [vals objectEnumerator];
+					NSString *cur;
+					
+					while (cur = [e nextObject])
+					{
+						[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
+					}
+					[myHeaders setObject:mutableVals forKey:key];
+				}
+				else
+				{
+					[myHeaders setObject:val forKey:key];
+				}
+			}
+		}
+		BOOL isChunkedTransfer = NO;
+		if ([myHeaders objectForKey:@"Transfer-Encoding"])
+		{
+			if ([[[myHeaders objectForKey:@"Transfer-Encoding"] lowercaseString] isEqualToString:@"chunked"])
+			{
+				isChunkedTransfer = YES;
+			}
+		}
+		// now get the data range for the content
+		unsigned start = NSMaxRange(headerRange);
+		
+		if (!isChunkedTransfer)
+		{
+			unsigned contentLength = [[myHeaders objectForKey:@"Content-Length"] intValue];
+			if (contentLength > 0)
+			{
+				[self setContent:[data subdataWithRange:NSMakeRange(start, contentLength)]];
+			}
+		}
+		else
+		{
+			NSCharacterSet *hexSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"];
+			NSRange lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
+											  range:NSMakeRange(start, [data length] - start)];
+			NSString *lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
+			NSScanner *scanner = [NSScanner scannerWithString:lengthString];
+			unsigned chunkLength = 0;
+			[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
+			[scanner scanHexInt:&chunkLength];
+			
+			while (chunkLength > 0)
+			{
+				[self appendContent:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
+				
+				lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
+										  range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
+				lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
+				scanner = [NSScanner scannerWithString:lengthString];
+				[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
+				[scanner scanHexInt:&chunkLength];
+			}
+		}	
+	}
 	return self;
 }
 
 - (void)dealloc
 {
-	CFRelease(_response);
+	[myRequest release];
+	[myResponse release];
 	[super dealloc];
 }
 
-- (unsigned)code
+- (NSString *)description
 {
-	return CFHTTPMessageGetResponseStatusCode(_response);
-}
-
-- (void)appendData:(NSData *)data
-{
-	CFHTTPMessageAppendBytes(_response,(UInt8 *)[data bytes],[data length]);
-}
-
-- (NSString *)valueForHeaderField:(NSString *)header
-{
-	return [(NSString *)CFHTTPMessageCopyHeaderFieldValue(_response,(CFStringRef)header) autorelease];
-}
-
-- (BOOL)headersComplete
-{
-	return CFHTTPMessageIsHeaderComplete(_response);
-}
-
-- (NSDictionary *)headers
-{
-	return [(NSDictionary *)CFHTTPMessageCopyAllHeaderFields(_response) autorelease];
-}
-
-- (void)setHeaders:(NSDictionary *)headers
-{
-	NSEnumerator *e = [headers keyEnumerator];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"HTTP/1.1 %d %@\n", myResponseCode, myResponse];
+	NSEnumerator *e = [myHeaders keyEnumerator];
 	NSString *key;
 	
-	while (key = [e nextObject]) 
-		CFHTTPMessageSetHeaderFieldValue(_response, (CFStringRef)key, (CFStringRef)[headers objectForKey:key]);
+	while (key = [e nextObject])
+	{
+		[str appendFormat:@"%@: %@\n", key, [[myHeaders objectForKey:key] description]];
+	}
+	//[str appendFormat:@"\n%@\n", [[self xmlDocument] XMLStringWithOptions:NSXMLNodePrettyPrint]];
+	return str;
 }
 
-- (NSString *)method
+- (NSString *)formattedResponse
 {
-	return [(NSString *)CFHTTPMessageCopyRequestMethod(_response) autorelease];
+	return [self description];
 }
 
-- (NSString *)version
+- (NSString *)response
 {
-	return [(NSString *)CFHTTPMessageCopyVersion(_response) autorelease];
+	return myResponse;
 }
 
-- (NSData *)body
+- (CKHTTPRequest *)request
 {
-	return [(NSData *)CFHTTPMessageCopyBody(_response) autorelease];
+	return myRequest;
 }
 
-- (void)setBody:(NSData *)body
+- (int)code
 {
-	CFHTTPMessageSetBody(_response, (CFDataRef)body);
+	return myResponseCode;
 }
 
 @end
+
