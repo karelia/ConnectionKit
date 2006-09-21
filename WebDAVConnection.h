@@ -26,28 +26,15 @@
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#import "StreamBasedConnection.h"
+#import "CKHTTPConnection.h"
 
-@class DAVRequest;
-
-@interface WebDAVConnection : StreamBasedConnection
+@interface WebDAVConnection : CKHTTPConnection
 {	
-	id				myCurrentRequest;
-	NSMutableData	*myResponseBuffer;
-	NSString		*myCurrentDirectory;
-	NSString		*myAuthorization;
-	
-	struct __davflags {
-		unsigned needsReconnection: 1;
-		unsigned isInReconnection: 1;
-		unsigned finishedReconnection: 1;
-		unsigned unused: 29;
-	} myDAVFlags;
-	
-	unsigned long long bytesTransferred;
-	unsigned long long bytesToTransfer;
-	unsigned long long transferHeaderLength;
-	NSFileHandle *myDownloadHandle;
+	NSString			*myCurrentDirectory;
+	unsigned long long	bytesTransferred;
+	unsigned long long	bytesToTransfer;
+	unsigned long long	transferHeaderLength;
+	NSFileHandle		*myDownloadHandle;
 }
 
 @end

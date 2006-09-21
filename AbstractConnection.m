@@ -75,6 +75,8 @@ NSString *ProtocolDomain = @"Protocol";
 NSString *ConnectionDomain = @"Connection";
 NSString *ThreadingDomain = @"Threading";
 NSString *StreamDomain = @"Stream";
+NSString *InputStreamDomain = @"Input Stream";
+NSString *OutputStreamDomain = @"Output Stream";
 
 static NSMutableArray *_connectionTypes = nil;
 
@@ -695,78 +697,96 @@ NSDictionary *sDataAttributes;
   NSLog (@"base class clean up, do we have to clean anything?");
 }
 
+#define SUBCLASS_RESPONSIBLE @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@ must implement %@", [self className], NSStringFromSelector(_cmd)] userInfo:nil];
+
 - (void)changeToDirectory:(NSString *)dirPath
 {
-    
+    SUBCLASS_RESPONSIBLE
 }
 
 - (NSString *)currentDirectory
 {
-	return nil;
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)deleteFile:(NSString *)path
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)uploadFile:(NSString *)localPath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {	
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (unsigned)numberOfTransfers
@@ -803,6 +823,7 @@ NSDictionary *sDataAttributes;
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	SUBCLASS_RESPONSIBLE
 }
 
 - (void)startBulkCommands

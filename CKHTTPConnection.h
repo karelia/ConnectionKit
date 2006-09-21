@@ -27,49 +27,43 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Cocoa/Cocoa.h>
+#import "StreamBasedConnection.h"
 
-@class CKHTTPRequest, DAVResponse;
+@class CKHTTPRequest, CKHTTPResponse;
 
-@interface CKHTTPConnection : NSObject 
+@interface CKHTTPConnection : StreamBasedConnection 
 {
-	CFReadStreamRef _readStream;
-	CFWriteStreamRef _writeStream;
-	
-	CKHTTPRequest *_request;
-	DAVResponse *_response;
-	
-	NSData *_sendData;
-	NSRange _sendRange;
-	
-	NSMutableData *_receivedData;
-	
-	id _delegate;
-	
+	id				myCurrentRequest;
+	NSMutableData	*myResponseBuffer;
+	NSString		*myAuthorization;
+		
 	struct __httpconflags {
 		unsigned didFailWithError:1;
 		unsigned didReceiveData:1;
 		unsigned didReceiveResponse:1;
-		unsigned didFinishLoading:1;
 		unsigned didSendDataOfLength:1;
-	} _flags;
+		unsigned needsReconnection: 1;
+		unsigned isInReconnection: 1;
+		unsigned finishedReconnection: 1;
+		unsigned unused: 27;
+	} myHTTPFlags;
 }
 
-- (id)initWithDelegate:(id)delegate;
+//- (id)initWithURL:(NSURL *)url request:(CKHTTPRequest **)request; // returns a connection and a request object that can be used.
 
 - (void)sendRequest:(CKHTTPRequest *)request;
-- (CKHTTPRequest *)request;
 
-- (void)cancel;
+- (void)processResponse:(CKHTTPResponse *)response; //subclasses override
+- (void)initiatingNewRequest:(CKHTTPRequest *)request withPacket:(NSData *)packet; //override
+- (BOOL)processBufferWithNewData:(NSData *)data; //subclass can process the response buffer, returns YES if the superclass should also try to process it.
+- (void)setAuthenticationWithRequest:(CKHTTPRequest *)request; // a way to override the authentication header
 
 @end
 
 @interface NSObject (CKHTTPConnectionDelegate)
 
-- (void)connection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error;
 - (void)connection:(CKHTTPConnection *)connection didReceiveDataOfLength:(int)length;
-- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(DAVResponse *)response;
-- (void)connectionDidFinishLoading:(CKHTTPConnection *)connection;
+- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
 - (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
 
 @end

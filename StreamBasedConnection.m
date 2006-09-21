@@ -286,7 +286,22 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 #warning Applying KVC hack
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
+	
+	if ([[host addresses] count] > 1) {
+		NSEnumerator *e = [[host addresses] objectEnumerator];
+		NSString *cur;
+		
+		while (cur = [e nextObject])
+		{
+			if ([cur rangeOfString:@"."].location != NSNotFound)
+			{
+				[host setValue:[NSArray arrayWithObject:cur] forKey:@"addresses"];
+			}
+		}
+	}
 	[self closeStreams];		// make sure streams are closed before opening/allocating new ones
+	
+	KTLog(TransportDomain, KTLogDebug, @"Opening streams to host: %@", host);
 	
 	[NSStream getStreamsToHost:host
 						  port:port
@@ -476,6 +491,11 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 		uint8_t *bytes = (uint8_t *)[chunk bytes];
 		[_lastChunkSent autorelease];
 		_lastChunkSent = [[NSDate date] retain];
+		// wait for the stream to open
+		while ([_sendStream streamStatus] != NSStreamStatusOpen)
+		{
+			[NSThread sleepUntilDate:[NSDate distantPast]];
+		}
 		[_sendStream write:bytes maxLength:chunkLength];
 		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
@@ -492,7 +512,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @"%d >> %@", len, [data descriptionAsString]);
+				KTLog(InputStreamDomain, KTLogDebug, @"%d >> %@", len, [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self recalcDownloadSpeedWithBytesSent:len];
 				[self processReceivedData:data];
@@ -597,7 +617,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
+				KTLog(InputStreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
 				[self recalcDownloadSpeedWithBytesSent:len];
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self processReceivedData:data];
@@ -693,7 +713,7 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 			unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
 			if (chunkLength > 0) {
 				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
-				KTLog(StreamDomain, KTLogDebug, @"<< %s", bytes);
+				KTLog(OutputStreamDomain, KTLogDebug, @"<< %s", bytes);
 				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 				[self recalcUploadSpeedWithBytesSent:chunkLength];
 				[self stream:_sendStream sentBytesOfLength:chunkLength];

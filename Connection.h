@@ -38,6 +38,7 @@
 #import <Connection/InterThreadMessaging.h>
 #import <Connection/MultipleConnection.h>
 #import <Connection/NSData+Connection.h>
+#import <Connection/NSString+Connection.h>
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>

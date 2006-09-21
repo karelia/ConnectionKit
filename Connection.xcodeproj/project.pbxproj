@@ -15,12 +15,19 @@
 		3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* WebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* FTPConnection.h */; };
 		3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* SFTPConnection.h */; };
+		792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; };
+		792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
+		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB20A806145001A00C6 /* CKHTTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB30A806145001A00C6 /* CKHTTPConnection.m */; };
 		792CFCBA0A806145001A00C6 /* CKHTTPRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB40A806145001A00C6 /* CKHTTPRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB50A806145001A00C6 /* CKHTTPRequest.m */; };
 		792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB60A806145001A00C6 /* CKHTTPResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
+		7946B0FE0AC0F4A400CAE90F /* S3Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B0FC0AC0F4A400CAE90F /* S3Connection.h */; };
+		7946B0FF0AC0F4A400CAE90F /* S3Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B0FD0AC0F4A400CAE90F /* S3Connection.m */; };
+		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; };
+		7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */; };
 		794DC3270A5A0EDC007157BE /* ConnectionThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */; };
 		794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */; };
 		794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD10A5CD6CA00913151 /* libcrypto.dylib */; };
@@ -58,9 +65,6 @@
 		79CFD85B09F7048500172CDD /* DAVDeleteResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81A09F7048400172CDD /* DAVDeleteResponse.m */; };
 		79CFD85D09F7048500172CDD /* DAVDirectoryContentsRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81C09F7048400172CDD /* DAVDirectoryContentsRequest.m */; };
 		79CFD85F09F7048500172CDD /* DAVDirectoryContentsResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81E09F7048400172CDD /* DAVDirectoryContentsResponse.m */; };
-		79CFD86109F7048500172CDD /* DAVFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82009F7048400172CDD /* DAVFileDownloadRequest.m */; };
-		79CFD86309F7048500172CDD /* DAVFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82209F7048400172CDD /* DAVFileDownloadResponse.m */; };
-		79CFD86509F7048500172CDD /* DAVRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82409F7048400172CDD /* DAVRequest.m */; };
 		79CFD86709F7048500172CDD /* DAVResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82609F7048400172CDD /* DAVResponse.m */; };
 		79CFD86909F7048500172CDD /* DAVUploadFileRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82809F7048400172CDD /* DAVUploadFileRequest.m */; };
 		79CFD86B09F7048500172CDD /* DAVUploadFileResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82A09F7048400172CDD /* DAVUploadFileResponse.m */; };
@@ -118,6 +122,12 @@
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */; };
+		79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA8D70AC23C25009EDAF9 /* CKHTTPPutRequest.m */; };
+		79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */; };
+		79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */; };
+		79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */; };
+		79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
@@ -156,6 +166,7 @@
 			dstSubfolderSpec = 10;
 			files = (
 				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
+				792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -179,12 +190,18 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
+		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
+		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
 		792CFCB20A806145001A00C6 /* CKHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPConnection.h; sourceTree = "<group>"; };
 		792CFCB30A806145001A00C6 /* CKHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPConnection.m; sourceTree = "<group>"; };
 		792CFCB40A806145001A00C6 /* CKHTTPRequest.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPRequest.h; sourceTree = "<group>"; };
 		792CFCB50A806145001A00C6 /* CKHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPRequest.m; sourceTree = "<group>"; };
 		792CFCB60A806145001A00C6 /* CKHTTPResponse.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPResponse.h; sourceTree = "<group>"; };
 		792CFCB70A806145001A00C6 /* CKHTTPResponse.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPResponse.m; sourceTree = "<group>"; };
+		7946B0FC0AC0F4A400CAE90F /* S3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = S3Connection.h; sourceTree = "<group>"; };
+		7946B0FD0AC0F4A400CAE90F /* S3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = S3Connection.m; sourceTree = "<group>"; };
+		7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSCalendarDate+Connection.h"; sourceTree = "<group>"; };
+		7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSCalendarDate+Connection.m"; sourceTree = "<group>"; };
 		794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionThreadManager.h; sourceTree = "<group>"; };
 		794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionThreadManager.m; sourceTree = "<group>"; };
 		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
@@ -240,12 +257,6 @@
 		79CFD81C09F7048400172CDD /* DAVDirectoryContentsRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDirectoryContentsRequest.m; sourceTree = "<group>"; };
 		79CFD81D09F7048400172CDD /* DAVDirectoryContentsResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVDirectoryContentsResponse.h; sourceTree = "<group>"; };
 		79CFD81E09F7048400172CDD /* DAVDirectoryContentsResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVDirectoryContentsResponse.m; sourceTree = "<group>"; };
-		79CFD81F09F7048400172CDD /* DAVFileDownloadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVFileDownloadRequest.h; sourceTree = "<group>"; };
-		79CFD82009F7048400172CDD /* DAVFileDownloadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVFileDownloadRequest.m; sourceTree = "<group>"; };
-		79CFD82109F7048400172CDD /* DAVFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVFileDownloadResponse.h; sourceTree = "<group>"; };
-		79CFD82209F7048400172CDD /* DAVFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVFileDownloadResponse.m; sourceTree = "<group>"; };
-		79CFD82309F7048400172CDD /* DAVRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVRequest.h; sourceTree = "<group>"; };
-		79CFD82409F7048400172CDD /* DAVRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVRequest.m; sourceTree = "<group>"; };
 		79CFD82509F7048400172CDD /* DAVResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVResponse.h; sourceTree = "<group>"; };
 		79CFD82609F7048400172CDD /* DAVResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DAVResponse.m; sourceTree = "<group>"; };
 		79CFD82709F7048400172CDD /* DAVUploadFileRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DAVUploadFileRequest.h; sourceTree = "<group>"; };
@@ -320,6 +331,12 @@
 		79E17A140A659CEC009CA013 /* SSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSHPassphrase.h; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPPutRequest.h; sourceTree = "<group>"; };
+		79FCA8D70AC23C25009EDAF9 /* CKHTTPPutRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPPutRequest.m; sourceTree = "<group>"; };
+		79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadRequest.h; sourceTree = "<group>"; };
+		79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadRequest.m; sourceTree = "<group>"; };
+		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
+		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1AD3DE0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -493,8 +510,14 @@
 				792CFCB30A806145001A00C6 /* CKHTTPConnection.m */,
 				792CFCB40A806145001A00C6 /* CKHTTPRequest.h */,
 				792CFCB50A806145001A00C6 /* CKHTTPRequest.m */,
+				79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */,
+				79FCA8D70AC23C25009EDAF9 /* CKHTTPPutRequest.m */,
 				792CFCB60A806145001A00C6 /* CKHTTPResponse.h */,
 				792CFCB70A806145001A00C6 /* CKHTTPResponse.m */,
+				79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */,
+				79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */,
+				79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */,
+				79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */,
 			);
 			name = HTTP;
 			sourceTree = "<group>";
@@ -573,13 +596,13 @@
 				79CFD83A09F7048400172CDD /* NNTPConnection.m */,
 				79CFD84309F7048400172CDD /* SFTPConnection.h */,
 				79CFD84409F7048400172CDD /* SFTPConnection.m */,
+				7946B0FC0AC0F4A400CAE90F /* S3Connection.h */,
+				7946B0FD0AC0F4A400CAE90F /* S3Connection.m */,
 				794DF0E40A5CD087007157BE /* SSH */,
 				79CFD83709F7048400172CDD /* MultipleConnection.h */,
 				79CFD83809F7048400172CDD /* MultipleConnection.m */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				79CFD11D09F7023D00172CDD /* DAV */,
-				794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */,
-				794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -587,8 +610,6 @@
 		79CFD11D09F7023D00172CDD /* DAV */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD82309F7048400172CDD /* DAVRequest.h */,
-				79CFD82409F7048400172CDD /* DAVRequest.m */,
 				79CFD82509F7048400172CDD /* DAVResponse.h */,
 				79CFD82609F7048400172CDD /* DAVResponse.m */,
 				79CFD81309F7048400172CDD /* DAVCreateDirectoryRequest.h */,
@@ -603,10 +624,6 @@
 				79CFD81C09F7048400172CDD /* DAVDirectoryContentsRequest.m */,
 				79CFD81D09F7048400172CDD /* DAVDirectoryContentsResponse.h */,
 				79CFD81E09F7048400172CDD /* DAVDirectoryContentsResponse.m */,
-				79CFD81F09F7048400172CDD /* DAVFileDownloadRequest.h */,
-				79CFD82009F7048400172CDD /* DAVFileDownloadRequest.m */,
-				79CFD82109F7048400172CDD /* DAVFileDownloadResponse.h */,
-				79CFD82209F7048400172CDD /* DAVFileDownloadResponse.m */,
 				79CFD82709F7048400172CDD /* DAVUploadFileRequest.h */,
 				79CFD82809F7048400172CDD /* DAVUploadFileRequest.m */,
 				79CFD82909F7048400172CDD /* DAVUploadFileResponse.h */,
@@ -629,6 +646,8 @@
 		79CFD8A009F705B400172CDD /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */,
+				794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */,
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
@@ -638,6 +657,10 @@
 				79CFD84209F7048400172CDD /* RunLoopForwarder.m */,
 				79CFD90009F7077900172CDD /* NSData+Connection.h */,
 				79CFD90109F7077900172CDD /* NSData+Connection.m */,
+				792BC8B00ABF6B2E0022415A /* NSString+Connection.h */,
+				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
+				7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */,
+				7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -690,6 +713,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */,
 				79CFD89509F704F400172CDD /* Connection.h in Headers */,
 				79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */,
 				79CFD84F09F7048500172CDD /* AbstractConnectionProtocol.h in Headers */,
@@ -717,6 +741,11 @@
 				792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */,
 				792CFCBA0A806145001A00C6 /* CKHTTPRequest.h in Headers */,
 				792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */,
+				7946B0FE0AC0F4A400CAE90F /* S3Connection.h in Headers */,
+				7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */,
+				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
+				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
+				79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -907,9 +936,6 @@
 				79CFD85B09F7048500172CDD /* DAVDeleteResponse.m in Sources */,
 				79CFD85D09F7048500172CDD /* DAVDirectoryContentsRequest.m in Sources */,
 				79CFD85F09F7048500172CDD /* DAVDirectoryContentsResponse.m in Sources */,
-				79CFD86109F7048500172CDD /* DAVFileDownloadRequest.m in Sources */,
-				79CFD86309F7048500172CDD /* DAVFileDownloadResponse.m in Sources */,
-				79CFD86509F7048500172CDD /* DAVRequest.m in Sources */,
 				79CFD86709F7048500172CDD /* DAVResponse.m in Sources */,
 				79CFD86909F7048500172CDD /* DAVUploadFileRequest.m in Sources */,
 				79CFD86B09F7048500172CDD /* DAVUploadFileResponse.m in Sources */,
@@ -943,6 +969,11 @@
 				792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */,
 				792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */,
 				792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */,
+				7946B0FF0AC0F4A400CAE90F /* S3Connection.m in Sources */,
+				7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */,
+				79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */,
+				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
+				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -956,6 +987,7 @@
 				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
 				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
 				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
+				792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
