@@ -351,6 +351,12 @@
 		CEB563840A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563860A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CED189610AC320E4002E8A4A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CED189620AC320E8002E8A4A /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CED189630AC320EA002E8A4A /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CED1897C0AC320FC002E8A4A /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CED1897D0AC32105002E8A4A /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CED1897E0AC3210D002E8A4A /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEDE18DE0A5C69BE0055352C /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -829,6 +835,7 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
@@ -1060,6 +1067,12 @@
 			isa = PBXVariantGroup;
 			children = (
 				79CFD8CB09F706C700172CDD /* English */,
+				CED189610AC320E4002E8A4A /* German */,
+				CED189620AC320E8002E8A4A /* French */,
+				CED189630AC320EA002E8A4A /* Italian */,
+				CED1897C0AC320FC002E8A4A /* zh_TW */,
+				CED1897D0AC32105002E8A4A /* Danish */,
+				CED1897E0AC3210D002E8A4A /* Japanese */,
 			);
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
