@@ -45,6 +45,7 @@
 #import "NSData+Connection.h"
 #import <Security/Security.h>
 #import "ConnectionThreadManager.h"
+#import "NSString+Connection.h"
 
 
 @interface WebDAVConnection (DotMac)
