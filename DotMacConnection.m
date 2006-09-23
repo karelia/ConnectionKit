@@ -128,7 +128,14 @@
 	NSString *username = nil;
 	NSString *password = nil;
 	
-	if (user == nil || [user isEqualToString:@""])
+	if (user && password)
+	{
+		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
+		{
+			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
+		}
+	}
+	else
 	{
 		if (![self getDotMacAccountName:&username password:&password])
 		{
@@ -147,13 +154,6 @@
 		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
 		{
 			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
-		}
-	}
-	else
-	{
-		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
-		{
-			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
 		}
 	}
 
