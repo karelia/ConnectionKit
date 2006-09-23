@@ -50,6 +50,7 @@
 		794EFE2B0A5CE58E00913151 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1E0A5CE58E00913151 /* session.c */; };
 		794EFE2C0A5CE58E00913151 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1F0A5CE58E00913151 /* sftp.c */; };
 		794EFE2D0A5CE58E00913151 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE200A5CE58E00913151 /* userauth.c */; };
+		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -835,7 +836,6 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
-			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
@@ -981,6 +981,7 @@
 				79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */,
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
 				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
+				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
