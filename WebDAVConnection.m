@@ -115,6 +115,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"webdav";
+}
+
 #pragma mark -
 #pragma mark Stream Overrides
 

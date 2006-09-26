@@ -167,6 +167,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"ftp";
+}
+
 #pragma mark -
 #pragma mark Commands
 

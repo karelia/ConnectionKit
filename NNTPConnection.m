@@ -76,6 +76,11 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"nntp";
+}
+
 - (void)processReceivedData:(NSData *)data
 {
 	NSRange newLinePosition;

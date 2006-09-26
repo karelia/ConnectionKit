@@ -31,6 +31,7 @@
 #import "DAVDirectoryContentsResponse.h"
 #import "DAVDirectoryContentsRequest.h"
 #import "AbstractConnectionProtocol.h"
+#import "NSCalendarDate+Connection.h"
 
 @implementation DAVDirectoryContentsResponse : DAVResponse
 

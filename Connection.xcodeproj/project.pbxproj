@@ -119,6 +119,13 @@
 		79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79E17A0C0A659C1E009CA013 /* Passphrase.nib */; };
 		79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E17A130A659CEC009CA013 /* SSHPassphrase.m */; };
 		79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E17A140A659CEC009CA013 /* SSHPassphrase.h */; };
+		79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; };
+		79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
+		79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; };
+		79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */; };
+		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
+		79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; };
+		79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
@@ -168,6 +175,9 @@
 			files = (
 				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
 				792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */,
+				79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */,
+				79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */,
+				79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -330,6 +340,12 @@
 		79E17A0D0A659C1E009CA013 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		79E17A130A659CEC009CA013 /* SSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSHPassphrase.m; sourceTree = "<group>"; };
 		79E17A140A659CEC009CA013 /* SSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSHPassphrase.h; sourceTree = "<group>"; };
+		79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCategory.h; sourceTree = "<group>"; };
+		79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCategory.m; sourceTree = "<group>"; };
+		79F54D490AC8BDA1006AD3E2 /* CKHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHost.h; sourceTree = "<group>"; };
+		79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHost.m; sourceTree = "<group>"; };
+		79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKBonjourCategory.h; sourceTree = "<group>"; };
+		79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKBonjourCategory.m; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPPutRequest.h; sourceTree = "<group>"; };
@@ -391,6 +407,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */,
+				79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */,
 				79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */,
 				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 			);
@@ -570,6 +587,12 @@
 				79CFD8D409F706F500172CDD /* PermissionsController.m */,
 				79CFD8D509F706F500172CDD /* ProgressCell.h */,
 				79CFD8D609F706F500172CDD /* ProgressCell.m */,
+				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
+				79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */,
+				79F54D490AC8BDA1006AD3E2 /* CKHost.h */,
+				79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */,
+				79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */,
+				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
 			);
 			name = "Test Application";
 			sourceTree = "<group>";
@@ -996,6 +1019,9 @@
 				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
 				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
 				792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */,
+				79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */,
+				79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */,
+				79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1163,6 +1189,95 @@
 			};
 			name = Release;
 		};
+		795E5C0B0AC77501007912A2 /* Embedded Application */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "Framework-Info.plist";
+				INSTALL_PATH = "@executable_path/../../../";
+				OTHER_CFLAGS = "-falign-loops=16";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+					"-seg1addr",
+					0xcf200000,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = NO;
+			};
+			name = "Embedded Application";
+		};
+		795E5C0C0AC77501007912A2 /* Embedded Application */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = Connection;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = "Embedded Application";
+		};
+		795E5C0D0AC77501007912A2 /* Embedded Application */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = "Embedded Application";
+		};
+		795E5C0E0AC77501007912A2 /* Embedded Application */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = "Embedded Application";
+		};
 		79CFD12909F702BF00172CDD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1296,6 +1411,7 @@
 			buildConfigurations = (
 				09D6602709FD379A0000BA00 /* Debug */,
 				09D6602809FD379A0000BA00 /* Release */,
+				795E5C0D0AC77501007912A2 /* Embedded Application */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1305,6 +1421,7 @@
 			buildConfigurations = (
 				79CFD12909F702BF00172CDD /* Debug */,
 				79CFD12A09F702BF00172CDD /* Release */,
+				795E5C0B0AC77501007912A2 /* Embedded Application */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1314,6 +1431,7 @@
 			buildConfigurations = (
 				C01FCF4B08A954540054247B /* Debug */,
 				C01FCF4C08A954540054247B /* Release */,
+				795E5C0C0AC77501007912A2 /* Embedded Application */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1323,6 +1441,7 @@
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,
 				C01FCF5008A954540054247B /* Release */,
+				795E5C0E0AC77501007912A2 /* Embedded Application */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
