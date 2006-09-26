@@ -4,6 +4,9 @@
 #import "PermissionsController.h"
 #import "FileTransfer.h"
 #import <Connection/Connection.h>
+#import "CKHostCategory.h"
+#import "CKHost.h"
+#import "CKBonjourCategory.h"
 
 static NSString *AutoSelect = @"Auto Select";
 
@@ -109,13 +112,47 @@ NSString *ProtocolKey = @"Protocol";
 	[cUser setStringValue:NSUserName()];
 	
 	//Get saved hosts
-	[savedHosts removeAllItems];
 	_savedHosts = [[NSMutableArray array] retain];
-	NSArray *hosts = [ud objectForKey:HostsKey];
+	
+	[_savedHosts addObject:[[[CKBonjourCategory alloc] init] autorelease]];
+	
+	id hosts = [ud objectForKey:HostsKey];
 	if (hosts)
 	{
-		[_savedHosts addObjectsFromArray:hosts];
+		if ([hosts isKindOfClass:[NSArray class]])
+		{
+			CKHostCategory *cat = [[CKHostCategory alloc] initWithName:NSLocalizedString(@"Saved Hosts", @"category name")];
+			NSEnumerator *e = [hosts objectEnumerator];
+			NSDictionary *cur;
+			CKHost *h;
+			
+			while ((cur = [e nextObject]))
+			{
+				h = [[CKHost alloc] init];
+				[h setHost:[cur objectForKey:HostKey]];
+				[h setPort:[cur objectForKey:PortKey]];
+				[h setUsername:[cur objectForKey:UsernameKey]];
+				[h setInitialPath:[cur objectForKey:InitialDirectoryKey]];
+				if ([cur objectForKey:URLKey] && ![[cur objectForKey:URLKey] isEqualToString:@""])
+				{
+					[h setURL:[NSURL URLWithString:[cur objectForKey:URLKey]]];
+				}
+				[h setConnectionType:[cur objectForKey:ProtocolKey]];
+				[cat addHost:h];
+				[h release];
+			}
+			[_savedHosts addObject:cat];
+			[cat release];
+		}
+		else
+		{
+			NSArray *ckhosts = [NSKeyedUnarchiver unarchiveObjectWithData:hosts];
+			[_savedHosts addObjectsFromArray:ckhosts];
+		}
 	}
+	[savedHosts setDataSource:self];
+	[savedHosts setDelegate:self];
+	
 	[self refreshHosts];
 	
 	//have a timer to remove completed transfers
@@ -172,45 +209,28 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)refreshHosts
 {
-	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"hosts"];
-	NSEnumerator *e = [_savedHosts objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:[NSString stringWithFormat:@"%@@%@:%@", [cur objectForKey:UsernameKey], [cur objectForKey:HostKey], [cur objectForKey:PortKey]]
-													  action:nil
-											   keyEquivalent:@""];
-		[item setRepresentedObject:cur];
-		[menu addItem:item];
-		[item release];
-	}
-	[savedHosts setMenu:menu];
-	[menu release];
-	
-	if ([_savedHosts count] == 0)
-		[savedHosts setEnabled:NO];
-	else
-		[savedHosts setEnabled:YES];
+	[savedHosts reloadData];
 }
 
 - (void)savedHostsChanged:(id)sender
 {
-	NSDictionary *host = [[sender selectedItem] representedObject];
-	if (host)
+	id selected = [savedHosts itemAtRow:[savedHosts selectedRow]];
+	
+	if ([selected isKindOfClass:[CKHost class]])
 	{
-		[cHost setStringValue:[host objectForKey:HostKey]];
-		[cUser setStringValue:[host objectForKey:UsernameKey]];
-		[cPort setStringValue:[host objectForKey:PortKey]];
-		if ([host objectForKey:InitialDirectoryKey])
-			[initialDirectory setStringValue:[host objectForKey:InitialDirectoryKey]];
+		CKHost *host = selected;
+		[cHost setStringValue:[host host]];
+		[cUser setStringValue:[host username]];
+		[cPort setStringValue:[host port]];
+		if ([host initialPath])
+			[initialDirectory setStringValue:[host initialPath]];
 		else
 			[initialDirectory setStringValue:@""];
 		
-		if ([host objectForKey:ProtocolKey])
-			[cTypePopup selectItemWithTitle:[host objectForKey:ProtocolKey]];
+		if ([host connectionType])
+			[cTypePopup selectItemWithTitle:[host connectionType]];
 		
-		NSString *pass = [Controller keychainPasswordForServer:[host objectForKey:HostKey] account:[host objectForKey:UsernameKey]];
+		NSString *pass = [host password];
 		if (pass)
 			[cPass setStringValue:pass];
 		else
@@ -218,6 +238,7 @@ NSString *ProtocolKey = @"Protocol";
 		
 		[connectWindow makeFirstResponder:cPass];
 	}
+	
 }
 
 - (void)saveHost:(id)sender
@@ -532,7 +553,7 @@ NSString *ProtocolKey = @"Protocol";
 
 - (IBAction)showConnect:(id)sender
 {
-	[self savedHostsChanged:savedHosts];
+	//[self savedHostsChanged:savedHosts];
 	[NSApp beginSheet:connectWindow
 	   modalForWindow:window
 		modalDelegate:nil
@@ -652,6 +673,54 @@ static NSImage *_folder = nil;
 {
 	if ([con isKindOfClass:[AbstractQueueConnection class]]) {
 		NSLog(@"Queue Description:\n%@", [(AbstractQueueConnection *)con queueDescription]);
+	}
+}
+
+#pragma mark -
+#pragma mark Outline View Data Source
+
+- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+{
+	if (item == nil)
+	{
+		return [_savedHosts count];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		return [item count];
+	}
+	return 0;
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+{
+	if (item == nil)
+	{
+		return [_savedHosts objectAtIndex:index];
+	}
+	return [item childAtIndex:index];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+{
+	return [item isKindOfClass:[CKHostCategory class]];
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+	if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		return [item name];
+	}
+	else
+	{
+		NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[item port]]];
+		if ([item username] && ![[item username] isEqualToString:@""])
+		{
+			[str appendFormat:@"%@@", [item username]];
+		}
+		[str appendString:[item host]];
+		return str;
 	}
 }
 

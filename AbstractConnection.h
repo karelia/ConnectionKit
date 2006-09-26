@@ -55,6 +55,7 @@ extern NSString *ThreadingDomain;
 extern NSString *StreamDomain;
 extern NSString *InputStreamDomain;
 extern NSString *OutputStreamDomain;
+extern NSString *SSLDomain;
 
 typedef enum {
 	ConnectionNotConnectedState = 0,
@@ -110,6 +111,8 @@ typedef enum {
 												error:(NSError **)error;
 
 + (id <AbstractConnectionProtocol>)connectionWithURL:(NSURL *)url error:(NSError **)error;
+
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port;
 
 // Convenience Superclass methods for basic getting & setting
 

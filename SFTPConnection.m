@@ -39,6 +39,7 @@
 #import <sys/types.h>
 #import <Carbon/Carbon.h>
 #import <Security/Security.h>
+#import "NSString+Connection.h"
 
 NSString *SFTPException = @"SFTPException";
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
@@ -126,6 +127,11 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 {
 	
 	[super dealloc];
+}
+
++ (NSString *)urlScheme
+{
+	return @"sftp";
 }
 
 #pragma mark -
@@ -322,9 +328,24 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 		return;
 	}
 	
+	// motd
+	LIBSSH2_CHANNEL *motd = libssh2_channel_open_session(mySession);
+	char motdmsg[1024];
+	int ret = libssh2_channel_read(motd, motdmsg, 1024);
+	
+	while (ret > 0)
+	{
+		if ([self transcript])
+		{
+			[self appendToTranscript:[NSAttributedString attributedStringWithString:[NSString stringWithData:[NSData dataWithBytes:motdmsg length:ret] encoding:NSUTF8StringEncoding] 
+																		 attributes:[AbstractConnection dataAttributes]]];
+		}
+	}
+	ret = libssh2_channel_close(motd);
+
 	//find out the home directory
 	LIBSSH2_CHANNEL *pwd = libssh2_channel_open_session(mySession);
-	int ret = libssh2_channel_exec(pwd, "/bin/pwd");
+	ret = libssh2_channel_exec(pwd, "/bin/pwd");
 	char dir[1024];
 	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.25]]; //give it time to have something to read
 	ret = libssh2_channel_read(pwd, dir, 1024);

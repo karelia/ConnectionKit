@@ -174,6 +174,9 @@ typedef struct __flags {
 - (double)uploadSpeed;
 - (double)downloadSpeed;
 
+- (NSString *)urlScheme; // by default calls class method
++ (NSString *)urlScheme; //eg http
+
 @end
 
 

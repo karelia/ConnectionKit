@@ -16,3 +16,7 @@
 - (NSString *)stringByDeletingFirstPathComponent;
 
 @end
+
+@interface NSAttributedString (Connection)
++ (NSAttributedString *)attributedStringWithString:(NSString *)str attributes:(NSDictionary *)attribs;
+@end

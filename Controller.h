@@ -31,7 +31,7 @@
     IBOutlet NSWindow *window;
 	IBOutlet NSDrawer *logDrawer;
 	IBOutlet NSTextView *log;
-	IBOutlet NSPopUpButton *savedHosts;
+	IBOutlet NSOutlineView *savedHosts;
 	IBOutlet NSButton *btnDisconnect;
 	IBOutlet NSTextField *initialDirectory;
 	IBOutlet NSTextView *fileCheckLog;

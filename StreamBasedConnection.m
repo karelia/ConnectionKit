@@ -45,8 +45,13 @@
 #import <sys/socket.h>
 #import <arpa/inet.h>
 
+#import <Security/Security.h>
+
 const unsigned int kStreamChunkSize = 2048;
 NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
+
+OSStatus SSLReadFunction(SSLConnectionRef connection, void *data, size_t *dataLength);
+OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t *dataLength);
 
 @interface StreamBasedConnection (Private)
 - (void)checkQueue;
@@ -822,4 +827,212 @@ NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 	_fileCheckInFlight = nil;
 	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
 }
+
+#pragma mark -
+#pragma mark SSL Support
+
+- (void)initializeSSL
+{
+	SecKeychainRef keychainRef = nil;
+	
+	if (SecKeychainCopyDefault(&keychainRef))
+	{
+		KTLog(SSLDomain, KTLogFatal, @"Unable to get default keychain");
+	}
+	
+	SecIdentitySearchRef searchRef = nil;
+	if (SecIdentitySearchCreate(keychainRef, CSSM_KEYUSE_SIGN, &searchRef))
+	{
+		KTLog(SSLDomain, KTLogFatal, @"Unable to create keychain search");
+		CFRelease(keychainRef);
+	}
+	
+	if (SecIdentitySearchCopyNext(searchRef, &mySSLIdentity))
+	{
+		KTLog(SSLDomain, KTLogFatal, @"Unable to get next search result");
+		CFRelease(keychainRef);
+		CFRelease(searchRef);
+	}
+	
+	CFRelease(keychainRef);
+	CFRelease(searchRef);
+}
+
+- (int)handshakeWithInputData:(NSMutableData *)inputData
+				   outputData:(NSMutableData *)outputData
+{
+	int ret;
+	
+	// If we haven't yet set up the SSL context, we should do so now.
+	if (!mySSLContext)
+	{
+		if (ret = SSLNewContext((Boolean)NO, &mySSLContext))
+		{
+			KTLog(SSLDomain, KTLogError, @"Error creating new context");
+			return ret;
+		}
+		
+		if (ret = SSLSetIOFuncs(mySSLContext, SSLReadFunction, SSLWriteFunction))
+		{
+			KTLog(SSLDomain, KTLogError, @"Error setting IO Functions");
+			return ret;
+		}
+		
+		if (ret = SSLSetConnection(mySSLContext, self))
+		{
+			KTLog(SSLDomain, KTLogError, @"Error setting connection");
+			return ret;
+		}
+		
+		if (ret = SSLSetEnableCertVerify(mySSLContext, (Boolean)YES))
+		{
+			KTLog(SSLDomain, KTLogError, @"Error calling SSLSetEnableCertVerify");
+			return ret;
+		}
+		
+		if (mySSLIdentity)
+		{
+			CFArrayRef certificates = CFArrayCreate(kCFAllocatorDefault,
+													(const void **)&mySSLIdentity,
+													mySSLIdentity ? 1 : 0,
+													NULL);
+			
+			ret = SSLSetCertificate(mySSLContext, certificates);
+			CFRelease(certificates);
+			
+			if (ret)
+			{
+				KTLog(SSLDomain, KTLogError, @"Error setting certificates: %d", ret);
+				return ret;
+			}
+			else
+				KTLog(SSLDomain, KTLogDebug, @"Set up certificates successfully");
+		}
+	}
+	
+	mySSLRecevieBuffer = inputData;
+	mySSLSendBuffer = outputData;
+	ret = SSLHandshake(mySSLContext);
+	
+	if (ret == errSSLWouldBlock)
+		return 0;
+	
+	if (! ret)
+		return 1;
+	
+	return ret;
+}
+
+- (NSData *)encryptData:(NSData *)data inputData:(NSMutableData *)inputData
+{
+	if ((! data) || (! [data length]))
+		return [NSData data];
+	
+	mySSLRecevieBuffer = inputData;
+	mySSLSendBuffer = [NSMutableData dataWithCapacity:2*[data length]];
+	unsigned int totalLength = [data length];
+	unsigned int processed = 0;
+	const void *buffer = [data bytes];
+	
+	while (processed < totalLength)
+	{
+		size_t written = 0;
+		
+		int ret;
+		if (ret = SSLWrite(mySSLContext, buffer + processed, totalLength - processed, &written))
+			return nil;
+		
+		processed += written;
+	}
+	
+	return [NSData dataWithData:mySSLSendBuffer];
+}
+
+- (NSData *)decryptData:(NSMutableData *)data outputData:(NSMutableData *)outputData
+{
+	if ((! data) || (! [data length]))
+		return [NSData data];
+	
+	mySSLRecevieBuffer = data;
+	mySSLSendBuffer = outputData;
+	NSMutableData *decryptedData = [NSMutableData dataWithCapacity:[data length]];
+	int ret = 0;
+	
+	while (! ret)
+	{
+		size_t read = 0;
+		char buf[1024];
+		
+		ret = SSLRead(mySSLContext, buf, 1024, &read);
+		if (ret && (ret != errSSLWouldBlock) && (ret != errSSLClosedGraceful))
+		{
+			KTLog(SSLDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
+			return nil;
+		}
+		
+		[decryptedData appendBytes:buf length:read];
+	}
+	
+	return [NSData dataWithData:decryptedData];
+}
+
+- (OSStatus)handleSSLWriteFromData:(const void *)data size:(size_t *)size
+{
+	[mySSLSendBuffer appendBytes:data length:*size];
+	return noErr;
+}
+
+- (OSStatus)handleSSLReadToData:(void *)data size:(size_t *)size
+{
+	size_t askedSize = *size;
+	*size = MIN(askedSize, [mySSLRecevieBuffer length]);
+	if (! *size)
+	{
+		return errSSLWouldBlock;
+	}
+	
+	NSRange byteRange = NSMakeRange(0, *size);
+	[mySSLRecevieBuffer getBytes:data range:byteRange];
+	[mySSLRecevieBuffer replaceBytesInRange:byteRange withBytes:NULL length:0];
+	
+	if (askedSize > *size)
+		return errSSLWouldBlock;
+	
+	return noErr;
+}
+
+- (void)setSSLOn:(BOOL)flag
+{
+	myStreamFlags.wantsSSL = flag;
+	if (myStreamFlags.wantsSSL)
+	{
+		if (!myStreamFlags.sslOn)
+		{
+			if ([_sendStream streamStatus] == NSStreamStatusOpen)
+			{
+				// start the handshake now.
+				
+			}
+		}
+	}
+	else
+	{
+		if (myStreamFlags.sslOn)
+		{
+			// turn ssl off
+			
+		}
+	}
+}
+
 @end
+
+OSStatus SSLReadFunction(SSLConnectionRef connection, void *data, size_t *dataLength)
+{
+	return [(StreamBasedConnection *)connection handleSSLReadToData:data size:dataLength];
+}
+
+OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t *dataLength)
+{
+	return [(StreamBasedConnection *)connection handleSSLWriteFromData:data size:dataLength];
+}

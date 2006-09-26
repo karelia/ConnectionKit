@@ -131,6 +131,11 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"file";
+}
+
 - (void)threadedConnect
 {
 	myFileManager = [[NSFileManager alloc] init];

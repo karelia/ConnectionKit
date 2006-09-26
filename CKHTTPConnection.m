@@ -84,6 +84,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"http";
+}
+
 - (void)sendError:(NSString *)error code:(int)code
 {
 	NSError *err = [NSError errorWithDomain:CKHTTPConnectionErrorDomain 

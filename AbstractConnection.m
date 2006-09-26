@@ -77,6 +77,7 @@ NSString *ThreadingDomain = @"Threading";
 NSString *StreamDomain = @"Stream";
 NSString *InputStreamDomain = @"Input Stream";
 NSString *OutputStreamDomain = @"Output Stream";
+NSString *SSLDomain = @"SSL";
 
 static NSMutableArray *_connectionTypes = nil;
 
@@ -231,6 +232,59 @@ NSDictionary *sDataAttributes;
 		}
 	}
 	return nil;
+}
+
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port and:(BOOL)flag
+{
+	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
+	NSDictionary *cur;
+	
+	while (cur = [e nextObject])
+	{
+		if (!flag)
+		{
+			if ([[NSClassFromString([cur objectForKey:ACClassKey]) name] isEqualToString:name])
+			{
+				return [NSClassFromString([cur objectForKey:ACClassKey]) urlScheme];
+			}
+		}
+		
+		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
+		NSDictionary *type;
+		
+		while (type = [f nextObject])
+		{
+			NSString *connType = [type objectForKey:ACTypeKey];
+			if ([connType isEqualToString:ACPortTypeKey])
+			{
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				{
+					if (flag)
+					{
+						if ([[NSClassFromString([cur objectForKey:ACClassKey]) name] isEqualToString:name])
+						{
+							return [NSClassFromString([cur objectForKey:ACClassKey]) urlScheme];
+						}
+					}
+					else
+					{
+						Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+						return [class urlScheme];
+					}
+				}
+			}
+		}
+	}
+	if (flag)
+	{
+		return [AbstractConnection urlSchemeForConnectionName:name port:port and:NO];
+	}
+	return nil;
+}
+
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port
+{
+	return [AbstractConnection urlSchemeForConnectionName:name port:port and:YES];
 }
 
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -815,6 +869,16 @@ NSDictionary *sDataAttributes;
 - (double)downloadSpeed
 {
 	return 0;
+}
+
+- (NSString *)urlScheme
+{
+	return [[self class] urlScheme];
+}
+
++ (NSString *)urlScheme
+{
+	return @"";
 }
 
 - (void)directoryContents

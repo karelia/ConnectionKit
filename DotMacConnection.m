@@ -83,6 +83,11 @@
 	return [c autorelease];
 }
 
++ (NSString *)urlScheme
+{
+	return @"dotmac";
+}
+
 #pragma mark init methods
 
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password

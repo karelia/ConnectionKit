@@ -34,6 +34,8 @@
 
 #import <Foundation/Foundation.h>
 #import <Connection/AbstractQueueConnection.h>
+#import <Security/SecureTransport.h>
+#import <Security/Security.h>
 
 /*
  *	A Stream Based Connection runs the streams in a background thread and handles the
@@ -70,8 +72,18 @@
 	struct __streamflags {
 		unsigned sendOpen : 1;
 		unsigned readOpen : 1;
-		unsigned unused : 30;
+		unsigned wantsSSL : 1;
+		unsigned sslOn : 1;
+		unsigned verifySSLCert : 1;
+		unsigned allowsBadCerts : 1; // for data transfer connections
+		unsigned unused : 27;
 	} myStreamFlags;
+	
+	// SSL Support
+	SSLContextRef		mySSLContext;
+	SecIdentityRef		mySSLIdentity;
+	NSMutableData		*mySSLSendBuffer;
+	NSMutableData		*mySSLRecevieBuffer;
 }
 
 - (void)openStreamsToPort:(unsigned)port;
@@ -114,6 +126,9 @@
 - (void)threadedConnect;
 - (void)threadedDisconnect;
 - (void)threadedForceDisconnect;
+
+// SSL Support
+- (void)setSSLOn:(BOOL)flag;
 
 @end
 

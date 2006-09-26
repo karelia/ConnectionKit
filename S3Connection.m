@@ -116,6 +116,11 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	[super dealloc];
 }
 
++ (NSString *)urlScheme
+{
+	return @"s3";
+}
+
 #pragma mark -
 #pragma mark HTTP Overrides
 
