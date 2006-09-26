@@ -11,7 +11,9 @@
                 localFileSelected = id; 
                 localPopupChanged = id; 
                 logConfig = id; 
+                newCategory = id; 
                 newFolder = id; 
+                newHost = id; 
                 permissions = id; 
                 printQueueDescription = id; 
                 refresh = id; 

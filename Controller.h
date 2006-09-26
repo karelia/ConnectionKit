@@ -49,6 +49,7 @@
 	BOOL isConnected;
 	
 	NSMutableArray *_savedHosts;
+	id selectedItem;
 	InputDialog *check;
 }
 - (IBAction)cancelConnect:(id)sender;

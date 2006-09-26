@@ -53,6 +53,8 @@
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
+		79B5ECF40AC93B90007BC0AD /* CKSecureHTTPConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */; };
+		79B5ECF50AC93B90007BC0AD /* CKSecureHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD84E09F7048500172CDD /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD80D09F7048400172CDD /* AbstractConnection.m */; };
 		79CFD84F09F7048500172CDD /* AbstractConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -178,6 +180,7 @@
 				79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */,
 				79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */,
 				79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */,
+				79B5ECF40AC93B90007BC0AD /* CKSecureHTTPConnection.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -247,6 +250,8 @@
 		7981F6F40A06006E004D775D /* WebDAVConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebDAVConnectionTest.m; sourceTree = "<group>"; };
 		7981F6F80A060084004D775D /* DotMacConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotMacConnectionTest.h; sourceTree = "<group>"; };
 		7981F6F90A060084004D775D /* DotMacConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotMacConnectionTest.m; sourceTree = "<group>"; };
+		79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSecureHTTPConnection.h; sourceTree = "<group>"; };
+		79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSecureHTTPConnection.m; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79CFD12709F702BE00172CDD /* Framework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		79CFD80C09F7048400172CDD /* AbstractConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnection.h; sourceTree = SOURCE_ROOT; };
@@ -532,6 +537,8 @@
 			children = (
 				792CFCB20A806145001A00C6 /* CKHTTPConnection.h */,
 				792CFCB30A806145001A00C6 /* CKHTTPConnection.m */,
+				79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */,
+				79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */,
 				792CFCB40A806145001A00C6 /* CKHTTPRequest.h */,
 				792CFCB50A806145001A00C6 /* CKHTTPRequest.m */,
 				79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */,
@@ -847,6 +854,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */;
+			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				English,
@@ -859,6 +867,8 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
+			projectRoot = "";
+			shouldCheckCompatibility = 1;
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
@@ -1022,6 +1032,7 @@
 				79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */,
 				79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */,
 				79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */,
+				79B5ECF50AC93B90007BC0AD /* CKSecureHTTPConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

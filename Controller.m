@@ -165,6 +165,29 @@ NSString *ProtocolKey = @"Protocol";
 	//[self runAutomatedScript];
 }
 
+- (void)newCategory:(id)sender
+{
+	CKHostCategory *cat = [[CKHostCategory alloc] initWithName:NSLocalizedString(@"New Category", @"new cat name")];
+	[_savedHosts addObject:cat];
+	[cat release];
+	[savedHosts reloadData];
+}
+
+- (void)newHost:(id)sender
+{
+	CKHost *h = [[CKHost alloc] init];
+	if (selectedItem)
+	{
+		[selectedItem addHost:h];
+	}
+	else
+	{
+		[_savedHosts addObject:h];
+	}
+	[h release];
+	[savedHosts reloadData];
+}
+
 - (void)checkForFile:(id)sender
 {
 	if (!check)
