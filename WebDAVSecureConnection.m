@@ -32,18 +32,56 @@
 
 @implementation WebDAVSecureConnection
 
-//+ (void)load
-//{
-//	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-//	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"443", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-//	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-//	[AbstractConnection registerConnectionClass:[WebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-//	[pool release];
-//}
++ (void)load
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"443", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
+	[AbstractConnection registerConnectionClass:[WebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
+	[pool release];
+}
 
 + (NSString *)name
 {
-	return @"WebDAV HTTPS";
+	return @"Secure WebDAV";
+}
+
+#pragma mark init methods
+
++ (id)connectionToHost:(NSString *)host
+port:(NSString *)port
+username:(NSString *)username
+password:(NSString *)password
+error:(NSError **)error
+{
+	WebDAVSecureConnection *c = [[self alloc] initWithHost:host
+	port:port
+	username:username
+	password:password
+	error:error];
+	return [c autorelease];
+}
+
+- (id)initWithHost:(NSString *)host
+port:(NSString *)port
+username:(NSString *)username
+password:(NSString *)password
+error:(NSError **)error
+{
+	if (self = [super initWithHost:host
+		port:port
+	username:username
+	password:password
+	error:error])
+	{
+		[self setSSLOn:YES];
+	}
+	return self;
+}
+
++ (NSString *)urlScheme
+{
+	return @"swebdav";
 }
 
 @end

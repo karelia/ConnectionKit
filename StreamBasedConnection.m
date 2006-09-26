@@ -633,12 +633,21 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventOpenCompleted:
 		{
 			myStreamFlags.sendOpen = YES;
-			[self sendStreamDidOpen];
+			
+			if (myStreamFlags.wantsSSL)
+			{
+				if (myStreamFlags.readOpen)
+				{
+					
+				}
+			}
+			else
+			{
+				[self sendStreamDidOpen];
+			}
 			
 			KTLog(StreamDomain, KTLogDebug, @"Command send stream opened");
-		//	if ([(NSInputStream *)_receiveStream hasBytesAvailable]) {
-		//		[self stream:_receiveStream handleEvent:NSStreamEventHasBytesAvailable];
-		//	}
+		
 			break;
 		}
 		case NSStreamEventErrorOccurred:
