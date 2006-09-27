@@ -42,5 +42,5 @@
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>
-#import <Connection/DAVResponse.h>
+#import <Connection/CKHTTPResponse.h>
 
