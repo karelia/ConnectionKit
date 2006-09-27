@@ -7,7 +7,7 @@
 //
 
 #import "CKSecureHTTPConnection.h"
-
+#import "DotMacConnection.h"
 
 @implementation CKSecureHTTPConnection
 
