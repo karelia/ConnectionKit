@@ -15,6 +15,12 @@
 		3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* WebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* FTPConnection.h */; };
 		3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* SFTPConnection.h */; };
+		790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */; };
+		790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = 790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */; };
+		790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0E30ACCE966004B4021 /* KTLogController.m */; };
+		790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
+		790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97324FDCFA39411CA2CEA /* AppKit.framework */; };
+		790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; };
 		792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -204,6 +210,12 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
+		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
+		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
+		790FF0DC0ACCE8EA004B4021 /* English */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = English; path = English.lproj/KTLogViewer.nib; sourceTree = "<group>"; };
+		790FF0E20ACCE966004B4021 /* KTLogController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = KTLogController.h; sourceTree = "<group>"; };
+		790FF0E30ACCE966004B4021 /* KTLogController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = KTLogController.m; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
 		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
 		792CFCB20A806145001A00C6 /* CKHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPConnection.h; sourceTree = "<group>"; };
@@ -392,6 +404,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		790FF0CA0ACCE4B7004B4021 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */,
+				790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12409F702BE00172CDD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -482,6 +503,7 @@
 				8D1107320486CEB800E47090 /* Connection.app */,
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
+				790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -489,6 +511,7 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
+				790FF0C30ACCE483004B4021 /* KTLog Viewer */,
 				080E96DDFE201D6D7F000001 /* Framework */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				79CFD11709F7020500172CDD /* Test Application */,
@@ -496,6 +519,7 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
+				790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -530,6 +554,16 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		790FF0C30ACCE483004B4021 /* KTLog Viewer */ = {
+			isa = PBXGroup;
+			children = (
+				790FF0E20ACCE966004B4021 /* KTLogController.h */,
+				790FF0E30ACCE966004B4021 /* KTLogController.m */,
+				790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */,
+			);
+			name = "KTLog Viewer";
 			sourceTree = "<group>";
 		};
 		792CFCA70A806108001A00C6 /* HTTP */ = {
@@ -708,6 +742,7 @@
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				79CFD81109F7048400172CDD /* ConnectionOpenPanel.h */,
 				79CFD81209F7048400172CDD /* ConnectionOpenPanel.m */,
+				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -809,6 +844,23 @@
 			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
+		790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */;
+			buildPhases = (
+				790FF0C80ACCE4B7004B4021 /* Resources */,
+				790FF0C90ACCE4B7004B4021 /* Sources */,
+				790FF0CA0ACCE4B7004B4021 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "KTLog Viewer";
+			productName = "KTLog Viewer";
+			productReference = 790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */;
+			productType = "com.apple.product-type.application";
+		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
@@ -871,6 +923,7 @@
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
 				09D6601C09FD37990000BA00 /* UnitTest */,
+				790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */,
 			);
 		};
 /* End PBXProject section */
@@ -880,6 +933,14 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		790FF0C80ACCE4B7004B4021 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -958,6 +1019,16 @@
 			files = (
 				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
 				09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		790FF0C90ACCE4B7004B4021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */,
+				790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */,
+				790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1069,6 +1140,14 @@
 				29B97319FDCFA39411CA2CEA /* English */,
 			);
 			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				790FF0DC0ACCE8EA004B4021 /* English */,
+			);
+			name = KTLogViewer.nib;
 			sourceTree = "<group>";
 		};
 		797CC8C509F861770063FF9B /* Localizable.strings */ = {
@@ -1197,6 +1276,78 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
+		};
+		790FF0D00ACCE4B8004B4021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		790FF0D10ACCE4B8004B4021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		790FF0D20ACCE4B8004B4021 /* Embedded Application */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = "Embedded Application";
 		};
 		795E5C0B0AC77501007912A2 /* Embedded Application */ = {
 			isa = XCBuildConfiguration;
@@ -1421,6 +1572,16 @@
 				09D6602709FD379A0000BA00 /* Debug */,
 				09D6602809FD379A0000BA00 /* Release */,
 				795E5C0D0AC77501007912A2 /* Embedded Application */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				790FF0D00ACCE4B8004B4021 /* Debug */,
+				790FF0D10ACCE4B8004B4021 /* Release */,
+				790FF0D20ACCE4B8004B4021 /* Embedded Application */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
