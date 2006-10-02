@@ -207,9 +207,9 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
-		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
-		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
-		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3C2D8EC20A63FF3B008FE1B0 /* French */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = French; path = French.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3C2D8EC30A63FF41008FE1B0 /* Danish */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Danish; path = Danish.lproj/Localizable.strings; sourceTree = "<group>"; };
 		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
 		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
@@ -372,18 +372,22 @@
 		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE1AD3DE0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
-		CE1AD3DF0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Italian; path = Italian.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE1AD3DF0A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Italian; path = Italian.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE1AD3E00A7E845A0083C01E /* Italian */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Italian; path = Italian.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E50A6DF53200C31C75 /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E60A6DF53700C31C75 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E70A6DF53A00C31C75 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E80A6DF53D00C31C75 /* Danish */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Danish; path = Danish.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
+		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE55A6630AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = Japanese; path = Japanese.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
-		CEA9AFD30A64224100855897 /* Japanese */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Japanese; path = Japanese.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEA9AFD30A64224100855897 /* Japanese */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = Japanese; path = Japanese.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
-		CEB563850A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEB563850A7AB7070081179A /* German */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = German; path = German.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563860A7AB7070081179A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CED189610AC320E4002E8A4A /* German */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = German; path = German.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189620AC320E8002E8A4A /* French */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = French; path = French.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -915,6 +919,7 @@
 				zh_TW,
 				Danish,
 				Italian,
+				zh_CN,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
@@ -1160,6 +1165,7 @@
 				CEA9AFD30A64224100855897 /* Japanese */,
 				CEB563850A7AB7070081179A /* German */,
 				CE1AD3DF0A7E845A0083C01E /* Italian */,
+				CE55A6620AD194740091C8AE /* zh_CN */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1174,6 +1180,7 @@
 				CEA9AFD10A64223000855897 /* Japanese */,
 				CEB563840A7AB7070081179A /* German */,
 				CE1AD3DE0A7E845A0083C01E /* Italian */,
+				CE55A6600AD194740091C8AE /* zh_CN */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = SOURCE_ROOT;
@@ -1188,6 +1195,7 @@
 				CED1897C0AC320FC002E8A4A /* zh_TW */,
 				CED1897D0AC32105002E8A4A /* Danish */,
 				CED1897E0AC3210D002E8A4A /* Japanese */,
+				CE55A6610AD194740091C8AE /* zh_CN */,
 			);
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
@@ -1218,6 +1226,7 @@
 				CE3032E80A6DF53D00C31C75 /* Danish */,
 				CEB563860A7AB7070081179A /* German */,
 				CE1AD3E00A7E845A0083C01E /* Italian */,
+				CE55A6630AD194740091C8AE /* zh_CN */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
