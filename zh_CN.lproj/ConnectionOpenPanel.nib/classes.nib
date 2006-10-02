@@ -1,0 +1,19 @@
+{
+    IBClasses = (
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
+        {
+            ACTIONS = {closePanel = id; createNewFolder = id; goToFolder = id; newFolder = id; }; 
+            CLASS = connectionOpenPanelController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                createFolder = NSWindow; 
+                delegate = id; 
+                directoryContents = NSArrayController; 
+                parentDirectories = NSArrayController; 
+                tableView = NSTableView; 
+            }; 
+            SUPERCLASS = NSWindowController; 
+        }
+    ); 
+    IBVersion = 1; 
+}
