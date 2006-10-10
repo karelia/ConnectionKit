@@ -193,22 +193,25 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 #pragma mark Invocation Queue
 
 - (void)processInvocations
-{	
-	[myLock lock];
-    while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
+{ 
+	if ([self isConnected])
 	{
-		myInflightInvocation = [myPendingInvocations objectAtIndex:0];
-		if ( nil != myInflightInvocation )
+		[myLock lock];
+		while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
 		{
-			[myInflightInvocation retain];
-			[myPendingInvocations removeObjectAtIndex:0];
-			[myInflightInvocation invoke];
-			[myInflightInvocation release];
-			myInflightInvocation = nil;
+			myInflightInvocation = [myPendingInvocations objectAtIndex:0];
+			if ( nil != myInflightInvocation )
+			{
+				[myInflightInvocation retain];
+				[myPendingInvocations removeObjectAtIndex:0];
+				[myInflightInvocation invoke];
+				[myInflightInvocation release];
+				myInflightInvocation = nil;
+			}
+			[NSThread sleepUntilDate:[NSDate distantPast]];
 		}
-		[NSThread sleepUntilDate:[NSDate distantPast]];
+		[myLock unlock];
 	}
-	[myLock unlock];
 }
 
 - (void)queueInvocation:(NSInvocation *)inv
@@ -554,6 +557,8 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	}
 	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[myFileManager currentDirectoryPath] stringByAppendingPathComponent:remotePath];
 	BOOL success = [myFileManager createFileAtPath:fullPath contents:data attributes:nil];
+	
+	NSLog(@"CREATED %@ -> %d", fullPath, success);
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) {
 		[myForwarder connection:self upload:remotePath sentDataOfLength:[data length]];
@@ -564,6 +569,13 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	if (success && _flags.uploadFinished)
 	{
 		[myForwarder connection:self uploadDidFinish:remotePath];
+	}
+	if (!success && _flags.error)
+	{
+		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
+										   code:ConnectionErrorUploading 
+									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload data", @"FileConnection copy from data error"), NSLocalizedDescriptionKey, nil]];
+		[myForwarder connection:self didReceiveError:err];
 	}
 }
 
