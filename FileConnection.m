@@ -558,7 +558,6 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[myFileManager currentDirectoryPath] stringByAppendingPathComponent:remotePath];
 	BOOL success = [myFileManager createFileAtPath:fullPath contents:data attributes:nil];
 	
-	NSLog(@"CREATED %@ -> %d", fullPath, success);
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) {
 		[myForwarder connection:self upload:remotePath sentDataOfLength:[data length]];
