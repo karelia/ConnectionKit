@@ -138,11 +138,11 @@
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
-		79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */; };
+		79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA8D70AC23C25009EDAF9 /* CKHTTPPutRequest.m */; };
-		79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */; };
+		79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */; };
-		79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */; };
+		79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */; };
 		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
@@ -923,7 +923,6 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
-			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
