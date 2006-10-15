@@ -42,5 +42,7 @@
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>
+#import <Connection/CKHTTPFileDownloadRequest.h>
+#import <Connection/CKHTTPPutRequest.h>
 #import <Connection/CKHTTPResponse.h>
-
+#import <Connection/CKHTTPFileDownloadResponse.h>
