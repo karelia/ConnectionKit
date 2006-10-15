@@ -569,6 +569,7 @@ NSDictionary *sDataAttributes;
 		[self setUsername:username];
 		[self setPassword:password];
 		_properties = [[NSMutableDictionary dictionary] retain];
+		_flags.isConnected = NO;
 		
 		if (error)
 		{
