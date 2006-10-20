@@ -93,31 +93,34 @@
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
 	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
-	SecKeychainItemRef item = nil;
-	OSStatus theStatus = noErr;
-	char *buffer;
-	UInt32 passwordLen;
-	
-	char *utf8 = (char *)[accountName UTF8String];
-	theStatus = SecKeychainFindGenericPassword(NULL,
-											   6,
-											   "iTools",
-											   strlen(utf8),
-											   utf8,
-											   &passwordLen,
-											   (void *)&buffer,
-											   &item);
-	
-	if (noErr == theStatus)
+	if (accountName)
 	{
-		buffer[passwordLen] = '\0';		// make it a legal C string by appending 0
-		if (password)
-			*password = [NSString stringWithUTF8String:buffer];
-		else
-			*password = nil;
+		SecKeychainItemRef item = nil;
+		OSStatus theStatus = noErr;
+		char *buffer;
+		UInt32 passwordLen;
 		
-		*account = accountName;
-		return YES;
+		char *utf8 = (char *)[accountName UTF8String];
+		theStatus = SecKeychainFindGenericPassword(NULL,
+												   6,
+												   "iTools",
+												   strlen(utf8),
+												   utf8,
+												   &passwordLen,
+												   (void *)&buffer,
+												   &item);
+		
+		if (noErr == theStatus)
+		{
+			buffer[passwordLen] = '\0';		// make it a legal C string by appending 0
+			if (password)
+				*password = [NSString stringWithUTF8String:buffer];
+			else
+				*password = nil;
+			
+			*account = accountName;
+			return YES;
+		}
 	}
 	return NO;
 }
