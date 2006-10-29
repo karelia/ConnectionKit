@@ -134,7 +134,7 @@
 
 extern NSString *StreamBasedErrorDomain;
 
-enum { StreamErrorFailedSocketCreation = 7000 };
+enum { StreamErrorFailedSocketCreation = 7000, StreamErrorTimedOut };
 
 extern const unsigned int kStreamChunkSize;
 
