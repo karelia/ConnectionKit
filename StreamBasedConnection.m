@@ -48,6 +48,8 @@
 #import <Security/Security.h>
 
 const unsigned int kStreamChunkSize = 2048;
+const NSTimeInterval kStreamTimeOutValue = 10.0; // 10 second timeout
+
 NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
 
 OSStatus SSLReadFunction(SSLConnectionRef connection, void *data, size_t *dataLength);
@@ -497,8 +499,21 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_lastChunkSent autorelease];
 		_lastChunkSent = [[NSDate date] retain];
 		// wait for the stream to open
+		NSDate *start = [NSDate date];
 		while ([_sendStream streamStatus] != NSStreamStatusOpen)
 		{
+			if (abs([start timeIntervalSinceNow]) > kStreamTimeOutValue)
+			{
+				[self closeStreams];
+				if (_flags.error)
+				{
+					NSError *error = [NSError errorWithDomain:StreamBasedErrorDomain
+														 code:StreamErrorTimedOut
+													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
+					[_forwarder connection:self didReceiveError:error];
+				}
+				return;
+			}
 			[NSThread sleepUntilDate:[NSDate distantPast]];
 		}
 		[_sendStream write:bytes maxLength:chunkLength];
