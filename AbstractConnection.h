@@ -188,3 +188,7 @@ extern NSString *ConnectionCommandKey;
 - (NSString *)ipv4Address;
 @end
 
+@interface NSArray (AbstractConnectionExtras)
+- (NSArray *)filteredArrayByRemovingHiddenFiles;
+@end
+
