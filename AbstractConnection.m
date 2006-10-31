@@ -991,8 +991,8 @@ NSDictionary *sDataAttributes;
 
 int filenameSort(id obj1, id obj2, void *context)
 {
-    NSString *f1 = [obj1 objectForKey:cxFilenameKey];
-	NSString *f2 = [obj2 objectForKey:cxFilenameKey];
+    NSString *f1 = [obj1 objectForKey:[cxFilenameKey lastPathComponent]];
+	NSString *f2 = [obj2 objectForKey:[cxFilenameKey lastPathComponent]];
 	
 	return [f1 caseInsensitiveCompare:f2];
 }
@@ -1425,5 +1425,23 @@ int filenameSort(id obj1, id obj2, void *context)
 			return cur;
 	}
 	return nil;
+}
+@end
+
+@implementation NSArray (AbstractConnectionExtras)
+- (NSArray *)filteredArrayByRemovingHiddenFiles
+{
+	NSMutableArray *files = [NSMutableArray array];
+	NSEnumerator *e = [self objectEnumerator];
+	NSDictionary *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if (![[[cur objectForKey:cxFilenameKey] lastPathComponent] hasPrefix:@"."])
+		{
+			[files addObject:cur];
+		}
+	}
+	return files;
 }
 @end

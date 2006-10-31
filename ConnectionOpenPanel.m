@@ -759,6 +759,7 @@ static NSImage *symFolder = nil;
 static NSImage *symFile = nil;
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
+	contents = [contents filteredArrayByRemovingHiddenFiles];
 	//set the parent directory (in reverse order)
 	//
   if ([dirPath hasSuffix:@"/"] && ([dirPath length] > 1))
