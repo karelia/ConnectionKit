@@ -250,6 +250,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 					[d setObject:[NSNumber numberWithLongLong:filesize] forKey:NSFileSize];
 					[contents addObject:d];
 				}
+				[self cacheDirectory:myCurrentDirectory withContents:contents];
 				
 				if (_flags.directoryContents)
 				{
@@ -684,6 +685,11 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	}
 }
 
 @end

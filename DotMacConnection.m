@@ -184,8 +184,10 @@
 				{
 					if (_flags.directoryContents)
 					{
+						NSArray *contents = [dav directoryContents];
+						[self cacheDirectory:[dav path] withContents:contents];
 						[_forwarder connection:self 
-							didReceiveContents:[dav directoryContents]
+							didReceiveContents:contents
 								   ofDirectory:[[dav path] stringByDeletingFirstPathComponent]];
 					}
 					break;

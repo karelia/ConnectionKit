@@ -489,7 +489,7 @@ NSString *ProtocolKey = @"Protocol";
 	{
 		NSString *dir = [[con currentDirectory] stringByAppendingPathComponent:val];
 		[con createDirectory:dir];
-		[con directoryContents];
+		[con contentsOfDirectory:[con currentDirectory]];
 	}
 }
 
@@ -503,7 +503,7 @@ NSString *ProtocolKey = @"Protocol";
 
 - (IBAction)refresh:(id)sender
 {
-	[con directoryContents];
+	[con contentsOfDirectory:[con currentDirectory]];
 }
 
 - (IBAction)remoteFileSelected:(id)sender
@@ -536,7 +536,7 @@ NSString *ProtocolKey = @"Protocol";
 		{
 			NSString *path = [[con currentDirectory] stringByAppendingPathComponent:[attribs objectForKey:cxFilenameKey]];
 			[con changeToDirectory:path];
-			[con directoryContents];
+			[con contentsOfDirectory:path];
 			//[remoteFiles removeAllObjects];
 			return;
 		}
@@ -546,7 +546,7 @@ NSString *ProtocolKey = @"Protocol";
 			if ([target characterAtIndex:[target length] - 1] == '/' || [target characterAtIndex:[target length] - 1] == '\\')
 			{
 				[con changeToDirectory:[attribs objectForKey:cxFilenameKey]];
-				[con directoryContents];
+				[con contentsOfDirectory:[attribs objectForKey:cxFilenameKey]];
 				return;
 			}
 		}
@@ -571,7 +571,7 @@ NSString *ProtocolKey = @"Protocol";
 {
 	NSString *path = [[sender selectedItem] representedObject];
 	[con changeToDirectory:path];
-	[con directoryContents];
+	[con contentsOfDirectory:path];
 }
 
 - (IBAction)showConnect:(id)sender
@@ -901,7 +901,7 @@ static NSImage *_folder = nil;
 	NSString *dir = [[initialDirectory stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	if (dir && [dir length] > 0)
 		[con changeToDirectory:[initialDirectory stringValue]];
-	[con directoryContents];
+	[con contentsOfDirectory:[con currentDirectory]];
 }
 
 - (void)connection:(AbstractConnection *)aConn didDisconnectFromHost:(NSString *)host
@@ -958,27 +958,20 @@ static NSImage *_folder = nil;
 
 - (void)connection:(AbstractConnection *)aConn didDeleteFile:(NSString *)path
 {
-	[aConn directoryContents];
+	[con contentsOfDirectory:[con currentDirectory]];
 }
 
 - (void)connection:(AbstractConnection *)aConn didDeleteDirectory:(NSString *)path
 {
-	[aConn directoryContents];
+	[con contentsOfDirectory:[con currentDirectory]];
 }
 
 
 - (void)connection:(AbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
-	NSLog(@"%@: %@", NSStringFromSelector(_cmd), dirPath);
+	NSLog(@"%@ %@", NSStringFromSelector(_cmd), dirPath);
 	[remoteFiles removeAllObjects];
-	NSEnumerator *e = [contents objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		if ([[cur objectForKey:cxFilenameKey] characterAtIndex:0] != '.')
-			[remoteFiles addObject:cur];
-	}
+	[remoteFiles addObjectsFromArray:[contents filteredArrayByRemovingHiddenFiles]];
 	[self refreshRemoteUI];
 }
 
@@ -998,7 +991,7 @@ static NSImage *_folder = nil;
 - (void)connection:(id <AbstractConnectionProtocol>)conn uploadDidFinish:(NSString *)remotePath
 {	
 	[[self uploadForRemoteFile:remotePath] setCompleted:YES];
-	[con directoryContents];
+	[con contentsOfDirectory:[con currentDirectory]];
 	[transferTable reloadData];
 }
 

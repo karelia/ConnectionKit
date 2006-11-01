@@ -1716,6 +1716,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, contents);
 		
+		[self cacheDirectory:_currentPath withContents:contents];
+		
 		if (_flags.directoryContents)
 		{
 			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
@@ -2206,6 +2208,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											 dependant:nil 
 											  userInfo:nil];
 	[self queueCommand:ls];
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	}
 }
 
 #pragma mark -

@@ -84,7 +84,8 @@ typedef enum {
 	ConnectionSentDisconnectState //24
 } ConnectionState;
 
-@interface AbstractConnection : NSObject <AbstractConnectionProtocol> {
+@interface AbstractConnection : NSObject <AbstractConnectionProtocol, NSCopying> 
+{
 
 	NSString *_connectionHost;
 	NSString *_connectionPort;
@@ -101,6 +102,8 @@ typedef enum {
 	connectionFlags _flags;
 	
 	NSMutableDictionary *_properties;
+	
+	NSMutableDictionary *_cachedDirectoryContents;
 }
 
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -158,6 +161,12 @@ typedef enum {
 + (NSDictionary *)sentAttributes;
 + (NSDictionary *)receivedAttributes;
 + (NSDictionary *)dataAttributes;
+
+// we cache directory contents so when changing to an existing directory we show the 
+// last cached version and issue a new listing
+- (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents;
+- (NSArray *)cachedContentsWithDirectory:(NSString *)path;
+- (void)clearDirectoryCache;
 
 @end
 
