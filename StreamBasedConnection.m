@@ -448,6 +448,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];
 	}
+	[_recursiveDeletionsQueue addObject:path];
 	_numberOfListingsRemaining++;
 	[_recursiveListingConnection contentsOfDirectory:path];
 }
@@ -982,7 +983,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
-		[_emptyDirectoriesToDelete addObject:dirPath];
+		if (![[_recursiveDeletionsQueue objectAtIndex:0] isEqualToString:dirPath])
+		{
+			[_emptyDirectoriesToDelete addObject:dirPath];
+		}
 		[_deletionLock unlock];
 	}
 }
@@ -993,7 +997,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_deletionLock lock];
 		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0)
+		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
 		{
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
 			NSString *cur;
@@ -1016,7 +1020,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_numberOfDirDeletionsRemaining--;
 		[_deletionLock unlock];
 		
-		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
+		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
 		{
 			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
