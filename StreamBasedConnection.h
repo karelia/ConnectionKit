@@ -76,7 +76,9 @@
 		unsigned sslOn : 1;
 		unsigned verifySSLCert : 1;
 		unsigned allowsBadCerts : 1; // for data transfer connections
-		unsigned unused : 27;
+		unsigned isNegotiatingSSL : 1;
+		unsigned initializedSSL : 1;
+		unsigned unused : 26;
 	} myStreamFlags;
 	
 	// SSL Support
@@ -84,6 +86,8 @@
 	SecIdentityRef		mySSLIdentity;
 	NSMutableData		*mySSLSendBuffer;
 	NSMutableData		*mySSLRecevieBuffer;
+	NSMutableData		*mySSLRawReadBuffer;
+	NSMutableData		*mySSLEncryptedSendBuffer;
 }
 
 - (void)openStreamsToPort:(unsigned)port;
@@ -133,6 +137,7 @@
 @end
 
 extern NSString *StreamBasedErrorDomain;
+extern NSString *SSLErrorDomain;
 
 enum { StreamErrorFailedSocketCreation = 7000, StreamErrorTimedOut };
 

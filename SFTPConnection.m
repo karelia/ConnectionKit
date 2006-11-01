@@ -1003,6 +1003,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 				[contents addObject:at];
 			}
 			free(dirbuf);
+			[self cacheDirectory:directory withContents:contents];
 			[_forwarder connection:self didReceiveContents:contents ofDirectory:directory];
 		}
 	}
@@ -1032,6 +1033,11 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
 										 userInfo:nil]];
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	}
 }
 
 + (NSString *)escapedPathStringWithString:(NSString *)str

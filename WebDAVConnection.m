@@ -136,9 +136,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				case 200:
 				case 207: //multi-status
 				{
+					NSArray *contents = [dav directoryContents];
+					[self cacheDirectory:[dav path] withContents:contents];
 					if (_flags.directoryContents)
 					{
-						[_forwarder connection:self didReceiveContents:[dav directoryContents] ofDirectory:[dav path]];
+						[_forwarder connection:self didReceiveContents:contents ofDirectory:[dav path]];
 					}
 					break;
 				}
@@ -429,6 +431,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				{
 					int percent = (100 * bytesTransferred) / bytesToTransfer;
 					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+					lastPercent = percent;
 				}
 			}
 		}
@@ -446,7 +449,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			if (_flags.downloadPercent)
 			{
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+				if (percent != lastPercent)
+				{
+					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+					lastPercent = percent;
+				}
 			}
 		}
 		
@@ -690,11 +697,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
-}
-
-- (void)checkExistenceOfPath:(NSString *)path
-{
-	
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	}
 }
 
 #pragma mark -

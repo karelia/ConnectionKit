@@ -51,6 +51,7 @@ const unsigned int kStreamChunkSize = 2048;
 const NSTimeInterval kStreamTimeOutValue = 10.0; // 10 second timeout
 
 NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
+NSString *SSLErrorDomain = @"SSLErrorDomain";
 
 OSStatus SSLReadFunction(SSLConnectionRef connection, void *data, size_t *dataLength);
 OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t *dataLength);
@@ -79,6 +80,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_createdThread = [NSThread currentThread];
 		myStreamFlags.sendOpen = NO;
 		myStreamFlags.readOpen = NO;
+		
+		myStreamFlags.wantsSSL = NO;
+		myStreamFlags.isNegotiatingSSL = NO;
+		myStreamFlags.sslOn = NO;
+		myStreamFlags.allowsBadCerts = NO;
+		myStreamFlags.initializedSSL = NO;
+		
+		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
 		
 		[NSThread prepareForConnectionInterThreadMessages];
 	}
@@ -474,26 +483,65 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	return YES;
 }
 
+- (NSMutableData *)outputDataBuffer
+{
+	NSMutableData *dataBuffer = nil;
+	
+	if (myStreamFlags.wantsSSL)
+	{
+		if (!myStreamFlags.sslOn && myStreamFlags.isNegotiatingSSL)
+		{
+			dataBuffer = mySSLEncryptedSendBuffer;
+		}
+	}
+	else
+	{
+		dataBuffer = _sendBuffer;
+	}
+	
+	return dataBuffer;
+}
+
 - (void)sendData:(NSData *)data
 {
+	if (myStreamFlags.wantsSSL)
+	{
+		if (!myStreamFlags.sslOn && !myStreamFlags.isNegotiatingSSL)
+		{
+			//put into the normal send buffer that is not encrypted.	
+			[_sendBufferLock lock];
+			[_sendBuffer appendData:data];
+			[_sendBufferLock unlock];
+			return;
+		}
+	}
+	BOOL bufferEmpty = NO;
+	NSMutableData *dataBuffer = [self outputDataBuffer];
+	
+	if (!dataBuffer) 
+	{
+		KTLog(SSLDomain, KTLogFatal, @"No Data Buffer in sendData:");
+		return nil;
+	}
+	
 	[_sendBufferLock lock];
-	BOOL bufferEmpty = [_sendBuffer length] == 0;
-	[_sendBuffer appendData:data];
+	bufferEmpty = [dataBuffer length] == 0;
+	[dataBuffer appendData:data];
 	[_sendBufferLock unlock];
 		
 	if (bufferEmpty) {
 		// prime the sending
 		[_sendBufferLock lock];
-		unsigned chunkLength = [_sendBuffer length];
+		unsigned chunkLength = [dataBuffer length];
 		if ([self shouldChunkData])
 		{
-			chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
+			chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
 		}
-		NSData *chunk = [_sendBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
+		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
 		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk descriptionAsString]);
-		[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
-							   withBytes:NULL
-								  length:0];
+		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
+							  withBytes:NULL
+								 length:0];
 		[_sendBufferLock unlock];
 		uint8_t *bytes = (uint8_t *)[chunk bytes];
 		[_lastChunkSent autorelease];
@@ -535,15 +583,36 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				KTLog(InputStreamDomain, KTLogDebug, @"%d >> %@", len, [data descriptionAsString]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self recalcDownloadSpeedWithBytesSent:len];
-				[self processReceivedData:data];
+				if (myStreamFlags.wantsSSL && myStreamFlags.isNegotiatingSSL)
+				{
+					[self negotiateSSLWithData:data];
+				}
+				else
+				{
+					[self processReceivedData:data];
+				}
 			}
+			
 			free(buf);
 			break;
 		}
 		case NSStreamEventOpenCompleted:
 		{
 			myStreamFlags.readOpen = YES;
-			[self receiveStreamDidOpen];
+			
+			if (myStreamFlags.wantsSSL)
+			{
+				if (myStreamFlags.sendOpen)
+				{
+					myStreamFlags.isNegotiatingSSL = YES;
+					[self initializeSSL];
+				}
+			}
+			else
+			{
+				[self receiveStreamDidOpen];
+			}
+			
 			KTLog(StreamDomain, KTLogDebug, @"Command receive stream opened");
 			break;
 		}
@@ -632,17 +701,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventHasBytesAvailable:
 		{
 			// This can be called in here when send and receive stream are the same.
-			uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
-			int len = [_receiveStream read:buf maxLength:kStreamChunkSize];
-			if (len >= 0)
-			{
-				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(InputStreamDomain, KTLogDebug, @">> %@", [data descriptionAsString]);
-				[self recalcDownloadSpeedWithBytesSent:len];
-				[self stream:_receiveStream readBytesOfLength:len];
-				[self processReceivedData:data];
-			}
-			free(buf);
+			[self handleReceiveStreamEvent:theEvent];
 			break;
 		}
 		case NSStreamEventOpenCompleted:
@@ -653,14 +712,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				if (myStreamFlags.readOpen)
 				{
-					
+					myStreamFlags.isNegotiatingSSL = YES;
+					[self initializeSSL];
 				}
 			}
 			else
 			{
 				[self sendStreamDidOpen];
 			}
-			
+
 			KTLog(StreamDomain, KTLogDebug, @"Command send stream opened");
 		
 			break;
@@ -738,17 +798,19 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		case NSStreamEventHasSpaceAvailable:
 		{
+			NSMutableData *dataBuffer = [self outputDataBuffer];
+			
 			[_sendBufferLock lock];
-			unsigned chunkLength = MIN(kStreamChunkSize, [_sendBuffer length]);
+			unsigned chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
 			if (chunkLength > 0) {
-				uint8_t *bytes = (uint8_t *)[_sendBuffer bytes];
+				uint8_t *bytes = (uint8_t *)[dataBuffer bytes];
 				KTLog(OutputStreamDomain, KTLogDebug, @"<< %s", bytes);
 				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 				[self recalcUploadSpeedWithBytesSent:chunkLength];
 				[self stream:_sendStream sentBytesOfLength:chunkLength];
-				[_sendBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
-									   withBytes:NULL
-										  length:0];
+				[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
+									  withBytes:NULL
+										 length:0];
 			}
 			[_sendBufferLock unlock];
 			break;
@@ -880,6 +942,41 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	CFRelease(keychainRef);
 	CFRelease(searchRef);
+	[mySSLRawReadBuffer autorelease];
+	mySSLRawReadBuffer = [[NSMutableData data] retain];
+	
+	[self negotiateSSLWithData:nil];
+}
+
+- (void)negotiateSSLWithData:(NSData *)data
+{
+	NSMutableData *outputData = [NSMutableData data];
+	[mySSLRawReadBuffer appendData:data];
+	int ret = [self handshakeWithInputData:mySSLRawReadBuffer outputData:outputData];
+	
+	if ([outputData length])
+	{
+		[self sendData:outputData];
+	}
+	
+	if (ret < 0)
+	{
+		if (_flags.error)
+		{
+			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:@"SSL Error Occurred" forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+		return;
+	}
+	
+	if (ret == 1)
+	{
+		myStreamFlags.isNegotiatingSSL = NO;
+		myStreamFlags.sslOn = YES;
+		
+		//[self ONB_provideEncryptedData];
+		return;
+	}
 }
 
 - (int)handshakeWithInputData:(NSMutableData *)inputData

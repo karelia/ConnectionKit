@@ -90,31 +90,31 @@ NSDictionary *sDataAttributes;
 #pragma mark -
 #pragma mark Registry
 
-//+ (void)initialize
-//{
-//	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-//
-//	NSFont *plainFont = [NSFont fontWithName:@"Courier" size:11];
-//	NSFont *boldFont = [[NSFontManager sharedFontManager] convertFont:plainFont toHaveTrait:NSBoldFontMask];
-//	
-//	sReceivedAttributes
-//		= [[NSDictionary alloc] initWithObjectsAndKeys:
-//			boldFont, NSFontAttributeName,
-//			[NSColor blackColor], NSForegroundColorAttributeName,
-//			nil];
-//	sSentAttributes
-//		= [[NSDictionary alloc] initWithObjectsAndKeys:
-//			plainFont, NSFontAttributeName,
-//			[NSColor redColor], NSForegroundColorAttributeName,
-//			nil];
-//	sDataAttributes
-//		= [[NSDictionary alloc] initWithObjectsAndKeys:
-//			plainFont, NSFontAttributeName,
-//			[NSColor blueColor], NSForegroundColorAttributeName,
-//			nil];
-//	
-//	[pool release];
-//}
++ (void)initialize
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+
+	NSFont *plainFont = [NSFont fontWithName:@"Courier" size:11];
+	NSFont *boldFont = [[NSFontManager sharedFontManager] convertFont:plainFont toHaveTrait:NSBoldFontMask];
+	
+	sReceivedAttributes
+		= [[NSDictionary alloc] initWithObjectsAndKeys:
+			boldFont, NSFontAttributeName,
+			[NSColor blackColor], NSForegroundColorAttributeName,
+			nil];
+	sSentAttributes
+		= [[NSDictionary alloc] initWithObjectsAndKeys:
+			plainFont, NSFontAttributeName,
+			[NSColor redColor], NSForegroundColorAttributeName,
+			nil];
+	sDataAttributes
+		= [[NSDictionary alloc] initWithObjectsAndKeys:
+			plainFont, NSFontAttributeName,
+			[NSColor blueColor], NSForegroundColorAttributeName,
+			nil];
+	
+	[pool release];
+}
 
 + (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types
 {
@@ -569,6 +569,7 @@ NSDictionary *sDataAttributes;
 		[self setUsername:username];
 		[self setPassword:password];
 		_properties = [[NSMutableDictionary dictionary] retain];
+		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
 		
 		if (error)
@@ -587,8 +588,34 @@ NSDictionary *sDataAttributes;
 	[_password release];
 	[_transcript release];
 	[_properties release];
+	[_cachedDirectoryContents release];
 	
 	[super dealloc];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	NSError *err = nil;
+	id <AbstractConnectionProtocol>copy = [[[self class] allocWithZone:zone] initWithHost:[self host]
+																					 port:[self port]
+																				 username:[self username]
+																				 password:[self password]
+																					error:&err];
+	if (err)
+	{
+		NSLog(@"Failed to copy connection: %@", err);
+		[copy release];
+		return nil;
+	}
+	NSEnumerator *e = [_properties objectEnumerator];
+	id key;
+	
+	while ((key = [e nextObject]))
+	{
+		[copy setProperty:[_properties objectForKey:key] forKey:key];
+	}
+	
+	return copy;
 }
 
 - (void)setHost:(NSString *)host
@@ -723,6 +750,22 @@ NSDictionary *sDataAttributes;
 {
 	return [_properties objectForKey:key];
 }
+
+- (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents
+{
+	[_cachedDirectoryContents setObject:contents forKey:path];
+}
+
+- (NSArray *)cachedContentsWithDirectory:(NSString *)path
+{
+	return [_cachedDirectoryContents objectForKey:path];
+}
+
+- (void)clearDirectoryCache
+{
+	[_cachedDirectoryContents removeAllObjects];
+}
+
 
 #pragma mark -
 #pragma mark Placeholder implementations
