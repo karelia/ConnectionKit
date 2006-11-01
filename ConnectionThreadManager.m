@@ -50,8 +50,6 @@ static NSLock *_initLock = nil;
 	{
 		myLock = [[NSLock alloc] init];
 		myTasks = [[NSMutableArray alloc] init];
-		myPort = [[NSPort port] retain];
-		[myPort setDelegate:self];
 		
 		[NSThread detachNewThreadSelector:@selector(connectionFrameworkThread:) toTarget:self withObject:nil];
 	}
@@ -73,7 +71,6 @@ static NSLock *_initLock = nil;
 	[NSThread prepareForConnectionInterThreadMessages];
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
 	// But then again, we can't remove the thread, so it really doesn't mean much.	
-	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
 	NSDate *backToTheFuture = [NSDate distantFuture];
 	
 	while (1)
@@ -82,48 +79,6 @@ static NSLock *_initLock = nil;
 	}
 	
 	[pool release];
-}
-
-- (void)sendPortMessage:(int)aMessage
-{
-	if (nil != myPort)
-	{
-		NSPortMessage *message = [[NSPortMessage alloc] initWithSendPort:myPort
-															 receivePort:myPort components:nil];
-		[message setMsgid:aMessage];
-		
-		@try {
-			if ([NSThread currentThread] != myBgThread)
-			{
-				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
-				if (!sent)
-				{
-					KTLog(ThreadingDomain, KTLogFatal, @"ConnectionThreadManager couldn't send message %d", aMessage);
-				}
-			}
-			else
-			{
-				[self handlePortMessage:message];
-			}
-		} @catch (NSException *ex) {
-			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
-		} @finally {
-			[message release];
-		} 
-	}
-}
-
-- (void)handlePortMessage:(NSPortMessage *)portMessage
-{
-    int message = [portMessage msgid];
-	
-	switch (message)
-	{
-		case CHECK_TASKS:
-		{
-			[self processTasks];
-		}
-	}
 }
 
 - (void)processTasks
@@ -151,7 +106,7 @@ static NSLock *_initLock = nil;
 	
 	if ([NSThread currentThread] != myBgThread)
 	{
-		[self sendPortMessage:CHECK_TASKS];
+		[self performSelector:@selector(processTasks) inThread:myBgThread beforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
 	}
 	else
 	{

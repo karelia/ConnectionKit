@@ -837,6 +837,11 @@ NSDictionary *sDataAttributes;
 	SUBCLASS_RESPONSIBLE
 }
 
+- (void)recursivelyDeleteDirectory:(NSString *)path
+{
+	SUBCLASS_RESPONSIBLE
+}
+
 - (void)uploadFile:(NSString *)localPath
 {
 	SUBCLASS_RESPONSIBLE

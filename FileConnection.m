@@ -465,6 +465,11 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[self queueInvocation:inv];
 }
 
+- (void)recursivelyDeleteDirectory:(NSString *)path
+{
+	[self deleteDirectory:path];
+}
+
 /*!	Upload the given file to the working directory.
 */
 

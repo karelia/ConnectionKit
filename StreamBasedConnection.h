@@ -66,8 +66,19 @@
 	double				_downloadSpeed;
 	
 	// This is a peer connection that is used to check if files exist
-	AbstractConnection	*_fileCheckingConnection;
+	id <AbstractConnectionProtocol>	_fileCheckingConnection;
 	NSString			*_fileCheckInFlight;
+	
+	// These peer connections are used to speed up recursive directory deletion
+	NSMutableArray					*_recursiveDeletionsQueue;
+	id <AbstractConnectionProtocol> _recursiveListingConnection;
+	id <AbstractConnectionProtocol> _recursiveDeletionConnection;
+	unsigned						_numberOfListingsRemaining;
+	unsigned						_numberOfDeletionsRemaining;
+	unsigned						_numberOfDirDeletionsRemaining;
+	NSMutableArray					*_emptyDirectoriesToDelete;
+	NSLock							*_deletionLock;
+	
 	
 	struct __streamflags {
 		unsigned sendOpen : 1;
