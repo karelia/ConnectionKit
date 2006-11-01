@@ -1016,7 +1016,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_numberOfDirDeletionsRemaining--;
 		[_deletionLock unlock];
 		
-		if (_numberOfDirDeletionsRemaining == 0)
+		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
 		{
 			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
