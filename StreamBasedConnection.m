@@ -87,6 +87,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.allowsBadCerts = NO;
 		myStreamFlags.initializedSSL = NO;
 		
+		_recursiveDeletionsQueue = [[NSMutableArray alloc] init];
+		
 		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
 		
 		[NSThread prepareForConnectionInterThreadMessages];
@@ -108,6 +110,16 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckInFlight release];
 	[_lastChunkSent release];
 	[_lastChunkReceived release];
+	
+	[_recursiveDeletionsQueue release];
+	[_recursiveListingConnection setDelegate:nil];
+	[_recursiveListingConnection forceDisconnect];
+	[_recursiveListingConnection release];
+	[_recursiveDeletionConnection setDelegate:nil];
+	[_recursiveDeletionConnection forceDisconnect];
+	[_recursiveDeletionConnection release];
+	[_emptyDirectoriesToDelete release];
+	[_deletionLock release];
 	
 	[super dealloc];
 }
@@ -383,6 +395,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_forwarder connection:self didDisconnectFromHost:[self host]];
 	}
 	[self closeStreams];
+	[_fileCheckingConnection disconnect];
+	[_recursiveListingConnection disconnect];
+	[_recursiveDeletionConnection disconnect];
 }
 
 - (void)threadedForceDisconnect
@@ -398,11 +413,43 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 	[_fileCheckingConnection forceDisconnect];
+	[_recursiveListingConnection forceDisconnect];
+	[_recursiveDeletionConnection forceDisconnect];
 }
 
 - (void) cleanupConnection
 {
 	[_fileCheckingConnection cleanupConnection];
+	[_recursiveListingConnection cleanupConnection];
+	[_recursiveDeletionConnection cleanupConnection];
+}
+
+- (void)recursivelyDeleteDirectory:(NSString *)path
+{
+	if (!_recursiveListingConnection)
+	{
+		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_deletionLock = [[NSLock alloc] init];
+		
+		_recursiveListingConnection = [[[self class] alloc] initWithHost:[self host]
+																	port:[self port]
+																username:[self username]
+																password:[self password]
+																   error:nil];
+		[_recursiveListingConnection setDelegate:self];
+		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
+		[_recursiveListingConnection connect];
+		_recursiveDeletionConnection = [[[self class] alloc] initWithHost:[self host]
+																	 port:[self port]
+																 username:[self username]
+																 password:[self password]
+																	error:nil];
+		[_recursiveDeletionConnection setDelegate:self];
+		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
+		[_recursiveDeletionConnection connect];
+	}
+	_numberOfListingsRemaining++;
+	[_recursiveListingConnection contentsOfDirectory:path];
 }
 
 #pragma mark -
@@ -521,7 +568,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if (!dataBuffer) 
 	{
 		KTLog(SSLDomain, KTLogFatal, @"No Data Buffer in sendData:");
-		return nil;
+		return;
 	}
 	
 	[_sendBufferLock lock];
@@ -888,30 +935,93 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
-	if (_flags.fileCheck) {
-		NSString *name = [_fileCheckInFlight lastPathComponent];
-		NSEnumerator *e = [contents objectEnumerator];
-		NSDictionary *cur;
-		BOOL foundFile = NO;
-		
-		while (cur = [e nextObject]) 
-		{
-			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+	if (con == _fileCheckingConnection)
+	{
+		if (_flags.fileCheck) {
+			NSString *name = [_fileCheckInFlight lastPathComponent];
+			NSEnumerator *e = [contents objectEnumerator];
+			NSDictionary *cur;
+			BOOL foundFile = NO;
+			
+			while (cur = [e nextObject]) 
 			{
-				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
-				foundFile = YES;
-				break;
+				if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+				{
+					[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
+					foundFile = YES;
+					break;
+				}
+			}
+			if (!foundFile)
+			{
+				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
 			}
 		}
-		if (!foundFile)
+		[self dequeueFileCheck];
+		[_fileCheckInFlight autorelease];
+		_fileCheckInFlight = nil;
+		[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
+	}
+	else if (con == _recursiveListingConnection)
+	{
+		[_deletionLock lock];
+		_numberOfListingsRemaining--;
+		NSEnumerator *e = [contents objectEnumerator];
+		NSDictionary *cur;
+		
+		while ((cur = [e nextObject]))
 		{
-			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
+			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			{
+				_numberOfListingsRemaining++;
+				[_recursiveListingConnection contentsOfDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+			}
+			else
+			{
+				_numberOfDeletionsRemaining++;
+				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+			}
+		}
+		[_emptyDirectoriesToDelete addObject:dirPath];
+		[_deletionLock unlock];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
+{
+	if (con == _recursiveDeletionConnection)
+	{
+		[_deletionLock lock];
+		_numberOfDeletionsRemaining--;
+		if (_numberOfDeletionsRemaining == 0)
+		{
+			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
+			NSString *cur;
+			
+			while (cur = [e nextObject])
+			{
+				_numberOfDirDeletionsRemaining++;
+				[_recursiveDeletionConnection deleteDirectory:cur];
+			}
+		}
+		[_deletionLock unlock];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath
+{
+	if (con == _recursiveDeletionConnection)
+	{
+		[_deletionLock lock];
+		_numberOfDirDeletionsRemaining--;
+		[_deletionLock unlock];
+		
+		if (_numberOfDirDeletionsRemaining == 0)
+		{
+			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 		}
 	}
-	[self dequeueFileCheck];
-	[_fileCheckInFlight autorelease];
-	_fileCheckInFlight = nil;
-	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
 }
 
 #pragma mark -

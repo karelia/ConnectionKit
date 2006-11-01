@@ -137,6 +137,7 @@ typedef struct __flags {
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)deleteFile:(NSString *)path;
 - (void)deleteDirectory:(NSString *)dirPath;
+- (void)recursivelyDeleteDirectory:(NSString *)path;
 
 - (void)startBulkCommands;
 - (void)endBulkCommands;

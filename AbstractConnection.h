@@ -144,6 +144,10 @@ typedef enum {
 - (void)setDelegate:(id)delegate;	//we do not retain the delegate
 - (id)delegate;
 
+/* Properties used:
+	RecursiveDirectoryDeletionTranscript is used by connections that recursively delete a directory
+	FileCheckingTranscript is used by connections that check for a files existence
+*/
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;
 

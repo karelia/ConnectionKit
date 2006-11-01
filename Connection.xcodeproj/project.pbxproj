@@ -21,8 +21,6 @@
 		790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
 		790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97324FDCFA39411CA2CEA /* AppKit.framework */; };
 		790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
-		792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; };
-		792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB20A806145001A00C6 /* CKHTTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB30A806145001A00C6 /* CKHTTPConnection.m */; };
@@ -59,8 +57,6 @@
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
-		79B5ECF40AC93B90007BC0AD /* CKSecureHTTPConnection.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */; };
-		79B5ECF50AC93B90007BC0AD /* CKSecureHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD84E09F7048500172CDD /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD80D09F7048400172CDD /* AbstractConnection.m */; };
 		79CFD84F09F7048500172CDD /* AbstractConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -182,11 +178,9 @@
 			dstSubfolderSpec = 10;
 			files = (
 				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
-				792BC8B20ABF6B2E0022415A /* NSString+Connection.h in CopyFiles */,
 				79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */,
 				79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */,
 				79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */,
-				79B5ECF40AC93B90007BC0AD /* CKSecureHTTPConnection.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1101,11 +1095,9 @@
 				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
 				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
 				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
-				792BC8B30ABF6B2E0022415A /* NSString+Connection.m in Sources */,
 				79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */,
 				79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */,
 				79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */,
-				79B5ECF50AC93B90007BC0AD /* CKSecureHTTPConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

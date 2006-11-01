@@ -375,6 +375,7 @@ NSString *ProtocolKey = @"Protocol";
 	[textStorage setDelegate:self];		// get notified when text changes
 	[con setTranscript:textStorage];
 	[[fileCheckLog textStorage] setDelegate:self];
+	[con setProperty:[fileCheckLog textStorage] forKey:@"RecursiveDirectoryDeletionTranscript"];
 	[con setProperty:[fileCheckLog textStorage] forKey:@"FileCheckingTranscript"];
 	
 	[con setDelegate:self];
@@ -429,7 +430,14 @@ NSString *ProtocolKey = @"Protocol";
 	}
 	else
 	{
-		[con deleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+		if (NSRunAlertPanel(@"Delete Directory?",@"Would you like to recursively delete the directory?",@"Recursive",@"Normal",nil) == NSOKButton)
+		{
+			[con recursivelyDeleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+		}
+		else
+		{
+			[con deleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+		}
 	}
 }
 
