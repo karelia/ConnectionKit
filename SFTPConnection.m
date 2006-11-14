@@ -1028,7 +1028,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(contentsOfDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
