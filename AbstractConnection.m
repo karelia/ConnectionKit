@@ -81,40 +81,14 @@ NSString *SSLDomain = @"SSL";
 
 static NSMutableArray *_connectionTypes = nil;
 
-NSDictionary *sSentAttributes;
-NSDictionary *sReceivedAttributes;
-NSDictionary *sDataAttributes;
+NSDictionary *sSentAttributes = nil;
+NSDictionary *sReceivedAttributes = nil;
+NSDictionary *sDataAttributes = nil;
 
 @implementation AbstractConnection
 
 #pragma mark -
 #pragma mark Registry
-
-+ (void)initialize
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-
-	NSFont *plainFont = [NSFont fontWithName:@"Courier" size:11];
-	NSFont *boldFont = [[NSFontManager sharedFontManager] convertFont:plainFont toHaveTrait:NSBoldFontMask];
-	
-	sReceivedAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			boldFont, NSFontAttributeName,
-			[NSColor blackColor], NSForegroundColorAttributeName,
-			nil];
-	sSentAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			plainFont, NSFontAttributeName,
-			[NSColor redColor], NSForegroundColorAttributeName,
-			nil];
-	sDataAttributes
-		= [[NSDictionary alloc] initWithObjectsAndKeys:
-			plainFont, NSFontAttributeName,
-			[NSColor blueColor], NSForegroundColorAttributeName,
-			nil];
-	
-	[pool release];
-}
 
 + (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types
 {
@@ -124,15 +98,23 @@ NSDictionary *sDataAttributes;
 
 + (NSDictionary *)sentAttributes
 {
-	return sSentAttributes;
+    if (!sSentAttributes)
+        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+    return sSentAttributes;
 }
+
 + (NSDictionary *)receivedAttributes
 {
-	return sReceivedAttributes;
+    if (!sReceivedAttributes)
+        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
+    return sReceivedAttributes;
 }
+
 + (NSDictionary *)dataAttributes
 {
-	return sDataAttributes;
+    if (!sDataAttributes)
+        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
+    return sDataAttributes;
 }
 
 + (NSString *)name
@@ -981,6 +963,11 @@ NSDictionary *sDataAttributes;
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"AbstractConnection does not implement checkExistanceOfPath:"
 								 userInfo:nil];
+}
+
+- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+{
+	return nil;
 }
 
 @end
