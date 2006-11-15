@@ -4,9 +4,6 @@
 #import "PermissionsController.h"
 #import "FileTransfer.h"
 #import <Connection/Connection.h>
-#import "CKHostCategory.h"
-#import "CKHost.h"
-#import "CKBonjourCategory.h"
 
 static NSString *AutoSelect = @"Auto Select";
 
@@ -771,8 +768,10 @@ static NSImage *_folder = nil;
 	for (i = 0; i < c && size >= 1024; i++) {
 		size = size / 1024;
 	}
+	float rem = 0;
 	
-	float rem = (spd - (i * 1024)) / (i * 1024);
+	if (i != 0)
+		rem = (spd - (i * 1024)) / (i * 1024);
 	
 	NSString *ext = suffix[i];
 	return [NSString stringWithFormat:@"%4.2f %@/s", size+rem, ext];

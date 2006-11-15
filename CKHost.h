@@ -50,3 +50,5 @@
 - (id <AbstractConnectionProtocol>)connection; 
 
 @end
+
+extern NSString *CKHostChanged;
