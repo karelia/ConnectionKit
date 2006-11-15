@@ -228,7 +228,7 @@ static NSString *KTLevelMap[] = {
 	[fm movePath:from toPath:to handler:nil];
 }
 
-- (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level message:(NSString *)log
+- (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level thread:(NSString *)thread message:(NSString *)log
 {
 	[myLock lock];
 	
@@ -252,7 +252,7 @@ static NSString *KTLevelMap[] = {
 	NSNumber *lineNumber = [NSNumber numberWithInt:line];
 	NSNumber *thisLevel = [NSNumber numberWithInt:level];
 	
-	NSDictionary *rec = [NSDictionary dictionaryWithObjectsAndKeys:now, @"t", filename, @"f", lineNumber, @"n", thisLevel, @"l", domain, @"d", log, @"m", nil];
+	NSDictionary *rec = [NSDictionary dictionaryWithObjectsAndKeys:now, @"t", filename, @"f", lineNumber, @"n", thisLevel, @"l", domain, @"d", log, @"m", thread, @"th", nil];
 	NSData *recData = [NSArchiver archivedDataWithRootObject:rec];
 	
 	if (!myLog)
@@ -302,7 +302,7 @@ static NSString *KTLevelMap[] = {
 	NSString *message = [[[NSString alloc] initWithFormat:log arguments:ap] autorelease];
 	va_end(ap);
 	
-	[[KTLogger sharedLogger] logFile:file lineNumber:line loggingDomain:domain loggingLevel:level message:message];
+	[[KTLogger sharedLogger] logFile:file lineNumber:line loggingDomain:domain loggingLevel:level thread:[NSString stringWithFormat:@"0x%06x",[NSThread currentThread]] message:message];
 }
 
 + (NSArray *)entriesWithLogFile:(NSString *)file
