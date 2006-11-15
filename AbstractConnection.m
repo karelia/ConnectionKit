@@ -29,6 +29,7 @@
  */
 
 #import "AbstractConnection.h"
+#import "AbstractQueueConnection.h" 
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -839,6 +840,47 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
+- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath records:(NSMutableArray *)files
+{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	BOOL isDir;
+	if ([fm fileExistsAtPath:localPath isDirectory:&isDir] && !isDir)
+	{
+		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
+		[self uploadFile:localPath toFile:remote];
+		[files addObject:[NSDictionary dictionaryWithObjectsAndKeys:localPath, QueueUploadLocalFileKey, remote, QueueUploadRemoteFileKey, nil]];
+	}
+	else
+	{
+		NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
+		NSString *path;
+		
+		while ((path = [e nextObject]))
+		{
+			if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
+			{
+				[self createDirectory:path];
+				[self recursivelyUpload:path to:[remotePath stringByAppendingPathComponent:[path lastPathComponent]] records:files];
+			}
+			else
+			{
+				NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
+				[self uploadFile:path toFile:remote];
+				[files addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, QueueUploadLocalFileKey, remote, QueueUploadRemoteFileKey, nil]];
+			}
+		}
+	}
+}
+
+- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+{
+	NSMutableArray *files = [NSMutableArray array];
+	
+	[self recursivelyUpload:localPath to:remotePath records:files];
+	
+	return files;
+}
+
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
 {
 	SUBCLASS_RESPONSIBLE
@@ -963,11 +1005,6 @@ NSDictionary *sDataAttributes = nil;
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"AbstractConnection does not implement checkExistanceOfPath:"
 								 userInfo:nil];
-}
-
-- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
-{
-	return nil;
 }
 
 @end

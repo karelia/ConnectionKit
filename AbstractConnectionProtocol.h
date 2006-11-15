@@ -145,6 +145,10 @@ typedef struct __flags {
 - (void)uploadFile:(NSString *)localPath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
+/* returns an array of dictionaries with local and remote paths so that the controller can then display 
+	the necessary files to upload
+*/
+- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset;
 - (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset;
