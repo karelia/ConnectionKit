@@ -61,6 +61,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)processFileCheckingQueue;
 - (void)recalcUploadSpeedWithBytesSent:(unsigned)length;
 - (void)recalcDownloadSpeedWithBytesSent:(unsigned)length;
+
+// SSL Stuff
+- (void)initializeSSL;
+- (void)negotiateSSLWithData:(NSData *)data;
+- (int)handshakeWithInputData:(NSMutableData *)inputData
+				   outputData:(NSMutableData *)outputData;
+
 @end
 
 @implementation StreamBasedConnection
