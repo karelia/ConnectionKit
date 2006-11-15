@@ -9,6 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @protocol AbstractConnectionProtocol;
+@class CKHostCategory;
 
 @interface CKHost : NSObject <NSCoding>
 {
@@ -22,6 +23,8 @@
 	NSString	*myDescription;
 	
 	id			myUserInfo;
+	
+	CKHostCategory *myCategory; // not retained
 }
 
 - (id)init;
@@ -46,8 +49,13 @@
 - (NSString *)annotation;
 - (id)userInfo;
 
+- (void)setCategory:(CKHostCategory *)cat;
+- (CKHostCategory *)category;
+
 // returns a new autoreleased connection of this type;
 - (id <AbstractConnectionProtocol>)connection; 
+
+- (BOOL)isLeaf;
 
 @end
 

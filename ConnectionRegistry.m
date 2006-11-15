@@ -16,6 +16,12 @@ static BOOL sRegistryCanInit = NO;
 static ConnectionRegistry *sRegistry = nil;
 
 NSString *CKRegistryNotification = @"CKRegistryNotification";
+NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
+
+@interface ConnectionRegistry (Private)
+- (void)otherProcessChanged:(NSNotification *)notification;
+- (NSString *)databaseFile;
+@end
 
 @implementation ConnectionRegistry
 
@@ -58,6 +64,29 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 					 selector:@selector(otherProcessChanged:)
 						 name:CKRegistryNotification
 					   object:nil];
+		NSArray *hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		[myConnections addObjectsFromArray:hosts];
+		NSEnumerator *e = [hosts objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([cur isKindOfClass:[CKHostCategory class]])
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(changed:)
+															 name:CKHostCategoryChanged
+														   object:cur];
+			}
+			else
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(changed:)
+															 name:CKHostChanged
+														   object:cur];
+			}
+		}
+		
 	}
 	return self;
 }
@@ -97,7 +126,29 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	{
 		[self willChangeValueForKey:@"connections"];
 		[myConnections removeAllObjects];
-		[myConnections addObjectsFromArray:[NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]]];
+		[myConnections addObject:myBonjour];
+		NSArray *hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		[myConnections addObjectsFromArray:hosts];
+		NSEnumerator *e = [hosts objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([cur isKindOfClass:[CKHostCategory class]])
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(changed:)
+															 name:CKHostCategoryChanged
+														   object:cur];
+			}
+			else
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(changed:)
+															 name:CKHostChanged
+														   object:cur];
+			}
+		}
 		[self didChangeValueForKey:@"connections"];
 	}
 }
@@ -120,8 +171,9 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	[myConnections addObject:myBonjour];
 	[fm removeFileAtPath:lockPath handler:nil];
 	
-	id pid = [NSNumber numberWithInt:[[NSProcessInfo processInfo] processIdentifier]];
+	NSString *pid = [NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]];
 	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
 }
 
 - (void)addCategory:(CKHostCategory *)category
@@ -133,6 +185,7 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	[self willChangeValueForKey:@"connections"];
 	[myConnections addObject:category];
 	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
 }
 
 - (void)removeCategory:(CKHostCategory *)category
@@ -143,9 +196,10 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	[self willChangeValueForKey:@"connections"];
 	[myConnections removeObject:category];
 	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
 }
 
-- (void)addConnection:(CKHost *)connection
+- (void)addHost:(CKHost *)connection
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(changed:)
@@ -154,9 +208,10 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	[self willChangeValueForKey:@"connections"];
 	[myConnections addObject:connection];
 	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
 }
 
-- (void)removeConnection:(CKHost *)connection
+- (void)removeHost:(CKHost *)connection
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self
 													name:CKHostChanged
@@ -164,6 +219,7 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 	[self willChangeValueForKey:@"connections"];
 	[myConnections removeObject:connection];
 	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
 }
 
 - (NSArray *)connections

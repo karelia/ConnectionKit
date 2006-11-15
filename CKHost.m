@@ -24,7 +24,11 @@ NSString *CKHostChanged = @"CKHostChanged";
 {
 	if ((self = [super init]))
 	{
-		
+		myConnectionType = @"FTP";
+		myHost = @"";
+		myUsername = NSUserName();
+		myInitialPath = @"";
+		myPort = @"";
 	}
 	return self;
 }
@@ -333,6 +337,20 @@ NSString *CKHostChanged = @"CKHostChanged";
 	return myUserInfo;
 }
 
+- (void)setCategory:(CKHostCategory *)cat
+{
+	if (cat != myCategory)
+	{
+		myCategory = cat;
+		[self didChange];
+	}
+}
+
+- (CKHostCategory *)category
+{
+	return myCategory;
+}
+
 - (id <AbstractConnectionProtocol>)connection
 {
 	id <AbstractConnectionProtocol> connection = nil;
@@ -369,5 +387,20 @@ NSString *CKHostChanged = @"CKHostChanged";
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"%@://%@:xxxx@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+}
+
+- (NSString *)name
+{
+	return [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+}
+
+- (NSArray *)children
+{
+	return nil;
+}
+
+- (BOOL)isLeaf
+{
+	return YES;
 }
 @end
