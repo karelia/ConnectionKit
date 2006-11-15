@@ -55,6 +55,14 @@
 		794EFE2C0A5CE58E00913151 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1F0A5CE58E00913151 /* sftp.c */; };
 		794EFE2D0A5CE58E00913151 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE200A5CE58E00913151 /* userauth.c */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
+		795FF1B60B0A821600EA9292 /* ConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795FF1B70B0A821600EA9292 /* ConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */; };
+		795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
+		795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */; };
+		795FF2200B0A940D00EA9292 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795FF2210B0A940E00EA9292 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -123,13 +131,7 @@
 		79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79E17A0C0A659C1E009CA013 /* Passphrase.nib */; };
 		79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E17A130A659CEC009CA013 /* SSHPassphrase.m */; };
 		79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E17A140A659CEC009CA013 /* SSHPassphrase.h */; };
-		79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; };
-		79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
-		79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; };
-		79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */; };
 		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
-		79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; };
-		79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
@@ -178,9 +180,6 @@
 			dstSubfolderSpec = 10;
 			files = (
 				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
-				79F54D410AC8BC85006AD3E2 /* CKHostCategory.h in CopyFiles */,
-				79F54D4B0AC8BDA1006AD3E2 /* CKHost.h in CopyFiles */,
-				79F565AE0AC90C76006AD3E2 /* CKBonjourCategory.h in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -244,6 +243,8 @@
 		794EFE1E0A5CE58E00913151 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
 		794EFE1F0A5CE58E00913151 /* sftp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sftp.c; sourceTree = "<group>"; };
 		794EFE200A5CE58E00913151 /* userauth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = userauth.c; sourceTree = "<group>"; };
+		795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionRegistry.h; sourceTree = "<group>"; };
+		795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionRegistry.m; sourceTree = "<group>"; };
 		796DB21109F89DCB0065897B /* SSLStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSLStream.h; sourceTree = "<group>"; };
 		796DB21209F89DCB0065897B /* SSLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSLStream.m; sourceTree = "<group>"; };
 		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
@@ -626,12 +627,6 @@
 				79CFD8D409F706F500172CDD /* PermissionsController.m */,
 				79CFD8D509F706F500172CDD /* ProgressCell.h */,
 				79CFD8D609F706F500172CDD /* ProgressCell.m */,
-				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
-				79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */,
-				79F54D490AC8BDA1006AD3E2 /* CKHost.h */,
-				79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */,
-				79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */,
-				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
 			);
 			name = "Test Application";
 			sourceTree = "<group>";
@@ -672,6 +667,14 @@
 				79CFD83809F7048400172CDD /* MultipleConnection.m */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				79CFD11D09F7023D00172CDD /* DAV */,
+				795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */,
+				795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */,
+				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
+				79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */,
+				79F54D490AC8BDA1006AD3E2 /* CKHost.h */,
+				79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */,
+				79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */,
+				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -816,6 +819,10 @@
 				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
 				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
 				79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */,
+				795FF1B60B0A821600EA9292 /* ConnectionRegistry.h in Headers */,
+				795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */,
+				795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */,
+				795FF2200B0A940D00EA9292 /* CKHostCategory.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -917,6 +924,7 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
+			projectRoot = "";
 			targets = (
 				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
@@ -1082,6 +1090,10 @@
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
 				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
+				795FF1B70B0A821600EA9292 /* ConnectionRegistry.m in Sources */,
+				795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */,
+				795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */,
+				795FF2210B0A940E00EA9292 /* CKHostCategory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1095,9 +1107,6 @@
 				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
 				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
 				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
-				79F54D420AC8BC85006AD3E2 /* CKHostCategory.m in Sources */,
-				79F54D4C0AC8BDA1006AD3E2 /* CKHost.m in Sources */,
-				79F565AF0AC90C76006AD3E2 /* CKBonjourCategory.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

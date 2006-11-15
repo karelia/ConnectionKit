@@ -6,10 +6,12 @@
 //  Copyright 2006 __MyCompanyName__. All rights reserved.
 //
 
-#import "CKHost.h"
+#import <Connection/CKHost.h>
 #import <Carbon/Carbon.h>
 #import <Security/Security.h>
 #import <Connection/Connection.h>
+
+NSString *CKHostChanged = @"CKHostChanged";
 
 @implementation CKHost
 
@@ -47,6 +49,7 @@
 	if ((self = [super init]))
 	{
 		int version = [coder decodeIntForKey:@"version"];
+#pragma unused (version)
 		myHost = [[coder decodeObjectForKey:@"host"] copy];
 		myPort = [[coder decodeObjectForKey:@"port"] copy];
 		myUsername = [[coder decodeObjectForKey:@"username"] copy];
@@ -70,97 +73,158 @@
 	[coder encodeObject:myInitialPath forKey:@"initialPath"];
 }
 
+- (void)didChange
+{
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
+}
+
 - (void)setHost:(NSString *)host
 {
-	[myHost autorelease];
-	myHost = [host copy];
+	if (host != myHost)
+	{
+		[self willChangeValueForKey:@"host"];
+		[myHost autorelease];
+		myHost = [host copy];
+		[self didChangeValueForKey:@"host"];
+		[self didChange];
+	}
 }
 
 - (void)setPort:(NSString *)port
 {
-	[myPort autorelease];
-	myPort = [port copy];
+	if (port != myPort)
+	{
+		[self willChangeValueForKey:@"port"];
+		[myPort autorelease];
+		myPort = [port copy];
+		[self didChangeValueForKey:@"port"];
+		[self didChange];
+	}
 }
 
 - (void)setUsername:(NSString *)username
 {
-	[myUsername autorelease];
-	myUsername = [username copy];
+	if (username != myUsername)
+	{
+		[self willChangeValueForKey:@"username"];
+		[myUsername autorelease];
+		myUsername = [username copy];
+		[self didChangeValueForKey:@"username"];
+		[self didChange];
+	}
 }
 
 - (void)setPassword:(NSString *)password
 {
-	[myPassword autorelease];
-	myPassword = [password copy];
-	
-	//save to keychain
-	@try {
-		SecKeychainAttribute attributes[4];
-		SecKeychainAttributeList list;
-		SecKeychainItemRef item;
-		OSStatus status;
-		char *desc = "ConnectionKit Password";
-		NSString *label = [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+	if (password != myPassword)
+	{
+		[self willChangeValueForKey:@"password"];
+		[myPassword autorelease];
+		myPassword = [password copy];
+		[self didChangeValueForKey:@"password"];
 		
-		attributes[0].tag = kSecAccountItemAttr;
-		attributes[0].data = (void *)[myUsername UTF8String];
-		attributes[0].length = strlen(attributes[0].data);
-		
-		attributes[1].tag = kSecCommentItemAttr;
-		attributes[1].data = (void *)[label UTF8String];
-		attributes[1].length = strlen(attributes[1].data);
-		
-		attributes[2].tag = kSecDescriptionItemAttr;
-		attributes[2].data = (void *)desc;
-		attributes[2].length = strlen(desc);
-		
-		attributes[3].tag = kSecLabelItemAttr;
-		attributes[3].data = (void *)[label UTF8String];
-		attributes[3].length = strlen(attributes[3].data);
-		
-		list.count = 4;
-		list.attr = attributes;
-		
-		char *passphraseUTF8 = (char *)[myPassword UTF8String];
-		status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
-		if (status != 0) 
-		{
-			NSLog(@"Error creating new item: %d\n", (int)status);
+		//save to keychain
+		@try {
+			SecKeychainAttribute attributes[4];
+			SecKeychainAttributeList list;
+			SecKeychainItemRef item;
+			OSStatus status;
+			char *desc = "ConnectionKit Password";
+			NSString *label = [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+			
+			attributes[0].tag = kSecAccountItemAttr;
+			attributes[0].data = (void *)[myUsername UTF8String];
+			attributes[0].length = strlen(attributes[0].data);
+			
+			attributes[1].tag = kSecCommentItemAttr;
+			attributes[1].data = (void *)[label UTF8String];
+			attributes[1].length = strlen(attributes[1].data);
+			
+			attributes[2].tag = kSecDescriptionItemAttr;
+			attributes[2].data = (void *)desc;
+			attributes[2].length = strlen(desc);
+			
+			attributes[3].tag = kSecLabelItemAttr;
+			attributes[3].data = (void *)[label UTF8String];
+			attributes[3].length = strlen(attributes[3].data);
+			
+			list.count = 4;
+			list.attr = attributes;
+			
+			char *passphraseUTF8 = (char *)[myPassword UTF8String];
+			status = SecKeychainItemCreateFromContent(kSecGenericPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
+			if (status != 0) 
+			{
+				NSLog(@"Error creating new item: %d\n", (int)status);
+			}
 		}
-	}
-	@catch (id error) {
-		
+		@catch (id error) {
+			
+		}
+		@finally {
+			[self didChange];
+		}
 	}
 }
 
 - (void)setConnectionType:(NSString *)type
 {
-	[myConnectionType autorelease];
-	myConnectionType = [type copy];
+	if (type != myConnectionType)
+	{
+		[self willChangeValueForKey:@"type"];
+		[myConnectionType autorelease];
+		myConnectionType = [type copy];
+		[self didChangeValueForKey:@"type"];
+		[self didChange];
+	}
 }
 
 - (void)setInitialPath:(NSString *)path
 {
-	[myInitialPath autorelease];
-	myInitialPath = [path copy];
+	if (path != myInitialPath)
+	{
+		[self willChangeValueForKey:@"initialPath"];
+		[myInitialPath autorelease];
+		myInitialPath = [path copy];
+		[self didChangeValueForKey:@"initialPath"];
+		[self didChange];
+	}
 }
 
 - (void)setURL:(NSURL *)url
 {
-	[myURL autorelease];
-	myURL = [url copy];
+	if (url != myURL)
+	{
+		[self willChangeValueForKey:@"url"];
+		[myURL autorelease];
+		myURL = [url copy];
+		[self didChangeValueForKey:@"url"];
+		[self didChange];
+	}
 }
 
 - (void)setAnnotation:(NSString *)description
 {
-	[myDescription autorelease];
-	myDescription = [description copy];
+	if (description != myDescription)
+	{
+		[self willChangeValueForKey:@"annotation"];
+		[myDescription autorelease];
+		myDescription = [description copy];
+		[self didChangeValueForKey:@"annotation"];
+		[self didChange];
+	}
 }
 
 - (void)setUserInfo:(id)ui
 {
-	[myUserInfo autorelease];
-	myUserInfo = [ui retain];
+	if (ui != myUserInfo)
+	{
+		[self willChangeValueForKey:@"userInfo"];
+		[myUserInfo autorelease];
+		myUserInfo = [ui retain];
+		[self didChangeValueForKey:@"userInfo"];
+		[self didChange];
+	}
 }
 
 - (NSString *)host
@@ -216,7 +280,6 @@
 			NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
 		}
 		
-		NSString *password = nil;
 		if (SecKeychainSearchCopyNext (search, &item) == noErr) {
 			UInt32 length;
 			char *pass;
@@ -241,35 +304,7 @@
 		if (item) CFRelease(item);
 		if (search) CFRelease (search);
 	}
-	if (!myPassword)
-	{
-		Str255 serverPString, accountPString;
-		
-		c2pstrcpy(serverPString, [myHost UTF8String]);
-		c2pstrcpy(accountPString, [myUsername UTF8String]);
-		
-		char passwordBuffer[256];
-		UInt32 actualLength;
-		OSStatus theStatus;
-		
-		theStatus = KCFindInternetPassword (
-											serverPString,			// StringPtr serverName,
-											NULL,					// StringPtr securityDomain,
-											accountPString,		// StringPtr accountName,
-											kAnyPort,				// UInt16 port,
-											kAnyProtocol,			// OSType protocol,
-											kAnyAuthType,			// OSType authType,
-											255,					// UInt32 maxLength,
-											passwordBuffer,		// void * passwordData,
-											&actualLength,			// UInt32 * actualLength,
-											nil					// KCItemRef * item
-											);
-		if (noErr == theStatus)
-		{
-			passwordBuffer[actualLength] = 0;		// make it a legal C string by appending 0
-			myPassword = [[NSString stringWithUTF8String:passwordBuffer] retain];
-		}
-	}
+
 	return myPassword;
 }
 

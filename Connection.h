@@ -46,3 +46,9 @@
 #import <Connection/CKHTTPPutRequest.h>
 #import <Connection/CKHTTPResponse.h>
 #import <Connection/CKHTTPFileDownloadResponse.h>
+
+#import <Connection/ConnectionRegistry.h>
+#import <Connection/CKHostCategory.h>
+#import <Connection/CKHost.h>
+#import <Connection/CKBonjourCategory.h>
+
