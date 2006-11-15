@@ -10,6 +10,12 @@
 #import "CKHost.h"
 #import "AbstractConnection.h"
 
+@interface CKBonjourHost : CKHost
+{
+	
+}
+@end
+
 @implementation CKBonjourCategory
 
 - (id)init
@@ -20,9 +26,9 @@
 		mySFTPCategory = [[CKHostCategory alloc] initWithName:@"sftp"];
 		myHTTPCategory = [[CKHostCategory alloc] initWithName:@"webdav"];
 		
-		[self addChildCategory:myFTPCategory];
-		[self addChildCategory:mySFTPCategory];
-		[self addChildCategory:myHTTPCategory];
+		[super addChildCategory:myFTPCategory];
+		[super addChildCategory:mySFTPCategory];
+		[super addChildCategory:myHTTPCategory];
 		
 		myFTPBrowser = [[NSNetServiceBrowser alloc] init];
 		[myFTPBrowser setDelegate:self];
@@ -51,6 +57,20 @@
 	[myHTTPCategory release];
 	
 	[super dealloc];
+}
+
+- (void)addChildCategory:(CKHostCategory *)cat
+{
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+								   reason:LocalizedStringInThisBundle(@"You can not add a child category to the Bonjour category.",@"Bonjour Error")
+								 userInfo:nil];
+}
+
+- (void)addHost:(CKHost *)host
+{
+	@throw [NSException exceptionWithName:NSInternalInconsistencyException
+								   reason:LocalizedStringInThisBundle(@"You can not add a new host to the Bonjour category.",@"Bonjour Error")
+								 userInfo:nil];
 }
 
 #pragma mark -
@@ -101,7 +121,7 @@
 
 - (void)netServiceDidResolveAddress:(NSNetService *)sender
 {
-	CKHost *h = [[CKHost alloc] init];
+	CKBonjourHost *h = [[CKBonjourHost alloc] init];
 	[h setHost:[sender hostName]];
 	[h setUserInfo:sender];
 	[sender release];
@@ -129,6 +149,15 @@
 - (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict
 {
 	NSLog(@"%@", errorDict);
+}
+
+@end
+
+@implementation CKBonjourHost
+
+- (CKHostCategory *)category
+{
+	return nil;
 }
 
 @end

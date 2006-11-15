@@ -14,7 +14,8 @@
 {
 	NSString *myName;
 	NSMutableArray *myChildCategories;
-	NSMutableArray *myHosts;
+	
+	CKHostCategory *myParentCategory; //not retained
 }
 
 - (id)initWithName:(NSString *)name;
@@ -28,11 +29,12 @@
 - (void)removeHost:(CKHost *)host;
 - (NSArray *)hosts;
 
+- (void)setCategory:(CKHostCategory *)parent;
+- (CKHostCategory *)category;
+
 - (NSImage *)icon;
 - (BOOL)isEditable;
 
-- (id)childAtIndex:(unsigned)index; // returns an object in the concatenated list of cats and dogs... I mean hosts!
-- (unsigned)count;
 @end
 
 extern NSString *CKHostCategoryChanged;

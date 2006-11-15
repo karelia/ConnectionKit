@@ -7,6 +7,7 @@
 //
 
 #import "CKHostCategory.h"
+#import "CKHost.h"
 
 NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
@@ -23,7 +24,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	{
 		myName = [name copy];
 		myChildCategories = [[NSMutableArray array] retain];
-		myHosts = [[NSMutableArray array] retain];
 	}
 	return self;
 }
@@ -32,7 +32,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 {
 	[myName release];
 	[myChildCategories release];
-	[myHosts release];
 	[super dealloc];
 }
 
@@ -43,8 +42,28 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 		int version = [coder decodeIntForKey:@"version"];
 #pragma unused (version)
 		myName = [[coder decodeObjectForKey:@"name"] copy];
-		myChildCategories = [[coder decodeObjectForKey:@"categories"] retain];
-		myHosts = [[coder decodeObjectForKey:@"hosts"] retain];
+		myChildCategories = [[NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"categories"]] retain];
+		
+		NSEnumerator *e = [myChildCategories objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([cur isKindOfClass:[CKHostCategory class]])
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(childChanged:)
+															 name:CKHostCategoryChanged
+														   object:cur];
+			}
+			else
+			{
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(hostChanged:)
+															 name:CKHostChanged
+														   object:cur];
+			}
+		}
 	}
 	return self;
 }
@@ -54,7 +73,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[coder encodeInt:[CKHostCategory version] forKey:@"version"];
 	[coder encodeObject:myName forKey:@"name"];
 	[coder encodeObject:myChildCategories forKey:@"categories"];
-	[coder encodeObject:myHosts forKey:@"hosts"];
 }
 
 - (NSString *)name
@@ -62,23 +80,47 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	return myName;
 }
 
+- (void)setName:(NSString *)name
+{
+	if (name != myName)
+	{
+		[myName autorelease];
+		myName = [name copy];
+		[self didChange];
+	}
+}
+
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostCategoryChanged object:self];
 }
 
+- (void)childChanged:(NSNotification *)n
+{
+	[self didChange];
+}
+
 - (void)addChildCategory:(CKHostCategory *)cat
 {
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(childChanged:) 
+												 name:CKHostCategoryChanged 
+											   object:cat];
 	[self willChangeValueForKey:@"childCategories"];
 	[myChildCategories addObject:cat];
+	[cat setCategory:self];
 	[self didChangeValueForKey:@"childCategories"];
+	[self didChange];
 }
 
 - (void)removeChildCategory:(CKHostCategory *)cat
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:cat];
 	[self willChangeValueForKey:@"childCategories"];
 	[myChildCategories removeObject:cat];
+	[cat setCategory:nil];
 	[self didChangeValueForKey:@"childCategories"];
+	[self didChange];
 }
 
 - (NSArray *)childCategories
@@ -97,22 +139,40 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 											 selector:@selector(hostChanged:)
 												 name:CKHostCategoryChanged
 											   object:host];
-	[self willChangeValueForKey:@"hosts"];
-	[myHosts addObject:host];
-	[self didChangeValueForKey:@"hosts"];
+	[self willChangeValueForKey:@"childCategories"];
+	[myChildCategories addObject:host];
+	[host setCategory:self];
+	[self didChangeValueForKey:@"childCategories"];
+	[self didChange];
 }
 
 - (void)removeHost:(CKHost *)host
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:host];
-	[self willChangeValueForKey:@"hosts"];
-	[myHosts removeObject:host];
-	[self didChangeValueForKey:@"hosts"];
+	[self willChangeValueForKey:@"childCategories"];
+	[myChildCategories removeObject:host];
+	[host setCategory:nil];
+	[self didChangeValueForKey:@"childCategories"];
+	[self didChange];
 }
 
 - (NSArray *)hosts
 {
-	return [NSArray arrayWithArray:myHosts];
+	return [NSArray arrayWithArray:myChildCategories];
+}
+
+- (void)setCategory:(CKHostCategory *)parent
+{
+	if (parent != myParentCategory)
+	{
+		myParentCategory = parent;
+		[self didChange];
+	}
+}
+
+- (CKHostCategory *)category
+{
+	return myParentCategory;
 }
 
 static NSImage *sFolderImage = nil;
@@ -132,16 +192,40 @@ static NSImage *sFolderImage = nil;
 	return YES;
 }
 
-- (id)childAtIndex:(unsigned)index
+- (NSArray *)children
 {
-	NSArray *concat = [myChildCategories arrayByAddingObjectsFromArray:myHosts];
-	
-	return [concat objectAtIndex:index];
+	return [NSArray arrayWithArray:myChildCategories];
 }
 
-- (unsigned)count
+- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
 {
-	return [myChildCategories count] + [myHosts count];
+	[str appendFormat:@"%@:\n", myName];
+	NSEnumerator *e = [myChildCategories objectEnumerator];
+	id host;
+	
+	while ((host = [e nextObject]))
+	{
+		if ([host isKindOfClass:[CKHost class]])
+		{
+			int i;
+			for (i = 0; i < indent; i++)
+			{
+				[str appendString:@"\t"];
+			}
+			[str appendFormat:@"\t%@\n", [host name]];
+		}
+		else
+		{
+			[host appendToDescription:str indentation:indent+1];
+		}
+	}
+}
+
+- (NSString *)description
+{
+	NSMutableString *str = [NSMutableString stringWithString:@"\n"];
+	[self appendToDescription:str indentation:0];
+	return str;
 }
 
 @end

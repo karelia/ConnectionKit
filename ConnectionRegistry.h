@@ -31,9 +31,11 @@
 - (void)addCategory:(CKHostCategory *)category;
 - (void)removeCategory:(CKHostCategory *)category;
 
-- (void)addConnection:(CKHost *)connection;
-- (void)removeConnection:(CKHost *)connection;
+- (void)addHost:(CKHost *)connection;
+- (void)removeHost:(CKHost *)connection;
 
 - (NSArray *)connections;
 
 @end
+
+extern NSString *CKRegistryChangedNotification;

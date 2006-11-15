@@ -138,15 +138,12 @@ NSString *ProtocolKey = @"Protocol";
 				[cat addHost:h];
 				[h release];
 			}
+			[[ConnectionRegistry sharedRegistry] addCategory:cat];
 			[_savedHosts addObject:cat];
 			[cat release];
 		}
-		else
-		{
-			NSArray *ckhosts = [NSKeyedUnarchiver unarchiveObjectWithData:hosts];
-			[_savedHosts addObjectsFromArray:ckhosts];
-		}
 	}
+	[ud removeObjectForKey:HostsKey];
 	[savedHosts setDataSource:self];
 	[savedHosts setDelegate:self];
 	
@@ -159,30 +156,86 @@ NSString *ProtocolKey = @"Protocol";
 								   userInfo:nil
 									repeats:YES];
 	
+	[[NSNotificationCenter defaultCenter] addObserver:self 
+											 selector:@selector(registryChanged:) 
+												 name:CKRegistryChangedNotification 
+											   object:nil];
 	//[self runAutomatedScript];
+}
+
+- (void)hostnameChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setHost:[sender stringValue]];
+}
+
+- (void)portChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setPort:[sender stringValue]];
+}
+
+- (void)usernameChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setUsername:[sender stringValue]];
+}
+
+- (void)passwordChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setPassword:[sender stringValue]];
+}
+
+- (void)initialDirectoryChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setInitialPath:[sender stringValue]];
+}
+
+- (void)urlChanged:(id)sender
+{
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setURL:[NSURL URLWithString:[sender stringValue]]];
+}
+
+- (void)registryChanged:(NSNotification *)n
+{
+	[savedHosts reloadData];
 }
 
 - (void)newCategory:(id)sender
 {
+	id parent = [savedHosts itemAtRow:[savedHosts selectedRow]];
+	if ([parent isKindOfClass:[CKHost class]])
+	{
+		parent = [parent category];
+	}
+
 	CKHostCategory *cat = [[CKHostCategory alloc] initWithName:NSLocalizedString(@"New Category", @"new cat name")];
-	[_savedHosts addObject:cat];
+	if (parent)
+	{
+		[parent addChildCategory:cat];
+	}
+	else
+	{
+		[[ConnectionRegistry sharedRegistry] addCategory:cat];
+	}
 	[cat release];
-	[savedHosts reloadData];
 }
 
 - (void)newHost:(id)sender
 {
-	CKHost *h = [[CKHost alloc] init];
-	if (selectedItem)
+	id parent = [savedHosts itemAtRow:[savedHosts selectedRow]];
+	if ([parent isKindOfClass:[CKHost class]])
 	{
-		[selectedItem addHost:h];
+		parent = [parent category];
+	}
+	
+	CKHost *h = [[CKHost alloc] init];
+	if (parent)
+	{
+		[parent addHost:h];
 	}
 	else
 	{
-		[_savedHosts addObject:h];
+		[[ConnectionRegistry sharedRegistry] addHost:h];
 	}
 	[h release];
-	[savedHosts reloadData];
 }
 
 - (void)checkForFile:(id)sender
@@ -205,7 +258,8 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)connectionTypeChanged:(id)sender
 {
-	[cPort setStringValue:[AbstractConnection registeredPortForConnectionType:[sender titleOfSelectedItem]]];
+	NSString *t = [AbstractConnection registeredPortForConnectionType:[sender titleOfSelectedItem]];
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setConnectionType:t];
 }
 
 - (void)cleanTransferTable:(NSTimer *)timer
@@ -711,11 +765,11 @@ static NSImage *_folder = nil;
 {
 	if (item == nil)
 	{
-		return [_savedHosts count];
+		return [[[ConnectionRegistry sharedRegistry] connections] count];
 	}
 	else if ([item isKindOfClass:[CKHostCategory class]])
 	{
-		return [item count];
+		return [[item childCategories] count];
 	}
 	return 0;
 }
@@ -724,14 +778,14 @@ static NSImage *_folder = nil;
 {
 	if (item == nil)
 	{
-		return [_savedHosts objectAtIndex:index];
+		return [[[ConnectionRegistry sharedRegistry] connections] objectAtIndex:index];
 	}
-	return [item childAtIndex:index];
+	return [[item childCategories] objectAtIndex:index];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
-	return [item isKindOfClass:[CKHostCategory class]];
+	return [item isKindOfClass:[CKHostCategory class]] && [[item childCategories] count] > 0 ;
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
@@ -747,7 +801,11 @@ static NSImage *_folder = nil;
 		{
 			[str appendFormat:@"%@@", [item username]];
 		}
-		[str appendString:[item host]];
+		if ([item host])
+		{
+			[str appendString:[item host]];
+		}
+		
 		return str;
 	}
 }
