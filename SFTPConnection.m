@@ -780,7 +780,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	NSData *data = [upload objectForKey:QueueUploadLocalDataKey];
 	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
 	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
-	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [[remote lastPathComponent] UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
+	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
 	if (_flags.didBeginUpload)
