@@ -30,6 +30,7 @@
 
 #import "AbstractConnection.h"
 #import "AbstractQueueConnection.h" 
+#import "CKTransferRecord.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -840,45 +841,74 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath records:(NSMutableArray *)files
+- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
+	NSDictionary *attribs;
+	CKTransferRecord *record;
 	BOOL isDir;
-	if ([fm fileExistsAtPath:localPath isDirectory:&isDir] && !isDir)
+	
+	//create this directory
+	[self createDirectory:remotePath];
+	
+	NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
+	NSString *path;
+	
+	while ((path = [e nextObject]))
 	{
-		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
-		[self uploadFile:localPath toFile:remote];
-		[files addObject:[NSDictionary dictionaryWithObjectsAndKeys:localPath, QueueUploadLocalFileKey, remote, QueueUploadRemoteFileKey, nil]];
-	}
-	else
-	{
-		NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
-		NSString *path;
-		
-		while ((path = [e nextObject]))
+		path = [localPath stringByAppendingPathComponent:path];
+		if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
 		{
-			if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
-			{
-				[self createDirectory:path];
-				[self recursivelyUpload:path to:[remotePath stringByAppendingPathComponent:[path lastPathComponent]] records:files];
-			}
-			else
-			{
-				NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
-				[self uploadFile:path toFile:remote];
-				[files addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, QueueUploadLocalFileKey, remote, QueueUploadRemoteFileKey, nil]];
-			}
+			[self recursivelyUpload:path 
+								 to:[remotePath stringByAppendingPathComponent:[path lastPathComponent]] 
+							   root:root 
+						   rootPath:rootPath];
+		}
+		else
+		{
+			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
+			[self uploadFile:path toFile:remote];
+			attribs = [fm fileAttributesAtPath:path traverseLink:NO];
+			record = [CKTransferRecord addFileRecord:remote 
+												size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]
+											withRoot:root
+											rootPath:rootPath];
+			[record setProperty:path forKey:QueueUploadLocalFileKey];
+			[record setProperty:remote forKey:QueueUploadRemoteFileKey];
 		}
 	}
 }
 
-- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
-	NSMutableArray *files = [NSMutableArray array];
+	CKTransferRecord *root = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:0];
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSDictionary *attribs;
+	CKTransferRecord *record;
+	BOOL isDir;
 	
-	[self recursivelyUpload:localPath to:remotePath records:files];
+	if ([fm fileExistsAtPath:localPath isDirectory:&isDir] && !isDir)
+	{
+		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
+		[self uploadFile:localPath toFile:remote];
+		attribs = [fm fileAttributesAtPath:localPath traverseLink:NO];
+		record = [CKTransferRecord addFileRecord:remote 
+											size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]
+										withRoot:root
+										rootPath:remotePath];
+		[record setProperty:localPath forKey:QueueUploadLocalFileKey];
+		[record setProperty:remote forKey:QueueUploadRemoteFileKey];
+	}
+	else
+	{
+		[self createDirectory:remotePath];
+		[self recursivelyUpload:localPath 
+							 to:[remotePath stringByAppendingPathComponent:[localPath lastPathComponent]] 
+						   root:root 
+					   rootPath:remotePath];
+	}
 	
-	return files;
+	return root;
 }
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset

@@ -167,7 +167,10 @@ typedef enum {
 + (NSDictionary *)dataAttributes;
 
 // we cache directory contents so when changing to an existing directory we show the 
-// last cached version and issue a new listing
+// last cached version and issue a new listing. You should keep a current path in your delegate
+// and ignore a listing if the path returned is not your current one. THis is where a user
+// can click through a cached directory structure and then the new listings are returned but they are
+// already in a different directory.
 - (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents;
 - (NSArray *)cachedContentsWithDirectory:(NSString *)path;
 - (void)clearDirectoryCache;

@@ -8,13 +8,17 @@
                 connectionTypeChanged = id; 
                 deleteFile = id; 
                 disconnect = id; 
+                hostnameChanged = id; 
+                initialDirectoryChanged = id; 
                 localFileSelected = id; 
                 localPopupChanged = id; 
                 logConfig = id; 
                 newCategory = id; 
                 newFolder = id; 
                 newHost = id; 
+                passwordChanged = id; 
                 permissions = id; 
+                portChanged = id; 
                 printQueueDescription = id; 
                 refresh = id; 
                 remoteFileSelected = id; 
@@ -24,6 +28,8 @@
                 showConnect = id; 
                 stopTransfer = id; 
                 transferSelected = id; 
+                urlChanged = id; 
+                usernameChanged = id; 
             }; 
             CLASS = Controller; 
             LANGUAGE = ObjC; 

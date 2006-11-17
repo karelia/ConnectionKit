@@ -48,6 +48,18 @@
 	return [@"/" stringByAppendingString:[comps componentsJoinedByString:@"/"]];
 }
 
+- (NSString *)stringByDeletingFirstPathComponent2
+{
+	NSString *str = self;
+	if ([str hasPrefix:@"/"])
+		str = [str substringFromIndex:1];
+	NSMutableArray *comps = [NSMutableArray arrayWithArray:[str componentsSeparatedByString:@"/"]];
+	if ([comps count] > 0) {
+		[comps removeObjectAtIndex:0];
+	}
+	return [comps componentsJoinedByString:@"/"];
+}
+
 @end
 
 @implementation NSAttributedString (Connection)

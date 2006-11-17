@@ -32,6 +32,8 @@
 #define LocalizedStringInThisBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
+@class CKTransferRecord;
+
 // Some shared Error Codes
 
 enum {
@@ -145,10 +147,11 @@ typedef struct __flags {
 - (void)uploadFile:(NSString *)localPath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
-/* returns an array of dictionaries with local and remote paths so that the controller can then display 
-	the necessary files to upload
+/* 
+	returns CKTransferRecord as a heirarchy of what will be upload, remote and local files 
+	can be found in the records node properties
 */
-- (NSArray *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset;
 - (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset;

@@ -26,7 +26,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 	{
 		myConnectionType = @"FTP";
 		myHost = @"";
-		myUsername = NSUserName();
+		myUsername = [NSUserName() copy];
 		myInitialPath = @"";
 		myPort = @"";
 	}
@@ -58,7 +58,16 @@ NSString *CKHostChanged = @"CKHostChanged";
 		myPort = [[coder decodeObjectForKey:@"port"] copy];
 		myUsername = [[coder decodeObjectForKey:@"username"] copy];
 		myConnectionType = [[coder decodeObjectForKey:@"type"] copy];
-		myURL = [[coder decodeObjectForKey:@"url"] copy];
+		@try {
+			NSString *url = [coder decodeObjectForKey:@"url"];
+			if (url && [url length] > 0)
+			{
+				myURL = [[NSURL URLWithString:url] retain];
+			}
+		}
+		@catch (NSException *ex) {
+			
+		}
 		myDescription = [[coder decodeObjectForKey:@"description"] copy];
 		myInitialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
 	}
@@ -72,7 +81,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 	[coder encodeObject:myPort forKey:@"port"];
 	[coder encodeObject:myUsername forKey:@"username"];
 	[coder encodeObject:myConnectionType forKey:@"type"];
-	[coder encodeObject:myURL forKey:@"url"];
+	[coder encodeObject:[myURL absoluteString] forKey:@"url"];
 	[coder encodeObject:myDescription forKey:@"description"];
 	[coder encodeObject:myInitialPath forKey:@"initialPath"];
 }
@@ -386,7 +395,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"%@://%@:xxxx@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+	return [NSString stringWithFormat:@"%@ %@://%@:xxxx@%@:%@/%@", myConnectionType, [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
 }
 
 - (NSString *)name
@@ -401,6 +410,101 @@ NSString *CKHostChanged = @"CKHostChanged";
 
 - (BOOL)isLeaf
 {
+	return YES;
+}
+
+#pragma mark -
+#pragma mark Droplet Support
+
+- (NSDictionary *)plistDictionary
+{
+	NSMutableDictionary *p = [NSMutableDictionary dictionary];
+	
+	[p setObject:@"NSApplication" forKey:@"NSPrincipalClass"];
+	[p setObject:@"DropletLauncher" forKey:@"NSMainNibFile"];
+	[p setObject:@"1" forKey:@"LSUIElement"];
+	[p setObject:@"English" forKey:@"CFBundleDevelopmentRegion"];
+	[p setObject:@"com.connectionkit.DropletLauncher" forKey:@"CFBundleIdentifier"];
+	[p setObject:@"6.0" forKey:@"CFBundleInfoDictionaryVersion"];
+	[p setObject:@"APPL" forKey:@"CFBundlePackageType"];
+	[p setObject:@"????" forKey:@"CFBundleSignature"];
+	[p setObject:@"1.0" forKey:@"CFBundleVersion"];
+	[p setObject:@"DropletLauncher" forKey:@"CFBundleExecutable"];
+	[p setObject:[[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleIdentifier"] forKey:@"CKApplication"];
+	[p setObject:@"DropletIcon" forKey:@"CFBundleIconFile"];
+	NSMutableDictionary *file = [NSMutableDictionary dictionary];
+	NSArray *osTypes = [NSArray arrayWithObjects:@"****", @"fold", nil];
+	[file setObject:osTypes forKey:@"CFBundleTypeOSTypes"];
+	NSArray *exts = [NSArray arrayWithObjects:@"*", nil];
+	[file setObject:exts forKey:@"CFBundleTypeExtensions"];
+	[file setObject:@"" forKey:@"CFBundleTypeIconFile"];
+	[file setObject:@"All Files and Folders" forKey:@"CFBundleTypeName"];
+	NSArray *files = [NSArray arrayWithObjects:file, nil];
+	[p setObject:files forKey:@"CFBundleDocumentTypes"];
+	return p;
+}
+
+- (BOOL)createDropletAtPath:(NSString *)path
+{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSMutableString *appName = [NSMutableString stringWithString:[self host]];
+	[appName replaceOccurrencesOfString:@"." withString:@"_" options:NSLiteralSearch range:NSMakeRange(0,[[self host] length])];
+	NSString *app = [[path stringByAppendingPathComponent:appName] stringByAppendingPathExtension:@"app"];
+	NSString *contents = [app stringByAppendingPathComponent:@"Contents"];
+	NSString *exe = [contents stringByAppendingPathComponent:@"MacOS"];
+	NSString *resources = [contents stringByAppendingPathComponent:@"Resources"];
+	NSString *plist = [[contents stringByAppendingPathComponent:@"Info"] stringByAppendingPathExtension:@"plist"];
+	
+	if ([fm fileExistsAtPath:app])
+	{
+		[fm removeFileAtPath:app handler:nil];
+	}
+	
+	if (![fm createDirectoryAtPath:app attributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0775] forKey:NSFilePosixPermissions]])
+	{
+		return NO;
+	}
+	[fm changeFileAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:NSFileExtensionHidden] atPath:app];
+	if (![fm createDirectoryAtPath:contents attributes:nil])
+	{
+		return NO;
+	}
+	if (![fm createDirectoryAtPath:exe attributes:nil])
+	{
+		return NO;
+	}
+	if (![fm createDirectoryAtPath:resources attributes:nil])
+	{
+		return NO;
+	}
+	//do Info.plist
+	[[NSPropertyListSerialization dataFromPropertyList:[self plistDictionary]
+												format:NSPropertyListXMLFormat_v1_0
+									  errorDescription:nil] writeToFile:plist atomically:YES];
+	// write host to resources
+	[NSKeyedArchiver archiveRootObject:self toFile:[[resources stringByAppendingPathComponent:@"configuration"] stringByAppendingPathExtension:@"ckhost"]];
+	
+	// copy executable
+	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@""] 
+		  toPath:[exe stringByAppendingPathComponent:@"DropletLauncher"] 
+		 handler:nil];
+	
+	// copy icon
+	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletIcon" ofType:@"icns"] 
+		  toPath:[[resources stringByAppendingPathComponent:@"DropletIcon"] stringByAppendingPathExtension:@"icns"]
+		 handler:nil];
+	
+	// copy the nib
+	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@"nib"] 
+		  toPath:[[resources stringByAppendingPathComponent:@"DropletLauncher"] stringByAppendingPathExtension:@"nib"]
+		 handler:nil];
+	
+	// hide the .app extension
+	
+	OSStatus ret;
+	NSURL *url = [NSURL fileURLWithPath:app];
+	ret = LSSetExtensionHiddenForURL((CFURLRef)url, true);
+	
 	return YES;
 }
 @end
