@@ -258,8 +258,7 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)connectionTypeChanged:(id)sender
 {
-	NSString *t = [AbstractConnection registeredPortForConnectionType:[sender titleOfSelectedItem]];
-	[[savedHosts itemAtRow:[savedHosts selectedRow]] setConnectionType:t];
+	[[savedHosts itemAtRow:[savedHosts selectedRow]] setConnectionType:[sender titleOfSelectedItem]];
 }
 
 - (void)cleanTransferTable:(NSTimer *)timer
@@ -293,6 +292,9 @@ NSString *ProtocolKey = @"Protocol";
 	if ([selected isKindOfClass:[CKHost class]])
 	{
 		CKHost *host = selected;
+		
+		[host createDropletAtPath:NSHomeDirectory()];
+		
 		[cHost setStringValue:[host host]];
 		[cUser setStringValue:[host username]];
 		[cPort setStringValue:[host port]];
@@ -808,6 +810,18 @@ static NSImage *_folder = nil;
 		
 		return str;
 	}
+}
+
+- (NSArray *)outlineView:(NSOutlineView *)outlineView namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedItems:(NSArray *)items
+{
+	NSMutableArray *files = [NSMutableArray array];
+	
+	NSEnumerator *e = [items objectEnumerator];
+	id cur;
+	
+	[files addObject:@"/tmp/configuration.ckhost"];
+	
+	return files;
 }
 
 #pragma mark -
@@ -1334,14 +1348,7 @@ NSString *IconKey = @"Icon";
 			
 			while (cur = [e nextObject])
 			{
-				if ([fm fileExistsAtPath:cur isDirectory:&isDir] && isDir)
-				{
-					[self uploadFolderContentsAtPath:cur];
-				}
-				else
-				{
-					[self uploadFile:cur to:[curRemoteDir stringByAppendingPathComponent:[cur lastPathComponent]]];
-				}
+				CKTransferRecord *root = [con recursivelyUpload:cur to:[con currentDirectory]];
 			}
 			[curRemoteDir release];
 			[transferTable reloadData];

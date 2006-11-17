@@ -1,0 +1,30 @@
+{
+    IBClasses = (
+        {
+            ACTIONS = {
+                cancelPassword = id; 
+                cancelUpload = id; 
+                connectPassword = id; 
+                toggleFiles = id; 
+            }; 
+            CLASS = DropletController; 
+            LANGUAGE = ObjC; 
+            OUTLETS = {
+                oCancel = NSButton; 
+                oFiles = NSOutlineView; 
+                oPassword = NSTextField; 
+                oPasswordPanel = NSPanel; 
+                oPasswordText = NSTextField; 
+                oProgressBar = NSProgressIndicator; 
+                oStatus = NSTextField; 
+                oToggleFiles = NSButton; 
+                oWindow = NSPanel; 
+            }; 
+            SUPERCLASS = NSObject; 
+        }, 
+        {CLASS = DropletOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
+        {CLASS = DropletPanel; LANGUAGE = ObjC; SUPERCLASS = NSPanel; }, 
+        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
+    ); 
+    IBVersion = 1; 
+}

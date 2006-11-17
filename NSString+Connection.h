@@ -10,10 +10,12 @@
 
 
 @interface NSString (Connection)
+
 - (NSString *)encodeLegally;
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
+- (NSString *)stringByDeletingFirstPathComponent2;
 
 @end
 
