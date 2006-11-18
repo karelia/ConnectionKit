@@ -70,6 +70,10 @@ NSString *CKHostChanged = @"CKHostChanged";
 		}
 		myDescription = [[coder decodeObjectForKey:@"description"] copy];
 		myInitialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
+		if (!myInitialPath)
+		{
+			myInitialPath = @"";
+		}
 	}
 	return self;
 }
@@ -407,7 +411,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"%@ %@://%@:xxxx@%@:%@/%@", myConnectionType, [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+	return [NSString stringWithFormat:@"%@ %@://%@:xxxx@%@:%@/%@", myConnectionType, [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath];
 }
 
 - (NSString *)name
