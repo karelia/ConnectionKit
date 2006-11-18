@@ -25,8 +25,8 @@
  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
  SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
- TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+														   TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+														   BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
@@ -446,6 +446,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveListingConnection setDelegate:self];
 		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveListingConnection connect];
+		NSLog(@"Listing Connection Opened");
 		_recursiveDeletionConnection = [[[self class] alloc] initWithHost:[self host]
 																	 port:[self port]
 																 username:[self username]
@@ -454,9 +455,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection setDelegate:self];
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];
+		NSLog(@"Deletion Connection Opened");
 	}
+	NSLog(@"%@ %@", @"Recursive Deletions Queue, ADD:", path);
 	[_recursiveDeletionsQueue addObject:path];
 	_numberOfListingsRemaining++;
+	NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
+	NSLog(@"%@ %@", @"Getting contents of", path);
 	[_recursiveListingConnection contentsOfDirectory:path];
 }
 
@@ -583,7 +588,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	bufferEmpty = [dataBuffer length] == 0;
 	[dataBuffer appendData:data];
 	[_sendBufferLock unlock];
-		
+	
 	if (bufferEmpty) {
 		// prime the sending
 		[_sendBufferLock lock];
@@ -775,9 +780,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				[self sendStreamDidOpen];
 			}
-
+			
 			KTLog(StreamDomain, KTLogDebug, @"Command send stream opened");
-		
+			
 			break;
 		}
 		case NSStreamEventErrorOccurred:
@@ -928,15 +933,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)checkExistenceOfPath:(NSString *)path
 {
 	NSString *dir = [path stringByDeletingLastPathComponent];
-  
-  //if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
-  //according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
-  //
+	
+	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
+	//according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
+	//
 	if (!dir || [dir length] == 0)
 	{
 		path = [[self currentDirectory] stringByAppendingPathComponent:path];
 	}
-		
+	
 	[self queueFileCheck:path];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
 }
@@ -972,8 +977,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	else if (con == _recursiveListingConnection)
 	{
+		NSLog(@"%@ %@", @"Got listing for", dirPath);
 		[_deletionLock lock];
 		_numberOfListingsRemaining--;
+		NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
@@ -981,17 +988,22 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
+				NSLog(@"%@ %@", @"Found a directory, adding", [dirPath stringByAppendingPathComponent:[cur objectForKey:@"cxFilenameKey"]]);
 				_numberOfListingsRemaining++;
+				NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
 				[_recursiveListingConnection contentsOfDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 			else
 			{
+				NSLog(@"%@ %@", @"Found a file, deleting", [dirPath stringByAppendingPathComponent:[cur objectForKey:@"cxFilenameKey"]]);
 				_numberOfDeletionsRemaining++;
+				NSLog(@"%@ %i", @"Number of FILE DELETIONS remaining is now", _numberOfDeletionsRemaining);
 				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
 		if (![[_recursiveDeletionsQueue objectAtIndex:0] isEqualToString:dirPath])
 		{
+			NSLog(@"%@ %@", @"Directory is empty, adding", dirPath);
 			[_emptyDirectoriesToDelete addObject:dirPath];
 		}
 		[_deletionLock unlock];
@@ -1004,14 +1016,16 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_deletionLock lock];
 		_numberOfDeletionsRemaining--;
+		NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfDeletionsRemaining);
 		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
 		{
+			NSLog(@"No files left to delete, let's delete empty directories");
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
 			NSString *cur;
-			
 			while (cur = [e nextObject])
 			{
 				_numberOfDirDeletionsRemaining++;
+				NSLog(@"%@ %i", @"Number of DIR DELETIONS remaining is now", _numberOfDirDeletionsRemaining);
 				[_recursiveDeletionConnection deleteDirectory:cur];
 			}
 		}
@@ -1023,12 +1037,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (con == _recursiveDeletionConnection)
 	{
+		NSLog(@"%@ %@", @"successfully deleted", dirPath);
 		[_deletionLock lock];
 		_numberOfDirDeletionsRemaining--;
+		NSLog(@"%@ %i", @"Number of DIR DELETIONS remaining is now", _numberOfDirDeletionsRemaining);
 		[_deletionLock unlock];
-		
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
 		{
+			NSLog(@"root");
 			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 		}
