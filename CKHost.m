@@ -164,40 +164,21 @@ NSString *CKHostChanged = @"CKHostChanged";
 			list.count = 4;
 			list.attr = attributes;
 			
-			char *passphraseUTF8 = (char *)[myPassword UTF8String];
-			
 			// see if it already exists
 			SecKeychainSearchRef search = nil;
-			status = SecKeychainSearchCreateFromAttributes(NULL, kSecGenericPasswordItemClass, &list, &search);
+			status = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
 			
 			if (status == noErr)
 			{
 				if ((status = SecKeychainSearchCopyNext (search, &item)) == noErr) 
 				{
-					UInt32 length;
-					char *pass;
-					SecKeychainAttribute editAttribs[4];
-					SecKeychainAttributeList editList;
-					OSStatus status;
-					
-					editAttribs[0].tag = kSecAccountItemAttr;
-					editAttribs[1].tag = kSecDescriptionItemAttr;
-					editAttribs[2].tag = kSecLabelItemAttr;
-					editAttribs[3].tag = kSecModDateItemAttr;
-					
-					editList.count = 4;
-					editList.attr = editAttribs;
-					
-					status = SecKeychainItemCopyContent (item, NULL, &editList, &length, (void **)&pass);
-					status = SecKeychainItemModifyContent (item, &list, strlen(passphraseUTF8), passphraseUTF8);
+					status = SecKeychainItemDelete(item);
 				}
-				else
+				char *passphraseUTF8 = (char *)[myPassword UTF8String];
+				status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
+				if (status != 0) 
 				{
-					status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
-					if (status != 0) 
-					{
-						NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
-					}
+					NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
 				}
 			}
 		}
