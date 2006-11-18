@@ -64,7 +64,6 @@ static NSSize sFilesCollapsedSize = {375, 105};
 		return;
 	}
 	myHost = [[NSKeyedUnarchiver unarchiveObjectWithFile:configurationFile] retain];
-	
 	if (![myHost password])
 	{
 		NSString *str = [NSString stringWithFormat:[oPasswordText stringValue], [myHost host], [myHost connectionType]];
