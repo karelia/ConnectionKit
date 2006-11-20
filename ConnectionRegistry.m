@@ -367,7 +367,6 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 			[self recursivelyWrite:cur to:catDir];
 		}
 	}
-	NSLog(@"%@", files);
 	[pboard setPropertyList:files forType:NSFilenamesPboardType];
 	return YES;
 }
