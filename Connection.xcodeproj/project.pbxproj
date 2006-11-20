@@ -72,6 +72,18 @@
 		794EFE2B0A5CE58E00913151 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1E0A5CE58E00913151 /* session.c */; };
 		794EFE2C0A5CE58E00913151 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1F0A5CE58E00913151 /* sftp.c */; };
 		794EFE2D0A5CE58E00913151 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE200A5CE58E00913151 /* userauth.c */; };
+		795A010A0B116832006905FA /* edit.png in Resources */ = {isa = PBXBuildFile; fileRef = 795A01090B116832006905FA /* edit.png */; };
+		795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
+		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
+		795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */; };
+		795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */; };
+		795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */ = {isa = PBXBuildFile; fileRef = 795AFEF00B115511006905FA /* UKKQueue Readme.txt */; };
+		795AFEFA0B115511006905FA /* UKKQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF10B115511006905FA /* UKKQueue.h */; };
+		795AFEFB0B115511006905FA /* UKKQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF20B115511006905FA /* UKKQueue.m */; };
+		795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
+		795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
+		795AFF190B1157D3006905FA /* CKHostCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFF170B1157D3006905FA /* CKHostCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFF180B1157D3006905FA /* CKHostCell.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		795FF1B60B0A821600EA9292 /* ConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		795FF1B70B0A821600EA9292 /* ConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */; };
@@ -101,6 +113,8 @@
 		7983E7050B0C4E4E00F5078E /* DropletLauncher in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6D20B0C4DF000F5078E /* DropletLauncher */; };
 		7983EDF90B0C802C00F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
 		7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */; };
+		79906BAF0B1175A800FE9681 /* host.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAD0B1175A800FE9681 /* host.png */; };
+		79906BB00B1175A800FE9681 /* bonjour.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAE0B1175A800FE9681 /* bonjour.png */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD84E09F7048500172CDD /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD80D09F7048400172CDD /* AbstractConnection.m */; };
 		79CFD84F09F7048500172CDD /* AbstractConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -308,6 +322,18 @@
 		794EFE1E0A5CE58E00913151 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
 		794EFE1F0A5CE58E00913151 /* sftp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sftp.c; sourceTree = "<group>"; };
 		794EFE200A5CE58E00913151 /* userauth.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = userauth.c; sourceTree = "<group>"; };
+		795A01090B116832006905FA /* edit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = edit.png; sourceTree = "<group>"; };
+		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
+		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
+		795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFNSubscribeFileWatcher.h; sourceTree = "<group>"; };
+		795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFNSubscribeFileWatcher.m; sourceTree = "<group>"; };
+		795AFEF00B115511006905FA /* UKKQueue Readme.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "UKKQueue Readme.txt"; sourceTree = "<group>"; };
+		795AFEF10B115511006905FA /* UKKQueue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKKQueue.h; sourceTree = "<group>"; };
+		795AFEF20B115511006905FA /* UKKQueue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKKQueue.m; sourceTree = "<group>"; };
+		795AFEF30B115511006905FA /* UKMainThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKMainThreadProxy.h; sourceTree = "<group>"; };
+		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
+		795AFF170B1157D3006905FA /* CKHostCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCell.h; sourceTree = "<group>"; };
+		795AFF180B1157D3006905FA /* CKHostCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCell.m; sourceTree = "<group>"; };
 		795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionRegistry.h; sourceTree = "<group>"; };
 		795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionRegistry.m; sourceTree = "<group>"; };
 		795FF4F10B0C013200EA9292 /* DropletHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DropletHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -340,6 +366,8 @@
 		7983E6D20B0C4DF000F5078E /* DropletLauncher */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DropletLauncher; sourceTree = BUILT_PRODUCTS_DIR; };
 		7983F3EC0B0D1B8B00F5078E /* DropletPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropletPanel.h; sourceTree = "<group>"; };
 		7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletPanel.m; sourceTree = "<group>"; };
+		79906BAD0B1175A800FE9681 /* host.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = host.png; sourceTree = "<group>"; };
+		79906BAE0B1175A800FE9681 /* bonjour.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bonjour.png; sourceTree = "<group>"; };
 		79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSecureHTTPConnection.h; sourceTree = "<group>"; };
 		79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSecureHTTPConnection.m; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -543,6 +571,8 @@
 		080E96DDFE201D6D7F000001 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
+				79CFD89409F704F400172CDD /* Connection.h */,
+				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
 				7983E2120B0C22D600F5078E /* Bookmark Registry */,
 				79CFD8A509F705FF00172CDD /* UI */,
@@ -717,6 +747,22 @@
 			name = SSH;
 			sourceTree = "<group>";
 		};
+		795AFEE50B1154E2006905FA /* UKKQueue */ = {
+			isa = PBXGroup;
+			children = (
+				795AFEEC0B115511006905FA /* UKFileWatcher.h */,
+				795AFEED0B115511006905FA /* UKFileWatcher.m */,
+				795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */,
+				795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */,
+				795AFEF00B115511006905FA /* UKKQueue Readme.txt */,
+				795AFEF10B115511006905FA /* UKKQueue.h */,
+				795AFEF20B115511006905FA /* UKKQueue.m */,
+				795AFEF30B115511006905FA /* UKMainThreadProxy.h */,
+				795AFEF40B115511006905FA /* UKMainThreadProxy.m */,
+			);
+			name = UKKQueue;
+			sourceTree = "<group>";
+		};
 		795FF4EA0B0C00FF00EA9292 /* Droplet */ = {
 			isa = PBXGroup;
 			children = (
@@ -747,6 +793,8 @@
 				79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */,
 				79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */,
 				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
+				795AFF170B1157D3006905FA /* CKHostCell.h */,
+				795AFF180B1157D3006905FA /* CKHostCell.m */,
 			);
 			name = "Bookmark Registry";
 			sourceTree = "<group>";
@@ -772,8 +820,6 @@
 			isa = PBXGroup;
 			children = (
 				792CFCA70A806108001A00C6 /* HTTP */,
-				79CFD89409F704F400172CDD /* Connection.h */,
-				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */,
 				79CFD80C09F7048400172CDD /* AbstractConnection.h */,
 				79CFD80D09F7048400172CDD /* AbstractConnection.m */,
@@ -847,6 +893,7 @@
 		79CFD8A009F705B400172CDD /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				795AFEE50B1154E2006905FA /* UKKQueue */,
 				794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */,
 				794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */,
 				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
@@ -886,6 +933,9 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				79906BAD0B1175A800FE9681 /* host.png */,
+				79906BAE0B1175A800FE9681 /* bonjour.png */,
+				795A01090B116832006905FA /* edit.png */,
 				79CFD97A09F70AA700172CDD /* network_icon.png */,
 				79CFD97B09F70AA700172CDD /* Stop.tiff */,
 				79CFD8E809F7076200172CDD /* connect.tiff */,
@@ -960,6 +1010,11 @@
 				795FF2200B0A940D00EA9292 /* CKHostCategory.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
+				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
+				795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */,
+				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
+				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
+				795AFF190B1157D3006905FA /* CKHostCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1148,6 +1203,9 @@
 				798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */,
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
+				795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */,
+				79906BAF0B1175A800FE9681 /* host.png in Resources */,
+				79906BB00B1175A800FE9681 /* bonjour.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1173,6 +1231,7 @@
 				79CFD8FF09F7076200172CDD /* upload.tif in Resources */,
 				79CFD97C09F70AA700172CDD /* network_icon.png in Resources */,
 				79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */,
+				795A010A0B116832006905FA /* edit.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1332,6 +1391,11 @@
 				795FF2210B0A940E00EA9292 /* CKHostCategory.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
+				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
+				795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */,
+				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
+				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
+				795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

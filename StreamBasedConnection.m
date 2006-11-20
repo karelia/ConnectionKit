@@ -80,8 +80,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
-		_forwarder = [[RunLoopForwarder alloc] init];
-		[_forwarder setReturnValueDelegate:self];
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
 		_createdThread = [NSThread currentThread];
@@ -106,7 +104,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)dealloc
 {
-	[_forwarder release];
 	[_sendStream release];
 	[_receiveStream release];
 	[_sendBufferLock release];

@@ -51,6 +51,7 @@
 
 #import <Connection/ConnectionRegistry.h>
 #import <Connection/CKHostCategory.h>
-#import <Connection/CKHost.h>
 #import <Connection/CKBonjourCategory.h>
+#import <Connection/CKHost.h>
+#import <Connection/CKHostCell.h>
 

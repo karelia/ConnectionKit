@@ -31,6 +31,8 @@
 #import "AbstractConnection.h"
 #import "AbstractQueueConnection.h" 
 #import "CKTransferRecord.h"
+#import "UKKQueue.h"
+#import "RunLoopForwarder.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -80,6 +82,7 @@ NSString *StreamDomain = @"Stream";
 NSString *InputStreamDomain = @"Input Stream";
 NSString *OutputStreamDomain = @"Output Stream";
 NSString *SSLDomain = @"SSL";
+NSString *EditingDomain = @"Editing";
 
 static NSMutableArray *_connectionTypes = nil;
 
@@ -552,9 +555,14 @@ NSDictionary *sDataAttributes = nil;
 		[self setPort:port];
 		[self setUsername:username];
 		[self setPassword:password];
+		_edits = [[NSMutableDictionary dictionary] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
+		_editWatcher = [[UKKQueue alloc] init];
+		[_editWatcher setDelegate:self];
+		_forwarder = [[RunLoopForwarder alloc] init];
+		[_forwarder setReturnValueDelegate:self];
 		
 		if (error)
 		{
@@ -566,6 +574,7 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)dealloc
 {
+	[_forwarder release];
 	[_connectionHost release];
 	[_connectionPort release];
 	[_username release];
@@ -573,6 +582,10 @@ NSDictionary *sDataAttributes = nil;
 	[_transcript release];
 	[_properties release];
 	[_cachedDirectoryContents release];
+	[_edits release];
+	[_editWatcher release];
+	[_editingConnection forceDisconnect];
+	[_editingConnection release];
 	
 	[super dealloc];
 }
@@ -591,7 +604,7 @@ NSDictionary *sDataAttributes = nil;
 		[copy release];
 		return nil;
 	}
-	NSEnumerator *e = [_properties objectEnumerator];
+	NSEnumerator *e = [_properties keyEnumerator];
 	id key;
 	
 	while ((key = [e nextObject]))
@@ -1035,6 +1048,114 @@ NSDictionary *sDataAttributes = nil;
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"AbstractConnection does not implement checkExistanceOfPath:"
 								 userInfo:nil];
+}
+
+- (void)editFile:(NSString *)remotePath 
+{
+	NSString *localEditable = [NSTemporaryDirectory() stringByAppendingPathComponent:[remotePath lastPathComponent]];
+	[_edits setObject:remotePath forKey:localEditable];
+	if (!_editingConnection)
+	{
+		_editingConnection = [self copy];
+		[_editingConnection setDelegate:self];
+		[_editingConnection setTranscript:[self transcript]];
+		[_editingConnection connect];
+	}
+	[_editingConnection downloadFile:remotePath toDirectory:[localEditable stringByDeletingLastPathComponent] overwrite:YES];
+}
+
+#pragma mark -
+#pragma mark UKKQueue Delegate Methods
+
+- (void)watcher:(id<UKFileWatcher>)kq receivedNotification:(NSString*)nm forPath:(NSString*)fpath
+{
+	if ([nm isEqualToString:UKFileWatcherAttributeChangeNotification]) //UKFileWatcherWriteNotification does not get called because of atomicity of file writing (i believe)
+	{
+		KTLog(EditingDomain, KTLogDebug, @"File changed: %@... uploading to server", fpath);
+		[self uploadFile:fpath toFile:[_edits objectForKey:fpath]];
+	}
+}
+
+#pragma mark -
+#pragma mark Editing Connection Delegate Methods
+
+- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent
+{
+	if (_flags.downloadPercent)
+	{
+		[_forwarder connection:self download:path progressedTo:percent];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length
+{
+	if (_flags.downloadProgressed)
+	{
+		[_forwarder connection:self download:path receivedDataOfLength:length];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath
+{
+	if (_flags.didBeginUpload)
+	{
+		[_forwarder connection:self downloadDidBegin:remotePath];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+{
+	if (_flags.downloadFinished)
+	{
+		[_forwarder connection:self downloadDidFinish:remotePath];
+	}
+	KTLog(EditingDomain, KTLogDebug, @"Downloaded file %@... watching for changes", remotePath);
+	NSEnumerator *e = [_edits keyEnumerator];
+	NSString *key, *cur;
+	
+	while ((key = [e nextObject]))
+	{
+		cur = [_edits objectForKey:key];
+		if ([cur isEqualToString:remotePath])
+		{
+			[_editWatcher addPathToQueue:key];
+			KTLog(EditingDomain, KTLogDebug, @"Opening file for editing %@", key);
+			[[NSWorkspace sharedWorkspace] openFile:key];
+		}
+	}
+	
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent
+{
+	if (_flags.uploadPercent)
+	{
+		[_forwarder connection:self upload:remotePath progressedTo:percent];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length
+{
+	if (_flags.uploadProgressed)
+	{
+		[_forwarder connection:self upload:remotePath sentDataOfLength:length];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath
+{
+	if (_flags.didBeginUpload)
+	{
+		[_forwarder connection:self uploadDidBegin:remotePath];
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
+{
+	if (_flags.uploadFinished)
+	{
+		[_forwarder connection:self uploadDidFinish:remotePath];
+	}
 }
 
 @end

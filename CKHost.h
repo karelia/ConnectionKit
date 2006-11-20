@@ -21,6 +21,7 @@
 	NSString	*myInitialPath;
 	NSURL		*myURL;
 	NSString	*myDescription;
+	NSImage		*myIcon;
 	
 	id			myUserInfo;
 	
@@ -38,6 +39,7 @@
 - (void)setURL:(NSURL *)url;
 - (void)setAnnotation:(NSString *)description;
 - (void)setUserInfo:(id)ui;
+- (void)setIcon:(NSImage *)icon;
 
 - (NSString *)host;
 - (NSString *)port;
@@ -48,6 +50,7 @@
 - (NSURL *)url;
 - (NSString *)annotation;
 - (id)userInfo;
+- (NSImage *)icon;
 
 - (void)setCategory:(CKHostCategory *)cat;
 - (CKHostCategory *)category;

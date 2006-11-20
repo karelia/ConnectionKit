@@ -185,6 +185,8 @@ typedef struct __flags {
 - (NSString *)urlScheme; // by default calls class method
 + (NSString *)urlScheme; //eg http
 
+- (void)editFile:(NSString *)remoteFile;
+
 @end
 
 

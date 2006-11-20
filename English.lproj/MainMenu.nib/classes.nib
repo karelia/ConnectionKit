@@ -8,6 +8,7 @@
                 connectionTypeChanged = id; 
                 deleteFile = id; 
                 disconnect = id; 
+                editFile = id; 
                 hostnameChanged = id; 
                 initialDirectoryChanged = id; 
                 localFileSelected = id; 
@@ -38,6 +39,7 @@
                 btnConnect = NSButton; 
                 btnDelete = NSButton; 
                 btnDisconnect = NSButton; 
+                btnEdit = NSButton; 
                 btnNewFolder = NSButton; 
                 btnPermissions = NSButton; 
                 btnRefresh = NSButton; 

@@ -46,11 +46,8 @@
  *
  */
 
-@class RunLoopForwarder;
-
 @interface StreamBasedConnection : AbstractQueueConnection 
 {
-	RunLoopForwarder	*_forwarder;
 	NSThread			*_createdThread;
 	
 	id<OutputStream>	_sendStream;
