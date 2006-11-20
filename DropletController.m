@@ -81,6 +81,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 - (void)startUpload
 {
 	[oProgressBar setIndeterminate:YES];
+	[oProgressBar setUsesThreadedAnimation:YES];
 	[oStatus setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Connecting to %@", @"connection string"), [myHost host]]];
 	[NSApp activateIgnoringOtherApps:YES];
 	[oWindow makeKeyAndOrderFront:self];
@@ -222,10 +223,10 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[a runModal];
 }
 
-- (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username
-{
-	
-}
+//- (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username
+//{
+//	
+//}
 
 - (CKTransferRecord *)recordWithPath:(NSString *)path
 {

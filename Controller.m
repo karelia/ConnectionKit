@@ -144,7 +144,7 @@ NSString *ProtocolKey = @"Protocol";
 		}
 	}
 	[ud removeObjectForKey:HostsKey];
-	[savedHosts setDataSource:self];
+	[savedHosts setDataSource:[ConnectionRegistry sharedRegistry]];
 	[savedHosts setDelegate:self];
 	
 	[self refreshHosts];
@@ -292,9 +292,7 @@ NSString *ProtocolKey = @"Protocol";
 	if ([selected isKindOfClass:[CKHost class]])
 	{
 		CKHost *host = selected;
-		
-		[host createDropletAtPath:NSHomeDirectory()];
-		
+				
 		[cHost setStringValue:[host host]];
 		[cUser setStringValue:[host username]];
 		[cPort setStringValue:[host port]];
@@ -758,70 +756,6 @@ static NSImage *_folder = nil;
 	if ([con isKindOfClass:[AbstractQueueConnection class]]) {
 		NSLog(@"Queue Description:\n%@", [(AbstractQueueConnection *)con queueDescription]);
 	}
-}
-
-#pragma mark -
-#pragma mark Outline View Data Source
-
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
-{
-	if (item == nil)
-	{
-		return [[[ConnectionRegistry sharedRegistry] connections] count];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		return [[item childCategories] count];
-	}
-	return 0;
-}
-
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
-{
-	if (item == nil)
-	{
-		return [[[ConnectionRegistry sharedRegistry] connections] objectAtIndex:index];
-	}
-	return [[item childCategories] objectAtIndex:index];
-}
-
-- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
-{
-	return [item isKindOfClass:[CKHostCategory class]] && [[item childCategories] count] > 0 ;
-}
-
-- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
-{
-	if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		return [item name];
-	}
-	else
-	{
-		NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[item port]]];
-		if ([item username] && ![[item username] isEqualToString:@""])
-		{
-			[str appendFormat:@"%@@", [item username]];
-		}
-		if ([item host])
-		{
-			[str appendString:[item host]];
-		}
-		
-		return str;
-	}
-}
-
-- (NSArray *)outlineView:(NSOutlineView *)outlineView namesOfPromisedFilesDroppedAtDestination:(NSURL *)dropDestination forDraggedItems:(NSArray *)items
-{
-	NSMutableArray *files = [NSMutableArray array];
-	
-	NSEnumerator *e = [items objectEnumerator];
-	id cur;
-	
-	[files addObject:@"/tmp/configuration.ckhost"];
-	
-	return files;
 }
 
 #pragma mark -

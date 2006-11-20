@@ -460,7 +460,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 	return p;
 }
 
-- (BOOL)createDropletAtPath:(NSString *)path
+- (NSString *)createDropletAtPath:(NSString *)path
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSMutableString *appName = [NSMutableString stringWithString:[self host]];
@@ -478,20 +478,20 @@ NSString *CKHostChanged = @"CKHostChanged";
 	
 	if (![fm createDirectoryAtPath:app attributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0775] forKey:NSFilePosixPermissions]])
 	{
-		return NO;
+		return nil;
 	}
 	[fm changeFileAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:NSFileExtensionHidden] atPath:app];
 	if (![fm createDirectoryAtPath:contents attributes:nil])
 	{
-		return NO;
+		return nil;
 	}
 	if (![fm createDirectoryAtPath:exe attributes:nil])
 	{
-		return NO;
+		return nil;
 	}
 	if (![fm createDirectoryAtPath:resources attributes:nil])
 	{
-		return NO;
+		return nil;
 	}
 	//do Info.plist
 	[[NSPropertyListSerialization dataFromPropertyList:[self plistDictionary]
@@ -521,6 +521,6 @@ NSString *CKHostChanged = @"CKHostChanged";
 	NSURL *url = [NSURL fileURLWithPath:app];
 	ret = LSSetExtensionHiddenForURL((CFURLRef)url, true);
 	
-	return YES;
+	return app;
 }
 @end
