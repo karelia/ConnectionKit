@@ -29,6 +29,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 		myUsername = [NSUserName() copy];
 		myInitialPath = @"";
 		myPort = @"";
+		myIcon = [[NSImage imageNamed:@"host"] retain];
 	}
 	return self;
 }
@@ -44,6 +45,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 	[myDescription release];
 	[myInitialPath release];
 	[myUserInfo release];
+	[myIcon release];
 	
 	[super dealloc];
 }
@@ -74,6 +76,11 @@ NSString *CKHostChanged = @"CKHostChanged";
 		{
 			myInitialPath = @"";
 		}
+		NSData *data = [coder decodeObjectForKey:@"icon"];
+		if (data)
+		{
+			myIcon = [[NSImage alloc] initWithData:data];
+		}
 	}
 	return self;
 }
@@ -88,6 +95,10 @@ NSString *CKHostChanged = @"CKHostChanged";
 	[coder encodeObject:[myURL absoluteString] forKey:@"url"];
 	[coder encodeObject:myDescription forKey:@"description"];
 	[coder encodeObject:myInitialPath forKey:@"initialPath"];
+	if (myIcon)
+	{
+		[coder encodeObject:[myIcon TIFFRepresentation] forKey:@"icon"];
+	}
 }
 
 - (void)didChange
@@ -429,6 +440,23 @@ NSString *CKHostChanged = @"CKHostChanged";
 	return YES;
 }
 
+- (void)setIcon:(NSImage *)icon
+{
+	if (icon != myIcon)
+	{
+		[self willChangeValueForKey:@"icon"];
+		[myIcon autorelease];
+		myIcon = [icon copy];
+		[self didChangeValueForKey:@"icon"];
+		[self didChange];
+	}
+}
+
+- (NSImage *)icon
+{
+	return myIcon;
+}
+
 #pragma mark -
 #pragma mark Droplet Support
 
@@ -463,7 +491,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 - (NSString *)createDropletAtPath:(NSString *)path
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
-	NSMutableString *appName = [NSMutableString stringWithString:[self host]];
+	NSMutableString *appName = [NSMutableString stringWithString:[self annotation] != nil ? [self annotation] : [self host]];
 	[appName replaceOccurrencesOfString:@"." withString:@"_" options:NSLiteralSearch range:NSMakeRange(0,[[self host] length])];
 	NSString *app = [[path stringByAppendingPathComponent:appName] stringByAppendingPathExtension:@"app"];
 	NSString *contents = [app stringByAppendingPathComponent:@"Contents"];

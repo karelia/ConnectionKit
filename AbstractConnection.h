@@ -56,6 +56,7 @@ extern NSString *StreamDomain;
 extern NSString *InputStreamDomain;
 extern NSString *OutputStreamDomain;
 extern NSString *SSLDomain;
+extern NSString *EditingDomain;
 
 typedef enum {
 	ConnectionNotConnectedState = 0,
@@ -84,6 +85,8 @@ typedef enum {
 	ConnectionSentDisconnectState //24
 } ConnectionState;
 
+@class UKKQueue, RunLoopForwarder;
+
 @interface AbstractConnection : NSObject <AbstractConnectionProtocol, NSCopying> 
 {
 
@@ -95,11 +98,17 @@ typedef enum {
 	ConnectionState _state;
 	
 	@protected
+		
+	RunLoopForwarder	*_forwarder;
 
 	NSTextStorage *_transcript;
 	id _delegate;
 
 	connectionFlags _flags;
+	
+	UKKQueue *_editWatcher;
+	NSMutableDictionary *_edits;
+	AbstractConnection *_editingConnection;
 	
 	NSMutableDictionary *_properties;
 	

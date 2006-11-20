@@ -11,6 +11,7 @@
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
 #import "AbstractConnection.h"
+#import "CKHostCell.h"
 
 static NSLock *sRegistryLock = nil;
 static BOOL sRegistryCanInit = NO;
@@ -126,8 +127,8 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	if ([[NSProcessInfo processInfo] processIdentifier] != [[notification object] intValue])
 	{
 		[self willChangeValueForKey:@"connections"];
+		unsigned idx = [myConnections indexOfObject:myBonjour];
 		[myConnections removeAllObjects];
-		[myConnections addObject:myBonjour];
 		NSArray *hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
 		[myConnections addObjectsFromArray:hosts];
 		NSEnumerator *e = [hosts objectEnumerator];
@@ -150,6 +151,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 														   object:cur];
 			}
 		}
+		[myConnections insertObject:myBonjour atIndex:idx];
 		[self didChangeValueForKey:@"connections"];
 	}
 }
@@ -286,22 +288,32 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 {
 	if ([item isKindOfClass:[CKHostCategory class]])
 	{
-		return [item name];
+		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
 	}
 	else
 	{
-		NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[(CKHost *)item port]]];
-		if ([item username] && ![[item username] isEqualToString:@""])
+		NSString *val = nil;
+		if ([item annotation] && [[item annotation] length] > 0)
 		{
-			[str appendFormat:@"%@@", [item username]];
+			val = [item annotation];
 		}
-		if ([item host])
+		else
 		{
-			[str appendString:[item host]];
+			NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[(CKHost *)item port]]];
+			if ([item username] && ![[item username] isEqualToString:@""])
+			{
+				[str appendFormat:@"%@@", [item username]];
+			}
+			if ([item host])
+			{
+				[str appendString:[item host]];
+			}
+			
+			val = str;
 		}
-		
-		return str;
+		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
 	}
+	return nil;
 }
 
 - (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path

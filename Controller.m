@@ -32,8 +32,6 @@ NSString *ProtocolKey = @"Protocol";
 
 @interface Controller(PRivate)
 - (void)refreshLocal;
-+ (BOOL) keychainSetPassword:(NSString *)inPassword forServer:(NSString *)aServer account:(NSString *)anAccount;
-+ (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName;
 - (void)refreshHosts;
 - (void)downloadFile:(NSString *)remote toFolder:(NSString *)local;
 - (void)uploadFile:(NSString *)local to:(NSString *)remote;
@@ -146,6 +144,10 @@ NSString *ProtocolKey = @"Protocol";
 	[ud removeObjectForKey:HostsKey];
 	[savedHosts setDataSource:[ConnectionRegistry sharedRegistry]];
 	[savedHosts setDelegate:self];
+	
+	CKHostCell *acell = [[CKHostCell alloc] initImageCell:nil];
+	[[[savedHosts tableColumns] objectAtIndex:0] setDataCell:acell];
+	[acell release];
 	
 	[self refreshHosts];
 	
@@ -315,78 +317,10 @@ NSString *ProtocolKey = @"Protocol";
 	
 }
 
-- (void)saveHost:(id)sender
-{
-	NSMutableDictionary *d = [NSMutableDictionary dictionary];
-	NSString *h = [cHost stringValue];
-	NSString *u = [cUser stringValue];
-	NSString *pass = [cPass stringValue];
-	NSString *p = [cPort stringValue];
-	NSString *url = [cURL stringValue];
-	NSString *dir = [initialDirectory stringValue];
-	NSString *protocol = [cTypePopup titleOfSelectedItem];
-	
-	if (h && u)
-	{
-		[d setObject:h forKey:HostKey];
-		[d setObject:u forKey:UsernameKey];
-		if (p)
-			[d setObject:p forKey:PortKey];
-		if (url)
-			[d setObject:url forKey:URLKey];
-		if (pass)
-			[Controller keychainSetPassword:pass forServer:h account:u];
-		if (dir)
-			[d setObject:dir forKey:InitialDirectoryKey];
-		if (![protocol isEqualToString:@"Auto Select"])
-			[d setObject:protocol forKey:ProtocolKey];
-		
-		[_savedHosts addObject:d];
-		[[NSUserDefaults standardUserDefaults] setObject:_savedHosts forKey:HostsKey];
-		[[NSUserDefaults standardUserDefaults] synchronize];
-		[self refreshHosts];
-	}
-}
-
 - (IBAction)cancelConnect:(id)sender
 {
 	[connectWindow orderOut:self];
 	[NSApp endSheet:connectWindow];
-}
-
-- (void)runAutomatedScript
-{
-	NSError *err = nil;
-	con = [[AbstractConnection connectionWithName:@"FTP"
-											 host:@"localhost"
-											 port:@"21"
-										 username:@"ghulands"
-										 password:[Controller keychainPasswordForServer:@"localhost" account:@"ghulands"]
-											error:&err] retain];
-	if (!con)
-	{
-		if (err)
-		{
-			[NSApp presentError:err];
-		}
-		return;
-	}
-	
-	[con connect];
-	[con changeToDirectory:@"Sites/sandvox"];
-	NSString *path = @"/Users/ghulands/Desktop/StockPhotos/";
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSEnumerator *e = [[fm directoryContentsAtPath:path] objectEnumerator];
-	NSString *cur;
-	while (cur = [e nextObject]) {
-		NSString *file = [NSString stringWithFormat:@"%@%@", path, cur];
-		BOOL isDir;
-		if ([fm fileExistsAtPath:file isDirectory:&isDir] && !isDir) {
-			[con uploadFile:file];
-			[self uploadFile:file to:[NSString stringWithFormat:@"%@", [cur lastPathComponent]]];
-			[transferTable reloadData];
-		}
-	}
 }
 
 - (IBAction)connect:(id)sender
@@ -568,6 +502,7 @@ NSString *ProtocolKey = @"Protocol";
 - (IBAction)remoteFileSelected:(id)sender
 {
 	int idx = [sender selectedRow];
+	NSDictionary *file = [remoteFiles objectAtIndex:idx];
 	
 	if (idx >= 0 && idx < [remoteFiles count])
 	{
@@ -580,6 +515,15 @@ NSString *ProtocolKey = @"Protocol";
 		[btnDelete setEnabled:NO];
 		[btnPermissions setEnabled:NO];
 		
+	}
+	
+	if (![[file objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+	{
+		[btnEdit setEnabled:YES];
+	}
+	else
+	{
+		[btnEdit setEnabled:NO];
 	}
 }
 
@@ -756,6 +700,14 @@ static NSImage *_folder = nil;
 	if ([con isKindOfClass:[AbstractQueueConnection class]]) {
 		NSLog(@"Queue Description:\n%@", [(AbstractQueueConnection *)con queueDescription]);
 	}
+}
+
+- (void)editFile:(id)sender
+{
+	unsigned idx = [remoteTable selectedRow];
+	NSDictionary *file = [remoteFiles objectAtIndex:idx];
+	NSString *remotePath = [[con currentDirectory] stringByAppendingPathComponent:[file objectForKey:cxFilenameKey]];
+	[con editFile:remotePath];
 }
 
 #pragma mark -
@@ -1320,108 +1272,6 @@ NSString *IconKey = @"Icon";
 - (void) scrollToVisible:(id)whichLog
 {
 	[whichLog scrollRangeToVisible:NSMakeRange([[whichLog textStorage] length], 0)];
-}
-
-#pragma mark -
-#pragma mark Keychain wrapper utilities
-
-// Courtesy of Dan Wood / Biophony, LLC.
-
-/*!	Get the appropriate keychain password.  Returns null if it couldn't be found or there was some other error
-*/
-+ (NSString *)keychainPasswordForServer:(NSString *)aServerName account:(NSString *)anAccountName
-{
-	NSString *result = nil;
-	if ([aServerName length] > 255 || [anAccountName length] > 255)
-	{
-		return result;
-	}
-		
-	Str255 serverPString, accountPString;
-	
-	c2pstrcpy(serverPString, [aServerName UTF8String]);
-	c2pstrcpy(accountPString, [anAccountName UTF8String]);
-	
-	char passwordBuffer[256];
-	UInt32 actualLength;
-	OSStatus theStatus;
-	
-	theStatus = KCFindInternetPassword (
-									 serverPString,			// StringPtr serverName,
-									 NULL,					// StringPtr securityDomain,
-									 accountPString,		// StringPtr accountName,
-									 kAnyPort,				// UInt16 port,
-									 kAnyProtocol,			// OSType protocol,
-									 kAnyAuthType,			// OSType authType,
-									 255,					// UInt32 maxLength,
-									 passwordBuffer,		// void * passwordData,
-									 &actualLength,			// UInt32 * actualLength,
-									 nil					// KCItemRef * item
-									 );
-	if (noErr == theStatus)
-	{
-		passwordBuffer[actualLength] = 0;		// make it a legal C string by appending 0
-		result = [NSString stringWithUTF8String:passwordBuffer];
-	}
-	return result;
-}
-
-
-/*!	Set the given password.  Returns YES if successful.
-*/
-
-+ (BOOL) keychainSetPassword:(NSString *)inPassword forServer:(NSString *)aServer account:(NSString *)anAccount
-{
-	Str255 serverPString, accountPString;
-	
-	if ([aServer length] > 255 || [anAccount length] > 255)
-	{
-		return NO;
-	}
-	
-	c2pstrcpy(serverPString, [aServer UTF8String]);
-	c2pstrcpy(accountPString, [anAccount UTF8String]);
-	
-	const char *passwordUTF8 = [inPassword UTF8String];
-	
-	char passwordBuffer[256];
-	OSStatus theStatus;
-	KCItemRef itemRef;
-	UInt32 actualLength;
-	
-	// See if there is already one matching this server/account
-	theStatus = KCFindInternetPassword (
-									 serverPString,			// StringPtr serverName,
-									 NULL,					// StringPtr securityDomain,
-									 accountPString,		// StringPtr accountName,
-									 kAnyPort,				// UInt16 port,
-									 kAnyProtocol,			// OSType protocol,
-									 kAnyAuthType,			// OSType authType,
-									 255,					// UInt32 maxLength,
-									 passwordBuffer,		// void * passwordData,
-									 &actualLength,			// UInt32 * actualLength,
-									 &itemRef				// KCItemRef * item
-									 );
-	
-	if (noErr == theStatus)            // Found already? If so, delete it!
-	{
-		theStatus = KCDeleteItem(itemRef);
-		theStatus = KCReleaseItem(&itemRef);
-	}
-	
-	// Now add in entry
-	theStatus = KCAddInternetPassword (
-									serverPString,			// StringPtr serverName,
-									nil,					// StringPtr securityDomain,
-									accountPString,			// StringPtr accountName,
-									kAnyPort,				// UInt16 port,
-									kAnyProtocol,			// OSType protocol,
-									kAnyAuthType,			// OSType authType,
-									strlen(passwordUTF8),	// UInt32 passwordLength,
-									passwordUTF8,			// const void * passwordData,
-									nil						// KCItemRef * item
-									);
-	return (noErr == theStatus);
 }
 
 #pragma mark -

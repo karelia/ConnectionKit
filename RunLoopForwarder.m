@@ -83,9 +83,17 @@
 	{
 		if ([[anInvocation methodSignature] methodReturnLength] == 0) {
 			[anInvocation retainArguments];
-			[anInvocation performSelector:@selector(invokeWithTarget:)
-							   withObject:myDelegate
-								 inThread:createdOnThread];
+			if ([NSThread currentThread] == createdOnThread)
+			{
+				[anInvocation performSelector:@selector(invokeWithTarget:)
+								   withObject:myDelegate];
+			}
+			else
+			{
+				[anInvocation performSelector:@selector(invokeWithTarget:)
+								   withObject:myDelegate
+									 inThread:createdOnThread];
+			}
 		} else {
 			//we need to get the return value
 			unsigned int length = [[anInvocation methodSignature] methodReturnLength];

@@ -11,6 +11,10 @@
 
 NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
+@interface CKHostCategory (private)
+- (void)didChange;
+@end
+
 @implementation CKHostCategory
 
 + (void)load

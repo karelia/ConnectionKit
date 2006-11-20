@@ -59,6 +59,19 @@
 	[super dealloc];
 }
 
+static NSImage *sBonjourIcon = nil;
+
+- (NSImage *)icon
+{
+	if (!sBonjourIcon)
+	{
+		NSBundle *b = [NSBundle bundleForClass:[self class]];
+		NSString *p = [b pathForResource:@"bonjour" ofType:@"png"];
+		sBonjourIcon = [[NSImage alloc] initWithContentsOfFile:p];
+	}
+	return sBonjourIcon;
+}
+
 - (void)addChildCategory:(CKHostCategory *)cat
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
