@@ -311,7 +311,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 			
 			val = str;
 		}
-		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
+		return [NSDictionary dictionaryWithObjectsAndKeys:val, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
 	}
 	return nil;
 }
