@@ -278,6 +278,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[self initiatingNewRequest:req withPacket:packet];
 		
 		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsString]);
+		
 		[self sendData:packet];
 	}
 	else 
@@ -351,13 +352,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		{
 			if (!_flags.isConnected)
 			{
-				[super handleReceiveStreamEvent:theEvent];
-			}
-			else
-			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
 			}
+			[super handleReceiveStreamEvent:theEvent];
 			break;
 		}
 		default:
@@ -383,15 +381,12 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			if (!_flags.isConnected)
-			{
-				[super handleSendStreamEvent:theEvent];
-			}
-			else
+			if (_flags.isConnected)
 			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
 			}
+			[super handleSendStreamEvent:theEvent];
 			break;
 		}
 		default:

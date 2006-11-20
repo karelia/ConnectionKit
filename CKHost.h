@@ -55,7 +55,7 @@
 // returns a new autoreleased connection of this type;
 - (id <AbstractConnectionProtocol>)connection; 
 
-- (BOOL)createDropletAtPath:(NSString *)path;
+- (NSString *)createDropletAtPath:(NSString *)path;
 
 @end
 

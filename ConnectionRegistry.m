@@ -10,6 +10,7 @@
 #import "CKHostCategory.h"
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
+#import "AbstractConnection.h"
 
 static NSLock *sRegistryLock = nil;
 static BOOL sRegistryCanInit = NO;
@@ -225,6 +226,114 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 - (NSArray *)connections
 {
 	return [NSArray arrayWithArray:myConnections];
+}
+
+#pragma mark -
+#pragma mark Outline View Data Source
+
+- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+{
+	if (item == nil)
+	{
+		return [[self connections] count];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		return [[item childCategories] count];
+	}
+	return 0;
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+{
+	if (item == nil)
+	{
+		return [[self connections] objectAtIndex:index];
+	}
+	return [[item childCategories] objectAtIndex:index];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+{
+	return [item isKindOfClass:[CKHostCategory class]] && [[item childCategories] count] > 0 ;
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+	if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		return [item name];
+	}
+	else
+	{
+		NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[(CKHost *)item port]]];
+		if ([item username] && ![[item username] isEqualToString:@""])
+		{
+			[str appendFormat:@"%@@", [item username]];
+		}
+		if ([item host])
+		{
+			[str appendString:[item host]];
+		}
+		
+		return str;
+	}
+}
+
+- (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path
+{
+	NSEnumerator *e = [[category hosts] objectEnumerator];
+	id cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHost class]])
+		{
+			[cur createDropletAtPath:path];
+		}
+		else
+		{
+			NSString *catDir = [path stringByAppendingPathComponent:[cur name]];
+			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+			[self recursivelyWrite:cur to:catDir];
+		}
+	}
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard
+{
+	// we write out all the hosts /tmp
+	NSString *wd = [NSString stringWithFormat:@"/tmp/ck"];
+	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
+	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
+									   forLocal:NO];
+	[pboard declareTypes:[NSArray arrayWithObject:NSFilenamesPboardType] owner:nil];
+	NSMutableArray *files = [NSMutableArray array];
+	NSEnumerator *e = [items objectEnumerator];
+	id cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHost class]])
+		{
+			@try {
+				[files addObject:[cur createDropletAtPath:wd]];
+			}
+			@catch (NSException *ex) {
+				
+			}
+		}
+		else
+		{
+			NSString *catDir = [wd stringByAppendingPathComponent:[cur name]];
+			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+			[files addObject:catDir];
+			[self recursivelyWrite:cur to:catDir];
+		}
+	}
+	NSLog(@"%@", files);
+	[pboard setPropertyList:files forType:NSFilenamesPboardType];
+	return YES;
 }
 
 @end
