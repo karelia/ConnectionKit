@@ -12,12 +12,24 @@
 #import <Connection/Connection.h>
 
 NSString *CKHostChanged = @"CKHostChanged";
+static NSImage *sHostIcon = nil;
 
 @implementation CKHost
 
 + (void)load
 {
 	[CKHost setVersion:1];
+}
+
++ (void)initialize
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	NSBundle *b = [NSBundle bundleForClass:[self class]];
+	NSString *p = [b pathForResource:@"host" ofType:@"png"];
+	sHostIcon = [[NSImage alloc] initWithContentsOfFile:p];
+	
+	[pool release];
 }
 
 - (id)init
@@ -29,7 +41,7 @@ NSString *CKHostChanged = @"CKHostChanged";
 		myUsername = [NSUserName() copy];
 		myInitialPath = @"";
 		myPort = @"";
-		myIcon = [[NSImage imageNamed:@"host"] retain];
+		myIcon = [sHostIcon retain];
 	}
 	return self;
 }
@@ -80,6 +92,10 @@ NSString *CKHostChanged = @"CKHostChanged";
 		if (data)
 		{
 			myIcon = [[NSImage alloc] initWithData:data];
+		}
+		else
+		{
+			myIcon = [sHostIcon retain];
 		}
 	}
 	return self;
