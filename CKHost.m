@@ -26,7 +26,7 @@ static NSImage *sHostIcon = nil;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	NSBundle *b = [NSBundle bundleForClass:[self class]];
-	NSString *p = [b pathForResource:@"host" ofType:@"png"];
+	NSString *p = [b pathForResource:@"bookmark" ofType:@"tif"];
 	sHostIcon = [[NSImage alloc] initWithContentsOfFile:p];
 	
 	[pool release];
