@@ -177,6 +177,30 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
 }
 
+- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(changed:)
+												 name:CKHostCategoryChanged
+											   object:category];
+	[self willChangeValueForKey:@"connections"];
+	[myConnections insertObject:category atIndex:index];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
+- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+{
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(changed:)
+												 name:CKHostChanged
+											   object:host];
+	[self willChangeValueForKey:@"connections"];
+	[myConnections insertObject:host atIndex:index];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
 - (void)addCategory:(CKHostCategory *)category
 {
 	[[NSNotificationCenter defaultCenter] addObserver:self

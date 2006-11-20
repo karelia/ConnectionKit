@@ -34,6 +34,9 @@
 - (void)addCategory:(CKHostCategory *)category;
 - (void)removeCategory:(CKHostCategory *)category;
 
+- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index;
+- (void)insertHost:(CKHost *)host atIndex:(unsigned)index;
+
 - (void)addHost:(CKHost *)connection;
 - (void)removeHost:(CKHost *)connection;
 
