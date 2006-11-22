@@ -145,11 +145,23 @@ NSString *ProtocolKey = @"Protocol";
 	[savedHosts setDataSource:[ConnectionRegistry sharedRegistry]];
 	[savedHosts setDelegate:self];
 	
+	
 	CKHostCell *acell = [[CKHostCell alloc] initImageCell:nil];
 	[[[savedHosts tableColumns] objectAtIndex:0] setDataCell:acell];
 	[acell release];
 	
 	[self refreshHosts];
+	
+	NSEnumerator *e = [[[ConnectionRegistry sharedRegistry] connections] objectEnumerator];
+	id cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHostCategory class]])
+		{
+			[savedHosts expandItem:cur];
+		}
+	}
 	
 	//have a timer to remove completed transfers
 	[NSTimer scheduledTimerWithTimeInterval:10
@@ -162,6 +174,8 @@ NSString *ProtocolKey = @"Protocol";
 											 selector:@selector(registryChanged:) 
 												 name:CKRegistryChangedNotification 
 											   object:nil];
+	
+	[oConMenu setMenu:[[ConnectionRegistry sharedRegistry] menu]];
 	//[self runAutomatedScript];
 }
 
@@ -198,6 +212,7 @@ NSString *ProtocolKey = @"Protocol";
 - (void)registryChanged:(NSNotification *)n
 {
 	[savedHosts reloadData];
+	[oConMenu setMenu:[[ConnectionRegistry sharedRegistry] menu]];
 }
 
 - (void)newCategory:(id)sender

@@ -168,6 +168,18 @@
 	return [myProperties objectForKey:key];
 }
 
+// keep NSDictionary accessor compatible so we can move over internal use of this class
+
+- (void)setObject:(id)object forKey:(id)key
+{
+	[self setProperty:object forKey:key];
+}
+
+- (id)objectForKey:(id)key
+{
+	return [self propertyForKey:key];
+}
+
 #pragma mark -
 #pragma mark Recursive File Transfer Methods
 

@@ -42,6 +42,8 @@
 
 - (NSArray *)connections;
 
+- (NSMenu *)menu;
+
 @end
 
 extern NSString *CKRegistryChangedNotification;

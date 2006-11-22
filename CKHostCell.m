@@ -236,7 +236,10 @@ textRect.origin.y += 1.0;
     [label release];
     
     // Draw the image
-	imageRect = CKCenteredAspectRatioPreservedRect(imageRect, [[self icon] size], imageRect.size);
+	NSSize maxImageSize = [[self icon] size];
+	if (maxImageSize.width > NSWidth(imageRect)) maxImageSize.width = NSWidth(imageRect);
+	if (maxImageSize.height > NSHeight(imageRect)) maxImageSize.height = NSHeight(imageRect);
+	imageRect = CKCenteredAspectRatioPreservedRect(imageRect, [[self icon] size], maxImageSize);
     //imageRect.size = imageSize;
 	//imageRect.size = [[self myIcon] size];
     //imageRect.origin.y = NSMidY(aRect) - imageRect.size.height / 2;
