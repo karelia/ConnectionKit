@@ -169,9 +169,10 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	}
 	
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
+	unsigned idx = [myConnections indexOfObject:myBonjour];
 	[myConnections removeObject:myBonjour];
 	[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
-	[myConnections addObject:myBonjour];
+	[myConnections insertObject:myBonjour atIndex:idx];
 	[fm removeFileAtPath:lockPath handler:nil];
 	
 	NSString *pid = [NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]];
@@ -254,6 +255,78 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	return [NSArray arrayWithArray:myConnections];
 }
 
+- (void)recursivelyCreate:(CKHostCategory *)cat withMenu:(NSMenu *)menu indentation:(int)indent
+{
+	NSEnumerator *e = [[cat hosts] objectEnumerator];
+	id cur;
+	
+	NSMenuItem *item;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHost class]])
+		{
+			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
+											  action:nil
+									   keyEquivalent:@""];
+			[item setRepresentedObject:cur];
+			[item setImage:[cur icon]];
+			[item setIndentationLevel:indent];
+			[menu addItem:item];
+			[item release];
+		}
+		else
+		{
+			item = [[NSMenuItem alloc] initWithTitle:[cur name]
+											  action:nil
+									   keyEquivalent:@""];
+			[item setRepresentedObject:cur];
+			[item setImage:[cur icon]];
+			[item setIndentationLevel:indent];
+			[menu addItem:item];
+			[item release];
+			[self recursivelyCreate:cur withMenu:menu indentation:indent+1];
+		}
+	}
+}
+
+- (NSMenu *)menu
+{
+	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"connections"];
+	
+	NSEnumerator *e = [myConnections objectEnumerator];
+	id cur;
+	
+	NSMenuItem *item;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHost class]])
+		{
+			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
+											  action:nil
+									   keyEquivalent:@""];
+			[item setRepresentedObject:cur];
+			[item setImage:[cur icon]];
+			[menu addItem:item];
+			[item release];
+		}
+		else
+		{
+			item = [[NSMenuItem alloc] initWithTitle:[cur name]
+											  action:nil
+									   keyEquivalent:@""];
+			[item setRepresentedObject:cur];
+			[item setImage:[cur icon]];
+			[menu addItem:item];
+			[item release];
+			[self recursivelyCreate:cur withMenu:menu indentation:1];
+		}
+	}
+	
+	return [menu autorelease];
+}
+
 #pragma mark -
 #pragma mark Outline View Data Source
 
@@ -299,17 +372,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		}
 		else
 		{
-			NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", [AbstractConnection urlSchemeForConnectionName:[item connectionType] port:[(CKHost *)item port]]];
-			if ([item username] && ![[item username] isEqualToString:@""])
-			{
-				[str appendFormat:@"%@@", [item username]];
-			}
-			if ([item host])
-			{
-				[str appendString:[item host]];
-			}
-			
-			val = str;
+			val = [item name];
 		}
 		return [NSDictionary dictionaryWithObjectsAndKeys:val, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
 	}

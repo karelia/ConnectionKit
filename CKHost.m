@@ -14,6 +14,10 @@
 NSString *CKHostChanged = @"CKHostChanged";
 static NSImage *sHostIcon = nil;
 
+@interface CKHost (private)
+- (NSString *)name;
+@end
+
 @implementation CKHost
 
 + (void)load
@@ -28,6 +32,8 @@ static NSImage *sHostIcon = nil;
 	NSBundle *b = [NSBundle bundleForClass:[self class]];
 	NSString *p = [b pathForResource:@"bookmark" ofType:@"tif"];
 	sHostIcon = [[NSImage alloc] initWithContentsOfFile:p];
+	[sHostIcon setScalesWhenResized:YES];
+	[sHostIcon setSize:NSMakeSize(16,16)];
 	
 	[pool release];
 }
@@ -174,7 +180,7 @@ static NSImage *sHostIcon = nil;
 			SecKeychainItemRef item;
 			OSStatus status;
 			char *desc = "ConnectionKit Password";
-			NSString *label = [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+			NSString *label = [self name];
 			
 			attributes[0].tag = kSecAccountItemAttr;
 			attributes[0].data = (void *)[myUsername UTF8String];
@@ -307,8 +313,7 @@ static NSImage *sHostIcon = nil;
 		SecKeychainAttribute attributes[4];
 		OSErr result;
 		char *desc = "ConnectionKit Password";
-		NSString *label = [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
-
+		NSString *label = [self name];
 		
 		attributes[0].tag = kSecAccountItemAttr;
 		attributes[0].data = (void *)[myUsername UTF8String];
@@ -336,7 +341,7 @@ static NSImage *sHostIcon = nil;
 			NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
 		}
 		
-		if (SecKeychainSearchCopyNext (search, &item) == noErr) {
+		if ((result = SecKeychainSearchCopyNext (search, &item)) == noErr) {
 			UInt32 length;
 			char *pass;
 			SecKeychainAttribute attributes[4];
@@ -443,7 +448,29 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)name
 {
-	return [NSString stringWithFormat:@"%@://%@@%@:%@/%@", [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath ? myInitialPath : @""];
+	NSString *type = [AbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : NSLocalizedString(@"auto", @"connection type")];
+	if ([self username] && ![[self username] isEqualToString:@""])
+	{
+		[str appendFormat:@"%@@", [self username]];
+	}
+	if ([self host])
+	{
+		[str appendString:[self host]];
+	}
+	if ([self port] && ![[self port] isEqualToString:@""])
+	{
+		[str appendFormat:@":%@", [self port]];
+	}
+	if ([self initialPath])
+	{
+		if (![[self initialPath] hasPrefix:@"/"])
+		{
+			[str appendString:@"/"];
+		}
+		[str appendFormat:@"%@", [self initialPath]];
+	}
+	return str;
 }
 
 - (NSArray *)children
