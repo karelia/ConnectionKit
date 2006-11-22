@@ -59,6 +59,7 @@
                 localTable = NSTableView; 
                 log = NSTextView; 
                 logDrawer = NSDrawer; 
+                oConMenu = NSPopUpButton; 
                 remotePopup = NSPopUpButton; 
                 remoteTable = NSTableView; 
                 savedHosts = id; 
