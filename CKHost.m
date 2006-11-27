@@ -48,12 +48,14 @@ static NSImage *sHostIcon = nil;
 		myInitialPath = @"";
 		myPort = @"";
 		myIcon = [sHostIcon retain];
+		myProperties = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
+	[myProperties release];
 	[myHost release];
 	[myPort release];
 	[myUsername release];
@@ -103,6 +105,12 @@ static NSImage *sHostIcon = nil;
 		{
 			myIcon = [sHostIcon retain];
 		}
+		NSDictionary *props = [coder decodeObjectForKey:@"properties"];
+		myProperties = [[NSMutableDictionary alloc] init];
+		if (props)
+		{
+			[myProperties addEntriesFromDictionary:props];
+		}
 	}
 	return self;
 }
@@ -121,6 +129,7 @@ static NSImage *sHostIcon = nil;
 	{
 		[coder encodeObject:[myIcon TIFFRepresentation] forKey:@"icon"];
 	}
+	[coder encodeObject:myProperties forKey:@"properties"];
 }
 
 - (void)didChange
@@ -498,6 +507,18 @@ static NSImage *sHostIcon = nil;
 - (NSImage *)icon
 {
 	return myIcon;
+}
+
+- (void)setProperty:(id)property forKey:(NSString *)key
+{
+	[self willChangeValueForKey:key];
+	[myProperties setObject:property forKey:key];
+	[self didChangeValueForKey:key];
+}
+
+- (id)propertyForKey:(NSString *)key
+{
+	return [myProperties objectForKey:key];
 }
 
 #pragma mark -
