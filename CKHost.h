@@ -22,6 +22,7 @@
 	NSURL		*myURL;
 	NSString	*myDescription;
 	NSImage		*myIcon;
+	NSMutableDictionary *myProperties;
 	
 	id			myUserInfo;
 	
@@ -57,6 +58,9 @@
 
 // returns a new autoreleased connection of this type;
 - (id <AbstractConnectionProtocol>)connection; 
+
+- (void)setProperty:(id)property forKey:(NSString *)key;
+- (id)propertyForKey:(NSString *)key;
 
 - (NSString *)createDropletAtPath:(NSString *)path;
 
