@@ -39,6 +39,8 @@
 
 @end
 
+NSString *KTLogKeyPrefix = @"KTLoggingLevel.";
+
 static KTLogger *_sharedLogger = nil;
 static unsigned long long KTLogMaximumLogSize = 5242880; // 5MB
 static BOOL KTLogToConsole = YES;
@@ -76,17 +78,21 @@ static NSString *KTLevelMap[] = {
 		myLoggingLevels = [[NSMutableArray array] retain];
 		// load in from user defaults
 		NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
-		NSArray *defaults = [ud objectForKey:@"KTLoggingLevels"];
-		if (defaults)
+		NSEnumerator *e = [[ud dictionaryRepresentation] keyEnumerator];
+		NSString *key;
+		
+		while ((key = [e nextObject]))
 		{
-			NSEnumerator *e = [defaults objectEnumerator];
-			NSDictionary *cur;
-			
-			while (cur = [e nextObject])
+			if ([key hasPrefix:KTLogKeyPrefix])
 			{
-				[myLoggingLevels addObject:[[cur mutableCopy] autorelease]];
+				NSMutableDictionary *d = [NSMutableDictionary dictionary];
+				NSString *domain = [key substringFromIndex:[KTLogKeyPrefix length]];
+				[d setObject:domain forKey:@"domain"];
+				[d setObject:[ud objectForKey:key] forKey:@"level"];
+				[myLoggingLevels addObject:d];
 			}
 		}
+		
 		NSNumber *con = [ud objectForKey:@"KTLogToConsole"];
 		if (con)
 		{
@@ -150,15 +156,29 @@ static NSString *KTLevelMap[] = {
 	return cur;
 }
 
+- (int)loggingLevelForDomain:(NSString *)domain
+{
+	NSNumber *level = [[NSUserDefaults standardUserDefaults] objectForKey:[KTLogKeyPrefix stringByAppendingString:domain]];
+	
+	if (level)
+	{
+		return [level intValue];
+	}
+	
+	return KTLogOff;
+}
+
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain
 {
 	[myLock lock];
-	NSMutableDictionary *rec = [self recordForDomain:domain];
+	int currentLevel = [self loggingLevelForDomain:domain];
 	
-	if ([[rec objectForKey:@"level"] intValue] != level)
+	if (currentLevel != level)
 	{
-		[rec setObject:[NSNumber numberWithInt:level] forKey:@"level"];
-		[[NSUserDefaults standardUserDefaults] setObject:myLoggingLevels forKey:@"KTLoggingLevels"];
+		[[self recordForDomain:domain] setObject:[NSNumber numberWithInt:level]
+										  forKey:@"level"];
+		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:level]
+												  forKey:[KTLogKeyPrefix stringByAppendingString:domain]];
 	}
 	[myLock unlock];
 }
@@ -232,13 +252,7 @@ static NSString *KTLevelMap[] = {
 {
 	[myLock lock];
 	
-	NSNumber *loggingLevel = [[self recordForDomain:domain] objectForKey:@"level"];
-	KTLoggingLevel currentLevel = KTLogInfo;
-	
-	if (loggingLevel)
-	{
-		currentLevel = [loggingLevel intValue];
-	}
+	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
 	
 	//we only log the current level or less.
 	if (currentLevel == KTLogOff || level > currentLevel)
@@ -414,7 +428,9 @@ static NSString *KTLevelMap[] = {
 	{
 		[rec setObject:anObject forKey:@"level"];
 	}
-	[[NSUserDefaults standardUserDefaults] setObject:myLoggingLevels forKey:@"KTLoggingLevels"];
+	
+	[[NSUserDefaults standardUserDefaults] setObject:[rec objectForKey:@"level"]
+											  forKey:[KTLogKeyPrefix stringByAppendingString:[rec objectForKey:@"domain"]]];
 }
 
 - (IBAction)addDomain:(id)sender
