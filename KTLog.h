@@ -31,6 +31,8 @@
 #import <stdarg.h>
 // This is based on the idea of MLog at http://www.borkware.com/rants/agentm/mlog/
 
+extern NSString *KTLogKeyPrefix;
+
 // This is the main logging function / macro
 
 #define KTLog(d, l, s, args...) [KTLogger logFile:__FILE__ lineNumber:__LINE__ loggingDomain:(d) loggingLevel:(l) format:(s) , ##args];
