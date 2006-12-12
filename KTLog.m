@@ -57,16 +57,13 @@ static NSString *KTLevelMap[] = {
 
 @implementation KTLogger
 
-+ (void)load
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	_sharedLogger = [[KTLogger alloc] init];
-	//[_sharedLogger setLoggingLevel:KTLogFatal forDomain:@"Stream"];
-	[pool release];
-}
 
 + (id)sharedLogger
 {
+	if (nil == _sharedLogger)
+	{
+		_sharedLogger = [[KTLogger alloc] init];
+	}
 	return _sharedLogger;
 }
 
