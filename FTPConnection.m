@@ -1714,7 +1714,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 		NSArray *contents = [self parseLines:results];
 		
-		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, contents);
+		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
 		
 		[self cacheDirectory:_currentPath withContents:contents];
 		

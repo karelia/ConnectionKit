@@ -298,7 +298,7 @@
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
-	//NSLog(@"%@", [gzip descriptionAsString]);
+	//NSLog(@"%@", [gzip descriptionAsUTF8String]);
 	NSString *stringBoundary = [NSString stringWithString:@"0xKhTmLbOuNdArY"];
 	NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",stringBoundary];
 	

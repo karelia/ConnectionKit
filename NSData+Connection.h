@@ -33,7 +33,7 @@
 @interface NSData (Connection)
 
 - (NSString *)base64Encoding;
-- (NSString *)descriptionAsString;
+- (NSString *)descriptionAsUTF8String;
 
 // gzip
 - (NSData *) inflate;

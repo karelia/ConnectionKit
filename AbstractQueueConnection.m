@@ -109,7 +109,7 @@ NSString *QueueDomain = @"Queuing";
 
 - (void)pushCommandOnHistoryQueue:(id)command
 {
-	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on History Queue: %@", command);
+	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on History Queue: %@", [command shortDescription]);
 	[_queueLock lock];
 	[_commandHistory insertObject:command atIndex:0];
 	// This is a framework internal "hack" to allow the webdav file upload request to release the data of a file
@@ -129,7 +129,7 @@ NSString *QueueDomain = @"Queuing";
 
 - (void)pushCommandOnCommandQueue:(id)command
 {
-	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on Command Queue: %@", command);
+	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on Command Queue: %@", [command shortDescription]);
 	[_queueLock lock];
 	[_commandQueue insertObject:command atIndex:0];
 	[_queueLock unlock];
@@ -172,37 +172,37 @@ NSString *QueueDomain = @"Queuing";
 
 - (void)queueDownload:(id)download
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queuing Download: %@", download);
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Download: %@", [download shortDescription]);
 	ADD_TO_QUEUE(_downloadQueue, download)
 }
 
 - (void)queueUpload:(id)upload
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queueing Upload: %@", upload);
+	KTLog(QueueDomain, KTLogDebug, @"Queueing Upload: %@", [upload shortDescription]);
 	ADD_TO_QUEUE(_uploadQueue, upload)
 }
 
 - (void)queueDeletion:(id)deletion
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queuing Deletion: %@", deletion);
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Deletion: %@", [deletion shortDescription]);
 	ADD_TO_QUEUE(_fileDeletes, deletion)
 }
 
 - (void)queueRename:(id)name
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queuing Rename: %@", name);
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Rename: %@", [name shortDescription]);
 	ADD_TO_QUEUE(_fileRenames, name)
 }
 
 - (void)queuePermissionChange:(id)perms
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queuing Permission Change: %@", perms);
+	KTLog(QueueDomain, KTLogDebug, @"Queuing Permission Change: %@", [perms shortDescription]);
 	ADD_TO_QUEUE(_filePermissions, perms)
 }
 
 - (void)queueFileCheck:(id)file
 {
-	KTLog(QueueDomain, KTLogDebug, @"Queuing File Existence: %@", file);
+	KTLog(QueueDomain, KTLogDebug, @"Queuing File Existence: %@", [file shortDescription]);
 	ADD_TO_QUEUE(_fileCheckQueue, file);
 }
 

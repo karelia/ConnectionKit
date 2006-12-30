@@ -104,7 +104,6 @@
 		798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */ = {isa = PBXBuildFile; fileRef = 798300050B0D4A2600F5078E /* DropletLauncher.nib */; };
 		798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 798313C70B0D67E000F5078E /* CKTransferProgressCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 798313C80B0D67E000F5078E /* CKTransferProgressCell.m */; };
-		798314AD0B0DD1AB00F5078E /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
 		7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E0940B0C1A8500F5078E /* DropletOutlineView.m */; };
@@ -198,6 +197,8 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -509,6 +510,8 @@
 		CED1897E0AC3210D002E8A4A /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEDE18DE0A5C69BE0055352C /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Connection.h"; sourceTree = "<group>"; };
+		CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Connection.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -917,6 +920,8 @@
 				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
 				7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */,
 				7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */,
+				CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */,
+				CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -1025,6 +1030,7 @@
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				795AFF190B1157D3006905FA /* CKHostCell.h in Headers */,
 				7978FC260B1183DE0048168B /* CKController.h in Headers */,
+				CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1408,6 +1414,7 @@
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */,
 				7978FC270B1183DE0048168B /* CKController.m in Sources */,
+				CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1421,7 +1428,6 @@
 				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
 				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
 				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
-				798314AD0B0DD1AB00F5078E /* NSString+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
