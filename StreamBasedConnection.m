@@ -595,7 +595,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
 		}
 		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk descriptionAsString]);
+		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
 		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							  withBytes:NULL
 								 length:0];
@@ -637,7 +637,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(InputStreamDomain, KTLogDebug, @"%d >> %@", len, [data descriptionAsString]);
+				KTLog(InputStreamDomain, KTLogDebug, @"%d >> %@", len, [data shortDescription]);
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self recalcDownloadSpeedWithBytesSent:len];
 				if (myStreamFlags.wantsSSL && myStreamFlags.isNegotiatingSSL)

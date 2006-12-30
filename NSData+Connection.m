@@ -54,7 +54,7 @@
     return base64String;
 }
 
-- (NSString *)descriptionAsString
+- (NSString *)descriptionAsUTF8String
 {
 	return [[[NSString alloc] initWithData:self encoding:NSUTF8StringEncoding] autorelease];
 }
@@ -62,6 +62,52 @@
 - (NSString *)descriptionAsASCIIString
 {
 	return [[[NSString alloc] initWithData:self encoding:NSASCIIStringEncoding] autorelease];
+}
+
+- (NSString *)shortDescription
+{
+	unsigned char *bytes = (unsigned char *)[self bytes];
+	unsigned length = [self length];
+	NSMutableString *buf = [NSMutableString stringWithFormat:@"NSData %d bytes:\n", length];
+	int i, j;
+	
+	for ( i = 0 ; i < length ; i += 16 )
+	{
+		if (i > 256)		// don't print too much!
+		{
+			[buf appendString:@"\n...\n"];
+			break;
+		}
+		for ( j = 0 ; j < 16 ; j++ )
+		{
+			int offset = i+j;
+			if (offset < length)
+			{
+				[buf appendFormat:@"%02X ",bytes[offset]];
+			}
+			else
+			{
+				[buf appendFormat:@"   "];
+			}
+		}
+		[buf appendString:@"| "];
+		for ( j = 0 ; j < 16 ; j++ )
+		{
+			int offset = i+j;
+			if (offset < length)
+			{
+				unsigned char theChar = bytes[offset];
+				if (theChar < 32 || theChar > 127)
+				{
+					theChar ='.';
+				}
+				[buf appendFormat:@"%c", theChar];
+			}
+		}
+		[buf appendString:@"\n"];
+	}
+	[buf deleteCharactersInRange:NSMakeRange([buf length]-1, 1)];
+	return buf;
 }
 
 // These are from cocoadev.com

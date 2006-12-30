@@ -245,42 +245,38 @@ static NSString *KTLevelMap[] = {
 	[fm movePath:from toPath:to handler:nil];
 }
 
-- (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level thread:(NSString *)thread message:(NSString *)log
+
+// Support for logFile: ... assumes that lock has been acquired.
+- (void)_logFile:(char *)file
+	  lineNumber:(int)line
+   loggingDomain:(NSString *)domain
+	loggingLevel:(int)level
+		  thread:(NSString *)thread
+		 message:(NSString *)log
 {
-	[myLock lock];
-	
-	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
-	
-	//we only log the current level or less.
-	if (currentLevel == KTLogOff || level > currentLevel)
-	{
-		[myLock unlock];
-		return;
-	}
-	
 	NSDate *now = [NSDate date];
 	NSString *filename = [NSString stringWithCString:file];
 	NSNumber *lineNumber = [NSNumber numberWithInt:line];
 	NSNumber *thisLevel = [NSNumber numberWithInt:level];
-	
+
 	NSDictionary *rec = [NSDictionary dictionaryWithObjectsAndKeys:now, @"t", filename, @"f", lineNumber, @"n", thisLevel, @"l", domain, @"d", log, @"m", thread, @"th", nil];
 	NSData *recData = [NSArchiver archivedDataWithRootObject:rec];
-	
+
 	if (!myLog)
 	{
 		// need to get the log file handle
 		myLog = [[NSFileHandle fileHandleForWritingAtPath:[self logfileName]] retain];
 	}
-	
+
 	[myLog seekToEndOfFile];
-	
+
 	unsigned len = [recData length];
 	NSMutableData *entry = [NSMutableData data];
 	[entry appendBytes:&len length:sizeof(unsigned)];
 	[entry appendData:recData];
-	
+
 	[myLog writeData:entry];
-	
+
 	if (KTLogToConsole)
 	{
 		NSProcessInfo *pi = [NSProcessInfo processInfo];
@@ -303,17 +299,105 @@ static NSString *KTLevelMap[] = {
 	{
 		[self rotateLogs];
 	}
+}
+
+
+- (void)logFile:(char *)file
+	 lineNumber:(int)line
+  loggingDomain:(NSString *)domain
+   loggingLevel:(int)level
+		 thread:(NSString *)thread
+		message:(NSString *)log
+{
+	[myLock lock];
+	
+	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
+	
+	//we only log the current level or less.
+	if (currentLevel == KTLogOff || level > currentLevel)
+	{
+		[myLock unlock];
+		return;
+	}
+	
+	[self _logFile:file lineNumber:line loggingDomain:domain loggingLevel:level thread:thread message:log];
+	
 	[myLock unlock];
 }
 
-+ (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level format:(NSString *)log, ...
+// Similar to above, but with a format and arguments.  Don't construct the string unless we want to use it.
+- (void)logFile:(char *)file
+	 lineNumber:(int)line
+  loggingDomain:(NSString *)domain
+   loggingLevel:(int)level
+		 thread:(NSString *)thread
+		 format:(NSString *)log
+	  arguments:(va_list)argList
+{
+	[myLock lock];
+	
+	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
+	
+	//we only log the current level or less.
+	if (currentLevel == KTLogOff || level > currentLevel)
+	{
+		[myLock unlock];
+		return;
+	}
+	
+	NSString *message = [[[NSString alloc] initWithFormat:log arguments:argList] autorelease];
+	[self _logFile:file
+		lineNumber:line
+	 loggingDomain:domain
+	  loggingLevel:level
+			thread:thread
+		   message:message];
+	
+	[myLock unlock];
+}	
+
+// Similar to above, but with a format
+- (void)logFile:(char *)file
+	 lineNumber:(int)line
+  loggingDomain:(NSString *)domain
+   loggingLevel:(int)level
+		 thread:(NSString *)thread
+		 format:(NSString *)log, ...
 {
 	va_list ap;
 	va_start(ap, log);
-	NSString *message = [[[NSString alloc] initWithFormat:log arguments:ap] autorelease];
-	va_end(ap);
 	
-	[[KTLogger sharedLogger] logFile:file lineNumber:line loggingDomain:domain loggingLevel:level thread:[NSString stringWithFormat:@"0x%06x",[NSThread currentThread]] message:message];
+	[self logFile:file
+	   lineNumber:line
+	loggingDomain:domain
+	 loggingLevel:level
+		   thread:thread
+		   format:log
+		arguments:ap];
+	
+	va_end(ap);
+}
+
+// Class method to log.  Accepts a format.  Thread argument is generated here, not passed in.
+
++ (void)logFile:(char *)file
+	 lineNumber:(int)line
+  loggingDomain:(NSString *)domain
+   loggingLevel:(int)level
+		 format:(NSString *)log, ...
+{
+	va_list ap;
+	va_start(ap, log);
+	
+	[[KTLogger sharedLogger] logFile:file
+						  lineNumber:line
+					   loggingDomain:domain
+						loggingLevel:level
+							  thread:[NSString stringWithFormat:@"0x%06x",[NSThread currentThread]]
+							 format:log
+						   arguments:ap];
+
+	va_end(ap);
 }
 
 + (NSArray *)entriesWithLogFile:(NSString *)file

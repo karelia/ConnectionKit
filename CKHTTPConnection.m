@@ -149,7 +149,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
 			
-			KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", response);
+			KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
 			
 			if ([self transcript])
 			{
@@ -277,7 +277,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		[self initiatingNewRequest:req withPacket:packet];
 		
-		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsString]);
+		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsUTF8String]);
 		
 		[self sendData:packet];
 	}

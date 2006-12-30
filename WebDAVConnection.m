@@ -406,7 +406,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				// file data starts after the header
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
-				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsString];
+				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsUTF8String];
 				
 				if ([self transcript])
 				{
