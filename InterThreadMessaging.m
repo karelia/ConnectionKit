@@ -7,7 +7,8 @@
 
 #import <pthread.h>
 #import "InterThreadMessaging.h"
-
+#import "KTLog.h"
+#import "AbstractConnection.h" //for threading domain
 @interface NSInvocation ( Connection )
 
 + (NSInvocation *)invocationWithSelector:(SEL)aSelector target:(id)aTarget arguments:(NSArray *)anArgumentArray;
@@ -393,7 +394,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 					  arg1:(id)arg1
 					  arg2:(id)arg2
 {
-	//NSLog(@"resending delayed message: %@ to %@", NSStringFromSelector(selector), receiver);
+	KTLog(ThreadingDomain, KTLogDebug, @"resending delayed message: %@ to %@", NSStringFromSelector(selector), receiver);
 	ConnectionInterThreadMessage *msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
 	bzero(msg, sizeof(struct ConnectionInterThreadMessage));
 	// we have already retained our args from the initial creation of the msg
@@ -432,7 +433,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 
 - (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread
 {
-	//NSLog(@"delaying message: %@ to %@", NSStringFromSelector(msg->data.sel.selector), msg->data.sel.receiver);
+	KTLog(ThreadingDomain, KTLogDebug, @"delaying message: %@ to %@", NSStringFromSelector(msg->data.sel.selector), msg->data.sel.receiver);
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
 													  target:self
 												   arguments:[NSArray array]];
