@@ -31,8 +31,10 @@
  */
  
 #import "FTPConnection.h"
-#import "RunLoopForwarder.h"
+
 #import "ConnectionThreadManager.h"
+#import "NSObject+Connection.h"
+#import "RunLoopForwarder.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -713,8 +715,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 				NSHost *host = [NSHost hostWithAddress:hostString];
-#warning Applying KVC hack
-				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
+				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 				
 				[self closeDataStreams];
 				[self setState:FTPAwaitingDataConnectionToOpen];
@@ -742,8 +743,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self sendCommand:@"EPRT"];
 				}
 				NSHost *host = [NSHost hostWithName:_connectionHost];
-#warning Applying KVC hack
-				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
+				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 					
 				[self closeDataStreams];
 				[self setState:FTPAwaitingDataConnectionToOpen];

@@ -33,10 +33,12 @@
  */
 
 #import "StreamBasedConnection.h"
-#import "InterThreadMessaging.h"
-#import "RunLoopForwarder.h"
-#import "NSData+Connection.h"
+
 #import "ConnectionThreadManager.h"
+#import "InterThreadMessaging.h"
+#import "NSData+Connection.h"
+#import "NSObject+Connection.h"
+#import "RunLoopForwarder.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -315,8 +317,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
-#warning Applying KVC hack
-		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
+		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 	}
 	
 	if ([[host addresses] count] > 1) {

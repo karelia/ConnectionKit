@@ -29,11 +29,13 @@
 
 
 #import "CKHTTPConnection.h"
-#import "CKHTTPResponse.h"
+
 #import "CKHTTPRequest.h"
+#import "CKHTTPResponse.h"
 #import "ConnectionThreadManager.h"
 #import "DAVResponse.h"
 #import "NSData+Connection.h"
+#import "NSObject+Connection.h"
 
 enum {
 	HTTPSentGenericRequestState = 32012
@@ -232,7 +234,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 	if (myHTTPFlags.didReceiveResponse)
 	{
-		[_forwarder connection:self didReceiveResponse:response];
+		[(NSObject *)_forwarder connection:self didReceiveResponse:response];
 	}
 	[self setState:ConnectionIdleState];
 }
