@@ -30,6 +30,8 @@
 
 #import "AbstractQueueConnection.h"
 
+#import "NSObject+Connection.h"
+
 //Download Queue Keys
 NSString *QueueDownloadDestinationFileKey = @"QueueDownloadDestinationFileKey";
 NSString *QueueDownloadRemoteFileKey = @"QueueDownloadRemoteFileKey";
