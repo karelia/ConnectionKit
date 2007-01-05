@@ -609,8 +609,7 @@
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	[super uploadFromData:data
-				   toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]];
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data
