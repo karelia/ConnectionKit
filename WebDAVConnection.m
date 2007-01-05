@@ -848,15 +848,25 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		{
 			bytesTransferred += length;
 		}
-			
-		if (_flags.uploadPercent)
+		CKInternalTransferRecord *upload = [self currentUpload];
+		
+		if (bytesToTransfer > 0)
 		{
-			if (bytesToTransfer > 0)
+			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			if (percent != lastPercent)
 			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[_forwarder connection:self 
-								upload:[[self currentUpload] remotePath]
-						  progressedTo:[NSNumber numberWithInt:percent]];
+				if (_flags.uploadPercent)
+				{
+					
+					[_forwarder connection:self 
+									upload:[[self currentUpload] remotePath]
+							  progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				if ([upload delegateRespondsToTransferProgressedTo])
+				{
+					[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				percent = lastPercent;
 			}
 		}
 		if (_flags.uploadProgressed)
@@ -864,6 +874,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[_forwarder connection:self 
 							upload:[[self currentUpload] remotePath]
 				  sentDataOfLength:length];
+		}
+		if ([upload delegateRespondsToTransferTransferredData])
+		{
+			[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:length];
 		}
 	}
 }

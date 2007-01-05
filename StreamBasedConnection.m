@@ -46,6 +46,7 @@
 #import <sys/types.h>
 #import <sys/socket.h>
 #import <arpa/inet.h>
+#import <poll.h>
 
 #import <Security/Security.h>
 
@@ -454,10 +455,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection connect];
 	}
 	[_recursiveDeletionsQueue addObject:path];
+	[_emptyDirectoriesToDelete addObject:path];
 	_numberOfListingsRemaining++;
 	[_recursiveListingConnection contentsOfDirectory:path];
 }
-
 #pragma mark -
 #pragma mark Stream Delegate Methods
 
@@ -508,7 +509,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (int)availableData:(NSData **)dataOut ofLength:(int)length
 {
-	if ([_receiveStream hasBytesAvailable])
+	struct pollfd fds;
+	fds.fd = [self socket];
+	fds.events = POLLIN;
+	int hasBytes = poll(&fds, 1, 10);
+	
+	if (hasBytes > 0)
+	//if ([_receiveStream hasBytesAvailable])
 	{
 		uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * length);
 		int len = [_receiveStream read:buf maxLength:length];
@@ -522,11 +529,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		*dataOut = data;
 		return len;
 	}
-	else
-	{
-		*dataOut = nil;
-		return 0;
-	}
+	*dataOut = nil;
+	return 0;
 }
 
 - (BOOL)shouldChunkData
@@ -987,10 +991,20 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
-		if (![[_recursiveDeletionsQueue objectAtIndex:0] isEqualToString:dirPath])
+		if (![_recursiveDeletionsQueue containsObject:dirPath])
 		{
 			[_emptyDirectoriesToDelete addObject:dirPath];
 		}
+		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
+		{
+			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
+			NSString *cur;
+			while (cur = [e nextObject])
+			{
+				_numberOfDirDeletionsRemaining++;
+				[_recursiveDeletionConnection deleteDirectory:cur];
+			}
+		}		
 		[_deletionLock unlock];
 	}
 }
@@ -1024,11 +1038,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_deletionLock unlock];
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
 		{
-			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			_numberOfDeletionsRemaining = 0;
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
+			[self directoryContents];
 		}
 	}
 }
+
 
 #pragma mark -
 #pragma mark SSL Support

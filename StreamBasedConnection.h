@@ -81,13 +81,14 @@
 	struct __streamflags {
 		unsigned sendOpen : 1;
 		unsigned readOpen : 1;
+		unsigned receiveHasBytes : 1;
 		unsigned wantsSSL : 1;
 		unsigned sslOn : 1;
 		unsigned verifySSLCert : 1;
 		unsigned allowsBadCerts : 1; // for data transfer connections
 		unsigned isNegotiatingSSL : 1;
 		unsigned initializedSSL : 1;
-		unsigned unused : 26;
+		unsigned unused : 25;
 	} myStreamFlags;
 	
 	// SSL Support
