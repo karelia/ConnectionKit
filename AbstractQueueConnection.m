@@ -29,7 +29,6 @@
  */
 
 #import "AbstractQueueConnection.h"
-
 #import "NSObject+Connection.h"
 
 //Download Queue Keys
@@ -88,6 +87,44 @@ NSString *QueueDomain = @"Queuing";
 	[_filesNeedingOverwriteConfirmation release];
 	
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Abstract Override
+
+- (void)turnOnRecursiveUpload
+{
+	_flags.isRecursiveUploading = YES;
+}
+
+- (void)turnOffRecursiveUpload
+{
+	_flags.isRecursiveUploading = NO;
+}
+
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+{
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(turnOnRecursiveUpload)
+													  target:self
+												   arguments:[NSArray array]];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionIdleState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
+	CKTransferRecord *rec = [super recursivelyUpload:localPath to:remotePath];
+	
+	inv = [NSInvocation invocationWithSelector:@selector(turnOffRecursiveUpload)
+										target:self
+									 arguments:[NSArray array]];
+	cmd = [ConnectionCommand command:inv
+						  awaitState:ConnectionIdleState
+						   sentState:ConnectionIdleState
+						   dependant:nil
+							userInfo:nil];
+	[self queueCommand:cmd];
+	return rec;
 }
 
 #pragma mark -
@@ -442,6 +479,7 @@ NSString *QueueDomain = @"Queuing";
 		_dependants = [[NSMutableArray arrayWithArray:deps] retain];
 		[_dependants makeObjectsPerformSelector:@selector(setParentCommand:) withObject:self];
 		_userInfo = [ui retain];
+		_properties = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
@@ -452,6 +490,7 @@ NSString *QueueDomain = @"Queuing";
 	[_dependants release];
 	[_userInfo release];
 	[_command release];
+	[_properties release];
 	[super dealloc];
 }
 
@@ -480,6 +519,16 @@ NSString *QueueDomain = @"Queuing";
 {
 	[_userInfo autorelease];
 	_userInfo = [ui retain];
+}
+
+- (void)setProperty:(id)property forKey:(NSString *)key
+{
+	[_properties setObject:property forKey:key];
+}
+
+- (id)propertyForKey:(NSString *)key
+{
+	return [_properties objectForKey:key];
 }
 
 - (id)command

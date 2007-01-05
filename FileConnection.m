@@ -32,6 +32,9 @@
 #import "RunLoopForwarder.h"
 #import "InterThreadMessaging.h"
 #import "ConnectionThreadManager.h"
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
+#import "AbstractQueueConnection.h"
 
 NSString *FileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
@@ -41,7 +44,8 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 - (void)processInvocations;
 - (void)fcUploadFile:(NSString *)f toFile:(NSString *)t;
 - (void)sendPortMessage:(int)message;
-
+- (void)fcUpload:(CKInternalTransferRecord *)upload
+checkRemoteExistence:(NSNumber *)check;
 @end
 
 @implementation FileConnection
@@ -197,6 +201,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	if ([self isConnected])
 	{
 		[myLock lock];
+		KTLog(StateMachineDomain, KTLogDebug, @"Checking invocation queue");
 		while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
 		{
 			myInflightInvocation = [myPendingInvocations objectAtIndex:0];
@@ -204,6 +209,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 			{
 				[myInflightInvocation retain];
 				[myPendingInvocations removeObjectAtIndex:0];
+				KTLog(StateMachineDomain, KTLogDebug, @"Invoking %@", NSStringFromSelector([myInflightInvocation selector]));
 				[myInflightInvocation invoke];
 				[myInflightInvocation release];
 				myInflightInvocation = nil;
@@ -217,6 +223,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 - (void)queueInvocation:(NSInvocation *)inv
 {
 	[myLock lock];
+	KTLog(QueueDomain, KTLogDebug, @"Queuing %@", NSStringFromSelector([inv selector]));
 	[myPendingInvocations addObject:inv];
 	[myLock unlock];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processInvocations];
@@ -475,7 +482,15 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 
 - (void)fcUploadFile:(NSString *)localPath
 {
-	[self fcUploadFile:localPath toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
+	NSString *remotePath = [myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]];
+	CKInternalTransferRecord *rec = [CKInternalTransferRecord recordWithLocal:localPath
+																		 data:nil
+																	   offset:0
+																	   remote:remotePath
+																	 delegate:nil
+																	 userInfo:nil];
+	[self fcUpload:rec
+		checkRemoteExistence:[NSNumber numberWithBool:NO]];
 }
 
 - (void)uploadFile:(NSString *)localPath
@@ -486,21 +501,52 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[self queueInvocation:inv];
 }
 
-/*!	Copy the given file to the given directory
-*/
-- (void)fcUploadFile:(NSString *)localPath toFile:(NSString *)remotePath
+- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	[self setCurrentOperation:kUploadFile];
-	
-	if (_flags.didBeginUpload)
-	{
-		[myForwarder connection:self uploadDidBegin:remotePath];
-	}
+	CKInternalTransferRecord *rec = [CKInternalTransferRecord recordWithLocal:localPath
+																		 data:nil
+																	   offset:0
+																	   remote:remotePath
+																	 delegate:nil
+																	 userInfo:nil];
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
+													  target:self
+												   arguments:[NSArray arrayWithObjects:rec, [NSNumber numberWithBool:NO], nil]];
+	[self queueInvocation:inv];
+}
 
+- (void)fcUpload:(CKInternalTransferRecord *)upload
+checkRemoteExistence:(NSNumber *)check
+{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	BOOL flag = [check boolValue];
+	
+	if (flag)
+	{
+		if ([fm fileExistsAtPath:[upload remotePath]])
+		{
+			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain
+												 code:kFileExists
+											 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"File Already Exists", @"FileConnection error"), 
+												 NSLocalizedDescriptionKey, 
+												 [upload remotePath],
+												 NSLocalizedFailureReasonErrorKey, nil]];
+			if ([upload delegateRespondsToError])
+			{
+				[[upload delegate] transfer:[upload userInfo] receivedError:error];
+			}
+			if (_flags.error)
+			{
+				[_forwarder connection:self didReceiveError:error];
+			}
+			return;
+		}
+	}
+	[fm removeFileAtPath:[upload remotePath] handler:nil];
 	NSTask *cp = [[NSTask alloc] init];
 	[cp setStandardError: [NSPipe pipe]]; //this will get the unit test to pass, else we get an error in the log, and since we already return an error...
 	[cp setLaunchPath:@"/bin/cp"];
-	[cp setArguments:[NSArray arrayWithObjects:@"-rf", localPath, remotePath, nil]];
+	[cp setArguments:[NSArray arrayWithObjects:@"-rf", [upload localPath], [upload remotePath], nil]];
 	[cp setCurrentDirectoryPath:[self currentDirectory]];
 	[cp launch];
 	while ([cp isRunning])
@@ -513,40 +559,80 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 		success = NO;
 	}
 	[cp release];
-	 //[myFileManager copyPath:localPath toPath:remotePath handler:self];
-	//need to send the amount of bytes transferred.
-	if (_flags.uploadProgressed) 
+	if ([upload delegateRespondsToTransferDidBegin])
 	{
-		NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:localPath];
-		[myForwarder connection:self upload:remotePath sentDataOfLength:[fh seekToEndOfFile]];
-	} 
+		[[upload delegate] transferDidBegin:[upload userInfo]];
+	}
+	if (_flags.didBeginUpload)
+	{
+		[myForwarder connection:self uploadDidBegin:[upload remotePath]];
+	}
+	//need to send the amount of bytes transferred.
+	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
+	if (_flags.uploadProgressed)
+	{
+		[myForwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+	}
+	if ([upload delegateRespondsToTransferTransferredData])
+	{
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
+	}
+	// send 100%
+	if ([upload delegateRespondsToTransferProgressedTo])
+	{
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
+	}
 	if (_flags.uploadPercent) 
 	{
-		[myForwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
+		[myForwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
+	// send finishe
 	if (success && _flags.uploadFinished)
 	{
-		[myForwarder connection:self uploadDidFinish:remotePath];
+		[myForwarder connection:self uploadDidFinish:[upload remotePath]];
 	}
-	if (!success && _flags.error)
+	if (success && [upload delegateRespondsToTransferDidFinish])
+	{
+		[[upload delegate] transferDidFinish:[upload userInfo]];
+	}
+	if (!success)
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
 										   code:ConnectionErrorUploading 
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
-		[myForwarder connection:self didReceiveError:err];
+									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[upload remotePath], @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
+		if (_flags.error)
+		{
+			[myForwarder connection:self didReceiveError:err];
+		}
+		if ([upload delegateRespondsToError])
+		{
+			[[upload delegate] transfer:[upload userInfo] receivedError:err];
+		}
 	}
 }
 
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFile:toFile:)
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSDictionary *attribs = [fm fileAttributesAtPath:localPath traverseLink:YES];
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
+																			data:nil
+																		  offset:0
+																		  remote:remotePath
+																		delegate:rec
+																		userInfo:rec];
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:localPath, remotePath, nil]];
+												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
 	[self queueInvocation:inv];
+	return rec;
 }
 
-
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
 	[self uploadFile:localPath];
@@ -591,7 +677,100 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[self queueInvocation:inv];
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
+{
+	NSFileManager *fm = [NSFileManager defaultManager];
+	BOOL flag = [check boolValue];
+	
+	if (flag)
+	{
+		if ([fm fileExistsAtPath:[upload remotePath]])
+		{
+			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain
+												 code:kFileExists
+											 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"File Already Exists", @"FileConnection error"), 
+												 NSLocalizedDescriptionKey, 
+												 [upload remotePath],
+												 NSLocalizedFailureReasonErrorKey, nil]];
+			if ([upload delegateRespondsToError])
+			{
+				[[upload delegate] transfer:[upload userInfo] receivedError:error];
+			}
+			if (_flags.error)
+			{
+				[_forwarder connection:self didReceiveError:error];
+			}
+			return;
+		}
+	}
+	[fm removeFileAtPath:[upload remotePath] handler:nil];
+	[fm createFileAtPath:[upload remotePath]
+				contents:[upload data]
+			  attributes:nil];
+	if ([upload delegateRespondsToTransferDidBegin])
+	{
+		[[upload delegate] transferDidBegin:[upload userInfo]];
+	}
+	if (_flags.didBeginUpload)
+	{
+		[myForwarder connection:self uploadDidBegin:[upload remotePath]];
+	}
+	//need to send the amount of bytes transferred.
+	unsigned long long size = [[[fm fileAttributesAtPath:[upload remotePath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
+	if (_flags.uploadProgressed)
+	{
+		[myForwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+	}
+	if ([upload delegateRespondsToTransferTransferredData])
+	{
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
+	}
+	// send 100%
+	if ([upload delegateRespondsToTransferProgressedTo])
+	{
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
+	}
+	if (_flags.uploadPercent) 
+	{
+		[myForwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
+	}
+	// send finished
+	if (_flags.uploadFinished)
+	{
+		[myForwarder connection:self uploadDidFinish:[upload remotePath]];
+	}
+	if ([upload delegateRespondsToTransferDidFinish])
+	{
+		[[upload delegate] transferDidFinish:[upload userInfo]];
+	}
+}
+
+- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
+{
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
+}
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath
+														size:[data length]];
+	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil
+																			data:data
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : rec
+																		userInfo:rec];
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadData:checkRemoteExistence:)
+													  target:self
+												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
+	[self queueInvocation:inv];
+	return rec;
+}
+
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
 	[self uploadFromData:data toFile:remotePath];
@@ -691,7 +870,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 	[self queueInvocation:inv];
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];

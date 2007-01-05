@@ -49,6 +49,7 @@
 	ConnectionState _sentState;
 	id				_userInfo;
 	ConnectionCommand *_parent;
+	NSMutableDictionary *_properties;
 }
 
 + (id)command:(id)type 
@@ -77,6 +78,9 @@
 - (ConnectionState)awaitState;
 - (ConnectionState)sentState;
 - (id)userInfo;
+
+- (void)setProperty:(id)property forKey:(NSString *)key;
+- (id)propertyForKey:(NSString *)key;
 
 - (void)addDependantCommand:(ConnectionCommand *)command;
 - (void)removeDependantCommand:(ConnectionCommand *)command;

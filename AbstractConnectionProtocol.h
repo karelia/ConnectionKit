@@ -74,9 +74,10 @@ typedef struct __flags {
 	unsigned inBulk:1;
 	unsigned fileCheck:1;
 	unsigned authorizeConnection:1;
+	unsigned isRecursiveUploading:1;
+	unsigned isRecursiveDeleting:1;
 	
-	unsigned padding:6;
-	
+	unsigned padding:4;
 } connectionFlags;
 
 
@@ -148,21 +149,66 @@ typedef struct __flags {
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
 /* 
+	New method that allows you to set a custom delegate for the upload.
+	You must implement the ConnectionTransferDelegate informal protocol.
+	By default the transfer record returned is the delegate of the transfer.
+*/
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate;
+/* 
 	returns CKTransferRecord as a heirarchy of what will be upload, remote and local files 
 	can be found in the records node properties
 */
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset;
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset;
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
+
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate;
+
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath;
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset;
+/* 
+	New method that allows you to set a custom delegate for the upload.
+	You must implement the ConnectionTransferDelegate informal protocol.
+	By default the transfer record returned is the delegate of the transfer.
+*/
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate;
+
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
+
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate;
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag;
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset;
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset;
+
+/* 
+	New method that allows you to set a custom delegate for the download.
+	You must implement the ConnectionTransferDelegate informal protocol.
+	By default the transfer record returned is the delegate of the transfer.
+*/
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate;
+
+- (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
+							 toDirectory:(NSString *)dirPath
+							  fileOffset:(unsigned long long)offset
+								delegate:(id)delegate;
 
 - (void)checkExistenceOfPath:(NSString *)path;
 
@@ -178,8 +224,7 @@ typedef struct __flags {
 
 - (void)setTranscript:(NSTextStorage *)transcript;
 
-- (long long)transferSpeed; // bytes/second -- this is deprecated using uploadSpeed or downloadSpeed
-- (double)uploadSpeed;
+- (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;
 
 - (NSString *)urlScheme; // by default calls class method
@@ -220,6 +265,14 @@ typedef struct __flags {
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con;
 - (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con;
 - (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists;
+@end
+
+@interface NSObject (ConnectionTransferDelegate)
+- (void)transferDidBegin:(CKTransferRecord *)transfer;
+- (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
+- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
+- (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
+- (void)transferDidFinish:(CKTransferRecord *)transfer;
 @end
 
 //registration type dictionary keys

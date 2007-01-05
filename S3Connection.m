@@ -589,13 +589,13 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	[self uploadFile:localPath toFile:remotePath];
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	// we don't support upload resumption
 	[self uploadFile:localPath];
 }
 
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	[self uploadFile:localPath toFile:remotePath];
 }
@@ -623,7 +623,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	[self uploadFromData:data toFile:remotePath];
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	// we don't support upload resumption
 	[self uploadFromData:data toFile:remotePath];
@@ -645,7 +645,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	[self queueCommand:cmd];
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }

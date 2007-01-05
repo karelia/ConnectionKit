@@ -33,8 +33,10 @@
 #import "FTPConnection.h"
 
 #import "ConnectionThreadManager.h"
-#import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
+#import "NSObject+Connection.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -44,6 +46,10 @@ NSString *FTPErrorDomain = @"FTPErrorDomain";
 
 // 500 ms.
 const double kDelegateNotificationTheshold = 0.5;
+
+@interface CKTransferRecord (Internal)
+- (void)setSize:(unsigned long long)size;
+@end
 
 @interface FTPConnection (Private)
 
@@ -55,7 +61,12 @@ const double kDelegateNotificationTheshold = 0.5;
 - (void)openDataStreamsToHost:(NSHost *)aHost port:(int)aPort;
 - (ConnectionCommand *)pushDataConnectionOnCommandQueue;
 - (ConnectionCommand *)nextAvailableDataConnectionType;
-- (void)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(long long)offset remotePath:(NSString *)remotePath;
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  orData:(NSData *)data 
+						  offset:(unsigned long long)offset 
+					  remotePath:(NSString *)remotePath
+			checkRemoteExistence:(BOOL)flag
+						delegate:(id)delegate;
 
 - (NSFileHandle *)writeHandle;
 - (void)setWriteHandle:(NSFileHandle *)aWriteHandle;
@@ -164,8 +175,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setCurrentPath:nil];
 	[_rootPath release];
 	[_lastNotified release];
-	[_lastTransfer release];
-	
+
 	[super dealloc];
 }
 
@@ -249,18 +259,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	if ([formattedCommand rangeOfString:@"RETR"].location != NSNotFound)
 	{
+		CKInternalTransferRecord *download = [self currentDownload];
 		if (_flags.didBeginDownload)
 		{
-			NSString *file = [[_downloadQueue objectAtIndex:0] objectForKey:QueueDownloadRemoteFileKey];
+			NSString *file = [download remotePath];
 			[_forwarder connection:self downloadDidBegin:file];
+		}
+		if ([download delegateRespondsToTransferDidBegin])
+		{
+			[[download delegate] transferDidBegin:[download userInfo]];
 		}
 	}
 	if ([formattedCommand rangeOfString:@"STOR"].location != NSNotFound)
 	{
+		CKInternalTransferRecord *download = [self currentDownload];
 		if (_flags.didBeginUpload)
 		{
-			NSString *file = [[_uploadQueue objectAtIndex:0] objectForKey:QueueUploadRemoteFileKey];
+			NSString *file = [download remotePath];
 			[_forwarder connection:self uploadDidBegin:file];
+		}
+		if ([download delegateRespondsToTransferDidBegin])
+		{
+			[[download delegate] transferDidBegin:[download userInfo]];
 		}
 	}
 	
@@ -342,11 +362,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			//MARK uuuu = ssss (u user s server)
 			if (GET_STATE == ConnectionUploadingFileState)
 			{
-				NSDictionary *d = [self currentUpload];
-				NSString *file = [d objectForKey:QueueUploadLocalFileKey];	// actual path to file, or destination name if from data
-				NSString *remoteFile = [d objectForKey:QueueUploadRemoteFileKey];
-				long long offset = [[d objectForKey:QueueUploadOffsetKey] longLongValue];
-				NSData *data = [d objectForKey:QueueUploadLocalDataKey];
+				CKInternalTransferRecord *d = [self currentUpload];
+				NSString *file = [d localPath];	// actual path to file, or destination name if from data
+				NSString *remoteFile = [d remotePath];
+				unsigned long long offset = [d offset];
+				NSData *data = [d data];
 				unsigned chunkLength = 0;
 				const uint8_t bytes [kStreamChunkSize];
 				_transferSent = 0;
@@ -388,20 +408,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
 				}
+				if ([d delegateRespondsToTransferTransferredData])
+				{
+					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
+				}
 				
-				if ([self isAboveNotificationTimeThreshold:[NSDate date]]) {
-					
+				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+				if (percent > _transferLastPercent)
+				{
 					if (_flags.uploadPercent)
 					{
-						int percent = (float)_transferSent / ((float)_transferSize * 1.0);
-						if (percent > _transferLastPercent)
-						{
-							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-							_transferLastPercent = percent;
-						}
-					}	
+						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+					}
+					if ([d delegateRespondsToTransferProgressedTo])
+					{
+						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					}
 				}
-							
+				_transferLastPercent = percent;
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
@@ -417,7 +441,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain 
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys: LocalizedStringInThisBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys: LocalizedStringInThisBundle(@"FTP Service Unavailable", @"FTP no service"), 
+														 NSLocalizedDescriptionKey,
+														 command, NSLocalizedFailureReasonErrorKey,
 														 _connectionHost, @"host", nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
@@ -438,10 +464,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionUploadingFileState)
 			{
-				NSDictionary *d = [self currentUpload];
-				NSString *file = [d objectForKey:QueueUploadLocalFileKey];	// actual path to file, or destination name if from data
-				NSString *remoteFile = [d objectForKey:QueueUploadRemoteFileKey];
-				NSData *data = [d objectForKey:QueueUploadLocalDataKey];
+				CKInternalTransferRecord *d = [self currentUpload];
+				NSString *file = [d localPath];	// actual path to file, or destination name if from data
+				NSString *remoteFile = [d remotePath];
+				NSData *data = [d data];
 				unsigned chunkLength = 0;
 				const uint8_t *bytes;
 				_transferLastPercent = 0;
@@ -460,6 +486,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				else	// use file
 				{
 					[self setReadData:nil];		// make sure we're not also trying to read from data
+					if (![[NSFileManager defaultManager] fileExistsAtPath:file])
+					{
+						NSString *str = [NSString stringWithFormat:@"File doesn't exist: %@", file];
+						NSAssert(NO, str);
+					}
 					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
 					NSAssert((nil != _readHandle), @"_readHandle is nil!");
 					NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
@@ -475,39 +506,66 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				_transferSent += chunkLength;
 				_transferCursor += chunkLength;
 				
+				
+				if ([d delegateRespondsToTransferTransferredData])
+				{
+					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
+				}
+				
 				if (_flags.uploadProgressed)
 				{
 					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
 				}
 				
-				if ([self isAboveNotificationTimeThreshold:[NSDate date]]) {
-					
+				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+				if (percent > _transferLastPercent)
+				{
 					if (_flags.uploadPercent)
 					{
-						int percent = (float)_transferSent / ((float)_transferSize * 1.0);
-						if (percent > _transferLastPercent)
-						{
-							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-							_transferLastPercent = percent;
-						}
+						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+					}
+					if ([d delegateRespondsToTransferProgressedTo])
+					{
+						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 					}
 				}
-				
+				_transferLastPercent = percent;
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
-				NSDictionary *download = [self currentDownload];
-				[[NSFileManager defaultManager] removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
-				[[NSFileManager defaultManager] createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
-														contents:nil
-													  attributes:nil];
-				[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download objectForKey:QueueDownloadDestinationFileKey]]];
+				CKInternalTransferRecord *download = [self currentDownload];
+				NSFileManager *fm = [NSFileManager defaultManager];
+				[fm removeFileAtPath:[download localPath] handler:nil];
+				[fm createFileAtPath:[download localPath]
+							contents:nil
+						  attributes:nil];
+				[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+				//start to read in the data to kick start it
 				uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
 				int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
 				if (len >= 0) {
 					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
 					_transferSent = len;
+					
+					if (_flags.downloadProgressed)
+					{
+						[_forwarder connection:self download:[download remotePath] receivedDataOfLength:len];
+					}
+					if ([download delegateRespondsToTransferTransferredData])
+					{
+						[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
+					}
+					int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+					if (_flags.downloadPercent)
+					{
+						[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
+					}
+					if ([download delegateRespondsToTransferProgressedTo])
+					{
+						[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					}
 				}
+// end this doesn't look right				
 				//need to get the transfer size
 				// 150 Opening connection (1652084 bytes)
 				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
@@ -521,6 +579,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				else
 				{
 					_transferSize = LONG_MAX;
+				}
+				if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
+				{
+					[(CKTransferRecord *)[download delegate] setSize:_transferSize];
 				}
 				
 				free(buf);
@@ -701,7 +763,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_serverSupport.canUsePASV = NO;
 					if (_flags.error)
 					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available"), NSLocalizedDescriptionKey, nil]];
+						NSError *err = [NSError errorWithDomain:FTPErrorDomain 
+														   code:FTPErrorNoDataModes 
+													   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available"), 
+														   NSLocalizedDescriptionKey, 
+														   command, NSLocalizedFailureReasonErrorKey,
+														   nil]];
 						[_forwarder connection:self didReceiveError:err];
 					}
 					_state = ConnectionSentQuitState;
@@ -971,8 +1038,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"File in Use", @"FTP file in use")
-																					  forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"File in Use", @"FTP file in use"),
+													 NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey, nil]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			[self setState:ConnectionIdleState];
@@ -983,8 +1051,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Action Aborted. Local Error", @"FTP Abort")
-																					  forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Action Aborted. Local Error", @"FTP Abort"),
+													 NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 				
@@ -998,8 +1067,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No Storage Space Available", @"FTP Error")
-																						  forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"No Storage Space Available", @"FTP Error"),
+														 NSLocalizedDescriptionKey,
+														 command, NSLocalizedFailureReasonErrorKey,
+														 nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 				[self sendCommand:@"ABOR"];
@@ -1065,8 +1136,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					NSError *err = [NSError errorWithDomain:FTPErrorDomain
 													   code:ConnectionErrorChangingDirectory
-												   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to change to directory", @"Bad ftp command")
-																						forKey:NSLocalizedDescriptionKey]];
+												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Failed to change to directory", @"Bad ftp command"),
+													   NSLocalizedDescriptionKey,
+													   command, NSLocalizedFailureReasonErrorKey, nil]];
 					[_forwarder connection:self didReceiveError:err];
 				}
 				
@@ -1097,7 +1169,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionCreateDirectoryState)
 			{
-				if (_flags.error)
+				if (_flags.error && !_flags.isRecursiveUploading)
 				{
 					NSString *error = LocalizedStringInThisBundle(@"Create directory operation failed", @"FTP Create directory error");
 					NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
@@ -1110,6 +1182,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						}
 					}
 					[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+					[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
 					NSError *err = [NSError errorWithDomain:FTPErrorDomain
 													   code:code
 												   userInfo:userInfo];
@@ -1139,8 +1212,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Invalid Account name", @"FTP Error")
-																						  forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Invalid Account name", @"FTP Error"),
+														 NSLocalizedDescriptionKey,
+														 command, NSLocalizedFailureReasonErrorKey,
+														 nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
@@ -1156,8 +1231,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Not Logged In", @"FTP Error")
-																						  forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Not Logged In", @"FTP Error"),
+														 NSLocalizedDescriptionKey,
+														 command, NSLocalizedFailureReasonErrorKey,
+														 nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
@@ -1172,8 +1249,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_flags.error) {
 					NSError *error = [NSError errorWithDomain:FTPErrorDomain
 														 code:code
-													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"You need an Account to Upload Files", @"FTP Error")
-																						  forKey:NSLocalizedDescriptionKey]];
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"You need an Account to Upload Files", @"FTP Error"),
+														 NSLocalizedDescriptionKey,
+														 command, NSLocalizedFailureReasonErrorKey,
+														 nil]];
 					[_forwarder connection:self didReceiveError:error];
 				}
 				[self setState:ConnectionIdleState];
@@ -1225,7 +1304,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			
 			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
-			
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
 			if (_flags.error) {
 				NSError *err = [NSError errorWithDomain:FTPErrorDomain
 												   code:code
@@ -1241,8 +1320,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Request Aborted. Page Type Unknown", @"FTP Error")
-																					  forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Request Aborted. Page Type Unknown", @"FTP Error"), 
+													 NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey,
+													 nil]];
 				[_forwarder connection:self didReceiveError:error];
 			}		
 			[self setState:ConnectionIdleState];
@@ -1253,8 +1334,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
 													 code:code
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error")
-																					  forKey:NSLocalizedDescriptionKey]];
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), 
+													 NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey,
+													 nil]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			[self setState:ConnectionIdleState];
@@ -1269,9 +1352,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																					  NSLocalizedDescriptionKey,
 													 command, NSLocalizedFailureReasonErrorKey,
 													 nil]];
-
-#warning TODO: it would be nice to include more additional keys, like I did here, to help with diagnosis of error codes.  Here I include the entire command so I can see what file was illegal.
-
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;
@@ -1292,6 +1372,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)threadedAbort
 {
 	[self sendCommand:@"ABOR"];
+	_isForceDisconnecting = YES;
+	[self closeDataConnection];
 }
 
 /*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object‚Äôs thread."
@@ -1347,32 +1429,37 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
-					NSMutableDictionary *download = [self currentDownload];
-					NSString *file = [download objectForKey:QueueDownloadRemoteFileKey];
+					CKInternalTransferRecord *download = [self currentDownload];
+					NSString *file = [download remotePath];
 					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
 					_transferSent += len;
 					
-					//update speed
-					NSDate *now = [NSDate date];
-					double delta = [now timeIntervalSinceReferenceDate] - [_lastTransfer timeIntervalSinceReferenceDate];
-					_transferSpeed = len / delta;
-					[_lastTransfer autorelease];
-					_lastTransfer = [now retain];
-					
 					//if ([self isAboveNotificationTimeThreshold:[NSDate date]]) 
 					{
-						if (_transferSize > 0 && _flags.downloadPercent)
+						if (_transferSize > 0)
 						{
 							int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
-							if (percent > [[download objectForKey:QueueDownloadTransferPercentReceived] intValue])
+							if (percent > [[[download delegate] objectForKey:QueueDownloadTransferPercentReceived] intValue])
 							{
-								[_forwarder connection:self download:file progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-								[download setObject:[NSNumber numberWithInt:percent] forKey:QueueDownloadTransferPercentReceived];
+								if ([download delegateRespondsToTransferProgressedTo])
+								{
+									[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+								}
+								if (_flags.downloadPercent)
+								{
+									[_forwarder connection:self download:file progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+								}
+								[[download delegate] setObject:[NSNumber numberWithInt:percent] forKey:QueueDownloadTransferPercentReceived];
 							}
 						}
 						
 						if (_flags.downloadProgressed) {
 							[_forwarder connection:self download:file receivedDataOfLength:len];
+						}
+						
+						if ([download delegateRespondsToTransferTransferredData])
+						{
+							[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
 						}
 					}
 				}
@@ -1437,7 +1524,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == ConnectionUploadingFileState || 
 				GET_STATE == ConnectionDownloadingFileState ||
 				GET_STATE == FTPAwaitingDataConnectionToOpen ||
-				GET_STATE == ConnectionAwaitingDirectoryContentsState) {
+				GET_STATE == ConnectionAwaitingDirectoryContentsState) 
+			{
+				if (GET_STATE == ConnectionUploadingFileState)
+				{
+					CKInternalTransferRecord *rec = [self currentUpload];
+					if ([rec delegateRespondsToError])
+					{
+						[[rec delegate] transfer:[rec userInfo] receivedError:[_receiveStream streamError]];
+					}
+				}
+				if (GET_STATE == ConnectionDownloadingFileState)
+				{
+					CKInternalTransferRecord *rec = [self currentDownload];
+					if ([rec delegateRespondsToError])
+					{
+						[[rec delegate] transfer:[rec userInfo] receivedError:[_receiveStream streamError]];
+					}
+				}
 				//This will most likely occur when there is a misconfig of the server and we cannot open a data connection so we have unroll the command stack
 				[self closeDataStreams];
 				NSArray *history = [self commandHistory];
@@ -1557,6 +1661,22 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				GET_STATE == ConnectionDownloadingFileState ||
 				GET_STATE == FTPAwaitingDataConnectionToOpen ||
 				GET_STATE == ConnectionAwaitingDirectoryContentsState) {
+				if (GET_STATE == ConnectionUploadingFileState)
+				{
+					CKInternalTransferRecord *rec = [self currentUpload];
+					if ([rec delegateRespondsToError])
+					{
+						[[rec delegate] transfer:[rec userInfo] receivedError:[_sendStream streamError]];
+					}
+				}
+				if (GET_STATE == ConnectionDownloadingFileState)
+				{
+					CKInternalTransferRecord *rec = [self currentDownload];
+					if ([rec delegateRespondsToError])
+					{
+						[[rec delegate] transfer:[rec userInfo] receivedError:[_sendStream streamError]];
+					}
+				}
 				//This will most likely occur when there is a misconfig of the server and we cannot open a data connection so we have unroll the command stack
 				[self closeDataStreams];
 				NSArray *history = [self commandHistory];
@@ -1614,8 +1734,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				unsigned chunkLength = 0;
 				const uint8_t *bytes = NULL;
-				NSDictionary *upload = [self currentUpload];
-				NSString *remoteFile = [upload objectForKey:QueueUploadRemoteFileKey];
+				CKInternalTransferRecord *upload = [self currentUpload];
+				NSString *remoteFile = [upload remotePath];
 				
 				if (nil != _readHandle)		// reading from file handle
 				{
@@ -1635,30 +1755,31 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_transferSent += chunkLength;
 					_delegateSizeBuffer += chunkLength;
 					_transferCursor += chunkLength;
-										
-					//update speed
-					NSDate *now = [NSDate date];
-					double delta = [now timeIntervalSinceReferenceDate] - [_lastTransfer timeIntervalSinceReferenceDate];
-					_transferSpeed = chunkLength / delta;
-					[_lastTransfer autorelease];
-					_lastTransfer = [now retain];
 					
 					//if ([self isAboveNotificationTimeThreshold:[NSDate date]]) {
+					if ([upload delegateRespondsToTransferTransferredData])
+					{
+						[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:_delegateSizeBuffer];
+					}
 						if (_flags.uploadProgressed)
 						{
 							[_forwarder connection:self upload:remoteFile sentDataOfLength:_delegateSizeBuffer];
 							_delegateSizeBuffer = 0;
 						}
 					//}
-					if (_flags.uploadPercent)
+					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
+					if (percent > _transferLastPercent)
 					{
-						int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
-						if (percent > _transferLastPercent)
+						if (_flags.uploadPercent)
 						{
 							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-							_transferLastPercent = percent;
+						}
+						if ([upload delegateRespondsToTransferProgressedTo])
+						{
+							[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 						}
 					}
+					_transferLastPercent = percent;
 				}				
 			}
 			break;
@@ -1675,35 +1796,58 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	KTLog(StreamDomain, KTLogDebug, @"closeDataConnection");
 	[self closeDataStreams];
+	
+	// no delegate notifications if we force disconnected the connection
+	if (_isForceDisconnecting)
+	{
+		_isForceDisconnecting = NO;
+		return;
+	}
+	
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
-		NSDictionary *download = [self currentDownload];
+		CKInternalTransferRecord *download = [[self currentDownload] retain];
+		[self dequeueDownload];
+		
 		if (_flags.downloadFinished)
 		{
-			[_forwarder connection:self downloadDidFinish:[download objectForKey:QueueDownloadRemoteFileKey]];
+			[_forwarder connection:self downloadDidFinish:[download remotePath]];
+		}
+		if ([download delegateRespondsToTransferDidFinish])
+		{
+			[[download delegate] transferDidFinish:[download userInfo]];
 		}
 		[_writeHandle closeFile];
 		[self setWriteHandle:nil];
-		[self dequeueDownload];
+		
 		if (_received226)
 		{
 			[self setState:ConnectionIdleState];
 		}
+		[download release];
 	}
 	else if (GET_STATE == ConnectionUploadingFileState)
 	{
-		NSDictionary *upload = [self currentUpload];
-		if (_flags.uploadFinished) {
-			[_forwarder connection:self uploadDidFinish:[upload objectForKey:QueueUploadRemoteFileKey]];
+		CKInternalTransferRecord *upload = [[self currentUpload] retain];
+		[self dequeueUpload];
+		
+		if (_flags.uploadFinished) 
+		{
+			[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+		}
+		if ([upload delegateRespondsToTransferDidFinish])
+		{
+			[[upload delegate] transferDidFinish:[upload userInfo]];
 		}
 		[self setReadData:nil];
 		[self setReadHandle:nil];
 		_transferSize = 0;
-		[self dequeueUpload];
+		
 		if (_received226)
 		{
 			[self setState:ConnectionIdleState];
 		}
+		[upload release];
 	}
 	else if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
 	{
@@ -1979,46 +2123,85 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)uploadFile:(NSString *)localPath
 {
-	[self uploadFile:localPath orData:nil offset:0 remotePath:nil];
+	[self uploadFile:localPath orData:nil offset:0 remotePath:nil checkRemoteExistence:NO delegate:nil];
 }
 
 /*!	Upload file to the given directory
 */
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	[self uploadFile:localPath orData:nil offset:0 remotePath:remotePath];
+	[self uploadFile:localPath orData:nil offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
+}
+
+- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
+{
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
+}
+
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
+{
+	return [self uploadFile:localPath
+					 orData:nil
+					 offset:0
+				 remotePath:remotePath
+	   checkRemoteExistence:flag
+				   delegate:delegate];
 }
 
 /*!	Upload file to the current directory
 */
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset;
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
 {
-	[self uploadFile:localPath orData:nil offset:offset remotePath:nil];
+	[self uploadFile:localPath orData:nil offset:offset remotePath:nil checkRemoteExistence:NO delegate:nil];
 }
 
 /*!	Upload file to the given directory
 */
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset;
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
 {
-	[self uploadFile:localPath orData:nil offset:offset remotePath:remotePath];
+	[self uploadFile:localPath orData:nil offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	[self uploadFile:nil orData:data offset:0 remotePath:remotePath];
+	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
-	[self uploadFile:nil orData:data offset:offset remotePath:remotePath];
+	[self uploadFile:nil orData:data offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
+	[self downloadFile:remotePath
+		   toDirectory:dirPath
+			 overwrite:flag
+			  delegate:nil];
+}
+
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
+{
+	[self resumeDownloadFile:remotePath
+				 toDirectory:dirPath
+				  fileOffset:offset
+					delegate:nil];
+}
+
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
+{
 	NSString *remoteFileName = [remotePath lastPathComponent];
+	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
+	
 	if (!flag)
 	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:[NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName]])
+		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
 		{
 			if (_flags.error) {
 				NSError *error = [NSError errorWithDomain:FTPErrorDomain
@@ -2027,15 +2210,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																					  forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:error];
 			}
+			return nil;
 		}
 	}
-	 
+	
 	/*
-			TYPE I
-			SIZE file
-			PASV/EPSV/ERPT/PORT
-			RETR file
-			TYPE A
+	 TYPE I
+	 SIZE file
+	 PASV/EPSV/ERPT/PORT
+	 RETR file
+	 TYPE A
 	 */
 	
 	[self startBulkCommands];
@@ -2044,9 +2228,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												sentState:FTPModeChangeState
 												dependant:nil
 												 userInfo:nil];
-	NSMutableDictionary *download = [NSMutableDictionary dictionaryWithObjectsAndKeys:remotePath, QueueDownloadRemoteFileKey, 
-		[NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName], QueueDownloadDestinationFileKey,
-		[NSNumber numberWithInt:0], QueueDownloadTransferPercentReceived, nil];
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
+																			  data:nil
+																			offset:0
+																			remote:remotePath
+																		  delegate:delegate ? delegate : record
+																		  userInfo:record];
+	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
+	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
+	[record setProperty:[NSNumber numberWithInt:0] forKey:QueueDownloadTransferPercentReceived];
+
 	[self queueDownload:download];
 	
 	ConnectionCommand *retr = [ConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
@@ -2075,19 +2267,35 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:retr];
 	[self queueCommand:ascii];
 	[self endBulkCommands];
+	
+	return record;
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
+							 toDirectory:(NSString *)dirPath
+							  fileOffset:(unsigned long long)offset
+								delegate:(id)delegate
 {
 	NSNumber *off = [NSNumber numberWithLongLong:offset];
 	NSString *remoteFileName = [remotePath lastPathComponent];
+	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
 	
 	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A" 
 											   awaitState:ConnectionIdleState 
 												sentState:ConnectionIdleState
 												dependant:nil 
 												 userInfo:nil];
-	NSDictionary *download = [NSDictionary dictionaryWithObjectsAndKeys:remotePath, QueueDownloadRemoteFileKey, [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName], QueueDownloadDestinationFileKey, nil];
+
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath
+														   size:0];
+	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
+	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
+	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
+																			  data:nil
+																			offset:offset
+																			remote:remotePath
+																		  delegate:delegate ? delegate : record
+																		  userInfo:record];
 	[_downloadQueue addObject:download];
 	ConnectionCommand *retr = [ConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
 											  awaitState:ConnectionIdleState 
@@ -2125,6 +2333,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:retr];
 	[self queueCommand:ascii];	
 	[self endBulkCommands];
+	
+	return record;
 }
 
 /*!	Send the abort message immediately
@@ -2448,7 +2658,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 /*!	Support upload method, handles all the gory details
 */
 
-- (void)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(long long)offset remotePath:(NSString *)remotePath
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  orData:(NSData *)data 
+						  offset:(unsigned long long)offset 
+					  remotePath:(NSString *)remotePath
+			checkRemoteExistence:(BOOL)flag
+						delegate:(id)delegate
 {
 	if (nil == localPath)
 	{
@@ -2479,19 +2694,29 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								dependant:store
 								 userInfo:nil];
 	}
-	
-	NSMutableDictionary *dict = [NSMutableDictionary dictionary];
-	if (0 != offset)
+	unsigned long long uploadSize = 0;
+	if (data)
 	{
-		[dict setObject:[NSNumber numberWithLongLong:offset] forKey:QueueUploadOffsetKey];
+		uploadSize = [data length];
 	}
-	if (nil != data)
+	else
 	{
-		[dict setObject:data forKey:QueueUploadLocalDataKey];
+		NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+		uploadSize = [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
-	[dict setObject:localPath forKey:QueueUploadLocalFileKey];
-	[dict setObject:remotePath forKey:QueueUploadRemoteFileKey];
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath
+														   size:uploadSize];
+	[record setUpload:YES];
+	[record setObject:localPath forKey:QueueUploadLocalFileKey];
+	[record setObject:remotePath forKey:QueueUploadRemoteFileKey];
+	
+	CKInternalTransferRecord *dict = [CKInternalTransferRecord recordWithLocal:localPath
+																		  data:data
+																		offset:offset
+																		remote:remotePath
+																	  delegate:delegate ? delegate : record
+																	  userInfo:record];
 	[self queueUpload:dict];
 	[store setUserInfo:dict];
 	
@@ -2516,6 +2741,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:store];
 	[self queueCommand:ascii];
 	[self endBulkCommands];
+	
+	return record;
 }
 
 /*! when transferring large files over a fast connection, like the same machine, the delegate notification
@@ -2536,11 +2763,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		ret = NO;
 	}
 	return ret;
-}
-
-- (long)transferSpeed
-{
-	return _transferSpeed;
 }
 
 #pragma mark -

@@ -33,12 +33,60 @@
 	[myName release];
 	[myContents release];
 	[myProperties release];
+	[myError release];
 	[super dealloc];
+}
+
+//- (void)willChangeValueForKey:(NSString *)key
+//{
+//	[super performSelectorOnMainThread:@selector(willChangeValueForKey:)
+//							withObject:key
+//						 waitUntilDone:YES];
+//}
+//
+//- (void)didChangeValueForKey:(NSString *)key
+//{
+//	[super performSelectorOnMainThread:@selector(didChangeValueForKey:)
+//							withObject:key
+//						 waitUntilDone:YES];
+//}
+
+- (void)setUpload:(BOOL)flag
+{
+	isUpload = YES;
+}
+
+- (BOOL)isUpload
+{
+	return isUpload;
+}
+
+- (void)cancel:(id)sender
+{
+	
+}
+
+- (void)setName:(NSString *)name
+{
+	if (myName != name)
+	{
+		[self willChangeValueForKey:@"name"];
+		[myName autorelease];
+		myName = [name copy];
+		[self didChangeValueForKey:@"name"];
+	}
 }
 
 - (NSString *)name
 {
 	return myName;
+}
+
+- (void)setSize:(unsigned long long)size
+{
+	[self willChangeValueForKey:@"progress"];
+	mySize = size;
+	[self didChangeValueForKey:@"progress"];
 }
 
 - (unsigned long long)size
@@ -78,9 +126,29 @@
 	}
 }
 
+- (double)speed
+{
+	return mySpeed;
+}
+
+- (void)setSpeed:(double)speed
+{
+	if (speed != mySpeed)
+	{
+		[self willChangeValueForKey:@"speed"];
+		mySpeed = speed;
+		[self didChangeValueForKey:@"speed"];
+	}
+}
+
 - (void)setProgress:(int)progress
 {
-	myProgress = progress;
+	if (myProgress != progress)
+	{
+		[self willChangeValueForKey:@"progress"];
+		myProgress = progress;
+		[self didChangeValueForKey:@"progress"];
+	}
 }
 
 - (NSNumber *)progress
@@ -93,7 +161,45 @@
 		int percent = (int)((transferred / (size * 1.0)) * 100);
 		return [NSNumber numberWithInt:percent];
 	}
+	if ([self hasError])
+	{
+		return [NSNumber numberWithInt:-1];
+	}
 	return [NSNumber numberWithInt:myProgress];
+}
+
+- (BOOL)hasError
+{
+	return (myError != nil);
+}
+
+- (NSError *)error
+{
+	return myError;
+}
+
+- (void)setError:(NSError *)error
+{
+	if (error != myError)
+	{
+		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
+		[myError autorelease];
+		myError = [error retain];
+		[self didChangeValueForKey:@"progress"];
+	}
+}
+
+- (id <AbstractConnectionProtocol>)connection
+{
+	return myConnection;
+}
+
+- (void)setConnection:(id <AbstractConnectionProtocol>)connection
+{
+	if (connection != myConnection)
+	{
+		myConnection = connection;
+	}
 }
 
 - (BOOL)isDirectory
@@ -120,8 +226,10 @@
 
 - (void)addContent:(CKTransferRecord *)record
 {
+	[self willChangeValueForKey:@"contents"];
 	[myContents addObject:record];
 	[record setParent:self];
+	[self didChangeValueForKey:@"contents"];
 }
 
 - (NSArray *)contents
@@ -141,7 +249,8 @@
 	{
 		[str appendString:@"/"];
 	}
-	[str appendString:@"\n"];
+	[str appendFormat:@"\t(%lld bytes - %@%%)\n", [self size], [self progress]];
+
 	NSEnumerator *e = [myContents objectEnumerator];
 	CKTransferRecord *cur;
 	
@@ -178,6 +287,39 @@
 - (id)objectForKey:(id)key
 {
 	return [self propertyForKey:key];
+}
+
+#pragma mark -
+#pragma mark Connection Transfer Delegate
+
+- (void)transferDidBegin:(CKTransferRecord *)transfer
+{
+	[self setProgress:1];
+	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
+}
+
+- (void)transfer:(CKTransferRecord *)transfer receivedDataOfLength:(unsigned long long)length
+{
+	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+	[self setSpeed:length / (now - myLastTransferTime)];
+	[self willChangeValueForKey:@"speed"];
+	myLastTransferTime = now;
+	[self didChangeValueForKey:@"speed"];
+}
+
+- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent
+{
+	[self setProgress:[percent intValue]];
+}
+
+- (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error
+{
+	[self setError:error];
+}
+
+- (void)transferDidFinish:(CKTransferRecord *)transfer
+{
+	[self setProgress:100];
 }
 
 #pragma mark -
@@ -299,6 +441,14 @@
 	rec = [CKTransferRecord recordWithName:filename size:size];
 	[lastRec addContent:rec];
 	return rec;
+}
+
++ (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root
+{
+	CKTransferRecord *parent = [CKTransferRecord recordForPath:[[record name] stringByDeletingLastPathComponent]
+													  withRoot:root];
+	[record setName:[[record name] lastPathComponent]];
+	[parent addContent:record];
 }
 
 @end

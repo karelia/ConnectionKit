@@ -44,7 +44,8 @@ enum { kChangeToDirectory = 7000,
 	kUploadFile,
 	kUploadFromData,
 	kDownloadFile,
-	kDirectoryContents
+	kDirectoryContents, 
+	kFileExists
 };
 
 @class RunLoopForwarder;
