@@ -39,12 +39,6 @@
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
-<<<<<<< .mine
-#import "NSData+Connection.h"
-#import "NSObject+Connection.h"
-#import "ConnectionThreadManager.h"
-=======
->>>>>>> .r343
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
