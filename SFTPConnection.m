@@ -62,8 +62,8 @@ const unsigned int kSFTPBufferSize = 32768;
 @end
 
 
-int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
-int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
+static int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
+static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 @implementation SFTPConnection
 
@@ -1193,7 +1193,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 @end
 
 
-int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
+static int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
 {
 	SFTPConnection *con = (SFTPConnection *)info;
 	NSData *data = [NSData dataWithBytes:buffer length:length];
@@ -1202,12 +1202,17 @@ int ssh_write(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
 	return [data length];
 }
 
-int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
+static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info)
 {
 	SFTPConnection *con = (SFTPConnection *)info;
-	NSData *data = nil;
+	NSData *data;
 	int size = [con availableData:&data ofLength:length];
-	[data getBytes:buffer];
+	
+	if (size > 0)
+	{
+		memcpy(buffer,[data bytes],[data length]);
+	}
+	//[data getBytes:buffer];
 	return size;
 }
 
