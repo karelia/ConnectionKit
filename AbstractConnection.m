@@ -854,6 +854,15 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
 - (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
@@ -890,7 +899,7 @@ NSDictionary *sDataAttributes = nil;
 			[record setProperty:remote forKey:QueueUploadRemoteFileKey];
 		}
 	}
-}
+} 
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
@@ -924,14 +933,23 @@ NSDictionary *sDataAttributes = nil;
 	return root;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	SUBCLASS_RESPONSIBLE
+}
+
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
@@ -944,9 +962,27 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
 {
 	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
+{
+	SUBCLASS_RESPONSIBLE
+}
+
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
@@ -954,9 +990,27 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
 {
 	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
+{
+	SUBCLASS_RESPONSIBLE
+}
+
+- (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
+							 toDirectory:(NSString *)dirPath
+							  fileOffset:(unsigned long long)offset
+								delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
 }
 
 - (unsigned)numberOfTransfers

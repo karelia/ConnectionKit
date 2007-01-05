@@ -359,7 +359,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	}
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
@@ -370,7 +370,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	}
 }
 
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
@@ -392,7 +392,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	}
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
@@ -408,7 +408,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }

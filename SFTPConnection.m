@@ -40,6 +40,8 @@
 #import <Carbon/Carbon.h>
 #import <Security/Security.h>
 #import "NSString+Connection.h"
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
 
 NSString *SFTPException = @"SFTPException";
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
@@ -479,6 +481,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 {
 	if ([cmd isKindOfClass:[NSInvocation class]])
 	{
+		KTLog(StateMachineDomain, KTLogDebug, @"Invoking command %@", NSStringFromSelector([cmd selector]));
 		[cmd invoke];
 	}
 }
@@ -536,7 +539,7 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 {
 	if (libssh2_sftp_mkdir(mySFTPChannel, [dirPath UTF8String], 040755))
 	{
-		if (_flags.error)
+		if (_flags.error && !_flags.isRecursiveUploading)
 		{
 			int msglen;
 			char *msg;
@@ -654,31 +657,55 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)threadedRunloopUploadFile:(NSFileHandle *)file
 {
-	NSDictionary *upload = [self currentUpload];
-	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	CKInternalTransferRecord *upload = [self currentUpload];
+	NSString *remote = [upload remotePath];
 	NSData *data = [file readDataOfLength:kSFTPBufferSize];
 	size_t chunksent = libssh2_sftp_write(myTransferHandle,[data bytes],[data length]);
 	if (_flags.uploadProgressed)
 	{
 		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
 	}
+	if ([upload delegateRespondsToTransferTransferredData])
+	{
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunksent];
+	}
 	if (chunksent != [data length])
 	{
-		//we have a problem
+//		NSError *error = [NSError errorWithDomain:SFTPErrorDomain
+//											 code:SFTPErrorWrite
+//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
+//		if (_flags.error)
+//		{
+//			[_forwarder connection:self didReceiveError:error];
+//		}
+//		if ([upload delegateRespondsToError])
+//		{
+//			[[upload delegate] transfer:[upload userInfo] receivedError:error];
+//		}
 	}
 	myBytesTransferred += chunksent;
+	int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 	if (_flags.uploadPercent)
 	{
-		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 		[_forwarder connection:self upload:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	if ([upload delegateRespondsToTransferProgressedTo])
+	{
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 	}
 	if (myBytesTransferred == myTransferSize)
 	{
+		[upload retain];
+		[self dequeueUpload];
 		if (_flags.uploadFinished)
 		{
 			[_forwarder connection:self uploadDidFinish:remote];
 		}
-		[self dequeueUpload];
+		if ([upload delegateRespondsToTransferDidFinish])
+		{
+			[[upload delegate] transferDidFinish:[upload userInfo]];
+		}
+		[upload release];
 		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 		[self setState:ConnectionIdleState];
 	}
@@ -690,10 +717,10 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)threadedUploadFile
 {
-	NSDictionary *upload = [self currentUpload];
-	NSString *local = [upload objectForKey:QueueUploadLocalFileKey];
-	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
-	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+	CKInternalTransferRecord *upload = [self currentUpload];
+	NSString *local = [upload localPath];
+	NSString *remote = [upload remotePath];
+	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
@@ -702,41 +729,70 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		[_forwarder connection:self uploadDidBegin:remote];
 	}
+	if ([upload delegateRespondsToTransferDidBegin])
+	{
+		[[upload delegate] transferDidBegin:[upload userInfo]];
+	}
 	[self performSelector:@selector(threadedRunloopUploadFile:) withObject:file afterDelay:0.0];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	NSMutableDictionary *upload = [NSMutableDictionary dictionary];
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
+}
+
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
+{
+	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
+																			data:nil
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : upload
+																		userInfo:upload];
+	[upload setUpload:YES];
 	[upload setObject:localPath forKey:QueueUploadLocalFileKey];
 	[upload setObject:remotePath forKey:QueueUploadRemoteFileKey];
-	NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:localPath];
-	[upload setObject:[NSNumber numberWithUnsignedLongLong:[fh seekToEndOfFile]] forKey:SFTPTransferSizeKey];
-	[self queueUpload:upload];
+	[upload setObject:[attribs objectForKey:NSFileSize] forKey:SFTPTransferSizeKey];
+	[self queueUpload:record];
 	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedUploadFile) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionUploadingFileState
 										dependant:nil
 										 userInfo:nil]];
+	
+	return upload;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	//we don't support resuming over sftp
 	[self uploadFile:localPath];
 }
 
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	//we don't support resuming over sftp
 	[self uploadFile:localPath toFile:remotePath];
 }
 
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate
+{
+	return [self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:delegate];
+}
+
 - (void)threadedRunloopUploadData:(NSData *)data
 {
-	NSDictionary *upload = [self currentUpload];
-	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
+	CKInternalTransferRecord *upload = [self currentUpload];
+	NSString *remote = [upload remotePath];
 	NSRange byteRange = NSMakeRange(myBytesTransferred, kSFTPBufferSize);
 	if (NSMaxRange(byteRange) > [data length])
 	{
@@ -748,23 +804,47 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
 	}
-	if (chunksent != [chunk length])
+	if ([upload delegateRespondsToTransferTransferredData])
 	{
-		//we have a problem
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunksent];
+	}
+	if (chunksent != [data length])
+	{
+//		NSError *error = [NSError errorWithDomain:SFTPErrorDomain
+//											 code:SFTPErrorWrite
+//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
+//		if (_flags.error)
+//		{
+//			[_forwarder connection:self didReceiveError:error];
+//		}
+//		if ([upload delegateRespondsToError])
+//		{
+//			[[upload delegate] transfer:[upload userInfo] receivedError:error];
+//		}
 	}
 	myBytesTransferred += chunksent;
+	int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 	if (_flags.uploadPercent)
 	{
-		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 		[_forwarder connection:self upload:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	if ([upload delegateRespondsToTransferProgressedTo])
+	{
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 	}
 	if (myBytesTransferred == myTransferSize)
 	{
+		[upload retain];
+		[self dequeueUpload];
 		if (_flags.uploadFinished)
 		{
 			[_forwarder connection:self uploadDidFinish:remote];
 		}
-		[self dequeueUpload];
+		if ([upload delegateRespondsToTransferDidFinish])
+		{
+			[[upload delegate] transferDidFinish:[upload userInfo]];
+		}
+		[upload release];
 		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 		[self setState:ConnectionIdleState];
 	}
@@ -776,10 +856,10 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)threadedUploadData
 {
-	NSDictionary *upload = [self currentUpload];
-	NSData *data = [upload objectForKey:QueueUploadLocalDataKey];
-	NSString *remote = [upload objectForKey:QueueUploadRemoteFileKey];
-	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+	CKInternalTransferRecord *upload = [self currentUpload];
+	NSData *data = [[upload userInfo] objectForKey:QueueUploadLocalDataKey];
+	NSString *remote = [upload remotePath];
+	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
@@ -787,34 +867,63 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		[_forwarder connection:self uploadDidBegin:remote];
 	}
+	if ([upload delegateRespondsToTransferDidBegin])
+	{
+		[[upload delegate] transferDidBegin:[upload userInfo]];
+	}
 	[self performSelector:@selector(threadedRunloopUploadData:) withObject:data afterDelay:0.0];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	NSMutableDictionary *upload = [NSMutableDictionary dictionary];
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
+}
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[data length]];
+	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
+																			data:data
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : upload
+																		userInfo:upload];
+	[upload setUpload:YES];
 	[upload setObject:data forKey:QueueUploadLocalDataKey];
 	[upload setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	[upload setObject:[NSNumber numberWithUnsignedInt:[data length]] forKey:SFTPTransferSizeKey];
-	[self queueUpload:upload];
+	[self queueUpload:record];
 	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedUploadData) target:self arguments:[NSArray array]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionUploadingFileState
 										dependant:nil
 										 userInfo:nil]];
+	
+	return upload;
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	//we don't support resuming over sftp
 	[self uploadFromData:data toFile:remotePath];
 }
 
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate
+{
+	return [self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:delegate];
+}
+
 - (void)threadedRunloopDownload:(NSFileHandle *)file
 {
-	NSDictionary *download = [self currentDownload];
-	NSString *remote = [download objectForKey:QueueDownloadRemoteFileKey];
+	CKInternalTransferRecord *download = [self currentDownload];
+	NSString *remote = [download remotePath];
 	NSMutableData *data = [NSMutableData dataWithLength:kSFTPBufferSize];
 	size_t read = libssh2_sftp_read(myTransferHandle,[data mutableBytes],kSFTPBufferSize);
 	
@@ -825,21 +934,35 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	{
 		[_forwarder connection:self download:remote receivedDataOfLength:read];
 	}
+	if ([download delegateRespondsToTransferTransferredData])
+	{
+		[[download delegate] transfer:[download userInfo] transferredDataOfLength:read];
+	}
 	[file writeData:data];
 	myBytesTransferred += read;
+	int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 	if (_flags.downloadPercent)
 	{
-		int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 		[_forwarder connection:self download:remote progressedTo:[NSNumber numberWithInt:percent]];
+	}
+	if ([download delegateRespondsToTransferProgressedTo])
+	{
+		[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 	}
 	
 	if (myBytesTransferred == myTransferSize)
 	{
+		[download retain];
+		[self dequeueDownload];
 		if (_flags.uploadFinished)
 		{
 			[_forwarder connection:self downloadDidFinish:remote];
 		}
-		[self dequeueDownload];
+		if ([download delegateRespondsToTransferDidFinish])
+		{
+			[[download delegate] transferDidFinish:[download userInfo]];
+		}
+		[download release];
 		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 		[self setState:ConnectionIdleState];
 	}
@@ -851,14 +974,15 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 
 - (void)threadedDownload
 {
-	NSDictionary *download = [self currentDownload];
-	NSString *remoteFile = [download objectForKey:QueueDownloadRemoteFileKey];
-	NSString *localFile = [download objectForKey:QueueDownloadDestinationFileKey];
+	CKInternalTransferRecord *download = [self currentDownload];
+	NSString *remoteFile = [download remotePath];
+	NSString *localFile = [download localPath];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	if (![fm fileExistsAtPath:localFile])
 	{
-		[fm createFileAtPath:localFile contents:[NSData data] attributes:nil];
+		[fm removeFileAtPath:localFile handler:nil];
 	}
+	[fm createFileAtPath:localFile contents:[NSData data] attributes:nil];
 	NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:localFile];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remoteFile UTF8String], LIBSSH2_FXF_READ, 0);
 	LIBSSH2_SFTP_ATTRIBUTES attrs;
@@ -873,6 +997,10 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 	if (_flags.didBeginDownload)
 	{
 		[_forwarder connection:self downloadDidBegin:remoteFile];
+	}
+	if ([download delegateRespondsToTransferDidBegin])
+	{
+		[[download delegate] transferDidBegin:[download userInfo]];
 	}
 	[self performSelector:@selector(threadedRunloopDownload:) withObject:handle afterDelay:0.0];
 }
@@ -905,10 +1033,26 @@ int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void *info);
 										 userInfo:nil]];
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	//we don't support resuming over sftp
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
+}
+
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
+{
+	return [self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:delegate];
+}
+
+- (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
+							 toDirectory:(NSString *)dirPath
+							  fileOffset:(unsigned long long)offset
+								delegate:(id)delegate
+{
+	return [self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:delegate];
 }
 
 - (void)cancelTransfer

@@ -44,7 +44,8 @@
 #import <Security/Security.h>
 #import "ConnectionThreadManager.h"
 #import "NSString+Connection.h"
-
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
 
 @interface WebDAVConnection (DotMac)
 - (void)processResponse:(DAVResponse *)response;
@@ -171,6 +172,7 @@
 
 - (void)processResponse:(DAVResponse *)response
 {
+	KTLog(ProtocolDomain, KTLogDebug, @"%@", response);
 	switch (GET_STATE)
 	{
 		case ConnectionAwaitingDirectoryContentsState:
@@ -242,8 +244,11 @@
 				}
 				case 405:
 				{		
-					err = LocalizedStringInThisBundle(@"The directory already exists", @".Mac Create Directory Error");
-					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					if (_flags.isRecursiveUploading)
+					{
+						err = LocalizedStringInThisBundle(@"The directory already exists", @".Mac Create Directory Error");
+						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					}
 					break;
 				}
 				case 409:
@@ -402,23 +407,35 @@
 	if (length == 0) return;
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
-		NSString *download = [[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] stringByDeletingFirstPathComponent];
+		CKInternalTransferRecord *download = [self currentDownload];
 		bytesTransferred += length;
-		if (_flags.downloadPercent)
+		if (bytesToTransfer > 0) // intel gives a crash for div by 0
 		{
-			if (bytesToTransfer > 0) // intel gives a crash for div by 0
+			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			
+			if (_flags.downloadPercent)
 			{
-				int percent = (bytesTransferred * 100) / bytesToTransfer;
 				[_forwarder connection:self 
-							  download:download
+							  download:[[download remotePath] stringByDeletingFirstPathComponent]
 						  progressedTo:[NSNumber numberWithInt:percent]];
 			}
+			
+			if ([download delegateRespondsToTransferProgressedTo])
+			{
+				[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+			}
 		}
+		
+		
 		if (_flags.downloadProgressed)
 		{
 			[_forwarder connection:self
-						  download:download
+						  download:[[download remotePath] stringByDeletingFirstPathComponent]
 			  receivedDataOfLength:length];
+		}
+		if ([download delegateRespondsToTransferTransferredData])
+		{
+			[[download delegate] transfer:[download userInfo] transferredDataOfLength:length];
 		}
 	}
 }
@@ -445,22 +462,31 @@
 			bytesTransferred += length;
 		}
 		
-		NSString *upload = [[self currentUpload] objectForKey:QueueUploadRemoteFileKey];
-		if (_flags.uploadPercent)
+		CKInternalTransferRecord *upload = [self currentUpload];
+		
+		if (bytesToTransfer > 0) // intel gives a crash for div by 0
 		{
-			if (bytesToTransfer > 0) // intel gives a crash for div by 0
+			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			if (_flags.uploadPercent)
 			{
-				int percent = (bytesTransferred * 100) / bytesToTransfer;
 				[_forwarder connection:self 
-								upload:upload
+								upload:[upload remotePath]
 						  progressedTo:[NSNumber numberWithInt:percent]];
+			}
+			if ([upload delegateRespondsToTransferProgressedTo])
+			{
+				[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 			}
 		}
 		if (_flags.uploadProgressed)
 		{
 			[_forwarder connection:self 
-							upload:upload
+							upload:[upload remotePath]
 				  sentDataOfLength:length];
+		}
+		if ([upload delegateRespondsToTransferTransferredData])
+		{
+			[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:length];
 		}
 	}
 }
@@ -564,10 +590,54 @@
 			   toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]];
 }
 
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
+{
+	return [super uploadFile:localPath
+					  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+		checkRemoteExistence:flag
+					delegate:delegate];
+}
+
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate
+{
+	return [self uploadFile:localPath
+					 toFile:remotePath
+	   checkRemoteExistence:NO
+				   delegate:delegate];
+}
+
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	[super uploadFromData:data
 				   toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]];
+}
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	return [super uploadFromData:data
+						  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+			checkRemoteExistence:flag
+						delegate:delegate];
+}
+
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate
+{
+	return [super resumeUploadFromData:data
+								toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+							fileOffset:offset
+							  delegate:delegate];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
@@ -577,7 +647,7 @@
 			  overwrite:flag];
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	[self downloadFile:remotePath
 		   toDirectory:dirPath

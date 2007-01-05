@@ -41,6 +41,8 @@
 #import "NSData+Connection.h"
 #import "CKHTTPFileDownloadRequest.h"
 #import "CKHTTPFileDownloadResponse.h"
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
@@ -125,6 +127,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)processResponse:(CKHTTPResponse *)response
 {	
+	KTLog(ProtocolDomain, KTLogDebug, @"%@", response);
 	switch (GET_STATE)
 	{
 		case ConnectionAwaitingDirectoryContentsState:
@@ -193,8 +196,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 405:
 				{		
-					err = LocalizedStringInThisBundle(@"The directory already exists", @"WebDAV Create Directory Error");
-					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					if (!_flags.isRecursiveUploading)
+					{
+						err = LocalizedStringInThisBundle(@"The directory already exists", @"WebDAV Create Directory Error");
+						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					}
 					break;
 				}
 				case 409:
@@ -357,21 +363,32 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		transferHeaderLength = [req headerLength];
 		bytesToTransfer = [packet length] - transferHeaderLength;
 		bytesTransferred = 0;
+		CKInternalTransferRecord *upload = [self currentUpload];
+		
 		if (_flags.didBeginUpload)
 		{
 			[_forwarder connection:self
-					uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+					uploadDidBegin:[upload remotePath]];
+		}
+		if ([upload delegateRespondsToTransferDidBegin])
+		{
+			[[upload delegate] transferDidBegin:[upload userInfo]];
 		}
 	}
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
 		bytesToTransfer = 0;
 		bytesTransferred = 0;
+		CKInternalTransferRecord *download = [self currentDownload];
 		
 		if (_flags.didBeginDownload)
 		{
 			[_forwarder connection:self
-				  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+				  downloadDidBegin:[download remotePath]];
+		}
+		if ([download delegateRespondsToTransferDidBegin])
+		{
+			[[download delegate] transferDidBegin:[download userInfo]];
 		}
 	}
 }
@@ -380,10 +397,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	if (GET_STATE == ConnectionDownloadingFileState)
 	{
+		CKInternalTransferRecord *download = [self currentDownload];
 		if (bytesToTransfer == 0)
 		{
 			NSDictionary *headers = [DAVResponse headersWithData:myResponseBuffer];
 			NSString *length = [headers objectForKey:@"Content-Length"];
+			
 			if (length)
 			{
 				NSScanner *scanner = [NSScanner scannerWithString:length];
@@ -391,18 +410,19 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				[scanner scanLongLong:&daBytes];
 				bytesToTransfer = daBytes;
 				
-				NSDictionary *download = [self currentDownload];
+				[(CKTransferRecord *)[download userInfo] setSize:daBytes];
+				
 				NSFileManager *fm = [NSFileManager defaultManager];
 				BOOL isDir;
-				if ([fm fileExistsAtPath:[download objectForKey:QueueDownloadDestinationFileKey] isDirectory:&isDir] && !isDir)
+				if ([fm fileExistsAtPath:[download localPath] isDirectory:&isDir] && !isDir)
 				{
-					[fm removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
+					[fm removeFileAtPath:[download localPath] handler:nil];
 				}
-				[fm createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
+				[fm createFileAtPath:[download localPath]
 							contents:nil
 						  attributes:nil];
 				[myDownloadHandle release];
-				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[download objectForKey:QueueDownloadDestinationFileKey]] retain];
+				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[download localPath]] retain];
 				
 				// file data starts after the header
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -424,15 +444,23 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				if (_flags.downloadProgressed)
 				{
-					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[fileData length]];
+					[_forwarder connection:self download:[download remotePath] receivedDataOfLength:[fileData length]];
+				}
+				if ([download delegateRespondsToTransferTransferredData])
+				{
+					[[download delegate] transfer:[download userInfo] transferredDataOfLength:[fileData length]];
 				}
 				
+				int percent = (100 * bytesTransferred) / bytesToTransfer;
 				if (_flags.downloadPercent)
 				{
-					int percent = (100 * bytesTransferred) / bytesToTransfer;
-					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
-					lastPercent = percent;
+					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
 				}
+				if ([download delegateRespondsToTransferProgressedTo])
+				{
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				lastPercent = percent;
 			}
 		}
 		else  //add the data at the end of the file
@@ -443,17 +471,25 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			
 			if (_flags.downloadProgressed)
 			{
-				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
+				[_forwarder connection:self download:[download remotePath] receivedDataOfLength:[data length]];
+			}
+			if ([download delegateRespondsToTransferTransferredData])
+			{
+				[[download delegate] transfer:[download userInfo] transferredDataOfLength:[data length]];
 			}
 			
-			if (_flags.downloadPercent)
+			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			if (percent != lastPercent)
 			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				if (percent != lastPercent)
+				if (_flags.downloadPercent)
 				{
-					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
-					lastPercent = percent;
+					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
 				}
+				if ([download delegateRespondsToTransferProgressedTo])
+				{
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				lastPercent = percent;
 			}
 		}
 		
@@ -467,13 +503,22 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
 			
+			[download retain];
+			[self dequeueDownload];
+			
 			if (_flags.downloadFinished)
 			{
-				[_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
+				[_forwarder connection:self downloadDidFinish:[download remotePath]];
 			}
+			if ([download delegateRespondsToTransferDidFinish])
+			{
+				[[download delegate] transferDidFinish:[download userInfo]];
+			}
+			[download release];
+			
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
-			[self dequeueDownload];
+			
 			[self setState:ConnectionIdleState];
 		}
 		return NO;
@@ -586,18 +631,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithFile:localPath filename:remotePath];
-	ConnectionCommand *cmd = [ConnectionCommand command:req
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionUploadingFileState
-											  dependant:nil
-											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:localPath forKey:QueueUploadLocalFileKey];
-	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
-	
-	[self queueUpload:attribs];
-	[self queueCommand:cmd];
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
@@ -606,31 +640,59 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[self uploadFile:localPath toFile:remotePath];
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
 {
-	// we don't support upload resumption
-	[self uploadFile:localPath];
-}
-
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
-{
-	[self uploadFile:localPath toFile:remotePath];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithData:data filename:remotePath];
+	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
+																			data:nil
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : transfer
+																		userInfo:transfer];
+	[transfer setUpload:YES];
+	[transfer setObject:localPath forKey:QueueUploadLocalFileKey];
+	[transfer setObject:remotePath forKey:QueueUploadRemoteFileKey];
+	
+	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithFile:localPath filename:remotePath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionUploadingFileState
 											  dependant:nil
 											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:data forKey:QueueUploadLocalDataKey];
-	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
-	[self queueUpload:attribs];
+	
+	[self queueUpload:record];
 	[self queueCommand:cmd];
+	
+	return transfer;
+}
+
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
+{
+	// we don't support upload resumption
+	[self uploadFile:localPath];
+}
+
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
+{
+	[self uploadFile:localPath toFile:remotePath];
+}
+
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate
+{
+	return [self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:delegate];
+}
+
+- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
+{
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
@@ -639,7 +701,36 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[self uploadFromData:data toFile:remotePath];
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:[data length]];
+	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
+																			data:data
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : transfer
+																		userInfo:transfer];
+	[transfer setUpload:YES];
+	[transfer setObject:data forKey:QueueUploadLocalDataKey];
+	[transfer setObject:remotePath forKey:QueueUploadRemoteFileKey];
+	
+	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithData:data filename:remotePath];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	
+	[self queueUpload:record];
+	[self queueCommand:cmd];
+	
+	return transfer;
+}
+
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	// we don't support upload resumption
 	[self uploadFromData:data toFile:remotePath];
@@ -647,22 +738,49 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
+	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:nil];
+}
+
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
+{
+	NSString *localPath = [dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
+	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:0];
+	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
+																			data:nil
+																		  offset:0
+																		  remote:remotePath
+																		delegate:delegate ? delegate : transfer
+																		userInfo:transfer];
+	[transfer setObject:remotePath forKey:QueueDownloadRemoteFileKey];
+	[transfer setObject:localPath forKey:QueueDownloadDestinationFileKey];
+	[transfer setUpload:NO];
+	
 	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:r
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDownloadingFileState
 											  dependant:nil
 											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:remotePath forKey:QueueDownloadRemoteFileKey];
-	[attribs setObject:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:QueueDownloadDestinationFileKey];
-	[self queueDownload:attribs];
+	[self queueDownload:record];
 	[self queueCommand:cmd];
+	
+	return transfer;
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
+}
+
+- (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
+							 toDirectory:(NSString *)dirPath
+							  fileOffset:(unsigned long long)offset
+								delegate:(id)delegate
+{
+	return [self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:delegate];
 }
 
 - (void)davDirectoryContents:(NSString *)dir

@@ -69,11 +69,7 @@ typedef enum {
 	long long			_transferCursor;
 	long long			_delegateSizeBuffer;
 	int					_transferLastPercent;
-	
-	// Transfer speed handling
-	NSDate				*_lastTransfer;
-	long				_transferSpeed; // bytes/second
-		
+			
 	NSFileHandle		*_writeHandle;
 	NSFileHandle		*_readHandle;
 	NSData				*_readData;
@@ -114,8 +110,6 @@ typedef enum {
 
 // TESTING
 - (NSString *)scanBetweenQuotes:(NSString *)aString;
-
-- (long)transferSpeed;
 
 @end
 

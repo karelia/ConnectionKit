@@ -358,12 +358,12 @@
 	}
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
 {
 	[self resumeUploadFile:localPath toFile:[localPath lastPathComponent] fileOffset:0];
 }
 
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"Not supported in MultipleConnection"
@@ -391,7 +391,7 @@
 	}
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(long long)offset
+- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"Not supported in MultipleConnection"
@@ -405,7 +405,7 @@
 								 userInfo:nil];
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(long long)offset
+- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"MultipleConnections does not support downloading"

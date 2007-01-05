@@ -965,7 +965,7 @@ static NSImage *_folder = nil;
 {
 	[[self uploadForRemoteFile:remotePath] setPercentTransferred:percent];
 	[transferTable reloadData];
-	[status setStringValue:[Controller formattedSpeed:[con transferSpeed]]];
+	[status setStringValue:[Controller formattedSpeed:[con uploadSpeed]]];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)conn uploadDidFinish:(NSString *)remotePath
@@ -986,7 +986,7 @@ static NSImage *_folder = nil;
 {
 	[[self downloadForRemoteFile:path] setPercentTransferred:percent];
 	[transferTable reloadData];
-	[status setStringValue:[Controller formattedSpeed:[con transferSpeed]]];
+	[status setStringValue:[Controller formattedSpeed:[con downloadSpeed]]];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath

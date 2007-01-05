@@ -39,6 +39,12 @@
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
+<<<<<<< .mine
+#import "NSData+Connection.h"
+#import "NSObject+Connection.h"
+#import "ConnectionThreadManager.h"
+=======
+>>>>>>> .r343
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -114,8 +120,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection forceDisconnect];
 	[_fileCheckingConnection release];
 	[_fileCheckInFlight release];
-	[_lastChunkSent release];
-	[_lastChunkReceived release];
 	
 	[_recursiveDeletionsQueue release];
 	[_recursiveListingConnection setDelegate:nil];
@@ -365,6 +369,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)connect
 {
+	_isForceDisconnecting = NO;
 	// do we really need to do this?
 	[self emptyCommandQueue];
 	
@@ -407,6 +412,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)threadedForceDisconnect
 {
+	_isForceDisconnecting = YES;
 	[self closeStreams];
 	if (_flags.didDisconnect)
 	{
@@ -444,7 +450,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveListingConnection setDelegate:self];
 		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveListingConnection connect];
-		NSLog(@"Listing Connection Opened");
 		_recursiveDeletionConnection = [[[self class] alloc] initWithHost:[self host]
 																	 port:[self port]
 																 username:[self username]
@@ -453,13 +458,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection setDelegate:self];
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];
-		NSLog(@"Deletion Connection Opened");
 	}
-	NSLog(@"%@ %@", @"Recursive Deletions Queue, ADD:", path);
 	[_recursiveDeletionsQueue addObject:path];
 	_numberOfListingsRemaining++;
-	NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
-	NSLog(@"%@ %@", @"Getting contents of", path);
 	[_recursiveListingConnection contentsOfDirectory:path];
 }
 
@@ -468,20 +469,18 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)recalcUploadSpeedWithBytesSent:(unsigned)length
 {
-	NSDate *now = [NSDate date];
-	NSTimeInterval diff = [_lastChunkSent timeIntervalSinceDate:now];
+	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+	NSTimeInterval diff = now - _lastChunkSent;
 	_uploadSpeed = length / diff;
-	[_lastChunkSent autorelease];
-	_lastChunkSent = [now retain];
+	_lastChunkSent = now;
 }
 
 - (void)recalcDownloadSpeedWithBytesSent:(unsigned)length
 {
-	NSDate *now = [NSDate date];
-	NSTimeInterval diff = [_lastChunkReceived timeIntervalSinceDate:now];
+	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+	NSTimeInterval diff = now - _lastChunkReceived;
 	_downloadSpeed = length / diff;
-	[_lastChunkReceived autorelease];
-	_lastChunkReceived = [now retain];
+	_lastChunkReceived = now;
 }
 
 - (void)closeStreams
@@ -596,14 +595,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
 		}
 		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-		KTLog(StreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
+
+		KTLog(OutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
+
 		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
 							  withBytes:NULL
 								 length:0];
 		[_sendBufferLock unlock];
 		uint8_t *bytes = (uint8_t *)[chunk bytes];
-		[_lastChunkSent autorelease];
-		_lastChunkSent = [[NSDate date] retain];
+		_lastChunkSent = [NSDate timeIntervalSinceReferenceDate];
 		// wait for the stream to open
 		NSDate *start = [NSDate date];
 		while ([_sendStream streamStatus] != NSStreamStatusOpen)
@@ -671,12 +671,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[self receiveStreamDidOpen];
 			}
 			
-			KTLog(StreamDomain, KTLogDebug, @"Command receive stream opened");
+			KTLog(InputStreamDomain, KTLogDebug, @"Command receive stream opened");
 			break;
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			KTLog(StreamDomain, KTLogError, @"receive stream error: %@", [_receiveStream streamError]);
+			KTLog(InputStreamDomain, KTLogError, @"receive stream error: %@", [_receiveStream streamError]);
 			if (_flags.error) 
 			{
 				NSError *error = nil;
@@ -732,7 +732,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventEndEncountered:
 		{
 			myStreamFlags.readOpen = NO;
-			KTLog(StreamDomain, KTLogDebug, @"Command receive stream ended");
+			KTLog(InputStreamDomain, KTLogDebug, @"Command receive stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
@@ -779,13 +779,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[self sendStreamDidOpen];
 			}
 			
-			KTLog(StreamDomain, KTLogDebug, @"Command send stream opened");
+			KTLog(OutputStreamDomain, KTLogDebug, @"Command send stream opened");
 			
 			break;
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			KTLog(StreamDomain, KTLogError, @"send stream error: %@", [_receiveStream streamError]);
+			KTLog(OutputStreamDomain, KTLogError, @"send stream error: %@", [_receiveStream streamError]);
 			if (_flags.error) 
 			{
 				NSError *error = nil;
@@ -841,7 +841,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventEndEncountered:
 		{
 			myStreamFlags.sendOpen = NO;
-			KTLog(StreamDomain, KTLogDebug, @"Command send stream ended");
+			KTLog(OutputStreamDomain, KTLogDebug, @"Command send stream ended");
 			[self closeStreams];
 			[self setState:ConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
@@ -875,7 +875,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		default:
 		{
-			KTLog(StreamDomain, KTLogError, @"Composite Event Code!  Need to deal with this!");
+			KTLog(OutputStreamDomain, KTLogError, @"Composite Event Code!  Need to deal with this!");
 			break;
 		}
 	}
@@ -888,7 +888,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	} else if (stream == (NSStream *)_receiveStream) {
 		[self handleReceiveStreamEvent:theEvent];
 	} else {
-		KTLog(StreamDomain, KTLogError, @"StreamBasedConnection: unknown stream (%@)", stream);
+		KTLog(TransportDomain, KTLogError, @"StreamBasedConnection: unknown stream (%@)", stream);
 	}
 }
 
@@ -975,10 +975,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	else if (con == _recursiveListingConnection)
 	{
-		NSLog(@"%@ %@", @"Got listing for", dirPath);
 		[_deletionLock lock];
 		_numberOfListingsRemaining--;
-		NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
@@ -986,22 +984,17 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
-				NSLog(@"%@ %@", @"Found a directory, adding", [dirPath stringByAppendingPathComponent:[cur objectForKey:@"cxFilenameKey"]]);
 				_numberOfListingsRemaining++;
-				NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfListingsRemaining);
 				[_recursiveListingConnection contentsOfDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 			else
 			{
-				NSLog(@"%@ %@", @"Found a file, deleting", [dirPath stringByAppendingPathComponent:[cur objectForKey:@"cxFilenameKey"]]);
 				_numberOfDeletionsRemaining++;
-				NSLog(@"%@ %i", @"Number of FILE DELETIONS remaining is now", _numberOfDeletionsRemaining);
 				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
 		if (![[_recursiveDeletionsQueue objectAtIndex:0] isEqualToString:dirPath])
 		{
-			NSLog(@"%@ %@", @"Directory is empty, adding", dirPath);
 			[_emptyDirectoriesToDelete addObject:dirPath];
 		}
 		[_deletionLock unlock];
@@ -1014,16 +1007,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_deletionLock lock];
 		_numberOfDeletionsRemaining--;
-		NSLog(@"%@ %i", @"Number of Listings remaining is now", _numberOfDeletionsRemaining);
 		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
 		{
-			NSLog(@"No files left to delete, let's delete empty directories");
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
 			NSString *cur;
 			while (cur = [e nextObject])
 			{
 				_numberOfDirDeletionsRemaining++;
-				NSLog(@"%@ %i", @"Number of DIR DELETIONS remaining is now", _numberOfDirDeletionsRemaining);
 				[_recursiveDeletionConnection deleteDirectory:cur];
 			}
 		}
@@ -1035,14 +1025,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (con == _recursiveDeletionConnection)
 	{
-		NSLog(@"%@ %@", @"successfully deleted", dirPath);
 		[_deletionLock lock];
 		_numberOfDirDeletionsRemaining--;
-		NSLog(@"%@ %i", @"Number of DIR DELETIONS remaining is now", _numberOfDirDeletionsRemaining);
 		[_deletionLock unlock];
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
 		{
-			NSLog(@"root");
 			[self deleteDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 		}

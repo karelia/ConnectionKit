@@ -60,6 +60,20 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
++ (NSString *)formattedSpeed:(NSNumber *)speed
+{
+	static NSString *suffix[] = {
+		@"B", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB"
+	};
+	int i, c = 7;
+	unsigned long long size = [speed unsignedLongLongValue];
+	
+	for (i = 0; i < c && size >= 1024; i++) {
+		size = size / 1024;
+	}
+	return [NSString stringWithFormat:@"%ld %@/s", size, suffix[i]];
+}
+
 @end
 
 @implementation NSAttributedString (Connection)

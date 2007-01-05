@@ -246,7 +246,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		CKHTTPRequest *req = [(CKHTTPRequest *)command retain];
 		[myCurrentRequest release];
 		myCurrentRequest = req;
-		
+				
 		if (myHTTPFlags.isInReconnection)
 		{
 			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];

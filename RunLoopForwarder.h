@@ -34,15 +34,18 @@
 #import <Cocoa/Cocoa.h>
 
 
-@interface RunLoopForwarder : NSObject {
+@interface RunLoopForwarder : NSObject 
+{
 	NSLock *lock;
 	NSThread *createdOnThread;
 	id	myDelegate;		// not retained
 	id  returnValueDelegate; // not retained
+	BOOL useMainThread; //default NO
 }
 
 - (void) setDelegate:(id)aDelegate;
 - (void) setReturnValueDelegate:(id)delegate;
+- (void) setUseMainThread:(BOOL)flag;
 @end
 
 @interface NSObject (RunLoopForwarderReturnValueDelegate)
