@@ -286,10 +286,7 @@ static NSString *KTLevelMap[] = {
 			[pi processName], [pi processIdentifier], KTLevelMap[level], domain, [filename lastPathComponent], line, log];
 		fprintf(stderr, [console UTF8String]);
 	}
-	else
-	{
-		NSLog(@"not logging to console");
-	}
+	
 	if (_loggingDelegate)
 	{
 		[_loggingDelegate logger:self logged:rec];

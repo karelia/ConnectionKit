@@ -67,6 +67,17 @@
 	[super dealloc];
 }
 
+- (id)copyWithZone:(NSZone *)zone
+{
+	CKInternalTransferRecord *copy = [[[self class] alloc] initWithLocal:myLocalPath
+																	data:myData
+																  offset:myOffset
+																  remote:myRemotePath
+																delegate:myDelegate
+																userInfo:myUserInfo];
+	return copy;
+}
+
 - (NSString *)localPath
 {
 	return myLocalPath;
@@ -80,6 +91,12 @@
 - (unsigned long long)offset
 {
 	return myOffset;
+}
+
+- (void)setRemotePath:(NSString *)path
+{
+	[myRemotePath autorelease];
+	myRemotePath = [path copy];
 }
 
 - (NSString *)remotePath

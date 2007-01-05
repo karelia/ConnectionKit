@@ -262,8 +262,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *download = [self currentDownload];
 		if (_flags.didBeginDownload)
 		{
-			NSString *file = [download remotePath];
-			[_forwarder connection:self downloadDidBegin:file];
+			[_forwarder connection:self downloadDidBegin:[download remotePath]];
 		}
 		if ([download delegateRespondsToTransferDidBegin])
 		{
@@ -275,8 +274,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *download = [self currentDownload];
 		if (_flags.didBeginUpload)
 		{
-			NSString *file = [download remotePath];
-			[_forwarder connection:self uploadDidBegin:file];
+			[_forwarder connection:self uploadDidBegin:[download remotePath]];
 		}
 		if ([download delegateRespondsToTransferDidBegin])
 		{

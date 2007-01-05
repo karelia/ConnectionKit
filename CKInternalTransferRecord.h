@@ -10,7 +10,7 @@
 
 @class RunLoopForwarder;
 
-@interface CKInternalTransferRecord : NSObject 
+@interface CKInternalTransferRecord : NSObject <NSCopying>
 {
 	NSString	*myLocalPath;
 	NSString	*myRemotePath;
@@ -60,4 +60,8 @@
 - (BOOL)delegateRespondsToTransferDidFinish;
 - (BOOL)delegateRespondsToError;
 
+@end
+
+@interface CKInternalTransferRecord (Private)
+- (void)setRemotePath:(NSString *)path;
 @end
