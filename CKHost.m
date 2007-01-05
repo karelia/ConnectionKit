@@ -319,7 +319,7 @@ static NSImage *sHostIcon = nil;
 		SecKeychainSearchRef search = nil;
 		SecKeychainItemRef item = nil;
 		SecKeychainAttributeList list;
-		SecKeychainAttribute attributes[4];
+		SecKeychainAttribute attributes[1];
 		OSErr result;
 		char *desc = "ConnectionKit Password";
 		NSString *label = [self name];
@@ -328,19 +328,7 @@ static NSImage *sHostIcon = nil;
 		attributes[0].data = (void *)[myUsername UTF8String];
 		attributes[0].length = strlen(attributes[0].data);
 		
-		attributes[1].tag = kSecCommentItemAttr;
-		attributes[1].data = (void *)[label UTF8String];
-		attributes[1].length = strlen(attributes[1].data);
-		
-		attributes[2].tag = kSecDescriptionItemAttr;
-		attributes[2].data = (void *)desc;
-		attributes[2].length = strlen(desc);
-		
-		attributes[3].tag = kSecLabelItemAttr;
-		attributes[3].data = (void *)[label UTF8String];
-		attributes[3].length = strlen(attributes[3].data);
-		
-		list.count = 4;
+		list.count = 1;
 		list.attr = &attributes[0];
 		
 		result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
@@ -353,16 +341,13 @@ static NSImage *sHostIcon = nil;
 		if ((result = SecKeychainSearchCopyNext (search, &item)) == noErr) {
 			UInt32 length;
 			char *pass;
-			SecKeychainAttribute attributes[4];
+			SecKeychainAttribute attributes[1];
 			SecKeychainAttributeList list;
 			OSStatus status;
 			
 			attributes[0].tag = kSecAccountItemAttr;
-			attributes[1].tag = kSecDescriptionItemAttr;
-			attributes[2].tag = kSecLabelItemAttr;
-			attributes[3].tag = kSecModDateItemAttr;
 			
-			list.count = 4;
+			list.count = 1;
 			list.attr = attributes;
 			
 			status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
@@ -374,7 +359,7 @@ static NSImage *sHostIcon = nil;
 		if (item) CFRelease(item);
 		if (search) CFRelease (search);
 	}
-
+	
 	return myPassword;
 }
 
@@ -556,7 +541,7 @@ static NSImage *sHostIcon = nil;
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSMutableString *appName = [NSMutableString stringWithString:[self annotation] != nil ? [self annotation] : [self host]];
-	[appName replaceOccurrencesOfString:@"." withString:@"_" options:NSLiteralSearch range:NSMakeRange(0,[[self host] length])];
+	[appName replaceOccurrencesOfString:@"." withString:@"_" options:NSLiteralSearch range:NSMakeRange(0,[appName length])];
 	NSString *app = [[path stringByAppendingPathComponent:appName] stringByAppendingPathExtension:@"app"];
 	NSString *contents = [app stringByAppendingPathComponent:@"Contents"];
 	NSString *exe = [contents stringByAppendingPathComponent:@"MacOS"];

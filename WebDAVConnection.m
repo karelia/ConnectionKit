@@ -257,7 +257,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					if (_flags.uploadFinished)
 					{
 						[_forwarder connection:self
-							   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+							   uploadDidFinish:[[self currentUpload] remotePath]];
 					}
 					break;
 				}
@@ -855,14 +855,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			{
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
 				[_forwarder connection:self 
-								upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+								upload:[[self currentUpload] remotePath]
 						  progressedTo:[NSNumber numberWithInt:percent]];
 			}
 		}
 		if (_flags.uploadProgressed)
 		{
 			[_forwarder connection:self 
-							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+							upload:[[self currentUpload] remotePath]
 				  sentDataOfLength:length];
 		}
 	}

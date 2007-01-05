@@ -301,7 +301,7 @@
 					if (_flags.uploadFinished)
 					{
 						[_forwarder connection:self
-							   uploadDidFinish:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+							   uploadDidFinish:[[self currentUpload] remotePath]];
 					}
 					break;
 				}
@@ -519,24 +519,20 @@
 
 - (NSDictionary *)currentDownload
 {
-  NSMutableDictionary *returnValue = [NSMutableDictionary dictionaryWithDictionary: [super currentDownload]];
-  
-  if ([returnValue objectForKey: QueueDownloadRemoteFileKey])
-    [returnValue setObject: [[returnValue objectForKey: QueueDownloadRemoteFileKey] stringByDeletingFirstPathComponent]
-                    forKey: QueueDownloadRemoteFileKey];
-  
-  return [NSDictionary dictionaryWithDictionary: returnValue];
+	CKInternalTransferRecord *returnValue = [[super currentDownload] copy];
+	
+	[returnValue setRemotePath:[[returnValue remotePath] stringByDeletingFirstPathComponent]];
+	
+	return [returnValue autorelease];
 }
 
-- (NSDictionary *)currentUpload
+- (CKInternalTransferRecord *)currentUpload
 {
-  NSMutableDictionary *returnValue = [NSMutableDictionary dictionaryWithDictionary: [super currentUpload]];
+	CKInternalTransferRecord *returnValue = [[super currentUpload] copy];
   
-  if ([returnValue objectForKey: QueueUploadRemoteFileKey])
-    [returnValue setObject: [[returnValue objectForKey: QueueUploadRemoteFileKey] stringByDeletingFirstPathComponent]
-                    forKey: QueueUploadRemoteFileKey];
+	[returnValue setRemotePath:[[returnValue remotePath] stringByDeletingFirstPathComponent]];
   
-  return [NSDictionary dictionaryWithDictionary: returnValue];
+	return [returnValue autorelease];
 }
 
 - (NSString *)rootDirectory
@@ -586,8 +582,7 @@
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	[super uploadFile:localPath
-			   toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]];
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
