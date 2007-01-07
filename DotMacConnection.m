@@ -547,8 +547,7 @@
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
-	[super createDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]
-			   permissions:permissions];
+	[self createDirectory:dirPath];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
