@@ -535,6 +535,13 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark -
 #pragma mark Abstract Connection Protocol
 
+- (void)threadedConnect
+{
+	[myCurrentDirectory autorelease];
+	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
+	[super threadedConnect];
+}
+
 - (void)davDidChangeToDirectory:(NSString *)dirPath
 {
 	[myCurrentDirectory autorelease];
