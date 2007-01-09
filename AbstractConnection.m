@@ -1133,6 +1133,15 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Editing Connection Delegate Methods
 
+- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+{
+	if (con == _editingConnection)
+	{
+		[_editingConnection release];
+		_editingConnection = nil;
+	}
+}
+
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent
 {
 	if (_flags.downloadPercent)

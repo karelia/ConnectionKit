@@ -942,6 +942,24 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
 }
 
+- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+{
+	if (con == _recursiveListingConnection)
+	{
+		[_editingConnection release];
+		_editingConnection = nil;
+	}
+	else if (con == _recursiveDeletionConnection)
+	{
+		[_editingConnection release];
+		_editingConnection = nil;
+	}
+	else
+	{
+		[super connection:con didDisconnectFromHost:host];
+	}
+}
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
 	if (con == _fileCheckingConnection)
