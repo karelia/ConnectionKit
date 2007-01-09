@@ -271,14 +271,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	if ([formattedCommand rangeOfString:@"STOR"].location != NSNotFound)
 	{
-		CKInternalTransferRecord *download = [self currentDownload];
+		CKInternalTransferRecord *upload = [self currentUpload];
 		if (_flags.didBeginUpload)
 		{
-			[_forwarder connection:self uploadDidBegin:[download remotePath]];
+			[_forwarder connection:self uploadDidBegin:[upload remotePath]];
 		}
-		if ([download delegateRespondsToTransferDidBegin])
+		if ([upload delegateRespondsToTransferDidBegin])
 		{
-			[[download delegate] transferDidBegin:[download userInfo]];
+			[[upload delegate] transferDidBegin:[upload userInfo]];
 		}
 	}
 	
