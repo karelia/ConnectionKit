@@ -532,12 +532,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
 				CKInternalTransferRecord *download = [self currentDownload];
-				NSFileManager *fm = [NSFileManager defaultManager];
-				[fm removeFileAtPath:[download localPath] handler:nil];
-				[fm createFileAtPath:[download localPath]
-							contents:nil
-						  attributes:nil];
-				[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+				if (_writeHandle == nil) // we can get setup in the handleDataReceievedEvent: method
+				{
+					NSFileManager *fm = [NSFileManager defaultManager];
+					[fm removeFileAtPath:[download localPath] handler:nil];
+					[fm createFileAtPath:[download localPath]
+								contents:nil
+							  attributes:nil];
+					[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+				}
 				//start to read in the data to kick start it
 				uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
 				int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
@@ -1422,14 +1425,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
 			
 			if (len >= 0)
-			{			
-				KTLog(StreamDomain, KTLogDebug, @"FTPD << %d bytes", len);
-
+			{	
+				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
+				KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [data shortDescription]);
+				
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
 					CKInternalTransferRecord *download = [self currentDownload];
 					NSString *file = [download remotePath];
-					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
+					if (_writeHandle == nil) // data receieved before receiving a 150
+					{
+						NSFileManager *fm = [NSFileManager defaultManager];
+						[fm removeFileAtPath:[download localPath] handler:nil];
+						[fm createFileAtPath:[download localPath]
+									contents:nil
+								  attributes:nil];
+						[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+					}
+					[_writeHandle writeData:data];
 					_transferSent += len;
 					
 					//if ([self isAboveNotificationTimeThreshold:[NSDate date]]) 
