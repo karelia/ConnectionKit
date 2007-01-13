@@ -281,6 +281,10 @@ NSDictionary *sDataAttributes = nil;
 											 password:(NSString *)password
 												error:(NSError **)error
 {
+	if ([port isKindOfClass:[NSNumber class]])
+	{
+		port = [NSString stringWithFormat:@"%@", port];
+	}
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
 	
