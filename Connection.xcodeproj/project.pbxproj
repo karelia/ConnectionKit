@@ -1309,7 +1309,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "echo ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\n#nmedit -R \"${SOURCE_ROOT}/UKKQueue_Symbols\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"";
+			shellScript = "HAS_SYMBOLS=`nm ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH} |grep .objc_class_name_UKKQueue |grep -w A`\necho $HAS_SYMBOLS\nif [ \"$HAS_SYMBOLS\" == \"\" ]\nthen\n\techo \"No need to strip symbols\"\nelse\n\tnmedit -R \"${SOURCE_ROOT}/UKKQueue_Symbols\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"\nfi\n";
 		};
 		797CBBEB09F854B60063FF9B /* Generate Localizable.strings */ = {
 			isa = PBXShellScriptBuildPhase;
