@@ -118,6 +118,12 @@
 				*password = [NSString stringWithUTF8String:buffer];
 			else
 				*password = nil;
+
+			theStatus = SecKeychainItemFreeContent (
+												 NULL,           //No attribute data to release
+												 buffer    //Release data buffer allocated by 
+																 //SecKeychainFindGenericPassword
+												 );
 			
 			*account = accountName;
 			return YES;

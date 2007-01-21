@@ -186,7 +186,7 @@ static NSImage *sHostIcon = nil;
 		@try {
 			SecKeychainAttribute attributes[4];
 			SecKeychainAttributeList list;
-			SecKeychainItemRef item;
+			SecKeychainItemRef item = nil;
 			OSStatus status;
 			char *desc = "ConnectionKit Password";
 			NSString *label = [self name];
