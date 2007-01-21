@@ -115,7 +115,7 @@
 				//save to keychain
 				SecKeychainAttribute attributes[4];
 				SecKeychainAttributeList list;
-				SecKeychainItemRef item;
+				SecKeychainItemRef item = nil;
 				OSStatus status;
 				char *desc = "SSH Public Key Password";
 				
