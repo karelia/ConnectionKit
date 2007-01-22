@@ -88,7 +88,8 @@
 		unsigned allowsBadCerts : 1; // for data transfer connections
 		unsigned isNegotiatingSSL : 1;
 		unsigned initializedSSL : 1;
-		unsigned unused : 25;
+		unsigned reportedError : 1;
+		unsigned unused: 24;
 	} myStreamFlags;
 	
 	// SSL Support

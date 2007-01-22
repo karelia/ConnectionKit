@@ -359,6 +359,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)threadedConnect
 {
+	myStreamFlags.reportedError = NO;
 	[self scheduleStreamsOnRunLoop];
 }
 
@@ -675,54 +676,58 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventErrorOccurred:
 		{
 			KTLog(InputStreamDomain, KTLogError, @"receive stream error: %@", [_receiveStream streamError]);
-			if (_flags.error) 
+			
+			NSError *error = nil;
+			
+			if (GET_STATE == ConnectionNotConnectedState) 
 			{
-				NSError *error = nil;
-				
-				if (GET_STATE == ConnectionNotConnectedState) {
-					error = [NSError errorWithDomain:ConnectionErrorDomain
-												code:ConnectionStreamError
-											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																				 forKey:NSLocalizedDescriptionKey]];
-				}
-				else {
-					// we want to catch the connection reset by peer error
-					error = [_receiveStream streamError];
-					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				error = [NSError errorWithDomain:ConnectionErrorDomain
+											code:ConnectionStreamError
+										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
+																			 forKey:NSLocalizedDescriptionKey]];
+			}
+			else
+			{
+				// we want to catch the connection reset by peer error
+				error = [_receiveStream streamError];
+				if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				{
+					KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_receiveStream streamError]);
+					error = nil;
+					
+					// resetup connection again
+					[self closeStreams];
+					[self setState:ConnectionNotConnectedState];
+					// roll back to the first command in this chain of commands
+					NSArray *cmds = [[self lastCommand] sequencedChain];
+					NSEnumerator *e = [cmds reverseObjectEnumerator];
+					ConnectionCommand *cur;
+					
+					while (cur = [e nextObject])
 					{
-						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_receiveStream streamError]);
-						error = nil;
-						
-						// resetup connection again
-						[self closeStreams];
-						[self setState:ConnectionNotConnectedState];
-						// roll back to the first command in this chain of commands
-						NSArray *cmds = [[self lastCommand] sequencedChain];
-						NSEnumerator *e = [cmds reverseObjectEnumerator];
-						ConnectionCommand *cur;
-						
-						while (cur = [e nextObject])
-						{
-							[self pushCommandOnCommandQueue:cur];
-						}
-						
-						NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
-																		  target:self
-																	   arguments:[NSArray array]];
-						int port = [[self port] intValue];
-						[inv setArgument:&port atIndex:2];
-						[inv performSelector:@selector(invoke) inThread:_createdThread];
-						
-						while (_sendStream == nil || _receiveStream == nil)
-						{
-							[NSThread sleepUntilDate:[NSDate distantPast]];
-						}
-						
-						[self scheduleStreamsOnRunLoop];
-						break;
+						[self pushCommandOnCommandQueue:cur];
 					}
+					
+					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
+																	  target:self
+																   arguments:[NSArray array]];
+					int port = [[self port] intValue];
+					[inv setArgument:&port atIndex:2];
+					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					
+					while (_sendStream == nil || _receiveStream == nil)
+					{
+						[NSThread sleepUntilDate:[NSDate distantPast]];
+					}
+					
+					[self scheduleStreamsOnRunLoop];
+					break;
 				}
-				
+			}
+			
+			if (_flags.error && !myStreamFlags.reportedError) 
+			{
+				myStreamFlags.reportedError = YES;
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;
@@ -784,54 +789,59 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventErrorOccurred:
 		{
 			KTLog(OutputStreamDomain, KTLogError, @"send stream error: %@", [_receiveStream streamError]);
-			if (_flags.error) 
+			
+			NSError *error = nil;
+			
+			if (GET_STATE == ConnectionNotConnectedState) 
 			{
-				NSError *error = nil;
-				
-				if (GET_STATE == ConnectionNotConnectedState) {
-					error = [NSError errorWithDomain:ConnectionErrorDomain
-												code:ConnectionStreamError
-											userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																				 forKey:NSLocalizedDescriptionKey]];
-				}
-				else {
-					// we want to catch the connection reset by peer error
-					error = [_sendStream streamError];
-					if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				error = [NSError errorWithDomain:ConnectionErrorDomain
+											code:ConnectionStreamError
+										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
+																			 forKey:NSLocalizedDescriptionKey]];
+			}
+			else 
+			{
+				// we want to catch the connection reset by peer error
+				error = [_sendStream streamError];
+				if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				{
+					KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_sendStream streamError]);
+					error = nil;
+					
+					// resetup connection again
+					[self closeStreams];
+					[self setState:ConnectionNotConnectedState];
+					
+					// roll back to the first command in this chain of commands
+					NSArray *cmds = [[self lastCommand] sequencedChain];
+					NSEnumerator *e = [cmds reverseObjectEnumerator];
+					ConnectionCommand *cur;
+					
+					while (cur = [e nextObject])
 					{
-						KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_sendStream streamError]);
-						error = nil;
-						
-						// resetup connection again
-						[self closeStreams];
-						[self setState:ConnectionNotConnectedState];
-						
-						// roll back to the first command in this chain of commands
-						NSArray *cmds = [[self lastCommand] sequencedChain];
-						NSEnumerator *e = [cmds reverseObjectEnumerator];
-						ConnectionCommand *cur;
-						
-						while (cur = [e nextObject])
-						{
-							[self pushCommandOnCommandQueue:cur];
-						}
-						
-						NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
-																		  target:self
-																	   arguments:[NSArray array]];
-						int port = [[self port] intValue];
-						[inv setArgument:&port atIndex:2];
-						[inv performSelector:@selector(invoke) inThread:_createdThread];
-						
-						while (_sendStream == nil || _receiveStream == nil)
-						{
-							[NSThread sleepUntilDate:[NSDate distantPast]];
-						}
-						
-						[self scheduleStreamsOnRunLoop];
-						break;
+						[self pushCommandOnCommandQueue:cur];
 					}
+					
+					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
+																	  target:self
+																   arguments:[NSArray array]];
+					int port = [[self port] intValue];
+					[inv setArgument:&port atIndex:2];
+					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					
+					while (_sendStream == nil || _receiveStream == nil)
+					{
+						[NSThread sleepUntilDate:[NSDate distantPast]];
+					}
+					
+					[self scheduleStreamsOnRunLoop];
+					break;
 				}
+			}
+			
+			if (_flags.error && !myStreamFlags.reportedError) 
+			{
+				myStreamFlags.reportedError = YES;
 				[_forwarder connection:self didReceiveError:error];
 			}
 			break;
