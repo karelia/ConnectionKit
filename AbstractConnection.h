@@ -87,7 +87,7 @@ typedef enum {
 
 @class UKKQueue, RunLoopForwarder;
 
-@interface AbstractConnection : NSObject <AbstractConnectionProtocol, NSCopying> 
+@interface AbstractConnection : NSObject <AbstractConnectionProtocol> 
 {
 
 	NSString *_connectionHost;

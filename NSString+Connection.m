@@ -60,18 +60,27 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
-+ (NSString *)formattedSpeed:(NSNumber *)speed
++ (NSString *)formattedSpeed:(double)speed
 {
-	static NSString *suffix[] = {
-		@"B", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB"
-	};
-	int i, c = 7;
-	unsigned long long size = [speed unsignedLongLongValue];
+	if (speed == 0) return @"0 B/s";
+	NSString *suffix[] = {@"B", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB"};
 	
-	for (i = 0; i < c && size >= 1024; i++) {
+	int i, c = 7;
+	double size = speed;
+	
+	for (i = 0; i < c && size >= 1024; i++) 
+	{
 		size = size / 1024;
 	}
-	return [NSString stringWithFormat:@"%ld %@/s", size, suffix[i]];
+	float rem = 0;
+	
+	if (i != 0)
+	{
+		rem = (speed - (i * 1024)) / (i * 1024);
+	}
+	
+	NSString *ext = suffix[i];
+	return [NSString stringWithFormat:@"%f %@/s", size+rem, ext];
 }
 
 @end

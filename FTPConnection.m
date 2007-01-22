@@ -2181,6 +2181,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	return [self uploadFile:nil
+					 orData:data
+					 offset:0
+				 remotePath:remotePath
+	   checkRemoteExistence:flag
+				   delegate:delegate];
+}
+
 - (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	[self uploadFile:nil orData:data offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];

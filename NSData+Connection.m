@@ -68,7 +68,7 @@
 {
 	unsigned char *bytes = (unsigned char *)[self bytes];
 	unsigned length = [self length];
-	NSMutableString *buf = [NSMutableString stringWithFormat:@"NSData %d bytes:\n", length];
+	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %d bytes:\n", [self className], length];
 	int i, j;
 	
 	for ( i = 0 ; i < length ; i += 16 )

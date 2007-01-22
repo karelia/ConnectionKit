@@ -121,9 +121,10 @@
 		7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */; };
 		79906BAF0B1175A800FE9681 /* host.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAD0B1175A800FE9681 /* host.png */; };
 		79906BB00B1175A800FE9681 /* bonjour.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAE0B1175A800FE9681 /* bonjour.png */; };
+		799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */; };
 		79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */; };
 		79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */; };
-		79B9CE580B1BC32100FBFDB3 /* CKTransferController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */; };
+		79B9CE580B1BC32100FBFDB3 /* CKTransferController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79B9CE590B1BC32100FBFDB3 /* CKTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */; };
 		79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* AbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD84E09F7048500172CDD /* AbstractConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD80D09F7048400172CDD /* AbstractConnection.m */; };
@@ -387,6 +388,7 @@
 		7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletPanel.m; sourceTree = "<group>"; };
 		79906BAD0B1175A800FE9681 /* host.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = host.png; sourceTree = "<group>"; };
 		79906BAE0B1175A800FE9681 /* bonjour.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bonjour.png; sourceTree = "<group>"; };
+		799ED2AC0B635C3400B6F2BA /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSecureHTTPConnection.h; sourceTree = "<group>"; };
 		79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSecureHTTPConnection.m; sourceTree = "<group>"; };
 		79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKInternalTransferRecord.h; sourceTree = "<group>"; };
@@ -718,6 +720,7 @@
 			children = (
 				790FF0E20ACCE966004B4021 /* KTLogController.h */,
 				790FF0E30ACCE966004B4021 /* KTLogController.m */,
+				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
 				790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */,
 			);
 			name = "KTLog Viewer";
@@ -954,7 +957,6 @@
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				79CFD81109F7048400172CDD /* ConnectionOpenPanel.h */,
 				79CFD81209F7048400172CDD /* ConnectionOpenPanel.m */,
-				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
 				798313C70B0D67E000F5078E /* CKTransferProgressCell.h */,
 				798313C80B0D67E000F5078E /* CKTransferProgressCell.m */,
 				791E83030B0EDAC90060E5FC /* error.png */,
@@ -963,6 +965,7 @@
 				7978FC250B1183DE0048168B /* CKController.m */,
 				79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */,
 				79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */,
+				799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1252,6 +1255,7 @@
 				79906BAF0B1175A800FE9681 /* host.png in Resources */,
 				79906BB00B1175A800FE9681 /* bonjour.png in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
+				799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1572,6 +1576,14 @@
 				798300060B0D4A2600F5078E /* en */,
 			);
 			name = DropletLauncher.nib;
+			sourceTree = "<group>";
+		};
+		799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				799ED2AC0B635C3400B6F2BA /* en */,
+			);
+			name = CKTransferController.nib;
 			sourceTree = "<group>";
 		};
 		79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */ = {

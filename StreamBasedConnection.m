@@ -266,6 +266,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	KTLog(StateMachineDomain, KTLogDebug, @"Checking Queue");
 	BOOL nextTry = 0 != [self numberOfCommands];
+	if (!nextTry)
+	{
+		KTLog(StateMachineDomain, KTLogDebug, @"Queue is Empty");
+	}
 	while (nextTry)
 	{
 		ConnectionCommand *command = [[self currentCommand] retain];

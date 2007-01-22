@@ -69,7 +69,7 @@ static NSString *KTLevelMap[] = {
 
 - (id)init
 {
-	if (self = [super init])
+	if ((self = [super init]))
 	{
 		myLock = [[NSLock alloc] init];
 		myLoggingLevels = [[NSMutableArray array] retain];
@@ -141,7 +141,7 @@ static NSString *KTLevelMap[] = {
 	NSEnumerator *e = [myLoggingLevels objectEnumerator];
 	NSMutableDictionary *cur;
 	
-	while (cur = [e nextObject])
+	while ((cur = [e nextObject]))
 	{
 		if ([[cur objectForKey:@"domain"] isEqualToString:domain])
 			return cur;
@@ -465,11 +465,18 @@ static NSString *KTLevelMap[] = {
 - (void)setLogToConsole:(BOOL)flag
 {
 	KTLogToConsole = flag;
+	[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithBool:flag]
+											  forKey:@"KTLogToConsole"];
 }
 
 - (BOOL)logToConsole
 {
-	return KTLogDebug;
+	return KTLogToConsole;
+}
+
+- (void)logToConsoleChanged:(id)sender
+{
+	[self setLogToConsole:[sender state] == NSOnState];
 }
 
 #pragma mark -
