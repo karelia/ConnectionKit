@@ -441,6 +441,11 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)beginSheetModalForWindow:(NSWindow *)window
 {
+	[myTransfers removeAllObjects];
+	[myPathsToVerify removeAllObjects];
+	[myRootedTransfers removeAllObjects];
+	[oFiles reloadData];
+	
 	myFlags.finishedContentGeneration = NO;
 	[self setStatusMessage:@""];
 	[oProgress setIndeterminate:YES];
