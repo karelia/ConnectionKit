@@ -16,7 +16,7 @@
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
-+ (NSString *)formattedSpeed:(NSNumber *)speed;
++ (NSString *)formattedSpeed:(double)speed;
 
 @end
 

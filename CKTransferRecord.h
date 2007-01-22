@@ -30,6 +30,7 @@
 - (BOOL)isUpload;
 
 - (NSString *)name;
+- (void)setName:(NSString *)name;
 - (void)setProgress:(int)progress; 
 
 - (void)cancel:(id)sender;
@@ -71,6 +72,8 @@
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
 @end
+
+extern NSString *CKTransferRecordProgressChangedNotification;
 
 @interface CKTransferRecord (Private)
 - (void)setConnection:(id <AbstractConnectionProtocol>)connection; 

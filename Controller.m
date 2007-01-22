@@ -419,24 +419,23 @@ NSString *ProtocolKey = @"Protocol";
 
 - (IBAction)deleteFile:(id)sender
 {
-	int row = [remoteTable selectedRow];
+	NSEnumerator *e = [remoteTable selectedRowEnumerator];
+	NSNumber *cur;
 	
-	NSDictionary *d = [remoteFiles objectAtIndex:row];
-	if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeRegular] ||
-		[[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+	while (cur = [e nextObject])
 	{
-		NSString *file = [[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]];
-		[con deleteFile:file];
-	}
-	else
-	{
-		if (NSRunAlertPanel(@"Delete Directory?",@"Would you like to recursively delete the directory?",@"Recursive",@"Normal",nil) == NSOKButton)
+		int row = [cur intValue];
+		
+		NSDictionary *d = [remoteFiles objectAtIndex:row];
+		if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeRegular] ||
+			[[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 		{
-			[con recursivelyDeleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+			NSString *file = [[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]];
+			[con deleteFile:file];
 		}
 		else
 		{
-			[con deleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
+			[con recursivelyDeleteDirectory:[[con currentDirectory] stringByAppendingPathComponent:[d objectForKey:cxFilenameKey]]];
 		}
 	}
 }
@@ -881,7 +880,7 @@ static NSImage *_folder = nil;
 	NSString *dir = [[initialDirectory stringValue] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 	if (dir && [dir length] > 0)
 		[con changeToDirectory:[initialDirectory stringValue]];
-	[con contentsOfDirectory:[con currentDirectory]];
+	[con directoryContents];
 }
 
 - (void)connection:(AbstractConnection *)aConn didDisconnectFromHost:(NSString *)host

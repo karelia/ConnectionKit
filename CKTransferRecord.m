@@ -9,7 +9,14 @@
 #import "CKTransferRecord.h"
 #import <Connection/NSString+Connection.h>
 
+NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";
+
 @implementation CKTransferRecord
+
++ (void)initialize
+{
+	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
+}
 
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size
 {
@@ -36,20 +43,6 @@
 	[myError release];
 	[super dealloc];
 }
-
-//- (void)willChangeValueForKey:(NSString *)key
-//{
-//	[super performSelectorOnMainThread:@selector(willChangeValueForKey:)
-//							withObject:key
-//						 waitUntilDone:YES];
-//}
-//
-//- (void)didChangeValueForKey:(NSString *)key
-//{
-//	[super performSelectorOnMainThread:@selector(didChangeValueForKey:)
-//							withObject:key
-//						 waitUntilDone:YES];
-//}
 
 - (void)setUpload:(BOOL)flag
 {
@@ -141,13 +134,33 @@
 	}
 }
 
+- (void)forceAnimationUpdate
+{
+	int i;
+	for (i = 1; i <= 10; i++)
+	{
+		[self willChangeValueForKey:@"progress"];
+		myProgress = i * 10;
+		[self didChangeValueForKey:@"progress"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
+															object:self];
+	}
+}
+
 - (void)setProgress:(int)progress
 {
 	if (myProgress != progress)
 	{
+		if (progress == 100 && myProgress == 1)
+		{
+			[self forceAnimationUpdate];
+			return;
+		}
 		[self willChangeValueForKey:@"progress"];
 		myProgress = progress;
 		[self didChangeValueForKey:@"progress"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
+															object:self];
 	}
 }
 
@@ -217,10 +230,19 @@
 	return myParent;
 }
 
+- (CKTransferRecord *)root
+{
+	if (myParent)
+	{
+		return [myParent root];
+	}
+	return self;
+}
+
 - (NSString *)path
 {
 	if (myParent == nil)
-		return [NSString stringWithFormat:@""];
+		return [NSString stringWithFormat:@"/%@", myName];
 	return [NSString stringWithFormat:@"%@/%@", [myParent path], myName];
 }
 
@@ -298,7 +320,7 @@
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
-- (void)transfer:(CKTransferRecord *)transfer receivedDataOfLength:(unsigned long long)length
+- (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	[self setSpeed:length / (now - myLastTransferTime)];
@@ -449,6 +471,24 @@
 													  withRoot:root];
 	[record setName:[[record name] lastPathComponent]];
 	[parent addContent:record];
+}
+
+#pragma mark -
+#pragma mark NSTreeController support
+
+- (BOOL)isLeaf
+{
+	return [myContents count] == 0;
+}
+
+- (NSDictionary *)nameWithProgress
+{
+	return [NSDictionary dictionaryWithObjectsAndKeys:[self progress], @"progress", [self name], @"name", nil];
+}
+
+- (void)setNameWithProgress:(id)notused
+{
+	; // just for KVO bindings
 }
 
 @end

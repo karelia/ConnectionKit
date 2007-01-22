@@ -40,6 +40,8 @@
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>
 #import <Connection/NSString+Connection.h>
+
+#import <Connection/CKTransferController.h>
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
 

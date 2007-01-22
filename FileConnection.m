@@ -148,6 +148,11 @@ checkRemoteExistence:(NSNumber *)check;
 		[myForwarder connection:self didConnectToHost:_connectionHost];
 	}
 	_flags.isConnected = YES;
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInThisBundle(@"Connected to File System\n", @"file transcript") 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 }
 
 - (void)threadedAbort
@@ -236,6 +241,11 @@ checkRemoteExistence:(NSNumber *)check;
 */
 - (void)connect
 {
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInThisBundle(@"Connecting...\n", @"file transcript")
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
 }
 
@@ -292,7 +302,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)createDirectory:(NSString *)aName
 {
-	[self createDirectory:aName permissions:0];
+	[self createDirectory:aName permissions:0755];
 }
 
 - (void)fcCreateDirectory:(NSString *)aName permissions:(NSNumber *)perms
@@ -300,11 +310,18 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kCreateDirectory];
 	unsigned long aPermissions = [perms unsignedLongValue];
 	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Create Directory %@ (%lo)\n", @"file transcript"), aName, aPermissions] 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
+	
 	NSDictionary *fmDictionary = nil;
 	if (0 != aPermissions)
 	{
 		fmDictionary = [NSDictionary dictionaryWithObject:[NSNumber numberWithLong:aPermissions] forKey:NSFilePosixPermissions];
 	}
+	
 	BOOL success = [myFileManager createDirectoryAtPath:aName attributes:fmDictionary];
 	
 	if (success)
@@ -399,6 +416,12 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kRename];
 	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath] 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
+	
 	BOOL success = [myFileManager movePath:fromPath toPath:toPath handler:self];
 	if (success && _flags.rename)
 	{
@@ -417,6 +440,12 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)fcDeleteFile:(NSString *)path
 {
 	[self setCurrentOperation:kDeleteFile];
+	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Deleting File %@\n", @"file transcript"), path] 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 	
 	NSTask *rm = [[NSTask alloc] init];
 	[rm setLaunchPath:@"/bin/rm"];
@@ -515,11 +544,16 @@ checkRemoteExistence:(NSNumber *)check;
 	[self queueInvocation:inv];
 }
 
-- (void)fcUpload:(CKInternalTransferRecord *)upload
-checkRemoteExistence:(NSNumber *)check
+- (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	BOOL flag = [check boolValue];
+	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]] 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 	
 	if (flag)
 	{
@@ -681,6 +715,12 @@ checkRemoteExistence:(NSNumber *)check
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	BOOL flag = [check boolValue];
+	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]] 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 	
 	if (flag)
 	{

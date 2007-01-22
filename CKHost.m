@@ -321,8 +321,6 @@ static NSImage *sHostIcon = nil;
 		SecKeychainAttributeList list;
 		SecKeychainAttribute attributes[1];
 		OSErr result;
-		char *desc = "ConnectionKit Password";
-		NSString *label = [self name];
 		
 		attributes[0].tag = kSecAccountItemAttr;
 		attributes[0].data = (void *)[myUsername UTF8String];
