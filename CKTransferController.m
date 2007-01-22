@@ -684,16 +684,29 @@ static NSSize closedSize = { 452, 153 };
 				NSString *filename = [file objectForKey:cxFilenameKey];
 				if ([filename isEqualToString:[cur name]])
 				{
-					KTLog(ControllerDomain, KTLogDebug, @"Verified file transferred %@", [cur path]);
 					[myPathsToVerify removeObject:[cur path]];
 					didFind = YES;
-					break;
+					
+					if ([[file objectForKey:NSFileSize] unsignedLongLongValue] > 0)
+					{
+						KTLog(ControllerDomain, KTLogDebug, @"Verified file transferred %@", [cur path]);
+						break;
+					}
+					else
+					{
+						KTLog(ControllerDomain, KTLogDebug, @"ERROR 0 file size %@", [cur path]);
+						NSString *msg = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The transferred file has a size of 0.", @"error transferring"), [cur path]]; 
+						NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
+															 code:CKFailedVerificationError
+														 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];
+						[cur setError:error];
+					}
 				}
 			}
 			if (!didFind)
 			{
 				KTLog(ControllerDomain, KTLogDebug, @"Failed to verify file transferred %@", [cur path]);
-				NSString *msg = [NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to verify file transferred successfully\n%@", @"error transferring"), [cur path]]; 
+				NSString *msg = [NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to verify file transferred successfully", @"error transferring")]; 
 				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 													 code:CKFailedVerificationError
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];
