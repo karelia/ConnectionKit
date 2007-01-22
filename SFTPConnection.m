@@ -1007,30 +1007,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {	
-	NSString *remoteFileName = [remotePath lastPathComponent];
-	NSString *localFile = [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName];
-	if (!flag)
-	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:localFile])
-		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:FTPDownloadFileExists
-												 userInfo:[NSDictionary dictionaryWithObject:@"Local File already exists" forKey:NSLocalizedDescriptionKey]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-		}
-	}
-	NSMutableDictionary *download = [NSMutableDictionary dictionary];
-	[download setObject:remotePath forKey:QueueDownloadRemoteFileKey];
-	[download setObject:localFile forKey:QueueDownloadDestinationFileKey];
-	[self queueDownload:download];
-	
-	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDownload) target:self arguments:[NSArray array]]
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionDownloadingFileState
-										dependant:nil
-										 userInfo:nil]];
+	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
@@ -1044,7 +1021,40 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
-	return [self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:delegate];
+	NSString *remoteFileName = [remotePath lastPathComponent];
+	NSString *localFile = [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName];
+	
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:0];
+	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localFile
+																			  data:nil
+																			offset:0
+																			remote:remotePath
+																		  delegate:delegate ? delegate : rec
+																		  userInfo:rec];
+	if (!flag)
+	{
+		if ([[NSFileManager defaultManager] fileExistsAtPath:localFile])
+		{
+			if (_flags.error) {
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain
+													 code:FTPDownloadFileExists
+												 userInfo:[NSDictionary dictionaryWithObject:@"Local File already exists" forKey:NSLocalizedDescriptionKey]];
+				[_forwarder connection:self didReceiveError:error];
+			}
+		}
+	}
+	[rec setObject:remotePath forKey:QueueDownloadRemoteFileKey];
+	[rec setObject:localFile forKey:QueueDownloadDestinationFileKey];
+	[rec setObject:[NSNumber numberWithBool:flag] forKey:@"Overwrite"];
+	
+	[self queueDownload:download];
+	
+	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDownload) target:self arguments:[NSArray array]]
+									   awaitState:ConnectionIdleState
+										sentState:ConnectionDownloadingFileState
+										dependant:nil
+										 userInfo:nil]];
+	return rec;
 }
 
 - (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
