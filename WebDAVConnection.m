@@ -847,8 +847,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			else
 			{
-				transferHeaderLength = 0;
 				length -= transferHeaderLength;
+				transferHeaderLength = 0;
+				bytesTransferred += length;
 			}
 		}
 		else
@@ -864,7 +865,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			{
 				if (_flags.uploadPercent)
 				{
-					
 					[_forwarder connection:self 
 									upload:[[self currentUpload] remotePath]
 							  progressedTo:[NSNumber numberWithInt:percent]];
@@ -873,7 +873,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				{
 					[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 				}
-				percent = lastPercent;
+				lastPercent = percent;
 			}
 		}
 		if (_flags.uploadProgressed)
