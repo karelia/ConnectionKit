@@ -149,6 +149,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)setProgress:(int)progress
 {
+	NSLog(@"%@ %d%%", myName, progress);
 	if (myProgress != progress)
 	{
 		if (progress == 100 && myProgress == 1)

@@ -459,8 +459,9 @@
 			}
 			else
 			{
-				transferHeaderLength = 0;
 				length -= transferHeaderLength;
+				transferHeaderLength = 0;
+				bytesTransferred += length;
 			}
 		}
 		else

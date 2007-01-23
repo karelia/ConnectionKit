@@ -201,7 +201,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		{
 			[myRootedTransfers addObject:cur];
 		}
-		
+		[self performSelectorOnMainThread:@selector(mainThreadTableReload:) withObject:nil waitUntilDone:NO];
 	}
 	return cur;
 }
@@ -526,6 +526,11 @@ static NSSize closedSize = { 452, 153 };
 - (NSArray *)transfers
 {
 	return myTransfers;
+}
+
+- (void)mainThreadTableReload:(id)unused
+{
+	[oFiles reloadData];
 }
 
 #pragma mark -
