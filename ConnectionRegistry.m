@@ -255,7 +255,9 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	return [NSArray arrayWithArray:myConnections];
 }
 
-- (void)recursivelyCreate:(CKHostCategory *)cat withMenu:(NSMenu *)menu indentation:(int)indent
+extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
+
+- (void)recursivelyCreate:(CKHostCategory *)cat withMenu:(NSMenu *)menu
 {
 	NSEnumerator *e = [[cat hosts] objectEnumerator];
 	id cur;
@@ -267,25 +269,38 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		if ([cur isKindOfClass:[CKHost class]])
 		{
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
-											  action:nil
+											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
+			NSMenu *subMenu = [[NSMenu alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]];
+			[subMenu addItem:item];
+			[item setSubmenu:subMenu];
 			[item setRepresentedObject:cur];
-			[item setImage:[cur icon]];
-			[item setIndentationLevel:indent];
+			NSImage *icon = [[cur icon] copy];
+			[icon setScalesWhenResized:YES];
+			[icon setSize:CKLimitMaxWidthHeight([icon size],16)];
+			[item setImage:icon];
+			[icon release];
 			[menu addItem:item];
 			[item release];
+			[subMenu release];
 		}
 		else
 		{
 			item = [[NSMenuItem alloc] initWithTitle:[cur name]
 											  action:nil
 									   keyEquivalent:@""];
+			NSMenu *subMenu = [[NSMenu alloc] initWithTitle:[cur name]];
+			[item setSubmenu:subMenu];
 			[item setRepresentedObject:cur];
-			[item setImage:[cur icon]];
-			[item setIndentationLevel:indent];
+			NSImage *icon = [[cur icon] copy];
+			[icon setScalesWhenResized:YES];
+			[icon setSize:CKLimitMaxWidthHeight([icon size],16)];
+			[item setImage:icon];
+			[icon release];
 			[menu addItem:item];
 			[item release];
-			[self recursivelyCreate:cur withMenu:menu indentation:indent+1];
+			[subMenu release];
+			[self recursivelyCreate:cur withMenu:subMenu];
 		}
 	}
 }
@@ -301,13 +316,16 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	
 	while ((cur = [e nextObject]))
 	{
+		NSImage *icon = [[cur icon] copy];
+		[icon setScalesWhenResized:YES];
+		[icon setSize:CKLimitMaxWidthHeight([icon size],16)];
 		if ([cur isKindOfClass:[CKHost class]])
 		{
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
-											  action:nil
+											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
 			[item setRepresentedObject:cur];
-			[item setImage:[cur icon]];
+			[item setImage:icon];
 			[menu addItem:item];
 			[item release];
 		}
@@ -316,17 +334,19 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 			item = [[NSMenuItem alloc] initWithTitle:[cur name]
 											  action:nil
 									   keyEquivalent:@""];
+			NSMenu *subMenu = [[[NSMenu alloc] initWithTitle:[cur name]] autorelease];
+			[item setSubmenu:subMenu];			
 			[item setRepresentedObject:cur];
-			[item setImage:[cur icon]];
+			[item setImage:icon];
 			[menu addItem:item];
 			[item release];
-			[self recursivelyCreate:cur withMenu:menu indentation:1];
+			[self recursivelyCreate:cur withMenu:subMenu];
 		}
+		[icon release];
 	}
 	
 	return [menu autorelease];
 }
-
 #pragma mark -
 #pragma mark Outline View Data Source
 
