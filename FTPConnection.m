@@ -676,7 +676,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentSizeState)
 			{
-				[scanner scanLongLong:&_transferSize];
+				CKInternalTransferRecord *download = [self currentDownload];
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
+				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
+				if ( [sizeScanner scanLocation] < [command length] )
+				{
+					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+					[sizeScanner scanLongLong:&_transferSize];
+				}
+				else
+				{
+					_transferSize = LONG_MAX;
+				}
+				if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
+				{
+					[(CKTransferRecord *)[download delegate] setSize:_transferSize];
+				}
+				
 				_transferSent = 0;
 				[self setState:ConnectionIdleState];
 			}
