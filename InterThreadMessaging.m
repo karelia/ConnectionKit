@@ -128,23 +128,22 @@ static NSLock * ConnectionMessageLockForThread (NSThread *thread)
 static NSPort *
 ConnectionMessagePortForThread (NSThread *thread)
 {
-    NSPort *port;
+    NSPort *port = nil;
 
-    assert(nil != thread);
 	if (!pThreadMessagePorts)
 	{
 		[ConnectionInterThreadManager class];
 	}
     assert(NULL != pThreadMessagePorts);
-
+	assert(nil != thread);
+	
     pthread_mutex_lock(&pGate);
     port = NSMapGet(pThreadMessagePorts, thread);
     pthread_mutex_unlock(&pGate);
 
 	if (nil == port)
 	{
-		ConnectionCreateMessagePortForThread(thread,
-											 [thread runLoop]);
+		ConnectionCreateMessagePortForThread(thread, [thread runLoop]);
 		pthread_mutex_lock(&pGate);
 		port = NSMapGet(pThreadMessagePorts, thread);
 		pthread_mutex_unlock(&pGate);
