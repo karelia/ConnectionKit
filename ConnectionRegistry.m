@@ -284,8 +284,6 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
 											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
-			NSMenu *subMenu = [[NSMenu alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]];
-			[item setSubmenu:subMenu];
 			[item setRepresentedObject:cur];
 			NSImage *icon = [[cur icon] copy];
 			[icon setScalesWhenResized:YES];
@@ -294,7 +292,6 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			[icon release];
 			[menu addItem:item];
 			[item release];
-			[subMenu release];
 		}
 		else
 		{
