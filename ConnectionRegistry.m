@@ -23,6 +23,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 @interface ConnectionRegistry (Private)
 - (void)otherProcessChanged:(NSNotification *)notification;
 - (NSString *)databaseFile;
+- (void)changed:(NSNotification *)notification;
 @end
 
 @implementation ConnectionRegistry
@@ -117,6 +118,17 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	return self;
 }
 
+- (void)beginGroupEditing
+{
+	myIsGroupEditing = YES;
+}
+
+- (void)endGroupEditing
+{
+	myIsGroupEditing = NO;
+	[self changed:nil];
+}
+
 - (NSString *)databaseFile
 {
 	return [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Preferences"] stringByAppendingPathComponent:@"com.connectionkit.registry"];
@@ -158,6 +170,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 - (void)changed:(NSNotification *)notification
 {
+	if (myIsGroupEditing) return;
 	//write out the db to disk
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSString *lockPath = @"/tmp/connection.registry.lock";

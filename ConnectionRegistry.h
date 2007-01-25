@@ -27,9 +27,14 @@
 	CKBonjourCategory *myBonjour;
 	NSDistributedNotificationCenter *myCenter;
 	NSLock *myLock;
+	
+	BOOL myIsGroupEditing;
 }
 
 + (id)sharedRegistry; //use this. DO NOT alloc one yourself
+
+- (void)beginGroupEditing;
+- (void)endGroupEditing;
 
 - (void)addCategory:(CKHostCategory *)category;
 - (void)removeCategory:(CKHostCategory *)category;
