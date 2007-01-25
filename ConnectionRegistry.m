@@ -454,4 +454,43 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	return YES;
 }
 
+- (NSDragOperation)outlineView:(NSOutlineView*)outlineView validateDrop:(id)info proposedItem:(id)item proposedChildIndex:(int)index
+{
+	NSArray *draggedItems = [[info draggingPasteboard] propertyListForType:NSFilenamesPboardType];
+	NSEnumerator *draggedItemsEnumerator = [draggedItems objectEnumerator];
+	NSString *currentItemPath;
+	BOOL canAcceptDrag = NO;
+	while ((currentItemPath = [draggedItemsEnumerator nextObject]) && !canAcceptDrag)
+	{
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[currentItemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ![currentItemPath hasPrefix:@"/tmp/ck"])
+		{
+			canAcceptDrag = YES;
+			break;
+		}
+	}
+	if (canAcceptDrag)
+	{
+		return NSDragOperationCopy;
+	}
+	return NSDragOperationNone;
+}
+
+- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(int)index
+{
+	NSArray *dropletPaths = [[info draggingPasteboard] propertyListForType:NSFilenamesPboardType];
+	NSEnumerator *dropletPathEnumerator = [dropletPaths objectEnumerator];
+	NSString *currentDropletPath;
+	while (currentDropletPath = [dropletPathEnumerator nextObject])
+	{
+		NSString *configurationFilePath = [currentDropletPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
+		CKHost *dropletHost = [NSKeyedUnarchiver unarchiveObjectWithFile:configurationFilePath];
+		if (dropletHost)
+		{
+			[[ConnectionRegistry sharedRegistry] addHost:dropletHost];
+			[[ConnectionRegistry sharedRegistry] changed:nil];
+		}
+	}
+	return YES;
+}
+
 @end
