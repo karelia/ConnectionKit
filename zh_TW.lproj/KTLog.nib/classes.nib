@@ -2,7 +2,7 @@
     IBClasses = (
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {
-            ACTIONS = {addDomain = id; logToConsoleChanged = id; }; 
+            ACTIONS = {addDomain = id; }; 
             CLASS = KTLogger; 
             LANGUAGE = ObjC; 
             OUTLETS = {oDomains = NSTableView; oPanel = NSPanel; }; 
