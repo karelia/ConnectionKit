@@ -504,6 +504,13 @@
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE05A3530B6A947800A25808 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3540B6A947E00A25808 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3640B6A94A800A25808 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3650B6A94AE00A25808 /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3660B6A94B500A25808 /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3670B6A94BB00A25808 /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE05A3680B6A94C000A25808 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE1AD3DE0A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE1AD3E00A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/Passphrase.nib; sourceTree = "<group>"; };
@@ -1582,6 +1589,13 @@
 			isa = PBXVariantGroup;
 			children = (
 				799ED2AC0B635C3400B6F2BA /* en */,
+				CE05A3530B6A947800A25808 /* zh_TW */,
+				CE05A3540B6A947E00A25808 /* zh_CN */,
+				CE05A3640B6A94A800A25808 /* ja */,
+				CE05A3650B6A94AE00A25808 /* it */,
+				CE05A3660B6A94B500A25808 /* fr */,
+				CE05A3670B6A94BB00A25808 /* de */,
+				CE05A3680B6A94C000A25808 /* da */,
 			);
 			name = CKTransferController.nib;
 			sourceTree = "<group>";
