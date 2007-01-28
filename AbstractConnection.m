@@ -563,8 +563,6 @@ NSDictionary *sDataAttributes = nil;
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
-		_editWatcher = [[UKKQueue alloc] init];
-		[_editWatcher setDelegate:self];
 		_forwarder = [[RunLoopForwarder alloc] init];
 		[_forwarder setReturnValueDelegate:self];
 		
@@ -1185,6 +1183,11 @@ NSDictionary *sDataAttributes = nil;
 		cur = [_edits objectForKey:key];
 		if ([cur isEqualToString:remotePath])
 		{
+			if (!_editWatcher)
+			{
+				_editWatcher = [[UKKQueue alloc] init];
+				[_editWatcher setDelegate:self];
+			}
 			[_editWatcher addPathToQueue:key];
 			KTLog(EditingDomain, KTLogDebug, @"Opening file for editing %@", key);
 			[[NSWorkspace sharedWorkspace] openFile:key];
