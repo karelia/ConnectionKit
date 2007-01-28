@@ -399,7 +399,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	libssh2_session_set_write(mySession,ssh_write);
 	
 	[super threadedConnect];
-  _flags.isConnected = YES;
+	_flags.isConnected = YES;
 }
 
 - (void)threadedDisconnect
@@ -408,16 +408,6 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	ret = libssh2_session_disconnect(mySession, "bye bye");
 	libssh2_session_free(mySession); mySession = NULL;
 	[super threadedDisconnect];
-}
-
-- (void)threadedForceDisconnect
-{
-	ConnectionCommand *cmd = [ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDisconnect) target:self arguments:[NSArray array]]
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionSentDisconnectState
-											  dependant:nil
-											   userInfo:nil];
-	[self pushCommandOnCommandQueue:cmd];
 }
 
 #pragma mark -

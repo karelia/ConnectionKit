@@ -478,10 +478,17 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if (![myDelegate transferControllerDefaultButtonAction:self])
 			return;
 	}
+	[myVerificationConnection setDelegate:nil];
+	[myVerificationConnection forceDisconnect];
+	[myVerificationConnection release]; myVerificationConnection = nil;
 	[[self connection] setDelegate:nil];
 	[[self connection] forceDisconnect];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
+	[myTransfers removeAllObjects];
+	[myPathsToVerify removeAllObjects];
+	[myRootedTransfers removeAllObjects];
+	[oFiles reloadData];
 }
 
 - (IBAction)alternateButtonPressed:(id)sender
@@ -491,10 +498,17 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if (![myDelegate transferControllerAlternateButtonAction:self])
 			return;
 	}
+	[myVerificationConnection setDelegate:nil];
+	[myVerificationConnection forceDisconnect];
+	[myVerificationConnection release]; myVerificationConnection = nil;
 	[[self connection] setDelegate:nil];
 	[[self connection] forceDisconnect];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
+	[myTransfers removeAllObjects];
+	[myPathsToVerify removeAllObjects];
+	[myRootedTransfers removeAllObjects];
+	[oFiles reloadData];
 }
 
 static NSSize openedSize = { 452, 489 };

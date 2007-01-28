@@ -740,13 +740,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentQuitState || GET_STATE == ConnectionSentDisconnectState)
 			{
-				[self closeStreams];
-				
-				[self setState:ConnectionNotConnectedState];
-				_flags.isConnected = NO;
-				if (_flags.didDisconnect) {
-					[_forwarder connection:self didDisconnectFromHost:_connectionHost];
-				}	
+				[super threadedDisconnect];
 			}
 			break;
 		}
