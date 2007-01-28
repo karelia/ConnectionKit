@@ -256,7 +256,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (NSArray *)contents
 {
-	return [NSArray arrayWithArray:myContents];
+	return myContents;
 }
 
 - (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent

@@ -990,7 +990,7 @@ static NSImage *_folder = nil;
 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
 {
-	[[self downloadForRemoteFile:remotePath] setCompleted:YES];
+	//[[self downloadForRemoteFile:remotePath] setCompleted:YES];
 	[transferTable reloadData];
 	[self refreshRemoteUI];
 	[self refreshLocal];

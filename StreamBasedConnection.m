@@ -400,20 +400,27 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)threadedDisconnect
 {
 	_state = ConnectionNotConnectedState;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
 	[self closeStreams];
 	[_fileCheckingConnection disconnect];
 	[_recursiveListingConnection disconnect];
 	[_recursiveDeletionConnection disconnect];
+	[self emptyAllQueues];
+	
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
 }
 
 - (void)threadedForceDisconnect
 {
 	_isForceDisconnecting = YES;
 	[self closeStreams];
+	[_fileCheckingConnection forceDisconnect];
+	[_recursiveListingConnection forceDisconnect];
+	[_recursiveDeletionConnection forceDisconnect];
+	[self emptyAllQueues];
+	
 	if (_flags.didDisconnect)
 	{
 		[_forwarder connection:self didDisconnectFromHost:[self host]];
