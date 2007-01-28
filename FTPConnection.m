@@ -1277,11 +1277,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			if (GET_STATE == ConnectionUploadingFileState)
 			{
-				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"You do not have access to write file %@", @"FTP file upload error"), [[_uploadQueue objectAtIndex:0] objectForKey:QueueUploadRemoteFileKey]];
+				CKInternalTransferRecord *upload = [self currentUpload];
+				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
-				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"File %@ does not exist on server", @"FTP file download error"), [[_downloadQueue objectAtIndex:0] objectForKey:QueueDownloadRemoteFileKey]];
+				CKInternalTransferRecord *download = [self currentDownload];
+				error = [NSString stringWithFormat:LocalizedStringInThisBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
 			}
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{
