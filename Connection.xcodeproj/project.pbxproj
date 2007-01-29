@@ -31,6 +31,9 @@
 		3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* WebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* FTPConnection.h */; };
 		3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* SFTPConnection.h */; };
+		790AD9180B6DD19D001FF53A /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = 790AD9120B6DD19D001FF53A /* openssl.c */; };
+		790AD9190B6DD19D001FF53A /* openssl.h in Headers */ = {isa = PBXBuildFile; fileRef = 790AD9130B6DD19D001FF53A /* openssl.h */; };
+		790AD91B0B6DD19D001FF53A /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = 790AD9150B6DD19D001FF53A /* pem.c */; };
 		790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */; };
 		790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = 790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */; };
 		790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0E30ACCE966004B4021 /* KTLogController.m */; };
@@ -293,6 +296,9 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
+		790AD9120B6DD19D001FF53A /* openssl.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = openssl.c; sourceTree = "<group>"; };
+		790AD9130B6DD19D001FF53A /* openssl.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = openssl.h; sourceTree = "<group>"; };
+		790AD9150B6DD19D001FF53A /* pem.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pem.c; sourceTree = "<group>"; };
 		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
 		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
@@ -773,6 +779,9 @@
 				794EFE1E0A5CE58E00913151 /* session.c */,
 				794EFE1F0A5CE58E00913151 /* sftp.c */,
 				794EFE200A5CE58E00913151 /* userauth.c */,
+				790AD9120B6DD19D001FF53A /* openssl.c */,
+				790AD9130B6DD19D001FF53A /* openssl.h */,
+				790AD9150B6DD19D001FF53A /* pem.c */,
 				794EFDD70A5CDD3200913151 /* libssh2_config.h */,
 				794EFDD80A5CDD3200913151 /* libssh2_priv.h */,
 				794EFDD90A5CDD3200913151 /* libssh2_publickey.h */,
@@ -1069,6 +1078,7 @@
 				CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */,
 				797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */,
 				797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */,
+				790AD9190B6DD19D001FF53A /* openssl.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1473,6 +1483,8 @@
 				CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */,
 				7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */,
 				797782840B474765008DBA01 /* NSDictionary+Connection.m in Sources */,
+				790AD9180B6DD19D001FF53A /* openssl.c in Sources */,
+				790AD91B0B6DD19D001FF53A /* pem.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -49,7 +49,7 @@
  * Not a common configuration for any SSH server though
  * username should be NULL, or a null terminated string
  */
-LIBSSH2_API char *libssh2_userauth_list(LIBSSH2_SESSION *session, const char *username, int username_len)
+LIBSSH2_API char *libssh2_userauth_list(LIBSSH2_SESSION *session, const char *username, unsigned int username_len)
 {
 	unsigned char reply_codes[3] = { SSH_MSG_USERAUTH_SUCCESS, SSH_MSG_USERAUTH_FAILURE, 0 };
 	unsigned long data_len = username_len + 31; /* packet_type(1) + username_len(4) + service_len(4) + service(14)"ssh-connection" +
@@ -116,8 +116,8 @@ LIBSSH2_API int libssh2_userauth_authenticated(LIBSSH2_SESSION *session)
 /* {{{ libssh2_userauth_password
  * Plain ol' login
  */
-LIBSSH2_API int libssh2_userauth_password_ex(LIBSSH2_SESSION *session, const char *username, int username_len,
-																					  const char *password, int password_len,
+LIBSSH2_API int libssh2_userauth_password_ex(LIBSSH2_SESSION *session, const char *username, unsigned int username_len,
+																					  const char *password, unsigned int password_len,
 																					  LIBSSH2_PASSWD_CHANGEREQ_FUNC((*passwd_change_cb)))
 {
 	unsigned char *data, *s, reply_codes[4] = { SSH_MSG_USERAUTH_SUCCESS, SSH_MSG_USERAUTH_FAILURE, SSH_MSG_USERAUTH_PASSWD_CHANGEREQ, 0 };
@@ -239,7 +239,8 @@ static int libssh2_file_read_publickey(LIBSSH2_SESSION *session, unsigned char *
 {
 	FILE *fd;
 	char *pubkey = NULL, c, *sp1, *sp2, *tmp;
-	int pubkey_len = 0, tmp_len;
+	int pubkey_len = 0;
+	unsigned int tmp_len;
 
 #ifdef LIBSSH2_DEBUG_USERAUTH
 	_libssh2_debug(session, LIBSSH2_DBG_AUTH, "Loading public key file: %s", pubkeyfile);
@@ -337,7 +338,7 @@ static int libssh2_file_read_privatekey(LIBSSH2_SESSION *session,	LIBSSH2_HOSTKE
 		return -1;
 	}
 
-	if ((*hostkey_method)->initPEM(session, (unsigned const char *)privkeyfile, (unsigned const char *)passphrase, hostkey_abstract)) {
+	if ((*hostkey_method)->initPEM(session, (const char *)privkeyfile, (unsigned const char *)passphrase, hostkey_abstract)) {
 		libssh2_error(session, LIBSSH2_ERROR_FILE, "Unable to initialize private key from file", 0);
 		return -1;
 	}
@@ -349,11 +350,11 @@ static int libssh2_file_read_privatekey(LIBSSH2_SESSION *session,	LIBSSH2_HOSTKE
 /* {{{ libssh2_userauth_hostbased_fromfile_ex
  * Authenticate using a keypair found in the named files
  */
-LIBSSH2_API int libssh2_userauth_hostbased_fromfile_ex(LIBSSH2_SESSION *session, const char *username, int username_len,
+LIBSSH2_API int libssh2_userauth_hostbased_fromfile_ex(LIBSSH2_SESSION *session, const char *username, unsigned int username_len,
                                                                                  const char *publickey, const char *privatekey,
                                                                                  const char *passphrase,
-																				 const char *hostname, int hostname_len,
-																				 const char *local_username, int local_username_len)
+																				 const char *hostname, unsigned int hostname_len,
+																				 const char *local_username, unsigned int local_username_len)
 {
 	LIBSSH2_HOSTKEY_METHOD *privkeyobj;
 	void *abstract;
@@ -480,7 +481,7 @@ LIBSSH2_API int libssh2_userauth_hostbased_fromfile_ex(LIBSSH2_SESSION *session,
 /* {{{ libssh2_userauth_publickey_fromfile_ex
  * Authenticate using a keypair found in the named files
  */
-LIBSSH2_API int libssh2_userauth_publickey_fromfile_ex(LIBSSH2_SESSION *session, const char *username, int username_len,
+LIBSSH2_API int libssh2_userauth_publickey_fromfile_ex(LIBSSH2_SESSION *session, const char *username, unsigned int username_len,
                                                                                  const char *publickey, const char *privatekey,
                                                                                  const char *passphrase)
 {
@@ -656,7 +657,7 @@ LIBSSH2_API int libssh2_userauth_publickey_fromfile_ex(LIBSSH2_SESSION *session,
 /* {{{ libssh2_userauth_keyboard_interactive
  * Authenticate using a challenge-response authentication
  */
-LIBSSH2_API int libssh2_userauth_keyboard_interactive_ex(LIBSSH2_SESSION *session, const char *username, int username_len,
+LIBSSH2_API int libssh2_userauth_keyboard_interactive_ex(LIBSSH2_SESSION *session, const char *username, unsigned int username_len,
 														 LIBSSH2_USERAUTH_KBDINT_RESPONSE_FUNC((*response_callback)))
 {
 	unsigned char *s, *data; /* packet */

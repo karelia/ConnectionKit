@@ -36,7 +36,6 @@
  */
 
 #include "libssh2_priv.h"
-#include <openssl/rand.h>
 #ifndef WIN32
 #include <unistd.h>
 #endif
@@ -105,8 +104,8 @@ LIBSSH2_CHANNEL *libssh2_channel_locate(LIBSSH2_SESSION *session, unsigned long 
 /* {{{ libssh2_channel_open_session
  * Establish a generic session channel
  */
-LIBSSH2_API LIBSSH2_CHANNEL *libssh2_channel_open_ex(LIBSSH2_SESSION *session, const char *channel_type, int channel_type_len, int window_size, int packet_size,
-																			   const char *message, int message_len)
+LIBSSH2_API LIBSSH2_CHANNEL *libssh2_channel_open_ex(LIBSSH2_SESSION *session, const char *channel_type, unsigned int channel_type_len, unsigned int window_size, 
+																			   unsigned int packet_size, const char *message, unsigned int message_len)
 {
 	unsigned char reply_codes[3] = { SSH_MSG_CHANNEL_OPEN_CONFIRMATION, SSH_MSG_CHANNEL_OPEN_FAILURE, 0 };
 	LIBSSH2_CHANNEL *channel = NULL;
@@ -257,7 +256,11 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_channel_direct_tcpip_ex(LIBSSH2_SESSION *se
 	memcpy(s, shost, shost_len);					s += shost_len;
 	libssh2_htonu32(s, sport);						s += 4;
 
-	channel = libssh2_channel_open_ex(session, "direct-tcpip", sizeof("direct-tcpip") - 1, LIBSSH2_CHANNEL_WINDOW_DEFAULT, LIBSSH2_CHANNEL_PACKET_DEFAULT, (const char *)message, message_len);
+	channel = libssh2_channel_open_ex(session, "direct-tcpip",
+                                          sizeof("direct-tcpip") - 1,
+                                          LIBSSH2_CHANNEL_WINDOW_DEFAULT,
+                                          LIBSSH2_CHANNEL_PACKET_DEFAULT,
+                                          (char *)message, message_len);
 	LIBSSH2_FREE(session, message);
 
 	return channel;
@@ -463,7 +466,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_channel_forward_accept(LIBSSH2_LISTENER *li
 /* {{{ libssh2_channel_setenv_ex
  * Set an environment variable prior to requesting a shell/program/subsystem
  */
-LIBSSH2_API int libssh2_channel_setenv_ex(LIBSSH2_CHANNEL *channel, char *varname, int varname_len, char *value, int value_len)
+LIBSSH2_API int libssh2_channel_setenv_ex(LIBSSH2_CHANNEL *channel, char *varname, unsigned int varname_len, char *value, unsigned int value_len)
 {
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned char *s, *packet, *data, reply_codes[3] = { SSH_MSG_CHANNEL_SUCCESS, SSH_MSG_CHANNEL_FAILURE, 0 }, local_channel[4];
@@ -520,8 +523,8 @@ LIBSSH2_API int libssh2_channel_setenv_ex(LIBSSH2_CHANNEL *channel, char *varnam
 /* {{{ libssh2_channel_request_pty_ex
  * Duh... Request a PTY
  */
-LIBSSH2_API int libssh2_channel_request_pty_ex(LIBSSH2_CHANNEL *channel, char *term, int term_len,
-																		 char *modes, int modes_len,
+LIBSSH2_API int libssh2_channel_request_pty_ex(LIBSSH2_CHANNEL *channel, char *term, unsigned int term_len,
+																		 char *modes, unsigned int modes_len,
 																		 int width, int height,
 																		 int width_px, int height_px)
 {
@@ -631,9 +634,9 @@ LIBSSH2_API int libssh2_channel_x11_req_ex(LIBSSH2_CHANNEL *channel, int single_
 		memcpy(s, auth_cookie, cookie_len);
 	} else {
 		int i;
-		char buffer[LIBSSH2_X11_RANDOM_COOKIE_LEN / 2];
+		unsigned char buffer[LIBSSH2_X11_RANDOM_COOKIE_LEN / 2];
 
-		RAND_bytes((unsigned char *)buffer, LIBSSH2_X11_RANDOM_COOKIE_LEN / 2);
+		libssh2_random(buffer, LIBSSH2_X11_RANDOM_COOKIE_LEN / 2);
 		for (i = 0; i < (LIBSSH2_X11_RANDOM_COOKIE_LEN / 2); i++) {
 			snprintf((char *)s + (i * 2), 2, "%02X", buffer[i]);
 		}
@@ -669,7 +672,7 @@ LIBSSH2_API int libssh2_channel_x11_req_ex(LIBSSH2_CHANNEL *channel, int single_
 /* {{{ libssh2_channel_process_startup
  * Primitive for libssh2_channel_(shell|exec|subsystem)
  */
-LIBSSH2_API int libssh2_channel_process_startup(LIBSSH2_CHANNEL *channel, const char *request, int request_len, const char *message, int message_len)
+LIBSSH2_API int libssh2_channel_process_startup(LIBSSH2_CHANNEL *channel, const char *request, unsigned int request_len, const char *message, unsigned int message_len)
 {
 	LIBSSH2_SESSION *session = channel->session;
 	unsigned char *s, *packet, *data, reply_codes[3] = { SSH_MSG_CHANNEL_SUCCESS, SSH_MSG_CHANNEL_FAILURE, 0 }, local_channel[4];

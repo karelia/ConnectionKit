@@ -100,13 +100,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
 		if ([[enclosedFolder progress] intValue] == 100)
 		{
-			if (!myVerificationConnection)
-			{
-				myVerificationConnection = [[self connection] copy];
-				[myVerificationConnection setName:@"verification"];
-				[myVerificationConnection setDelegate:self];
-				[myVerificationConnection connect];
-			}
 			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
 			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
 		}
@@ -474,7 +467,16 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	[oProgress startAnimation:self];
 	
+	[[self connection] setName:@"main uploader"];
 	[[self connection] connect];
+	
+	if (!myVerificationConnection)
+	{
+		myVerificationConnection = [[self connection] copy];
+		[myVerificationConnection setName:@"verification"];
+		[myVerificationConnection setDelegate:self];
+		[myVerificationConnection connect];
+	}
 	
 	if (myFlags.useThread)
 	{
@@ -650,7 +652,7 @@ static NSSize closedSize = { 452, 152 };
 			[myForwarder transferControllerDidFinish:self];
 		}
 	}
-}
+} 
 
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
 {
