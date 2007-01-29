@@ -14,6 +14,7 @@
 #import "CKTransferRecord.h"
 #import "FileConnection.h"
 #import "RunLoopForwarder.h" 
+#import "SFTPConnection.h"
 
 NSString *ControllerDomain = @"Controller";
 NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
@@ -469,8 +470,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	[[self connection] setName:@"main uploader"];
 	[[self connection] connect];
-	
-	if (!myVerificationConnection)
+
+	// temporarily turn off verification for sftp until I can sort out the double connection problem
+	if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
 	{
 		myVerificationConnection = [[self connection] copy];
 		[myVerificationConnection setName:@"verification"];
