@@ -73,7 +73,6 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[label release];
 	
 	// draw the image or progress pie
-	if (myProgress == 0) return;
 	if (myProgress < 0)
 	{
 		NSSize s = CKLimitMaxWidthHeight([sErrorImage size], NSHeight(cellFrame));
@@ -87,7 +86,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 					  operation:NSCompositeSourceOver
 					   fraction:1.0];
 	}
-	else if (myProgress > 0 && myProgress < 100)
+	else if (myProgress >= 0 && myProgress < 100)
 	{
 		NSAffineTransform *flip;
 		if ([controlView isFlipped]) 
@@ -127,6 +126,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		[sProgressColor set];
 		[pie setLineWidth:1.0];
 		[pie stroke];
+		[sProgressColor set];
 		[circle setLineWidth:1.0];
 		[circle stroke];
 		
