@@ -245,6 +245,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			[_forwarder connection:self didReceiveError: error];
 		}
 	}
+	[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+	
 	const char *fingerprint = libssh2_hostkey_hash(mySession, LIBSSH2_HOSTKEY_HASH_MD5);
 	NSMutableString *fp = [NSMutableString stringWithString:@""];
 	int i;
@@ -481,6 +483,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)threadedChangeToDirectory:(NSString *)dirPath
 {
+	KTLog(ProtocolDomain, KTLogDebug, @"Changing to directory: %@", dirPath);
 	LIBSSH2_SFTP_HANDLE *dir = libssh2_sftp_opendir(mySFTPChannel, [dirPath UTF8String]);
 	
 	if (dir == NULL)
@@ -527,6 +530,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)threadedCreateDirectory:(NSString *)dirPath
 {
+	KTLog(ProtocolDomain, KTLogDebug, @"Creating directory: %@", dirPath);
 	if (libssh2_sftp_mkdir(mySFTPChannel, [dirPath UTF8String], 040755))
 	{
 		if (_flags.error && !_flags.isRecursiveUploading)
@@ -575,6 +579,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 - (void)threadedSetPermissions:(NSNumber *)perms forFile:(NSString *)path
 {
 	unsigned long permissions = [perms unsignedLongValue];
+	KTLog(ProtocolDomain, KTLogDebug, @"Setting permissions (%ol) %@", permissions, path);
 	LIBSSH2_SFTP_ATTRIBUTES attribs;
 	char *utf8 = (char *)[path UTF8String];
 	int ret = libssh2_sftp_stat_ex(mySFTPChannel, utf8, strlen(utf8), 0, &attribs);
@@ -596,16 +601,12 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	[self queueRename:[NSDictionary dictionaryWithObjectsAndKeys:fromPath, SFTPRenameFromKey, toPath, SFTPRenameToKey, nil]];
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"rename %@ %@", [SFTPConnection escapedPathStringWithString:fromPath], [SFTPConnection escapedPathStringWithString:toPath]]
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionAwaitingRenameState
-										dependant:nil
-										 userInfo:nil]];
+	
 }
 
 - (void)threadedDeleteFile:(NSString *)path
 {
+	KTLog(ProtocolDomain, KTLogDebug, @"Deleting path: %@", path);
 	if (libssh2_sftp_unlink(mySFTPChannel, (char *)[path UTF8String]))
 	{
 		//report error
@@ -632,12 +633,6 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 - (void)deleteDirectory:(NSString *)dirPath
 {
 	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"need to upate to new sftp library" userInfo:nil];
-	[self queueDeletion:dirPath];
-	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"rmdir %@", [SFTPConnection escapedPathStringWithString:dirPath]]
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionDeleteDirectoryState
-										dependant:nil
-										 userInfo:nil]];
 }
 
 - (void)uploadFile:(NSString *)localPath
@@ -713,6 +708,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
+	
+	KTLog(ProtocolDomain, KTLogDebug, @"Uploading %@ to: %@", local, remote);
 	
 	NSFileHandle *file = [NSFileHandle fileHandleForReadingAtPath:local];
 	if (_flags.didBeginUpload)
@@ -853,6 +850,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
+	KTLog(ProtocolDomain, KTLogDebug, @"Uploading data to: %@", remote);
+	
 	if (_flags.didBeginUpload)
 	{
 		[_forwarder connection:self uploadDidBegin:remote];
@@ -968,6 +967,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	NSString *remoteFile = [download remotePath];
 	NSString *localFile = [download localPath];
 	NSFileManager *fm = [NSFileManager defaultManager];
+	
+	KTLog(ProtocolDomain, KTLogDebug, @"Downloading %@ to %@", remoteFile, localFile);
+	
 	if (![fm fileExistsAtPath:localFile])
 	{
 		[fm removeFileAtPath:localFile handler:nil];
@@ -1067,6 +1069,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)threadedContentsOfDirectory:(NSString *)directory
 {
+	KTLog(ProtocolDomain, KTLogDebug, @"Fetching contents of directory: %@", directory);
 	char *dirbuf = (char *)malloc(sizeof(char) * kSFTPBufferSize);
 	LIBSSH2_SFTP_HANDLE *dir = libssh2_sftp_opendir(mySFTPChannel, [directory UTF8String]);
 	
