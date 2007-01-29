@@ -403,6 +403,9 @@ NSString *ProtocolKey = @"Protocol";
 		[status setStringValue:[NSString stringWithFormat:@"Connecting to: %@", [cHost stringValue]]];
 		[con connect];
 	}
+//	id <AbstractConnectionProtocol> copy = [con copy];
+//	[copy setDelegate:self];
+//	[copy connect];
 }
 
 - (void)browse:(ConnectionOpenPanel *)panel returnCode:(int)returnCode contextInfo:(id)ui

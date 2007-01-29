@@ -297,6 +297,8 @@ LIBSSH2_API LIBSSH2_SESSION *libssh2_session_init_ex(
 	_libssh2_debug(session, LIBSSH2_DBG_TRANS, "New session resource allocated");
 #endif
 
+	libssh2_crypto_init ();
+
 	return session;
 }
 /* }}} */
@@ -453,16 +455,8 @@ LIBSSH2_API void libssh2_session_free(LIBSSH2_SESSION *session)
 
 		/* Client to Server */
 		/* crypt */
-		if (session->local.crypt) {
-			if (session->local.crypt->flags & LIBSSH2_CRYPT_METHOD_FLAG_EVP) {
-				if (session->local.crypt_abstract) {
-					EVP_CIPHER_CTX_cleanup(session->local.crypt_abstract);
-					LIBSSH2_FREE(session, session->local.crypt_abstract);
-					session->local.crypt_abstract = NULL;
-				}
-			} else if (session->local.crypt->dtor) {
-				session->local.crypt->dtor(session, &session->local.crypt_abstract);
-			}
+		if (session->local.crypt && session->local.crypt->dtor) {
+			session->local.crypt->dtor(session, &session->local.crypt_abstract);
 		}
 		/* comp */
 		if (session->local.comp && session->local.comp->dtor) {
@@ -475,16 +469,8 @@ LIBSSH2_API void libssh2_session_free(LIBSSH2_SESSION *session)
 
 		/* Server to Client */
 		/* crypt */
-		if (session->remote.crypt) {
-			if (session->remote.crypt->flags & LIBSSH2_CRYPT_METHOD_FLAG_EVP) {
-				if (session->remote.crypt_abstract) {
-					EVP_CIPHER_CTX_cleanup(session->remote.crypt_abstract);
-					LIBSSH2_FREE(session, session->remote.crypt_abstract);
-					session->remote.crypt_abstract = NULL;
-				}
-			} else if (session->remote.crypt->dtor) {
-				session->remote.crypt->dtor(session, &session->remote.crypt_abstract);
-			}
+		if (session->remote.crypt && session->remote.crypt->dtor) {
+			session->remote.crypt->dtor(session, &session->remote.crypt_abstract);
 		}
 		/* comp */
 		if (session->remote.comp && session->remote.comp->dtor) {
@@ -927,7 +913,7 @@ LIBSSH2_API int libssh2_poll(LIBSSH2_POLLFD *fds, unsigned int nfds, long timeou
 		sysret = poll(sockets, nfds, timeout_remaining);
 		gettimeofday((struct timeval *)&tv_end, NULL);
 		timeout_remaining -= (tv_end.tv_sec - tv_begin.tv_sec) * 1000;
-		timeout_remaining -= ceil((tv_end.tv_usec - tv_begin.tv_usec) / 1000);
+		timeout_remaining -= (tv_end.tv_usec - tv_begin.tv_usec) / 1000;
 }
 #else
 		/* If the platform doesn't support gettimeofday,
@@ -982,7 +968,7 @@ LIBSSH2_API int libssh2_poll(LIBSSH2_POLLFD *fds, unsigned int nfds, long timeou
 		gettimeofday((struct timeval *)&tv_end, NULL);
 
 		timeout_remaining -= (tv_end.tv_sec - tv_begin.tv_sec) * 1000;
-		timeout_remaining -= ceil((tv_end.tv_usec - tv_begin.tv_usec) / 1000);
+		timeout_remaining -= (tv_end.tv_usec - tv_begin.tv_usec) / 1000;
 }
 #else
 		/* If the platform doesn't support gettimeofday,

@@ -147,7 +147,7 @@ static int libssh2_publickey_packet_receive(LIBSSH2_PUBLICKEY *pkey, unsigned ch
 	unsigned long packet_len;
 	unsigned char *packet;
 
-	if (libssh2_channel_read(channel, buffer, 4) != 4) {
+	if (libssh2_channel_read(channel, (char *)buffer, 4) != 4) {
 		libssh2_error(session, LIBSSH2_ERROR_PUBLICKEY_PROTOCOL, "Invalid response from publickey subsystem", 0);
 		return -1;
 	}
@@ -159,7 +159,7 @@ static int libssh2_publickey_packet_receive(LIBSSH2_PUBLICKEY *pkey, unsigned ch
 		return -1;
 	}
 
-	if (libssh2_channel_read(channel, packet, packet_len) != packet_len) {
+	if (libssh2_channel_read(channel, (char *)packet, packet_len) != packet_len) {
 		libssh2_error(session, LIBSSH2_ERROR_SOCKET_TIMEOUT, "Timeout waiting for publickey subsystem response packet", 0);
 		LIBSSH2_FREE(session, packet);
 		return -1;
@@ -194,7 +194,7 @@ static int libssh2_publickey_response_id(unsigned char **pdata, int data_len)
 
 	while (codes->name) {
 		if (codes->name_len == response_len &&
-			strncmp(codes->name, (const char *)data, response_len) == 0) {
+			strncmp(codes->name, (char *)data, response_len) == 0) {
 			*pdata = data + response_len;
 			return codes->code;
 		}
@@ -212,7 +212,8 @@ static int libssh2_publickey_response_success(LIBSSH2_PUBLICKEY *pkey)
 {
 	LIBSSH2_SESSION *session = pkey->channel->session;
 	unsigned char *data, *s;
-	unsigned long data_len, response;
+	unsigned long data_len;
+	int response;
 
 	while (1) {
 		if (libssh2_publickey_packet_receive(pkey, &data, &data_len)) {
@@ -322,7 +323,7 @@ LIBSSH2_API LIBSSH2_PUBLICKEY *libssh2_publickey_init(LIBSSH2_SESSION *session)
 #ifdef LIBSSH2_DEBUG_PUBLICKEY
 	_libssh2_debug(session, LIBSSH2_DBG_PUBLICKEY, "Sending publickey version packet advertising version %d support", (int)LIBSSH2_PUBLICKEY_VERSION);
 #endif
-    if ((s - buffer) != libssh2_channel_write(channel, buffer, (s - buffer))) {
+    if ((s - buffer) != libssh2_channel_write(channel, (char*)buffer, (s - buffer))) {
         libssh2_error(session, LIBSSH2_ERROR_SOCKET_SEND, "Unable to send publickey version packet", 0);
 		goto err_exit;
     }
@@ -482,7 +483,7 @@ LIBSSH2_API int libssh2_publickey_add_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned
 #ifdef LIBSSH2_DEBUG_PUBLICKEY
 	_libssh2_debug(session, LIBSSH2_DBG_PUBLICKEY, "Sending publickey \"add\" packet: type=%s blob_len=%ld num_attrs=%ld", name, blob_len, num_attrs);
 #endif
-    if ((s - packet) != libssh2_channel_write(channel, packet, (s - packet))) {
+    if ((s - packet) != libssh2_channel_write(channel, (char *)packet, (s - packet))) {
         libssh2_error(session, LIBSSH2_ERROR_SOCKET_SEND, "Unable to send publickey add packet", 0);
 		LIBSSH2_FREE(session, packet);
 		return -1;
@@ -530,7 +531,7 @@ LIBSSH2_API int libssh2_publickey_remove_ex(LIBSSH2_PUBLICKEY *pkey, const unsig
 #ifdef LIBSSH2_DEBUG_PUBLICKEY
 	_libssh2_debug(session, LIBSSH2_DBG_PUBLICKEY, "Sending publickey \"remove\" packet: type=%s blob_len=%ld", name, blob_len);
 #endif
-    if ((s - packet) != libssh2_channel_write(channel, packet, (s - packet))) {
+    if ((s - packet) != libssh2_channel_write(channel, (char *)packet, (s - packet))) {
         libssh2_error(session, LIBSSH2_ERROR_SOCKET_SEND, "Unable to send publickey remove packet", 0);
 		LIBSSH2_FREE(session, packet);
 		return -1;
@@ -551,10 +552,11 @@ LIBSSH2_API int libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned l
 	LIBSSH2_SESSION *session = channel->session;
 	libssh2_publickey_list *list = NULL;
 	unsigned char *s, buffer[12], *data = NULL;
-	unsigned long buffer_len = 12, keys = 0, max_keys = 0, data_len, i, response;
-	/*	packet_len(4) + 
+	unsigned long buffer_len = 12, keys = 0, max_keys = 0, data_len, i;
+	/*	packet_len(4) +
 		list_len(4) +
 		"list"(4) */
+	int response;
 
 	s = buffer;
 	libssh2_htonu32(s, buffer_len - 4);							s += 4;
@@ -564,7 +566,7 @@ LIBSSH2_API int libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned l
 #ifdef LIBSSH2_DEBUG_PUBLICKEY
 	_libssh2_debug(session, LIBSSH2_DBG_PUBLICKEY, "Sending publickey \"list\" packet");
 #endif
-    if ((s - buffer) != libssh2_channel_write(channel, buffer, (s - buffer))) {
+    if ((s - buffer) != libssh2_channel_write(channel, (char *)buffer, (s - buffer))) {
         libssh2_error(session, LIBSSH2_ERROR_SOCKET_SEND, "Unable to send publickey list packet", 0);
 		return -1;
     }

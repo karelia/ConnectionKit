@@ -1,4 +1,4 @@
-/* Copyright (c) 2004-2006, Sara Golemon <sarag@libssh2.org>
+/* Copyright (c) 2004-2007, Sara Golemon <sarag@libssh2.org>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms,
@@ -42,19 +42,16 @@
 #include "libssh2_config.h"
 #include "libssh2.h"
 
+#include <stdio.h>
+
 #ifndef WIN32
 #include <sys/socket.h>
 #endif
-#include <openssl/evp.h>
-#ifndef OPENSSL_NO_SHA
-#include <openssl/sha.h>
-#endif
-#ifndef OPENSSL_NO_MD5
-#include <openssl/md5.h>
-#endif
 
-#ifdef __hpux
-# define inline 
+#ifdef LIBSSH2_LIBGCRYPT
+#include "libgcrypt.h"
+#else
+#include "openssl.h"
 #endif
 
 #define LIBSSH2_ALLOC(session, count)								session->alloc((count), &(session)->abstract)
@@ -68,7 +65,7 @@
 				session->ssh_msg_disconnect((session), (reason), (message), (message_len), (language), (language_len), &(session)->abstract)
 
 #define LIBSSH2_MACERROR(session, data, datalen)					session->macerror((session), (data), (datalen), &(session)->abstract)
-#define LIBSSH2_X11_OPEN(channel, shost, sport)						channel->session->x11(((channel)->session), (channel), (char *)(shost), (int)(sport), (&(channel)->session->abstract))
+#define LIBSSH2_X11_OPEN(channel, shost, sport)						channel->session->x11(((channel)->session), (channel), (shost), (sport), (&(channel)->session->abstract))
 
 #define LIBSSH2_CHANNEL_CLOSE(session, channel)						channel->close_cb((session), &(session)->abstract, (channel), &(channel)->abstract)
 
@@ -221,12 +218,10 @@ struct _LIBSSH2_SESSION {
 	 */
 	unsigned char *server_hostkey;
 	unsigned long server_hostkey_len;
-#ifndef OPENSSL_NO_MD5
+#if LIBSSH2_MD5
 	unsigned char server_hostkey_md5[MD5_DIGEST_LENGTH];
-#endif /* ! OPENSSL_NO_MD5 */
-#ifndef OPENSSL_NO_SHA
+#endif /* ! LIBSSH2_MD5 */
 	unsigned char server_hostkey_sha1[SHA_DIGEST_LENGTH];
-#endif
 
 	/* (remote as source of data -- packet_read ) */
 	libssh2_endpoint_data remote;
@@ -273,7 +268,7 @@ struct _LIBSSH2_SESSION {
 /* libssh2 extensible ssh api, ultimately I'd like to allow loading additional methods via .so/.dll */
 
 struct _LIBSSH2_KEX_METHOD {
-	char *name;
+	const char *name;
 
 	/* Key exchange, populates session->* and returns 0 on success, non-0 on error */
 	int (*exchange_keys)(LIBSSH2_SESSION *session);
@@ -282,26 +277,19 @@ struct _LIBSSH2_KEX_METHOD {
 };
 
 struct _LIBSSH2_HOSTKEY_METHOD {
-	char *name;
+	const char *name;
 	unsigned long hash_len;
 
 	int (*init)(LIBSSH2_SESSION *session, unsigned char *hostkey_data, unsigned long hostkey_data_len, void **abstract);
-	int (*initPEM)(LIBSSH2_SESSION *session, unsigned const char *privkeyfile, unsigned const char *passphrase, void **abstract);
+	int (*initPEM)(LIBSSH2_SESSION *session, const char *privkeyfile, unsigned const char *passphrase, void **abstract);
 	int (*sig_verify)(LIBSSH2_SESSION *session, const unsigned char *sig, unsigned long sig_len, const unsigned char *m, unsigned long m_len, void **abstract);
-	int (*sign)(LIBSSH2_SESSION *session, unsigned char **signature, unsigned long *signature_len, const unsigned char *data, unsigned long data_len, void **abstract);
 	int (*signv)(LIBSSH2_SESSION *session, unsigned char **signature, unsigned long *signature_len, unsigned long veccount, const struct iovec datavec[], void **abstract);
 	int (*encrypt)(LIBSSH2_SESSION *session, unsigned char **dst, unsigned long *dst_len, const unsigned char *src, unsigned long src_len, void **abstract);
 	int (*dtor)(LIBSSH2_SESSION *session, void **abstract);
 };
 
-/* When FLAG_EVP is set, crypt contains a pointer to an EVP_CIPHER generator and init and dtor are ignored
- * Yes, I know it's a hack.
-  */
-
-#define LIBSSH2_CRYPT_METHOD_FLAG_EVP	0x0001
-
 struct _LIBSSH2_CRYPT_METHOD {
-	char *name;
+	const char *name;
 
 	int blocksize;
 
@@ -311,13 +299,15 @@ struct _LIBSSH2_CRYPT_METHOD {
 
 	long flags;
 
-	int (*init)(LIBSSH2_SESSION *session, unsigned char *iv, int *free_iv, unsigned char *secret, int *free_secret, int encrypt, void **abstract);
+	int (*init)(LIBSSH2_SESSION *session, LIBSSH2_CRYPT_METHOD *method, unsigned char *iv, int *free_iv, unsigned char *secret, int *free_secret, int encrypt, void **abstract);
 	int (*crypt)(LIBSSH2_SESSION *session, unsigned char *block, void **abstract);
 	int (*dtor)(LIBSSH2_SESSION *session, void **abstract);
+
+	_libssh2_cipher_type(algo);
 };
 
 struct _LIBSSH2_COMP_METHOD {
-	char *name;
+	const char *name;
 
 	int (*init)(LIBSSH2_SESSION *session, int compress, void **abstract);
 	int (*comp)(LIBSSH2_SESSION *session, int compress, unsigned char **dest, unsigned long *dest_len, unsigned long payload_limit, int *free_dest,
@@ -326,7 +316,7 @@ struct _LIBSSH2_COMP_METHOD {
 };
 
 struct _LIBSSH2_MAC_METHOD {
-	char *name;
+	const char *name;
 
 	/* The length of a given MAC packet */
 	int mac_len;
@@ -485,5 +475,15 @@ LIBSSH2_MAC_METHOD **libssh2_mac_methods(void);
 
 /* Language API doesn't exist yet.  Just act like we've agreed on a language */
 #define libssh2_kex_agree_lang(session, endpoint, str, str_len)	0
+
+/* pem.c */
+int _libssh2_pem_parse (LIBSSH2_SESSION *session,
+			const char *headerbegin,
+			const char *headerend,
+			FILE *fp,
+			char **data, unsigned int *datalen);
+int _libssh2_pem_decode_sequence (unsigned char **data, unsigned int *datalen);
+int _libssh2_pem_decode_integer (unsigned char **data, unsigned int *datalen,
+				 unsigned char **i, unsigned int *ilen);
 
 #endif /* LIBSSH2_H */

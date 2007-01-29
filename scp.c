@@ -163,7 +163,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 		*(p++) = '\0';
 		/* Make sure we don't get fooled by leftover values */
 		errno = 0;
-		mtime = (long)strtol((const char *)s, NULL, 10);
+		mtime = strtol((const char *)s, NULL, 10);
 		if (errno) {
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, invalid mtime", 0);
 			libssh2_channel_free(channel);
@@ -190,7 +190,7 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 		*(p++) = '\0';
 		/* Make sure we don't get fooled by leftover values */
 		errno = 0;
-		atime = (long)strtol((const char *)s, NULL, 10);
+		atime = strtol((const char *)s, NULL, 10);
 		if (errno) {
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, invalid atime", 0);
 			libssh2_channel_free(channel);
@@ -260,9 +260,9 @@ LIBSSH2_API LIBSSH2_CHANNEL *libssh2_scp_recv(LIBSSH2_SESSION *session, const ch
 			return NULL;
 		}
 
-		s = (char *)response + 1;
+		s = (char *)(response + 1);
 		
-		p = strchr((const char *)s, ' ');
+		p = strchr(s, ' ');
 		if (!p || ((p - s) <= 0)) {
 			/* No spaces or space in the wrong spot */
 			libssh2_error(session, LIBSSH2_ERROR_SCP_PROTOCOL, "Invalid response from SCP server, malformed mode", 0);
