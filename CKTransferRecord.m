@@ -90,7 +90,23 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	
 	while ((cur = [e nextObject]))
 	{
-		size += [cur size];
+		unsigned long long s = [cur size];
+		if (s == -1) return -1; // propagate the error
+		size += s;
+	}
+	return size;
+}
+
+- (unsigned long long)sizeWithOutErrors
+{
+	unsigned long long size = mySize;
+	NSEnumerator *e = [myContents objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		unsigned long long s = [cur size];
+		size += s;
 	}
 	return size;
 }
@@ -169,7 +185,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	if ([self isDirectory]) 
 	{
 		//get the real transfer progress of the whole directory
-		unsigned long long size = [self size];
+		unsigned long long size = [self sizeWithOutErrors];
 		unsigned long long transferred = [self transferred];
 		int percent = (int)((transferred / (size * 1.0)) * 100);
 		return [NSNumber numberWithInt:percent];

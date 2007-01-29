@@ -576,6 +576,7 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)dealloc
 {
+	[_name release];
 	[_forwarder release];
 	[_connectionHost release];
 	[_connectionPort release];
@@ -615,6 +616,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 	
 	return copy;
+}
+
+- (NSString *)description
+{
+	return [NSString stringWithFormat:@"%@ - %@", [self className], _name];
 }
 
 - (void)setHost:(NSString *)host
@@ -1113,11 +1119,26 @@ NSDictionary *sDataAttributes = nil;
 	if (!_editingConnection)
 	{
 		_editingConnection = [self copy];
+		[_editingConnection setName:@"editing"];
 		[_editingConnection setDelegate:self];
 		[_editingConnection setTranscript:[self transcript]];
 		[_editingConnection connect];
 	}
 	[_editingConnection downloadFile:remotePath toDirectory:[localEditable stringByDeletingLastPathComponent] overwrite:YES];
+}
+
+- (void)setName:(NSString *)name
+{
+	if (name != _name)
+	{
+		[_name autorelease];
+		_name = [name copy];
+	}
+}
+
+- (NSString *)name;
+{
+	return _name;
 }
 
 #pragma mark -

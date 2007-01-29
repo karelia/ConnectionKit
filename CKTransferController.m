@@ -61,6 +61,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[cell release];
 	[oFiles setIndentationMarkerFollowsCell:YES];
 	[oFiles setDataSource:self];
+	[oFiles setDelegate:self];
 	
 	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
@@ -74,10 +75,12 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)progressChanged:(NSNotification *)n
 {
-	[oFiles performSelectorOnMainThread:@selector(reloadData)
-							 withObject:nil
-						  waitUntilDone:NO];
-	
+	if ([oShowFiles state] == NSOnState)
+	{
+		[oFiles performSelectorOnMainThread:@selector(reloadData)
+								 withObject:nil
+							  waitUntilDone:NO];
+	}
 	unsigned long long totalBytes = 0;
 	unsigned long long totalTransferred = 0;
 	NSEnumerator *e = [myTransfers objectEnumerator];
@@ -89,7 +92,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		totalTransferred += [cur transferred];
 	}
 	[oProgress setDoubleValue:(double)totalTransferred / (double)totalBytes];
-	[[self window] display];
 	
 	if (myFlags.verifyTransfers)
 	{
@@ -99,6 +101,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 			if (!myVerificationConnection)
 			{
 				myVerificationConnection = [[self connection] copy];
+				[myVerificationConnection setName:@"verification"];
 				[myVerificationConnection setDelegate:self];
 				[myVerificationConnection connect];
 			}
@@ -512,7 +515,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 }
 
 static NSSize openedSize = { 452, 489 };
-static NSSize closedSize = { 452, 153 };
+static NSSize closedSize = { 452, 155 };
 
 - (IBAction)showHideFiles:(id)sender
 {
@@ -589,6 +592,23 @@ static NSSize closedSize = { 452, 153 };
 		return [NSString formattedSpeed:[item speed]];
 	}
 	
+	return nil;
+}
+
+#pragma mark -
+#pragma mark Outline View Delegate Methods
+
+- (NSString *)outlineView:(NSOutlineView *)ov 
+		   toolTipForCell:(NSCell *)cell 
+					 rect:(NSRectPointer)rect 
+			  tableColumn:(NSTableColumn *)tc 
+					 item:(id)item 
+			mouseLocation:(NSPoint)mouseLocation
+{
+	if ([item error])
+	{
+		return [[[item error] userInfo] objectForKey:NSLocalizedDescriptionKey];
+	}
 	return nil;
 }
 
