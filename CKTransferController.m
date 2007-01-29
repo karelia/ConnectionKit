@@ -63,6 +63,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oFiles setDataSource:self];
 	[oFiles setDelegate:self];
 	
+	[oTitle setStringValue:@""];
 	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
 	[oProgress setUsesThreadedAnimation:YES];
@@ -71,6 +72,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 											 selector:@selector(progressChanged:)
 												 name:CKTransferRecordProgressChangedNotification
 											   object:nil];
+	
 }
 
 - (void)progressChanged:(NSNotification *)n
@@ -409,6 +411,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
+	myFlags.stopTransfer = NO;
+	
 	[self setStatusMessage:LocalizedStringInThisBundle(@"Generating Content...", @"message")];
 	
 	if (myFlags.delegateProvidesContent)
@@ -423,13 +427,21 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	[self performSelectorOnMainThread:@selector(finishedKickOff:) withObject:nil waitUntilDone:NO];
 	
-	if (myFlags.delegateFinishedContentGeneration)
+	if (myFlags.stopTransfer)
 	{
-		[myForwarder transferControllerFinishedContentGeneration:self];
+		[[self connection] setDelegate:nil];
+		[[self connection] forceDisconnect];
 	}
-	
-	// let the runloop run incase anyone is using it... like FileConnection. 
-	[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+	else
+	{
+		if (myFlags.delegateFinishedContentGeneration)
+		{
+			[myForwarder transferControllerFinishedContentGeneration:self];
+		}
+		
+		// let the runloop run incase anyone is using it... like FileConnection. 
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+	}
 	
 	[pool release];
 }
@@ -515,7 +527,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 }
 
 static NSSize openedSize = { 452, 489 };
-static NSSize closedSize = { 452, 155 };
+static NSSize closedSize = { 452, 152 };
 
 - (IBAction)showHideFiles:(id)sender
 {
@@ -548,6 +560,11 @@ static NSSize closedSize = { 452, 155 };
 - (void)mainThreadTableReload:(id)unused
 {
 	[oFiles reloadData];
+}
+
+- (void)stopTransfer:(id)sender
+{
+	myFlags.stopTransfer = YES;
 }
 
 #pragma mark -

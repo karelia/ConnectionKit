@@ -56,7 +56,8 @@ enum {
 		unsigned delegateDidFinish: 1;
 		unsigned finishedContentGeneration: 1;
 		unsigned verifyTransfers: 1;
-		unsigned unused: 25;
+		unsigned stopTransfer: 1;
+		unsigned unused: 24;
 	} myFlags;
 }
 
@@ -92,6 +93,8 @@ enum {
 - (void)setAlternateButtonTitle:(NSString *)title;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window;
+
+- (void)stopTransfer:(id)sender;
 
 - (IBAction)defaultButtonPressed:(id)sender;
 - (IBAction)alternateButtonPressed:(id)sender;
