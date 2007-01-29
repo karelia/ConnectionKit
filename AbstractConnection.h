@@ -89,7 +89,7 @@ typedef enum {
 
 @interface AbstractConnection : NSObject <AbstractConnectionProtocol> 
 {
-
+	NSString *_name;
 	NSString *_connectionHost;
 	NSString *_connectionPort;
 	NSString *_username;

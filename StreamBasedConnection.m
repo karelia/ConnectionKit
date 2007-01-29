@@ -449,19 +449,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
 		_deletionLock = [[NSLock alloc] init];
 		
-		_recursiveListingConnection = [[[self class] alloc] initWithHost:[self host]
-																	port:[self port]
-																username:[self username]
-																password:[self password]
-																   error:nil];
+		_recursiveListingConnection = [self copy];
+		[_recursiveListingConnection setName:@"recursive listing"];
 		[_recursiveListingConnection setDelegate:self];
 		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveListingConnection connect];
-		_recursiveDeletionConnection = [[[self class] alloc] initWithHost:[self host]
-																	 port:[self port]
-																 username:[self username]
-																 password:[self password]
-																	error:nil];
+		_recursiveDeletionConnection = [self copy];
+		[_recursiveDeletionConnection setName:@"recursive deletion"];
 		[_recursiveDeletionConnection setDelegate:self];
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];

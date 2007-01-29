@@ -117,6 +117,10 @@ typedef struct __flags {
 - (NSString *)username;
 - (NSString *)password;
 
+// you can set a name on a connection to help with debugging
+- (void)setName:(NSString *)name;
+- (NSString *)name; 
+
 - (void)setDelegate:(id)delegate;   // we do not retain the delegate
 - (id)delegate;
 
