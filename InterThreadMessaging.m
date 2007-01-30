@@ -307,7 +307,7 @@ ConnectionPostMessage (ConnectionInterThreadMessage *message, NSThread *thread, 
                                          receivePort:replyPort
                                          components:components];
 
-    if (nil == limitDate) { limitDate = [NSDate dateWithTimeIntervalSinceNow:1.5]; }
+    if (nil == limitDate || [limitDate timeIntervalSinceNow] > 0 ) { limitDate = [NSDate dateWithTimeIntervalSinceNow:1.5]; }
 	NSLock *ourLock = ConnectionMessageLockForThread([NSThread currentThread]);
 	NSLock *receiverLock = ConnectionMessageLockForThread(thread);
 	if (![ourLock tryLock])

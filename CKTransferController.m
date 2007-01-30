@@ -78,6 +78,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)progressChanged:(NSNotification *)n
 {
+	if (myFlags.finishedContentGeneration == NO) return;
+	
 	if ([oShowFiles state] == NSOnState)
 	{
 		[oFiles performSelectorOnMainThread:@selector(reloadData)
@@ -94,7 +96,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		totalBytes += [cur size];
 		totalTransferred += [cur transferred];
 	}
-	[oProgress setDoubleValue:(double)totalTransferred / (double)totalBytes];
+	
+	double prog = ((double)totalTransferred * 1.0) / ((double)totalBytes * 1.0);
+	[oProgress setDoubleValue:prog];
 	
 	if (myFlags.verifyTransfers)
 	{
@@ -347,11 +351,16 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oIcon setImage:icon];
 }
 
+- (void)mainThreadSetStatus:(NSString *)message
+{
+	[oStatus setStringValue:message];
+}
+
 - (void)setStatusMessage:(NSString *)message
 {
-	[oStatus performSelectorOnMainThread:@selector(setStringValue:) 
-							  withObject:message
-						   waitUntilDone:NO];
+	[self performSelectorOnMainThread:@selector(mainThreadSetStatus:) 
+						   withObject:message
+						waitUntilDone:NO];
 }
 
 - (void)setProgress:(double)progress
@@ -434,7 +443,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		}
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		// [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 	}
 	
 	[pool release];
@@ -472,6 +481,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[[self connection] connect];
 
 	// temporarily turn off verification for sftp until I can sort out the double connection problem
+	if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
 	if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
 	{
 		myVerificationConnection = [[self connection] copy];
@@ -571,6 +581,24 @@ static NSSize closedSize = { 452, 152 };
 	myFlags.stopTransfer = YES;
 }
 
+- (BOOL)hadErrorsTransferring
+{
+	BOOL ret = NO;
+	NSEnumerator *e = [myTransfers objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur hasError])
+		{
+			ret = YES;
+			break;
+		}
+	}
+	
+	return ret;
+}
+
 #pragma mark -
 #pragma mark Outline View Data Source
 
@@ -646,13 +674,24 @@ static NSSize closedSize = { 452, 152 };
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
-	if (con == [self connection])
+	if (myFlags.verifyTransfers)
 	{
-		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
-		if (myFlags.delegateDidFinish)
+		if (con == [self connection]) 
 		{
-			[myForwarder transferControllerDidFinish:self];
+			return;
 		}
+	}
+	else
+	{
+		if (con != [self connection])
+		{
+			return;
+		}
+	}
+	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
+	if (myFlags.delegateDidFinish)
+	{
+		[myForwarder transferControllerDidFinish:self];
 	}
 } 
 

@@ -103,6 +103,8 @@ enum {
 - (IBAction)cancelPassword:(id)sender;
 - (IBAction)connectPassword:(id)sender;
 
+- (BOOL)hadErrorsTransferring;
+
 @end
 
 @interface NSObject (CKTransferControllerDelegate)

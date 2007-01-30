@@ -135,7 +135,8 @@ static int libssh2_banner_receive(LIBSSH2_SESSION *session)
 {
 	char banner[256];
 	int banner_len = 0;
-
+	int tries = 10;
+	
 	while ((banner_len < sizeof(banner)) &&
 			((banner_len == 0) || (banner[banner_len-1] != '\n'))) {
 		char c = '\0';
@@ -182,7 +183,8 @@ static int libssh2_banner_receive(LIBSSH2_SESSION *session)
 		banner_len--;
 	}
 
-	if (!banner_len) return 1;
+	if (!banner_len) 
+		return 1;
 
 	session->remote.banner = LIBSSH2_ALLOC(session, banner_len + 1);
 	memcpy(session->remote.banner, banner, banner_len);
@@ -375,7 +377,7 @@ LIBSSH2_API int libssh2_session_startup(LIBSSH2_SESSION *session, int socket)
 		libssh2_error(session, LIBSSH2_ERROR_BANNER_SEND, "Error sending banner to remote host", 0);
 		return LIBSSH2_ERROR_BANNER_SEND;
 	}
-
+	
 	if (libssh2_banner_receive(session)) {
 		/* Unable to receive banner from remote */
 		libssh2_error(session, LIBSSH2_ERROR_BANNER_NONE, "Timeout waiting for banner", 0);

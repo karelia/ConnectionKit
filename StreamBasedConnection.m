@@ -515,6 +515,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (int)availableData:(NSData **)dataOut ofLength:(int)length
 {
+	if ([_receiveStream streamStatus] != NSStreamStatusOpen)
+	{
+		*dataOut = nil;
+		return 0;
+	}
 	struct pollfd fds;
 	fds.fd = [self socket];
 	fds.events = POLLIN;

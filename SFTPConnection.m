@@ -647,11 +647,11 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	size_t chunksent = libssh2_sftp_write(myTransferHandle,[data bytes],[data length]);
 	if (_flags.uploadProgressed)
 	{
-		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
+		[_forwarder connection:self upload:remote sentDataOfLength:[data length]];
 	}
 	if ([upload delegateRespondsToTransferTransferredData])
 	{
-		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunksent];
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:[data length]];
 	}
 	if (chunksent != [data length])
 	{
@@ -667,7 +667,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 //			[[upload delegate] transfer:[upload userInfo] receivedError:error];
 //		}
 	}
-	myBytesTransferred += chunksent;
+	myBytesTransferred += [data length];
 	int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 	if (_flags.uploadPercent)
 	{
@@ -1179,11 +1179,11 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
 										 userInfo:nil]];
-	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	if (cachedContents)
-	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
-	}
+	//NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	//if (cachedContents)
+	//{
+	//	[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	//}
 }
 
 + (NSString *)escapedPathStringWithString:(NSString *)str
@@ -1209,7 +1209,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	SFTPConnection *con = (SFTPConnection *)info;
 	NSData *data;
 	int size = [con availableData:&data ofLength:length];
-	
+		
 	if (size > 0)
 	{
 		memcpy(buffer,[data bytes],[data length]);
