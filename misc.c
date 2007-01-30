@@ -195,7 +195,7 @@ void _libssh2_debug(LIBSSH2_SESSION *session, int context, const char *format, .
 		context = 0;
 	}
 
-	len = snprintf(buffer, 1535, "[libssh2] %s: ", contexts[context]);
+	len = snprintf(buffer, 1535, "[libssh2] %s(%d): ", contexts[context], session->socket_fd);
 
 	va_start(vargs, format);
 	len += vsnprintf(buffer + len, 1535 - len, format, vargs);

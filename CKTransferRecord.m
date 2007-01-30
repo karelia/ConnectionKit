@@ -31,6 +31,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		mySize = size;
 		myContents = [[NSMutableArray array] retain];
 		myProperties = [[NSMutableDictionary dictionary] retain];
+		myError = nil;
 	}
 	return self;
 }
@@ -90,23 +91,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	
 	while ((cur = [e nextObject]))
 	{
-		unsigned long long s = [cur size];
-		if (s == -1) return -1; // propagate the error
-		size += s;
-	}
-	return size;
-}
-
-- (unsigned long long)sizeWithOutErrors
-{
-	unsigned long long size = mySize;
-	NSEnumerator *e = [myContents objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		unsigned long long s = [cur size];
-		size += s;
+		size += [cur size];
 	}
 	return size;
 }
@@ -125,13 +110,13 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		}
 		return rem;
 	}
-	if (myProgress == -1) 
+	if (myProgress == -1) //if we have an error return it as if we transferred the lot of it
 	{
 		return mySize;
 	} 
 	else
 	{	
-		return (mySize * (myProgress / 100.0));
+		return mySize * (myProgress / 100.0);
 	}
 }
 
@@ -153,10 +138,10 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 - (void)forceAnimationUpdate
 {
 	int i;
-	for (i = 1; i <= 10; i++)
+	for (i = 1; i <= 4; i++)
 	{
 		[self willChangeValueForKey:@"progress"];
-		myProgress = i * 10;
+		myProgress = i * 25;
 		[self didChangeValueForKey:@"progress"];
 		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
 															object:self];
@@ -185,7 +170,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	if ([self isDirectory]) 
 	{
 		//get the real transfer progress of the whole directory
-		unsigned long long size = [self sizeWithOutErrors];
+		unsigned long long size = [self size];
 		unsigned long long transferred = [self transferred];
 		int percent = (int)((transferred / (size * 1.0)) * 100);
 		return [NSNumber numberWithInt:percent];
@@ -199,7 +184,23 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (BOOL)hasError
 {
-	return (myError != nil);
+	BOOL ret = (myError != nil);
+	if (!ret)
+	{
+		// check children for errors
+		NSEnumerator *e = [myContents objectEnumerator];
+		CKTransferRecord *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([cur hasError])
+			{
+				ret = YES;
+				break;
+			}
+		}
+	}
+	return ret;
 }
 
 - (NSError *)error
@@ -215,6 +216,8 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		[myError autorelease];
 		myError = [error retain];
 		[self didChangeValueForKey:@"progress"];
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
+															object:self];
 	}
 }
 
@@ -333,11 +336,13 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
 	[self setProgress:1];
+	myTransferred = 0;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
+	myTransferred += length;
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	[self setSpeed:length / (now - myLastTransferTime)];
 	[self willChangeValueForKey:@"speed"];

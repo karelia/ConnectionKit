@@ -77,6 +77,7 @@
 - (void) setUseMainThread:(BOOL)flag
 {
 	useMainThread = flag;
+	createdOnThread = nil;
 }
 
 /*!	Take an invocation that didn't get recognized ... pretty much every one ... and run it on the main thread's runloop.

@@ -13,6 +13,7 @@
 	BOOL				isUpload;
 	NSString			*myName;
 	unsigned long long	mySize;
+	unsigned long long  myTransferred;
 	NSTimeInterval		myLastTransferTime;
 	double				mySpeed;
 	int					myProgress;

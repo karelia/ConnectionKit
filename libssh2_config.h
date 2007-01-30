@@ -57,6 +57,7 @@
 
 /* Output connection layer debugging info to stderr */
 /* #undef LIBSSH2_DEBUG_CONNECTION */
+//#define LIBSSH2_DEBUG_CONNECTION
 
 /* Output failure events to stderr */
 /* #undef LIBSSH2_DEBUG_ERRORS */
