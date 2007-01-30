@@ -443,7 +443,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		}
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
 	}
 	
 	[pool release];
@@ -678,6 +678,8 @@ static NSSize closedSize = { 452, 152 };
 	{
 		if (con == [self connection]) 
 		{
+			// we know if the uploader has disconnected, that the final verification dir would have been queued
+			[myVerificationConnection disconnect];
 			return;
 		}
 	}
