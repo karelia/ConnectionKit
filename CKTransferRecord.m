@@ -39,6 +39,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 - (void)dealloc
 {
 	[myName release];
+	[myContents makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
 	[myContents release];
 	[myProperties release];
 	[myError release];
