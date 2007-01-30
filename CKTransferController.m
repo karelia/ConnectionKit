@@ -443,7 +443,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		}
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
-		// [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
+		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]];
 	}
 	
 	[pool release];
