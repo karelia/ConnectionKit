@@ -177,9 +177,10 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)threadedDisconnect
 {
-	[myLock lock];
+	// no need to lock because the processInvocations has the lock in this thread
+	//[myLock lock];
 	[myPendingInvocations removeAllObjects];
-	[myLock unlock];
+	//[myLock unlock];
 	
 	if ( _flags.cancel )
 	{
@@ -249,21 +250,9 @@ checkRemoteExistence:(NSNumber *)check;
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
 }
 
-/*!	Basically a no-op, just send the completion method.
-*/
-
-- (void)fcDisconnect
-{
-	if (_flags.didDisconnect)
-	{
-		[myForwarder connection:self didDisconnectFromHost:[self host]];
-	}
-	_flags.isConnected = NO;
-}
-
 - (void)disconnect
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDisconnect)
+	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedDisconnect)
 													  target:self
 												   arguments:[NSArray array]];
 	[self queueInvocation:inv];
