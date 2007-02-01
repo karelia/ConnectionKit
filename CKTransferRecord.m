@@ -174,6 +174,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		//get the real transfer progress of the whole directory
 		unsigned long long size = [self size];
 		unsigned long long transferred = [self transferred];
+		if (size == 0) size = 1;
 		int percent = (int)((transferred / (size * 1.0)) * 100);
 		return [NSNumber numberWithInt:percent];
 	}

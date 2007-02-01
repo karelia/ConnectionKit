@@ -414,6 +414,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)threadedForceDisconnect
 {
+	_state = ConnectionNotConnectedState;
 	_isForceDisconnecting = YES;
 	[self closeStreams];
 	[_fileCheckingConnection forceDisconnect];
@@ -429,6 +430,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)forceDisconnect
 {
+	_state = ConnectionNotConnectedState;
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 	[_fileCheckingConnection forceDisconnect];
 	[_recursiveListingConnection forceDisconnect];
