@@ -32,6 +32,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		myContents = [[NSMutableArray array] retain];
 		myProperties = [[NSMutableDictionary dictionary] retain];
 		myError = nil;
+		myProgress = 0;
 	}
 	return self;
 }
@@ -336,7 +337,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	[self setProgress:1];
+	[self setProgress:0];
 	myTransferred = 0;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 }
