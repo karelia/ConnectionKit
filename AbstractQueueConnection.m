@@ -245,7 +245,7 @@ NSString *QueueDomain = @"Queuing";
 	ADD_TO_QUEUE(_fileCheckQueue, file);
 }
 
-#define DEQUEUE(q) [_queueLock lock]; [q removeObjectAtIndex:0]; [_queueLock unlock];
+#define DEQUEUE(q) [_queueLock lock]; if ([q count] > 0) [q removeObjectAtIndex:0]; [_queueLock unlock];
 
 - (void)dequeueCommand
 {
