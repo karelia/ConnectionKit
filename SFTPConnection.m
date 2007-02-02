@@ -843,7 +843,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 - (void)threadedUploadData
 {
 	CKInternalTransferRecord *upload = [self currentUpload];
-	NSData *data = [[upload userInfo] objectForKey:QueueUploadLocalDataKey];
+	NSData *data = [upload data];
 	NSString *remote = [upload remotePath];
 	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
@@ -880,7 +880,6 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 																		delegate:delegate ? delegate : upload
 																		userInfo:upload];
 	[upload setUpload:YES];
-	[upload setObject:data forKey:QueueUploadLocalDataKey];
 	[upload setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	[upload setObject:[NSNumber numberWithUnsignedInt:[data length]] forKey:SFTPTransferSizeKey];
 	[self queueUpload:record];
