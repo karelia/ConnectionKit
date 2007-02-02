@@ -445,7 +445,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		// let the runloop run incase anyone is using it... like FileConnection. 
 		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
 	}
-	
+	if (myFlags.useThread)
+	{
+		KTLog(ControllerDomain, KTLogDebug, @"kickoff: thread finishing up");
+	}
 	[pool release];
 }
 
@@ -455,10 +458,12 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oProgress setMaxValue:1.0];
 	[oProgress setDoubleValue:0];
 	[oProgress setIndeterminate:NO];
+	KTLog(ControllerDomain, KTLogDebug, @"Set progress bar to determinate");
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window
 {
+	KTLog(ControllerDomain, KTLogDebug, @"Beginning modal sheet");
 	[myTransfers removeAllObjects];
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
