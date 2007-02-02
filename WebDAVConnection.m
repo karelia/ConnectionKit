@@ -721,7 +721,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
 	[transfer setUpload:YES];
-	[transfer setObject:data forKey:QueueUploadLocalDataKey];
 	[transfer setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
 	DAVUploadFileRequest *req = [DAVUploadFileRequest uploadWithData:data filename:remotePath];

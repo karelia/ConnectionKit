@@ -691,7 +691,6 @@
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
-				790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -735,6 +734,7 @@
 				790FF0E30ACCE966004B4021 /* KTLogController.m */,
 				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
 				790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */,
+				790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */,
 			);
 			name = "KTLog Viewer";
 			sourceTree = "<group>";
