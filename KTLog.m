@@ -270,7 +270,7 @@ static NSString *KTLevelMap[] = {
 
 	[myLog seekToEndOfFile];
 
-	unsigned len = [recData length];
+	unsigned len = CFSwapInt32HostToLittle([recData length]);
 	NSMutableData *entry = [NSMutableData data];
 	[entry appendBytes:&len length:sizeof(unsigned)];
 	[entry appendData:recData];
@@ -409,6 +409,7 @@ static NSString *KTLevelMap[] = {
 			unsigned len;
 			NSData *lenData = [log readDataOfLength:sizeof(unsigned)];
 			[lenData getBytes:&len];
+			len = CFSwapInt32LittleToHost(len);
 			NSData *archive = [log readDataOfLength:len];
 			NSDictionary *record = [NSUnarchiver unarchiveObjectWithData:archive];
 			[entries addObject:record];
