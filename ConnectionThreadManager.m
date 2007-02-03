@@ -92,8 +92,14 @@ static NSLock *_initLock = nil;
 	
 	while (cur = [e nextObject])
 	{
-		[cur invoke];
-		[[cur target] release];
+		@try {
+			[cur invoke];
+			[[cur target] release];
+		}
+		@catch (NSException *ex) {
+			KTLog(ThreadingDomain, KTLogDebug, @"Exception caught when invoking: %@\n %@", cur, ex);
+			NSLog(@"Exception caught when invoking: %@\n %@", cur, ex);
+		}
 	}
 	
 }
