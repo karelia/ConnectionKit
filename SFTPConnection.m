@@ -473,7 +473,13 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	if ([cmd isKindOfClass:[NSInvocation class]])
 	{
 		KTLog(StateMachineDomain, KTLogDebug, @"Invoking command %@", NSStringFromSelector([cmd selector]));
-		[cmd invoke];
+		@try {
+			[cmd invoke];
+		}
+		@catch (NSException *ex) {
+			KTLog(StateMachineDomain, KTLogDebug, @"Exception caught when invoking: %@\n %@", cmd, ex);
+			NSLog(@"Exception caught when invoking: %@\n %@", cmd, ex);
+		}
 	}
 }
 
@@ -732,6 +738,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
+	NSAssert(localPath != nil && ![localPath isEqualToString:@""], @"localPath is nil");
+	NSAssert(remotePath != nil && ![remotePath isEqualToString:@""], @"remotePath is nil");
+	
 	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
 	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
@@ -872,6 +881,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
+	NSAssert(data != nil, @"data is nil");
+	NSAssert(remotePath != nil && ![remotePath isEqualToString:@""], @"remotePath is nil");
+	
 	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[data length]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
