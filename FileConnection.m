@@ -216,9 +216,17 @@ checkRemoteExistence:(NSNumber *)check;
 				[myInflightInvocation retain];
 				[myPendingInvocations removeObjectAtIndex:0];
 				KTLog(StateMachineDomain, KTLogDebug, @"Invoking %@", NSStringFromSelector([myInflightInvocation selector]));
-				[myInflightInvocation invoke];
-				[myInflightInvocation release];
-				myInflightInvocation = nil;
+				@try {
+					[myInflightInvocation invoke];
+				}
+				@catch (NSException *ex) {
+					KTLog(StateMachineDomain, KTLogDebug, @"Exception while invoking %@", NSStringFromSelector([myInflightInvocation selector]));
+					NSLog(@"Exception while invoking %@", NSStringFromSelector([myInflightInvocation selector]));
+				}
+				@finally {
+					[myInflightInvocation release];
+					myInflightInvocation = nil;
+				}
 			}
 			[NSThread sleepUntilDate:[NSDate distantPast]];
 		}

@@ -821,7 +821,7 @@ static NSImage *_folder = nil;
 {
 	FileTransfer *t = [FileTransfer uploadFile:local to:remote];
 	[transfers addObject:t];
-	[con uploadFile:local toFile:remote];
+	CKTransferRecord *rec = [con uploadFile:local toFile:remote checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)recursivelyUploadContentsAtPath:(NSString *)aFolderPath serverPath:(NSString *)aServerPath

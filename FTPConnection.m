@@ -2435,12 +2435,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											  sentState:ConnectionChangingDirectoryState
 											  dependant:pwd
 											   userInfo:nil];
+	[self startBulkCommands];
 	[_commandQueue insertObject:pwd2 atIndex:0];
 	[_commandQueue insertObject:cwd2 atIndex:0];
 	[_commandQueue insertObject:ls atIndex:0];
 	[_commandQueue insertObject:dataCmd atIndex:0];
 	[_commandQueue insertObject:pwd atIndex:0];
 	[_commandQueue insertObject:cwd atIndex:0];
+	[self endBulkCommands];
 	[self setState:ConnectionIdleState];
 }
 
@@ -2534,13 +2536,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (ConnectionCommand *)pushDataConnectionOnCommandQueue
 {
-	ConnectionCommand *cmd = nil;
-	cmd = [ConnectionCommand command:@"DATA_CON"
-						  awaitState:ConnectionIdleState
-						   sentState:FTPDeterminingDataConnectionType
-						   dependant:nil
-							userInfo:nil];
-	return cmd;
+	return [ConnectionCommand command:@"DATA_CON"
+						   awaitState:ConnectionIdleState
+							sentState:FTPDeterminingDataConnectionType
+							dependant:nil
+							 userInfo:nil];
 }
 
 
