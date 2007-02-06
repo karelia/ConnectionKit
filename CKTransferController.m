@@ -421,7 +421,12 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	if (myFlags.delegateProvidesContent)
 	{
 		// don't use the forwarder as we want to be called on the current thread
-		[myDelegate transferControllerNeedsContent:self];
+		@try {
+			[myDelegate transferControllerNeedsContent:self];
+		}
+		@catch (NSException *ex) {
+			KTLog(ControllerDomain, KTLogDebug, @"Exception caught in kickoff: %@", ex);
+		}
 	}
 	
 	myFlags.finishedContentGeneration = YES;
@@ -470,7 +475,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oFiles reloadData];
 	
 	myFlags.finishedContentGeneration = NO;
-	[self setStatusMessage:@""];
+	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
 	[oProgress setUsesThreadedAnimation:YES];
 	
