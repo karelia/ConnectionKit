@@ -151,6 +151,7 @@ NSString *QueueDomain = @"Queuing";
 	KTLog(QueueDomain, KTLogDebug, @"Pushing Command on History Queue: %@", [command shortDescription]);
 	[_queueLock lock];
 	[_commandHistory insertObject:command atIndex:0];
+	
 	// This is a framework internal "hack" to allow the webdav file upload request to release the data of a file
 	if ([command isKindOfClass:[ConnectionCommand class]])
 	{
