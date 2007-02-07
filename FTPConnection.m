@@ -2565,8 +2565,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 	CFStreamCreatePairWithSocket(kCFAllocatorDefault,connectedFrom,&read,&write);
 	//cast as NSStreams
-	NSInputStream *iStream = (NSInputStream *)read;
-	NSOutputStream *oStream = (NSOutputStream *)write;
+	NSInputStream *iStream = [(NSInputStream *)read autorelease];
+	NSOutputStream *oStream = [(NSOutputStream *)write autorelease];
 	
 	//send the data streams to the ftp connection object
 	[con setDataInputStreamAndOpen:iStream outputStream:oStream socket:connectedFrom];

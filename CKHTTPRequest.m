@@ -243,10 +243,10 @@
 				NSDictionary *rec = [myUploads objectForKey:key];
 				NSString *filename = [rec objectForKey:@"filename"];
 				NSData *data = [rec objectForKey:@"data"];
-				NSString *UTI = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+				NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																				  (CFStringRef)[filename pathExtension],
-																				  NULL);
-				NSString *mime = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType);	
+																				  NULL) autorelease];
+				NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
 				if (!mime || [mime length] == 0)
 				{
 					mime = @"application/octet-stream";

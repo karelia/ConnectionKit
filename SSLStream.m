@@ -73,6 +73,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		}
 		SecIdentitySearchRef search = nil;
 		SecIdentitySearchCreate(kc, CSSM_KEYUSE_SIGN, &search);
+		CFRelease(kc);
 		if (!search)
 		{
 			KTLog(TransportDomain, KTLogFatal, @"Failed to create SSL identity search");
@@ -80,6 +81,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 			return nil;
 		}
 		SecIdentitySearchCopyNext(search, &_sslIdentity);
+		CFRelease(search);
 		if (!_sslIdentity)
 		{
 			KTLog(TransportDomain, KTLogFatal, @"Failed to create SSL identity");
