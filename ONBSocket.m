@@ -1319,6 +1319,8 @@ void ONB_SocketCallback(CFSocketRef socket,
 									nativeHandle,
 									(CFReadStreamRef *)&inputStream,
 									(CFWriteStreamRef *)&outputStream);
+	[inputStream autorelease];
+	[outputStream autorelease];
 
 	// Make sure that the streams close the underlying socket when they are closed.
 	CFReadStreamSetProperty((CFReadStreamRef) inputStream,

@@ -81,6 +81,7 @@
 		// length  may be zero, it just means a zero-length password
 		password = [NSString stringWithCString:pass length:length];
 
+		SecKeychainItemFreeContent(&list, pass);
 	}
 	if (item) CFRelease(item);
 	if (search) CFRelease (search);
@@ -145,6 +146,7 @@
 				if (status != 0) {
 					NSLog(@"Error creating new item: %d\n", (int)status);
 				}
+				CFRelease(item);
 			}
 		}
 		

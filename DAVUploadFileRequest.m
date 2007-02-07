@@ -44,10 +44,10 @@
 	{
 		myFilename = [filename copy];
 		[self setContent:data];
-		NSString *UTI = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																		  (CFStringRef)[filename pathExtension],
-																		  NULL);
-		NSString *mime = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType);	
+																		  NULL) autorelease];
+		NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
 		if (!mime || [mime length] == 0)
 		{
 			mime = @"application/octet-stream";
@@ -69,10 +69,10 @@
 		myLocalFilename = [local copy];
 		myFilename = [remote copy];
 		//get the mime type from lauch services
-		NSString *UTI = (NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																		  (CFStringRef)[remote pathExtension],
-																		  NULL);
-		NSString *mime = (NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType);	
+																		  NULL) autorelease];
+		NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
 		if (!mime || [mime length] == 0)
 		{
 			mime = @"application/octet-stream";

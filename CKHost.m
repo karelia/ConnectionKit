@@ -220,13 +220,17 @@ static NSImage *sHostIcon = nil;
 				{
 					status = SecKeychainItemDelete(item);
 				}
+				if (item) CFRelease(item);
+
 				char *passphraseUTF8 = (char *)[myPassword UTF8String];
 				status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
 				if (status != 0) 
 				{
 					NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
 				}
+				if (item) CFRelease(item);
 			}
+			if (search) CFRelease(search);
 		}
 		@catch (id error) {
 			
@@ -352,6 +356,7 @@ static NSImage *sHostIcon = nil;
 			
 			// length  may be zero, it just means a zero-length password
 			myPassword = [[NSString stringWithCString:pass length:length] retain];
+			SecKeychainItemFreeContent(&list, pass);
 			
 		}
 		if (item) CFRelease(item);

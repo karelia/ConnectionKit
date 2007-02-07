@@ -107,6 +107,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)dealloc
 {
+	CFRelease(mySSLContext);
+	CFRelease(mySSLIdentity);
+	[mySSLSendBuffer release];
+	[mySSLRecevieBuffer release];
+	[mySSLRawReadBuffer release];
+	[mySSLEncryptedSendBuffer release];
+	
 	[_sendStream release];
 	[_receiveStream release];
 	[_sendBufferLock release];
@@ -1092,28 +1099,26 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)initializeSSL
 {
 	SecKeychainRef keychainRef = nil;
+	SecIdentitySearchRef searchRef = nil;
 	
 	if (SecKeychainCopyDefault(&keychainRef))
 	{
 		KTLog(SSLDomain, KTLogFatal, @"Unable to get default keychain");
 	}
 	
-	SecIdentitySearchRef searchRef = nil;
 	if (SecIdentitySearchCreate(keychainRef, CSSM_KEYUSE_SIGN, &searchRef))
 	{
 		KTLog(SSLDomain, KTLogFatal, @"Unable to create keychain search");
-		CFRelease(keychainRef);
 	}
 	
 	if (SecIdentitySearchCopyNext(searchRef, &mySSLIdentity))
 	{
 		KTLog(SSLDomain, KTLogFatal, @"Unable to get next search result");
-		CFRelease(keychainRef);
-		CFRelease(searchRef);
 	}
 	
-	CFRelease(keychainRef);
-	CFRelease(searchRef);
+	if (keychainRef) CFRelease(keychainRef);
+	if (searchRef) CFRelease(searchRef);
+
 	[mySSLRawReadBuffer autorelease];
 	mySSLRawReadBuffer = [[NSMutableData data] retain];
 	
