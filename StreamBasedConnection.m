@@ -107,7 +107,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)dealloc
 {
-	CFRelease(mySSLContext);
+	SSLDisposeContext(mySSLContext);
 	CFRelease(mySSLIdentity);
 	[mySSLSendBuffer release];
 	[mySSLRecevieBuffer release];
