@@ -146,7 +146,7 @@
 				if (status != 0) {
 					NSLog(@"Error creating new item: %d\n", (int)status);
 				}
-				CFRelease(item);
+				if (item) CFRelease(item);
 			}
 		}
 		
