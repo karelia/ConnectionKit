@@ -507,7 +507,16 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (NSDictionary *)nameWithProgress
 {
-	return [NSDictionary dictionaryWithObjectsAndKeys:[self progress], @"progress", [self name], @"name", nil];
+	NSNumber *progress = nil;
+	if ([self hasError])
+	{
+		progress = [NSNumber numberWithInt:-1];
+	}
+	else
+	{
+		progress = [self progress];
+	}
+	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
 }
 
 - (void)setNameWithProgress:(id)notused
