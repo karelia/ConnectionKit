@@ -77,9 +77,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 }
 
 - (void)progressChanged:(NSNotification *)n
-{
-	//if (myFlags.finishedContentGeneration == NO) return;
-	
+{	
 	if ([oShowFiles state] == NSOnState)
 	{
 		[oFiles performSelectorOnMainThread:@selector(reloadData)
