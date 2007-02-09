@@ -82,7 +82,8 @@ typedef enum {
 	ConnectionSettingPermissionsState,
 	ConnectionSentSizeState,		
 	ConnectionChangedDirectoryState,
-	ConnectionSentDisconnectState //24
+	ConnectionSentDisconnectState, 
+	ConnectionCheckingFileExistenceState // 25
 } ConnectionState;
 
 @class UKKQueue, RunLoopForwarder;
@@ -184,6 +185,14 @@ typedef enum {
 - (NSArray *)cachedContentsWithDirectory:(NSString *)path;
 - (void)clearDirectoryCache;
 
+@end
+
+@interface AbstractConnection (PrivateSubclassSupport)
+- (void)threadedConnect;
+- (void)threadedDisconnect;
+- (void)threadedForceDisconnect;
+- (void)threadedCancelTransfer;
+- (void)threadedCancelAll;
 @end
 
 extern NSString *ConnectionAwaitStateKey;

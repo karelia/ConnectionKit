@@ -30,6 +30,7 @@
 
 #import "AbstractQueueConnection.h"
 #import "NSObject+Connection.h"
+#import "ConnectionThreadManager.h"
 
 //Download Queue Keys
 NSString *QueueDownloadDestinationFileKey = @"QueueDownloadDestinationFileKey";
@@ -127,6 +128,26 @@ NSString *QueueDomain = @"Queuing";
 	return rec;
 }
 
+- (void)threadedDisconnect
+{
+	[self emptyAllQueues];
+	[super threadedDisconnect];
+}
+
+- (void)threadedForceDisconnect
+{
+	[self emptyAllQueues];
+	[super threadedForceDisconnect];
+}
+
+- (void)threadedCancelAll
+{
+	[_queueLock lock];
+	[_commandQueue removeAllObjects];
+	[_queueLock unlock];
+	[super threadedCancelAll];
+}
+
 #pragma mark -
 #pragma mark Command History
 
@@ -178,10 +199,49 @@ NSString *QueueDomain = @"Queuing";
 #pragma mark -
 #pragma mark Queue Support
 
+- (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
+{
+	KTLog(StateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
+	
+    [super setState:aState];
+	
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
+}
+
+- (void)sendCommand:(id)command
+{
+	; //subclass to do work
+}
+
 - (void)checkQueue
 {
-	//subclasses need to implement this.
-}
+	KTLog(StateMachineDomain, KTLogDebug, @"Checking Queue");
+	BOOL nextTry = 0 != [self numberOfCommands];
+	if (!nextTry)
+	{
+		KTLog(StateMachineDomain, KTLogDebug, @"Queue is Empty");
+	}
+	while (nextTry)
+	{
+		ConnectionCommand *command = [[self currentCommand] retain];
+		if (GET_STATE == [command awaitState])
+		{
+			KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
+			_state = [command sentState];	// don't use setter; we don't want to recurse
+			[self pushCommandOnHistoryQueue:command];
+			[self dequeueCommand];
+			nextTry = (0 != [_commandQueue count]);		// go to next one, there's something else to do
+			
+			[self sendCommand:[command command]];
+		}
+		else
+		{
+			KTLog(StateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
+			nextTry = NO;		// don't try.  
+		}
+		[command release];
+	}
+}	
 
 - (NSString *)queueDescription
 {
@@ -208,6 +268,7 @@ NSString *QueueDomain = @"Queuing";
 	[_commandQueue addObject:command];
 	KTLog(QueueDomain, KTLogDebug, @".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
 	[_queueLock unlock];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 }
 
 - (void)queueDownload:(id)download

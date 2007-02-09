@@ -179,7 +179,7 @@
 		BOOL containsObject = NO;
 		
 		NSEnumerator *theEnum = [[directoryContents arrangedObjects] objectEnumerator];
-		id currentObject;
+		id currentObject = nil;
 		
 		while ((currentObject = [theEnum nextObject]) && !containsObject)
 			containsObject = [[currentObject objectForKey: @"fileName"] isEqualToString: [self newFolderName]];
@@ -745,7 +745,8 @@
 
 - (void)connection:(AbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
 {
-	[aConn changeToDirectory: dirPath];
+	[aConn changeToDirectory:[dirPath stringByDeletingLastPathComponent]];
+	createdDirectory = [[dirPath lastPathComponent] retain]; 
 	[aConn directoryContents];
 }
 
@@ -782,6 +783,7 @@ static NSImage *symFile = nil;
 	NSDictionary *cur;
 	
 	[directoryContents removeObjects: [directoryContents content]];
+	NSDictionary *selected = nil;
 	
 	while (cur = [e nextObject])
 	{
@@ -794,6 +796,13 @@ static NSImage *symFile = nil;
 							forKey: @"fileName"];
 			[currentItem setObject: [NSMutableArray array] 
 							forKey: @"subItems"];
+			if (createdDirectory)
+			{
+				if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory])
+				{
+					selected = currentItem;
+				}
+			}
 			BOOL isLeaf = NO;
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 			{
@@ -867,6 +876,10 @@ static NSImage *symFile = nil;
 			
 			
 			[directoryContents addObject: currentItem];
+		}
+		if (selected)
+		{
+			[directoryContents setSelectedObjects:[NSArray arrayWithObject:selected]];
 		}
 	}
 	

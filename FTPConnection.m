@@ -835,15 +835,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
 			{	
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
-				[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
-															awaitState:ConnectionIdleState
-															 sentState:FTPAwaitingRemoteSystemTypeState
-															 dependant:nil
-															  userInfo:nil]
-									atIndex:0];
 				[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
 															awaitState:ConnectionIdleState
 															 sentState:ConnectionAwaitingCurrentDirectoryState
+															 dependant:nil
+															  userInfo:nil]
+									atIndex:0];
+				[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
+															awaitState:ConnectionIdleState
+															 sentState:FTPAwaitingRemoteSystemTypeState
 															 dependant:nil
 															  userInfo:nil]
 									atIndex:0];
@@ -909,21 +909,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_rootPath == nil) 
 					_rootPath = [[NSString stringWithString:path] retain];
 				
-				if (!_flags.isConnected)
-				{
-					if (_flags.didConnect) {
-						[_forwarder connection:self didConnectToHost:_connectionHost];
-					}
-					
-					_flags.isConnected = YES;
-					[self setState:ConnectionIdleState];
-					break;
-				}
-				
 				if (_flags.changeDirectory) {
 					[_forwarder connection:self didChangeToDirectory:_currentPath];
 				}
-				[self setState:ConnectionIdleState];
 			}
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{
@@ -936,8 +924,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					}
 					[_forwarder connection:self didCreateDirectory:path];
 				}
-				[self setState:ConnectionIdleState];
 			}
+			[self setState:ConnectionIdleState];
 			break;
 		}
 #pragma mark 300 series codes
@@ -1383,11 +1371,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self sendCommand:@"QUIT"];
 }
 
-- (void)threadedAbort
+- (void)threadedCancelTransfer
 {
 	[self sendCommand:@"ABOR"];
 	_isForceDisconnecting = YES;
 	[self closeDataConnection];
+	[super threadedCancelTransfer];
 }
 
 /*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object‚Äôs thread."
@@ -2372,21 +2361,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self endBulkCommands];
 	
 	return record;
-}
-
-/*!	Send the abort message immediately
-*/
-- (void)cancelTransfer
-{
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedAbort];
-}
-
-- (void)cancelAll
-{
-	[self cancelTransfer];
-	[_queueLock lock];
-	[_commandQueue removeAllObjects];
-	[_queueLock unlock];
 }
 
 - (void)directoryContents
