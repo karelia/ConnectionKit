@@ -2624,12 +2624,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	CFDataRef addrData = CFSocketCopyAddress(_activeSocket);
-	if (addrData)
-	{
-		struct sockaddr_in active_addr;
-		CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
-		CFRelease(addrData);
-	}
+	
+	struct sockaddr_in active_addr;
+	CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
+	if (addrData) CFRelease(addrData);
+
 	unsigned port = ntohs(active_addr.sin_port); //Do I need to convert from network byte order? YES
 	return [NSString stringWithFormat:@"EPRT |1|%@|%u|", [[NSHost currentHost] ipv4Address], port];
 }
