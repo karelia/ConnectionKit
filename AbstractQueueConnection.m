@@ -224,13 +224,13 @@ NSString *QueueDomain = @"Queuing";
 	while (nextTry)
 	{
 		ConnectionCommand *command = [[self currentCommand] retain];
-		if (GET_STATE == [command awaitState])
+		if (command && GET_STATE == [command awaitState])
 		{
 			KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
 			_state = [command sentState];	// don't use setter; we don't want to recurse
 			[self pushCommandOnHistoryQueue:command];
 			[self dequeueCommand];
-			nextTry = (0 != [_commandQueue count]);		// go to next one, there's something else to do
+			nextTry = (0 != [self numberOfCommands]);		// go to next one, there's something else to do
 			
 			[self sendCommand:[command command]];
 		}
@@ -355,7 +355,7 @@ NSString *QueueDomain = @"Queuing";
 	[_queueLock lock]; \
 	id obj = nil; \
 	if ([q count] > 0) { \
-		obj = [q objectAtIndex:0]; \
+		obj = [[[q objectAtIndex:0] retain] autorelease]; \
 	} \
 	[_queueLock unlock]; \
 	return obj;
