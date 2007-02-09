@@ -2569,8 +2569,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//add to the runloop
 	CFRunLoopSourceRef src = CFSocketCreateRunLoopSource(kCFAllocatorDefault,_activeSocket,0);
-	CFRunLoopAddSource(CFRunLoopGetCurrent(), src, kCFRunLoopCommonModes);
-	CFRelease(src);
+	if (src)
+	{
+		CFRunLoopAddSource(CFRunLoopGetCurrent(), src, kCFRunLoopCommonModes);
+		CFRelease(src);
+	}
 	
 	CFSocketError err;
 	struct sockaddr_in my_addr;
@@ -2582,14 +2585,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	bzero(&(my_addr.sin_zero), 8);
 	
 	CFDataRef addrData = CFDataCreate(kCFAllocatorDefault,(const UInt8 *)&my_addr,sizeof(my_addr));
-	err = CFSocketSetAddress(_activeSocket,addrData);
-	CFRelease(addrData);
+	if (addrData)
+	{
+		err = CFSocketSetAddress(_activeSocket,addrData);
+		CFRelease(addrData);
+	}
 	
 	if (err != kCFSocketSuccess) {
 		KTLog(TransportDomain, KTLogError, @"Failed CFSocketSetAddress() to %@:%u", [[NSHost currentHost] ipv4Address], port);
-		CFSocketInvalidate(_activeSocket);
-		CFRelease(_activeSocket);
-		_activeSocket = nil;
+		if (_activeSocket)
+		{
+			CFSocketInvalidate(_activeSocket);
+			CFRelease(_activeSocket);
+			_activeSocket = nil;
+		}
 		
 		if (_flags.error) {
 			
@@ -2615,10 +2624,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	CFDataRef addrData = CFSocketCopyAddress(_activeSocket);
-	struct sockaddr_in active_addr;
-	CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
-	CFRelease(addrData);
-	
+	if (addrData)
+	{
+		struct sockaddr_in active_addr;
+		CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
+		CFRelease(addrData);
+	}
 	unsigned port = ntohs(active_addr.sin_port); //Do I need to convert from network byte order? YES
 	return [NSString stringWithFormat:@"EPRT |1|%@|%u|", [[NSHost currentHost] ipv4Address], port];
 }

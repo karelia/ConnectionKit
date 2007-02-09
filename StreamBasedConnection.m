@@ -1149,16 +1149,20 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 													mySSLIdentity ? 1 : 0,
 													NULL);
 			
-			ret = SSLSetCertificate(mySSLContext, certificates);
-			CFRelease(certificates);
-			
+			if (certificates)
+			{
+				ret = SSLSetCertificate(mySSLContext, certificates);
+				CFRelease(certificates);
+			}
 			if (ret)
 			{
 				KTLog(SSLDomain, KTLogError, @"Error setting certificates: %d", ret);
 				return ret;
 			}
 			else
+			{
 				KTLog(SSLDomain, KTLogDebug, @"Set up certificates successfully");
+			}
 		}
 	}
 	

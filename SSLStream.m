@@ -154,8 +154,8 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	[_inputData release];
 	[_outputData release];
 	
-	CFRelease(_sslIdentity);
-	CFRelease(_sslContext);
+	if (_sslIdentity) CFRelease(_sslIdentity);
+	if (_sslContext) SSLDisposeContext(_sslContext);
 	
 	[super dealloc];
 }
@@ -391,8 +391,11 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		}
 		
 		CFArrayRef certs = CFArrayCreate(kCFAllocatorDefault, (const void **)&_sslIdentity, 1, NULL);
-		ret = SSLSetCertificate(_sslContext, certs);
-		CFRelease(certs);
+		if (certs)
+		{
+			ret = SSLSetCertificate(_sslContext, certs);
+			CFRelease(certs);
+		}
 		
 		if (ret)
 		{
