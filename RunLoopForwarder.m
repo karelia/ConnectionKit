@@ -40,7 +40,7 @@
 - (id)init
 {
 	if (self = [super init]) {
-		lock = [[NSLock alloc] init];
+		lock = [[NSRecurisveLock alloc] init];
 		createdOnThread = [NSThread currentThread];
 		[NSThread prepareForConnectionInterThreadMessages];
 		useMainThread = NO;
