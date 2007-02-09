@@ -29,7 +29,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnection.h>
+#import <Connection/AbstractQueueConnection.h>
 
 extern NSString *FileConnectionErrorDomain;
 
@@ -50,16 +50,11 @@ enum { kChangeToDirectory = 7000,
 
 @class RunLoopForwarder;
 
-@interface FileConnection : AbstractConnection 
+@interface FileConnection : AbstractQueueConnection 
 {
 	int				myCurrentOperation;
-	NSMutableArray  *myPendingInvocations;
 	NSString		*myCurrentDirectory;
-	NSInvocation	*myInflightInvocation;
-	
-	RunLoopForwarder*myForwarder;
-	NSLock			*myLock;
-	
+		
 	NSFileManager *myFileManager;
 }
 

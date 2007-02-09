@@ -108,7 +108,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)dealloc
 {
 	SSLDisposeContext(mySSLContext);
-	CFRelease(mySSLIdentity);
+	if (mySSLIdentity) CFRelease(mySSLIdentity);
 	[mySSLSendBuffer release];
 	[mySSLRecevieBuffer release];
 	[mySSLRawReadBuffer release];
@@ -260,45 +260,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	// Subclasses handle this
 }
 
-- (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
-{
-	KTLog(StateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
-	
-    [super setState:aState];
-	
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
-}
-
-- (void)checkQueue
-{
-	KTLog(StateMachineDomain, KTLogDebug, @"Checking Queue");
-	BOOL nextTry = 0 != [self numberOfCommands];
-	if (!nextTry)
-	{
-		KTLog(StateMachineDomain, KTLogDebug, @"Queue is Empty");
-	}
-	while (nextTry)
-	{
-		ConnectionCommand *command = [[self currentCommand] retain];
-		if (GET_STATE == [command awaitState])
-		{
-			KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
-			_state = [command sentState];	// don't use setter; we don't want to recurse
-			[self pushCommandOnHistoryQueue:command];
-			[self dequeueCommand];
-			nextTry = (0 != [_commandQueue count]);		// go to next one, there's something else to do
-			
-			[self sendCommand:[command command]];
-		}
-		else
-		{
-			KTLog(StateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
-			nextTry = NO;		// don't try.  
-		}
-		[command release];
-	}
-}	
-
 #pragma mark -
 #pragma mark AbstractConnection Overrides
 
@@ -372,6 +333,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	myStreamFlags.reportedError = NO;
 	[self scheduleStreamsOnRunLoop];
+	[super threadedConnect];
 }
 
 - (void)connect
@@ -388,7 +350,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	[self openStreamsToPort:connectionPort];
 	
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+	[super connect];
 }
 
 /*!	Disconnect from host.  Called by foreground thread.
@@ -411,12 +373,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection disconnect];
 	[_recursiveListingConnection disconnect];
 	[_recursiveDeletionConnection disconnect];
-	[self emptyAllQueues];
 	
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
+	[super threadedDisconnect];
 }
 
 - (void)threadedForceDisconnect
@@ -427,12 +385,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection forceDisconnect];
 	[_recursiveListingConnection forceDisconnect];
 	[_recursiveDeletionConnection forceDisconnect];
-	[self emptyAllQueues];
-	
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
+
+	[super threadedForceDisconnect];
 }
 
 - (void)forceDisconnect

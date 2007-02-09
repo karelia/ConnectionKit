@@ -138,5 +138,34 @@
 	return result;
 }
 
+- (IMP)methodForSelector:(SEL)aSelector
+{
+	IMP implementation = NULL;
+	[lock lock];
+	if (myDelegate)
+	{
+		implementation = [myDelegate methodForSelector:aSelector];
+	}
+	if (!implementation)
+	{
+		implementation = [super methodForSelector:aSelector];
+	}
+	return implementation;
+}
+
+- (BOOL)respondsToSelector:(SEL)selector
+{
+	BOOL result = NO;
+	if (myDelegate)
+	{
+		result = [myDelegate respondsToSelector:selector];
+	}
+	if (!result)
+	{
+		result = [super respondsToSelector:selector];
+	}
+	return result;
+}
+
 @end
 

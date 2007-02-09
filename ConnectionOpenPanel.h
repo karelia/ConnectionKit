@@ -63,6 +63,7 @@ enum {
 	BOOL isSelectionValid;
 	NSTimeInterval timeout;
 	NSTimer *timer;
+	NSString *createdDirectory;
 	
 	NSString *lastDirectory;
 }

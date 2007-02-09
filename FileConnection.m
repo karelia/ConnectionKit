@@ -117,20 +117,13 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
-		myPendingInvocations = [[NSMutableArray array] retain];
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
-		myForwarder = [[RunLoopForwarder alloc] init];
-		myLock = [[NSLock alloc] init];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[myInflightInvocation release];
-	[myForwarder release];
-	[myLock release];
-	[myPendingInvocations release];
 	[myCurrentDirectory release];
 	[super dealloc];
 }
@@ -140,114 +133,6 @@ checkRemoteExistence:(NSNumber *)check;
 	return @"file";
 }
 
-- (void)threadedConnect
-{
-	myFileManager = [[NSFileManager alloc] init];
-	if ( _flags.didConnect )
-	{
-		[myForwarder connection:self didConnectToHost:_connectionHost];
-	}
-	_flags.isConnected = YES;
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInThisBundle(@"Connected to File System\n", @"file transcript") 
-																  attributes:[AbstractConnection sentAttributes]] autorelease]];
-	}
-}
-
-- (void)threadedAbort
-{
-	if ( _flags.cancel )
-	{
-		[myForwarder connectionDidCancelTransfer:self];
-	}
-	[self processInvocations];
-}
-
-- (void)threadedCancelAll
-{
-	[myLock lock];
-	[myPendingInvocations removeAllObjects];
-	[myLock unlock];
-	if ( _flags.cancel )
-	{
-		[myForwarder connectionDidCancelTransfer:self];
-	}
-}
-
-- (void)threadedDisconnect
-{
-	// no need to lock because the processInvocations has the lock in this thread
-	//[myLock lock];
-	[myPendingInvocations removeAllObjects];
-	//[myLock unlock];
-	
-	if ( _flags.cancel )
-	{
-		[myForwarder connectionDidCancelTransfer:self];
-	}
-	_flags.isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[myForwarder connection:self didDisconnectFromHost:[self host]];
-	}
-}
-
-- (void)setDelegate:(id)delegate
-{
-	[super setDelegate:delegate];
-	[myForwarder setDelegate:delegate];
-}
-
-#pragma mark -
-#pragma mark Invocation Queue
-
-- (void)processInvocations
-{ 
-	if ([self isConnected])
-	{
-		[myLock lock];
-		KTLog(StateMachineDomain, KTLogDebug, @"Checking invocation queue");
-		while ( (nil != myPendingInvocations) && ([myPendingInvocations count] > 0) && !myInflightInvocation)
-		{
-			myInflightInvocation = [myPendingInvocations objectAtIndex:0];
-			if ( nil != myInflightInvocation )
-			{
-				[myInflightInvocation retain];
-				[myPendingInvocations removeObjectAtIndex:0];
-				KTLog(StateMachineDomain, KTLogDebug, @"Invoking %@", NSStringFromSelector([myInflightInvocation selector]));
-				@try {
-					[myInflightInvocation invoke];
-				}
-				@catch (NSException *ex) {
-					KTLog(StateMachineDomain, KTLogDebug, @"Exception while invoking %@", NSStringFromSelector([myInflightInvocation selector]));
-					NSLog(@"Exception while invoking %@", NSStringFromSelector([myInflightInvocation selector]));
-				}
-				@finally {
-					[myInflightInvocation release];
-					myInflightInvocation = nil;
-				}
-			}
-			[NSThread sleepUntilDate:[NSDate distantPast]];
-		}
-		[myLock unlock];
-	}
-}
-
-- (void)queueInvocation:(NSInvocation *)inv
-{
-	[myLock lock];
-	KTLog(QueueDomain, KTLogDebug, @"Queuing %@", NSStringFromSelector([inv selector]));
-	[myPendingInvocations addObject:inv];
-	[myLock unlock];
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processInvocations];
-}
-
-#pragma mark -
-#pragma mark Main Methods
-
-/*!	Basically a no-op, just send the completion method.
-*/
 - (void)connect
 {
 	if ([self transcript])
@@ -255,21 +140,45 @@ checkRemoteExistence:(NSNumber *)check;
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInThisBundle(@"Connecting...\n", @"file transcript")
 																  attributes:[AbstractConnection sentAttributes]] autorelease]];
 	}
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+	[super connect];
 }
 
-- (void)disconnect
+- (void)sendCommand:(id)command
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedDisconnect)
-													  target:self
-												   arguments:[NSArray array]];
-	[self queueInvocation:inv];
+	[command invoke];
 }
 
-- (void)forceDisconnect
+- (void)threadedConnect
 {
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
+	[super threadedConnect];
+	myFileManager = [[NSFileManager alloc] init];
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInThisBundle(@"Connected to File System\n", @"file transcript") 
+																  attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
+	[self setState:ConnectionIdleState];
 }
+
+- (void)threadedAbort
+{
+	if ( _flags.cancel )
+	{
+		[_forwarder connectionDidCancelTransfer:self];
+	}
+	[self processInvocations];
+}
+
+- (void)threadedCancelAll
+{
+	if ( _flags.cancel )
+	{
+		[_forwarder connectionDidCancelTransfer:self];
+	}
+}
+
+#pragma mark -
+#pragma mark Main Methods
 
 - (void)fcChangeToDirectory:(NSString *)aDirectory
 {
@@ -278,10 +187,11 @@ checkRemoteExistence:(NSNumber *)check;
 	BOOL success = [myFileManager changeCurrentDirectoryPath:aDirectory];
 	if (success && _flags.changeDirectory)
 	{
-		[myForwarder connection:self didChangeToDirectory:aDirectory];
+		[_forwarder connection:self didChangeToDirectory:aDirectory];
 	}
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [[myFileManager currentDirectoryPath] copy];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)changeToDirectory:(NSString *)aDirectory	// an absolute directory
@@ -289,7 +199,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcChangeToDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:aDirectory, nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionChangedDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (NSString *)currentDirectory
@@ -325,7 +240,7 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		if (_flags.createDirectory)
 		{
-			[myForwarder connection:self didCreateDirectory:aName];
+			[_forwarder connection:self didCreateDirectory:aName];
 		}
 	}
 	else
@@ -344,12 +259,13 @@ checkRemoteExistence:(NSNumber *)check;
 				aName,
 				ConnectionDirectoryExistsFilenameKey,
 				nil];
-			[myForwarder connection:self
+			[_forwarder connection:self
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:ui]];
 		}
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)createDirectory:(NSString *)aName permissions:(unsigned long)aPermissions
@@ -357,7 +273,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCreateDirectory:permissions:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:aName, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionCreateDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcSetPermissions:(NSNumber *)perms forFile:(NSString *)path
@@ -381,14 +302,14 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		if (_flags.permissions)
 		{
-			[myForwarder connection:self didSetPermissionsForFile:path];
+			[_forwarder connection:self didSetPermissionsForFile:path];
 		}
 	}
 	else
 	{
 		if (_flags.error)
 		{
-			[myForwarder connection:self
+			[_forwarder connection:self
 				  didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													  code:[self currentOperation]
 												  userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
@@ -399,6 +320,7 @@ checkRemoteExistence:(NSNumber *)check;
 													  nil]]];
 		}
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
@@ -406,7 +328,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcSetPermissions:forFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionSettingPermissionsState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcRename:(NSString *)fromPath to:(NSString *)toPath
@@ -422,8 +349,9 @@ checkRemoteExistence:(NSNumber *)check;
 	BOOL success = [myFileManager movePath:fromPath toPath:toPath handler:self];
 	if (success && _flags.rename)
 	{
-		[myForwarder connection:self didRename:fromPath to:toPath];
+		[_forwarder connection:self didRename:fromPath to:toPath];
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
@@ -431,7 +359,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcRename:to:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:fromPath, toPath, nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingRenameState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcDeleteFile:(NSString *)path
@@ -456,9 +389,10 @@ checkRemoteExistence:(NSNumber *)check;
 	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteFile)
 	{
-		[myForwarder connection:self didDeleteFile:path];
+		[_forwarder connection:self didDeleteFile:path];
 	}
 	[rm release];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)deleteFile:(NSString *)path
@@ -466,7 +400,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteFile:)
 													  target:self 
 												   arguments:[NSArray arrayWithObject:path]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDeleteFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcDeleteDirectory:(NSString *)dirPath
@@ -485,9 +424,10 @@ checkRemoteExistence:(NSNumber *)check;
 	BOOL success = [rm terminationStatus] == 0;
 	if (success && _flags.deleteDirectory)
 	{
-		[myForwarder connection:self didDeleteDirectory:dirPath];
+		[_forwarder connection:self didDeleteDirectory:dirPath];
 	}
 	[rm release];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
@@ -495,7 +435,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteDirectory:)
 													  target:self 
 												   arguments:[NSArray arrayWithObject:dirPath]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDeleteDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)recursivelyDeleteDirectory:(NSString *)path
@@ -524,7 +469,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:localPath]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
@@ -538,7 +488,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:rec, [NSNumber numberWithBool:NO], nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -596,13 +551,13 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.didBeginUpload)
 	{
-		[myForwarder connection:self uploadDidBegin:[upload remotePath]];
+		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
 	}
 	//need to send the amount of bytes transferred.
 	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
 	if (_flags.uploadProgressed)
 	{
-		[myForwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
 	}
 	if ([upload delegateRespondsToTransferTransferredData])
 	{
@@ -615,12 +570,12 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.uploadPercent) 
 	{
-		[myForwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
+		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
-	// send finishe
+	// send finished
 	if (success && _flags.uploadFinished)
 	{
-		[myForwarder connection:self uploadDidFinish:[upload remotePath]];
+		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
 	}
 	if (success && [upload delegateRespondsToTransferDidFinish])
 	{
@@ -633,13 +588,14 @@ checkRemoteExistence:(NSNumber *)check;
 									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[upload remotePath], @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
 		if (_flags.error)
 		{
-			[myForwarder connection:self didReceiveError:err];
+			[_forwarder connection:self didReceiveError:err];
 		}
 		if ([upload delegateRespondsToError])
 		{
 			[[upload delegate] transfer:[upload userInfo] receivedError:err];
 		}
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
@@ -659,7 +615,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 	return rec;
 }
 
@@ -675,29 +636,30 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.didBeginUpload)
 	{
-		[myForwarder connection:self uploadDidBegin:remotePath];
+		[_forwarder connection:self uploadDidBegin:remotePath];
 	}
 	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[myFileManager currentDirectoryPath] stringByAppendingPathComponent:remotePath];
 	BOOL success = [myFileManager createFileAtPath:fullPath contents:data attributes:nil];
 	
 	//need to send the amount of bytes transferred.
 	if (_flags.uploadProgressed) {
-		[myForwarder connection:self upload:remotePath sentDataOfLength:[data length]];
+		[_forwarder connection:self upload:remotePath sentDataOfLength:[data length]];
 	} 
 	if (_flags.uploadPercent) {
-		[myForwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
+		[_forwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
 	}
 	if (success && _flags.uploadFinished)
 	{
-		[myForwarder connection:self uploadDidFinish:remotePath];
+		[_forwarder connection:self uploadDidFinish:remotePath];
 	}
 	if (!success && _flags.error)
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
 										   code:ConnectionErrorUploading 
 									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload data", @"FileConnection copy from data error"), NSLocalizedDescriptionKey, nil]];
-		[myForwarder connection:self didReceiveError:err];
+		[_forwarder connection:self didReceiveError:err];
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
@@ -705,7 +667,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFromData:toFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:data, remotePath, nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -750,13 +717,13 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.didBeginUpload)
 	{
-		[myForwarder connection:self uploadDidBegin:[upload remotePath]];
+		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
 	}
 	//need to send the amount of bytes transferred.
 	unsigned long long size = [[[fm fileAttributesAtPath:[upload remotePath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
 	if (_flags.uploadProgressed)
 	{
-		[myForwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
 	}
 	if ([upload delegateRespondsToTransferTransferredData])
 	{
@@ -769,17 +736,18 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.uploadPercent) 
 	{
-		[myForwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
+		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
 	// send finished
 	if (_flags.uploadFinished)
 	{
-		[myForwarder connection:self uploadDidFinish:[upload remotePath]];
+		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
 	}
 	if ([upload delegateRespondsToTransferDidFinish])
 	{
 		[[upload delegate] transferDidFinish:[upload userInfo]];
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
@@ -803,7 +771,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadData:checkRemoteExistence:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionUploadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 	return rec;
 }
 
@@ -823,7 +796,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSString *name = [remotePath lastPathComponent];
 	if (_flags.didBeginDownload)
 	{
-		[myForwarder connection:self downloadDidBegin: remotePath];
+		[_forwarder connection:self downloadDidBegin: remotePath];
 	}
 	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
@@ -861,14 +834,14 @@ checkRemoteExistence:(NSNumber *)check;
 		//need to send the amount of bytes transferred.
 		if (_flags.downloadProgressed) {
 			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
-			[myForwarder connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
+			[_forwarder connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
 		} 
 		if (_flags.downloadPercent) {
-			[myForwarder connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
+			[_forwarder connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
 		}
 		if (_flags.downloadFinished)
 		{
-			[myForwarder connection:self downloadDidFinish: remotePath];
+			[_forwarder connection:self downloadDidFinish: remotePath];
 		}
 	}
 	else	// no handler, so we send error message 'manually'
@@ -884,7 +857,7 @@ checkRemoteExistence:(NSNumber *)check;
     
 		if (_flags.error)
 		{
-			[myForwarder connection:self
+			[_forwarder connection:self
 				   didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 													   code:[self currentOperation]
 												   userInfo:
@@ -895,8 +868,8 @@ checkRemoteExistence:(NSNumber *)check;
 						   NSFilePathErrorKey,
 						   nil] ]];
 		}
-
 	}
+	[self setState:ConnectionIdleState];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
@@ -904,7 +877,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDownloadFile:toDirectory:overwrite:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:remotePath, dirPath, [NSNumber numberWithBool:flag], nil]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionDownloadingFileState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
@@ -913,22 +891,17 @@ checkRemoteExistence:(NSNumber *)check;
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }
 
-- (void)cancelTransfer
-{
-	[self sendPortMessage:ABORT];
-}
-
-- (void)cancelAll
-{
-	[self sendPortMessage:CANCEL_ALL];
-}
-
 - (void)directoryContents
 {
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDirectoryContents)
 													  target:self
 												   arguments:[NSArray array]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingDirectoryContentsState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcContentsOfDirectory:(NSString *)dirPath
@@ -954,7 +927,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.directoryContents)
 	{
-		[myForwarder connection:self didReceiveContents:packaged ofDirectory:dirPath];
+		[_forwarder connection:self didReceiveContents:packaged ofDirectory:dirPath];
 	}
 }
 
@@ -968,7 +941,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcContentsOfDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingDirectoryContentsState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 - (void)fcCheckExistenceOfPath:(NSString *)path
@@ -981,7 +959,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 	if (_flags.fileCheck)
 	{
-		[myForwarder connection: self 
+		[_forwarder connection: self 
 		 checkedExistenceOfPath: path
 					 pathExists: fileExists];
 	}
@@ -992,7 +970,12 @@ checkRemoteExistence:(NSNumber *)check;
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCheckExistenceOfPath:)
                                                     target:self
                                                  arguments:[NSArray arrayWithObject:path]];
-	[self queueInvocation:inv];
+	ConnectionCommand *cmd = [ConnectionCommand command:inv
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionCheckingFileExistenceState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:cmd];
 }
 
 
@@ -1007,7 +990,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 	if (_flags.error)
 	{
-		[myForwarder connection:self
+		[_forwarder connection:self
 			   didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
 												   code:[self currentOperation]
 											   userInfo:

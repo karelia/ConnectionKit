@@ -33,6 +33,7 @@
 #import "CKTransferRecord.h"
 #import "UKKQueue.h"
 #import "RunLoopForwarder.h"
+#import "ConnectionThreadManager.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -711,6 +712,7 @@ NSDictionary *sDataAttributes = nil;
 - (void)setDelegate:(id)del
 {
 	_delegate = del;
+	[_forwarder setDelegate:del];
 
 	// There are 21 callbacks & flags.
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
@@ -777,7 +779,16 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)connect
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+}
+
+- (void)threadedConnect
+{
 	_flags.isConnected = YES;
+	if (_flags.didConnect)
+	{
+		[_forwarder connection:self didConnectToHost:[self host]];
+	}
 }
 
 - (BOOL)isConnected
@@ -787,11 +798,30 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)disconnect
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
+}
+
+- (void)threadedDisconnect
+{
 	_flags.isConnected = NO;
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
 }
 
 - (void)forceDisconnect
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
+}
+
+- (void)threadedForceDisconnect
+{
+	_flags.isConnected = NO;
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
 }
 
 
@@ -1028,10 +1058,22 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)cancelTransfer
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedCancelTransfer];
+}
+
+- (void)threadedCancelTransfer
+{
+	
 }
 
 - (void)cancelAll
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedCancelAll];
+}
+
+- (void)threadedCancelAll
+{
+	
 }
 
 - (long long)transferSpeed
