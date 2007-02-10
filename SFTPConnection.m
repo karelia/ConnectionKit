@@ -241,7 +241,12 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		{
 			NSError *error = [NSError errorWithDomain: SFTPErrorDomain
 												 code: libssh2_session_last_error(mySession,nil,nil,0)
-											 userInfo: [NSDictionary dictionaryWithObject:[self error] forKey:NSLocalizedDescriptionKey]];
+											 userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
+				LocalizedStringInThisBundle(@"Secure Shell Connection Error", @""), NSLocalizedDescriptionKey,
+				[NSString stringWithFormat:
+					LocalizedStringInThisBundle(@"The SSH manager returned the following error message:\n\n%@",@""), [self error]]
+												 ,NSLocalizedFailureReasonErrorKey,
+												 nil]];
 			[_forwarder connection:self didReceiveError: error];
 		}
 	}

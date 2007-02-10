@@ -553,7 +553,7 @@ static NSSize closedSize = { 452, 152 };
 {
 	NSRect r = [[self window] frame];
 	NSSize newSize = [sender state] == NSOnState ? openedSize : closedSize;
-	NSString *name = [sender state] == NSOnState ? NSLocalizedString(@"Hide Files", @"transfer controller") : NSLocalizedString(@"Show Files", @"transfer controller");
+	NSString *name = [sender state] == NSOnState ? LocalizedStringInThisBundle(@"Hide Files", @"transfer controller") : LocalizedStringInThisBundle(@"Show Files", @"transfer controller");
 	r.origin.y -= newSize.height - r.size.height;
 	r.size = newSize;
 	
@@ -705,11 +705,11 @@ static NSSize closedSize = { 452, 152 };
 
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
 {
-	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authorize Connection?", @"authorise")
-									 defaultButton:NSLocalizedString(@"Authorize", @"authorise")
-								   alternateButton:NSLocalizedString(@"Cancel", @"authorise")
+	NSAlert *alert = [NSAlert alertWithMessageText:LocalizedStringInThisBundle(@"Authorize Connection?", @"authorise")
+									 defaultButton:LocalizedStringInThisBundle(@"Authorize", @"authorise")
+								   alternateButton:LocalizedStringInThisBundle(@"Cancel", @"authorise")
 									   otherButton:nil
-						 informativeTextWithFormat:NSLocalizedString(@"%@\nWhat would you like to do?", @"authorise"), message];
+						 informativeTextWithFormat:LocalizedStringInThisBundle(@"%@\nWhat would you like to do?", @"authorise"), message];
 	
 	if ([alert runModal] == NSOKButton)
 	{
@@ -756,14 +756,14 @@ static NSSize closedSize = { 452, 152 };
 		[[self connection] forceDisconnect];
 		[[self connection] setDelegate:nil];
 		
-		[oTitle setStringValue:NSLocalizedString(@"Publishing Failed", @"Transfer Controller")];
-		[self setStatusMessage:NSLocalizedString(@"An error occured.", @"Transfer Controller")];
+		[oTitle setStringValue:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
+		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
 		
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
 		[oAlternateButton setHidden:YES];
-		[oDefaultButton setTitle:NSLocalizedString(@"Close", @"Close")];
+		[oDefaultButton setTitle:LocalizedStringInThisBundle(@"Close", @"Close")];
 		[oDefaultButton setImagePosition:NSImageRight];
 		[oDefaultButton setKeyEquivalent:@"\r"];
 		[oDefaultButton setHidden:NO];

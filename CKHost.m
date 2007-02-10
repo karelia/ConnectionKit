@@ -446,7 +446,7 @@ static NSImage *sHostIcon = nil;
 - (NSString *)name
 {
 	NSString *type = [AbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
-	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : NSLocalizedString(@"auto", @"connection type")];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : LocalizedStringInThisBundle(@"auto", @"connection type")];
 	if ([self username] && ![[self username] isEqualToString:@""])
 	{
 		[str appendFormat:@"%@@", [self username]];
