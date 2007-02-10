@@ -28,6 +28,8 @@ enum {
 	NSMutableArray						*myRootedTransfers;
 	NSString							*myRootPath;
 	
+	NSString							*myUploadingPrefix;
+	
 	IBOutlet NSTextField				*oTitle;
 	IBOutlet NSProgressIndicator		*oProgress;
 	IBOutlet NSImageView				*oIcon;
@@ -91,6 +93,7 @@ enum {
 - (void)setFinished; // set progress to 100%
 - (void)setDefaultButtonTitle:(NSString *)title;
 - (void)setAlternateButtonTitle:(NSString *)title;
+- (void)setUploadingStatusPrefix:(NSString *)prefix;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 
