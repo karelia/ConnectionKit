@@ -408,6 +408,15 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	}
 }
 
+- (void)setUploadingStatusPrefix:(NSString *)prefix
+{
+	if (prefix != myUploadingPrefix)
+	{
+		[myUploadingPrefix autorelease];
+		myUploadingPrefix = [prefix copy];
+	}
+}
+
 - (void)kickoff:(id)unused
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -775,7 +784,17 @@ static NSSize closedSize = { 452, 152 };
 
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath
 {
-	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Uploading %@", @"status message"), [remotePath lastPathComponent]]];
+	NSMutableString *msg = [NSMutableString string];
+	if (myUploadingPrefix)
+	{
+		[msg appendString:myUploadingPrefix];
+	}
+	else
+	{
+		[msg appendString:LocalizedStringInThisBundle(@"Uploading", @"status message")];
+	}
+	[msg appendFormat:@" %@", [remotePath lastPathComponent]]
+	[self setStatusMessage:msg];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath

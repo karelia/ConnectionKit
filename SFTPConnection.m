@@ -466,11 +466,13 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	char *errmsg;
 	int len;
 	int err = libssh2_session_last_error(mySession,&errmsg,&len,0);
+	NSMutableString *str = [NSMutableString stringWithString:LocalizedStringInThisBundle(@"There was an error with the SSH subsystem: ", @"sftp error")];
 	if (err == LIBSSH2_ERROR_SFTP_PROTOCOL)
 	{
-		return [self sftpError];
+		[str appendString:[self sftpError]];
 	}
-	return [NSString stringWithCString:errmsg length:len];
+	[str appendString:[NSString stringWithCString:errmsg length:len]];
+	return str;
 }
 
 - (void)sendCommand:(id)cmd
