@@ -57,7 +57,7 @@ enum {
 		unsigned finishedContentGeneration: 1;
 		unsigned verifyTransfers: 1;
 		unsigned stopTransfer: 1;
-		unsigned unused: 24;
+		unsigned unused: 22;
 	} myFlags;
 }
 
