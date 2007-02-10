@@ -245,7 +245,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 				LocalizedStringInThisBundle(@"Secure Shell Connection Error", @""), NSLocalizedDescriptionKey,
 				[NSString stringWithFormat:
 					LocalizedStringInThisBundle(@"The SSH manager returned the following error message:\n\n%@",@""), [self error]]
-												 ,NSLocalizedFailureReasonErrorKey,
+												 NSLocalizedRecoverySuggestionErrorKey,	// to force the reason behind the error to show up on the alert message, even though it seems really more appropriate to be NSLocalizedFailureReasonErrorKey
 												 nil]];
 			[_forwarder connection:self didReceiveError: error];
 		}
