@@ -793,7 +793,7 @@ static NSSize closedSize = { 452, 152 };
 	{
 		[msg appendString:LocalizedStringInThisBundle(@"Uploading", @"status message")];
 	}
-	[msg appendFormat:@" %@", [remotePath lastPathComponent]]
+	[msg appendFormat:@" %@", [remotePath lastPathComponent]];
 	[self setStatusMessage:msg];
 }
 
