@@ -428,8 +428,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];
 	}
-	[_recursiveDeletionsQueue addObject:path];
-	[_emptyDirectoriesToDelete addObject:path];
+	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
+	[_emptyDirectoriesToDelete addObject:[path stringByStandardizingPath]];
 	_numberOfListingsRemaining++;
 	[_recursiveListingConnection contentsOfDirectory:path];
 }
@@ -997,9 +997,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[_recursiveDeletionConnection deleteFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
-		if (![_recursiveDeletionsQueue containsObject:dirPath])
+		if (![_recursiveDeletionsQueue containsObject:[dirPath stringByStandardizingPath]])
 		{
-			[_emptyDirectoriesToDelete addObject:dirPath];
+			[_emptyDirectoriesToDelete addObject:[dirPath stringByStandardizingPath]];
 		}
 		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
 		{
@@ -1046,7 +1046,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			_numberOfDeletionsRemaining = 0;
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
-			[self directoryContents];
+			if (_flags.deleteDirectory) {
+				[_forwarder connection:self didDeleteDirectory:dirPath];
+			}
 		}
 	}
 }
