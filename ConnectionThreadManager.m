@@ -24,12 +24,10 @@ static NSLock *_initLock = nil;
 
 @implementation ConnectionThreadManager
 
-+ (void)load
++ (void)initialize	// preferred over +load in most cases
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
 	_initLock = [[NSLock alloc] init];
-	
 	[pool release];
 }
 

@@ -41,7 +41,7 @@
 
 @implementation DAVResponse
 
-+ (void)load
++ (void)initialize	// preferred over +load in most cases
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		

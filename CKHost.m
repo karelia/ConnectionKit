@@ -20,15 +20,11 @@ static NSImage *sHostIcon = nil;
 
 @implementation CKHost
 
-+ (void)load
-{
-	[CKHost setVersion:1];
-}
-
 + (void)initialize
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
+	[CKHost setVersion:1];
 	NSBundle *b = [NSBundle bundleForClass:[self class]];
 	NSString *p = [b pathForResource:@"bookmark" ofType:@"tif"];
 	sHostIcon = [[NSImage alloc] initWithContentsOfFile:p];

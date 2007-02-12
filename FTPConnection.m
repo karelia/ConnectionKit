@@ -92,10 +92,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 @implementation FTPConnection
 
-// load or initialize?
-// http://www.cocoabuilder.com/archive/message/2003/3/19/86306
-
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"21", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];

@@ -29,7 +29,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 @implementation NNTPConnection
 
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"119", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
