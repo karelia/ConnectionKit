@@ -41,7 +41,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 @implementation S3Connection
 
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"80", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];

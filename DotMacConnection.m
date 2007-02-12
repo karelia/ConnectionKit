@@ -56,7 +56,7 @@
 
 #pragma mark class methods
 
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"80", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];

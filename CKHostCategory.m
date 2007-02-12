@@ -17,7 +17,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
 @implementation CKHostCategory
 
-+ (void)load
++ (void)initialize	// preferred over +load in most cases
 {
 	[CKHostCategory setVersion:1];
 }

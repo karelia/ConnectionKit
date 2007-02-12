@@ -50,7 +50,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 @implementation FileConnection
 
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"0", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];

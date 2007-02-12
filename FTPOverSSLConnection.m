@@ -11,7 +11,7 @@
 
 @implementation FTPOverSSLConnection
 
-+ (void)load
++ (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"990", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
