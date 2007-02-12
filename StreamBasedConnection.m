@@ -114,8 +114,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[mySSLRawReadBuffer release];
 	[mySSLEncryptedSendBuffer release];
 	
-	[_sendStream release];
-	[_receiveStream release];
+	// NSStream has a problem in that if you release and set the delegate to nil in the same runloop pass it will still send messages
+	// autoreleasing will stop the crashes.
+	[_sendStream setDelegate:nil];
+	[_receiveStream setDelegate:nil];
+	[_sendStream autorelease];
+	[_receiveStream autorelease];
+	
 	[_sendBufferLock release];
 	[_sendBuffer release];
 	[_fileCheckingConnection setDelegate:nil];
