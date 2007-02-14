@@ -470,6 +470,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oProgress setMaxValue:1.0];
 	[oProgress setDoubleValue:0];
 	[oProgress setIndeterminate:NO];
+	[oShowHideFilesTitle setHidden:NO];
+	[oShowFiles setHidden:NO];
 	KTLog(ControllerDomain, KTLogDebug, @"Set progress bar to determinate");
 }
 
@@ -480,6 +482,15 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
+	
+	//make sure sheet is collapsed
+	if ([oShowFiles state] != NSOffState)
+	{
+		[oShowFiles setState:NSOffState];
+		[self showHideFiles:oShowFiles];
+	}
+	[oShowHideFilesTitle setHidden:YES];
+	[oShowFiles setHidden:YES];
 	
 	myFlags.finishedContentGeneration = NO;
 	[oStatus setStringValue:@""];
