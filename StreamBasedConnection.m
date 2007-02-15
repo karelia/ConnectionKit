@@ -39,6 +39,7 @@
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
+#import "CKCacheableHost.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -277,7 +278,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)openStreamsToPort:(unsigned)port
 {
-	NSHost *host = [NSHost hostWithName:_connectionHost];
+	NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
 	if(!host){
 		KTLog(TransportDomain, KTLogError, @"Cannot find the host: %@", _connectionHost);
 		

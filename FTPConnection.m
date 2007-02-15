@@ -37,6 +37,7 @@
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
 #import "NSObject+Connection.h"
+#import "CKCacheableHost.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -790,7 +791,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				int port = i[4] << 8 | i[5];
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
-				NSHost *host = [NSHost hostWithAddress:hostString];
+				NSHost *host = [CKCacheableHost hostWithAddress:hostString];
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 				
 				[self closeDataStreams];
@@ -818,7 +819,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_state = FTPSettingEPRTState;
 					[self sendCommand:@"EPRT"];
 				}
-				NSHost *host = [NSHost hostWithName:_connectionHost];
+				NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 					
 				[self closeDataStreams];
