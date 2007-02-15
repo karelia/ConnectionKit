@@ -98,7 +98,7 @@ static NSLock *_initLock = nil;
 		@try {
 			if ([NSThread currentThread] != myBgThread)
 			{
-				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:15.0]];
+				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:2.0]];
 				if (!sent)
 				{
 					KTLog(ThreadingDomain, KTLogFatal, @"ConnectionThreadManager couldn't send message %d", aMessage);
@@ -110,10 +110,17 @@ static NSLock *_initLock = nil;
 			}
 		} @catch (NSException *ex) {
 			KTLog(ThreadingDomain, KTLogError, @"%@", ex);
+			// if we fail to send it is usually because the queueing is occurring on the main thread. so we can actually just use the runloop to repost
+			[self performSelector:@selector(runloopResend:) withObject:[NSNumber numberWithInt:aMessage] afterDelay:0.0];
 		} @finally {
 			[message release];
 		} 
 	}
+}
+
+- (void)runloopResend:(NSNumber *)msg
+{
+	[self sendPortMessage:[msg intValue]];
 }
 
 - (void)handlePortMessage:(NSPortMessage *)portMessage
