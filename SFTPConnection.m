@@ -375,10 +375,6 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	}
 	
 	[self setState:ConnectionIdleState];
-	if (_flags.didConnect)
-	{
-		[_forwarder connection:self didConnectToHost:[self host]];
-	}
 }
 
 - (void)sendStreamDidOpen
@@ -522,6 +518,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	ConnectionCommand *cd = [ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedChangeToDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 											awaitState:ConnectionIdleState
 											 sentState:ConnectionChangingDirectoryState
@@ -575,6 +573,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedCreateDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionCreateDirectoryState
@@ -603,6 +603,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
+	
 	[self queuePermissionChange:path];
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:) target:self arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]]
 									   awaitState:ConnectionIdleState
@@ -613,7 +615,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
 }
 
 - (void)threadedDeleteFile:(NSString *)path
@@ -635,6 +638,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDeleteFile:) target:self arguments:[NSArray arrayWithObject:path]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionDeleteFileState
@@ -644,12 +649,14 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	@throw [NSException exceptionWithName:NSInvalidArgumentException reason:@"need to upate to new sftp library" userInfo:nil];
 }
 
 - (void)uploadFile:(NSString *)localPath
 {
-	[self uploadFile:localPath toFile:[[self currentDirectory] stringByAppendingPathComponent: [localPath lastPathComponent]]];
+	[self uploadFile:localPath 
+			  toFile:[[self currentDirectory] stringByAppendingPathComponent: [localPath lastPathComponent]]];
 }
 
 - (void)threadedRunloopUploadFile:(NSFileHandle *)file
@@ -888,8 +895,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
-	NSAssert(data != nil, @"data is nil");
-	NSAssert(remotePath != nil && ![remotePath isEqualToString:@""], @"remotePath is nil");
+	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[data length]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
@@ -1030,6 +1037,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"no remotePath");
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localFile = [NSString stringWithFormat:@"%@/%@", dirPath, remoteFileName];
 	
@@ -1072,16 +1082,6 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 								delegate:(id)delegate
 {
 	return [self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:delegate];
-}
-
-- (void)cancelTransfer
-{
-	
-}
-
-- (void)cancelAll
-{
-	
 }
 
 - (void)threadedContentsOfDirectory:(NSString *)directory
@@ -1192,6 +1192,8 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:) target:self arguments:[NSArray arrayWithObject:dirPath]]
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState

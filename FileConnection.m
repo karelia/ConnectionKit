@@ -196,6 +196,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)changeToDirectory:(NSString *)aDirectory	// an absolute directory
 {
+	NSAssert(aDirectory && ![aDirectory isEqualToString:@""], @"no directory specified");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcChangeToDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:aDirectory, nil]];
@@ -212,9 +214,9 @@ checkRemoteExistence:(NSNumber *)check;
 	return myCurrentDirectory;
 }
 
-- (void)createDirectory:(NSString *)aName
+- (void)createDirectory:(NSString *)dirPath
 {
-	[self createDirectory:aName permissions:0755];
+	[self createDirectory:dirPath permissions:0755];
 }
 
 - (void)fcCreateDirectory:(NSString *)aName permissions:(NSNumber *)perms
@@ -268,11 +270,13 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:ConnectionIdleState];
 }
 
-- (void)createDirectory:(NSString *)aName permissions:(unsigned long)aPermissions
+- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)aPermissions
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCreateDirectory:permissions:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:aName, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
+												   arguments:[NSArray arrayWithObjects:dirPath, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
 	ConnectionCommand *cmd = [ConnectionCommand command:inv
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionCreateDirectoryState
@@ -325,6 +329,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcSetPermissions:forFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]];
@@ -356,6 +361,9 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcRename:to:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects:fromPath, toPath, nil]];
@@ -397,6 +405,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteFile:)
 													  target:self 
 												   arguments:[NSArray arrayWithObject:path]];
@@ -432,6 +442,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteDirectory:)
 													  target:self 
 												   arguments:[NSArray arrayWithObject:dirPath]];
@@ -448,52 +460,14 @@ checkRemoteExistence:(NSNumber *)check;
 	[self deleteDirectory:path];
 }
 
-/*!	Upload the given file to the working directory.
-*/
-
-- (void)fcUploadFile:(NSString *)localPath
-{
-	NSString *remotePath = [myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]];
-	CKInternalTransferRecord *rec = [CKInternalTransferRecord recordWithLocal:localPath
-																		 data:nil
-																	   offset:0
-																	   remote:remotePath
-																	 delegate:nil
-																	 userInfo:nil];
-	[self fcUpload:rec
-		checkRemoteExistence:[NSNumber numberWithBool:NO]];
-}
-
 - (void)uploadFile:(NSString *)localPath
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFile:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:localPath]];
-	ConnectionCommand *cmd = [ConnectionCommand command:inv
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionUploadingFileState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
+	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	CKInternalTransferRecord *rec = [CKInternalTransferRecord recordWithLocal:localPath
-																		 data:nil
-																	   offset:0
-																	   remote:remotePath
-																	 delegate:nil
-																	 userInfo:nil];
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:rec, [NSNumber numberWithBool:NO], nil]];
-	ConnectionCommand *cmd = [ConnectionCommand command:inv
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionUploadingFileState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
+{	
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -603,6 +577,9 @@ checkRemoteExistence:(NSNumber *)check;
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
+	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSDictionary *attribs = [fm fileAttributesAtPath:localPath traverseLink:YES];
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
@@ -630,49 +607,9 @@ checkRemoteExistence:(NSNumber *)check;
 	[self uploadFile:localPath];
 }
 
-- (void)fcUploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self setCurrentOperation:kUploadFromData];
-	
-	if (_flags.didBeginUpload)
-	{
-		[_forwarder connection:self uploadDidBegin:remotePath];
-	}
-	NSString *fullPath = [remotePath hasPrefix:@"/"] ? remotePath : [[myFileManager currentDirectoryPath] stringByAppendingPathComponent:remotePath];
-	BOOL success = [myFileManager createFileAtPath:fullPath contents:data attributes:nil];
-	
-	//need to send the amount of bytes transferred.
-	if (_flags.uploadProgressed) {
-		[_forwarder connection:self upload:remotePath sentDataOfLength:[data length]];
-	} 
-	if (_flags.uploadPercent) {
-		[_forwarder connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:100]];
-	}
-	if (success && _flags.uploadFinished)
-	{
-		[_forwarder connection:self uploadDidFinish:remotePath];
-	}
-	if (!success && _flags.error)
-	{
-		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
-										   code:ConnectionErrorUploading 
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:remotePath, @"upload", LocalizedStringInThisBundle(@"Failed to upload data", @"FileConnection copy from data error"), NSLocalizedDescriptionKey, nil]];
-		[_forwarder connection:self didReceiveError:err];
-	}
-	[self setState:ConnectionIdleState];
-}
-
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadFromData:toFile:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:data, remotePath, nil]];
-	ConnectionCommand *cmd = [ConnectionCommand command:inv
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionUploadingFileState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -760,6 +697,9 @@ checkRemoteExistence:(NSNumber *)check;
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
+	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath
 														size:[data length]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil
@@ -938,6 +878,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcContentsOfDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];
@@ -967,6 +909,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path not specified");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCheckExistenceOfPath:)
                                                     target:self
                                                  arguments:[NSArray arrayWithObject:path]];

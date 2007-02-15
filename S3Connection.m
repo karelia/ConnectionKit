@@ -508,6 +508,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	if (![dirPath hasSuffix:@"/"])
 	{
 		dirPath = [dirPath stringByAppendingString:@"/"];
@@ -537,6 +538,8 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+	
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" uri:path] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -549,6 +552,8 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" uri:dirPath] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -676,6 +681,8 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];

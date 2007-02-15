@@ -328,6 +328,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
 										   code:500
@@ -434,6 +436,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	[self queueCommand:[ConnectionCommand command:@"LIST"
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState

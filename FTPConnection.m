@@ -1987,7 +1987,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	NSAssert((nil != dirPath), @"dirPath is nil!");
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	ConnectionCommand *pwd = [ConnectionCommand command:@"PWD"
 											 awaitState:ConnectionIdleState 
 											  sentState:ConnectionAwaitingCurrentDirectoryState
@@ -2014,6 +2015,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	
 	ConnectionCommand *cmd = [ConnectionCommand command:[NSString stringWithFormat:@"MKD %@", dirPath]
 											 awaitState:ConnectionIdleState 
 											  sentState:ConnectionCreateDirectoryState
@@ -2056,6 +2059,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
@@ -2076,6 +2081,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], path, nil]];
@@ -2090,6 +2097,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	[self queueDeletion:dirPath];
 	ConnectionCommand *rm = [ConnectionCommand command:[NSString stringWithFormat:@"RMD %@", dirPath]
 											awaitState:ConnectionIdleState 
@@ -2101,6 +2110,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	
 	[self queueRename:fromPath];
 	[self queueRename:toPath];
 
@@ -2120,6 +2132,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+	
 	[self queueDeletion:path];
 	ConnectionCommand *del = [ConnectionCommand command:[NSString stringWithFormat:@"DELE %@", path]
 											 awaitState:ConnectionIdleState 
@@ -2153,6 +2167,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
+	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	return [self uploadFile:localPath
 					 orData:nil
 					 offset:0
@@ -2185,6 +2202,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
+	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	return [self uploadFile:nil
 					 orData:data
 					 offset:0
@@ -2219,6 +2239,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"no remotePath");
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
 	
@@ -2299,6 +2322,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							  fileOffset:(unsigned long long)offset
 								delegate:(id)delegate
 {
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"no remotePath");
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSNumber *off = [NSNumber numberWithLongLong:offset];
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
@@ -2419,6 +2445,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];

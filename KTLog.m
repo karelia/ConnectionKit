@@ -308,10 +308,15 @@ static NSString *KTLevelMap[] = {
 {
 	[myLock lock];
 	
+	KTLoggingLevel wildcardLevel = [self loggingLevelForDomain:@"*"];
 	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
 	
 	//we only log the current level or less.
-	if (currentLevel == KTLogOff || level > currentLevel)
+	if (level >= wildcardLevel)
+	{
+		; // wild card enabled and over level threshold, don't test anything else
+	}
+	else if (currentLevel == KTLogOff || level > currentLevel)
 	{
 		[myLock unlock];
 		return;
@@ -333,10 +338,15 @@ static NSString *KTLevelMap[] = {
 {
 	[myLock lock];
 	
+	KTLoggingLevel wildcardLevel = [self loggingLevelForDomain:@"*"];
 	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
 	
 	//we only log the current level or less.
-	if (currentLevel == KTLogOff || level > currentLevel)
+	if (level >= wildcardLevel)
+	{
+		; // wild card enabled and over level threshold, don't test anything else
+	}
+	else if (currentLevel == KTLogOff || level > currentLevel)
 	{
 		[myLock unlock];
 		return;
