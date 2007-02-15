@@ -65,6 +65,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oFiles setDelegate:self];
 	
 	[oTitle setStringValue:@""];
+	
 	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
 	[oProgress setUsesThreadedAnimation:YES];
@@ -115,6 +116,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myConnection autorelease];
 	myConnection = [connection retain];
 }
+
+#warning GREG -- This seems to be called a lot, would it be better to just put the value of what the delegate returns into the ivar just once?
 
 - (id <AbstractConnectionProtocol>)connection
 {
@@ -437,9 +440,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	}
 	
 	myFlags.finishedContentGeneration = YES;
-	
-	[[self connection] disconnect];
-	
+		
 	[self performSelectorOnMainThread:@selector(finishedKickOff:) withObject:nil waitUntilDone:NO];
 	
 	if (myFlags.stopTransfer)
@@ -453,6 +454,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		{
 			[myForwarder transferControllerFinishedContentGeneration:self];
 		}
+		[[self connection] disconnect];
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
 		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
@@ -721,6 +723,7 @@ static NSSize closedSize = { 452, 152 };
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 	if (myFlags.delegateDidFinish)
 	{
+#warning GREG -- Maybe have a separate callback if the transfer FAILED.  Maybe even a separate one for transfer was STOPPED.
 		[myForwarder transferControllerDidFinish:self];
 	}
 } 
@@ -777,6 +780,8 @@ static NSSize closedSize = { 452, 152 };
 		KTLog(ControllerDomain, KTLogDebug, @"%@ %@", NSStringFromSelector(_cmd), error);
 		[[self connection] forceDisconnect];
 		[[self connection] setDelegate:nil];
+		
+#warning - need a client callback to update the title approrpriately, maybe also cleanup.
 		
 		[oTitle setStringValue:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];

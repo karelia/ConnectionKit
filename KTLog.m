@@ -342,7 +342,7 @@ static NSString *KTLevelMap[] = {
 	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
 	
 	//we only log the current level or less.
-	if (level >= wildcardLevel)
+	if (wildcardLevel > KTLogOff && level >= wildcardLevel)
 	{
 		; // wild card enabled and over level threshold, don't test anything else
 	}
