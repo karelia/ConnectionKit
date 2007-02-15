@@ -580,6 +580,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	
 	DAVCreateDirectoryRequest *req = [DAVCreateDirectoryRequest createDirectoryWithPath:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -597,18 +599,20 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
 	//no op
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	NSAssert((nil != fromPath), @"fromPath is nil!");
-    NSAssert((nil != toPath), @"toPath is nil!");
-	
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
 }
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+
 	DAVDeleteRequest *req = [DAVDeleteRequest deleteFileWithPath:path];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -621,6 +625,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	DAVDeleteRequest *req = [DAVDeleteRequest deleteFileWithPath:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -633,7 +639,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)uploadFile:(NSString *)localPath
 {
-	[self uploadFile:localPath toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
+	[self uploadFile:localPath 
+			  toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
@@ -643,8 +650,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {
-	// currently we aren't checking remote existence
-	[self uploadFile:localPath toFile:remotePath];
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
@@ -652,6 +658,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
+	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
 	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
@@ -704,8 +713,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
 {
-	// we don't support checking remote existence
-	[self uploadFromData:data toFile:remotePath];
+	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data
@@ -713,6 +721,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
+	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
 	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:[data length]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
@@ -752,6 +763,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"no remotePath");
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSString *localPath = [dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
 	CKTransferRecord *transfer = [CKTransferRecord recordWithName:remotePath size:0];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
@@ -812,6 +826,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];

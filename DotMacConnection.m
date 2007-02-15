@@ -595,7 +595,7 @@
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
-{
+{	
 	return [super uploadFile:localPath
 					  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
 		checkRemoteExistence:flag
@@ -622,7 +622,7 @@
 							  toFile:(NSString *)remotePath 
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
-{
+{	
 	return [super uploadFromData:data
 						  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
 			checkRemoteExistence:flag
@@ -661,6 +661,7 @@
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no path specified");
 	NSString *dir = [[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]];
 	
 	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory

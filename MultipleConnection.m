@@ -259,6 +259,7 @@
 
 - (void)createDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:dirPath forKey:@"folder"];
 	[self queueCreateDirectory:rec];
@@ -278,6 +279,7 @@
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:path forKey:@"file"];
 	[self queuePermissionChange:rec];
@@ -292,6 +294,9 @@
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:toPath forKey:@"file"];
 	[self queueRename:rec];
@@ -306,6 +311,8 @@
 
 - (void)deleteFile:(NSString *)path
 {
+	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
+	
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:path forKey:@"file"];
 	[self queueDeletion:rec];
@@ -315,6 +322,8 @@
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
+	
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:dirPath forKey:@"file"];
 	[self queueDeletion:rec];
@@ -431,6 +440,8 @@
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
+	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
 								   reason:@"MultipleConnections does not support contentsOfDirectory"
 								 userInfo:nil];
