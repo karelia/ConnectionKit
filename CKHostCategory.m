@@ -184,7 +184,9 @@ static NSImage *sFolderImage = nil;
 {
 	if (!sFolderImage)
 	{
-		sFolderImage = [[NSImage imageNamed:@"folder"] copy];
+		NSBundle *b = [NSBundle bundleForClass:[self class]];
+		NSString *p = [b pathForResource:@"folder" ofType:@"png"];
+		sFolderImage = [[NSImage alloc] initWithContentsOfFile:p];
 		[sFolderImage setScalesWhenResized:YES];
 		[sFolderImage setSize:NSMakeSize(16,16)];
 	}

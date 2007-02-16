@@ -144,7 +144,7 @@ typedef struct __flags {
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)deleteFile:(NSString *)path;
 - (void)deleteDirectory:(NSString *)dirPath;
-- (void)recursivelyDeleteDirectory:(NSString *)path;
+- (void)recursivelyDeleteDirectory:(NSString *)path deletionNotificationDelegate:(id)sender;
 
 - (void)startBulkCommands;
 - (void)endBulkCommands;
@@ -166,6 +166,7 @@ typedef struct __flags {
 	can be found in the records node properties
 */
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)flag;
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
 - (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
