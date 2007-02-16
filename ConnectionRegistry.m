@@ -17,6 +17,7 @@ static NSLock *sRegistryLock = nil;
 static BOOL sRegistryCanInit = NO;
 static ConnectionRegistry *sRegistry = nil;
 
+NSString *CKLocalRegistryPboardType = @"CKLocalRegistryPboardType";
 NSString *CKRegistryNotification = @"CKRegistryNotification";
 NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
@@ -58,6 +59,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		myLock = [[NSLock alloc] init];
 		myCenter = [NSDistributedNotificationCenter defaultCenter];
 		myConnections = [[NSMutableArray alloc] init];
+		myDraggedItems = [[NSMutableArray alloc] init];
 		myBonjour = [[CKBonjourCategory alloc] init];
 		[myConnections addObject:myBonjour];
 		
@@ -94,6 +96,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 - (void)dealloc
 {
+	[myDraggedItems release];
 	[myBonjour release];
 	[myLock release];
 	[myConnections release];
@@ -354,6 +357,78 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	
 	return [menu autorelease];
 }
+
+- (id)actualItemWithAnnotation:(NSString *)optionalAnnotation name:(NSString *)optionalName host:(NSString *)optionalHost username:(NSString *)optionalUsername fromItems:(NSArray *)items 
+{
+	NSEnumerator *hostsEnumerator = [items objectEnumerator];
+	id currentHost = nil;
+	int matchesNeeded = 0;
+	int currentMatches = 0;
+	if (optionalAnnotation)
+	{
+		matchesNeeded++;
+	}
+	if (optionalHost)
+	{
+		matchesNeeded++;
+	}
+	if (optionalUsername)
+	{
+		matchesNeeded++;
+	}
+	if (optionalName)
+	{
+		matchesNeeded++;
+	}
+	while (currentHost = [hostsEnumerator nextObject])
+	{
+		currentMatches = 0;
+		if ([[currentHost className] isEqualToString:@"CKHost"])
+		{
+			if ([currentHost annotation])
+			{
+				if ([[currentHost annotation] isEqual:optionalAnnotation])
+				{
+					currentMatches++;
+				}
+			}
+			if ([currentHost host])
+			{
+				if ([[currentHost host] isEqual:optionalHost])
+				{
+					currentMatches++;
+				}
+			}
+			if ([currentHost username])
+			{
+				if ([[currentHost username] isEqual:optionalUsername])
+				{
+					currentMatches++;
+				}
+			}
+			if (matchesNeeded == currentMatches)
+			{
+				return (CKHost *)currentHost;
+			}
+		}
+		else
+		{
+			if ([currentHost name])
+			{
+				if ([[currentHost name] isEqual:optionalName])
+				{
+					currentMatches++;
+				}
+			}
+			if (matchesNeeded == currentMatches)
+			{
+				return (CKHostCategory *)currentHost;
+			}
+		}
+	}
+	return nil;
+}
+
 #pragma mark -
 #pragma mark Outline View Data Source
 
@@ -433,7 +508,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
 	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
 									   forLocal:NO];
-	[pboard declareTypes:[NSArray arrayWithObject:NSFilenamesPboardType] owner:nil];
+	[pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, CKLocalRegistryPboardType, nil] owner:nil];
 	NSMutableArray *files = [NSMutableArray array];
 	NSEnumerator *e = [items objectEnumerator];
 	id cur;
@@ -458,6 +533,8 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		}
 	}
 	[pboard setPropertyList:files forType:NSFilenamesPboardType];
+	[myDraggedItems addObjectsFromArray:items];
+	
 	return YES;
 }
 
@@ -469,9 +546,22 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	BOOL canAcceptDrag = NO;
 	while ((currentItemPath = [draggedItemsEnumerator nextObject]) && !canAcceptDrag)
 	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:[currentItemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ![currentItemPath hasPrefix:@"/tmp/ck"])
+		if (item == nil && index == -1)
 		{
 			canAcceptDrag = YES;
+			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
+		}
+		else if ([[item className] isEqualToString:@"CKHostCategory"])
+		{
+			canAcceptDrag = YES;
+			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex+1];
+			break;
+		}
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[currentItemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ![currentItemPath hasPrefix:@"/tmp/ck"])
+		{  
+			//Drag from Finder
+			canAcceptDrag = YES;
+			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
 			break;
 		}
 	}
@@ -489,12 +579,86 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	NSString *currentDropletPath;
 	while (currentDropletPath = [dropletPathEnumerator nextObject])
 	{
-		NSString *configurationFilePath = [currentDropletPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
-		CKHost *dropletHost = [NSKeyedUnarchiver unarchiveObjectWithFile:configurationFilePath];
-		if (dropletHost)
+		if (![currentDropletPath hasPrefix:@"/tmp/ck"])
 		{
-			[[ConnectionRegistry sharedRegistry] addHost:dropletHost];
-			[[ConnectionRegistry sharedRegistry] changed:nil];
+			//Drag to import
+			NSString *configurationFilePath = [currentDropletPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
+			CKHost *dropletHost = [NSKeyedUnarchiver unarchiveObjectWithFile:configurationFilePath];
+			if (dropletHost)
+			{
+				//Dragged a Bookmark
+				if ([[item className] isEqualToString:@"CKHostCategory"])
+				{
+					//Into a Category
+					[item addHost:dropletHost];
+				}
+				else
+				{
+					//Into root
+					[self addHost:dropletHost];					
+				}
+			}
+		}
+		else
+		{
+			NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
+			id currentItem = nil;
+			while (currentItem = [itemsToMoveEnumerator nextObject])
+			{
+				//Make sure the item we dragged isn't attempting to be dragged into itself!
+				if (currentItem != item)
+				{
+					if ([[currentItem className] isEqualToString:@"CKHost"])
+					{
+						//Moving a Host
+						if ([currentItem category])
+						{
+							//Remove the host from the parent category
+							[[currentItem category] removeHost:currentItem];
+						}
+						else
+						{
+							//Remove the host from the root.
+							[self removeHost:currentItem];
+						}
+						if (item == nil)
+						{
+							//Add new Host to the root.
+							[self addHost:currentItem];
+						}
+						else
+						{
+							//Add the Host to it's new parent category.
+							[item addHost:currentItem];
+						}
+					}
+					else
+					{
+						//Moving a category
+						if ([currentItem category])
+						{
+							//Remove the category from the parent category
+							[[currentItem category] removeChildCategory:currentItem];
+						}
+						else
+						{
+							//Remove the category from the root
+							[self removeCategory:currentItem];
+						}
+						if (item == nil)
+						{
+							//Add new category to the root.
+							[self addCategory:currentItem];
+						}
+						else
+						{		
+							//Add new category to its new parent category.
+							[item addChildCategory:currentItem];
+						}
+					}
+				}
+				[myDraggedItems removeAllObjects];
+			}
 		}
 	}
 	return YES;

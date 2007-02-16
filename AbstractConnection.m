@@ -897,7 +897,7 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath
+- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSDictionary *attribs;
@@ -918,28 +918,36 @@ NSDictionary *sDataAttributes = nil;
 			[self recursivelyUpload:path 
 								 to:[remotePath stringByAppendingPathComponent:[path lastPathComponent]] 
 							   root:root 
-						   rootPath:rootPath];
+						   rootPath:rootPath
+				  ignoreHiddenFiles:ignoreHiddenFilesFlag];
 		}
 		else
 		{
 			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
-			[self uploadFile:path toFile:remote];
-			attribs = [fm fileAttributesAtPath:path traverseLink:NO];
-			record = [CKTransferRecord addFileRecord:remote 
-												size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]
-											withRoot:root
-											rootPath:rootPath];
-			[record setProperty:path forKey:QueueUploadLocalFileKey];
-			[record setProperty:remote forKey:QueueUploadRemoteFileKey];
+			if (!ignoreHiddenFilesFlag || ![[remote lastPathComponent] hasPrefix:@"."])
+			{
+				[self uploadFile:path toFile:remote];
+				attribs = [fm fileAttributesAtPath:path traverseLink:NO];
+				record = [CKTransferRecord addFileRecord:remote 
+													size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]
+												withRoot:root
+												rootPath:rootPath];
+				[record setProperty:path forKey:QueueUploadLocalFileKey];
+				[record setProperty:remote forKey:QueueUploadRemoteFileKey];
+			}
 		}
 	}
 } 
-
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+{
+	return [self recursivelyUpload:localPath to:remotePath ignoreHiddenFiles:NO];
+}
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
 	CKTransferRecord *root = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:0];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSDictionary *attribs;
+	
 	CKTransferRecord *record;
 	BOOL isDir;
 	
@@ -961,7 +969,8 @@ NSDictionary *sDataAttributes = nil;
 		[self recursivelyUpload:localPath 
 							 to:[remotePath stringByAppendingPathComponent:[localPath lastPathComponent]] 
 						   root:root 
-					   rootPath:remotePath];
+					   rootPath:remotePath
+			  ignoreHiddenFiles:ignoreHiddenFilesFlag];
 	}
 	
 	return root;

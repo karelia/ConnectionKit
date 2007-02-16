@@ -24,6 +24,7 @@
 @interface ConnectionRegistry : NSObject 
 {
 	NSMutableArray *myConnections;
+	NSMutableArray *myDraggedItems;
 	CKBonjourCategory *myBonjour;
 	NSDistributedNotificationCenter *myCenter;
 	NSLock *myLock;
