@@ -719,6 +719,9 @@ NSDictionary *sDataAttributes = nil;
 	_flags.changeDirectory		= [del respondsToSelector:@selector(connection:didChangeToDirectory:)];
 	_flags.createDirectory		= [del respondsToSelector:@selector(connection:didCreateDirectory:)];
 	_flags.deleteDirectory		= [del respondsToSelector:@selector(connection:didDeleteDirectory:)];
+	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
+	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
+	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
 	_flags.deleteFile			= [del respondsToSelector:@selector(connection:didDeleteFile:)];
 	_flags.didBeginUpload		= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
 	_flags.didConnect			= [del respondsToSelector:@selector(connection:didConnectToHost:)];
@@ -753,6 +756,12 @@ NSDictionary *sDataAttributes = nil;
 {
 	return [_properties objectForKey:key];
 }
+
+- (void)removePropertyForKey:(NSString *)key;
+{
+	[_properties removeObjectForKey:key];
+}
+
 
 - (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents
 {

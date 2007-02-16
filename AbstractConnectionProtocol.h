@@ -55,6 +55,9 @@ typedef struct __flags {
 	unsigned changeDirectory:1;
 	unsigned createDirectory:1;
 	unsigned deleteDirectory:1;
+	unsigned deleteDirectoryInAncestor:1;
+	unsigned deleteFileInAncestor:1;
+	unsigned discoverFilesToDeleteInAncestor:1;
 	unsigned deleteFile:1;
 	unsigned didBeginUpload:1;
 	unsigned didConnect:1;
@@ -226,6 +229,7 @@ typedef struct __flags {
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;
+- (void)removePropertyForKey:(NSString *)key;
 
 - (void)setTranscript:(NSTextStorage *)transcript;
 
@@ -252,16 +256,29 @@ typedef struct __flags {
 - (void)connection:(id <AbstractConnectionProtocol>)con didCreateDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path;
+
+
+// recursivelyDeleteDirectory
+//     These methods may change soon -- Seth
+- (void)connection:(id <AbstractConnectionProtocol>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath;
+
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error;
 - (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path;
+
+
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length; 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath;
+
+
 - (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;

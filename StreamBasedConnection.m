@@ -985,6 +985,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
+		if (_flags.discoverFilesToDeleteInAncestor) {
+			[_forwarder connection:self didDiscoverFilesToDelete:contents inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		}
+		
 		while ((cur = [e nextObject]))
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
@@ -1011,7 +1015,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				_numberOfDirDeletionsRemaining++;
 				[_recursiveDeletionConnection deleteDirectory:cur];
 			}
-		}		
+			[_emptyDirectoriesToDelete removeAllObjects];
+		}
 		[_deletionLock unlock];
 	}
 }
@@ -1020,6 +1025,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (con == _recursiveDeletionConnection)
 	{
+		if (_flags.deleteFileInAncestor) {
+			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		}
+		
 		[_deletionLock lock];
 		_numberOfDeletionsRemaining--;
 		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
@@ -1031,6 +1040,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				_numberOfDirDeletionsRemaining++;
 				[_recursiveDeletionConnection deleteDirectory:cur];
 			}
+			[_emptyDirectoriesToDelete removeAllObjects];
 		}
 		[_deletionLock unlock];
 	}
@@ -1049,6 +1059,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 			if (_flags.deleteDirectory) {
 				[_forwarder connection:self didDeleteDirectory:dirPath];
+			}
+		} else {
+			if (_flags.deleteDirectoryInAncestor) {
+				[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			}
 		}
 	}

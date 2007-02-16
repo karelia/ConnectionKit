@@ -2270,11 +2270,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 */
 	
 	[self startBulkCommands];
-	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A"
-											   awaitState:ConnectionIdleState
-												sentState:FTPModeChangeState
-												dependant:nil
-												 userInfo:nil];
 	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
@@ -2291,7 +2286,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	ConnectionCommand *retr = [ConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
 											  awaitState:ConnectionIdleState 
 											   sentState:ConnectionDownloadingFileState
-											   dependant:ascii
+											   dependant:nil
 												userInfo:download];
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
 	[dataCmd addDependantCommand: retr];
@@ -2302,17 +2297,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   dependant:dataCmd
 												userInfo:nil];
 	
-	ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
-											 awaitState:ConnectionIdleState 
+	if (!_setTransferMode) {
+		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
+											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
-											  dependant:_serverSupport.hasSize ? size : nil
+											  dependant:nil
 											   userInfo:nil];
-	[self queueCommand:bin];
+		[self queueCommand:bin];
+		_setTransferMode = YES;
+	}
+	
+	
 	if (_serverSupport.hasSize)
 		[self queueCommand:size];
 	[self queueCommand:dataCmd];
 	[self queueCommand:retr];
-	[self queueCommand:ascii];
 	[self endBulkCommands];
 	
 	return record;
@@ -2330,12 +2329,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
 	
-	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A" 
-											   awaitState:ConnectionIdleState 
-												sentState:ConnectionIdleState
-												dependant:nil 
-												 userInfo:nil];
-
 	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath
 														   size:0];
 	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
@@ -2350,7 +2343,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	ConnectionCommand *retr = [ConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
 											  awaitState:ConnectionIdleState 
 											   sentState:ConnectionDownloadingFileState
-											   dependant:ascii
+											   dependant:nil
 												userInfo:download];
 	ConnectionCommand *rest = [ConnectionCommand command:[NSString stringWithFormat:@"REST %@", off]
 											  awaitState:ConnectionIdleState 
@@ -2365,23 +2358,27 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								dependant:rest
 								 userInfo:nil];
 	}
+	
+	
 	ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
-											 awaitState:ConnectionIdleState 
-											  sentState:ConnectionIdleState
-											  dependant:_serverSupport.hasSize ? size : rest
-											   userInfo:nil];
+												 awaitState:ConnectionIdleState 
+												  sentState:ConnectionIdleState
+												  dependant:_serverSupport.hasSize ? size : rest
+												   userInfo:nil];
+	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	[dataCmd addDependantCommand:bin];
+	if (!_setTransferMode) {
+		[dataCmd addDependantCommand:bin];
+	}
 	
 	[self startBulkCommands];
 	[self queueCommand:dataCmd];
-	
-	[self queueCommand:bin];
+	if (!_setTransferMode)
+		[self queueCommand:bin];
 	if (_serverSupport.hasSize)
 		[self queueCommand:size];
 	[self queueCommand:rest];
 	[self queueCommand:retr];
-	[self queueCommand:ascii];	
 	[self endBulkCommands];
 	
 	return record;
@@ -2723,15 +2720,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	KTLog(QueueDomain, KTLogDebug, @"Queueing Upload: localPath = %@ data = %d bytes offset = %lld remotePath = %@", localPath, [data length], offset, remotePath);
 	
-	ConnectionCommand *ascii = [ConnectionCommand command:@"TYPE A"
-											   awaitState:ConnectionIdleState
-												sentState:FTPModeChangeState
-												dependant:nil
-												 userInfo:nil];
 	ConnectionCommand *store = [ConnectionCommand command:[NSString stringWithFormat:@"STOR %@", remotePath]
 											   awaitState:ConnectionIdleState
 												sentState:ConnectionUploadingFileState
-												dependant:ascii
+												dependant:nil
 												 userInfo:nil];
 	ConnectionCommand *rest = nil;
 	if (offset != 0) {
@@ -2771,14 +2763,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[dataCmd addDependantCommand:offset != 0 ? rest : store];
 	[dataCmd setUserInfo:dict];
 	
-	ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
+	[self startBulkCommands];
+	
+	if (!_setTransferMode) {
+		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
-											  dependant:dataCmd
+											  dependant:nil
 											   userInfo:nil];
+		[self queueCommand:bin];
+		_setTransferMode = YES;
+	}
 	
-	[self startBulkCommands];
-	[self queueCommand:bin];
+	
 	[self queueCommand:dataCmd];
 	
 	if (0 != offset)
@@ -2786,7 +2783,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self queueCommand:rest];
 	}
 	[self queueCommand:store];
-	[self queueCommand:ascii];
 	[self endBulkCommands];
 	
 	return record;
