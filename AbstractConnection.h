@@ -160,6 +160,7 @@ typedef enum {
 */
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;
+- (void)removePropertyForKey:(NSString *)key;
 
 // Subclass registration
 + (void)registerConnectionClass:(Class)inClass forTypes:(NSArray *)types;

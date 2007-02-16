@@ -69,7 +69,9 @@ typedef enum {
 	long long			_transferCursor;
 	long long			_delegateSizeBuffer;
 	int					_transferLastPercent;
-			
+	
+	BOOL				_setTransferMode;
+	
 	NSFileHandle		*_writeHandle;
 	NSFileHandle		*_readHandle;
 	NSData				*_readData;
