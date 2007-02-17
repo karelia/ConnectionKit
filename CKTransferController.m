@@ -117,8 +117,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	myConnection = [connection retain];
 }
 
-#warning GREG -- This seems to be called a lot, would it be better to just put the value of what the delegate returns into the ivar just once?
-
 - (id <AbstractConnectionProtocol>)connection
 {
 	if (myFlags.delegateProvidesConnection)
@@ -331,7 +329,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	myFlags.delegateFinishedContentGeneration = [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
 	myFlags.delegateHandlesDefaultButton = [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
 	myFlags.delegateHandlesAlternateButton = [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
-	myFlags.delegateDidFinish = [delegate respondsToSelector:@selector(transferControllerDidFinish:)];
+	myFlags.delegateDidFinish = [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
 }
 
 - (id)delegate
@@ -484,6 +482,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
+	myStatus = CKSuccessStatus;
 	
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
@@ -609,6 +608,7 @@ static NSSize closedSize = { 452, 152 };
 - (void)stopTransfer:(id)sender
 {
 	myFlags.stopTransfer = YES;
+	myStatus = CKAbortStatus;
 }
 
 - (BOOL)hadErrorsTransferring
@@ -721,10 +721,10 @@ static NSSize closedSize = { 452, 152 };
 		}
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
+
 	if (myFlags.delegateDidFinish)
 	{
-#warning GREG -- Maybe have a separate callback if the transfer FAILED.  Maybe even a separate one for transfer was STOPPED.
-		[myForwarder transferControllerDidFinish:self];
+		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
 	}
 } 
 
@@ -778,10 +778,10 @@ static NSSize closedSize = { 452, 152 };
 	else
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"%@ %@", NSStringFromSelector(_cmd), error);
-		[[self connection] forceDisconnect];
 		[[self connection] setDelegate:nil];
+		[[self connection] forceDisconnect];
 		
-#warning - need a client callback to update the title approrpriately, maybe also cleanup.
+		myStatus = CKErrorStatus;
 		
 		[oTitle setStringValue:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
@@ -794,6 +794,8 @@ static NSSize closedSize = { 452, 152 };
 		[oDefaultButton setImagePosition:NSImageRight];
 		[oDefaultButton setKeyEquivalent:@"\r"];
 		[oDefaultButton setHidden:NO];
+		
+		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
 		
 		NSAlert *a = [NSAlert alertWithError:error];
 		[a runModal];
