@@ -16,12 +16,20 @@ enum {
 	CKFailedVerificationError = 54321
 };
 
+typedef enum {
+	CKSuccessStatus = 0,
+	CKErrorStatus,
+	CKAbortStatus
+} CKTransferControllerStatus;
+
 @class RunLoopForwarder;
 
 @interface CKTransferController : NSWindowController 
 {
 	id <AbstractConnectionProtocol>		myConnection;
 	id <AbstractConnectionProtocol>		myVerificationConnection;
+	
+	CKTransferControllerStatus			myStatus;
 	
 	NSMutableArray						*myTransfers;
 	NSMutableSet						*myPathsToVerify;
@@ -118,6 +126,6 @@ enum {
 // return YES if you want the controllers default action to also be invoked
 - (BOOL)transferControllerDefaultButtonAction:(CKTransferController *)controller;
 - (BOOL)transferControllerAlternateButtonAction:(CKTransferController *)controller;
-- (void)transferControllerDidFinish:(CKTransferController *)controller;
+- (void)transferControllerDidFinish:(CKTransferController *)controller returnCode:(CKTransferControllerStatus)code;
 
 @end
