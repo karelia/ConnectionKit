@@ -452,6 +452,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		{
 			[myForwarder transferControllerFinishedContentGeneration:self];
 		}
+		myStatus = CKSuccessStatus;		// We have all the content, so we should be OK to set success now. 
 		[[self connection] disconnect];
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
@@ -482,8 +483,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
-	myStatus = CKSuccessStatus;
-	
+	myStatus = CKErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
+
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
 	{
