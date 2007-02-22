@@ -43,6 +43,10 @@
 		lock = [[NSRecursiveLock alloc] init];
 		createdOnThread = [NSThread currentThread];
 		[NSThread prepareForConnectionInterThreadMessages];
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(threadWillDie:)
+													 name:NSThreadWillExitNotification
+												   object:createdOnThread];
 		useMainThread = NO;
 	}
 	return self;
@@ -50,8 +54,16 @@
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
 	[lock release];
 	[super dealloc];
+}
+
+- (void)threadWillDie:(NSNotification *)n
+{
+	[lock lock];
+	createdOnThread = nil;
+	[lock unlock];
 }
 
 - (void) setDelegate:(id)aDelegate
