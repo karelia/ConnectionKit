@@ -726,6 +726,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	NSString *local = [upload localPath];
 	NSString *remote = [upload remotePath];
 	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+#warning Leaks tool showed that myTransferHandle was not getting deallocated here.
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
@@ -871,6 +872,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	NSData *data = [upload data];
 	NSString *remote = [upload remotePath];
 	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+#warning this might leak like the threadedUploadFile
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
@@ -1002,6 +1004,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	}
 	[fm createFileAtPath:localFile contents:[NSData data] attributes:nil];
 	NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:localFile];
+#warning this might leak like threadedUploadFile
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remoteFile UTF8String], LIBSSH2_FXF_READ, 0);
 	LIBSSH2_SFTP_ATTRIBUTES attrs;
 	
