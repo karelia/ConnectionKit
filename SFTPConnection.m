@@ -810,14 +810,14 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	}
 #warning this byte range was really out of hand for Terrence
 	NSData *chunk = [data subdataWithRange:byteRange];
-	size_t chunksent = libssh2_sftp_write(myTransferHandle,[chunk bytes],[chunk length]);
+	size_t chunksent = libssh2_sftp_write(myTransferHandle,[chunk bytes],[chunk length]); // we cannot trust the return value of this method
 	if (_flags.uploadProgressed)
 	{
-		[_forwarder connection:self upload:remote sentDataOfLength:chunksent];
+		[_forwarder connection:self upload:remote sentDataOfLength:[chunk length]];
 	}
 	if ([upload delegateRespondsToTransferTransferredData])
 	{
-		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunksent];
+		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:[chunk length]];
 	}
 	if (chunksent != [data length])
 	{
@@ -833,7 +833,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 //			[[upload delegate] transfer:[upload userInfo] receivedError:error];
 //		}
 	}
-	myBytesTransferred += chunksent;
+	myBytesTransferred += [chunk length];
 	int percent = (int)((myBytesTransferred * 100) / myTransferSize);
 	if (_flags.uploadPercent)
 	{
