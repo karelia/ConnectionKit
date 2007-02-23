@@ -231,29 +231,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", command];
 
-	if ([self transcript])
-	{
-		NSString *commandToEcho = command;
-		if ([command rangeOfString:@"PASS"].location != NSNotFound)
-		{
-			if (![defaults boolForKey:@"AllowPasswordToBeLogged"])
-			{
-				commandToEcho = [NSString stringWithFormat:@"PASS %C%C%C%C%C", 0x2022, 0x2022, 0x2022, 0x2022, 0x2022];
-			}
-		}
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", commandToEcho] attributes:[AbstractConnection sentAttributes]] autorelease]];
-	}
-	
-	NSString *loggableCommand = command;
+	NSString *commandToEcho = command;
 	if ([command rangeOfString:@"PASS"].location != NSNotFound)
 	{
 		if (![defaults boolForKey:@"AllowPasswordToBeLogged"])
 		{
-			loggableCommand = @"PASS ####";
+			commandToEcho = @"PASS ####";
 		}
 	}
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", commandToEcho] attributes:[AbstractConnection sentAttributes]] autorelease]];
+	}
 		
-	KTLog(ProtocolDomain, KTLogDebug, @">> %@", loggableCommand);
+	KTLog(ProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
 
 	if ([formattedCommand rangeOfString:@"RETR"].location != NSNotFound)
 	{
