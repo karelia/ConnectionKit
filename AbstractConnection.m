@@ -282,52 +282,56 @@ NSDictionary *sDataAttributes = nil;
 											 password:(NSString *)password
 												error:(NSError **)error
 {
+	id result = nil;
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
 	
 	KTLog(ConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
 	
 	if (!name) {
-		return [AbstractConnection connectionToHost:host
-											   port:port
-										   username:username
-										   password:password
-											  error:error];
+		result = [AbstractConnection connectionToHost:host
+												 port:port
+											 username:username
+											 password:password
+												error:error];
 	}
-	
-	while (cur = [e nextObject])
+	else
 	{
-		Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-		NSString *n = [[class name] lowercaseString];
-		NSString *searchName = [name lowercaseString];
-		
-		if ([n isEqualToString:searchName])
+		while (cur = [e nextObject])
 		{
-			if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
+			Class class = NSClassFromString([cur objectForKey:ACClassKey]);
+			NSString *n = [[class name] lowercaseString];
+			NSString *searchName = [name lowercaseString];
+			
+			if ([n isEqualToString:searchName])
 			{
-				KTLog(ConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
-				if (port == nil)
-					port = [AbstractConnection registeredPortForConnectionType:[class name]];
-				
-				return [class connectionToHost:host
-										  port:port
-									  username:username
-									  password:password
-										 error:error];
+				if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
+				{
+					KTLog(ConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
+					if (port == nil)
+						port = [AbstractConnection registeredPortForConnectionType:[class name]];
+					
+					result = [class connectionToHost:host
+												port:port
+											username:username
+											password:password
+											   error:error];
+					break;
+				}
 			}
 		}
 	}
-	
-	if (error)
+	if (!result && error)
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
 										   code:ConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested connection type", @"failed to find a connection class")
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(
+				@"No connection available for requested connection type", @"failed to find a connection class")
 																			forKey:NSLocalizedDescriptionKey]];
 		*error = err;
 	}
 	
-	return nil;
+	return result;
 }
 
 /*!	Tries to guess what kind of connection to make based upon the port or ..... ?????????

@@ -119,10 +119,11 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (id <AbstractConnectionProtocol>)connection
 {
-	if (myFlags.delegateProvidesConnection)
+	if (!myConnection && myFlags.delegateProvidesConnection)
 	{
 		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self];
 		[con setDelegate:self];
+		[self setConnection:con];		// cache for next time
 		return con;
 	}
 	return myConnection;
@@ -509,6 +510,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	[[self connection] setName:@"main uploader"];
 	[[self connection] connect];
+	
+#warning GREG -- can we make sure to not kick off and gather contents, upload, etc. until we have a verified working connection?
 
 	// temporarily turn off verification for sftp until I can sort out the double connection problem
 	if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
@@ -723,6 +726,11 @@ static NSSize closedSize = { 452, 152 };
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
+	if (CKErrorStatus == myStatus)	// we might have gotten an unexpected disconnect -- bad password for example
+	{
+		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
+		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
+	}				
 	if (myFlags.delegateDidFinish)
 	{
 		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
@@ -784,7 +792,7 @@ static NSSize closedSize = { 452, 152 };
 		
 		myStatus = CKErrorStatus;
 		
-		[oTitle setStringValue:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
+		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
 		
 		[oProgress setIndeterminate:NO];
