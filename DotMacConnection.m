@@ -285,7 +285,7 @@
 					[ui setObject:err forKey:NSLocalizedDescriptionKey];
 					[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 					[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-					[ui setObject:[dav directory] forKey:@"directory"];
+					[ui setObject:[(DAVCreateDirectoryRequest *)[dav request] path] forKey:@"directory"];
 					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
 														 code:[dav code]
 													 userInfo:ui];
