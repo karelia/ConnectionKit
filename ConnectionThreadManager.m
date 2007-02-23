@@ -72,7 +72,7 @@ static NSLock *_initLock = nil;
 	
 	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
 	
-	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open after TWO YEARS!
+	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open since 2002!
 	// But then again, we can't remove the thread, so it really doesn't mean much.	
 	NSDate *backToTheFuture = [NSDate distantFuture];
 	

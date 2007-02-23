@@ -135,7 +135,7 @@ static int libssh2_banner_receive(LIBSSH2_SESSION *session)
 {
 	char banner[256];
 	int banner_len = 0;
-	int tries = 10;
+//unused	int tries = 10;
 	
 	while ((banner_len < sizeof(banner)) &&
 			((banner_len == 0) || (banner[banner_len-1] != '\n'))) {

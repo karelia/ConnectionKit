@@ -881,7 +881,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)recursivelyDeleteDirectory:(NSString *)path
+- (void)recursivelyDeleteDirectory:(NSString *)path deletionNotificationDelegate:(id)sender;
 {
 	SUBCLASS_RESPONSIBLE
 }

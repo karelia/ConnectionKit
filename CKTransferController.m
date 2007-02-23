@@ -102,7 +102,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	if (myFlags.verifyTransfers)
 	{
 		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
-		if ([[enclosedFolder progress] intValue] == 100)
+		if ([[enclosedFolder progress] intValue] == 100 && nil != [enclosedFolder error])
 		{
 			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
 			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
