@@ -36,7 +36,7 @@ static NSMutableDictionary *responseMap = nil;
 
 @implementation CKHTTPResponse
 
-+ (void)initialize	// preferred over +load in most cases
++ (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	responseMap = [[NSMutableDictionary dictionary] retain];

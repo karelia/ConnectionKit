@@ -29,7 +29,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 @implementation ConnectionRegistry
 
-+ (void)initialize	// preferred over +load in most cases
++ (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	sRegistryLock = [[NSLock alloc] init];
