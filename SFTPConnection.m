@@ -808,6 +808,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		byteRange.length = myTransferSize - myBytesTransferred;
 	}
+#warning this byte range was really out of hand for Terrence
 	NSData *chunk = [data subdataWithRange:byteRange];
 	size_t chunksent = libssh2_sftp_write(myTransferHandle,[chunk bytes],[chunk length]);
 	if (_flags.uploadProgressed)
