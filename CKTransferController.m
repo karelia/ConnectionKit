@@ -787,6 +787,8 @@ static NSSize closedSize = { 452, 152 };
 	else
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"%@ %@", NSStringFromSelector(_cmd), error);
+		[myVerificationConnection setDelegate:nil];
+		[myVerificationConnection forceDisconnect];
 		[[self connection] setDelegate:nil];
 		[[self connection] forceDisconnect];
 		
