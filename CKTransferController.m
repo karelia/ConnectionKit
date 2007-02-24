@@ -707,6 +707,15 @@ static NSSize closedSize = { 452, 152 };
 		[myVerificationConnection setDelegate:nil];
 		[myVerificationConnection forceDisconnect];
 		
+		[oProgress setIndeterminate:NO];
+		[oProgress setDoubleValue:0.0];
+		[oProgress displayIfNeeded];
+		[oAlternateButton setHidden:YES];
+		[oDefaultButton setTitle:LocalizedStringInThisBundle(@"Close", @"Close")];
+		[oDefaultButton setImagePosition:NSImageRight];
+		[oDefaultButton setKeyEquivalent:@"\r"];
+		[oDefaultButton setHidden:NO];
+		
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller")];
 		
