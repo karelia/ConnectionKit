@@ -698,6 +698,23 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
+- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con
+{
+	if (con == [self connection])
+	{
+		[con setDelegate:nil];
+		[con forceDisconnect];
+		[myVerificationConnection setDelegate:nil];
+		[myVerificationConnection forceDisconnect];
+		
+		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
+		[self setStatusMessage:LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller")];
+		
+		myStatus = CKErrorStatus;
+		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
+	}
+}
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
 {
 	if (con == [self connection])
@@ -726,7 +743,7 @@ static NSSize closedSize = { 452, 152 };
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
-	if (CKErrorStatus == myStatus)	// we might have gotten an unexpected disconnect -- bad password for example
+	if (CKErrorStatus == myStatus)
 	{
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
