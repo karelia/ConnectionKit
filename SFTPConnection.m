@@ -711,13 +711,13 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			[[upload delegate] transferDidFinish:[upload userInfo]];
 		}
 		[upload release];
+		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 		[self setState:ConnectionIdleState];
 	}
 	else 
 	{
 		[self performSelector:@selector(threadedRunloopUploadFile:) withObject:file afterDelay:0.0];
 	}
-	libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 }
 
 - (void)threadedUploadFile
