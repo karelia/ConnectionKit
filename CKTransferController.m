@@ -825,7 +825,15 @@ static NSSize closedSize = { 452, 152 };
 		myStatus = CKErrorStatus;
 		
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
-		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
+		NSString *localised = [error localizedDescription];
+		if (localised)
+		{
+			[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"An error occured. %@", @"Transfer Controller"), localised] ];
+		}
+		else
+		{
+			[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
+		}
 		
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
