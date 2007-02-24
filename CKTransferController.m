@@ -468,12 +468,16 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)finishedKickOff:(id)sender
 {
+	if (myStatus != CKErrorStatus)
+	{
+		[oShowHideFilesTitle setHidden:NO];
+		[oShowFiles setHidden:NO];
+	}
 	[oProgress setMinValue:0];
 	[oProgress setMaxValue:1.0];
 	[oProgress setDoubleValue:0];
 	[oProgress setIndeterminate:NO];
-	[oShowHideFilesTitle setHidden:NO];
-	[oShowFiles setHidden:NO];
+	
 	KTLog(ControllerDomain, KTLogDebug, @"Set progress bar to determinate");
 }
 
