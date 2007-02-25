@@ -393,7 +393,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	if (!filter)
 	{
-		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@", query, query, query];
+		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@ OR protocol contains[cd] %@", query, query, query, query];
 	}
 	return [[self allHosts] filteredArrayUsingPredicate:filter];
 }
