@@ -252,15 +252,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 }
 
-- (void)queueCommand:(id)command
-{
-	[super queueCommand:command];
-	
-	if (!_flags.inBulk) {
-		[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
-	}
-}
-
 - (void)sendCommand:(id)command
 {
 	// Subclasses handle this
