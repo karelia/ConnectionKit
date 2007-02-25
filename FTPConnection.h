@@ -49,7 +49,8 @@ typedef enum {
 	FTPAwaitingDataConnectionToOpen,
 	FTPModeChangeState,
 	FTPAwaitingRemoteSystemTypeState,
-	FTPChangeDirectoryListingStyle
+	FTPChangeDirectoryListingStyle,
+	FTPNoOpState
 } FTPState;
 
 @interface FTPConnection : StreamBasedConnection
@@ -108,6 +109,7 @@ typedef enum {
 		unsigned unused: 14;
 	} _serverSupport;
 	
+	NSTimer *_noopTimer;
 }
 
 // TESTING

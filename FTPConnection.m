@@ -173,7 +173,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setCurrentPath:nil];
 	[_rootPath release];
 	[_lastNotified release];
-
+	[_noopTimer invalidate];
+	[_noopTimer release];
+	
 	[super dealloc];
 }
 
@@ -1354,6 +1356,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 #pragma mark Stream Handling
 
+- (void)threadedConnect
+{
+	_noopTimer = [[NSTimer scheduledTimerWithTimeInterval:60
+												   target:self
+												 selector:@selector(sendNoOp:)
+												 userInfo:nil
+												  repeats:YES] retain];
+}
+
 - (void)threadedDisconnect
 {
 	_state = ConnectionSentDisconnectState;
@@ -2466,6 +2477,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case FTPAwaitingDataConnectionToOpen: return @"FTPAwaitingDataConnectionToOpen";
 		case FTPAwaitingRemoteSystemTypeState: return @"FTPAwaitingRemoteSystemTypeState";
 		case FTPChangeDirectoryListingStyle: return @"FTPChangeDirectoryListingStyle";
+		case FTPNoOpState: return @"FTPNoOpState";
 		default: return [super stateName:state];
 	}
 }
@@ -2797,6 +2809,30 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		ret = NO;
 	}
 	return ret;
+}
+
+- (void)sendNoOp:(NSTimer *)timer
+{
+	ConnectionCommand *cmd = [ConnectionCommand command:@"NOOP"
+											 awaitState:ConnectionIdleState
+											  sentState:FTPNoOpState
+											  dependant:nil
+											   userInfo:nil];
+	[_queueLock lock];
+	unsigned i, c = [_commandQueue count];
+	ConnectionCommand *cur;
+	
+	for (i = 0; i < c; i++) 
+	{
+		cur = [_commandQueue objectAtIndex:i];
+		if ([cur awaitState] == ConnectionIdleState)
+		{
+			[_commandQueue insertObject:cmd atIndex:i];
+			break;
+		}
+	}
+	[_queueLock unlock];
+	[self checkQueue];
 }
 
 #pragma mark -
