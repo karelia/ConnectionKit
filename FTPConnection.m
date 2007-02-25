@@ -1363,6 +1363,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												 selector:@selector(sendNoOp:)
 												 userInfo:nil
 												  repeats:YES] retain];
+	[super threadedConnect];
 }
 
 - (void)threadedDisconnect
