@@ -599,4 +599,15 @@ static NSImage *sHostIcon = nil;
 	
 	return app;
 }
+
+- (id)valueForUndefinedKey:(NSString *)key
+{
+	SEL sel = NSSelectorFromString(key);
+	if ([self respondsToSelector:sel])
+	{
+		return [self performSelector:sel];
+	}
+	return nil;
+}
+
 @end

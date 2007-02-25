@@ -358,75 +358,65 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	return [menu autorelease];
 }
 
-- (id)actualItemWithAnnotation:(NSString *)optionalAnnotation name:(NSString *)optionalName host:(NSString *)optionalHost username:(NSString *)optionalUsername fromItems:(NSArray *)items 
+- (NSArray *)allHostsWithinItems:(NSArray *)itemsToSearch
 {
-	NSEnumerator *hostsEnumerator = [items objectEnumerator];
-	id currentHost = nil;
-	int matchesNeeded = 0;
-	int currentMatches = 0;
-	if (optionalAnnotation)
+	NSMutableArray *allHosts = [NSMutableArray array];
+	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
+	id currentItem;
+	while (currentItem = [itemsToSearchEnumerator nextObject])
 	{
-		matchesNeeded++;
-	}
-	if (optionalHost)
-	{
-		matchesNeeded++;
-	}
-	if (optionalUsername)
-	{
-		matchesNeeded++;
-	}
-	if (optionalName)
-	{
-		matchesNeeded++;
-	}
-	while (currentHost = [hostsEnumerator nextObject])
-	{
-		currentMatches = 0;
-		if ([[currentHost className] isEqualToString:@"CKHost"])
+		if ([[currentItem className] isEqualToString:@"CKHost"])
 		{
-			if ([currentHost annotation])
-			{
-				if ([[currentHost annotation] isEqual:optionalAnnotation])
-				{
-					currentMatches++;
-				}
-			}
-			if ([currentHost host])
-			{
-				if ([[currentHost host] isEqual:optionalHost])
-				{
-					currentMatches++;
-				}
-			}
-			if ([currentHost username])
-			{
-				if ([[currentHost username] isEqual:optionalUsername])
-				{
-					currentMatches++;
-				}
-			}
-			if (matchesNeeded == currentMatches)
-			{
-				return (CKHost *)currentHost;
-			}
+			[allHosts addObject:(CKHost *)currentItem];
 		}
-		else
+		else if ([[currentItem className] isEqualToString:@"CKHostCategory"])
 		{
-			if ([currentHost name])
-			{
-				if ([[currentHost name] isEqual:optionalName])
-				{
-					currentMatches++;
-				}
-			}
-			if (matchesNeeded == currentMatches)
-			{
-				return (CKHostCategory *)currentHost;
-			}
+			[allHosts addObjectsFromArray:[self allHostsWithinItems:[(CKHostCategory *)currentItem hosts]]];
 		}
 	}
-	return nil;
+	return allHosts;
+}
+
+- (NSArray *)allHosts
+{
+	return [self allHostsWithinItems:[self connections]];
+}
+
+- (NSArray *)hostsMatching:(NSString *)query
+{
+	NSPredicate *filter = nil;
+	@try {
+		filter = [NSPredicate predicateWithFormat:query];
+	} 
+	@catch (NSException *ex) {
+		
+	}
+	if (!filter)
+	{
+		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@", query, query, query];
+	}
+	return [[self allHosts] filteredArrayUsingPredicate:filter];
+}
+
+- (NSArray *)allCategoriesWithinItems:(NSArray *)itemsToSearch
+{
+	NSMutableArray *allCategories = [NSMutableArray array];
+	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
+	id currentItem;
+	while (currentItem = [itemsToSearchEnumerator nextObject])
+	{
+		if ([[currentItem className] isEqualToString:@"CKHostCategory"])
+		{
+			[allCategories addObject:(CKHostCategory *)currentItem];
+			[allCategories addObjectsFromArray:[self allCategoriesWithinItems:[(CKHostCategory *)currentItem childCategories]]];
+		}
+	}
+	return allCategories;
+}
+
+- (NSArray *)allCategories
+{
+	return [self allCategoriesWithinItems:[self connections]];
 }
 
 #pragma mark -
