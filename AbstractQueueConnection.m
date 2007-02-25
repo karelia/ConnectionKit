@@ -268,7 +268,10 @@ NSString *QueueDomain = @"Queuing";
 	[_commandQueue addObject:command];
 	KTLog(QueueDomain, KTLogDebug, @".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
 	[_queueLock unlock];
-	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
+	
+	if (!_flags.inBulk) {
+		[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
+	}
 }
 
 - (void)queueDownload:(id)download
