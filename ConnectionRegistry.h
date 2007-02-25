@@ -50,6 +50,11 @@
 
 - (NSMenu *)menu;
 
+- (NSArray *)allHosts;
+- (NSArray *)allCategories;
+
+- (NSArray *)hostsMatching:(NSString *)query;
+
 @end
 
 extern NSString *CKRegistryChangedNotification;

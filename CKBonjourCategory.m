@@ -137,6 +137,7 @@ static NSImage *sBonjourIcon = nil;
 	CKBonjourHost *h = [[CKBonjourHost alloc] init];
 	[h setHost:[sender hostName]];
 	[h setUserInfo:sender];
+	[h setAnnotation:[sender name]];
 	[sender release];
 	[h setUsername:NSUserName()];
 	
