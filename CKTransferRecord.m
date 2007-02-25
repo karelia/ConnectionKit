@@ -371,6 +371,25 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 #pragma mark -
 #pragma mark Recursive File Transfer Methods
 
++ (CKTransferRecord *)rootRecordWithPath:(NSString *)path
+{
+	CKTransferRecord *cur;
+	
+	cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+	path = [path stringByDeletingFirstPathComponent];
+	CKTransferRecord *thisNode, *subNode = cur;
+	
+	while ((![path isEqualToString:@"/"]))
+	{
+		thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+		path = [path stringByDeletingFirstPathComponent];
+		[subNode addContent:thisNode];
+		subNode = thisNode;
+	}
+	
+	return cur;
+}
+
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
 {
 	if ([[record name] isEqualToString:[path firstPathComponent]]) 
