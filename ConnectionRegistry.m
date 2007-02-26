@@ -422,8 +422,39 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 #pragma mark -
 #pragma mark Outline View Data Source
 
+- (void)setFilterString:(NSString *)filter
+{
+	if (filter != myFilter)
+	{
+		[myFilter autorelease];
+		[myFilteredHosts autorelease];
+		
+		if ([filter isEqualToString:@""])
+		{
+			myFilter = nil;
+			myFilteredHosts = nil;
+		}
+		else
+		{
+			myFilter = [filter copy];
+			myFilteredHosts = [[self hostsMatching:filter] retain];
+		}
+		[myOutlineView reloadData];
+	}
+}
+
+- (void)handleFilterableOutlineView:(NSOutlineView *)view
+{
+	myOutlineView = view;
+	[myOutlineView setDataSource:self];
+}
+
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
+	if (myFilter)
+	{
+		return [myFilteredHosts count];
+	}
 	if (item == nil)
 	{
 		return [[self connections] count];
@@ -437,6 +468,10 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
 {
+	if (myFilter)
+	{
+		return [myFilteredHosts objectAtIndex:index];
+	}
 	if (item == nil)
 	{
 		return [[self connections] objectAtIndex:index];
@@ -446,6 +481,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
+	if (myFilter) return NO;
 	return [item isKindOfClass:[CKHostCategory class]] && [[item childCategories] count] > 0 ;
 }
 
@@ -469,6 +505,22 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		return [NSDictionary dictionaryWithObjectsAndKeys:val, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
 	}
 	return nil;
+}
+
+- (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+	if ([item isKindOfClass:[CKHostCategory class]] && [item isEditable])
+	{
+		[item setName:object];
+	}
+	else if ([item isKindOfClass:[CKHost class]])
+	{
+		NSURL *url = [NSURL URLWithString:object];
+		if (url)
+		{
+			[item setURL:url];
+		}
+	}
 }
 
 - (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path

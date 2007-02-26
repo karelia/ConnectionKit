@@ -64,6 +64,8 @@
 
 - (NSString *)createDropletAtPath:(NSString *)path;
 
+- (BOOL)canConnect;
+
 @end
 
 extern NSString *CKHostChanged;

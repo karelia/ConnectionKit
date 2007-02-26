@@ -19,6 +19,7 @@
 }
 
 - (id)initWithName:(NSString *)name;
+- (void)setName:(NSString *)name;
 - (NSString *)name;
 
 - (void)addChildCategory:(CKHostCategory *)cat;

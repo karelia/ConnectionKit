@@ -86,6 +86,11 @@ static NSImage *sBonjourIcon = nil;
 								 userInfo:nil];
 }
 
+- (BOOL)isEditable
+{
+	return NO;
+}
+
 #pragma mark -
 #pragma mark Browser Delegate
 
