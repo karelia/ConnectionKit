@@ -22,6 +22,12 @@ typedef enum {
 	CKAbortStatus
 } CKTransferControllerStatus;
 
+typedef enum {
+	CKNotConnectedStatus = 0,
+	CKConnectedStatus = 1,
+	CKDisconnectedStatus = -1
+} CKTransferConnectionStatus;
+
 @class RunLoopForwarder;
 
 @interface CKTransferController : NSWindowController 
@@ -29,7 +35,8 @@ typedef enum {
 	id <AbstractConnectionProtocol>		myConnection;
 	id <AbstractConnectionProtocol>		myVerificationConnection;
 	
-	CKTransferControllerStatus			myStatus;
+	CKTransferControllerStatus			myReturnStatus;
+	CKTransferConnectionStatus			myConnectionStatus;
 	
 	NSMutableArray						*myTransfers;
 	NSMutableSet						*myPathsToVerify;
@@ -58,6 +65,7 @@ typedef enum {
 	
 	struct __cktransfercontroller_flags {
 		unsigned useThread: 1;
+		unsigned waitForConnection:1;
 		unsigned delegateProvidesConnection: 1; 
 		unsigned delegateProvidesContent: 1;
 		unsigned delegateHandlesDefaultButton: 1;
@@ -67,7 +75,7 @@ typedef enum {
 		unsigned finishedContentGeneration: 1;
 		unsigned verifyTransfers: 1;
 		unsigned stopTransfer: 1;
-		unsigned unused: 22;
+		unsigned unused: 21;
 	} myFlags;
 }
 
@@ -92,6 +100,9 @@ typedef enum {
 
 - (void)setVerifyTransfers:(BOOL)flag;
 - (BOOL)verifyTransfers;
+
+- (void)setWaitForConnection:(BOOL)flag;
+- (BOOL)waitForConnection;
 
 - (void)setDelegate:(id)delegate;
 - (id)delegate;
