@@ -45,6 +45,8 @@ typedef enum {
 	
 	NSString							*myUploadingPrefix;
 	
+	NSError								*myError;
+	
 	IBOutlet NSTextField				*oTitle;
 	IBOutlet NSProgressIndicator		*oProgress;
 	IBOutlet NSImageView				*oIcon;
@@ -129,6 +131,9 @@ typedef enum {
 - (IBAction)connectPassword:(id)sender;
 
 - (BOOL)hadErrorsTransferring;
+
+- (NSError *)error;
+- (void)setError:(NSError *)anError;
 
 @end
 

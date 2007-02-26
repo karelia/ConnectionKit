@@ -21,6 +21,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 @interface CKTransferController (Private)
 - (CKTransferRecord *)recordWithPath:(NSString *)path root:(CKTransferRecord *)root;
+- (CKTransferRecord *)rootRecordWithPath:(NSString *)path;
 @end
 
 @implementation CKTransferController
@@ -77,182 +78,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 }
 
-- (void)progressChanged:(NSNotification *)n
-{	
-	if ([oShowFiles state] == NSOnState)
-	{
-		[oFiles performSelectorOnMainThread:@selector(reloadData)
-								 withObject:nil
-							  waitUntilDone:NO];
-	}
-	unsigned long long totalBytes = 0;
-	unsigned long long totalTransferred = 0;
-	NSEnumerator *e = [myTransfers objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		totalBytes += [cur size];
-		totalTransferred += [cur transferred];
-	}
-	
-	double prog = ((double)totalTransferred * 1.0) / ((double)totalBytes * 1.0);
-	[oProgress setDoubleValue:prog];
-	
-	if (myFlags.verifyTransfers)
-	{
-		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
-		if ([[enclosedFolder progress] intValue] == 100 && nil != [enclosedFolder error])
-		{
-			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
-			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
-		}
-	}
-}
-
-- (void)setConnection:(id <AbstractConnectionProtocol>)connection
-{
-	if ([myConnection delegate] == self) [myConnection setDelegate:nil];
-	[myConnection autorelease];
-	myConnection = [connection retain];
-}
-
-- (id <AbstractConnectionProtocol>)connection
-{
-	if (!myConnection && myFlags.delegateProvidesConnection)
-	{
-		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self];
-		[con setDelegate:self];
-		[self setConnection:con];		// cache for next time
-		return con;
-	}
-	return myConnection;
-}
-
-- (void)setRootPath:(NSString *)path
-{
-	if (myRootPath != path)
-	{
-		[myRootPath autorelease];
-		myRootPath = [path copy];
-	}
-}
-
-- (CKTransferRecord *)recursiveRootRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
-	{
-		NSEnumerator *e = [[root contents] objectEnumerator];
-		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
-		if ([path isEqualToString:@"/"])
-			return root;
-		
-		while ((cur = [e nextObject]))
-		{
-			CKTransferRecord *child = [self recursiveRootRecordWithPath:path root:cur];
-			if (child)
-				return root;
-		}
-		
-		// if we get here it doesn't exist so create it
-		cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-		[root addContent:cur];
-		[self recursiveRootRecordWithPath:path root:cur];
-		return root;
-	}
-	return nil;
-}
-
-- (CKTransferRecord *)rootRecordWithPath:(NSString *)path
-{
-	NSEnumerator *e = [myTransfers objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		if ([[cur name] isEqualToString:[path firstPathComponent]])
-		{
-			// walk the tree to make sure all folders are created
-			return [self recursiveRootRecordWithPath:path root:cur];
-		}
-	}
-	if (!cur)
-	{
-		cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-		path = [path stringByDeletingFirstPathComponent];
-		CKTransferRecord *thisNode, *subNode = cur;
-		
-		while ((![path isEqualToString:@"/"]))
-		{
-			thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-			path = [path stringByDeletingFirstPathComponent];
-			[subNode addContent:thisNode];
-			subNode = thisNode;
-		}
-		[self willChangeValueForKey:@"transfers"];
-		[myTransfers addObject:cur];
-		[self didChangeValueForKey:@"transfers"];
-		if (myRootPath)
-		{
-			[myRootedTransfers addObject:[self recordWithPath:myRootPath root:cur]];
-		}
-		else
-		{
-			[myRootedTransfers addObject:cur];
-		}
-		[self performSelectorOnMainThread:@selector(mainThreadTableReload:) withObject:nil waitUntilDone:NO];
-	}
-	return cur;
-}
-
-- (CKTransferRecord *)recursiveRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
-	{
-		CKTransferRecord *child = nil;
-		NSEnumerator *e = [[root contents] objectEnumerator];
-		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
-		if ([path isEqualToString:@"/"])
-			return root;
-		
-		while ((cur = [e nextObject]))
-		{
-			child = [self recursiveRecordWithPath:path root:cur];
-			if (child)
-				return child;
-		}
-	}
-	return nil;
-}
-
-- (CKTransferRecord *)recordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	return [self recursiveRecordWithPath:path root:root];
-}
-
-- (CKTransferRecord *)recordWithPath:(NSString *)path
-{
-	NSEnumerator *e = [myTransfers objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		CKTransferRecord *child = [self recordWithPath:path root:cur];
-		if (child)
-		{
-			return child;
-		}
-	}
-	return nil;
-}
+#pragma mark -
+#pragma mark Operations
 
 - (void)createDirectory:(NSString *)directory
 {
@@ -311,53 +138,8 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myPathsToVerify addObject:remotePath];
 }
 
-- (void)setContentGeneratedInSeparateThread:(BOOL)flag
-{
-	myFlags.useThread = flag;
-}
-
-- (BOOL)contentGeneratedInSeparateThread
-{
-	return myFlags.useThread;
-}
-
-- (void)setWaitForConnection:(BOOL)flag
-{
-	myFlags.waitForConnection = flag;
-}
-
-- (BOOL)waitForConnection
-{
-	return myFlags.waitForConnection;
-}
-
-- (void)setVerifyTransfers:(BOOL)flag
-{
-	myFlags.verifyTransfers = flag;
-}
-
-- (BOOL)verifyTransfers
-{
-	return myFlags.verifyTransfers;
-}
-
-- (void)setDelegate:(id)delegate
-{
-	myDelegate = delegate;
-	[myForwarder setDelegate:myDelegate];
-	
-	myFlags.delegateProvidesConnection = [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
-	myFlags.delegateProvidesContent = [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
-	myFlags.delegateFinishedContentGeneration = [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
-	myFlags.delegateHandlesDefaultButton = [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
-	myFlags.delegateHandlesAlternateButton = [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
-	myFlags.delegateDidFinish = [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
-}
-
-- (id)delegate
-{
-	return myDelegate;
-}
+#pragma mark -
+#pragma mark UI
 
 - (void)setTitle:(NSString *)title
 {
@@ -439,6 +221,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		myUploadingPrefix = [prefix copy];
 	}
 }
+
+#pragma mark -
+#pragma mark Control Flow
 
 - (void)kickoff:(id)unused
 {
@@ -579,6 +364,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[self finishSetupForDisplay];
 }
 
+#pragma mark -
+#pragma mark Actions
+
 - (IBAction)defaultButtonPressed:(id)sender
 {
 	if (myFlags.delegateHandlesDefaultButton)
@@ -647,10 +435,144 @@ static NSSize closedSize = { 452, 152 };
 	// Is this just not implemented yet?
 }
 
+#pragma mark -
+#pragma mark Accessors
+
+- (void)setConnection:(id <AbstractConnectionProtocol>)connection
+{
+	if ([myConnection delegate] == self) [myConnection setDelegate:nil];
+	[myConnection autorelease];
+	myConnection = [connection retain];
+}
+
+- (id <AbstractConnectionProtocol>)connection
+{
+	if (!myConnection && myFlags.delegateProvidesConnection)
+	{
+		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self];
+		[con setDelegate:self];
+		[self setConnection:con];		// cache for next time
+		return con;
+	}
+	return myConnection;
+}
+
+- (void)setRootPath:(NSString *)path
+{
+	if (myRootPath != path)
+	{
+		[myRootPath autorelease];
+		myRootPath = [path copy];
+	}
+}
+
+- (void)setContentGeneratedInSeparateThread:(BOOL)flag
+{
+	myFlags.useThread = flag;
+}
+
+- (BOOL)contentGeneratedInSeparateThread
+{
+	return myFlags.useThread;
+}
+
+- (void)setWaitForConnection:(BOOL)flag
+{
+	myFlags.waitForConnection = flag;
+}
+
+- (BOOL)waitForConnection
+{
+	return myFlags.waitForConnection;
+}
+
+- (void)setVerifyTransfers:(BOOL)flag
+{
+	myFlags.verifyTransfers = flag;
+}
+
+- (BOOL)verifyTransfers
+{
+	return myFlags.verifyTransfers;
+}
+
+- (void)setDelegate:(id)delegate
+{
+	myDelegate = delegate;
+	[myForwarder setDelegate:myDelegate];
+	
+	myFlags.delegateProvidesConnection = [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
+	myFlags.delegateProvidesContent = [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
+	myFlags.delegateFinishedContentGeneration = [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
+	myFlags.delegateHandlesDefaultButton = [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
+	myFlags.delegateHandlesAlternateButton = [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
+	myFlags.delegateDidFinish = [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
+}
+
+- (id)delegate
+{
+	return myDelegate;
+}
+
+
+- (NSError *)error
+{
+    return myError; 
+}
+
+- (void)setError:(NSError *)anError
+{
+    [anError retain];
+    [myError release];
+    myError = anError;
+}
+
 - (NSArray *)transfers
 {
 	return myTransfers;
 }
+
+
+#pragma mark -
+#pragma mark Notification
+
+- (void)progressChanged:(NSNotification *)n
+{	
+	if ([oShowFiles state] == NSOnState)
+	{
+		[oFiles performSelectorOnMainThread:@selector(reloadData)
+								 withObject:nil
+							  waitUntilDone:NO];
+	}
+	unsigned long long totalBytes = 0;
+	unsigned long long totalTransferred = 0;
+	NSEnumerator *e = [myTransfers objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		totalBytes += [cur size];
+		totalTransferred += [cur transferred];
+	}
+	
+	double prog = ((double)totalTransferred * 1.0) / ((double)totalBytes * 1.0);
+	[oProgress setDoubleValue:prog];
+	
+	if (myFlags.verifyTransfers)
+	{
+		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
+		if ([[enclosedFolder progress] intValue] == 100 && nil != [enclosedFolder error])
+		{
+			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
+			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
+		}
+	}
+}
+
+
+
+#pragma mark -
+#pragma mark Misc
 
 - (void)mainThreadTableReload:(id)unused
 {
@@ -680,6 +602,124 @@ static NSSize closedSize = { 452, 152 };
 	
 	return ret;
 }
+
+- (CKTransferRecord *)recursiveRootRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
+{
+	NSString *first = [path firstPathComponent];
+	
+	if ([[root name] isEqualToString:first])
+	{
+		NSEnumerator *e = [[root contents] objectEnumerator];
+		CKTransferRecord *cur;
+		path = [path stringByDeletingFirstPathComponent];
+		
+		if ([path isEqualToString:@"/"])
+			return root;
+		
+		while ((cur = [e nextObject]))
+		{
+			CKTransferRecord *child = [self recursiveRootRecordWithPath:path root:cur];
+			if (child)
+				return root;
+		}
+		
+		// if we get here it doesn't exist so create it
+		cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+		[root addContent:cur];
+		[self recursiveRootRecordWithPath:path root:cur];
+		return root;
+	}
+	return nil;
+}
+
+- (CKTransferRecord *)rootRecordWithPath:(NSString *)path
+{
+	NSEnumerator *e = [myTransfers objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([[cur name] isEqualToString:[path firstPathComponent]])
+		{
+			// walk the tree to make sure all folders are created
+			return [self recursiveRootRecordWithPath:path root:cur];
+		}
+	}
+	if (!cur)
+	{
+		cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+		path = [path stringByDeletingFirstPathComponent];
+		CKTransferRecord *thisNode, *subNode = cur;
+		
+		while ((![path isEqualToString:@"/"]))
+		{
+			thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+			path = [path stringByDeletingFirstPathComponent];
+			[subNode addContent:thisNode];
+			subNode = thisNode;
+		}
+		[self willChangeValueForKey:@"transfers"];
+		[myTransfers addObject:cur];
+		[self didChangeValueForKey:@"transfers"];
+		if (myRootPath)
+		{
+			[myRootedTransfers addObject:[self recordWithPath:myRootPath root:cur]];
+		}
+		else
+		{
+			[myRootedTransfers addObject:cur];
+		}
+		[self performSelectorOnMainThread:@selector(mainThreadTableReload:) withObject:nil waitUntilDone:NO];
+	}
+	return cur;
+}
+
+- (CKTransferRecord *)recursiveRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
+{
+	NSString *first = [path firstPathComponent];
+	
+	if ([[root name] isEqualToString:first])
+	{
+		CKTransferRecord *child = nil;
+		NSEnumerator *e = [[root contents] objectEnumerator];
+		CKTransferRecord *cur;
+		path = [path stringByDeletingFirstPathComponent];
+		
+		if ([path isEqualToString:@"/"])
+			return root;
+		
+		while ((cur = [e nextObject]))
+		{
+			child = [self recursiveRecordWithPath:path root:cur];
+			if (child)
+				return child;
+		}
+	}
+	return nil;
+}
+
+- (CKTransferRecord *)recordWithPath:(NSString *)path root:(CKTransferRecord *)root
+{
+	return [self recursiveRecordWithPath:path root:root];
+}
+
+- (CKTransferRecord *)recordWithPath:(NSString *)path
+{
+	NSEnumerator *e = [myTransfers objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		CKTransferRecord *child = [self recordWithPath:path root:cur];
+		if (child)
+		{
+			return child;
+		}
+	}
+	return nil;
+}
+
+
 
 #pragma mark -
 #pragma mark Outline View Data Source
