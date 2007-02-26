@@ -300,6 +300,17 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[[self connection] deleteFile:remotePath];
 }
 
+- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+{
+#warning I have not tested this method yet -- Greg
+	CKTransferRecord *root = [self rootRecordWithPath:[remotePath stringByDeletingLastPathComponent]];
+	CKTransferRecord *upload = [[self connection] recursivelyUpload:localPath to:remotePath];
+	
+	[upload setName:[remotePath lastPathComponent]];
+	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addContent:upload];
+	[myPathsToVerify addObject:remotePath];
+}
+
 - (void)setContentGeneratedInSeparateThread:(BOOL)flag
 {
 	myFlags.useThread = flag;
@@ -481,7 +492,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	KTLog(ControllerDomain, KTLogDebug, @"Set progress bar to determinate");
 }
 
-- (void)beginSheetModalForWindow:(NSWindow *)window
+- (void)setupForDisplay
 {
 	KTLog(ControllerDomain, KTLogDebug, @"Beginning modal sheet");
 	[myTransfers removeAllObjects];
@@ -489,7 +500,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
 	myStatus = CKErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
-
+	
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
 	{
@@ -503,20 +514,15 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
 	[oProgress setUsesThreadedAnimation:YES];
-	
-	[NSApp beginSheet:[self window]
-	   modalForWindow:window
-		modalDelegate:nil
-	   didEndSelector:nil
-		  contextInfo:nil];
-	
+}
+
+- (void)finishSetupForDisplay
+{
 	[oProgress startAnimation:self];
 	
 	[[self connection] setName:@"main uploader"];
 	[[self connection] connect];
 	
-#warning GREG -- can we make sure to not kick off and gather contents, upload, etc. until we have a verified working connection?
-
 	// temporarily turn off verification for sftp until I can sort out the double connection problem
 	if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
 	if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
@@ -537,6 +543,26 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	}
 }
 
+- (void)runModal
+{
+	[self setupForDisplay];
+	[NSApp runModalForWindow:[self window]];
+	[self finishSetupForDisplay];
+}
+
+- (void)beginSheetModalForWindow:(NSWindow *)window
+{
+	[self setupForDisplay];
+	
+	[NSApp beginSheet:[self window]
+	   modalForWindow:window
+		modalDelegate:nil
+	   didEndSelector:nil
+		  contextInfo:nil];
+	
+	[self finishSetupForDisplay];
+}
+
 - (IBAction)defaultButtonPressed:(id)sender
 {
 	if (myFlags.delegateHandlesDefaultButton)
@@ -549,6 +575,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myVerificationConnection release]; myVerificationConnection = nil;
 	[[self connection] setDelegate:nil];
 	[[self connection] forceDisconnect];
+	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
 	[myTransfers removeAllObjects];
@@ -569,6 +596,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myVerificationConnection release]; myVerificationConnection = nil;
 	[[self connection] setDelegate:nil];
 	[[self connection] forceDisconnect];
+	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
 	[myTransfers removeAllObjects];
