@@ -434,6 +434,11 @@ static NSImage *sHostIcon = nil;
 	return connection;
 }
 
+- (BOOL)canConnect
+{
+	return [self connection] != nil;
+}
+
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"%@ %@://%@:xxxx@%@:%@/%@", myConnectionType, [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath];

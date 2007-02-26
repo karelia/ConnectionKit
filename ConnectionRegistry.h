@@ -29,6 +29,10 @@
 	NSDistributedNotificationCenter *myCenter;
 	NSLock *myLock;
 	
+	NSOutlineView *myOutlineView;
+	NSString *myFilter;
+	NSArray *myFilteredHosts;
+	
 	BOOL myIsGroupEditing;
 }
 
@@ -54,6 +58,9 @@
 - (NSArray *)allCategories;
 
 - (NSArray *)hostsMatching:(NSString *)query;
+
+- (void)setFilterString:(NSString *)filter;
+- (void)handleFilterableOutlineView:(NSOutlineView *)view;
 
 @end
 
