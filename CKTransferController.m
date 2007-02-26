@@ -321,6 +321,16 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	return myFlags.useThread;
 }
 
+- (void)setWaitForConnection:(BOOL)flag
+{
+	myFlags.waitForConnection = flag;
+}
+
+- (BOOL)waitForConnection
+{
+	return myFlags.waitForConnection;
+}
+
 - (void)setVerifyTransfers:(BOOL)flag
 {
 	myFlags.verifyTransfers = flag;
@@ -435,9 +445,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	myFlags.stopTransfer = NO;
-	
-	[self setStatusMessage:LocalizedStringInThisBundle(@"Generating Content...", @"message")];
-	
+		
 	if (myFlags.delegateProvidesContent)
 	{
 		// don't use the forwarder as we want to be called on the current thread
@@ -464,7 +472,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		{
 			[myForwarder transferControllerFinishedContentGeneration:self];
 		}
-		myStatus = CKSuccessStatus;		// We have all the content, so we should be OK to set success now. 
+		myReturnStatus = CKSuccessStatus;		// We have all the content, so we should be OK to set success now. 
 		[[self connection] disconnect];
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
@@ -479,7 +487,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)finishedKickOff:(id)sender
 {
-	if (myStatus != CKErrorStatus)
+	if (myReturnStatus != CKErrorStatus)
 	{
 		[oShowHideFilesTitle setHidden:NO];
 		[oShowFiles setHidden:NO];
@@ -499,8 +507,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
-	myStatus = CKErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
-	
+
+	myReturnStatus = CKErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
+	myConnectionStatus = CKNotConnectedStatus;
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
 	{
@@ -523,6 +532,13 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[[self connection] setName:@"main uploader"];
 	[[self connection] connect];
 	
+	if (myFlags.waitForConnection)
+	{
+		while (CKNotConnectedStatus == myConnectionStatus)
+		{
+			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
+		}
+	}
 	// temporarily turn off verification for sftp until I can sort out the double connection problem
 	if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
 	if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
@@ -623,12 +639,12 @@ static NSSize closedSize = { 452, 152 };
 
 - (IBAction)cancelPassword:(id)sender
 {
-	
+	// Is this just not implemented yet?
 }
 
 - (IBAction)connectPassword:(id)sender
 {
-	
+	// Is this just not implemented yet?
 }
 
 - (NSArray *)transfers
@@ -644,7 +660,7 @@ static NSSize closedSize = { 452, 152 };
 - (void)stopTransfer:(id)sender
 {
 	myFlags.stopTransfer = YES;
-	myStatus = CKAbortStatus;
+	myReturnStatus = CKAbortStatus;
 }
 
 - (BOOL)hadErrorsTransferring
@@ -751,8 +767,10 @@ static NSSize closedSize = { 452, 152 };
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller")];
 		
-		myStatus = CKErrorStatus;
-		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
+		myReturnStatus = CKErrorStatus;
+		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+		
+		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
 	}
 }
 
@@ -760,12 +778,18 @@ static NSSize closedSize = { 452, 152 };
 {
 	if (con == [self connection])
 	{
+		myConnectionStatus = CKConnectedStatus;
 		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Connected to %@", @"transfer controller"), host]];
 	}
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
+	if (con == [self connection])
+	{
+		myConnectionStatus = CKDisconnectedStatus;
+	}
+
 	if (myFlags.verifyTransfers)
 	{
 		if (con == [self connection]) 
@@ -784,14 +808,14 @@ static NSSize closedSize = { 452, 152 };
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
-	if (CKErrorStatus == myStatus)
+	if (CKErrorStatus == myReturnStatus)
 	{
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
 	}				
 	if (myFlags.delegateDidFinish)
 	{
-		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
+		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 	}
 } 
 
@@ -850,7 +874,7 @@ static NSSize closedSize = { 452, 152 };
 		[[self connection] setDelegate:nil];
 		[[self connection] forceDisconnect];
 		
-		myStatus = CKErrorStatus;
+		myReturnStatus = CKErrorStatus;
 		
 		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
 		NSString *localised = [error localizedDescription];
@@ -872,7 +896,7 @@ static NSSize closedSize = { 452, 152 };
 		[oDefaultButton setKeyEquivalent:@"\r"];
 		[oDefaultButton setHidden:NO];
 		
-		[myForwarder transferControllerDidFinish:self returnCode:myStatus];
+		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 		
 		NSAlert *a = [NSAlert alertWithError:error];
 		[a runModal];
