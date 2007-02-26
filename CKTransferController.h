@@ -85,6 +85,8 @@ typedef enum {
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)remotePath;
 - (void)deleteFile:(NSString *)remotePath;
 
+- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
+
 - (void)setContentGeneratedInSeparateThread:(BOOL)flag;
 - (BOOL)contentGeneratedInSeparateThread;
 
@@ -104,6 +106,7 @@ typedef enum {
 - (void)setUploadingStatusPrefix:(NSString *)prefix;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window;
+- (void)runModal;
 
 - (void)stopTransfer:(id)sender;
 
