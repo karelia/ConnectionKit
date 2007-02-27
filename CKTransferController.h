@@ -154,7 +154,7 @@ typedef enum {
 
 - (id <AbstractConnectionProtocol>)transferControllerNeedsConnection:(CKTransferController *)controller;
 - (BOOL)transferControllerNeedsContent:(CKTransferController *)controller; // this will be called on a new thread if you setContentGeneratedInSeparateThread:YES
-- (void)transferControllerFinishedContentGeneration:(CKTransferController *)controller; // called on the main thread
+- (void)transferControllerFinishedContentGeneration:(CKTransferController *)controller completed:(BOOL)aFlag; // called on the main thread
 // return YES if you want the controllers default action to also be invoked
 - (BOOL)transferControllerDefaultButtonAction:(CKTransferController *)controller;
 - (BOOL)transferControllerAlternateButtonAction:(CKTransferController *)controller;
