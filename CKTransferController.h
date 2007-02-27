@@ -13,12 +13,13 @@ extern NSString *ControllerDomain; // used for logging
 extern NSString *CKTransferControllerDomain; // used for errors
 
 enum {
-	CKFailedVerificationError = 54321
+	CKFailedVerificationError = 54321,
+	CKPasswordError
 };
 
 typedef enum {
 	CKSuccessStatus = 0,
-	CKErrorStatus,
+	CKFatalErrorStatus,
 	CKAbortStatus
 } CKTransferControllerStatus;
 
@@ -45,7 +46,7 @@ typedef enum {
 	
 	NSString							*myUploadingPrefix;
 	
-	NSError								*myError;
+	NSError								*myFatalError;
 	
 	IBOutlet NSTextField				*oTitle;
 	IBOutlet NSProgressIndicator		*oProgress;
@@ -132,8 +133,8 @@ typedef enum {
 
 - (BOOL)hadErrorsTransferring;
 
-- (NSError *)error;
-- (void)setError:(NSError *)anError;
+- (NSError *)fatalError;
+- (void)setFatalError:(NSError *)aFatalError;
 
 @end
 
