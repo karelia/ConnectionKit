@@ -293,7 +293,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
 
-	myReturnStatus = CKFatalErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
+	myReturnStatus = CKUnknownStatus;	// assume an error if we didn't get far, like immediate disconnect.
 	myConnectionStatus = CKNotConnectedStatus;
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
@@ -321,7 +321,13 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	{
 		while (CKNotConnectedStatus == myConnectionStatus)
 		{
-			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
+			// let the runloop run incase anyone is using it... like FileConnection. 
+			BOOL found = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:5.0]];
+			if (!found)
+			{
+				NSLog(@"Continuing anyhow");
+				break;
+			}
 		}
 	}
 	if (CKConnectedStatus == myConnectionStatus)
@@ -794,6 +800,7 @@ static NSSize closedSize = { 452, 152 };
 {
 	if (con == [self connection])
 	{
+		KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
 		[con setDelegate:nil];
 		[con forceDisconnect];
 		[myVerificationConnection setDelegate:nil];
@@ -820,6 +827,7 @@ static NSSize closedSize = { 452, 152 };
 {
 	if (con == [self connection])
 	{
+		KTLog(ControllerDomain, KTLogDebug, @"Did Connect to Host");
 		myConnectionStatus = CKConnectedStatus;
 		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Connected to %@", @"transfer controller"), host]];
 	}
@@ -850,9 +858,6 @@ static NSSize closedSize = { 452, 152 };
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
-	if (CKFatalErrorStatus == myReturnStatus)
-	{
-	}				
 	if (myFlags.delegateDidFinish)
 	{
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
