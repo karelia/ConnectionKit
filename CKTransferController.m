@@ -253,9 +253,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	}
 	else
 	{
-		if (contentGenerationSuccessful && myFlags.delegateFinishedContentGeneration)
+		if (myFlags.delegateFinishedContentGeneration)
 		{
-			[myForwarder transferControllerFinishedContentGeneration:self];
+			[myForwarder transferControllerFinishedContentGeneration:self completed:contentGenerationSuccessful];
 		}
 		myReturnStatus = CKSuccessStatus;		// We have all the content, so we should be OK to set success now. 
 		[[self connection] disconnect];
@@ -542,7 +542,7 @@ static NSSize closedSize = { 452, 152 };
 	
 	myFlags.delegateProvidesConnection			= [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
 	myFlags.delegateProvidesContent				= [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
-	myFlags.delegateFinishedContentGeneration	= [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
+	myFlags.delegateFinishedContentGeneration	= [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:completed:)];
 	myFlags.delegateHandlesDefaultButton		= [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
 	myFlags.delegateHandlesAlternateButton		= [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
 	myFlags.delegateDidFinish					= [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
