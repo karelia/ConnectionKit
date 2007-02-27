@@ -511,7 +511,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 {
 	if ([item isKindOfClass:[CKHostCategory class]] && [item isEditable])
 	{
-		[item setName:object];
+		[((CKHostCategory *)item) setName:object];
 	}
 	else if ([item isKindOfClass:[CKHost class]])
 	{

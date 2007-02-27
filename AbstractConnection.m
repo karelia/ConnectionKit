@@ -326,9 +326,12 @@ NSDictionary *sDataAttributes = nil;
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
 										   code:ConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(
-				@"No connection available for requested connection type", @"failed to find a connection class")
-																			forKey:NSLocalizedDescriptionKey]];
+									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(
+				@"No connection available for requested connection type", @"failed to find a connection class"),
+										   NSLocalizedDescriptionKey,
+										   [(*error) localizedDescription],
+										   NSLocalizedRecoverySuggestionErrorKey,	// some additional context
+										   nil]];
 		*error = err;
 	}
 	
@@ -882,7 +885,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)recursivelyDeleteDirectory:(NSString *)path deletionNotificationDelegate:(id)sender;
+- (void)recursivelyDeleteDirectory:(NSString *)path;
 {
 	SUBCLASS_RESPONSIBLE
 }

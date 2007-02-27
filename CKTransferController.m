@@ -246,7 +246,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		
 	[self performSelectorOnMainThread:@selector(finishedKickOff:) withObject:nil waitUntilDone:NO];
 	
-	if (myFlags.stopTransfer)
+	if (myFlags.stopTransfer || CKFatalErrorStatus == myReturnStatus)
 	{
 		[[self connection] setDelegate:nil];
 		[[self connection] forceDisconnect];
@@ -272,7 +272,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)finishedKickOff:(id)sender
 {
-	if (myReturnStatus != CKErrorStatus)
+	if (myReturnStatus != CKFatalErrorStatus)
 	{
 		[oShowHideFilesTitle setHidden:NO];
 		[oShowFiles setHidden:NO];
@@ -293,7 +293,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
 
-	myReturnStatus = CKErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
+	myReturnStatus = CKFatalErrorStatus;	// assume an error if we didn't get far, like immediate disconnect.
 	myConnectionStatus = CKNotConnectedStatus;
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
@@ -324,23 +324,26 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 			[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
 		}
 	}
-	// temporarily turn off verification for sftp until I can sort out the double connection problem
-	if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
-	if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
+	if (CKConnectedStatus == myConnectionStatus)
 	{
-		myVerificationConnection = [[self connection] copy];
-		[myVerificationConnection setName:@"verification"];
-		[myVerificationConnection setDelegate:self];
-		[myVerificationConnection connect];
-	}
-	
-	if (myFlags.useThread)
-	{
-		[NSThread detachNewThreadSelector:@selector(kickoff:) toTarget:self withObject:nil];
-	}
-	else
-	{
-		[self kickoff:nil];
+		// temporarily turn off verification for sftp until I can sort out the double connection problem
+		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
+		if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
+		{
+			myVerificationConnection = [[self connection] copy];
+			[myVerificationConnection setName:@"verification"];
+			[myVerificationConnection setDelegate:self];
+			[myVerificationConnection connect];
+		}
+		
+		if (myFlags.useThread)
+		{
+			[NSThread detachNewThreadSelector:@selector(kickoff:) toTarget:self withObject:nil];
+		}
+		else
+		{
+			[self kickoff:nil];
+		}
 	}
 }
 
@@ -515,16 +518,17 @@ static NSSize closedSize = { 452, 152 };
 }
 
 
-- (NSError *)error
+
+- (NSError *)fatalError
 {
-    return myError; 
+    return myFatalError; 
 }
 
-- (void)setError:(NSError *)anError
+- (void)setFatalError:(NSError *)aFatalError
 {
-    [anError retain];
-    [myError release];
-    myError = anError;
+    [aFatalError retain];
+    [myFatalError release];
+    myFatalError = aFatalError;
 }
 
 - (NSArray *)transfers
@@ -798,16 +802,14 @@ static NSSize closedSize = { 452, 152 };
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
-		[oAlternateButton setHidden:YES];
-		[oDefaultButton setTitle:LocalizedStringInThisBundle(@"Close", @"Close")];
-		[oDefaultButton setImagePosition:NSImageRight];
-		[oDefaultButton setKeyEquivalent:@"\r"];
-		[oDefaultButton setHidden:NO];
 		
-		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
-		[self setStatusMessage:LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller")];
-		
-		myReturnStatus = CKErrorStatus;
+		NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
+											 code:CKPasswordError
+										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+											 LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
+		[self setFatalError:error];
+		myReturnStatus = CKFatalErrorStatus;
+		[self setStatusMessage:LocalizedStringInThisBundle(@"Password was not accepted.", @"")];
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 		
 		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
@@ -848,10 +850,8 @@ static NSSize closedSize = { 452, 152 };
 	}
 	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
-	if (CKErrorStatus == myReturnStatus)
+	if (CKFatalErrorStatus == myReturnStatus)
 	{
-		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
-		[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
 	}				
 	if (myFlags.delegateDidFinish)
 	{
@@ -914,32 +914,14 @@ static NSSize closedSize = { 452, 152 };
 		[[self connection] setDelegate:nil];
 		[[self connection] forceDisconnect];
 		
-		myReturnStatus = CKErrorStatus;
-		
-		[self setTitle:LocalizedStringInThisBundle(@"Publishing Failed", @"Transfer Controller")];
-		NSString *localised = [error localizedDescription];
-		if (localised)
-		{
-			[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"An error occured. %@", @"Transfer Controller"), localised] ];
-		}
-		else
-		{
-			[self setStatusMessage:LocalizedStringInThisBundle(@"An error occured.", @"Transfer Controller")];
-		}
+		[self setFatalError:error];
+		myReturnStatus = CKFatalErrorStatus;
 		
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
-		[oAlternateButton setHidden:YES];
-		[oDefaultButton setTitle:LocalizedStringInThisBundle(@"Close", @"Close")];
-		[oDefaultButton setImagePosition:NSImageRight];
-		[oDefaultButton setKeyEquivalent:@"\r"];
-		[oDefaultButton setHidden:NO];
 		
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
-		
-		NSAlert *a = [NSAlert alertWithError:error];
-		[a runModal];
 	}
 }
 
