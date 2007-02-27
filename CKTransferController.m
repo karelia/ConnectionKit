@@ -35,7 +35,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		myPathsToVerify = [[NSMutableSet alloc] init];
 		[NSBundle loadNibNamed:@"CKTransferController" owner:self];
 		myForwarder = [[RunLoopForwarder alloc] init];
-		myFlags.finishedContentGeneration = NO;
 	}
 	return self;
 }
@@ -224,23 +223,28 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)kickoff:(id)unused
 {
+	
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
+	myPhase = CKKickoffPhase;
 	myFlags.stopTransfer = NO;
-		
+	
+	BOOL contentGenerationSuccessful = YES;	// will be set to NO if provider had error or abort
 	if (myFlags.delegateProvidesContent)
 	{
 		// don't use the forwarder as we want to be called on the current thread
 		@try {
-			[myDelegate transferControllerNeedsContent:self];
+			myPhase = CKContentGenerationPhase;
+			contentGenerationSuccessful = [myDelegate transferControllerNeedsContent:self];
 		}
 		@catch (NSException *ex) {
 			KTLog(ControllerDomain, KTLogDebug, @"Exception caught in kickoff: %@", ex);
 		}
 	}
 	
-	myFlags.finishedContentGeneration = YES;
-		
+	myPhase = CKFinishedContentGenerationPhase;
+	
+	// adjust UI on main thread
 	[self performSelectorOnMainThread:@selector(finishedKickOff:) withObject:nil waitUntilDone:NO];
 	
 	if (myFlags.stopTransfer || CKFatalErrorStatus == myReturnStatus)
@@ -249,7 +253,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	}
 	else
 	{
-		if (myFlags.delegateFinishedContentGeneration)
+		if (contentGenerationSuccessful && myFlags.delegateFinishedContentGeneration)
 		{
 			[myForwarder transferControllerFinishedContentGeneration:self];
 		}
@@ -257,7 +261,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		[[self connection] disconnect];
 		
 		// let the runloop run incase anyone is using it... like FileConnection. 
-		[[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
+		//
+		// No longer needed, greg says...  Need to test to make sure
+		// [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantPast]];
 	}
 	if (myFlags.useThread)
 	{
@@ -283,14 +289,16 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)setupForDisplay
 {
+	myPhase = CKInitialPhase;
+	myReturnStatus = CKUnknownStatus;	// assume an error if we didn't get far, like immediate disconnect.
+	myConnectionStatus = CKNotConnectedStatus;
+
 	KTLog(ControllerDomain, KTLogDebug, @"Beginning modal sheet");
 	[myTransfers removeAllObjects];
 	[myPathsToVerify removeAllObjects];
 	[myRootedTransfers removeAllObjects];
 	[oFiles reloadData];
 
-	myReturnStatus = CKUnknownStatus;	// assume an error if we didn't get far, like immediate disconnect.
-	myConnectionStatus = CKNotConnectedStatus;
 	//make sure sheet is collapsed
 	if ([oShowFiles state] != NSOffState)
 	{
@@ -300,7 +308,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[oShowHideFilesTitle setHidden:YES];
 	[oShowFiles setHidden:YES];
 	
-	myFlags.finishedContentGeneration = NO;
 	[oStatus setStringValue:@""];
 	[oProgress setIndeterminate:YES];
 	[oProgress setUsesThreadedAnimation:YES];
@@ -325,13 +332,14 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		{
 			// let the runloop run incase anyone is using it... like FileConnection. 
 			(void) [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:giveUp];
-			if (NSOrderedDescending == [[NSDate date] compare:giveUp])
+			NSDate *now = [NSDate date];
+			if (NSOrderedDescending == [now compare:giveUp])
 			{
 				break;	// give up, keep going, hopefully we are OK if we missed a message.
 			}
 		}
 	}
-	if (CKConnectedStatus == myConnectionStatus)
+	if (CKDisconnectedStatus != myConnectionStatus)	// don't proceed if we already had an error connecting
 	{
 		// temporarily turn off verification for sftp until I can sort out the double connection problem
 		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
@@ -600,8 +608,6 @@ static NSSize closedSize = { 452, 152 };
 		}
 	}
 }
-
-
 
 #pragma mark -
 #pragma mark Misc
@@ -895,6 +901,7 @@ static NSSize closedSize = { 452, 152 };
 
 	if (myFlags.delegateDidFinish)
 	{
+		myPhase = CKDonePhase;
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 	}
 } 

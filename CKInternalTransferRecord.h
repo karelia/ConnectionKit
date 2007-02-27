@@ -17,7 +17,7 @@
 	NSData		*myData;
 	unsigned long long myOffset;
 	RunLoopForwarder *myForwarder;
-	id			myDelegate;
+	id			myDelegate;			// delegates are not retained
 	id			myUserInfo;
 	
 	struct __ckinternaltransferrecordflags {

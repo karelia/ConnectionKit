@@ -30,6 +30,15 @@ typedef enum {
 	CKDisconnectedStatus = -1
 } CKTransferConnectionStatus;
 
+
+typedef enum {
+	CKInitialPhase,
+	CKKickoffPhase,
+	CKContentGenerationPhase,
+	CKFinishedContentGenerationPhase,
+	CKDonePhase
+} CKTransferPhase;
+
 @class RunLoopForwarder;
 
 @interface CKTransferController : NSWindowController 
@@ -39,6 +48,7 @@ typedef enum {
 	
 	CKTransferControllerStatus			myReturnStatus;
 	CKTransferConnectionStatus			myConnectionStatus;
+	CKTransferPhase						myPhase;
 	
 	NSMutableArray						*myTransfers;
 	NSMutableSet						*myPathsToVerify;
@@ -68,15 +78,14 @@ typedef enum {
 	id									myDelegate;
 	
 	struct __cktransfercontroller_flags {
-		unsigned useThread: 1;
-		unsigned waitForConnection:1;
 		unsigned delegateProvidesConnection: 1; 
 		unsigned delegateProvidesContent: 1;
 		unsigned delegateHandlesDefaultButton: 1;
 		unsigned delegateHandlesAlternateButton: 1;
 		unsigned delegateFinishedContentGeneration: 1;
 		unsigned delegateDidFinish: 1;
-		unsigned finishedContentGeneration: 1;
+		unsigned useThread: 1;
+		unsigned waitForConnection:1;
 		unsigned verifyTransfers: 1;
 		unsigned stopTransfer: 1;
 		unsigned unused: 21;
@@ -144,7 +153,7 @@ typedef enum {
 @interface NSObject (CKTransferControllerDelegate)
 
 - (id <AbstractConnectionProtocol>)transferControllerNeedsConnection:(CKTransferController *)controller;
-- (void)transferControllerNeedsContent:(CKTransferController *)controller; // this will be called on a new thread if you setContentGeneratedInSeparateThread:YES
+- (BOOL)transferControllerNeedsContent:(CKTransferController *)controller; // this will be called on a new thread if you setContentGeneratedInSeparateThread:YES
 - (void)transferControllerFinishedContentGeneration:(CKTransferController *)controller; // called on the main thread
 // return YES if you want the controllers default action to also be invoked
 - (BOOL)transferControllerDefaultButtonAction:(CKTransferController *)controller;
