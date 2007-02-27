@@ -444,12 +444,17 @@ static NSSize closedSize = { 452, 152 };
 - (IBAction)showHideFiles:(id)sender
 {
 	NSRect r = [[self window] frame];
-	NSSize newSize = [sender state] == NSOnState ? openedSize : closedSize;
-	NSString *name = [sender state] == NSOnState ? LocalizedStringInThisBundle(@"Hide Files", @"transfer controller") : LocalizedStringInThisBundle(@"Show Files", @"transfer controller");
+	BOOL showing = [sender state] == NSOnState;
+	NSSize newSize = showing ? openedSize : closedSize;
+	NSString *name = showing ? LocalizedStringInThisBundle(@"Hide Files", @"transfer controller") : LocalizedStringInThisBundle(@"Show Files", @"transfer controller");
 	r.origin.y -= newSize.height - r.size.height;
 	r.size = newSize;
 	
 	[oFiles reloadData];
+	if (showing)		// initially expand the first level
+	{
+		[oFiles expandItem:[oFiles itemAtRow:0]];
+	}
 	[oShowHideFilesTitle setStringValue:name];
 	[[self window] setFrame:r display:YES animate:YES];
 }
@@ -824,12 +829,46 @@ static NSSize closedSize = { 452, 152 };
 		   toolTipForCell:(NSCell *)cell 
 					 rect:(NSRectPointer)rect 
 			  tableColumn:(NSTableColumn *)tc 
-					 item:(id)item 
+					 item:(id)item	// CKTransferRecord
 			mouseLocation:(NSPoint)mouseLocation
 {
 	if ([item error])
 	{
 		return [[[item error] userInfo] objectForKey:NSLocalizedDescriptionKey];
+	}
+	else if (nil != item)
+	{
+		NSString *sizeString = nil;
+		unsigned long long bytes = [((CKTransferRecord *)item) size];
+		if (bytes > 1024 * 1024 )
+		{
+			float megabytes = (double)bytes / (1024.0 * 1024.0);
+			if (megabytes > 10.0)					// larger values, no decimal precicions
+			{
+				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.0f Megabytes", @"Tooltip for file size"), megabytes];
+			}
+			else
+			{
+				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.1f Megabytes", @"Tooltip for file size"), megabytes];
+			}
+		}
+		else if (bytes > 1024 )
+		{
+			float kilobytes = (double)bytes / 1024.0;
+			if (kilobytes >= 10)					// larger values, no decimal precicions
+			{
+				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.0f Kilobytes", @"Tooltip for file size"), kilobytes];
+			}
+			else
+			{
+				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.1f Kilobytes", @"Tooltip for file size"), kilobytes];
+			}
+		}
+		else
+		{
+			sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%qu bytes", @"Tooltip for file size"), bytes];
+		}
+		return sizeString;
 	}
 	return nil;
 }
