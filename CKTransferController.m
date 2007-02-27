@@ -315,16 +315,19 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	if (myFlags.waitForConnection)
 	{
+		// Run some runloops for a while, waiting for a change in state.  Is this a good way to do it?
+		// I can't figure out what the return value of runMode:beforeDate: is and how to use it.
+		// Should the give-up date be an absolute time like it is now, or n seconds relative to each
+		// run loop invocation?
+		
 		NSDate *giveUp = [NSDate dateWithTimeIntervalSinceNow:5.0];
 		while (CKNotConnectedStatus == myConnectionStatus)
 		{
-			KTLog(ControllerDomain, KTLogDebug, @"Waiting for connetion status to be other than CKNotConnectedStatus, now = %d", myConnectionStatus);
 			// let the runloop run incase anyone is using it... like FileConnection. 
-			BOOL found = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:giveUp];
-			if (!found)
+			(void) [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:giveUp];
+			if (NSOrderedDescending == [[NSDate date] compare:giveUp])
 			{
-				NSLog(@"Continuing anyhow");
-				break;
+				break;	// give up, keep going, hopefully we are OK if we missed a message.
 			}
 		}
 	}
