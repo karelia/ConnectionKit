@@ -266,6 +266,10 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 - (NSArray *)connections
 {
+	if (myFilter)
+	{
+		return [NSArray arrayWithArray:myFilteredHosts];
+	}
 	return [NSArray arrayWithArray:myConnections];
 }
 
@@ -379,7 +383,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (NSArray *)allHosts
 {
-	return [self allHostsWithinItems:[self connections]];
+	return [self allHostsWithinItems:myConnections];
 }
 
 - (NSArray *)hostsMatching:(NSString *)query
@@ -416,7 +420,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (NSArray *)allCategories
 {
-	return [self allCategoriesWithinItems:[self connections]];
+	return [self allCategoriesWithinItems:myConnections];
 }
 
 #pragma mark -
