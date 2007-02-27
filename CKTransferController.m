@@ -753,11 +753,12 @@ static NSSize closedSize = { 452, 152 };
 
 - (void)forceDisconnectAll
 {
-	if ([[self connection] delegate] == self)				[myConnection setDelegate:nil];
+	// don't use [self connection] because we don't want to create a connection if we've already cleared it
+	if ([myConnection delegate] == self)				[myConnection setDelegate:nil];
 
 	[myVerificationConnection setDelegate:nil];
 	[myVerificationConnection forceDisconnect];
-	[[self connection] forceDisconnect];
+	[myConnection forceDisconnect];
 	
 	// Release connections
 	[self setConnection:nil];	// will only deallocate if it's not a weak ref
