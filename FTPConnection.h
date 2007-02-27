@@ -68,7 +68,6 @@ typedef enum {
 	long long			_transferSize;
 	long long			_transferSent;
 	long long			_transferCursor;
-	long long			_delegateSizeBuffer;
 	int					_transferLastPercent;
 	
 	BOOL				_setTransferMode;
