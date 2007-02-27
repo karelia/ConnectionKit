@@ -1063,6 +1063,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 #pragma mark -
 #pragma mark SSL Support
 
+- (NSString *)sslErrorStringWithCode:(OSStatus)code
+{
+	return [NSString stringWithFormat:@"%s: %s", GetMacOSStatusErrorString(code), GetMacOSStatusCommentString(code)];
+}
+
 - (void)initializeSSL
 {
 	SecKeychainRef keychainRef = nil;
@@ -1126,7 +1131,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (int)handshakeWithInputData:(NSMutableData *)inputData
 				   outputData:(NSMutableData *)outputData
 {
-	int ret;
+	OSStatus ret;
 	
 	// If we haven't yet set up the SSL context, we should do so now.
 	if (!mySSLContext)
@@ -1149,7 +1154,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			return ret;
 		}
 		
-		if (ret = SSLSetEnableCertVerify(mySSLContext, (Boolean)YES))
+		// we need to manually verify the certificates so that if they aren't valid, the connection isn't terminated straight away
+		if (ret = SSLSetEnableCertVerify(mySSLContext, (Boolean)NO))
 		{
 			KTLog(SSLDomain, KTLogError, @"Error calling SSLSetEnableCertVerify");
 			return ret;
@@ -1298,10 +1304,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 OSStatus SSLReadFunction(SSLConnectionRef connection, void *data, size_t *dataLength)
 {
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, (Boolean)YES);
 	return [(StreamBasedConnection *)connection handleSSLReadToData:data size:dataLength];
 }
 
 OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t *dataLength)
 {
-	return [(StreamBasedConnection *)connection handleSSLWriteFromData:data size:dataLength];
+	OSStatus result = [(StreamBasedConnection *)connection handleSSLWriteFromData:data size:dataLength];
+	// give the runloop a run after writing to have an opportunity to read
+	CFRunLoopRunInMode(kCFRunLoopDefaultMode, 1, (Boolean)YES);
+	return result;
 }
