@@ -1767,18 +1767,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					[_dataSendStream write:bytes maxLength:chunkLength];
 					_transferSent += chunkLength;
-					_delegateSizeBuffer += chunkLength;
 					_transferCursor += chunkLength;
 					
 					//if ([self isAboveNotificationTimeThreshold:[NSDate date]]) {
 					if ([upload delegateRespondsToTransferTransferredData])
 					{
-						[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:_delegateSizeBuffer];
+						[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunkLength];
 					}
 						if (_flags.uploadProgressed)
 						{
-							[_forwarder connection:self upload:remoteFile sentDataOfLength:_delegateSizeBuffer];
-							_delegateSizeBuffer = 0;
+							[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
 						}
 					//}
 					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);

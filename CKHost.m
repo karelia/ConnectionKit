@@ -410,7 +410,8 @@ static NSImage *sHostIcon = nil;
 	{
 		connection = [AbstractConnection connectionWithURL:myURL error:&error];
 	}
-	else if (myConnectionType && ![myConnectionType isEqualToString:@""] && ![myConnectionType isEqualToString:@"Auto Select"])
+	
+	if (!connection && myConnectionType && ![myConnectionType isEqualToString:@""] && ![myConnectionType isEqualToString:@"Auto Select"])
 	{
 		connection = [AbstractConnection connectionWithName:myConnectionType
 													   host:myHost
@@ -419,7 +420,8 @@ static NSImage *sHostIcon = nil;
 												   password:[self password]
 													  error:&error];
 	}
-	else
+	
+	if (!connection)
 	{
 		connection = [AbstractConnection connectionToHost:myHost
 													 port:myPort
