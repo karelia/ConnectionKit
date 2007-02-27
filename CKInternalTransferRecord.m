@@ -40,7 +40,7 @@
 		myRemotePath = [remote copy];
 		myData = [data retain];
 		myOffset = offset;
-		myDelegate = [delegate retain];
+		myDelegate = delegate;
 		myForwarder = [[RunLoopForwarder alloc] init];
 		[myForwarder setUseMainThread:YES];
 		[myForwarder setDelegate:myDelegate];
@@ -57,7 +57,6 @@
 
 - (void)dealloc
 {
-	[myDelegate release];
 	[myLocalPath release];
 	[myRemotePath release];
 	[myData release];
