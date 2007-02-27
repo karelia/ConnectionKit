@@ -42,10 +42,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)dealloc
 {
-	if ([myConnection delegate] == self) [myConnection setDelegate:nil];
-	[myConnection release];
-	[myVerificationConnection forceDisconnect]; 
-	[myVerificationConnection release];
+	[self forceDisconnectAll];
 	[myTransfers release];
 	[myForwarder setDelegate:nil];
 	[myForwarder release];
@@ -143,10 +140,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)setTitle:(NSString *)title
 {
+	[[self window] setTitle:title];
 	[oTitle performSelectorOnMainThread:@selector(setStringValue:) 
 							 withObject:title
-						  waitUntilDone:NO];
-	[[self window] setTitle:title];
+						  waitUntilDone:YES];
 }
 
 - (void)setIcon:(NSImage *)icon
@@ -248,8 +245,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	if (myFlags.stopTransfer || CKFatalErrorStatus == myReturnStatus)
 	{
-		[[self connection] setDelegate:nil];
-		[[self connection] forceDisconnect];
+		[self forceDisconnectAll];
 	}
 	else
 	{
@@ -319,10 +315,12 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	
 	if (myFlags.waitForConnection)
 	{
+		NSDate *giveUp = [NSDate dateWithTimeIntervalSinceNow:5.0];
 		while (CKNotConnectedStatus == myConnectionStatus)
 		{
+			KTLog(ControllerDomain, KTLogDebug, @"Waiting for connetion status to be other than CKNotConnectedStatus, now = %d", myConnectionStatus);
 			// let the runloop run incase anyone is using it... like FileConnection. 
-			BOOL found = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:5.0]];
+			BOOL found = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:giveUp];
 			if (!found)
 			{
 				NSLog(@"Continuing anyhow");
@@ -336,7 +334,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
 		if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
 		{
-			myVerificationConnection = [[self connection] copy];
+			myVerificationConnection = [[self connection] copyWithZone:[self zone]];
 			[myVerificationConnection setName:@"verification"];
 			[myVerificationConnection setDelegate:self];
 			[myVerificationConnection connect];
@@ -373,6 +371,21 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	[self finishSetupForDisplay];
 }
 
+- (void) postABogusEvent
+{
+	// Post an event to help the runloop waiting for a connection
+	NSEvent *theEvent = [NSEvent otherEventWithType:NSApplicationDefined
+										   location:NSZeroPoint
+									  modifierFlags:0
+										  timestamp:0.0
+									   windowNumber:0
+											context:[NSApp context]
+											subtype:0
+											  data1:0
+											  data2:0];
+	[NSApp postEvent:theEvent atStart:YES];
+}	
+
 #pragma mark -
 #pragma mark Actions
 
@@ -383,11 +396,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if (![myDelegate transferControllerDefaultButtonAction:self])
 			return;
 	}
-	[myVerificationConnection setDelegate:nil];
-	[myVerificationConnection forceDisconnect];
-	[myVerificationConnection release]; myVerificationConnection = nil;
-	[[self connection] setDelegate:nil];
-	[[self connection] forceDisconnect];
+	
+	// Treat as stop/done
+	[self forceDisconnectAll];
 	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
@@ -404,11 +415,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if (![myDelegate transferControllerAlternateButtonAction:self])
 			return;
 	}
-	[myVerificationConnection setDelegate:nil];
-	[myVerificationConnection forceDisconnect];
-	[myVerificationConnection release]; myVerificationConnection = nil;
-	[[self connection] setDelegate:nil];
-	[[self connection] forceDisconnect];
+	
+	// Treat as stop/done
+	[self forceDisconnectAll];
 	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
@@ -447,20 +456,30 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Accessors
 
+// set a connection.  Generally called when this class maintains its collection.
+// If delegate provides collection, then we do not deal with retaining.
+
 - (void)setConnection:(id <AbstractConnectionProtocol>)connection
 {
 	if ([myConnection delegate] == self) [myConnection setDelegate:nil];
-	[myConnection autorelease];
-	myConnection = [connection retain];
+	if (!myFlags.delegateProvidesConnection)
+	{
+		[myConnection autorelease];
+		myConnection = [connection retain];
+	}
+	else	// weak reference
+	{
+		myConnection = connection;
+	}
 }
 
 - (id <AbstractConnectionProtocol>)connection
 {
 	if (!myConnection && myFlags.delegateProvidesConnection)
 	{
+		// delegate returns a connection; we do not retain it.
 		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self];
 		[con setDelegate:self];
-		[self setConnection:con];		// cache for next time
 		return con;
 	}
 	return myConnection;
@@ -510,12 +529,12 @@ static NSSize closedSize = { 452, 152 };
 	myDelegate = delegate;
 	[myForwarder setDelegate:myDelegate];
 	
-	myFlags.delegateProvidesConnection = [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
-	myFlags.delegateProvidesContent = [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
-	myFlags.delegateFinishedContentGeneration = [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
-	myFlags.delegateHandlesDefaultButton = [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
-	myFlags.delegateHandlesAlternateButton = [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
-	myFlags.delegateDidFinish = [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
+	myFlags.delegateProvidesConnection			= [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
+	myFlags.delegateProvidesContent				= [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
+	myFlags.delegateFinishedContentGeneration	= [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:)];
+	myFlags.delegateHandlesDefaultButton		= [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
+	myFlags.delegateHandlesAlternateButton		= [delegate respondsToSelector:@selector(transferControllerAlternateButtonAction:)];
+	myFlags.delegateDidFinish					= [delegate respondsToSelector:@selector(transferControllerDidFinish:returnCode:)];
 }
 
 - (id)delegate
@@ -729,6 +748,18 @@ static NSSize closedSize = { 452, 152 };
 	return nil;
 }
 
+- (void)forceDisconnectAll
+{
+	if ([[self connection] delegate] == self)				[myConnection setDelegate:nil];
+
+	[myVerificationConnection setDelegate:nil];
+	[myVerificationConnection forceDisconnect];
+	[[self connection] forceDisconnect];
+	
+	// Release connections
+	[self setConnection:nil];	// will only deallocate if it's not a weak ref
+	[myVerificationConnection release]; myVerificationConnection = nil;
+}	
 
 
 #pragma mark -
@@ -801,11 +832,7 @@ static NSSize closedSize = { 452, 152 };
 	if (con == [self connection])
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
-		[con setDelegate:nil];
-		[con forceDisconnect];
-		[myVerificationConnection setDelegate:nil];
-		[myVerificationConnection forceDisconnect];
-		
+		[self forceDisconnectAll];
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
@@ -820,6 +847,7 @@ static NSSize closedSize = { 452, 152 };
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 		
 		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
+		[self postABogusEvent];
 	}
 }
 
@@ -829,6 +857,8 @@ static NSSize closedSize = { 452, 152 };
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"Did Connect to Host");
 		myConnectionStatus = CKConnectedStatus;
+		[self postABogusEvent];
+		
 		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Connected to %@", @"transfer controller"), host]];
 	}
 }
@@ -838,6 +868,7 @@ static NSSize closedSize = { 452, 152 };
 	if (con == [self connection])
 	{
 		myConnectionStatus = CKDisconnectedStatus;
+		[self postABogusEvent];
 	}
 
 	if (myFlags.verifyTransfers)
@@ -914,10 +945,7 @@ static NSSize closedSize = { 452, 152 };
 	else
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"%@ %@", NSStringFromSelector(_cmd), error);
-		[myVerificationConnection setDelegate:nil];
-		[myVerificationConnection forceDisconnect];
-		[[self connection] setDelegate:nil];
-		[[self connection] forceDisconnect];
+		[self forceDisconnectAll];
 		
 		[self setFatalError:error];
 		myReturnStatus = CKFatalErrorStatus;

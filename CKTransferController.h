@@ -34,7 +34,7 @@ typedef enum {
 
 @interface CKTransferController : NSWindowController 
 {
-	id <AbstractConnectionProtocol>		myConnection;
+	id <AbstractConnectionProtocol>		myConnection;		// may not be retained
 	id <AbstractConnectionProtocol>		myVerificationConnection;
 	
 	CKTransferControllerStatus			myReturnStatus;
@@ -136,6 +136,8 @@ typedef enum {
 
 - (NSError *)fatalError;
 - (void)setFatalError:(NSError *)aFatalError;
+
+- (void)forceDisconnectAll;
 
 @end
 
