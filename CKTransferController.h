@@ -18,7 +18,8 @@ enum {
 };
 
 typedef enum {
-	CKSuccessStatus = 0,
+	CKUnknownStatus = 0,
+	CKSuccessStatus,
 	CKFatalErrorStatus,
 	CKAbortStatus
 } CKTransferControllerStatus;
