@@ -32,6 +32,8 @@
 		myEntries = [[KTLogger entriesWithLogFile:log] retain];
 		[self didChangeValueForKey:@"entries"];
 	}
+	
+	[[[oTable tableColumnWithIdentifier:@"f"] dataCell] setLineBreakMode: NSLineBreakByTruncatingHead];
 }
 
 - (NSArray *)entries
