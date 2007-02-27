@@ -127,12 +127,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 - (void)threadedConnect
 {
 	[super threadedConnect];
-	_flags.isConnected = YES;
 	[self setState:ConnectionIdleState];
-	if (_flags.didConnect)
-	{
-		[_forwarder connection:self didConnectToHost:[self host]];
-	}
 }
 
 - (void)processReceivedData:(NSData *)data
