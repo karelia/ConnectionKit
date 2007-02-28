@@ -63,7 +63,7 @@
 
 + (NSString *)formattedFileSize:(double)size
 {
-	if (size == 0) return @"0 B";
+	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInThisBundle(@"bytes", @"filesize")];
 	NSString *suffix[] = {
 		LocalizedStringInThisBundle(@"bytes", @"filesize"),
 		LocalizedStringInThisBundle(@"Kilobytes", @"filesize"),
@@ -80,7 +80,7 @@
 
 + (NSString *)formattedSpeed:(double)speed
 {
-	return [NSString stringWithFormat:@"%@/s", [NSString formattedFileSize:speed]];
+	return [NSString stringWithFormat:@"%@/%@", [NSString formattedFileSize:speed], LocalizedStringInThisBundle(@"s", @"seconds")];
 }
 
 @end
