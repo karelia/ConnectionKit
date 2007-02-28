@@ -258,6 +258,9 @@ NSString *QueueDomain = @"Queuing";
 		}
 		[command release];
 	}
+	[_queueLock lock];
+	myQueueFlags.isCheckingQueue = NO;
+	[_queueLock unlock];
 }	
 
 - (NSString *)queueDescription
@@ -286,7 +289,13 @@ NSString *QueueDomain = @"Queuing";
 	KTLog(QueueDomain, KTLogDebug, @".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
 	[_queueLock unlock];
 	
-	if (!_flags.inBulk && !myQueueFlags.isCheckingQueue) {
+	BOOL isChecking;
+	
+	[_queueLock lock];
+	isChecking = myQueueFlags.isCheckingQueue;
+	[_queueLock unlock];
+	
+	if (!_flags.inBulk && !isChecking) {
 		[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 	}
 }
