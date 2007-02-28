@@ -41,13 +41,13 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)dealloc
 {
-	[self forceDisconnectAll];
 	[myTransfers release];
 	[myForwarder setDelegate:nil];
 	[myForwarder release];
 	[myRootPath release];
 	[myRootedTransfers release];
 	[myPathsToVerify release];
+	[self forceDisconnectAll];	// won't send delegate message
 	
 	[super dealloc];
 }
@@ -250,6 +250,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	if (myFlags.stopTransfer || CKFatalErrorStatus == myReturnStatus)
 	{
 		[self forceDisconnectAll];
+		if (myFlags.delegateDidFinish)
+		{
+			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+		}
 	}
 	else
 	{
@@ -768,7 +772,7 @@ static NSSize closedSize = { 452, 152 };
 	return nil;
 }
 
-- (void)forceDisconnectAll
+- (void)forceDisconnectAll	// possibly called from backgrond thread, can't use myForwarder
 {
 	// don't use [self connection] because we don't want to create a connection if we've already cleared it
 	if ([myConnection delegate] == self)				[myConnection setDelegate:nil];
@@ -857,7 +861,6 @@ static NSSize closedSize = { 452, 152 };
 	if (con == [self connection])
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
-		[self forceDisconnectAll];
 		[oProgress setIndeterminate:NO];
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
@@ -869,9 +872,13 @@ static NSSize closedSize = { 452, 152 };
 		[self setFatalError:error];
 		myReturnStatus = CKFatalErrorStatus;
 		[self setStatusMessage:LocalizedStringInThisBundle(@"Password was not accepted.", @"")];
-		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 		
 		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
+		[self forceDisconnectAll];
+		if (myFlags.delegateDidFinish)
+		{
+			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+		}
 		[self postABogusEvent];
 	}
 }
@@ -971,7 +978,6 @@ static NSSize closedSize = { 452, 152 };
 	else
 	{
 		KTLog(ControllerDomain, KTLogDebug, @"%@ %@", NSStringFromSelector(_cmd), error);
-		[self forceDisconnectAll];
 		
 		[self setFatalError:error];
 		myReturnStatus = CKFatalErrorStatus;
@@ -980,7 +986,7 @@ static NSSize closedSize = { 452, 152 };
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
 		
-		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+		[self forceDisconnectAll];
 	}
 }
 
