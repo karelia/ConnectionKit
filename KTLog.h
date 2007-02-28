@@ -32,6 +32,7 @@
 // This is based on the idea of MLog at http://www.borkware.com/rants/agentm/mlog/
 
 extern NSString *KTLogKeyPrefix;
+extern NSString *KTLogWildcardDomain;
 
 // This is the main logging function / macro
 
@@ -41,20 +42,24 @@ extern NSString *KTLogKeyPrefix;
 	KTLog writes the log information to ~/Library/Logs/processName.ktlog
 	It provides automatic log rolling once the filesize is over a threshold. The default file size is 5MB
  
-	KTLogInfo is the default level. Setting the level to KTLogError would allow the logger to log KTLogInfo, KTLogWarn 
-	and KTLogError to the log file.
+	KTLogWarn is the default level.  Lower values are less chatty (fatal being rare), higher values are more chatty,
+	with debug being the chattiest.
  
 	By default KTLog will also log messages to the console (stderr)
  */
 
 typedef enum {
 	KTLogOff = 0,
-	KTLogInfo,
-	KTLogWarn,
-	KTLogError,
 	KTLogFatal,
+	KTLogError,
+	KTLogWarn,
+	KTLogInfo,
 	KTLogDebug
 } KTLoggingLevel;
+
+// Default for all levels (except KTLogWildcardDomain which is off unless you turn it to some level)
+
+#define DEFAULT_LEVEL KTLogWarn
 
 @interface KTLogger : NSObject 
 {

@@ -40,6 +40,7 @@
 @end
 
 NSString *KTLogKeyPrefix = @"KTLoggingLevel.";
+NSString *KTLogWildcardDomain = @"*";
 
 static KTLogger *_sharedLogger = nil;
 static unsigned long long KTLogMaximumLogSize = 5242880; // 5MB
@@ -48,10 +49,10 @@ static id _loggingDelegate = nil;
 
 static NSString *KTLevelMap[] = {
 	@"Off",
-	@"INFO",
-	@"WARN",
-	@"ERROR",
 	@"FATAL",
+	@"ERROR",
+	@"WARN",
+	@"INFO",
 	@"DEBUG"
 };
 
@@ -161,8 +162,11 @@ static NSString *KTLevelMap[] = {
 	{
 		return [level intValue];
 	}
-	
-	return KTLogOff;
+	else if ([domain isEqualToString:KTLogWildcardDomain])
+	{
+		return KTLogOff;	// wildcard defaults to off
+	}
+	return DEFAULT_LEVEL;
 }
 
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain
@@ -308,22 +312,11 @@ static NSString *KTLevelMap[] = {
 {
 	[myLock lock];
 	
-	KTLoggingLevel wildcardLevel = [self loggingLevelForDomain:@"*"];
-	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
-	
-	//we only log the current level or less.
-	if (level >= wildcardLevel)
+	if (	level <= [self loggingLevelForDomain:KTLogWildcardDomain]
+		||	level <= [self loggingLevelForDomain:domain])	// only log statement whose level is at or below my threshold
 	{
-		; // wild card enabled and over level threshold, don't test anything else
+		[self _logFile:file lineNumber:line loggingDomain:domain loggingLevel:level thread:thread message:log];
 	}
-	else if (currentLevel == KTLogOff || level > currentLevel)
-	{
-		[myLock unlock];
-		return;
-	}
-	
-	[self _logFile:file lineNumber:line loggingDomain:domain loggingLevel:level thread:thread message:log];
-	
 	[myLock unlock];
 }
 
@@ -338,28 +331,17 @@ static NSString *KTLevelMap[] = {
 {
 	[myLock lock];
 	
-	KTLoggingLevel wildcardLevel = [self loggingLevelForDomain:@"*"];
-	KTLoggingLevel currentLevel = [self loggingLevelForDomain:domain];
-	
-	//we only log the current level or less.
-	if (wildcardLevel > KTLogOff && level >= wildcardLevel)
+	if (	level <= [self loggingLevelForDomain:KTLogWildcardDomain]
+		||	level <= [self loggingLevelForDomain:domain])	// only log statement whose level is at or below my threshold
 	{
-		; // wild card enabled and over level threshold, don't test anything else
+		NSString *message = [[[NSString alloc] initWithFormat:log arguments:argList] autorelease];
+		[self _logFile:file
+			lineNumber:line
+		 loggingDomain:domain
+		  loggingLevel:level
+				thread:thread
+			   message:message];
 	}
-	else if (currentLevel == KTLogOff || level > currentLevel)
-	{
-		[myLock unlock];
-		return;
-	}
-	
-	NSString *message = [[[NSString alloc] initWithFormat:log arguments:argList] autorelease];
-	[self _logFile:file
-		lineNumber:line
-	 loggingDomain:domain
-	  loggingLevel:level
-			thread:thread
-		   message:message];
-	
 	[myLock unlock];
 }	
 
