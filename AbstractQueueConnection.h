@@ -106,9 +106,15 @@ extern NSString *QueueDomain;
 	NSMutableArray		*_fileRenames;
 	NSMutableArray		*_fileCheckQueue;
 	NSMutableDictionary	*_filesNeedingOverwriteConfirmation;
+	
+	struct __aqc_flags {
+		unsigned isCheckingQueue: 1;
+		unsigned usued: 29;
+	} myQueueFlags;
 }
 
 - (void)checkQueue;
+- (BOOL)isCheckingQueue;
 
 //Command History
 - (id)lastCommand;
