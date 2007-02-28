@@ -7,7 +7,8 @@
 //
 
 #import "NSString+Connection.h"
-
+#import <math.h>
+#import "AbstractConnectionProtocol.h"
 
 @implementation NSString (Connection)
 
@@ -60,27 +61,26 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
++ (NSString *)formattedFileSize:(double)size
+{
+	if (size == 0) return @"0 B";
+	NSString *suffix[] = {
+		LocalizedStringInThisBundle(@"bytes", @"filesize"),
+		LocalizedStringInThisBundle(@"Kilobytes", @"filesize"),
+		LocalizedStringInThisBundle(@"MB", @"filesize"),
+		LocalizedStringInThisBundle(@"GB", @"filesize"),
+		LocalizedStringInThisBundle(@"TB", @"filesize"),
+		LocalizedStringInThisBundle(@"PB", @"filesize"),
+		LocalizedStringInThisBundle(@"EB", @"filesize")
+	};
+	
+	int power = floor(log(size) / log(1024));
+	return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
+}
+
 + (NSString *)formattedSpeed:(double)speed
 {
-	if (speed == 0) return @"0 B/s";
-	NSString *suffix[] = {@"B", @"KB", @"MB", @"GB", @"TB", @"PB", @"EB"};
-	
-	int i, c = 7;
-	double size = speed;
-	
-	for (i = 0; i < c && size >= 1024; i++) 
-	{
-		size = size / 1024;
-	}
-	float rem = 0;
-	
-	if (i != 0)
-	{
-		rem = (speed - (i * 1024)) / (i * 1024);
-	}
-	
-	NSString *ext = suffix[i];
-	return [NSString stringWithFormat:@"%f %@/s", size+rem, ext];
+	return [NSString stringWithFormat:@"%@/s", [NSString formattedFileSize:speed]];
 }
 
 @end

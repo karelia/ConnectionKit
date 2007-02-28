@@ -347,7 +347,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 {
 	myTransferred += length;
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-	[self setSpeed:length / (now - myLastTransferTime)];
+	[self setSpeed:((double)length) / (now - myLastTransferTime)];
 	[self willChangeValueForKey:@"speed"];
 	myLastTransferTime = now;
 	[self didChangeValueForKey:@"speed"];

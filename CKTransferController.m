@@ -453,7 +453,13 @@ static NSSize closedSize = { 452, 152 };
 	[oFiles reloadData];
 	if (showing)		// initially expand the first level
 	{
-		[oFiles expandItem:[oFiles itemAtRow:0]];
+		NSEnumerator *e = [myRootedTransfers objectEnumerator];
+		CKTransferRecord *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			[oFiles expandItem:cur expandChildren:NO];
+		}
 	}
 	[oShowHideFilesTitle setStringValue:name];
 	[[self window] setFrame:r display:YES animate:YES];
@@ -706,11 +712,7 @@ static NSSize closedSize = { 452, 152 };
 		[self didChangeValueForKey:@"transfers"];
 		if (myRootPath)
 		{
-			id toAdd = [self recordWithPath:myRootPath root:cur];
-			if (toAdd)
-			{
-				[myRootedTransfers addObject:toAdd];
-			}
+			[myRootedTransfers addObject:[self recordWithPath:myRootPath root:cur]];
 		}
 		else
 		{
@@ -842,37 +844,7 @@ static NSSize closedSize = { 452, 152 };
 	}
 	else if (nil != item)
 	{
-		NSString *sizeString = nil;
-		unsigned long long bytes = [((CKTransferRecord *)item) size];
-		if (bytes > 1024 * 1024 )
-		{
-			float megabytes = (double)bytes / (1024.0 * 1024.0);
-			if (megabytes > 10.0)					// larger values, no decimal precicions
-			{
-				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.0f Megabytes", @"Tooltip for file size"), megabytes];
-			}
-			else
-			{
-				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.1f Megabytes", @"Tooltip for file size"), megabytes];
-			}
-		}
-		else if (bytes > 1024 )
-		{
-			float kilobytes = (double)bytes / 1024.0;
-			if (kilobytes >= 10)					// larger values, no decimal precicions
-			{
-				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.0f Kilobytes", @"Tooltip for file size"), kilobytes];
-			}
-			else
-			{
-				sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%.1f Kilobytes", @"Tooltip for file size"), kilobytes];
-			}
-		}
-		else
-		{
-			sizeString = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%qu bytes", @"Tooltip for file size"), bytes];
-		}
-		return sizeString;
+		return [NSString formattedFileSize:(double)[((CKTransferRecord *)item) size]];
 	}
 	return nil;
 }
