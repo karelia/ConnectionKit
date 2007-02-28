@@ -706,7 +706,11 @@ static NSSize closedSize = { 452, 152 };
 		[self didChangeValueForKey:@"transfers"];
 		if (myRootPath)
 		{
-			[myRootedTransfers addObject:[self recordWithPath:myRootPath root:cur]];
+			id toAdd = [self recordWithPath:myRootPath root:cur];
+			if (toAdd)
+			{
+				[myRootedTransfers addObject:toAdd];
+			}
 		}
 		else
 		{
