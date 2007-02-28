@@ -38,6 +38,7 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
+		myUUID = [[NSString uuid] retain];
 		myConnectionType = @"FTP";
 		myHost = @"";
 		myUsername = [NSUserName() copy];
@@ -51,6 +52,7 @@ static NSImage *sHostIcon = nil;
 
 - (void)dealloc
 {
+	[myUUID release];
 	[myProperties release];
 	[myHost release];
 	[myPort release];
@@ -72,6 +74,11 @@ static NSImage *sHostIcon = nil;
 	{
 		int version = [coder decodeIntForKey:@"version"];
 #pragma unused (version)
+		myUUID = [[coder decodeObjectForKey:@"uuid"] copy];
+		if (!myUUID)
+		{
+			myUUID = [[NSString uuid] retain];
+		}
 		myHost = [[coder decodeObjectForKey:@"host"] copy];
 		myPort = [[coder decodeObjectForKey:@"port"] copy];
 		myUsername = [[coder decodeObjectForKey:@"username"] copy];
@@ -114,6 +121,7 @@ static NSImage *sHostIcon = nil;
 - (void)encodeWithCoder:(NSCoder *)coder
 {
 	[coder encodeInt:[CKHost version] forKey:@"version"];
+	[coder encodeObject:myUUID forKey:@"uuid"];
 	[coder encodeObject:myHost forKey:@"host"];
 	[coder encodeObject:myPort forKey:@"port"];
 	[coder encodeObject:myUsername forKey:@"username"];
@@ -131,6 +139,11 @@ static NSImage *sHostIcon = nil;
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
+}
+
+- (NSString *)uuid
+{
+	return myUUID;
 }
 
 - (void)setHost:(NSString *)host

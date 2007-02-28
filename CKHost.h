@@ -13,6 +13,7 @@
 
 @interface CKHost : NSObject <NSCoding>
 {
+	NSString	*myUUID;
 	NSString	*myHost;
 	NSString	*myPort;
 	NSString	*myUsername;
@@ -42,6 +43,7 @@
 - (void)setUserInfo:(id)ui;
 - (void)setIcon:(NSImage *)icon;
 
+- (NSString *)uuid;
 - (NSString *)host;
 - (NSString *)port;
 - (NSString *)username;
