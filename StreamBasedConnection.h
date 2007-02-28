@@ -133,7 +133,7 @@
 - (void)processReceivedData:(NSData *)data;
 - (void)sendCommand:(id)command;
 
-- (void)sendData:(NSData *)data;
+- (unsigned)sendData:(NSData *)data; // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
 - (NSData *)availableData;
 - (int)availableData:(NSData **)data ofLength:(int)length;
 
