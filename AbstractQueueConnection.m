@@ -213,9 +213,18 @@ NSString *QueueDomain = @"Queuing";
 	; //subclass to do work
 }
 
+- (BOOL)isCheckingQueue
+{
+	return myQueueFlags.isCheckingQueue;
+}
+
 - (void)checkQueue
 {
 	KTLog(StateMachineDomain, KTLogDebug, @"Checking Queue");
+	[_queueLock lock];
+	myQueueFlags.isCheckingQueue = YES;
+	[_queueLock unlock];
+	
 	BOOL nextTry = 0 != [self numberOfCommands];
 	if (!nextTry)
 	{
@@ -230,9 +239,17 @@ NSString *QueueDomain = @"Queuing";
 			_state = [command sentState];	// don't use setter; we don't want to recurse
 			[self pushCommandOnHistoryQueue:command];
 			[self dequeueCommand];
-			nextTry = (0 != [self numberOfCommands]);		// go to next one, there's something else to do
 			
 			[self sendCommand:[command command]];
+			
+			// go to next one, there's something else to do
+			[_queueLock lock];
+			nextTry = [_commandQueue count] > 0; 
+			if (!nextTry)
+			{
+				myQueueFlags.isCheckingQueue = NO;
+			}
+			[_queueLock unlock];
 		}
 		else
 		{
@@ -269,7 +286,7 @@ NSString *QueueDomain = @"Queuing";
 	KTLog(QueueDomain, KTLogDebug, @".. %@ (queue size now = %d)", [command command], [_commandQueue count]);		// show when a command gets queued
 	[_queueLock unlock];
 	
-	if (!_flags.inBulk) {
+	if (!_flags.inBulk && !myQueueFlags.isCheckingQueue) {
 		[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 	}
 }
