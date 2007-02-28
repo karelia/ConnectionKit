@@ -18,6 +18,7 @@
 - (NSString *)stringByDeletingFirstPathComponent2;
 + (NSString *)formattedFileSize:(double)size;
 + (NSString *)formattedSpeed:(double)speed;
++ (id)uuid;
 
 @end
 
