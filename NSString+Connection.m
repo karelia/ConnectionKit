@@ -83,6 +83,15 @@
 	return [NSString stringWithFormat:@"%@/%@", [NSString formattedFileSize:speed], LocalizedStringInThisBundle(@"s", @"abbreviation for seconds, e.g. 12 MB/s")];
 }
 
++ (id)uuid
+{
+	CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
+	CFStringRef uuidStr = CFUUIDCreateString(kCFAllocatorDefault, uuid);
+	CFRelease(uuid);
+	[(NSString *)uuidStr autorelease];
+	return (NSString *)uuidStr;
+}
+
 @end
 
 @implementation NSAttributedString (Connection)
