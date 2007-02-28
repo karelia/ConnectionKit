@@ -528,7 +528,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	return dataBuffer;
 }
 
-- (void)sendData:(NSData *)data
+- (unsigned)sendData:(NSData *)data
 {
 	if (myStreamFlags.wantsSSL)
 	{
@@ -538,7 +538,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[_sendBufferLock lock];
 			[_sendBuffer appendData:data];
 			[_sendBufferLock unlock];
-			return;
+			return 0;
 		}
 	}
 	BOOL bufferEmpty = NO;
@@ -547,13 +547,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if (!dataBuffer) 
 	{
 		KTLog(SSLDomain, KTLogFatal, @"No Data Buffer in sendData:");
-		return;
+		return 0;
 	}
 	
 	[_sendBufferLock lock];
 	bufferEmpty = [dataBuffer length] == 0;
 	[dataBuffer appendData:data];
 	[_sendBufferLock unlock];
+	unsigned chunkLength = 0;
 	
 	if (bufferEmpty) {
 		// prime the sending
@@ -587,13 +588,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
 					[_forwarder connection:self didReceiveError:error];
 				}
-				return;
+				return 0;
 			}
 			[NSThread sleepUntilDate:[NSDate distantPast]];
 		}
 		[_sendStream write:bytes maxLength:chunkLength];
 		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
+	return chunkLength;
 }
 
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
@@ -1254,7 +1256,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (OSStatus)handleSSLWriteFromData:(const void *)data size:(size_t *)size
 {
 	[mySSLSendBuffer appendBytes:data length:*size];
-	return noErr;
+	return errSSLWouldBlock;
 }
 
 - (OSStatus)handleSSLReadToData:(void *)data size:(size_t *)size
