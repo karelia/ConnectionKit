@@ -171,7 +171,10 @@ static NSLock *_initLock = nil;
 	}
 	else
 	{
-		[self processTasks];
+		// we want to do this the next time through the runloop
+		[self performSelector:@selector(processTasks)
+				   withObject:nil
+				   afterDelay:0.0];
 	}
 }
 
