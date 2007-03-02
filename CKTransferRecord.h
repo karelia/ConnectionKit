@@ -14,6 +14,7 @@
 	NSString			*myName;
 	unsigned long long	mySize;
 	unsigned long long  myTransferred;
+	unsigned long long  myIntermediateTransferred;
 	NSTimeInterval		myLastTransferTime;
 	double				mySpeed;
 	int					myProgress;
