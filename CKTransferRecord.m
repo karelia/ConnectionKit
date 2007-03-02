@@ -340,17 +340,26 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 {
 	[self setProgress:0];
 	myTransferred = 0;
+	myIntermediateTransferred = 0;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
 	myTransferred += length;
+	myIntermediateTransferred += length;
+	
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-	[self setSpeed:((double)length) / (now - myLastTransferTime)];
-	[self willChangeValueForKey:@"speed"];
-	myLastTransferTime = now;
-	[self didChangeValueForKey:@"speed"];
+	NSTimeInterval difference = now - myLastTransferTime;
+	
+	if (difference > 1.0)
+	{
+		[self willChangeValueForKey:@"speed"];
+		[self setSpeed:((double)myIntermediateTransferred) / difference];
+		[self didChangeValueForKey:@"speed"];
+		myIntermediateTransferred = 0;
+		myLastTransferTime = now;
+	}
 }
 
 - (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent
