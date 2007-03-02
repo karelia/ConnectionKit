@@ -644,10 +644,11 @@ checkRemoteExistence:(NSNumber *)check;
 			return;
 		}
 	}
-	[fm removeFileAtPath:[upload remotePath] handler:nil];
-	[fm createFileAtPath:[upload remotePath]
-				contents:[upload data]
-			  attributes:nil];
+	(void) [fm removeFileAtPath:[upload remotePath] handler:nil];
+	BOOL success = [fm createFileAtPath:[upload remotePath]
+									   contents:[upload data]
+									 attributes:nil];
+
 	if ([upload delegateRespondsToTransferDidBegin])
 	{
 		[[upload delegate] transferDidBegin:[upload userInfo]];
@@ -676,14 +677,30 @@ checkRemoteExistence:(NSNumber *)check;
 		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
 	// send finished
-	if (_flags.uploadFinished)
+	if (success && _flags.uploadFinished)
 	{
 		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
 	}
-	if ([upload delegateRespondsToTransferDidFinish])
+	if (success && [upload delegateRespondsToTransferDidFinish])
 	{
 		[[upload delegate] transferDidFinish:[upload userInfo]];
 	}
+
+	 if (!success)
+	 {
+		 NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
+											code:ConnectionErrorUploading 
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[upload remotePath], @"upload", LocalizedStringInThisBundle(@"Failed to upload data", @"FileConnection copy data error"), NSLocalizedDescriptionKey, nil]];
+		 if (_flags.error)
+		 {
+			 [_forwarder connection:self didReceiveError:err];
+		 }
+		 if ([upload delegateRespondsToError])
+		 {
+			 [[upload delegate] transfer:[upload userInfo] receivedError:err];
+		 }
+	 }
+
 	[self setState:ConnectionIdleState];
 }
 
@@ -741,36 +758,36 @@ checkRemoteExistence:(NSNumber *)check;
 	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
 	}
-  
-  NSString *destinationPath = [NSString stringWithFormat:@"%@/%@", dirPath, name];
-  NSString *tempPath = nil;
-  if ([aFlag boolValue])
-  {
-    //we were asked to overwrite, we'll do it atomically because we are nice:-)
-    //
-    if ([[NSFileManager defaultManager] fileExistsAtPath: destinationPath])
-    {
-      tempPath = [dirPath stringByAppendingPathComponent: [[NSProcessInfo processInfo] globallyUniqueString]];
-      
-      if (![[NSFileManager defaultManager] movePath: destinationPath
-                                            toPath: tempPath
-                                           handler: nil])
-      {
-        //we failed to move it, we'll fail to copy...
-        //
-        tempPath = nil;
-      }
-    }
+	
+	NSString *destinationPath = [NSString stringWithFormat:@"%@/%@", dirPath, name];
+	NSString *tempPath = nil;
+	if ([aFlag boolValue])
+	{
+		//we were asked to overwrite, we'll do it atomically because we are nice:-)
+		//
+		if ([[NSFileManager defaultManager] fileExistsAtPath: destinationPath])
+		{
+			tempPath = [dirPath stringByAppendingPathComponent: [[NSProcessInfo processInfo] globallyUniqueString]];
+			
+			if (![[NSFileManager defaultManager] movePath: destinationPath
+												   toPath: tempPath
+												  handler: nil])
+			{
+				//we failed to move it, we'll fail to copy...
+				//
+				tempPath = nil;
+			}
+		}
   }
-  
+	
 	BOOL success = [myFileManager copyPath:remotePath toPath: destinationPath handler:self];
 	if (success)
 	{
-    //we can delete the old file if one was present
-    //
-    if (tempPath)
-      [myFileManager removeFileAtPath: tempPath handler: nil];
-    
+		//we can delete the old file if one was present
+		//
+		if (tempPath)
+			[myFileManager removeFileAtPath: tempPath handler: nil];
+		
 		//need to send the amount of bytes transferred.
 		if (_flags.downloadProgressed) {
 			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
@@ -786,15 +803,15 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	else	// no handler, so we send error message 'manually'
 	{
-    if (tempPath)
-    {
-      //restore the file, hopefully this will work:-)
-      //
-      [[NSFileManager defaultManager] movePath: tempPath
-                                        toPath: destinationPath
-                                       handler: nil];
+		if (tempPath)
+		{
+			//restore the file, hopefully this will work:-)
+			//
+			[[NSFileManager defaultManager] movePath: tempPath
+											  toPath: destinationPath
+											 handler: nil];
     }
-    
+		
 		if (_flags.error)
 		{
 			[_forwarder connection:self
@@ -925,6 +942,8 @@ checkRemoteExistence:(NSNumber *)check;
 
 #pragma mark -
 #pragma mark Delegate Methods
+
+#warning -- doesn't seem to be used?
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo
 {

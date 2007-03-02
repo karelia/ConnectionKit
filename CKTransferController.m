@@ -973,7 +973,7 @@ static NSSize closedSize = { 452, 152 };
 		
 		return;
 	}
-	else if ([error code] == kSetPermissions) // File connection set permissions failed
+	else if ([error code] == kSetPermissions) // File connection set permissions failed ... ignore this (why?)
 	{
 		return;
 	}

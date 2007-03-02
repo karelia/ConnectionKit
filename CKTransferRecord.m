@@ -169,6 +169,12 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (NSNumber *)progress
 {
+	// Check if self of descendents have an error, so we can show that error.
+	if ([self hasError])
+	{
+		return [NSNumber numberWithInt:-1];
+	}
+	
 	if ([self isDirectory]) 
 	{
 		//get the real transfer progress of the whole directory
@@ -177,10 +183,6 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		if (size == 0) size = 1;
 		int percent = (int)((transferred / (size * 1.0)) * 100);
 		return [NSNumber numberWithInt:percent];
-	}
-	if ([self hasError])
-	{
-		return [NSNumber numberWithInt:-1];
 	}
 	return [NSNumber numberWithInt:myProgress];
 }
@@ -424,20 +426,8 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 + (CKTransferRecord *)recordForFullPath:(NSString *)path withRoot:(CKTransferRecord *)root
 {
-	NSEnumerator *e = [[root contents] objectEnumerator];
-	CKTransferRecord *cur;
-	CKTransferRecord *child;
-	
-	while ((cur = [e nextObject]))
-	{
-		child = [CKTransferRecord recursiveRecord:cur forFullPath:path];
-		if (child)
-		{
-			return child;
-		}
-	}
-	return nil;
-}
+	return [self recursiveRecord:root forPath:path];
+}	
 
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path
 {
