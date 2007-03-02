@@ -187,6 +187,33 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	return [NSNumber numberWithInt:myProgress];
 }
 
+- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses
+{
+	if ([self isLeaf])
+	{
+		if (myError != nil)
+		{
+			(*outErrors)++;
+		}
+		else
+		{
+			(*outSuccesses)++;
+		}
+	}
+	else
+	{
+		// check children for errors
+		NSEnumerator *e = [myContents objectEnumerator];
+		CKTransferRecord *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			(void) [cur problemsTransferringCountingErrors:outErrors successes:outSuccesses];
+		}
+	}
+	return (*outErrors > 0);	// return if there were any problems
+}
+
 - (BOOL)hasError
 {
 	BOOL ret = (myError != nil);

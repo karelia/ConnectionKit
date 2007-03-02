@@ -14,7 +14,8 @@ extern NSString *CKTransferControllerDomain; // used for errors
 
 enum {
 	CKFailedVerificationError = 54321,
-	CKPasswordError
+	CKPasswordError,
+	CKTooManyErrorsError
 };
 
 typedef enum {
@@ -141,7 +142,7 @@ typedef enum {
 - (IBAction)cancelPassword:(id)sender;
 - (IBAction)connectPassword:(id)sender;
 
-- (BOOL)hadErrorsTransferring;
+- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
 
 - (NSError *)fatalError;
 - (void)setFatalError:(NSError *)aFatalError;

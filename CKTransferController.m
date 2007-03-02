@@ -640,6 +640,19 @@ static NSSize closedSize = { 452, 152 };
 	myReturnStatus = CKAbortStatus;
 }
 
+// Return YES if there were problems, collecting stats into the supplied variables
+- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+{
+	NSEnumerator *e = [myTransfers objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		(void) [cur problemsTransferringCountingErrors:outErrors successes:outSuccesses];
+	}
+	return (*outErrors > 0);
+}
+
 - (BOOL)hadErrorsTransferring
 {
 	BOOL ret = NO;
@@ -657,6 +670,7 @@ static NSSize closedSize = { 452, 152 };
 	
 	return ret;
 }
+
 
 - (CKTransferRecord *)recursiveRootRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
@@ -926,6 +940,31 @@ static NSSize closedSize = { 452, 152 };
 	if (myFlags.delegateDidFinish)
 	{
 		myPhase = CKDonePhase;
+		
+		// Before sending the callback, check to see if we actually uploaded most of the files.  If not,
+		// then consider it a fatal error.
+		if (CKSuccessStatus == myReturnStatus)
+		{
+			int countErrorUploads = 0;
+			int countSuccessUploads = 0;
+			BOOL hadErrors = [self problemsTransferringCountingErrors:&countErrorUploads successes:&countSuccessUploads];
+// if this fraction (or more) of files had an error, consider it a problem uploading.
+#define ERROR_THRESHOLD 0.20
+			if (hadErrors && (float)countErrorUploads >= (ERROR_THRESHOLD * (float)countSuccessUploads) )
+			{
+				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
+													 code:CKTooManyErrorsError
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
+			
+				[self setFatalError:error];
+				myReturnStatus = CKFatalErrorStatus;
+				
+				[oProgress setIndeterminate:NO];
+				[oProgress setDoubleValue:0.0];
+				[oProgress displayIfNeeded];
+			}
+		}
 		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 	}
 } 
