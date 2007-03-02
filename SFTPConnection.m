@@ -897,7 +897,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
-	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	CKTransferRecord *upload = [CKTransferRecord recordWithName:remotePath size:[data length]];

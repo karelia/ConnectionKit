@@ -2204,7 +2204,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate
 {
-	NSAssert(data && [data length] > 0, @"no data");
+	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	return [self uploadFile:nil

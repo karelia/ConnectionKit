@@ -74,6 +74,8 @@
 + (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root;
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
+- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+
 @end
 
 extern NSString *CKTransferRecordProgressChangedNotification;
@@ -84,4 +86,5 @@ extern NSString *CKTransferRecordProgressChangedNotification;
 - (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;
 - (void)setSize:(unsigned long long)size;
+- (BOOL)isLeaf;
 @end
