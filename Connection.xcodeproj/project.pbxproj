@@ -212,6 +212,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */ = {isa = PBXBuildFile; fileRef = CE4F78E80B9C8F530083B946 /* Logs.icns */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
 /* End PBXBuildFile section */
@@ -514,7 +515,7 @@
 		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE05A3530B6A947800A25808 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE05A3540B6A947E00A25808 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE05A3640B6A94A800A25808 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/CKTransferController.nib; sourceTree = "<group>"; };
@@ -529,6 +530,7 @@
 		CE3032E60A6DF53700C31C75 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E70A6DF53A00C31C75 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE3032E80A6DF53D00C31C75 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE4F78E80B9C8F530083B946 /* Logs.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Logs.icns; sourceTree = "<group>"; };
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -712,6 +714,7 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				CE4F78E80B9C8F530083B946 /* Logs.icns */,
 				797CC8C509F861770063FF9B /* Localizable.strings */,
 				79CFD8E709F7072100172CDD /* Interfaces */,
 				79CFD8E409F7071E00172CDD /* Images */,
@@ -1251,6 +1254,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */,
+				CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1744,7 +1748,7 @@
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1770,7 +1774,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -2046,7 +2050,7 @@
 			buildSettings = {
 				COPY_PHASE_STRIP = YES;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
