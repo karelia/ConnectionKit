@@ -133,7 +133,9 @@ typedef enum {
 - (void)beginSheetModalForWindow:(NSWindow *)window;
 - (void)runModal;
 
-- (void)stopTransfer:(id)sender;
+- (void)requestStopTransfer;
+- (void) stopTransfer;
+
 
 - (IBAction)defaultButtonPressed:(id)sender;
 - (IBAction)alternateButtonPressed:(id)sender;
