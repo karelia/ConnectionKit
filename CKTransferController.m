@@ -414,8 +414,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 			return;
 	}
 	
-	// Treat as stop/done
-	[self forceDisconnectAll];
+	// Treat as stop/done?  Or will it be different when we are done?
+	[self stopTransfer];
+	
 	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
@@ -433,8 +434,9 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 			return;
 	}
 	
-	// Treat as stop/done
-	[self forceDisconnectAll];
+	// Treat as stop/done?  Or will it be different when we are done?
+	[self stopTransfer];
+
 	[[NSApplication sharedApplication] stopModal];
 	[[NSApplication sharedApplication] endSheet:[self window]];
 	[[self window] orderOut:self];
@@ -634,11 +636,22 @@ static NSSize closedSize = { 452, 152 };
 	[oFiles reloadData];
 }
 
-- (void)stopTransfer:(id)sender
+- (void)requestStopTransfer;
 {
 	myFlags.stopTransfer = YES;
 	myReturnStatus = CKAbortStatus;
 }
+
+- (void) stopTransfer
+{
+	[self requestStopTransfer];
+	[self forceDisconnectAll];
+	if (myFlags.delegateDidFinish)
+	{
+		[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+	}
+}
+
 
 // Return YES if there were problems, collecting stats into the supplied variables
 - (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
@@ -1028,6 +1041,10 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 		[oProgress displayIfNeeded];
 		
 		[self forceDisconnectAll];
+		if (myFlags.delegateDidFinish)
+		{
+			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+		}
 	}
 }
 
