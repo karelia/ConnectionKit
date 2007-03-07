@@ -31,7 +31,7 @@ static NSLock *sCacheLock = nil;
 	host = [sCachedHosts objectForKey:name];
 	[sCacheLock unlock];
 	
-	if (!host)
+	if (!host && (nil != name))
 	{
 		host = [NSHost hostWithName:name];
 		// kvo hack

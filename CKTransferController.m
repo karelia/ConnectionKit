@@ -434,16 +434,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 			return;
 	}
 	
-	// Treat as stop/done?  Or will it be different when we are done?
-	[self stopTransfer];
-
-	[[NSApplication sharedApplication] stopModal];
-	[[NSApplication sharedApplication] endSheet:[self window]];
-	[[self window] orderOut:self];
-	[myTransfers removeAllObjects];
-	[myPathsToVerify removeAllObjects];
-	[myRootedTransfers removeAllObjects];
-	[oFiles reloadData];
+	NSBeep();	// second button really isn't defined without delegate
 }
 
 static NSSize openedSize = { 452, 489 };

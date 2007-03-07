@@ -212,6 +212,7 @@
 		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
 		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
 		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CE10A48D0B9CE94A004C85F8 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81009F7048400172CDD /* AbstractQueueConnection.m */; };
 		CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */ = {isa = PBXBuildFile; fileRef = CE4F78E80B9C8F530083B946 /* Logs.icns */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
@@ -515,7 +516,7 @@
 		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
 		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE05A3530B6A947800A25808 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE05A3540B6A947E00A25808 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE05A3640B6A94A800A25808 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/CKTransferController.nib; sourceTree = "<group>"; };
@@ -1405,6 +1406,7 @@
 				790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */,
 				790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */,
 				790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */,
+				CE10A48D0B9CE94A004C85F8 /* AbstractQueueConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
