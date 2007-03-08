@@ -933,6 +933,17 @@ NSDictionary *sDataAttributes = nil;
 			if (child)
 				return child;
 		}
+		
+		// if we get here we need to create the record		
+		CKTransferRecord *tmp = root;
+		while (![path isEqualToString:@"/"])
+		{
+			cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
+			[tmp addContent:cur];
+			tmp = cur;
+			path = [path stringByDeletingFirstPathComponent];
+		}
+		return cur;
 	}
 	return nil;
 }
