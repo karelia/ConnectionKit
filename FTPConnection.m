@@ -1356,16 +1356,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 #pragma mark Stream Handling
 
-- (void)threadedConnect
-{
-	_noopTimer = [[NSTimer scheduledTimerWithTimeInterval:60
-												   target:self
-												 selector:@selector(sendNoOp:)
-												 userInfo:nil
-												  repeats:YES] retain];
-	[super threadedConnect];
-}
-
 - (void)threadedDisconnect
 {
 	_state = ConnectionSentDisconnectState;
@@ -1903,6 +1893,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		close(_connectedActive);
 		_connectedActive = -1;
 	}
+	//cancel the noop timer
+	[_noopTimer invalidate];
+	[_noopTimer release]; _noopTimer = nil;
+	
 	//_serverSupport.isActiveDataConn = NO;
 }
 
@@ -1914,6 +1908,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				  outputStream:&_dataSendStream];
 	
 	[self prepareAndOpenDataStreams];
+	
+	// send no op commands
+	NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+	if ([ud objectForKey:@"FTPSendsNoOps"] && [[ud objectForKey:@"FTPSendsNoOps"] boolValue])
+	{
+		_noopTimer = [[NSTimer scheduledTimerWithTimeInterval:60
+													   target:self
+													 selector:@selector(sendNoOp:)
+													 userInfo:nil
+													  repeats:YES] retain];
+	}
 }
 
 - (void)prepareAndOpenDataStreams
@@ -2530,6 +2535,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								userInfo:nil];
 	}
 	_received226 = NO;
+	
 	return cmd;
 }
 
@@ -2812,26 +2818,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)sendNoOp:(NSTimer *)timer
 {
-	ConnectionCommand *cmd = [ConnectionCommand command:@"NOOP"
-											 awaitState:ConnectionIdleState
-											  sentState:FTPNoOpState
-											  dependant:nil
-											   userInfo:nil];
-	[_queueLock lock];
-	unsigned i, c = [_commandQueue count];
-	ConnectionCommand *cur;
-	
-	for (i = 0; i < c; i++) 
-	{
-		cur = [_commandQueue objectAtIndex:i];
-		if ([cur awaitState] == ConnectionIdleState)
-		{
-			[_commandQueue insertObject:cmd atIndex:i];
-			break;
-		}
-	}
-	[_queueLock unlock];
-	[self checkQueue];
+	[self sendCommand:@"NOOP"];
 }
 
 #pragma mark -
