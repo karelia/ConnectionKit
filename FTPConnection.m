@@ -556,6 +556,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					{
 						[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 					}
+					_transferLastPercent = percent;
 				}
 				
 				free(buf);
@@ -1439,7 +1440,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						if (_transferSize > 0)
 						{
 							int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
-							if (percent > [[[download delegate] objectForKey:QueueDownloadTransferPercentReceived] intValue])
+							if (percent > _transferLastPercent)
 							{
 								if ([download delegateRespondsToTransferProgressedTo])
 								{
@@ -1449,7 +1450,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								{
 									[_forwarder connection:self download:file progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
 								}
-								[[download delegate] setObject:[NSNumber numberWithInt:percent] forKey:QueueDownloadTransferPercentReceived];
+								_transferLastPercent = percent;
 							}
 						}
 						
