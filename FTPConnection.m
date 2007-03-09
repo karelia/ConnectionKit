@@ -557,25 +557,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 					}
 				}
-// end this doesn't look right				
-				//need to get the transfer size
-				// 150 Opening connection (1652084 bytes)
-				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
-				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
-				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-				if ( [sizeScanner scanLocation] < [command length] )
-				{
-					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-					[sizeScanner scanLongLong:&_transferSize];
-				}
-				else
-				{
-					_transferSize = LONG_MAX;
-				}
-				if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
-				{
-					[(CKTransferRecord *)[download delegate] setSize:_transferSize];
-				}
 				
 				free(buf);
 			}
@@ -668,17 +649,32 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == ConnectionSentSizeState)
 			{
 				CKInternalTransferRecord *download = [self currentDownload];
-				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
-				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
-				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-				if ( [sizeScanner scanLocation] < [command length] )
+				if ([command rangeOfString:@"("].location != NSNotFound)
 				{
-					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-					[sizeScanner scanLongLong:&_transferSize];
+					NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+					NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
+					[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
+					if ( [sizeScanner scanLocation] < [command length] )
+					{
+						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+						[sizeScanner scanLongLong:&_transferSize];
+					}
 				}
 				else
 				{
-					_transferSize = LONG_MAX;
+					// some servers return 213 4937728
+					NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+					NSCharacterSet *sp = [NSCharacterSet whitespaceCharacterSet];
+					[sizeScanner scanUpToCharactersFromSet:sp intoString:nil];
+					if ( [sizeScanner scanLocation] < [command length] )
+					{
+						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+						[sizeScanner scanLongLong:&_transferSize];
+					}
+					else
+					{
+						_transferSize = LONG_MAX;
+					}
 				}
 				if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
 				{
