@@ -51,6 +51,7 @@
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
 
+- (CKTransferRecord *)root;
 - (CKTransferRecord *)parent;
 - (NSString *)path; 
 
