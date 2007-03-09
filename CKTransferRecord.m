@@ -115,11 +115,8 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	if (myProgress == -1) //if we have an error return it as if we transferred the lot of it
 	{
 		return mySize;
-	} 
-	else
-	{	
-		return mySize * (myProgress / 100.0);
 	}
+	return myTransferred;
 }
 
 - (double)speed
