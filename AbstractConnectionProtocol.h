@@ -218,6 +218,10 @@ typedef struct __flags {
 							  fileOffset:(unsigned long long)offset
 								delegate:(id)delegate;
 
+- (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
+									   to:(NSString *)localPath
+								overwrite:(BOOL)flag;
+
 - (void)checkExistenceOfPath:(NSString *)path;
 
 - (unsigned)numberOfTransfers;

@@ -55,7 +55,7 @@ enum { kChangeToDirectory = 7000,
 	int				myCurrentOperation;
 	NSString		*myCurrentDirectory;
 		
-	NSFileManager *myFileManager;
+	NSFileManager	*myFileManager;
 }
 
 - (int)currentOperation;

@@ -38,8 +38,10 @@
 #import "InterThreadMessaging.h"
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
+#import "NSFileManager+Connection.h"
 #import "RunLoopForwarder.h"
 #import "CKCacheableHost.h"
+#import "CKTransferRecord.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -95,8 +97,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.sslOn = NO;
 		myStreamFlags.allowsBadCerts = NO;
 		myStreamFlags.initializedSSL = NO;
+		myStreamFlags.isDeleting = NO;
 		
 		_recursiveDeletionsQueue = [[NSMutableArray alloc] init];
+		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_deletionLock = [[NSLock alloc] init];
+		
+		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
+		_recursiveDownloadLock = [[NSLock alloc] init];
 		
 		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
 		
@@ -138,6 +146,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_recursiveDeletionConnection release];
 	[_emptyDirectoriesToDelete release];
 	[_deletionLock release];
+	
+	[_recursiveDownloadConnection setDelegate:nil];
+	[_recursiveDownloadConnection forceDisconnect];
+	[_recursiveDownloadConnection release];
+	[_recursiveDownloadQueue release];
+	[_recursiveDownloadLock release];
 	
 	[super dealloc];
 }
@@ -336,7 +350,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)connect
 {
 	_isForceDisconnecting = NO;
-	// do we really need to do this?
 	[self emptyCommandQueue];
 	
 	int connectionPort = [_connectionPort intValue];
@@ -370,6 +383,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection disconnect];
 	[_recursiveListingConnection disconnect];
 	[_recursiveDeletionConnection disconnect];
+	[_recursiveDownloadConnection disconnect];
 	
 	[super threadedDisconnect];
 }
@@ -379,9 +393,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	_state = ConnectionNotConnectedState;
 	_isForceDisconnecting = YES;
 	[self closeStreams];
-	[_fileCheckingConnection forceDisconnect];
-	[_recursiveListingConnection forceDisconnect];
-	[_recursiveDeletionConnection forceDisconnect];
 
 	[super threadedForceDisconnect];
 }
@@ -393,6 +404,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection forceDisconnect];
 	[_recursiveListingConnection forceDisconnect];
 	[_recursiveDeletionConnection forceDisconnect];
+	[_recursiveDownloadConnection forceDisconnect];
 }
 
 - (void) cleanupConnection
@@ -400,31 +412,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection cleanupConnection];
 	[_recursiveListingConnection cleanupConnection];
 	[_recursiveDeletionConnection cleanupConnection];
+	[_recursiveDownloadConnection cleanupConnection];
 }
 
-- (void)recursivelyDeleteDirectory:(NSString *)path
-{
-	if (!_recursiveListingConnection)
-	{
-		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
-		_deletionLock = [[NSLock alloc] init];
-		
-		_recursiveListingConnection = [self copy];
-		[_recursiveListingConnection setName:@"recursive listing"];
-		[_recursiveListingConnection setDelegate:self];
-		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
-		[_recursiveListingConnection connect];
-		_recursiveDeletionConnection = [self copy];
-		[_recursiveDeletionConnection setName:@"recursive deletion"];
-		[_recursiveDeletionConnection setDelegate:self];
-		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
-		[_recursiveDeletionConnection connect];
-	}
-	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
-	[_emptyDirectoriesToDelete addObject:[path stringByStandardizingPath]];
-	_numberOfListingsRemaining++;
-	[_recursiveListingConnection contentsOfDirectory:path];
-}
 #pragma mark -
 #pragma mark Stream Delegate Methods
 
@@ -887,7 +877,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)processFileCheckingQueue
 {
-	if (!_fileCheckingConnection) {
+	if (!_fileCheckingConnection) 
+	{
 		_fileCheckingConnection = [[[self class] alloc] initWithHost:[self host]
 																port:[self port]
 															username:[self username]
@@ -895,8 +886,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 															   error:nil];
 		[_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
+	}
+	if (![_fileCheckingConnection isConnected])
+	{
 		[_fileCheckingConnection connect];
 	}
+	[_fileCheckLock lock];
 	if (!_fileCheckInFlight && [self numberOfFileChecks] > 0)
 	{
 		_fileCheckInFlight = [[self currentFileCheck] copy];
@@ -906,6 +901,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_fileCheckingConnection changeToDirectory:dir];
 		[_fileCheckingConnection directoryContents];
 	}
+	[_fileCheckLock unlock];
 }
 
 - (void)checkExistenceOfPath:(NSString *)path
@@ -919,14 +915,117 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		path = [[self currentDirectory] stringByAppendingPathComponent:path];
 	}
-	
+	[_fileCheckLock lock];
 	[self queueFileCheck:path];
+	[_fileCheckLock unlock];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
 }
 
+#pragma mark -
+#pragma mark Recursive Deletion Support Methods
+
+- (void)processRecursiveDeletionQueue
+{
+	if (!_recursiveListingConnection)
+	{
+		_recursiveListingConnection = [self copy];
+		[_recursiveListingConnection setName:@"recursive listing"];
+		[_recursiveListingConnection setDelegate:self];
+		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
+		_recursiveDeletionConnection = [self copy];
+		[_recursiveDeletionConnection setName:@"recursive deletion"];
+		[_recursiveDeletionConnection setDelegate:self];
+		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
+	}
+	if (![_recursiveListingConnection isConnected])
+	{
+		[_recursiveListingConnection connect];
+	}
+	if (![_recursiveDeletionConnection isConnected])
+	{
+		[_recursiveDeletionConnection connect];
+	}
+	[_deletionLock lock];
+	if (!myStreamFlags.isDeleting && [_fileCheckQueue count] > 0)
+	{
+		_numberOfListingsRemaining++;
+		myStreamFlags.isDeleting = YES;
+		[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+	}
+	[_deletionLock unlock];
+}
+
+- (void)recursivelyDeleteDirectory:(NSString *)path
+{
+	[_deletionLock lock];
+	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
+	[_emptyDirectoriesToDelete addObject:[path stringByStandardizingPath]];
+	[_deletionLock unlock];
+	
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveDeletionQueue];
+}
+
+#pragma mark -
+#pragma mark Recursive Downloading Support
+
+- (void)processRecursiveDownloadingQueue
+{
+	if (!_recursiveDownloadConnection)
+	{
+		_recursiveDownloadConnection = [self copy];
+		[_recursiveDownloadConnection setName:@"recursive download"];
+		[_recursiveDownloadConnection setDelegate:self];
+		[_recursiveDownloadConnection setTranscript:[self propertyForKey:@"RecursiveDownloadTranscript"]];
+	}
+	if (![_recursiveDownloadConnection isConnected])
+	{
+		[_recursiveDownloadConnection connect];
+	}
+	[_recursiveDownloadLock lock];
+	if (!myStreamFlags.isDownloading && [_recursiveDownloadQueue count] > 0)
+	{
+		myStreamFlags.isDownloading = YES;
+		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
+		_downloadListingsRemaining++;
+		[_recursiveDownloadConnection changeToDirectory:[rec objectForKey:@"remote"]];
+		[_recursiveDownloadConnection directoryContents];
+	}
+	[_recursiveDownloadLock unlock];
+}
+
+- (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
+									   to:(NSString *)localPath
+								overwrite:(BOOL)flag
+{
+	CKTransferRecord *rec = [CKTransferRecord rootRecordWithPath:remotePath];
+	
+	NSMutableDictionary *d = [NSMutableDictionary dictionary];
+	
+	[d setObject:rec forKey:@"record"];
+	[d setObject:remotePath forKey:@"remote"];
+	[d setObject:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:@"local"];
+	[d setObject:[NSNumber numberWithBool:flag] forKey:@"overwrite"];
+	
+	[_recursiveDownloadLock lock];
+	[_recursiveDownloadQueue addObject:d];
+	[_recursiveDownloadLock unlock];
+	
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveDownloadingQueue];
+	
+	return rec;
+}
+
+#pragma mark -
+#pragma mark Peer Connection Delegate Methods
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
-	if (con == _recursiveListingConnection)
+	if (con == _fileCheckingConnection)
+	{
+		[_fileCheckingConnection release];
+		_fileCheckingConnection = nil;
+	}
+	else if (con == _recursiveListingConnection)
 	{
 		[_editingConnection release];
 		_editingConnection = nil;
@@ -936,9 +1035,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_editingConnection release];
 		_editingConnection = nil;
 	}
-	else
+	else if (con == _recursiveListingConnection)
 	{
-		[super connection:con didDisconnectFromHost:host];
+		[_recursiveListingConnection release];
+		_recursiveListingConnection = nil;
 	}
 }
 
@@ -1012,6 +1112,58 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		[_deletionLock unlock];
 	}
+	else if (con == _recursiveDownloadConnection) 
+	{
+		[_recursiveDownloadLock lock];
+		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
+		CKTransferRecord *root = [rec objectForKey:@"record"];
+		NSString *remote = [rec objectForKey:@"remote"];
+		NSString *local = [rec objectForKey:@"local"];
+		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
+		_downloadListingsRemaining--;
+		[_recursiveDownloadLock unlock];
+		
+		// setup the local relative directory
+		NSString *relativePath = [dirPath substringFromIndex:[remote length]];
+		NSString *localDir = [local stringByAppendingPathComponent:relativePath];
+		[[NSFileManager defaultManager] recursivelyCreateDirectory:localDir attributes:nil];
+		
+		NSEnumerator *e = [contents objectEnumerator];
+		NSDictionary *cur;
+				
+		while ((cur = [e nextObject]))
+		{
+			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			{
+				[_recursiveDownloadLock lock];
+				_downloadListingsRemaining++;
+				[_recursiveDownloadLock unlock];
+				[_recursiveDownloadConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDownloadConnection directoryContents];
+			}
+			else
+			{
+				CKTransferRecord *down = [self downloadFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]] 
+												toDirectory:localDir
+												  overwrite:overwrite
+												   delegate:nil];
+				[CKTransferRecord mergeTextPathRecord:down withRoot:root];
+			}
+		}
+		if (_downloadListingsRemaining == 0)
+		{
+			[_recursiveDownloadLock lock];
+			myStreamFlags.isDownloading = NO;
+			[_recursiveDownloadQueue removeObjectAtIndex:0];
+			
+			if ([_recursiveDownloadQueue count] > 0)
+			{
+				[self performSelector:@selector(processRecursiveDownloadingQueue) withObject:nil afterDelay:0.0];
+			}
+			
+			[_recursiveDownloadLock unlock];
+		}
+	}
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
@@ -1049,6 +1201,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
 		{
 			_numberOfDeletionsRemaining = 0;
+			myStreamFlags.isDeleting = NO;
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 			if (_flags.deleteDirectory) {
 				[_forwarder connection:self didDeleteDirectory:dirPath];
@@ -1060,7 +1213,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 	}
 }
-
 
 #pragma mark -
 #pragma mark SSL Support

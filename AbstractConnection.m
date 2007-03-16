@@ -1112,6 +1112,14 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
+- (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
+									   to:(NSString *)localPath
+								overwrite:(BOOL)flag
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
 - (unsigned)numberOfTransfers
 {
 	return 0;
