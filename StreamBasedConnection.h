@@ -65,7 +65,8 @@
 	
 	// This is a peer connection that is used to check if files exist
 	id <AbstractConnectionProtocol>	_fileCheckingConnection;
-	NSString			*_fileCheckInFlight;
+	NSLock							*_fileCheckLock;
+	NSString						*_fileCheckInFlight;
 	
 	// These peer connections are used to speed up recursive directory deletion
 	NSMutableArray					*_recursiveDeletionsQueue;
@@ -77,6 +78,11 @@
 	NSMutableArray					*_emptyDirectoriesToDelete;
 	NSLock							*_deletionLock;
 	
+	// Peer connection support for recursive download
+	id <AbstractConnectionProtocol> _recursiveDownloadConnection;
+	unsigned						_downloadListingsRemaining;
+	NSMutableArray					*_recursiveDownloadQueue;
+	NSLock							*_recursiveDownloadLock;
 	
 	struct __streamflags {
 		unsigned sendOpen : 1;
@@ -89,7 +95,9 @@
 		unsigned isNegotiatingSSL : 1;
 		unsigned initializedSSL : 1;
 		unsigned reportedError : 1;
-		unsigned unused: 24;
+		unsigned isDeleting: 1;
+		unsigned isDownloading: 1;
+		unsigned unused: 22;
 	} myStreamFlags;
 	
 	// SSL Support
