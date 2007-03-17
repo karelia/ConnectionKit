@@ -6,7 +6,7 @@
 //  Copyright (c) 2006 Karelia Software. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 @interface NSObject ( Connection )
 

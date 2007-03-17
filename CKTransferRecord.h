@@ -74,6 +74,7 @@
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path;
 + (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root;
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
++ (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
 - (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
 

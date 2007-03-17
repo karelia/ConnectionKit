@@ -73,7 +73,7 @@
 	
 	for ( i = 0 ; i < length ; i += 16 )
 	{
-		if (i > 256)		// don't print too much!
+		if (i > 1024)		// don't print too much!
 		{
 			[buf appendString:@"\n...\n"];
 			break;
