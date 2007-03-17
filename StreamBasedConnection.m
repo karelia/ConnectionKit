@@ -50,6 +50,7 @@
 #import <sys/socket.h>
 #import <arpa/inet.h>
 #import <poll.h>
+#import <netdb.h>
 
 #import <Security/Security.h>
 
@@ -318,13 +319,43 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	KTLog(TransportDomain, KTLogDebug, @"Opening streams to host: %@", host);
 	
-	[NSStream getStreamsToHost:host
-						  port:port
-				   inputStream:&_receiveStream
-				  outputStream:&_sendStream];
+	int sock = socket( AF_INET, SOCK_STREAM, 0 );
+	// Set TCP Keep Alive
+	int opt = 1;
+	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
+	{
+		NSLog(@"Failed to set socket keep alive setting");
+	}
+	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)))
+	{
+		NSLog(@"Failed to set tcp no delay setting");
+	}
+	opt = 120; // 2 minutes
+	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, &opt, sizeof(opt)))
+	{
+		NSLog(@"Failed to set tcp keep alive setting");
+	}
 	
-	[_receiveStream retain];	// the above objects are created autorelease; we have to retain them
-	[_sendStream retain];
+	struct sockaddr_in addr;
+	bzero((char *) &addr, sizeof(addr));
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(port);
+	addr.sin_addr.s_addr = inet_addr([[host address] cString]);
+	
+	if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == 0)
+	{
+		CFStreamCreatePairWithSocket(kCFAllocatorDefault, 
+									 sock, 
+									 (CFReadStreamRef *)(&_receiveStream),
+									 (CFWriteStreamRef *)(&_sendStream));
+		
+		[_receiveStream retain];	// the above objects are created autorelease; we have to retain them
+		[_sendStream retain];
+		
+		// CFStreamCreatePairWithSocket does not close the socket by default
+		CFReadStreamSetProperty((CFReadStreamRef)_receiveStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+		CFWriteStreamSetProperty((CFWriteStreamRef)_sendStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+	}
 	
 	if(!_receiveStream || !_sendStream){
 		KTLog(TransportDomain, KTLogError, @"Cannot create a stream to the host: %@", _connectionHost);
@@ -618,22 +649,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventOpenCompleted:
 		{
 			myStreamFlags.readOpen = YES;
-			
-			// Set TCP Keep Alive
-			int opt = 1;
-			if (setsockopt([self socket], SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
-			{
-				NSLog(@"Failed to set socket keep alive setting");
-			}
-			if (setsockopt([self socket], IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)))
-			{
-				NSLog(@"Failed to set tcp no delay setting");
-			}
-			opt = 120; // 2 minutes
-			if (setsockopt([self socket], IPPROTO_TCP, TCP_KEEPALIVE, &opt, sizeof(opt)))
-			{
-				NSLog(@"Failed to set tcp keep alive setting");
-			}
 			
 			if (myStreamFlags.wantsSSL)
 			{
