@@ -619,6 +619,22 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			myStreamFlags.readOpen = YES;
 			
+			// Set TCP Keep Alive
+			int opt = 1;
+			if (setsockopt([self socket], SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
+			{
+				NSLog(@"Failed to set socket keep alive setting");
+			}
+			if (setsockopt([self socket], IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)))
+			{
+				NSLog(@"Failed to set tcp no delay setting");
+			}
+			opt = 120; // 2 minutes
+			if (setsockopt([self socket], IPPROTO_TCP, TCP_KEEPALIVE, &opt, sizeof(opt)))
+			{
+				NSLog(@"Failed to set tcp keep alive setting");
+			}
+			
 			if (myStreamFlags.wantsSSL)
 			{
 				if (myStreamFlags.sendOpen)
@@ -946,7 +962,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection connect];
 	}
 	[_deletionLock lock];
-	if (!myStreamFlags.isDeleting && [_fileCheckQueue count] > 0)
+	if (!myStreamFlags.isDeleting && [_recursiveDeletionsQueue count] > 0)
 	{
 		_numberOfListingsRemaining++;
 		myStreamFlags.isDeleting = YES;
