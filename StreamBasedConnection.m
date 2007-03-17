@@ -1178,6 +1178,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 												toDirectory:localDir
 												  overwrite:overwrite
 												   delegate:nil];
+				[down setSize:[[cur objectForKey:NSFileSize] unsignedLongLongValue]];
 				[CKTransferRecord mergeTextPathRecord:down withRoot:root];
 			}
 		}
