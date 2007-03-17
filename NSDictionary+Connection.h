@@ -6,7 +6,7 @@
 //  Copyright 2006 __MyCompanyName__. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSDictionary (Connection)
