@@ -69,7 +69,7 @@
 		794EFE250A5CE58E00913151 /* kex.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE180A5CE58E00913151 /* kex.c */; };
 		794EFE260A5CE58E00913151 /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE190A5CE58E00913151 /* mac.c */; };
 		794EFE270A5CE58E00913151 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1A0A5CE58E00913151 /* misc.c */; };
-		794EFE280A5CE58E00913151 /* packet.m in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1B0A5CE58E00913151 /* packet.m */; };
+		794EFE280A5CE58E00913151 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1B0A5CE58E00913151 /* packet.c */; };
 		794EFE290A5CE58E00913151 /* publickey.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1C0A5CE58E00913151 /* publickey.c */; };
 		794EFE2A0A5CE58E00913151 /* scp.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1D0A5CE58E00913151 /* scp.c */; };
 		794EFE2B0A5CE58E00913151 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 794EFE1E0A5CE58E00913151 /* session.c */; };
@@ -342,7 +342,7 @@
 		794EFE180A5CE58E00913151 /* kex.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = kex.c; sourceTree = "<group>"; };
 		794EFE190A5CE58E00913151 /* mac.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = mac.c; sourceTree = "<group>"; };
 		794EFE1A0A5CE58E00913151 /* misc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = misc.c; sourceTree = "<group>"; };
-		794EFE1B0A5CE58E00913151 /* packet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = packet.m; sourceTree = "<group>"; };
+		794EFE1B0A5CE58E00913151 /* packet.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = packet.c; sourceTree = "<group>"; };
 		794EFE1C0A5CE58E00913151 /* publickey.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = publickey.c; sourceTree = "<group>"; };
 		794EFE1D0A5CE58E00913151 /* scp.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = scp.c; sourceTree = "<group>"; };
 		794EFE1E0A5CE58E00913151 /* session.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = session.c; sourceTree = "<group>"; };
@@ -786,7 +786,7 @@
 				794EFE180A5CE58E00913151 /* kex.c */,
 				794EFE190A5CE58E00913151 /* mac.c */,
 				794EFE1A0A5CE58E00913151 /* misc.c */,
-				794EFE1B0A5CE58E00913151 /* packet.m */,
+				794EFE1B0A5CE58E00913151 /* packet.c */,
 				794EFE1C0A5CE58E00913151 /* publickey.c */,
 				794EFE1D0A5CE58E00913151 /* scp.c */,
 				794EFE1E0A5CE58E00913151 /* session.c */,
@@ -1472,7 +1472,7 @@
 				794EFE250A5CE58E00913151 /* kex.c in Sources */,
 				794EFE260A5CE58E00913151 /* mac.c in Sources */,
 				794EFE270A5CE58E00913151 /* misc.c in Sources */,
-				794EFE280A5CE58E00913151 /* packet.m in Sources */,
+				794EFE280A5CE58E00913151 /* packet.c in Sources */,
 				794EFE290A5CE58E00913151 /* publickey.c in Sources */,
 				794EFE2A0A5CE58E00913151 /* scp.c in Sources */,
 				794EFE2B0A5CE58E00913151 /* session.c in Sources */,
