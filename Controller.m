@@ -86,9 +86,8 @@ NSString *ProtocolKey = @"Protocol";
 	[remoteTable setDataSource:self];
 	[transferTable setDataSource:self];
 	
-	NSTableColumn *col = [transferTable tableColumnWithIdentifier:@"progress"];
-	ProgressCell *cell = [[ProgressCell alloc] initTextCell:@""];
-	[col setDataCell:cell];
+	CKTransferProgressCell *cell = [[CKTransferProgressCell alloc] init];
+	[[transferTable tableColumnWithIdentifier:@"progress"] setDataCell:cell];
 	[cell release];
 	
 	currentLocalPath = [[NSString stringWithFormat:@"%@", NSHomeDirectory()] copy];
@@ -280,16 +279,16 @@ NSString *ProtocolKey = @"Protocol";
 
 - (void)cleanTransferTable:(NSTimer *)timer
 {
-	NSMutableArray *completed = [NSMutableArray array];
-	NSEnumerator *e = [transfers objectEnumerator];
-	FileTransfer *cur;
-	
-	while (cur = [e nextObject]) {
-		if ([cur isCompleted]) 
-			[completed addObject:cur];
-	}
-	[transfers removeObjectsInArray:completed];
-	[transferTable reloadData];
+//	NSMutableArray *completed = [NSMutableArray array];
+//	NSEnumerator *e = [transfers objectEnumerator];
+//	CKTransferRecord *cur;
+//	
+//	while (cur = [e nextObject]) {
+//		if ([cur isCompleted]) 
+//			[completed addObject:cur];
+//	}
+//	[transfers removeObjectsInArray:completed];
+//	[transferTable reloadData];
 }
 
 - (void)disconnect:(id)sender
@@ -377,6 +376,8 @@ NSString *ProtocolKey = @"Protocol";
 	[[fileCheckLog textStorage] setDelegate:self];
 	[con setProperty:[fileCheckLog textStorage] forKey:@"RecursiveDirectoryDeletionTranscript"];
 	[con setProperty:[fileCheckLog textStorage] forKey:@"FileCheckingTranscript"];
+	[con setProperty:[fileCheckLog textStorage] forKey:@"RecursiveDownloadTranscript"];
+	
 	
 	[con setDelegate:self];
 	[self cancelConnect:sender];
@@ -810,18 +811,14 @@ static NSImage *_folder = nil;
 
 - (void)downloadFile:(NSString *)remote toFolder:(NSString *)local
 {
-	FileTransfer *t = [FileTransfer downloadFile:remote to:local];
-	[transfers addObject:t];
-	[con downloadFile:remote
-		  toDirectory:local
-			overwrite:YES];
+	CKTransferRecord *rec = [con downloadFile:remote toDirectory:local overwrite:YES delegate:nil];
+	[transfers addObject:rec];
 }
 
 - (void)uploadFile:(NSString *)local to:(NSString *)remote
 {
-	FileTransfer *t = [FileTransfer uploadFile:local to:remote];
-	[transfers addObject:t];
 	CKTransferRecord *rec = [con uploadFile:local toFile:remote checkRemoteExistence:NO delegate:nil];
+	[transfers addObject:rec];
 }
 
 - (void)recursivelyUploadContentsAtPath:(NSString *)aFolderPath serverPath:(NSString *)aServerPath
@@ -957,46 +954,26 @@ static NSImage *_folder = nil;
 	[self refreshRemoteUI];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)upload
+- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length
 {
-	[[self uploadForRemoteFile:upload] setPercentTransferred:[NSNumber numberWithInt:0]];
 	[transferTable reloadData];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)conn upload:(NSString *)remotePath progressedTo:(NSNumber *)percent
+- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length
 {
-	[[self uploadForRemoteFile:remotePath] setPercentTransferred:percent];
-	[transferTable reloadData];
-	[status setStringValue:[Controller formattedSpeed:[con uploadSpeed]]];
-}
-
-- (void)connection:(id <AbstractConnectionProtocol>)conn uploadDidFinish:(NSString *)remotePath
-{	
-	[[self uploadForRemoteFile:remotePath] setCompleted:YES];
-	[con contentsOfDirectory:[con currentDirectory]];
 	[transferTable reloadData];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
 {
-	downloadCounter = 0;
-	[[self downloadForRemoteFile:remotePath] setPercentTransferred:[NSNumber numberWithInt:0]];
+	[self refreshRemoteUI];
 	[transferTable reloadData];
-}
-
-- (void)connection:(id <AbstractConnectionProtocol>)conn download:(NSString *)path progressedTo:(NSNumber *)percent
-{
-	[[self downloadForRemoteFile:path] setPercentTransferred:percent];
-	[transferTable reloadData];
-	[status setStringValue:[Controller formattedSpeed:[con downloadSpeed]]];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
 {
-	//[[self downloadForRemoteFile:remotePath] setCompleted:YES];
-	[transferTable reloadData];
-	[self refreshRemoteUI];
 	[self refreshLocal];
+	[transferTable reloadData];
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists
@@ -1020,8 +997,6 @@ static NSImage *_folder = nil;
 		return [remoteFiles count];
 	else if (aTable == localTable)
 		return [localFiles count];
-	else if (aTable == transferTable)
-		return [transfers count];
 	return 0;
 }
 
@@ -1100,35 +1075,6 @@ NSString *IconKey = @"Icon";
 			return [row objectForKey:NSFileModificationDate];
 		}
 	}
-	else if (aTable == transferTable)
-	{
-		FileTransfer *transfer = [transfers objectAtIndex:rowIndex];
-		if ([identifier isEqualToString:@"image"])
-		{
-			if ([transfer type] == DownloadType)
-			{
-				if (!download)
-					download = [[NSImage imageNamed:@"download.tif"] retain];
-				return download;
-			}
-			else
-			{
-				if (!upload)
-					upload = [[NSImage imageNamed:@"upload.tif"] retain];
-				return upload;
-			}
-		}
-		else if ([identifier isEqualToString:@"icon"])
-		{
-			NSImage *img = [[NSWorkspace sharedWorkspace] iconForFileType:[[transfer remoteFile] pathExtension]];
-			[img setSize:NSMakeSize(16,16)];
-			return img;
-		}
-		else if ([identifier isEqualToString:@"name"])
-			return [transfer remoteFile];
-		else if ([identifier isEqualToString:@"progress"])
-			return [transfer percentTransferred];
-	}
 	else if (aTable == localTable)
 	{
 		NSString *file = [localFiles objectAtIndex:rowIndex];
@@ -1175,8 +1121,10 @@ NSString *IconKey = @"Icon";
 		NSNumber *cur;
 		while (cur = [e nextObject])
 		{
-			NSString *file = [localFiles objectAtIndex:[cur intValue]];
+			NSMutableDictionary *file = [[remoteFiles objectAtIndex:[cur intValue]] mutableCopy];
+			[file removeObjectForKey:@"Icon"];
 			[files addObject:file];
+			[file release];
 		}
 		[pboard declareTypes:[NSArray arrayWithObject:cxLocalFilePBoardType] owner:nil];
 		[pboard setPropertyList:files forType:cxLocalFilePBoardType]; //
@@ -1189,15 +1137,10 @@ NSString *IconKey = @"Icon";
 		NSNumber *cur;
 		while (cur = [e nextObject])
 		{
-			NSDictionary *file = [remoteFiles objectAtIndex:[cur intValue]];
-			if ([[file objectForKey:NSFileType] isEqualToString:NSFileTypeRegular])
-				[f addObject:[file objectForKey:cxFilenameKey]];
-			else if ([[file objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-			{
-				NSString *target = [file objectForKey:cxSymbolicLinkTargetKey];
-				if ([target characterAtIndex:[target length] - 1] != '/'  && [target characterAtIndex:[target length] - 1] != '\\')
-					[f addObject:[file objectForKey:cxFilenameKey]];
-			}
+			NSMutableDictionary *file = [[remoteFiles objectAtIndex:[cur intValue]] mutableCopy];
+			[file removeObjectForKey:@"Icon"];
+			[f addObject:file];
+			[file release];
 		}
 		[pboard declareTypes:[NSArray arrayWithObject:cxRemoteFilePBoardType] owner:nil];
 		[pboard setPropertyList:f forType:cxRemoteFilePBoardType];
@@ -1213,12 +1156,38 @@ NSString *IconKey = @"Icon";
 	{
 		NSArray *files = [pb propertyListForType:cxRemoteFilePBoardType];
 		NSEnumerator *e = [files objectEnumerator];
-		NSString *cur;
+		NSDictionary *file;
 		
-		while (cur = [e nextObject])
+		while (file = [e nextObject])
 		{
-			[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:cur]
-							toFolder: currentLocalPath];
+			if ([[file objectForKey:NSFileType] isEqualToString:NSFileTypeRegular])
+			{
+				[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:[file objectForKey:cxFilenameKey]]
+						  toFolder: currentLocalPath];
+			}
+			else if ([[file objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+			{
+				NSString *target = [file objectForKey:cxSymbolicLinkTargetKey];
+				if ([target characterAtIndex:[target length] - 1] != '/'  && [target characterAtIndex:[target length] - 1] != '\\')
+				{
+					[self downloadFile:[[con currentDirectory] stringByAppendingPathComponent:target]
+							  toFolder: currentLocalPath];
+				}
+				else
+				{
+					CKTransferRecord *rec = [con recursivelyDownload:[[con currentDirectory] stringByAppendingPathComponent:target]
+																  to:currentLocalPath
+														   overwrite:YES];
+					[transfers addObject:rec];
+				}
+			}
+			else if ([[file objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			{
+				CKTransferRecord *rec = [con recursivelyDownload:[[con currentDirectory] stringByAppendingPathComponent:[file objectForKey:cxFilenameKey]]
+															  to:currentLocalPath
+													   overwrite:YES];
+				[transfers addObject:rec];
+			}
 		}
 		[transferTable reloadData];
 		return YES;
@@ -1229,11 +1198,27 @@ NSString *IconKey = @"Icon";
 		{
 			NSArray *files = [pb propertyListForType:cxLocalFilePBoardType];
 			NSEnumerator *e = [files objectEnumerator];
-			NSString *cur;
+			NSDictionary *cur;
 			
 			while (cur = [e nextObject])
 			{
-				[self uploadFile:cur to:[[con currentDirectory] stringByAppendingPathComponent:[cur lastPathComponent]]];
+				if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+				{
+					CKTransferRecord *rec = [con recursivelyUpload:[currentLocalPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
+																to:[con currentDirectory]];
+					[transfers addObject:rec];
+				}
+				else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+				{
+					CKTransferRecord *rec = [con recursivelyUpload:[currentLocalPath stringByAppendingPathComponent:[cur objectForKey:cxSymbolicLinkTargetKey]]
+																to:[con currentDirectory]];
+					[transfers addObject:rec];
+				}
+				else
+				{
+					[self uploadFile:[cur objectForKey:cxFilenameKey]
+								  to:[[con currentDirectory] stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				}
 			}
 			[transferTable reloadData];
 			
@@ -1271,6 +1256,74 @@ NSString *IconKey = @"Icon";
 	if (tableView == localTable || tableView == remoteTable)
 		return NSDragOperationCopy;
 	return NSDragOperationNone;
+}
+
+#pragma mark -
+#pragma mark Outline View Data Source
+
+- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+{
+	if (item == nil)
+	{
+		return [transfers count];
+	}
+	return [[item contents] count];
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+{
+	if (item == nil)
+	{
+		return [transfers objectAtIndex:index];
+	}
+	return [[item contents] objectAtIndex:index];
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
+{
+	return [item isDirectory];
+}
+
+- (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
+{
+	NSString *identifier = [tableColumn identifier];
+	CKTransferRecord *transfer = (CKTransferRecord *)item;
+	
+	if ([identifier isEqualToString:@"progress"])
+	{
+		return [NSDictionary dictionaryWithObjectsAndKeys:[transfer progress], @"progress", [transfer name], @"name", nil];
+	}
+	else if ([identifier isEqualToString:@"file"])
+	{
+		return [transfer name];
+	}
+	else if ([identifier isEqualToString:@"speed"])
+	{
+		return [NSString formattedSpeed:[transfer speed]];
+	}
+	if ([identifier isEqualToString:@"image"])
+	{
+		if (![transfer isUpload])
+		{
+			if (!download)
+				download = [[NSImage imageNamed:@"download.tif"] retain];
+			return download;
+		}
+		else
+		{
+			if (!upload)
+				upload = [[NSImage imageNamed:@"upload.tif"] retain];
+			return upload;
+		}
+	}
+	else if ([identifier isEqualToString:@"icon"])
+	{
+		NSImage *img = [[NSWorkspace sharedWorkspace] iconForFileType:[[transfer path] pathExtension]];
+		[img setSize:NSMakeSize(16,16)];
+		return img;
+	}
+	
+	return nil;
 }
 
 #pragma mark -
