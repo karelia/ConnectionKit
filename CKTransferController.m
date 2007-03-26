@@ -352,7 +352,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
 		
 		/// temporarily turn off FTP verification too  just for simplification
-		if ([[self connection] isKindOfClass:[FTPConnection class]]) myFlags.verifyTransfers = NO;
+		//if ([[self connection] isKindOfClass:[FTPConnection class]]) myFlags.verifyTransfers = NO;
 
 		if (!myVerificationConnection && myFlags.verifyTransfers)
 		{
