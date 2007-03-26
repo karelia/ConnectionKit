@@ -115,6 +115,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)remotePath
 {
 	KTLog(ControllerDomain, KTLogDebug, @"Queuing permissions %lo to %@", permissions, remotePath);
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"no file/path specified");
 	[[self connection] setPermissions:permissions forFile:remotePath];
 }
 
@@ -349,7 +350,11 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	{
 		// temporarily turn off verification for sftp until I can sort out the double connection problem
 		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
-		if (!myVerificationConnection && ![[self connection] isKindOfClass:[SFTPConnection class]])
+		
+		/// temporarily turn off FTP verification too  just for simplification
+		if ([[self connection] isKindOfClass:[FTPConnection class]]) myFlags.verifyTransfers = NO;
+
+		if (!myVerificationConnection && myFlags.verifyTransfers)
 		{
 			myVerificationConnection = [[self connection] copyWithZone:[self zone]];
 			[myVerificationConnection setName:@"verification"];
@@ -1032,10 +1037,6 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 		[oProgress displayIfNeeded];
 		
 		[self forceDisconnectAll];
-		if (myFlags.delegateDidFinish)
-		{
-			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
-		}
 	}
 }
 
