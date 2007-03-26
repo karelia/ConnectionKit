@@ -347,11 +347,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		CFStreamCreatePairWithSocket(kCFAllocatorDefault, 
 									 sock, 
 									 (CFReadStreamRef *)(&_receiveStream),
-									 (CFWriteStreamRef *)(&_sendStream));
-		
-		[_receiveStream retain];	// the above objects are created autorelease; we have to retain them
-		[_sendStream retain];
-		
+									 (CFWriteStreamRef *)(&_sendStream));		// "Ownership follows the Create Rule."
+
 		// CFStreamCreatePairWithSocket does not close the socket by default
 		CFReadStreamSetProperty((CFReadStreamRef)_receiveStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
 		CFWriteStreamSetProperty((CFWriteStreamRef)_sendStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
@@ -597,7 +594,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_lastChunkSent = [NSDate timeIntervalSinceReferenceDate];
 		// wait for the stream to open
 		NSDate *start = [NSDate date];
-		while ([_sendStream streamStatus] != NSStreamStatusOpen)
+		while (([_sendStream streamStatus] != NSStreamStatusOpen) || ![_sendStream hasSpaceAvailable])
 		{
 			if (abs([start timeIntervalSinceNow]) > kStreamTimeOutValue)
 			{

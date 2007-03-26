@@ -721,7 +721,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 										(CFStringRef)host,
 										[port unsignedShortValue],
 										(CFReadStreamRef *)&ONB_inputStream,
-										(CFWriteStreamRef *)&ONB_outputStream);
+										(CFWriteStreamRef *)&ONB_outputStream);		// "Ownership follows the Create Rule."
 
 	// Make sure that the streams close the underlying socket when they are closed.
 	CFReadStreamSetProperty((CFReadStreamRef) ONB_inputStream,
@@ -1318,7 +1318,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	CFStreamCreatePairWithSocket(kCFAllocatorDefault,
 									nativeHandle,
 									(CFReadStreamRef *)&inputStream,
-									(CFWriteStreamRef *)&outputStream);
+									(CFWriteStreamRef *)&outputStream);		// "Ownership follows the Create Rule."
 	[inputStream autorelease];
 	[outputStream autorelease];
 

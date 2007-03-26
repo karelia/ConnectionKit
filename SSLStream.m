@@ -118,7 +118,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 											 (CFHostRef)host,
 											 port,
 											 &_receiveStream,
-											 &_sendStream);
+											 &_sendStream);		// "Ownership follows the Create Rule."
 		CFOptionFlags allStreamFlags = kCFStreamEventNone & kCFStreamEventOpenCompleted & kCFStreamEventHasBytesAvailable & kCFStreamEventCanAcceptBytes & kCFStreamEventErrorOccurred & kCFStreamEventEndEncountered;
 		CFStreamClientContext ctx;
 		ctx.info = self;

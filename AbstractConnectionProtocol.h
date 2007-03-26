@@ -345,6 +345,7 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (id)propertyForKey:(NSString *)key;
 - (NSError *)streamError;
 - (NSStreamStatus)streamStatus;
+- (BOOL) hasSpaceAvailable;
 
 - (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len;
 @end
