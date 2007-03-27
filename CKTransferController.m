@@ -253,10 +253,18 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	if (myFlags.stopTransfer || CKFatalErrorStatus == myReturnStatus)
 	{
 		[self forceDisconnectAll];
+		
+		// Tell client that it should finish
+		if (myFlags.delegateFinishedContentGeneration)
+		{
+			[myForwarder transferControllerFinishedContentGeneration:self completed:NO];
+		}
+			
 		if (myFlags.delegateDidFinish)
 		{
 			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
 		}
+		[self forceDisconnectAll];
 	}
 	else
 	{
@@ -1036,6 +1044,9 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
 		
+		[con cancelAll];
+		[myVerificationConnection cancelAll];
+
 		[self forceDisconnectAll];
 	}
 }
