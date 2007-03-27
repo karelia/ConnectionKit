@@ -512,8 +512,18 @@ static NSSize closedSize = { 452, 152 };
 	if (!myConnection && myFlags.delegateProvidesConnection)
 	{
 		// delegate returns a connection; we do not retain it.
-		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self];
+		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:YES];
 		[con setDelegate:self];
+		return con;
+	}
+	return myConnection;
+}
+
+- (id <AbstractConnectionProtocol>)connectionIfAleadyCreated
+{
+	if (!myConnection && myFlags.delegateProvidesConnection)
+	{
+		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:NO];
 		return con;
 	}
 	return myConnection;
@@ -563,7 +573,7 @@ static NSSize closedSize = { 452, 152 };
 	myDelegate = delegate;
 	[myForwarder setDelegate:myDelegate];
 	
-	myFlags.delegateProvidesConnection			= [delegate respondsToSelector:@selector(transferControllerNeedsConnection:)];
+	myFlags.delegateProvidesConnection			= [delegate respondsToSelector:@selector(transferControllerNeedsConnection:createIfNeeded:)];
 	myFlags.delegateProvidesContent				= [delegate respondsToSelector:@selector(transferControllerNeedsContent:)];
 	myFlags.delegateFinishedContentGeneration	= [delegate respondsToSelector:@selector(transferControllerFinishedContentGeneration:completed:)];
 	myFlags.delegateHandlesDefaultButton		= [delegate respondsToSelector:@selector(transferControllerDefaultButtonAction:)];
@@ -809,6 +819,9 @@ static NSSize closedSize = { 452, 152 };
 {
 	// don't use [self connection] because we don't want to create a connection if we've already cleared it
 	if ([myConnection delegate] == self)				[myConnection setDelegate:nil];
+	
+	[[self connectionIfAleadyCreated] setDelegate:nil];
+	[[self connectionIfAleadyCreated] forceDisconnect];	// what if we have multiple connections provided by the delegate?
 
 	[myVerificationConnection setDelegate:nil];
 	[myVerificationConnection forceDisconnect];
@@ -1044,9 +1057,6 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 		[oProgress setDoubleValue:0.0];
 		[oProgress displayIfNeeded];
 		
-		[con cancelAll];
-		[myVerificationConnection cancelAll];
-
 		[self forceDisconnectAll];
 	}
 }

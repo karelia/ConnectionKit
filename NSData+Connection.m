@@ -66,19 +66,24 @@
 
 - (NSString *)shortDescription
 {
+	unsigned int width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
+	unsigned int maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
+	if (!width) width = 32;
+	if (!maxBytes) maxBytes = 1024;
+
 	unsigned char *bytes = (unsigned char *)[self bytes];
 	unsigned length = [self length];
 	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %d bytes:\n", [self className], length];
 	int i, j;
 	
-	for ( i = 0 ; i < length ; i += 16 )
+	for ( i = 0 ; i < length ; i += width )
 	{
-		if (i > 1024)		// don't print too much!
+		if (i > maxBytes)		// don't print too much!
 		{
 			[buf appendString:@"\n...\n"];
 			break;
 		}
-		for ( j = 0 ; j < 16 ; j++ )
+		for ( j = 0 ; j < width ; j++ )
 		{
 			int offset = i+j;
 			if (offset < length)
@@ -91,7 +96,7 @@
 			}
 		}
 		[buf appendString:@"| "];
-		for ( j = 0 ; j < 16 ; j++ )
+		for ( j = 0 ; j < width ; j++ )
 		{
 			int offset = i+j;
 			if (offset < length)
