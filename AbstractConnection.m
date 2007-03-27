@@ -824,6 +824,7 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)forceDisconnect
 {
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedCancelAll];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 }
 
