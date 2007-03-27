@@ -155,7 +155,7 @@ typedef enum {
 
 @interface NSObject (CKTransferControllerDelegate)
 
-- (id <AbstractConnectionProtocol>)transferControllerNeedsConnection:(CKTransferController *)controller;
+- (id <AbstractConnectionProtocol>)transferControllerNeedsConnection:(CKTransferController *)controller createIfNeeded:(BOOL)aCreate;
 - (BOOL)transferControllerNeedsContent:(CKTransferController *)controller; // this will be called on a new thread if you setContentGeneratedInSeparateThread:YES
 - (void)transferControllerFinishedContentGeneration:(CKTransferController *)controller completed:(BOOL)aFlag; // called on the main thread
 // return YES if you want the controllers default action to also be invoked
