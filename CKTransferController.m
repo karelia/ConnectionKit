@@ -825,7 +825,6 @@ static NSSize closedSize = { 452, 152 };
 
 	[myVerificationConnection setDelegate:nil];
 	[myVerificationConnection forceDisconnect];
-	[myConnection forceDisconnect];
 	
 	// Release connections
 	[self setConnection:nil];	// will only deallocate if it's not a weak ref
