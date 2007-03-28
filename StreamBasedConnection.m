@@ -25,8 +25,8 @@
  OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
  SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-														   TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
-														   BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
+ BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
@@ -406,7 +406,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)threadedDisconnect
 {
-	_state = ConnectionNotConnectedState;
+	[self setState:ConnectionNotConnectedState];
 	[self closeStreams];
 	[_fileCheckingConnection disconnect];
 	[_recursiveListingConnection disconnect];
@@ -418,7 +418,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)threadedForceDisconnect
 {
-	_state = ConnectionNotConnectedState;
+	[self setState:ConnectionNotConnectedState];
 	_isForceDisconnecting = YES;
 	[self closeStreams];
 
@@ -427,7 +427,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)forceDisconnect
 {
-	_state = ConnectionNotConnectedState;
+	[self setState:ConnectionNotConnectedState];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 	[_fileCheckingConnection forceDisconnect];
 	[_recursiveListingConnection forceDisconnect];
@@ -882,7 +882,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		case NSStreamEventHasSpaceAvailable:
 		{
-			KTLog(OutputStreamDomain, KTLogDebug, @"Space available, sending any queued output");
+			// KTLog(OutputStreamDomain, KTLogDebug, @"Space available, sending any queued output");
 			[self sendQueuedOutput];
 			break;
 		}
