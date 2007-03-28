@@ -546,7 +546,38 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	return dataBuffer;
 }
 
-- (unsigned)sendData:(NSData *)data
+- (void) sendQueuedOutput
+{
+	NSMutableData *dataBuffer = [self outputDataBuffer];
+	
+	[_sendBufferLock lock];
+	unsigned chunkLength = [dataBuffer length];
+	if ([self shouldChunkData])
+	{
+		chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
+	}
+	if (chunkLength > 0)
+	{
+		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
+		
+		KTLog(OutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
+		uint8_t *bytes = (uint8_t *)[chunk bytes];
+		[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
+		[self recalcUploadSpeedWithBytesSent:chunkLength];
+		[self stream:_sendStream sentBytesOfLength:chunkLength];
+		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
+							  withBytes:NULL
+								 length:0];
+		_lastChunkSent = [NSDate timeIntervalSinceReferenceDate];
+	}
+	else
+	{
+		// KTLog(OutputStreamDomain, KTLogDebug, @"NOTHING NEEDED TO BE SENT RIGHT NOW");
+	}
+	[_sendBufferLock unlock];
+}	
+
+- (unsigned)sendData:(NSData *)data // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
 {
 	if (myStreamFlags.wantsSSL)
 	{
@@ -559,7 +590,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			return 0;
 		}
 	}
-	BOOL bufferEmpty = NO;
+	BOOL bufferWasEmpty = NO;
 	NSMutableData *dataBuffer = [self outputDataBuffer];
 	
 	if (!dataBuffer) 
@@ -569,50 +600,47 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	
 	[_sendBufferLock lock];
-	bufferEmpty = [dataBuffer length] == 0;
+	bufferWasEmpty = [dataBuffer length] == 0;
 	[dataBuffer appendData:data];
 	[_sendBufferLock unlock];
 	unsigned chunkLength = 0;
 	
-	if (bufferEmpty) {
+	if (bufferWasEmpty) {
 		// prime the sending
-		[_sendBufferLock lock];
-		unsigned chunkLength = [dataBuffer length];
-		if ([self shouldChunkData])
+		if (([_sendStream streamStatus] == NSStreamStatusOpen) && [_sendStream hasSpaceAvailable])
 		{
-			chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
+			// KTLog(OutputStreamDomain, KTLogDebug, @"Buffer was empty, and there is space available, so sending this queued output");
+			// It's already ready for us, go ahead and send out some data
+			[self sendQueuedOutput];
 		}
-		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-
-		KTLog(OutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
-
-		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
-							  withBytes:NULL
-								 length:0];
-		[_sendBufferLock unlock];
-		uint8_t *bytes = (uint8_t *)[chunk bytes];
-		_lastChunkSent = [NSDate timeIntervalSinceReferenceDate];
-		// wait for the stream to open
-		NSDate *start = [NSDate date];
-		while (([_sendStream streamStatus] != NSStreamStatusOpen) || ![_sendStream hasSpaceAvailable])
+		else
 		{
-			if (abs([start timeIntervalSinceNow]) > kStreamTimeOutValue)
-			{
-				[self closeStreams];
-				if (_flags.error)
-				{
-					NSError *error = [NSError errorWithDomain:StreamBasedErrorDomain
-														 code:StreamErrorTimedOut
-													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
-					[_forwarder connection:self didReceiveError:error];
-				}
-				return 0;
-			}
-			[NSThread sleepUntilDate:[NSDate distantPast]];
+			// KTLog(OutputStreamDomain, KTLogDebug, @"Buffer was empty, but no space available, so we will WAIT for the event and not send now");
 		}
-		[_sendStream write:bytes maxLength:chunkLength];
-		[self stream:_sendStream sentBytesOfLength:chunkLength];
 	}
+	else
+	{
+		// KTLog(OutputStreamDomain, KTLogDebug, @"Buffer was NOT empty, so we have just appended it and we'll let it get sent out when it's ready");
+	}
+		// wait for the stream to open
+//		NSDate *start = [NSDate date];
+//		while (([_sendStream streamStatus] != NSStreamStatusOpen) || ![_sendStream hasSpaceAvailable])
+//		{
+//			if (abs([start timeIntervalSinceNow]) > kStreamTimeOutValue)
+//			{
+//				[self closeStreams];
+//				if (_flags.error)
+//				{
+//					NSError *error = [NSError errorWithDomain:StreamBasedErrorDomain
+//														 code:StreamErrorTimedOut
+//													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
+//					[_forwarder connection:self didReceiveError:error];
+//				}
+//				return 0;
+//			}
+//			[NSThread sleepUntilDate:[NSDate distantPast]];
+//		}
+
 	return chunkLength;
 }
 
@@ -854,21 +882,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		case NSStreamEventHasSpaceAvailable:
 		{
-			NSMutableData *dataBuffer = [self outputDataBuffer];
-			
-			[_sendBufferLock lock];
-			unsigned chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
-			if (chunkLength > 0) {
-				uint8_t *bytes = (uint8_t *)[dataBuffer bytes];
-				KTLog(OutputStreamDomain, KTLogDebug, @"<< %s", bytes);
-				[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
-				[self recalcUploadSpeedWithBytesSent:chunkLength];
-				[self stream:_sendStream sentBytesOfLength:chunkLength];
-				[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
-									  withBytes:NULL
-										 length:0];
-			}
-			[_sendBufferLock unlock];
+			KTLog(OutputStreamDomain, KTLogDebug, @"Space available, sending any queued output");
+			[self sendQueuedOutput];
 			break;
 		}
 		default:
