@@ -48,7 +48,7 @@
 	ConnectionState _awaitState;
 	ConnectionState _sentState;
 	id				_userInfo;
-	ConnectionCommand *_parent;
+	ConnectionCommand *_parent;			// weak reference
 	NSMutableDictionary *_properties;
 }
 
