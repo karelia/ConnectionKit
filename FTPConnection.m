@@ -2578,6 +2578,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CFRelease(s);
 }
 
+#warning crash in Karelia case 18263, EXC_BAD_ACCESS @  __spin_lock + 9 <--  -[FTPConnection setupActiveConnectionWithPort:] + 141
+
 - (BOOL)setupActiveConnectionWithPort:(unsigned)port
 {
 	CFOptionFlags cbTypes = kCFSocketAcceptCallBack; //once accepted we will tear down the _activeSocket
