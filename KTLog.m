@@ -284,10 +284,15 @@ static NSString *KTLevelMap[] = {
 	if (KTLogToConsole)
 	{
 		NSProcessInfo *pi = [NSProcessInfo processInfo];
-		NSString *console = [NSString stringWithFormat:@"%@ %@[%d][%@:%@][%@:%d] %@\n", [now descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S.%F"
-																												  timeZone:nil
-																													locale:nil],
-			[pi processName], [pi processIdentifier], KTLevelMap[level], domain, [filename lastPathComponent], line, log];
+		NSString *processName = [pi processName];
+		NSString *nowDescription = [now descriptionWithCalendarFormat:@"%Y-%m-%d %H:%M:%S.%F"
+															 timeZone:nil
+															   locale:nil];
+		NSString *logLevelString = (level >= 0 && level <= 5) ? KTLevelMap[level] : @"UNKNOWN";
+		
+		NSString *console = [NSString stringWithFormat:@"%@ %@[%d][%@:%@][%@:%d] %@\n",
+			nowDescription, processName, [pi processIdentifier], logLevelString, domain,
+			[filename lastPathComponent], line, log];
 		fprintf(stderr, [console UTF8String]);
 	}
 	
