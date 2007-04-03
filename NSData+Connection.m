@@ -111,7 +111,10 @@
 		}
 		[buf appendString:@"\n"];
 	}
-	[buf deleteCharactersInRange:NSMakeRange([buf length]-1, 1)];
+	if (length)
+	{
+		[buf deleteCharactersInRange:NSMakeRange([buf length]-1, 1)];
+	}
 	return buf;
 }
 
