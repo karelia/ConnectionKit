@@ -69,6 +69,8 @@
 	unsigned int width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
 	unsigned int maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
 	if (!width) width = 32;
+	if (width > 64) width = 64;	// let's be reasonable people!
+	
 	if (!maxBytes) maxBytes = 1024;
 
 	unsigned char *bytes = (unsigned char *)[self bytes];
