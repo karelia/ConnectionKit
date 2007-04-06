@@ -757,13 +757,14 @@ static NSSize closedSize = { 452, 152 };
 		[self willChangeValueForKey:@"transfers"];
 		[myTransfers addObject:cur];
 		[self didChangeValueForKey:@"transfers"];
+		/// TJT: changed conditional here: we have to not process 0 length strings, too!
 		if ( (nil != myRootPath) && ([myRootPath length] > 0) )
 		{
 			CKTransferRecord *record = [self recordWithPath:myRootPath root:cur];
 			if ( nil == record )
 			{
-				/// this seems to the source of the infamous "attempt to add nil object" exception
-				/// myRootPath is a 0 length string
+				/// TJT: this seems to the source of the infamous "attempt to add nil object" exception
+				/// TJT: myRootPath is a 0 length string
 				NSLog(@"error: recordWithPath:root: returned nil myRootPath=%@ cur=%@", myRootPath, cur);
 			}
 			else
