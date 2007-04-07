@@ -477,8 +477,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self setReadData:nil];		// make sure we're not also trying to read from data
 					if (![[NSFileManager defaultManager] fileExistsAtPath:file])
 					{
-						NSString *str = [NSString stringWithFormat:@"File doesn't exist: %@", file];
-						NSAssert(NO, str);
+						NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
+						NSAssert(NO, str);		// hacky way to throw an exception.
 					}
 					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
 					NSAssert((nil != _readHandle), @"_readHandle is nil!");
