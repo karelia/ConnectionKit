@@ -783,6 +783,11 @@ static NSSize closedSize = { 452, 152 };
 
 - (CKTransferRecord *)recursiveRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
+	/// TJT: passing in a path of / is going to return nil
+	/// so let's not do that, returning nil is a bad idea
+	if ([path isEqualToString:@"/"])
+		return root;
+
 	NSString *first = [path firstPathComponent];
 	
 	if ([[root name] isEqualToString:first])
@@ -802,6 +807,9 @@ static NSSize closedSize = { 452, 152 };
 				return child;
 		}
 	}
+	
+	/// TJT: returning nil here seems to be a really bad idea
+	/// (we get "attempt to add nil object" exception downstream)
 	return nil;
 }
 
