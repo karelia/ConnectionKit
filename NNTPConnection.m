@@ -120,7 +120,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
 															  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-	KTLog(ProtocolDomain, KTLogDebug, @"<< %@", command);
+	KTLog(ProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
 	switch (code) {
 #pragma mark -

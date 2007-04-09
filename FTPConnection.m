@@ -340,7 +340,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer] attributes:[AbstractConnection receivedAttributes]] autorelease]];
 	}
 	
-	KTLog(ProtocolDomain, KTLogDebug, @"<< %@", command);
+	KTLog(ProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
 	switch (code)
 	{
@@ -1367,7 +1367,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[super threadedCancelTransfer];
 }
 
-/*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object‚Äôs thread."
+/*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object’s thread."
 */
 - (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
 {	
