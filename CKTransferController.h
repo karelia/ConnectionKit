@@ -151,6 +151,8 @@ typedef enum {
 
 - (void)forceDisconnectAll;
 
+- (BOOL)hadErrorsTransferring;
+
 @end
 
 @interface NSObject (CKTransferControllerDelegate)
