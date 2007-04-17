@@ -1041,7 +1041,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													 code:code
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Action Aborted. Local Error", @"FTP Abort"),
 													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey]];
+													 command, NSLocalizedFailureReasonErrorKey, nil]];
 				[_forwarder connection:self didReceiveError:error];
 			}
 				
