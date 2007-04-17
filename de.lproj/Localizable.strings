@@ -1,6 +1,9 @@
 ﻿/* ssh host key changed */
 "%@'s fingerprint does not match the one on record. If the server has changed its key, then this is to be expected. If not then you should check with the system administrator before proceeding.\nThe new fingerprint is %@.\nDo you wish to connect to the server?" = "%1$@s Fingerprint entspricht nicht dem gespeicherten. Falls der Server den Schlüssel geändert hat ist dies zu erwarten. Wenn nicht, kontaktieren Sie den Systemadministrator, bevor Sie fortfahren.\nDer neue Fingerprint ist %2$@.\nWollen Sie mit dem Server verbinden?";
 
+/* authorise */
+"%@\nWhat would you like to do?" = "%@\nWas möchten Sie tun?";
+
 /* ConnectionOpenPanel */
 "A Connection Error Occurred" = "Ein Verbindungsfehler ist aufgetreten";
 
@@ -23,26 +26,79 @@
 /* multiple connection joiner */
 "and" = "und";
 
+/* close window */
+"Are you sure you want to stop the upload?" = "Wollen Sie die Übertragung wirklich stoppen?";
+
 /* failed pk authentication for ssh */
 "Authentication by Public Key Failed" = "Authentifizierung durch Publik Key versagt.";
 
 /* failed authentication for ssh */
 "Authentication Failed. Do you have permission to access this server via SFTP?" = "Authentifizierung fehlgeschlagen. Haben Sie Zugang zu diesem Server per SFTP?";
 
+/* authorise */
+"Authorize" = "Autorisieren";
+
+/* authorise */
+"Authorize Connection?" = "Verbindung autorisieren?";
+
+/* connection type */
+"auto" = "auto";
+
+/* config */
+"Bad Configuration" = "Falsche Konfiguration";
+
+/* error */
+"Bad Droplet" = "Falsches Droplet";
+
 /* sftp last error */
 "Bad Message" = "Ungültige Nachricht";
 
+/* Transfer Controller */
+"Bad Password." = "Falsches Kennwort.";
+
+/* filesize: bytes */
+"bytes" = "bytes";
+
+/* authorise */
+"Cancel" = "Abbrechen";
+
 /* FTP upload error */
-"Cannot Upload File. Storage quota on server exceeded" = "Datein kann nicht geladen werden. Serverlimit ueberschritten";
+"Cannot Upload File. Storage quota on server exceeded" = "Datei kann nicht hochgeladen werden. Speicherkontingent auf Server überschritten.";
+
+/* transfer controller
+   connected message */
+
+"Connected to %@" = "Verbunden mit %@";
+
+/* file transcript */
+"Connected to File System\n" = "Verbunden mit Dateisystem\n";
+
+/* connection string */
+"Connecting to %@" = "Mit %@ verbinden";
+
+/* file transcript */
+"Connecting...\n" = "Verbinden…\n";
 
 /* sftp last error */
 "Connection Lost" = "Verbindung verloren";
+
+/* close window */
+"Continue Upload" = "Übertragung fortsetzen";
+
+/* file transcript */
+"Copying %@ to %@\n" = "Kopieren von %1$@ nach %2$@\n";
 
 /* FileConnection set permissions error */
 "Could not change file permissions" = "Konnte Dateirechte nicht ändern";
 
 /* FileConnection create directory error */
-"Could not create directory" = "Neuer Ordner konnte nicht erzeugt werden";
+"Could not create directory" = "Verzeichnis konnte nicht erzeugt werden";
+
+/* config */
+"Couldn't find configuration file specified\n %@" = "Konnte angegebene Konfigurationsdatei nicht finden\n %@";
+
+/* file transcript */
+"Create Directory %@ (%lo)\n" = "Erzeuge Verzeichnis %1$@ (%2$lo)\n";
 
 /* FTP Create directory error */
 "Create directory operation failed" = "Neuer Ordner Vorgang versagt";
@@ -50,8 +106,20 @@
 /* Failed to open a data stream connection */
 "Data Stream Timed Out" = "Datenstrom Wartezeit ueberschritten";
 
+/* file transcript */
+"Deleting File %@\n" = "Datei %@ löschen\n";
+
 /* sftp last error */
 "Directory not empty" = "Verzeichnis nicht leer";
+
+/* status */
+"Disconnected" = "Getrennt";
+
+/* transfer controller */
+"Disconnected from %@" = "Getrennt von %@";
+
+/* filesize: exabytes */
+"EB" = "EB";
 
 /* sftp last error */
 "End of File" = "Ende der Datei";
@@ -86,7 +154,7 @@
 "Failed to delete file" = "Datei konnte nicht gelöscht werden";
 
 /* failed to find the id_dsa.pub */
-"Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey." = "Konnte in &@ keine Public Key finden. Falls Sie eine selbst-benannte Key haben, setzen Sie bitte den Standardschlüssel SSHPublicKey.";
+"Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey." = "Konnte in %@ keine öffentlichen Schlüssel finden. Falls Sie eine selbst-benannte Schlüssel haben, setzen Sie bitte den benutzerdefinierten Standardschlüssel SSHPublicKey.";
 
 /* failed authentication for ssh */
 "Failed to initialize SFTP Subsystem. Do you have permission to access this server via SFTP?" = "SFTP Untersystem konnte nicht initialisiert werden. Haben Sie Zugang zu diesem Server per SFTp?";
@@ -94,11 +162,17 @@
 /* No .mac account or password */
 "Failed to retrieve .mac account details" = "Konnte .mac Kontodaten nicht erhalten";
 
-/* FileConnection copy from data error */
-"Failed to upload data" = "Datei konnte nicht hochgeladen werden";
+/* FileConnection copy data error */
+"Failed to upload data" = "Daten konnte nicht hochgeladen werden";
 
 /* FileConnection copy file error */
-"Failed to upload file" = "Konnte Datei nicht hochladen";
+"Failed to upload file" = "Datei konnte nicht hochladen werden";
+
+/* error transferring */
+"Failed to verify file transferred successfully" = "Überprüfung der Dateiübertragung fehlgeschlagen";
+
+/* sftp error */
+"Failed to write all data" = "Nicht alle Daten konnten geschrieben werden";
 
 /* sftp last error */
 "Failure" = "Versagen";
@@ -108,6 +182,9 @@
 
 /* FTP error */
 "File / Directory does not exist" = "Datei / Verzeichnis existiert nicht";
+
+/* FileConnection error */
+"File Already Exists" = "Datei existiert bereits";
 
 /* sftp last error */
 "File already exists" = "Datei existiert bereits";
@@ -120,6 +197,12 @@
 
 /* FTP no service */
 "FTP Service Unavailable" = "FTP Dienst nicht verfügbar";
+
+/* filesize: gigabytes */
+"GB" = "GB";
+
+/* transfer controller */
+"Hide Files" = "Dateien ausblenden";
 
 /* Couldn't open the port to the host */
 "Host Unavailable" = "Host nicht verfügbar";
@@ -141,6 +224,9 @@
 /* Stream Error before opening */
 "Is the service running on the server" = "Laüft der Dienst auf dem Server";
 
+/* filesize: kilobytes */
+"Kilobytes" = "Kilobytes";
+
 /* sftp last error */
 "Link Loop" = "Link Loop";
 
@@ -150,11 +236,17 @@
 /* sftp last error */
 "Lock Conflict" = "Lock Conflict";
 
+/* filesize: megabytes */
+"MB" = "MB";
+
 /* sftp last error */
 "Method not Supported" = "Mehode nicht unterstützt";
 
 /* new cat name */
 "New Category" = "Neue Kategorie";
+
+/* config */
+"No configuration file specified" = "Keine Konfigurationsdatei angegeben";
 
 /* sftp last error */
 "No Connection" = "Keine Verbindung";
@@ -202,11 +294,25 @@
 
 "Parent Folder does not exist" = "Enthaltender Ordner existiert nicht";
 
+/* No comment provided by engineer. */
+"Password was not accepted." = "Kennwort wurde abgelehnt.";
+
+/* filesize: petabytes */
+"PB" = "PB";
+
 /* sftp last error */
 "Permission Denied" = "Zugang nicht erlaubt";
 
+/* config
+   error */
+
+"Quit" = "Beenden";
+
 /* sftp last error */
 "Quota exceeded" = "Quota überschritten";
+
+/* file transcript */
+"Renaming %@ to %@\n" = "Umbenennen von %1$@ nach %2$@\n";
 
 /* FTP Error */
 "Request Aborted. Page Type Unknown" = "Vorgang abgebrochen. Seitentyp unbekannt";
@@ -214,11 +320,29 @@
 /* sftp last error */
 "Request Denied" = "Vorang abgelehnt";
 
+/* abbreviation for seconds, e.g. 12 MB/s */
+"s" = "s";
+
 /* category name */
 "Saved Hosts" = "Gespeicherte Hosts";
 
+/* No comment provided by engineer. */
+"Secure Shell Connection Error" = "Secure Shell Verbindungsfehler";
+
+/* transfer controller */
+"Show Files" = "Dateien einblenden";
+
+/* close window */
+"Stop Upload" = "Übertragung stoppen";
+
+/* close window */
+"Stop Upload?" = "Übertragung stoppen?";
+
 /* Error creating stream */
 "Stream Unavailable" = "Stream nicht verfügbar";
+
+/* filesize: terabytes */
+"TB" = "TB";
 
 /* WebDAV Create Directory Error
    .Mac Create Directory Error */
@@ -238,14 +362,32 @@
 
 "The server does not allow the creation of directories at the current location" = "Der Server erlaubt kein erstellen von Verzeichnissen am momentanen Pfad";
 
+/* No comment provided by engineer. */
+"The SSH manager returned the following error message:\n\n%@" = "Beim SSH Dienst ist der folgende Fehler aufgetreten: \n\n%@";
+
+/* error transferring */
+"The transferred file has a size of 0." = "Die übertragenen Datei hat die Größe 0.";
+
 /* .Mac Directory Contents Error */
 "There is no .Mac access to the directory" = "Kein .Mac Zugang zum gewählten Verzeichnis";
 
 /* No WebDAV access to the specified path */
 "There is no WebDAV access to the directory" = "Kein WebDAV Zugang zum Verzeichnis";
 
+/* sftp error */
+"There was an error with the SSH subsystem: " = "Es ist ein Fehler des SSH Untersystems aufgetreten:";
+
+/* error */
+"This droplet is missing the original application that created it. You will need to reinstall the original application." = "Diesem Droplet fehlt das Originalprogramm, mit welchem es erstellt wurden. Bitte reinstallieren Sie das Originalprogramm.";
+
 /* ssh authorise remote host fingerprint */
-"This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?" = "Dies ist die erste Verbindung zu %1$@. Es hat einen Fingerprint \n%2@. Wollen Sie verbinden?";
+"This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?" = "Dies ist die erste Verbindung zu %1$@. Sie hat den Fingerprint \n%2$@. Wollen Sie verbinden?";
+
+/* time out */
+"Timed Out waiting for remote host." = "Zeitüberschreitung beim Warten auf den entfernten Host.";
+
+/* Transfer Controller */
+"Too many files had transfer problems" = "Zu viele Dateien hatten Übertragungsprobleme";
 
 /* FileConnection failed to copy file */
 "Unable to store data in file" = "Konnte Daten nicht in Datei sichern";
@@ -256,17 +398,35 @@
 /* sftp last error */
 "Unknown Principle" = "Unbekanntes Prinzip";
 
-/* No username or password */
-"Username and Password are required for FTP connections" = "Username und Passwort werden für FTP-Zugang benötigt";
+/* status message */
+"Uploading" = "Laden";
+
+/* status */
+"Uploading %@" = "Laden von %@";
 
 /* No username or password */
-"Username and Password are required for WebDAV connections" = "Username und Passwort werden für WebDAV Verbindungen benötigt";
+"Username and Password are required for FTP connections" = "Username und Kennwort werden für FTP-Zugang benötigt";
+
+/* No username or password */
+"Username and Password are required for S3 connections" = "Benutzername und Kennwort werden für S3 Verbindungen benötigt";
+
+/* No username or password */
+"Username and Password are required for WebDAV connections" = "Username und Kennwort werden für WebDAV Verbindungen benötigt";
 
 /* No username or password */
 "Username is required for SFTP connections" = "Username wird für SFTP benötigt";
 
 /* sftp last error */
 "Write Protected" = "Schreibgeschützt";
+
+/* file transcript */
+"Writing data to %@\n" = "Schreibe Daten nach %@\n";
+
+/* Bonjour Error */
+"You can not add a child category to the Bonjour category." = "Sie können keinen neuen Unterkategorie zur Bonjour Kategorie hinzufügen.";
+
+/* Bonjour Error */
+"You can not add a new host to the Bonjour category." = "Sie können keinen neuen Host zur Bonjour Kategorie hinzufügen.";
 
 /* FTP file upload error */
 "You do not have access to write file %@" = "Sie haben keinen Schreibzugang zur Datei %@";
