@@ -960,6 +960,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
 			}
+
+			if (_flags.error) {
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain
+													 code:code
+												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out"),
+													 NSLocalizedDescriptionKey,
+													 command, NSLocalizedFailureReasonErrorKey, nil]];
+				[_forwarder connection:self didReceiveError:error];
+			}
 			[self setState:ConnectionNotConnectedState]; 
 			break;
 		}
