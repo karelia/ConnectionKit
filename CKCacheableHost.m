@@ -34,6 +34,7 @@ static NSLock *sCacheLock = nil;
 	if (!host && (nil != name))
 	{
 		host = [NSHost hostWithName:name];
+		if ( nil == host ) return nil;
 		// kvo hack
 		[host setValue:[NSArray arrayWithObject:name] forKey:@"names"];
 		[sCacheLock lock];
@@ -54,6 +55,7 @@ static NSLock *sCacheLock = nil;
 	if (!host)
 	{
 		host = [NSHost hostWithName:address];
+		if ( nil == host ) return nil;
 		// kvo hack
 		[host setValue:[NSArray arrayWithObject:address] forKey:@"addresses"];
 		[sCacheLock lock];
