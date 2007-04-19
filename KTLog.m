@@ -293,7 +293,7 @@ static NSString *KTLevelMap[] = {
 		NSString *console = [NSString stringWithFormat:@"%@ %@[%d][%@:%@][%@:%d] %@\n",
 			nowDescription, processName, [pi processIdentifier], logLevelString, domain,
 			[filename lastPathComponent], line, log];
-		char *utf8String = [console UTF8String];
+		const char *utf8String = [console UTF8String];
 		fprintf(stderr, "%s", utf8String);
 	}
 	
