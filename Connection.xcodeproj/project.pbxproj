@@ -555,6 +555,13 @@
 		CEDE18DE0A5C69BE0055352C /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Connection.h"; sourceTree = "<group>"; };
 		CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Connection.m"; sourceTree = "<group>"; };
+		CEF894CF0BD72A45002886AA /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894E90BD72A55002886AA /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894EE0BD72A5C002886AA /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894F30BD72A62002886AA /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894F80BD72A6A002886AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894FD0BD72A70002886AA /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF895020BD72A76002886AA /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1617,6 +1624,13 @@
 			isa = PBXVariantGroup;
 			children = (
 				798300060B0D4A2600F5078E /* en */,
+				CEF894CF0BD72A45002886AA /* da */,
+				CEF894E90BD72A55002886AA /* de */,
+				CEF894EE0BD72A5C002886AA /* fr */,
+				CEF894F30BD72A62002886AA /* it */,
+				CEF894F80BD72A6A002886AA /* ja */,
+				CEF894FD0BD72A70002886AA /* zh_CN */,
+				CEF895020BD72A76002886AA /* zh_TW */,
 			);
 			name = DropletLauncher.nib;
 			sourceTree = "<group>";
