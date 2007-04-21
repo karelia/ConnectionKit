@@ -183,17 +183,20 @@
 /* FTP error */
 "File / Directory does not exist" = "Datei / Verzeichnis existiert nicht";
 
-/* FileConnection error */
-"File Already Exists" = "Datei existiert bereits";
-
 /* sftp last error */
 "File already exists" = "Datei existiert bereits";
+
+/* FileConnection error */
+"File Already Exists" = "Datei existiert bereits";
 
 /* FTP file in use */
 "File in Use" = "Datei wird benutzt";
 
 /* FTP Upload error */
 "Filename not Allowed" = "Dateiname nicht erlaubt";
+
+/* FTP service timed out */
+"FTP service not available; Remote server has closed connection" = "FTP service not available; Remote server has closed connection";
 
 /* FTP no service */
 "FTP Service Unavailable" = "FTP Dienst nicht verfügbar";
