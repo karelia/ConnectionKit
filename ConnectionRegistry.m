@@ -189,8 +189,9 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	[myConnections insertObject:myBonjour atIndex:idx];
 	[fm removeFileAtPath:lockPath handler:nil];
 	
-	NSString *pid = [NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]];
+	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
 	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
+	[pid release];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
 }
 
@@ -397,7 +398,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	if (!filter)
 	{
-		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@ OR protocol contains[cd] %@", query, query, query, query];
+		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@ OR protocol contains[cd] %@ OR url.absoluteString contains[cd] %@", query, query, query, query, query];
 	}
 	return [[self allHosts] filteredArrayUsingPredicate:filter];
 }
