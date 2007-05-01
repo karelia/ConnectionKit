@@ -176,6 +176,8 @@ NSString *ProtocolKey = @"Protocol";
 	
 	[oConMenu setMenu:[[ConnectionRegistry sharedRegistry] menu]];
 	//[self runAutomatedScript];
+	
+	[[ConnectionRegistry sharedRegistry] handleFilterableOutlineView:savedHosts];
 }
 
 - (void)hostnameChanged:(id)sender
@@ -728,6 +730,11 @@ static NSImage *_folder = nil;
 	[con editFile:remotePath];
 }
 
+- (void)searchChanged:(id)sender
+{
+	[[ConnectionRegistry sharedRegistry] setFilterString:[sender stringValue]];
+}
+
 #pragma mark -
 #pragma mark Connection Helper Methods
 
@@ -1119,10 +1126,13 @@ NSString *IconKey = @"Icon";
 		NSMutableArray *files = [NSMutableArray array];
 		NSEnumerator *e = [rows objectEnumerator];
 		NSNumber *cur;
+		NSFileManager *fm = [NSFileManager defaultManager];
+		
 		while (cur = [e nextObject])
 		{
-			NSMutableDictionary *file = [[remoteFiles objectAtIndex:[cur intValue]] mutableCopy];
-			[file removeObjectForKey:@"Icon"];
+			NSString *name = [localFiles objectAtIndex:[cur intValue]];
+			NSMutableDictionary *file = [[fm fileAttributesAtPath:name traverseLink:NO] mutableCopy];
+			[file setObject:[name lastPathComponent] forKey:cxFilenameKey];
 			[files addObject:file];
 			[file release];
 		}
@@ -1216,7 +1226,7 @@ NSString *IconKey = @"Icon";
 				}
 				else
 				{
-					[self uploadFile:[cur objectForKey:cxFilenameKey]
+					[self uploadFile:[currentLocalPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
 								  to:[[con currentDirectory] stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 				}
 			}
