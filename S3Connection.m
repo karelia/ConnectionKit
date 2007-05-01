@@ -35,9 +35,13 @@
 #import "CKHTTPPutRequest.h"
 #import "CKHTTPFileDownloadRequest.h"
 #import "CKHTTPResponse.h"
+#import "CKInternalTransferRecord.h"
+#import "CKTransferRecord.h"
+#import "NSFileManager+Connection.h"
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
 NSString *S3StorageClassKey = @"S3StorageClassKey";
+NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 
 @implementation S3Connection
 
@@ -121,6 +125,41 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	return @"s3";
 }
 
+- (NSString *)internalRepresentationWithPath:(NSString *)path
+{
+	NSString *separator = [self propertyForKey:@"S3PathSeparator"];
+	if (!separator)
+	{
+		separator = S3PathSeparator;
+	}
+	NSString *bucket = [path firstPathComponent];
+	NSString *p = [[[path stringByDeletingFirstPathComponent] componentsSeparatedByString:@"/"] componentsJoinedByString:separator];
+	return [[@"/" stringByAppendingString:bucket] stringByAppendingPathComponent:p];
+}
+
+- (NSString *)externalRepresentationWithPath:(NSString *)internalPath
+{
+	NSString *separator = [self propertyForKey:@"S3PathSeparator"];
+	if (!separator)
+	{
+		separator = S3PathSeparator;
+	}
+	NSMutableArray *comps = [[[internalPath componentsSeparatedByString:separator] mutableCopy] autorelease];
+	NSString *bucket = [[[comps objectAtIndex:0] retain] autorelease];
+	if ([bucket isEqualToString:@""])
+	{
+		bucket = @"/";
+	}
+	[comps removeObjectAtIndex:0];
+	NSString *p = [comps componentsJoinedByString:@"/"];
+	p = [bucket stringByAppendingPathComponent:p]; // doesn't add trailing /
+	if ([internalPath hasSuffix:separator])
+	{
+		p = [p stringByAppendingString:@"/"];
+	}
+	return p;
+}
+
 #pragma mark -
 #pragma mark HTTP Overrides
 
@@ -164,8 +203,15 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 														 options:NSXMLDocumentTidyXML
 														   error:&error];
 		NSString *desc = [[[[doc rootElement] nodesForXPath:@"//Error" error:&error] objectAtIndex:0] XMLStringWithOptions:NSXMLNodePrettyPrint];
-		NSError *err = [NSError errorWithDomain:S3ErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:desc forKey:NSLocalizedDescriptionKey]];
-		[_forwarder connection:self didReceiveError:err];
+		if (desc)
+		{
+			NSError *err = [NSError errorWithDomain:S3ErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:desc forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:err];
+		}
+		else
+		{
+			KTLog(S3ErrorDomain, KTLogError, @"An unknown error occured:\n%@", response);
+		}
 	}
 }
 
@@ -190,32 +236,37 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 				KTLog(ProtocolDomain, KTLogDebug, @"\n%@", [doc XMLStringWithOptions:NSXMLNodePrettyPrint]);
 				
 				//do the buckets first
-				NSArray *buckets = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
-				NSMutableArray *contents = [NSMutableArray array];
-				NSEnumerator *e = [buckets objectEnumerator];
 				NSXMLElement *cur;
+				NSEnumerator *e;
+				NSMutableArray *contents = [NSMutableArray array];
 				
-				while ((cur = [e nextObject]))
+				if ([myCurrentDirectory isEqualToString:@"/"])
 				{
-					NSString *name = [[[cur elementsForName:@"Name"] objectAtIndex:0] stringValue];
-					NSString *date = [[[cur elementsForName:@"CreationDate"] objectAtIndex:0] stringValue];
+					NSArray *buckets = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
+					e = [buckets objectEnumerator];
 					
-					NSMutableDictionary *d = [NSMutableDictionary dictionary];
-					[d setObject:name forKey:cxFilenameKey];
-					[d setObject:[NSCalendarDate calendarDateWithZuluFormat:date] forKey:NSFileCreationDate];
-					[d setObject:NSFileTypeDirectory forKey:NSFileType];
-					[contents addObject:d];
+					while ((cur = [e nextObject]))
+					{
+						NSString *name = [[[cur elementsForName:@"Name"] objectAtIndex:0] stringValue];
+						NSString *date = [[[cur elementsForName:@"CreationDate"] objectAtIndex:0] stringValue];
+						
+						NSMutableDictionary *d = [NSMutableDictionary dictionary];
+						[d setObject:name forKey:cxFilenameKey];
+						[d setObject:[NSCalendarDate calendarDateWithZuluFormat:date] forKey:NSFileCreationDate];
+						[d setObject:NSFileTypeDirectory forKey:NSFileType];
+						[contents addObject:d];
+					}
 				}
 				
 				// contents inside a bucket
-				buckets = [[doc rootElement] nodesForXPath:@"//Contents" error:&error];
-				e = [buckets objectEnumerator];
+				NSArray *bucketContents = [[doc rootElement] nodesForXPath:@"//Contents" error:&error];
+				e = [bucketContents objectEnumerator];
 				
 				NSString *currentPath = [myCurrentDirectory stringByDeletingFirstPathComponent];
 				
 				while ((cur = [e nextObject]))
 				{
-					NSString *name = [[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue];
+					NSString *name = [self externalRepresentationWithPath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
 					NSString *date = [[[cur elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
 					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
 					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
@@ -225,7 +276,10 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 					if ([name length] < [currentPath length]) continue; // this is a record from a parent folder
 					if ([name rangeOfString:currentPath].location == NSNotFound) continue; // this is an element in a different folder
 					
-					name = [name substringFromIndex:[currentPath length]];
+					if ([name hasPrefix:currentPath])
+					{
+						name = [name substringFromIndex:[currentPath length]];
+					}
 					
 					if ([name rangeOfString:@"/"].location < [name length] - 1) continue; // we are in a subfolder
 					
@@ -254,18 +308,23 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 				
 				if (_flags.directoryContents)
 				{
-					[_forwarder connection:self didReceiveContents:contents ofDirectory:myCurrentDirectory];
+					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self externalRepresentationWithPath:myCurrentDirectory]];
 				}
 			}
 			break;
 		}
 		case ConnectionUploadingFileState:
 		{
-			NSDictionary *upload = [self currentUpload];
+			CKInternalTransferRecord *upload = [self currentUpload];
 			
 			if (_flags.uploadFinished)
 			{
-				[_forwarder connection:self uploadDidFinish:[upload objectForKey:QueueUploadRemoteFileKey]];
+				[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+			}
+			
+			if ([upload delegateRespondsToTransferDidFinish])
+			{
+				[[upload delegate] transferDidFinish:[upload delegate]];
 			}
 			
 			[self dequeueUpload];
@@ -401,10 +460,16 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 		transferHeaderLength = [req headerLength];
 		bytesToTransfer = [packet length] - transferHeaderLength;
 		bytesTransferred = 0;
+		
+		CKInternalTransferRecord *upload = [self currentUpload];
+		
 		if (_flags.didBeginUpload)
 		{
-			[_forwarder connection:self
-					uploadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+			[_forwarder connection:self uploadDidBegin:[upload remotePath]];
+		}
+		if ([upload delegateRespondsToTransferDidBegin])
+		{
+			[[upload delegate] transferDidBegin:[upload delegate]];
 		}
 	}
 	if (GET_STATE == ConnectionDownloadingFileState)
@@ -412,10 +477,15 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 		bytesToTransfer = 0;
 		bytesTransferred = 0;
 		
+		CKInternalTransferRecord *download = [self currentDownload];
+		
 		if (_flags.didBeginDownload)
 		{
-			[_forwarder connection:self
-				  downloadDidBegin:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]];
+			[_forwarder connection:self downloadDidBegin:[download remotePath]];
+		}
+		if ([download delegateRespondsToTransferDidBegin])
+		{
+			[[download delegate] transferDidBegin:[download delegate]];
 		}
 	}
 }
@@ -426,6 +496,8 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	if (length == 0) return;
 	if (GET_STATE == ConnectionUploadingFileState)
 	{
+		CKInternalTransferRecord *upload = [self currentUpload];
+		
 		if (transferHeaderLength > 0)
 		{
 			if (length <= transferHeaderLength)
@@ -434,8 +506,9 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 			}
 			else
 			{
-				transferHeaderLength = 0;
 				length -= transferHeaderLength;
+				transferHeaderLength = 0;
+				bytesTransferred += length;
 			}
 		}
 		else
@@ -443,21 +516,35 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 			bytesTransferred += length;
 		}
 		
-		if (_flags.uploadPercent)
+		if (bytesToTransfer > 0)
 		{
-			if (bytesToTransfer > 0)
+			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			
+			if (percent != myLastPercent)
 			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[_forwarder connection:self 
-								upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
-						  progressedTo:[NSNumber numberWithInt:percent]];
+				if (_flags.uploadPercent)
+				{
+					[_forwarder connection:self 
+									upload:[upload remotePath]
+							  progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				if ([upload delegateRespondsToTransferProgressedTo])
+				{
+					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				myLastPercent = percent;
 			}
 		}
+		
 		if (_flags.uploadProgressed)
 		{
 			[_forwarder connection:self 
-							upload:[[self currentUpload] objectForKey:QueueUploadRemoteFileKey]
+							upload:[upload remotePath]
 				  sentDataOfLength:length];
+		}
+		if ([upload delegateRespondsToTransferTransferredData])
+		{
+			[[upload delegate] transfer:[upload delegate] transferredDataOfLength:length];
 		}
 	}
 }
@@ -516,10 +603,14 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	
 	if ([[dirPath componentsSeparatedByString:@"/"] count] > 3) // 1 - first slash, 2 - bucket, 3 - trailing slash
 	{
-		NSString *bucket = [dirPath firstPathComponent];
-		dirPath = [NSString stringWithFormat:@"/%@/%@", bucket, [dirPath stringByDeletingFirstPathComponent]];
+		dirPath = [self internalRepresentationWithPath:dirPath];
 	}
-	
+	else
+	{
+		// we are creating a bucket, so remove the trailing /
+		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
+	}
+		
 	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -539,8 +630,9 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 - (void)deleteFile:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
-	
-	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" uri:path] autorelease];
+		
+	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
+															uri:[self internalRepresentationWithPath:path]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteFileState
@@ -553,8 +645,9 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 - (void)deleteDirectory:(NSString *)dirPath
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
-	
-	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" uri:dirPath] autorelease];
+		
+	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
+															uri:[self internalRepresentationWithPath:dirPath]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteDirectoryState
@@ -571,8 +664,22 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	NSString *thePath = [NSString stringWithFormat:@"/%@/%@", [remotePath firstPathComponent], [remotePath stringByDeletingFirstPathComponent]];
-	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath uri:thePath];
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
+}
+
+- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
+{
+	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
+}
+
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate
+{
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
+	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
+																	   uri:[self internalRepresentationWithPath:remotePath]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
 	
 	ConnectionCommand *cmd = [ConnectionCommand command:req
@@ -580,18 +687,17 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 											  sentState:ConnectionUploadingFileState
 											  dependant:nil
 											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:localPath forKey:QueueUploadLocalFileKey];
-	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
-	[self queueUpload:attribs];
+	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
+																			data:nil
+																		  offset:0
+																		  remote:remotePath
+																		delegate:rec
+																		userInfo:nil];
+	[self queueUpload:upload];
 	[self queueCommand:cmd];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	// currently we aren't checking remote existence
-	[self uploadFile:localPath toFile:remotePath];
+	
+	return rec;
 }
 
 - (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
@@ -685,7 +791,7 @@ NSString *S3StorageClassKey = @"S3StorageClassKey";
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
 													  target:self
-												   arguments:[NSArray arrayWithObject:dirPath]];
+												   arguments:[NSArray arrayWithObject:[self internalRepresentationWithPath:dirPath]]];
 	ConnectionCommand *cmd = [ConnectionCommand command:inv 
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionAwaitingDirectoryContentsState
