@@ -103,6 +103,7 @@ ConnectionCreateMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
         port = [[NSPort allocWithZone:NULL] init];
         [port setDelegate:[ConnectionInterThreadManager class]];
         [port scheduleInRunLoop:runLoop forMode:NSDefaultRunLoopMode];
+		[port scheduleInRunLoop:runLoop forMode:NSModalPanelRunLoopMode];
 		NSLock *lock = [[NSRecursiveLock alloc] init];
         NSMapInsertKnownAbsent(pThreadMessagePorts, thread, port);
 		NSMapInsertKnownAbsent(pThreadMessageLocks, thread, lock);
