@@ -7,6 +7,7 @@
 //
 
 #import "CKCacheableHost.h"
+#import "AbstractConnection.h"
 
 static NSMutableDictionary *sCachedHosts = nil;
 static NSLock *sCacheLock = nil;
@@ -33,8 +34,14 @@ static NSLock *sCacheLock = nil;
 	
 	if (!host && (nil != name))
 	{
+		NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 		host = [NSHost hostWithName:name];
+		NSTimeInterval end = [NSDate timeIntervalSinceReferenceDate];
+		
 		if ( nil == host ) return nil;
+		
+		KTLog(TransportDomain, KTLogDebug, @"Resolved hostWithName:%@ in %g seconds", name, end - start);
+		
 		// kvo hack
 		[host setValue:[NSArray arrayWithObject:name] forKey:@"names"];
 		[sCacheLock lock];
@@ -54,8 +61,14 @@ static NSLock *sCacheLock = nil;
 	
 	if (!host)
 	{
+		NSTimeInterval start = [NSDate timeIntervalSinceReferenceDate];
 		host = [NSHost hostWithName:address];
+		NSTimeInterval end = [NSDate timeIntervalSinceReferenceDate];
+		
 		if ( nil == host ) return nil;
+		
+		KTLog(TransportDomain, KTLogDebug, @"Resolved hostWithName:%@ in %g seconds", address, end - start);
+		
 		// kvo hack
 		[host setValue:[NSArray arrayWithObject:address] forKey:@"addresses"];
 		[sCacheLock lock];

@@ -51,6 +51,8 @@
 #import <arpa/inet.h>
 #import <poll.h>
 #import <netdb.h>
+#import <sys/types.h>
+#import <sys/sysctl.h>
 
 #import <Security/Security.h>
 
@@ -319,7 +321,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	KTLog(TransportDomain, KTLogDebug, @"Opening streams to host: %@", host);
 	
-	int sock = socket( AF_INET, SOCK_STREAM, 0 );
+	int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	// Set TCP Keep Alive
 	int opt = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
@@ -330,7 +332,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		NSLog(@"Failed to set tcp no delay setting");
 	}
-	opt = 120; // 2 minutes
+	opt = 240; // 2 minutes
 	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, &opt, sizeof(opt)))
 	{
 		NSLog(@"Failed to set tcp keep alive setting");
@@ -341,6 +343,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = inet_addr([[host address] cString]);
+	
+	KTLog(TransportDomain, KTLogDebug, @"Connecting to %@", [host address]);
 	
 	if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == 0)
 	{
