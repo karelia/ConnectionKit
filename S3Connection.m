@@ -225,6 +225,14 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 	}
 	switch (GET_STATE)
 	{
+		if (!hasSentAuthenticationToDelegate)
+		{
+			if (_flags.didAuthenticate)
+			{
+				[_forwarder connection:self didAuthenticateToHost:[self host]];
+			}
+			hasSentAuthenticationToDelegate = YES;
+		}
 		case ConnectionAwaitingDirectoryContentsState: 
 		{
 			if ([response code] / 100 == 2)
@@ -348,6 +356,13 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 			}
 			[self dequeueDeletion];
 			break;
+		}
+		case ConnectionCreateDirectoryState:
+		{
+			if (_flags.createDirectory)
+			{
+				[_forwarder connection:self didCreateDirectory:[self externalRepresentationWithPath:[[response request] uri]]];
+			}
 		}
 	}
 	[self setState:ConnectionIdleState];
@@ -694,6 +709,8 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 																		  remote:remotePath
 																		delegate:rec
 																		userInfo:nil];
+	[rec setUpload:YES];
+	
 	[self queueUpload:upload];
 	[self queueCommand:cmd];
 	

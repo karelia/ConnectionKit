@@ -152,6 +152,10 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)threadedConnect
 {
 	[super threadedConnect];
+	if (_flags.didAuthenticate)
+	{
+		[_forwarder connection:self didAuthenticateToHost:[self host]];
+	}
 	myFileManager = [[NSFileManager alloc] init];
 	if ([self transcript])
 	{
@@ -289,21 +293,11 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)fcSetPermissions:(NSNumber *)perms forFile:(NSString *)path
 {
 	[self setCurrentOperation:kSetPermissions];
-	unsigned long permissions = [perms unsignedLongValue];
 	
-	NSTask *chmod = [[NSTask alloc] init];
-	[chmod setLaunchPath:@"/bin/chmod"];
-	[chmod setArguments:[NSArray arrayWithObjects:[NSString stringWithFormat:@"%lo", permissions], path, nil]];
-	[chmod launch];
-	while ([chmod isRunning])
-	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-	}
+	NSMutableDictionary *attribs = [[myFileManager fileAttributesAtPath:path traverseLink:NO] mutableCopy];
+	[attribs setObject:perms forKey:NSFilePosixPermissions];
 	
-	BOOL success = [chmod terminationStatus] == 0;
-	[chmod release];
-	
-	if (success)
+	if ([myFileManager changeFileAttributes:attribs atPath:path])
 	{
 		if (_flags.permissions)
 		{
@@ -325,6 +319,7 @@ checkRemoteExistence:(NSNumber *)check;
 													  nil]]];
 		}
 	}
+	[attribs release];
 	[self setState:ConnectionIdleState];
 }
 
@@ -386,21 +381,25 @@ checkRemoteExistence:(NSNumber *)check;
 																  attributes:[AbstractConnection sentAttributes]] autorelease]];
 	}
 	
-	NSTask *rm = [[NSTask alloc] init];
-	[rm setLaunchPath:@"/bin/rm"];
-	[rm setArguments:[NSArray arrayWithObjects:@"-f", path, nil]];
-	[rm launch];
-	while ([rm isRunning])
+	if ([myFileManager removeFileAtPath:path handler:self])
 	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
+		if (_flags.deleteFile)
+		{
+			[_forwarder connection:self didDeleteFile:path];
+		}
+	}
+	else
+	{
+		if (_flags.error)
+		{
+			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain
+												 code:kDeleteFile
+											 userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to delete file: %@", @"error for deleting a file"), path] 
+																				  forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:error];
+		}
 	}
 	
-	BOOL success = [rm terminationStatus] == 0;
-	if (success && _flags.deleteFile)
-	{
-		[_forwarder connection:self didDeleteFile:path];
-	}
-	[rm release];
 	[self setState:ConnectionIdleState];
 }
 
@@ -423,21 +422,25 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteDirectory];
 	
-	NSTask *rm = [[NSTask alloc] init];
-	[rm setLaunchPath:@"/bin/rm"];
-	[rm setArguments:[NSArray arrayWithObjects:@"-rf", dirPath, nil]];
-	[rm launch];
-	while ([rm isRunning])
+	if ([myFileManager removeFileAtPath:dirPath handler:self])
 	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
+		if (_flags.deleteDirectory)
+		{
+			[_forwarder connection:self didDeleteDirectory:dirPath];
+		}
+	}
+	else
+	{
+		if (_flags.error)
+		{
+			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain
+												 code:kDeleteFile
+											 userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to delete directory: %@", @"error for deleting a directory"), dirPath] 
+																				  forKey:NSLocalizedDescriptionKey]];
+			[_forwarder connection:self didReceiveError:error];
+		}
 	}
 	
-	BOOL success = [rm terminationStatus] == 0;
-	if (success && _flags.deleteDirectory)
-	{
-		[_forwarder connection:self didDeleteDirectory:dirPath];
-	}
-	[rm release];
 	[self setState:ConnectionIdleState];
 }
 
@@ -504,32 +507,42 @@ checkRemoteExistence:(NSNumber *)check;
 		}
 	}
 	[fm removeFileAtPath:[upload remotePath] handler:nil];
-	NSTask *cp = [[NSTask alloc] init];
-	[cp setStandardError: [NSPipe pipe]]; //this will get the unit test to pass, else we get an error in the log, and since we already return an error...
-	[cp setLaunchPath:@"/bin/cp"];
-	[cp setArguments:[NSArray arrayWithObjects:@"-rf", [upload localPath], [upload remotePath], nil]];
-	[cp setCurrentDirectoryPath:[self currentDirectory]];
-	[cp launch];
-	while ([cp isRunning])
-	{
-		[NSThread sleepUntilDate:[NSDate distantPast]];
-	}
-	BOOL success = YES;
-	if ([cp terminationStatus] != 0)
-	{
-		success = NO;
-	}
-	[cp release];
+	
 	if ([upload delegateRespondsToTransferDidBegin])
 	{
 		[[upload delegate] transferDidBegin:[upload userInfo]];
-	}
+	} 
 	if (_flags.didBeginUpload)
 	{
 		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
 	}
-	//need to send the amount of bytes transferred.
+	
+	FILE *from = fopen([[upload localPath] cString], "r");
+	FILE *to = fopen([[upload remotePath] cString], "a");
+	//NSAssert(from != NULL, [NSString stringWithFormat:@"path from cannot be found: %@", [upload localPath]]);
+	//NSAssert(to != NULL, [NSString stringWithFormat:@"path to cannot be found: %@", [upload remotePath]]);
+	int fno = fileno(from), tno = fileno(to);
+	char bytes[8096];
+	int len;
 	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
+	
+	clearerr(from);
+	
+	// feof() doesn;t seem to work for some reason so we'll just count the byte size of the file
+	while (size > 0) 
+	{
+		len = read(fno, bytes, 8096);
+		len = write(tno, bytes, len);
+		size -= len;
+	}
+	
+	fclose(from);
+	fclose(to);
+	
+#warning TODO: for now we won't send progress - just 100%
+	
+	//need to send the amount of bytes transferred.
+	
 	if (_flags.uploadProgressed)
 	{
 		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
@@ -538,6 +551,7 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
 	}
+	
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
 	{
@@ -548,28 +562,15 @@ checkRemoteExistence:(NSNumber *)check;
 		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
 	// send finished
-	if (success && _flags.uploadFinished)
+	if ( _flags.uploadFinished)
 	{
 		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
 	}
-	if (success && [upload delegateRespondsToTransferDidFinish])
+	if ([upload delegateRespondsToTransferDidFinish])
 	{
 		[[upload delegate] transferDidFinish:[upload userInfo]];
 	}
-	if (!success)
-	{
-		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain 
-										   code:ConnectionErrorUploading 
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[upload remotePath], @"upload", LocalizedStringInThisBundle(@"Failed to upload file", @"FileConnection copy file error"), NSLocalizedDescriptionKey, nil]];
-		if (_flags.error)
-		{
-			[_forwarder connection:self didReceiveError:err];
-		}
-		if ([upload delegateRespondsToError])
-		{
-			[[upload delegate] transfer:[upload userInfo] receivedError:err];
-		}
-	}
+	
 	[self setState:ConnectionIdleState];
 }
 
