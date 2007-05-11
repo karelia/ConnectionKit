@@ -42,6 +42,8 @@
 	
 	if (self)
 	{
+		shouldDisplayOpenButton = YES;
+		shouldDisplayOpenCancelButton = YES;
 		[self setTimeout:30];
 		[self setConnection: inConnection];
 		[self setAllowsMultipleSelection: NO];
