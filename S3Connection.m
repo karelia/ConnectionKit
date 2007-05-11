@@ -101,6 +101,11 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 		host = @"s3.amazonaws.com";
 	}
 	
+	if ([port isEqualToString:@""])
+	{
+		port = @"80";
+	}
+	
 	if (self = [super initWithHost:host
                               port:port
                           username:username
