@@ -569,6 +569,7 @@ NSDictionary *sDataAttributes = nil;
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
 		_forwarder = [[RunLoopForwarder alloc] init];
+		_name = @"Default";
 		[_forwarder setReturnValueDelegate:self];
 		
 		if (error)

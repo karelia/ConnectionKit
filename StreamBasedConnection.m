@@ -322,6 +322,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	KTLog(TransportDomain, KTLogDebug, @"Opening streams to host: %@", host);
 	
 	int sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	
+	KTLog(TransportDomain, KTLogDebug, @"Socket: %d", port);
+	
 	// Set TCP Keep Alive
 	int opt = 1;
 	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
@@ -344,7 +347,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	addr.sin_port = htons(port);
 	addr.sin_addr.s_addr = inet_addr([[host address] cString]);
 	
-	KTLog(TransportDomain, KTLogDebug, @"Connecting to %@", [host address]);
+	KTLog(TransportDomain, KTLogDebug, @"Connecting to %@:%d", [host address], port);
 	
 	if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == 0)
 	{
@@ -356,6 +359,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		// CFStreamCreatePairWithSocket does not close the socket by default
 		CFReadStreamSetProperty((CFReadStreamRef)_receiveStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
 		CFWriteStreamSetProperty((CFWriteStreamRef)_sendStream, kCFStreamPropertyShouldCloseNativeSocket, kCFBooleanTrue);
+	}
+	else
+	{
+		KTLog(TransportDomain, KTLogDebug, @"connect() failed");
 	}
 	
 	if(!_receiveStream || !_sendStream){
