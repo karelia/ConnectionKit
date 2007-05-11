@@ -63,7 +63,10 @@
 
 - (void) awakeFromNib
 {
-	//observe the selection from the tree controller
+	[openButton setHidden:!shouldDisplayOpenButton];
+    [openCancelButton setHidden:!shouldDisplayOpenCancelButton];
+    
+    //observe the selection from the tree controller
 	//
 	[directoryContents addObserver: self
 						forKeyPath: @"selection"
@@ -160,6 +163,7 @@
 		
 		[self close];
 	}
+	myKeepRunning = NO;
 }
 
 - (IBAction) newFolder: (id) sender
@@ -308,6 +312,40 @@
 	//NSLog(@"in -setCanCreateDirectories, old value of canCreateDirectories: %@, changed to: %@", (canCreateDirectories ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
 	
 	canCreateDirectories = flag;
+}
+
+//=========================================================== 
+//  shouldDisplayOpenButton 
+//=========================================================== 
+- (BOOL)shouldDisplayOpenButton
+{
+	//NSLog(@"in -shouldDisplayOpenButton, returned shouldDisplayOpenButton = %@", shouldDisplayOpenButton ? @"YES": @"NO" );
+	
+	return shouldDisplayOpenButton;
+}
+
+- (void)setShouldDisplayOpenButton:(BOOL)flag
+{
+	//NSLog(@"in -setShouldDisplayOpenButton, old value of shouldDisplayOpenButton: %@, changed to: %@", (shouldDisplayOpenButton ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
+	
+	shouldDisplayOpenButton = flag;
+}
+
+//=========================================================== 
+//  shouldDisplayOpenCancelButton 
+//=========================================================== 
+- (BOOL)shouldDisplayOpenCancelButton
+{
+	//NSLog(@"in -shouldDisplayOpenCancelButton, returned shouldDisplayOpenCancelButton = %@", shouldDisplayOpenCancelButton ? @"YES": @"NO" );
+	
+	return shouldDisplayOpenCancelButton;
+}
+
+- (void)setShouldDisplayOpenCancelButton:(BOOL)flag
+{
+	//NSLog(@"in -setShouldDisplayOpenCancelButton, old value of shouldDisplayOpenCancelButton: %@, changed to: %@", (shouldDisplayOpenCancelButton ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
+	
+	shouldDisplayOpenCancelButton = flag;
 }
 
 //=========================================================== 
@@ -631,7 +669,11 @@
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
-	int ret = [[NSApplication sharedApplication] runModalForWindow: [self window]];
+	//int ret = [[NSApplication sharedApplication] runModalForWindow: [self window]];
+	
+	myKeepRunning = YES;
+	myModalSession = [[NSApplication sharedApplication] beginModalSessionForWindow:[self window]];
+	
 	[self setInitialDirectory: directory];
 	
 	[self setIsLoading: YES];
@@ -641,6 +683,18 @@
 										   userInfo:nil
 											repeats:NO];
 	[[self connection] connect];
+	
+	int ret;
+	for (;;) {
+		if (!myKeepRunning)
+		{
+			break;
+		}
+		ret = [NSApp runModalSession:myModalSession];
+		CFRunLoopRunInMode(kCFRunLoopDefaultMode,1,TRUE);
+	}
+	
+	[NSApp endModalSession:myModalSession];
 	
 	return ret;
 }
@@ -740,7 +794,7 @@
 
 - (void)connection:(AbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
 {
-	[aConn changeToDirectory:[dirPath stringByDeletingLastPathComponent]];
+	[aConn changeToDirectory:dirPath];
 	createdDirectory = [[dirPath lastPathComponent] retain]; 
 	[aConn directoryContents];
 }

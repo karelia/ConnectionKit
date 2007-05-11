@@ -48,6 +48,8 @@ enum {
 	BOOL canChooseDirectories;
 	BOOL canChooseFiles;
 	BOOL canCreateDirectories;
+    BOOL shouldDisplayOpenButton;
+    BOOL shouldDisplayOpenCancelButton;
 	BOOL allowsMultipleSelection;
 	BOOL isLoading;
 	NSString *prompt;
@@ -58,13 +60,16 @@ enum {
 	IBOutlet NSArrayController *parentDirectories;
 	IBOutlet NSWindow *createFolder;
 	IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *openButton;
+    IBOutlet NSButton *openCancelButton;
 	id delegate;
 	SEL delegateSelector;
 	BOOL isSelectionValid;
 	NSTimeInterval timeout;
 	NSTimer *timer;
 	NSString *createdDirectory;
-	
+	NSModalSession myModalSession;
+	BOOL myKeepRunning;
 	NSString *lastDirectory;
 }
 
@@ -84,6 +89,10 @@ enum {
 - (void)setCanChooseFiles:(BOOL)flag;
 - (BOOL)canCreateDirectories;
 - (void)setCanCreateDirectories:(BOOL)flag;
+- (BOOL)shouldDisplayOpenButton;
+- (void)setShouldDisplayOpenButton:(BOOL)flag;
+- (BOOL)shouldDisplayOpenCancelButton;
+- (void)setShouldDisplayOpenCancelButton:(BOOL)flag;
 - (BOOL)allowsMultipleSelection;
 - (void)setAllowsMultipleSelection:(BOOL)flag;
 - (BOOL)isLoading;
