@@ -93,7 +93,14 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	
 	while ((cur = [e nextObject]))
 	{
-		size += [cur size];
+		if ([cur respondsToSelector:@selector(size)])
+		{
+			size += [cur size];
+		}
+		else
+		{
+			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
+		}
 	}
 	return size;
 }
