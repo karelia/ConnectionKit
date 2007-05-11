@@ -540,6 +540,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	[super threadedConnect];
+	
+	if (_flags.didAuthenticate)
+	{
+		[_forwarder connection:self didAuthenticateToHost:[self host]];
+	}
 }
 
 - (void)davDidChangeToDirectory:(NSString *)dirPath

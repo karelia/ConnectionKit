@@ -324,6 +324,11 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		}
 	}
 	
+	if (_flags.didAuthenticate)
+	{
+		[_forwarder connection:self didAuthenticateToHost:[self host]];
+	}
+	
 	if (!mySession || !libssh2_userauth_authenticated(mySession))
 	{
 		if (_flags.error)
@@ -725,7 +730,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	CKInternalTransferRecord *upload = [self currentUpload];
 	NSString *local = [upload localPath];
 	NSString *remote = [upload remotePath];
-	myTransferSize = [[[upload userInfo] objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
+	myTransferSize = [[upload objectForKey:SFTPTransferSizeKey] unsignedLongLongValue];
 	myTransferHandle = libssh2_sftp_open(mySFTPChannel, [remote UTF8String], LIBSSH2_FXF_TRUNC | LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT, 0100644);
 	myBytesTransferred = 0;
 	
@@ -765,9 +770,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 																		delegate:delegate ? delegate : upload
 																		userInfo:upload];
 	[upload setUpload:YES];
-	[upload setObject:localPath forKey:QueueUploadLocalFileKey];
-	[upload setObject:remotePath forKey:QueueUploadRemoteFileKey];
-	[upload setObject:[attribs objectForKey:NSFileSize] forKey:SFTPTransferSizeKey];
+	[record setObject:localPath forKey:QueueUploadLocalFileKey];
+	[record setObject:remotePath forKey:QueueUploadRemoteFileKey];
+	[record setObject:[attribs objectForKey:NSFileSize] forKey:SFTPTransferSizeKey];
 	[self queueUpload:record];
 	
 	[self queueCommand:[ConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedUploadFile) target:self arguments:[NSArray array]]
@@ -978,13 +983,13 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			[[download delegate] transferDidFinish:[download userInfo]];
 		}
 		[download release];
+		libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 		[self setState:ConnectionIdleState];
 	}
 	else 
 	{
 		[self performSelector:@selector(threadedRunloopDownload:) withObject:file afterDelay:0.0];
 	}
-	libssh2_sftp_close_handle(myTransferHandle); myTransferHandle = NULL;
 }
 
 - (void)threadedDownload
@@ -1201,11 +1206,11 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
 										 userInfo:nil]];
-	//NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	//if (cachedContents)
-	//{
-	//	[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
-	//}
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+	}
 }
 
 + (NSString *)escapedPathStringWithString:(NSString *)str

@@ -747,6 +747,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.directoryContentsStreamed= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
 	_flags.fileCheck				= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:)];
 	_flags.authorizeConnection		= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
+	_flags.didAuthenticate			= [del respondsToSelector:@selector(connection:didAuthenticateToHost:)];
 }
 
 - (id)delegate

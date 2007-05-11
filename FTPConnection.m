@@ -822,6 +822,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
 			{	
+				if (_flags.didAuthenticate)
+				{
+					[_forwarder connection:self didAuthenticateToHost:[self host]];
+				}
+				
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
 				[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
 															awaitState:ConnectionIdleState

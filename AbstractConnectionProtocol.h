@@ -79,8 +79,9 @@ typedef struct __flags {
 	unsigned authorizeConnection:1;
 	unsigned isRecursiveUploading:1;
 	unsigned isRecursiveDeleting:1;
+	unsigned didAuthenticate:1;
 	
-	unsigned padding:4;
+	unsigned padding:3;
 } connectionFlags;
 
 
@@ -256,7 +257,10 @@ typedef struct __flags {
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath;
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host;
+- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host; // this only guarantees that the socket connected.
+- (void)connection:(id <AbstractConnectionProtocol>)con didAuthenticateToHost:(NSString *)host; // this is a successful login
+- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con;
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didCreateDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path;
@@ -289,7 +293,7 @@ typedef struct __flags {
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath;
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con;
-- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con;
+
 - (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists;
 @end
 

@@ -37,6 +37,7 @@
 	unsigned long long	bytesToTransfer;
 	unsigned long long	transferHeaderLength;
 	unsigned int myLastPercent;
+	BOOL hasSentAuthenticationToDelegate;
 	NSFileHandle *myDownloadHandle;
 }
 
