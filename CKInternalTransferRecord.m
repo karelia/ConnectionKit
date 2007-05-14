@@ -54,6 +54,8 @@
 		myFlags.error = [myDelegate respondsToSelector:@selector(transfer:didReceiveError:)];
 		myFlags.percent = [myDelegate respondsToSelector:@selector(transfer:progressedTo:)];
 		myFlags.progressed = [myDelegate respondsToSelector:@selector(transfer:transferredDataOfLength:)];
+		
+		myProperties = [[NSMutableDictionary alloc] initWithCapacity:8];
 	}
 	return self;
 }
@@ -66,6 +68,7 @@
 	[myData release];
 	[myUserInfo release];
 	[myForwarder release];
+	[myProperties release];
 	
 	[super dealloc];
 }
@@ -158,6 +161,16 @@
 	[str appendFormat:@"Offset: %lld", myOffset];
 	
 	return str;
+}
+
+- (void)setObject:(id)object forKey:(id)key
+{
+	[myProperties setObject:object forKey:key];
+}
+
+- (id)objectForKey:(id)key
+{
+	return [myProperties objectForKey:key];
 }
 
 @end

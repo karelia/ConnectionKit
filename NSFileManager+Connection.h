@@ -12,5 +12,6 @@
 @interface NSFileManager (Connection)
 
 - (void)recursivelyCreateDirectory:(NSString *)path attributes:(NSDictionary *)attributes;
+- (unsigned long long)sizeOfPath:(NSString *)path;
 
 @end

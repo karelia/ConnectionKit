@@ -13,23 +13,32 @@
 
 - (void)recursivelyCreateDirectory:(NSString *)path attributes:(NSDictionary *)attributes
 {
-	NSFileManager *fm = [NSFileManager defaultManager];
 	BOOL isDir;
 	
-	if (![fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
+	if (![self fileExistsAtPath:path isDirectory:&isDir] && isDir)
 	{
 		NSRange r = [path rangeOfString:@"/"];
 		while (r.location != NSNotFound)
 		{
 			NSString *subpath = [path substringWithRange:NSMakeRange(0,NSMaxRange(r))];
-			if (![fm fileExistsAtPath:subpath isDirectory:&isDir] && isDir)
+			if (![self fileExistsAtPath:subpath isDirectory:&isDir] && isDir)
 			{
-				[fm createDirectoryAtPath:subpath attributes:attributes];
+				[self createDirectoryAtPath:subpath attributes:attributes];
 			}
 			r = [path rangeOfString:@"/" options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
 		}
-		[fm createDirectoryAtPath:path attributes:attributes];
+		[self createDirectoryAtPath:path attributes:attributes];
 	}
+}
+
+- (unsigned long long)sizeOfPath:(NSString *)path
+{
+	NSDictionary *attribs = [self fileAttributesAtPath:path traverseLink:NO];
+	if (attribs)
+	{
+		return [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
+	}
+	return 0;
 }
 
 @end
