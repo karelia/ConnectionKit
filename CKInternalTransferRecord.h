@@ -19,6 +19,7 @@
 	RunLoopForwarder *myForwarder;
 	id			myDelegate;   // retained; see .m for why
 	id			myUserInfo;
+	NSMutableDictionary *myProperties;
 	
 	struct __ckinternaltransferrecordflags {
 		unsigned didBegin: 1;
@@ -59,6 +60,9 @@
 - (BOOL)delegateRespondsToTransferTransferredData;
 - (BOOL)delegateRespondsToTransferDidFinish;
 - (BOOL)delegateRespondsToError;
+
+- (void)setObject:(id)object forKey:(id)key;
+- (id)objectForKey:(id)key;
 
 @end
 
