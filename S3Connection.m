@@ -228,16 +228,16 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 		[self setState:ConnectionIdleState];
 		return;
 	}
+	if (!hasSentAuthenticationToDelegate)
+	{
+		if (_flags.didAuthenticate)
+		{
+			[_forwarder connection:self didAuthenticateToHost:[self host]];
+		}
+		hasSentAuthenticationToDelegate = YES;
+	}
 	switch (GET_STATE)
 	{
-		if (!hasSentAuthenticationToDelegate)
-		{
-			if (_flags.didAuthenticate)
-			{
-				[_forwarder connection:self didAuthenticateToHost:[self host]];
-			}
-			hasSentAuthenticationToDelegate = YES;
-		}
 		case ConnectionAwaitingDirectoryContentsState: 
 		{
 			if ([response code] / 100 == 2)
