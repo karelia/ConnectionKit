@@ -250,6 +250,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			[_forwarder connection:self didReceiveError: error];
 		}
 		[self threadedForceDisconnect];
+		return;
 	}
 	
 	const char *fingerprint = libssh2_hostkey_hash(mySession, LIBSSH2_HOSTKEY_HASH_MD5);
