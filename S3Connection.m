@@ -208,14 +208,23 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 														 options:NSXMLDocumentTidyXML
 														   error:&error];
 		NSString *desc = [[[[doc rootElement] nodesForXPath:@"//Error" error:&error] objectAtIndex:0] XMLStringWithOptions:NSXMLNodePrettyPrint];
-		if (desc)
+		NSString *code = [[[[doc rootElement] nodesForXPath:@"//Error/Code" error:&error] objectAtIndex:0] stringValue];
+			
+		if ([code isEqualToString:@"SignatureDoesNotMatch"])
 		{
-			NSError *err = [NSError errorWithDomain:S3ErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:desc forKey:NSLocalizedDescriptionKey]];
-			[_forwarder connection:self didReceiveError:err];
+			[_forwarder connectionDidSendBadPassword:self];
 		}
 		else
 		{
-			KTLog(S3ErrorDomain, KTLogError, @"An unknown error occured:\n%@", response);
+			if (desc)
+			{
+				NSError *err = [NSError errorWithDomain:S3ErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:desc forKey:NSLocalizedDescriptionKey]];
+				[_forwarder connection:self didReceiveError:err];
+			}
+			else
+			{
+				KTLog(S3ErrorDomain, KTLogError, @"An unknown error occured:\n%@", response);
+			}
 		}
 	}
 }
