@@ -525,15 +525,16 @@ checkRemoteExistence:(NSNumber *)check;
 	char bytes[8096];
 	int len;
 	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
-	
+	unsigned long long sizeDecrementing = size;
+
 	clearerr(from);
 	
 	// feof() doesn;t seem to work for some reason so we'll just count the byte size of the file
-	while (size > 0) 
+	while (sizeDecrementing > 0) 
 	{
 		len = read(fno, bytes, 8096);
 		len = write(tno, bytes, len);
-		size -= len;
+		sizeDecrementing -= len;
 	}
 	
 	fclose(from);

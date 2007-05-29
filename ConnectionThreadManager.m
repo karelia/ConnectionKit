@@ -98,7 +98,7 @@ static NSLock *_initLock = nil;
 		@try {
 			if ([NSThread currentThread] != myBgThread)
 			{
-				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:2.0]];
+				BOOL sent = [message sendBeforeDate:[NSDate dateWithTimeIntervalSinceNow:5.0]];
 				if (!sent)
 				{
 					KTLog(ThreadingDomain, KTLogFatal, @"ConnectionThreadManager couldn't send message %d", aMessage);
