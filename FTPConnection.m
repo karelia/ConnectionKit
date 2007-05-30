@@ -457,68 +457,80 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSString *file = [d localPath];	// actual path to file, or destination name if from data
 				NSString *remoteFile = [d remotePath];
 				NSData *data = [d data];
-				unsigned chunkLength = 0;
-				const uint8_t *bytes;
-				_transferLastPercent = 0;
-				_transferSent = 0;
-				_transferCursor = 0;
-								
-				if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
+				
+				if (nil == file && nil == data)
 				{
-					[self setReadData:data];
-					[self setReadHandle:nil];		// make sure we're not also trying to read from file
+					NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: no file or data.  currrentUpload = %p remotePath = %@",
+						d, remoteFile ];
+					NSLog(@"%@", str);
+					//NSAssert(NO, str);		// hacky way to throw an exception.
+				}
+				else
+				{
 					
-					_transferSize = [data length];
-					chunkLength = MIN(_transferSize, kStreamChunkSize);						
-					bytes = (uint8_t *)[data bytes];
-				}
-				else	// use file
-				{
-					[self setReadData:nil];		// make sure we're not also trying to read from data
-					if (![[NSFileManager defaultManager] fileExistsAtPath:file])
+					unsigned chunkLength = 0;
+					const uint8_t *bytes;
+					_transferLastPercent = 0;
+					_transferSent = 0;
+					_transferCursor = 0;
+									
+					if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
 					{
-						NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
-						NSAssert(NO, str);		// hacky way to throw an exception.
+						[self setReadData:data];
+						[self setReadHandle:nil];		// make sure we're not also trying to read from file
+						
+						_transferSize = [data length];
+						chunkLength = MIN(_transferSize, kStreamChunkSize);						
+						bytes = (uint8_t *)[data bytes];
 					}
-					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-					NSAssert((nil != _readHandle), @"_readHandle is nil!");
-					NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
-					bytes = (uint8_t *)[chunk bytes];
-					chunkLength = [chunk length];		// actual length of bytes read
+					else	// use file
+					{
+						[self setReadData:nil];		// make sure we're not also trying to read from data
+						if (![[NSFileManager defaultManager] fileExistsAtPath:file])
+						{
+							NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
+							NSAssert(NO, str);		// hacky way to throw an exception.
+						}
+						[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
+						NSAssert((nil != _readHandle), @"_readHandle is nil!");
+						NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
+						bytes = (uint8_t *)[chunk bytes];
+						chunkLength = [chunk length];		// actual length of bytes read
 
-					NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
-					_transferSize = [size longValue];
-				}
-				
-				//kick start the transfer
-				[_dataSendStream write:bytes maxLength:chunkLength];
-				_transferSent += chunkLength;
-				_transferCursor += chunkLength;
-				
-				
-				if ([d delegateRespondsToTransferTransferredData])
-				{
-					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
-				}
-				
-				if (_flags.uploadProgressed)
-				{
-					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-				}
-				
-				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
-				if (percent > _transferLastPercent)
-				{
-					if (_flags.uploadPercent)
-					{
-						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+						NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
+						_transferSize = [size longValue];
 					}
-					if ([d delegateRespondsToTransferProgressedTo])
+					
+					//kick start the transfer
+					[_dataSendStream write:bytes maxLength:chunkLength];
+					_transferSent += chunkLength;
+					_transferCursor += chunkLength;
+					
+					
+					if ([d delegateRespondsToTransferTransferredData])
 					{
-						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+						[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
 					}
+					
+					if (_flags.uploadProgressed)
+					{
+						[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
+					}
+					
+					int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+					if (percent > _transferLastPercent)
+					{
+						if (_flags.uploadPercent)
+						{
+							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+						}
+						if ([d delegateRespondsToTransferProgressedTo])
+						{
+							[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+						}
+					}
+					_transferLastPercent = percent;
 				}
-				_transferLastPercent = percent;
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
