@@ -207,9 +207,9 @@ NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
 		NSXMLDocument *doc = [[NSXMLDocument alloc] initWithData:[response content] 
 														 options:NSXMLDocumentTidyXML
 														   error:&error];
-		NSString *desc = [[[[doc rootElement] nodesForXPath:@"//Error" error:&error] objectAtIndex:0] XMLStringWithOptions:NSXMLNodePrettyPrint];
+		NSString *desc = [[[[doc rootElement] nodesForXPath:@"//Error/Message" error:&error] objectAtIndex:0] stringValue];
 		NSString *code = [[[[doc rootElement] nodesForXPath:@"//Error/Code" error:&error] objectAtIndex:0] stringValue];
-			
+		
 		if ([code isEqualToString:@"SignatureDoesNotMatch"])
 		{
 			[_forwarder connectionDidSendBadPassword:self];
