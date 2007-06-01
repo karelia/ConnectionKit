@@ -41,7 +41,7 @@
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
 NSString *S3StorageClassKey = @"S3StorageClassKey";
-NSString *S3PathSeparator = @"0xKhTmLbOuNdArY";
+NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 @implementation S3Connection
 
