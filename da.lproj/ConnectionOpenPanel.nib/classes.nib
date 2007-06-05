@@ -9,6 +9,8 @@
                 createFolder = NSWindow; 
                 delegate = id; 
                 directoryContents = NSArrayController; 
+                openButton = NSButton; 
+                openCancelButton = NSButton; 
                 parentDirectories = NSArrayController; 
                 tableView = NSTableView; 
             }; 

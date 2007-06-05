@@ -104,7 +104,7 @@
 "Create directory operation failed" = "Neuer Ordner Vorgang versagt";
 
 /* Failed to open a data stream connection */
-"Data Stream Timed Out" = "Datenstrom Wartezeit ueberschritten";
+"Data Stream Timed Out" = "Datenstrom Zeitüberschreitung";
 
 /* file transcript */
 "Deleting File %@\n" = "Datei %@ löschen\n";
@@ -146,12 +146,18 @@
 
 "Failed to delete directory" = "Verzeichnis konnte nicht gelöscht werden";
 
+/* error for deleting a directory */
+"Failed to delete directory: %@" = "Konnte Verzeichnis %@ nicht löschen";
+
 /* couldn't delete the file
    .Mac file deletion error
    WebDAV File Deletion Error */
 
 
 "Failed to delete file" = "Datei konnte nicht gelöscht werden";
+
+/* error for deleting a file */
+"Failed to delete file: %@" = "Konnte Datei %@ nicht löschen";
 
 /* failed to find the id_dsa.pub */
 "Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey." = "Konnte in %@ keine öffentlichen Schlüssel finden. Falls Sie eine selbst-benannte Schlüssel haben, setzen Sie bitte den benutzerdefinierten Standardschlüssel SSHPublicKey.";
@@ -160,13 +166,10 @@
 "Failed to initialize SFTP Subsystem. Do you have permission to access this server via SFTP?" = "SFTP Untersystem konnte nicht initialisiert werden. Haben Sie Zugang zu diesem Server per SFTp?";
 
 /* No .mac account or password */
-"Failed to retrieve .mac account details" = "Konnte .mac Kontodaten nicht erhalten";
+"Failed to retrieve .mac account details" = "Konnte .Mac Account Daten nicht erhalten";
 
 /* FileConnection copy data error */
 "Failed to upload data" = "Daten konnte nicht hochgeladen werden";
-
-/* FileConnection copy file error */
-"Failed to upload file" = "Datei konnte nicht hochladen werden";
 
 /* error transferring */
 "Failed to verify file transferred successfully" = "Überprüfung der Dateiübertragung fehlgeschlagen";
@@ -183,11 +186,11 @@
 /* FTP error */
 "File / Directory does not exist" = "Datei / Verzeichnis existiert nicht";
 
-/* sftp last error */
-"File already exists" = "Datei existiert bereits";
-
 /* FileConnection error */
 "File Already Exists" = "Datei existiert bereits";
+
+/* sftp last error */
+"File already exists" = "Datei existiert bereits";
 
 /* FTP file in use */
 "File in Use" = "Datei wird benutzt";
@@ -196,7 +199,7 @@
 "Filename not Allowed" = "Dateiname nicht erlaubt";
 
 /* FTP service timed out */
-"FTP service not available; Remote server has closed connection" = "FTP service not available; Remote server has closed connection";
+"FTP service not available; Remote server has closed connection" = "FTP Dienst nicht verfügbar; Der Server hat die Verbindung beendet.";
 
 /* FTP no service */
 "FTP Service Unavailable" = "FTP Dienst nicht verfügbar";
@@ -216,7 +219,7 @@
 "Insufficient storage space available" = "Unzureichender freier Speicher";
 
 /* FTP Error */
-"Invalid Account name" = "Ungültiger Accountname";
+"Invalid Account name" = "Ungültiger Kontoname";
 
 /* sftp last error */
 "Invalid filename" = "Ungültiger Dateiname";
@@ -225,7 +228,7 @@
 "Invalid Handle" = "Ungültiger Name";
 
 /* Stream Error before opening */
-"Is the service running on the server" = "Laüft der Dienst auf dem Server";
+"Is the service running on the server" = "Läuft der Dienst auf dem Server";
 
 /* filesize: kilobytes */
 "Kilobytes" = "Kilobytes";
@@ -237,7 +240,7 @@
 "Local File already exists" = "Lokale Datei existiert bereits";
 
 /* sftp last error */
-"Lock Conflict" = "Lock Conflict";
+"Lock Conflict" = "Problem mit der Sperre";
 
 /* filesize: megabytes */
 "MB" = "MB";
@@ -267,7 +270,7 @@
 "No Media" = "Keine Medien";
 
 /* sftp last error */
-"No space left on remote machine" = "Kein Platz mehr auf der Fernmaschine";
+"No space left on remote machine" = "Kein Platz mehr auf dem entfernten Host";
 
 /* FTP Error */
 "No Storage Space Available" = "Kein verfügbarer Speicher";
@@ -295,7 +298,7 @@
 /* WebDAV Uploading Error
    .Mac File Uploading Error */
 
-"Parent Folder does not exist" = "Enthaltender Ordner existiert nicht";
+"Parent Folder does not exist" = "Übergeordneter Ordner existiert nicht";
 
 /* No comment provided by engineer. */
 "Password was not accepted." = "Kennwort wurde abgelehnt.";
@@ -312,7 +315,7 @@
 "Quit" = "Beenden";
 
 /* sftp last error */
-"Quota exceeded" = "Quota überschritten";
+"Quota exceeded" = "Speicherkontingent überschritten";
 
 /* file transcript */
 "Renaming %@ to %@\n" = "Umbenennen von %1$@ nach %2$@\n";
@@ -358,12 +361,12 @@
 /* WebDAV Create Directory Error
    .Mac Create Directory Error */
 
-"The directory already exists" = "Das Verzeichnis existiert nicht";
+"The directory already exists" = "Das Verzeichnis existiert bereits";
 
 /* WebDAV Create Directory Error
    .Mac Create Directory Error */
 
-"The server does not allow the creation of directories at the current location" = "Der Server erlaubt kein erstellen von Verzeichnissen am momentanen Pfad";
+"The server does not allow the creation of directories at the current location" = "Der Server erlaubt kein Erstellen von Verzeichnissen am momentanen Ort";
 
 /* No comment provided by engineer. */
 "The SSH manager returned the following error message:\n\n%@" = "Beim SSH Dienst ist der folgende Fehler aufgetreten: \n\n%@";
@@ -375,13 +378,13 @@
 "There is no .Mac access to the directory" = "Kein .Mac Zugang zum gewählten Verzeichnis";
 
 /* No WebDAV access to the specified path */
-"There is no WebDAV access to the directory" = "Kein WebDAV Zugang zum Verzeichnis";
+"There is no WebDAV access to the directory" = "Es ist kein WebDAV Zugang zum Verzeichnis vorhanden";
 
 /* sftp error */
 "There was an error with the SSH subsystem: " = "Es ist ein Fehler des SSH Untersystems aufgetreten:";
 
 /* error */
-"This droplet is missing the original application that created it. You will need to reinstall the original application." = "Diesem Droplet fehlt das Originalprogramm, mit welchem es erstellt wurden. Bitte reinstallieren Sie das Originalprogramm.";
+"This droplet is missing the original application that created it. You will need to reinstall the original application." = "Diesem Droplet fehlt das Originalprogramm mit welchem es erstellt wurden. Bitte reinstallieren Sie das Originalprogramm.";
 
 /* ssh authorise remote host fingerprint */
 "This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?" = "Dies ist die erste Verbindung zu %1$@. Sie hat den Fingerprint \n%2$@. Wollen Sie verbinden?";
@@ -402,22 +405,22 @@
 "Unknown Principle" = "Unbekanntes Prinzip";
 
 /* status message */
-"Uploading" = "Laden";
+"Uploading" = "Hochladen";
 
 /* status */
-"Uploading %@" = "Laden von %@";
+"Uploading %@" = "Hochladen von %@";
 
 /* No username or password */
-"Username and Password are required for FTP connections" = "Username und Kennwort werden für FTP-Zugang benötigt";
+"Username and Password are required for FTP connections" = "Benutzername und Kennwort werden für FTP-Zugang benötigt";
 
 /* No username or password */
 "Username and Password are required for S3 connections" = "Benutzername und Kennwort werden für S3 Verbindungen benötigt";
 
 /* No username or password */
-"Username and Password are required for WebDAV connections" = "Username und Kennwort werden für WebDAV Verbindungen benötigt";
+"Username and Password are required for WebDAV connections" = "Benutzername und Kennwort werden für WebDAV Verbindungen benötigt";
 
 /* No username or password */
-"Username is required for SFTP connections" = "Username wird für SFTP benötigt";
+"Username is required for SFTP connections" = "Benutzername wird für SFTP benötigt";
 
 /* sftp last error */
 "Write Protected" = "Schreibgeschützt";
@@ -426,7 +429,7 @@
 "Writing data to %@\n" = "Schreibe Daten nach %@\n";
 
 /* Bonjour Error */
-"You can not add a child category to the Bonjour category." = "Sie können keinen neuen Unterkategorie zur Bonjour Kategorie hinzufügen.";
+"You can not add a child category to the Bonjour category." = "Sie können keinen neue Unterkategorie zur Bonjour Kategorie hinzufügen.";
 
 /* Bonjour Error */
 "You can not add a new host to the Bonjour category." = "Sie können keinen neuen Host zur Bonjour Kategorie hinzufügen.";
@@ -435,4 +438,4 @@
 "You do not have access to write file %@" = "Sie haben keinen Schreibzugang zur Datei %@";
 
 /* FTP Error */
-"You need an Account to Upload Files" = "Sie brauchen einen Account, um Dateien hochzuladen";
+"You need an Account to Upload Files" = "Sie brauchen eine Konto, um Dateien hochzuladen";
