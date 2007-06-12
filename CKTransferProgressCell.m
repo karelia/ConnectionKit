@@ -37,8 +37,15 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (void)setObjectValue:(id)value
 {
-	myProgress = [[value objectForKey:@"progress"] intValue];
-	[super setObjectValue:[value objectForKey:@"name"]];
+	if ([value isKindOfClass:[NSDictionary class]])
+	{
+		myProgress = [[value objectForKey:@"progress"] intValue];
+		[super setObjectValue:[value objectForKey:@"name"]];
+	}
+	else if ([value isKindOfClass:[NSNumber class]])
+	{
+		myProgress = [value intValue];
+	}
 }
 
 #define PADDING 5
