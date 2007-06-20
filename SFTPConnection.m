@@ -405,7 +405,18 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	mySession = libssh2_session_init();
 	libssh2_session_set_user_info(mySession,self);
 	libssh2_session_set_read(mySession,ssh_read);
-	libssh2_session_set_write(mySession,ssh_write);
+
+	
+/*
+	From Scott Gruby:
+ 
+	The major problem with Connection Kit is that the networking code basically needs to be rewritten. The queued sending mechanism works extremely poorly when there are blocking reads like the SSH library uses. So, the SSH library does a blocking read (which CK just interprets as doing reads until it gets data with no timeout) which prevents the write from ever completing. My hacky fix was to comment out the following line in SFTPConnection.m:
+ 
+ //	libssh2_session_set_write(mySession,ssh_write);
+ 
+ 
+ This allows the SSH library to make synchronous writes using UNIX sockets; while not a complete solution, it does appear to work.
+*/
 	
 	[super threadedConnect];
 	_flags.isConnected = YES;
