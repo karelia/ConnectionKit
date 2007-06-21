@@ -51,7 +51,8 @@ NSString *SFTPRenameFromKey = @"from";
 NSString *SFTPRenameToKey = @"to";
 NSString *SFTPTransferSizeKey = @"size";
 
-const unsigned int kSFTPBufferSize = 32768;
+///const unsigned int kSFTPBufferSize = 32768;
+const unsigned int kSFTPBufferSize = 32768/2; // via Scott Gruby, companion to change in -threadedConnect
 
 @interface SFTPConnection (Private)
 
