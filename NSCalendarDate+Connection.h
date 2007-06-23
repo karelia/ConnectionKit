@@ -22,4 +22,6 @@
 	 */
 + (id)calendarDateWithString:(NSString *)string;
 
+- (NSString *)zuluFormat;
+
 @end

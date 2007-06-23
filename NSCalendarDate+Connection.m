@@ -63,4 +63,9 @@
 	return date;
 }
 
+- (NSString *)zuluFormat
+{
+	return [self descriptionWithCalendarFormat:@"%Y-%m-%dT%H:%M:%SZ" timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0] locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
+}
+
 @end
