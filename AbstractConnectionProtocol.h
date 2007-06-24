@@ -58,6 +58,7 @@ typedef struct __flags {
 	unsigned deleteDirectoryInAncestor:1;
 	unsigned deleteFileInAncestor:1;
 	unsigned discoverFilesToDeleteInAncestor:1;
+	unsigned discoverFilesToDeleteInDirectory:1;
 	unsigned deleteFile:1;
 	unsigned didBeginUpload:1;
 	unsigned didConnect:1;
@@ -269,6 +270,7 @@ typedef struct __flags {
 // recursivelyDeleteDirectory
 //     These methods may change soon -- Seth
 - (void)connection:(id <AbstractConnectionProtocol>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDiscoverFilesToDelete:(NSArray *)contents inDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath;
 

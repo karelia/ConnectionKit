@@ -1132,8 +1132,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
-		if (_flags.discoverFilesToDeleteInAncestor) {
+		if (_flags.discoverFilesToDeleteInAncestor) 
+		{
 			[_forwarder connection:self didDiscoverFilesToDelete:contents inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		}
+		if (_flags.discoverFilesToDeleteInDirectory)
+		{
+			[_forwarder connection:self didDiscoverFilesToDelete:contents inDirectory:dirPath];
 		}
 		
 		while ((cur = [e nextObject]))

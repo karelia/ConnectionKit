@@ -730,6 +730,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.deleteDirectoryInAncestor= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
 	_flags.deleteFileInAncestor		= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
 	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
+	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:)];
 	_flags.deleteFile				= [del respondsToSelector:@selector(connection:didDeleteFile:)];
 	_flags.didBeginUpload			= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
 	_flags.didConnect				= [del respondsToSelector:@selector(connection:didConnectToHost:)];
