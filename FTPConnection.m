@@ -154,7 +154,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		_serverSupport.canUsePASV = YES;
 		_serverSupport.canUseEPSV = YES;
 		
-		_serverSupport.hasSize = NO;
+		_serverSupport.hasSize = YES;
 		_flags.isConnected = NO;
 	}
 	return self;
