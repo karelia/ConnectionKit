@@ -1499,7 +1499,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			KTLog(StreamDomain, KTLogDebug, @"FTP Data receive stream opened");
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data receive stream opened");
 			[_openStreamsTimeout invalidate];
 			[_openStreamsTimeout release];
 			_openStreamsTimeout = nil;
@@ -1639,7 +1639,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[_openStreamsTimeout release];
 			_openStreamsTimeout = nil;
 			
-			KTLog(StreamDomain, KTLogDebug, @"FTP Data send stream opened");
+			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream opened");
 			
 			if (!_serverSupport.isActiveDataConn)
 				[self setState:ConnectionIdleState];
@@ -1970,7 +1970,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)dataConnectionOpenTimedOut:(NSTimer *)timer
 {
 	//do something
-	KTLog(ProtocolDomain, KTLogError, @"Timed out opening data connection");
+	KTLog(TransportDomain, KTLogError, @"Timed out opening data connection");
 
 	if ([self transcript])
 	{
