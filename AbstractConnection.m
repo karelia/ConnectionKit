@@ -626,7 +626,7 @@ NSDictionary *sDataAttributes = nil;
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"%@ - %@", [self className], _name];
+	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
 - (void)setHost:(NSString *)host

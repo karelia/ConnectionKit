@@ -96,6 +96,8 @@ extern NSString *QueueDomain;
 @interface AbstractQueueConnection : AbstractConnection 
 {
 	NSRecursiveLock		*_queueLock;
+	int					_checkQueueCount;
+	
 	// Queue Support
 	NSMutableArray		*_commandHistory;
 	NSMutableArray		*_commandQueue;

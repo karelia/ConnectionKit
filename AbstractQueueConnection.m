@@ -225,42 +225,68 @@ NSString *QueueDomain = @"Queuing";
 	myQueueFlags.isCheckingQueue = YES;
 	[_queueLock unlock];
 	
-	BOOL nextTry = 0 != [self numberOfCommands];
-	if (!nextTry)
-	{
-		KTLog(StateMachineDomain, KTLogDebug, @"Queue is Empty");
-	}
-	while (nextTry)
-	{
-		ConnectionCommand *command = [[self currentCommand] retain];
-		if (command && GET_STATE == [command awaitState])
+	BOOL checkAgain = NO;
+	do {
+		
+		
+		BOOL nextTry = 0 != [self numberOfCommands];
+		if (!nextTry)
 		{
-			KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
-			_state = [command sentState];	// don't use setter; we don't want to recurse
-			[self pushCommandOnHistoryQueue:command];
-			[self dequeueCommand];
-			
-			[self sendCommand:[command command]];
-			
-			// go to next one, there's something else to do
-			[_queueLock lock];
-			nextTry = [_commandQueue count] > 0; 
-			if (!nextTry)
+			KTLog(StateMachineDomain, KTLogDebug, @"Queue is Empty");
+		}
+		while (nextTry)
+		{
+			ConnectionCommand *command = [[self currentCommand] retain];
+			if (command && GET_STATE == [command awaitState])
 			{
-				myQueueFlags.isCheckingQueue = NO;
+				KTLog(StateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
+				_state = [command sentState];	// don't use setter; we don't want to recurse
+				[self pushCommandOnHistoryQueue:command];
+				[self dequeueCommand];
+				
+				[self sendCommand:[command command]];
+				
+				// go to next one, there's something else to do
+				[_queueLock lock];
+				nextTry = [_commandQueue count] > 0; 
+				if (!nextTry)
+				{
+					myQueueFlags.isCheckingQueue = NO;
+				}
+				[_queueLock unlock];
 			}
-			[_queueLock unlock];
+			else
+			{
+				KTLog(StateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
+				nextTry = NO;		// don't try.  
+			}
+			[command release];
 		}
-		else
+		
+		
+		// It is possible that queueCommand: can be called while checkQueue is called
+		// and queueCommand: will not call checkQueue because the value of myQueueFlags.isCheckingQueue
+		// is YES. checkQueue, however, might have already checked the numberOfCommands and assigned
+		// NO to nextTry BEFORE queueCommand: gets called (and queueCommand: gets called before
+		// checkQueue reaches then end and sets isCheckingQueue to NO) which will lead to checkQueue
+		// never being called for that newly added command. 
+		// This simple check counting mechanism allows queueCommand to signal to checkQueue that a new
+		// command has been added and the queue should be checked again. -- Seth Willits
+		[_queueLock lock];
+		checkAgain = (_checkQueueCount > 0);
+		if (checkAgain)
 		{
-			KTLog(StateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
-			nextTry = NO;		// don't try.  
+			_checkQueueCount--;
 		}
-		[command release];
-	}
+		[_queueLock unlock];
+		
+	} while (checkAgain);
+	
+	
 	[_queueLock lock];
 	myQueueFlags.isCheckingQueue = NO;
 	[_queueLock unlock];
+	KTLog(StateMachineDomain, KTLogDebug, @"Done Checking Queue");
 }	
 
 - (NSString *)queueDescription
@@ -293,6 +319,11 @@ NSString *QueueDomain = @"Queuing";
 	
 	[_queueLock lock];
 	isChecking = myQueueFlags.isCheckingQueue;
+	
+	// See checkQueue for an explanation of _checkQueueCount
+	if (isChecking) {
+		_checkQueueCount++;
+	}
 	[_queueLock unlock];
 	
 	if (!_flags.inBulk && !isChecking) {
