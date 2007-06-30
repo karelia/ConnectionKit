@@ -96,7 +96,8 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	
 	while ((cur = [e nextObject]))
 	{
-		CKTransferRecord *record = [myConnection recursivelyUpload:cur to:[myHost initialPath]];
+		CKTransferRecord *root = [myConnection recursivelyUpload:cur to:[myHost initialPath]];
+		CKTransferRecord *record = [CKTransferRecord recursiveRecord:root forFullPath:[[myHost initialPath] stringByAppendingPathComponent:[cur lastPathComponent]]];
 		[myTransfers addObject:record];
 	}
 	[oFiles reloadData];
