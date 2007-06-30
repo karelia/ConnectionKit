@@ -65,8 +65,8 @@ typedef enum {
 	NSOutputStream		*_dataSendStream;
 	BOOL				_received226;
 	
-	long long			_transferSize;
-	long long			_transferSent;
+	unsigned long long	_transferSize;
+	unsigned long long	_transferSent;
 	long long			_transferCursor;
 	int					_transferLastPercent;
 	
