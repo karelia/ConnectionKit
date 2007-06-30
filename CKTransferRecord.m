@@ -59,7 +59,10 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)cancel:(id)sender
 {
-	
+	if ([self connection])
+	{
+		[[self connection] cancelTransfer];
+	}
 }
 
 - (void)setName:(NSString *)name
