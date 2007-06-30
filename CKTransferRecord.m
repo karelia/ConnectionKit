@@ -130,15 +130,20 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 {
 	if ([self isDirectory]) 
 	{
-		double speed = 0;
-		NSEnumerator *e = [myContents objectEnumerator];
-		CKTransferRecord *cur;
-		
-		while ((cur = [e nextObject])) 
+		if (myTransferStartTime == 0.0)
 		{
-			speed += [cur speed];
+			myTransferStartTime = [NSDate timeIntervalSinceReferenceDate];
 		}
-		return speed;
+		NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+		if (myLastDirectorySpeedUpdate == 0.0 || now - myLastDirectorySpeedUpdate >= 1.0)
+		{
+			myLastDirectorySpeedUpdate = now;
+			NSTimeInterval elapsedTime = now - myTransferStartTime;
+			unsigned long long transferred = [self transferred];
+			[self willChangeValueForKey:@"speed"];
+			mySpeed = transferred / elapsedTime;
+			[self didChangeValueForKey:@"speed"];
+		}
 	}
 	return mySpeed;
 }

@@ -16,6 +16,8 @@
 	unsigned long long  myTransferred;
 	unsigned long long  myIntermediateTransferred;
 	NSTimeInterval		myLastTransferTime;
+	NSTimeInterval		myTransferStartTime;
+	NSTimeInterval		myLastDirectorySpeedUpdate;
 	double				mySpeed;
 	int					myProgress;
 	NSMutableArray		*myContents;
