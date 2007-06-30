@@ -63,15 +63,12 @@ typedef enum {
 	NSTimer				*_openStreamsTimeout;
 	NSInputStream		*_dataReceiveStream;
 	NSOutputStream		*_dataSendStream;
-	BOOL				_received226;
 	
 	unsigned long long	_transferSize;
 	unsigned long long	_transferSent;
 	long long			_transferCursor;
 	int					_transferLastPercent;
-	
-	BOOL				_setTransferMode;
-	
+		
 	NSFileHandle		*_writeHandle;
 	NSFileHandle		*_readHandle;
 	NSData				*_readData;
@@ -105,8 +102,10 @@ typedef enum {
 		unsigned isActiveDataConn: 1;
 		unsigned loggedIn: 1;
 		unsigned isMicrosoft: 1;
-		unsigned unused: 14;
-	} _serverSupport;
+		unsigned setTransferMode: 1;
+		unsigned received226: 1;
+		unsigned unused: 12;
+	} _ftpFlags;
 	
 	NSTimer *_noopTimer;
 }
