@@ -149,12 +149,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		_dataBuffer = [[NSMutableData data] retain];
 		_commandBuffer = [[NSMutableString alloc] initWithString:@""];
 		
-		_serverSupport.canUseActive = YES;
-		_serverSupport.canUseEPRT = YES;
-		_serverSupport.canUsePASV = YES;
-		_serverSupport.canUseEPSV = YES;
+		_ftpFlags.canUseActive = YES;
+		_ftpFlags.canUseEPRT = YES;
+		_ftpFlags.canUsePASV = YES;
+		_ftpFlags.canUseEPSV = YES;
 		
-		_serverSupport.hasSize = YES;
+		_ftpFlags.hasSize = YES;
 		_flags.isConnected = NO;
 	}
 	return self;
@@ -210,23 +210,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if ([command isEqualToString:@"EPRT"]) 
 	{
-		_serverSupport.isActiveDataConn = YES;
+		_ftpFlags.isActiveDataConn = YES;
 		command = [self setupEPRTConnection];
 	} 
 	else if ([command isEqualToString:@"PORT"]) 
 	{
-		_serverSupport.isActiveDataConn = YES;
+		_ftpFlags.isActiveDataConn = YES;
 		command = [self setupActiveConnection];
 	} 
 	else if ([command isEqualToString:@"EPSV"])
 	{
-		_serverSupport.isActiveDataConn = NO;
+		_ftpFlags.isActiveDataConn = NO;
 	}
 	else if ([command isEqualToString:@"PASV"])
 	{
-		_serverSupport.isActiveDataConn = NO;
+		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([command isEqualToString:@"LIST -FA"] && _serverSupport.isMicrosoft)
+	else if ([command isEqualToString:@"LIST -FA"] && _ftpFlags.isMicrosoft)
 	{
 		command = @"LIST";
 	}
@@ -605,50 +605,50 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				//parse features
 				if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
-					_serverSupport.hasSize = YES;
+					_ftpFlags.hasSize = YES;
 				else
-					_serverSupport.hasSize = NO;
+					_ftpFlags.hasSize = NO;
 				if ([buffer rangeOfString:@"ADAT"].location != NSNotFound)
-					_serverSupport.hasADAT = YES;
+					_ftpFlags.hasADAT = YES;
 				else
-					_serverSupport.hasADAT = NO;
+					_ftpFlags.hasADAT = NO;
 				if ([buffer rangeOfString:@"AUTH"].location != NSNotFound)
-					_serverSupport.hasAUTH = YES;
+					_ftpFlags.hasAUTH = YES;
 				else
-					_serverSupport.hasAUTH = NO;
+					_ftpFlags.hasAUTH = NO;
 				if ([buffer rangeOfString:@"CCC"].location != NSNotFound)
-					_serverSupport.hasCCC = YES;
+					_ftpFlags.hasCCC = YES;
 				else
-					_serverSupport.hasCCC = NO;
+					_ftpFlags.hasCCC = NO;
 				if ([buffer rangeOfString:@"CONF"].location != NSNotFound)
-					_serverSupport.hasCONF = YES;
+					_ftpFlags.hasCONF = YES;
 				else
-					_serverSupport.hasCONF = NO;
+					_ftpFlags.hasCONF = NO;
 				if ([buffer rangeOfString:@"ENC"].location != NSNotFound)
-					_serverSupport.hasENC = YES;
+					_ftpFlags.hasENC = YES;
 				else
-					_serverSupport.hasENC = NO;
+					_ftpFlags.hasENC = NO;
 				if ([buffer rangeOfString:@"MIC"].location != NSNotFound)
-					_serverSupport.hasMIC = YES;
+					_ftpFlags.hasMIC = YES;
 				else
-					_serverSupport.hasMIC = NO;
+					_ftpFlags.hasMIC = NO;
 				if ([buffer rangeOfString:@"PBSZ"].location != NSNotFound)
-					_serverSupport.hasPBSZ = YES;
+					_ftpFlags.hasPBSZ = YES;
 				else
-					_serverSupport.hasPBSZ = NO;
+					_ftpFlags.hasPBSZ = NO;
 				if ([buffer rangeOfString:@"PROT"].location != NSNotFound)
-					_serverSupport.hasPROT = YES;
+					_ftpFlags.hasPROT = YES;
 				else
-					_serverSupport.hasPROT = NO;
+					_ftpFlags.hasPROT = NO;
 				if ([buffer rangeOfString:@"MDTM"].location != NSNotFound)
-					_serverSupport.hasMDTM = YES;
+					_ftpFlags.hasMDTM = YES;
 				else
-					_serverSupport.hasMDTM = NO;
+					_ftpFlags.hasMDTM = NO;
 				if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
-					_serverSupport.hasSITE = YES;
+					_ftpFlags.hasSITE = YES;
 				else
-					_serverSupport.hasSITE = NO;
-				if (_serverSupport.loggedIn == NO) {
+					_ftpFlags.hasSITE = NO;
+				if (_ftpFlags.loggedIn == NO) {
 					[self sendCommand:[NSString stringWithFormat:@"USER %@", _username]];
 					[self setState:ConnectionSentUsernameState];
 				} else {
@@ -707,14 +707,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
 				{
-					_serverSupport.isMicrosoft = YES;
+					_ftpFlags.isMicrosoft = YES;
 					[self setState:FTPChangeDirectoryListingStyle];
 					[self sendCommand:@"SITE DIRSTYLE"];
 					break;
 				}
 				else
 				{
-					_serverSupport.isMicrosoft = NO;
+					_ftpFlags.isMicrosoft = NO;
 				}
 			}
 			[self setState:ConnectionIdleState];
@@ -722,16 +722,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 220:
 		{
-			if (GET_STATE == ConnectionNotConnectedState && _serverSupport.loggedIn == NO)
+			if (GET_STATE == ConnectionNotConnectedState && _ftpFlags.loggedIn == NO)
 			{				
 				if ([command rangeOfString:@"Microsoft FTP Service"].location != NSNotFound ||
 					[buffer rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
 				{
-					_serverSupport.isMicrosoft = YES;
+					_ftpFlags.isMicrosoft = YES;
 				}
 				else
 				{
-					_serverSupport.isMicrosoft = NO;
+					_ftpFlags.isMicrosoft = NO;
 				}
 				[self sendCommand:@"FEAT"];
 				[self setState:ConnectionSentFeatureRequestState];
@@ -749,8 +749,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//skip 225 (no transfer to ABOR)
 		case 226:
 		{
-			_received226 = YES;
-			if (_serverSupport.isActiveDataConn == YES) {
+			_ftpFlags.received226 = YES;
+			if (_ftpFlags.isActiveDataConn == YES) {
 				[self closeDataConnection];
 			}
 			if (_dataSendStream == nil || _dataReceiveStream == nil)
@@ -774,7 +774,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					 ( sscanf(start, "(%d,%d,%d,%d,%d,%d)",&i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 &&
 					   sscanf(start, "=%d,%d,%d,%d,%d,%d", &i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 ) )
 				{
-					_serverSupport.canUsePASV = NO;
+					_ftpFlags.canUsePASV = NO;
 					if (_flags.error)
 					{
 						NSError *err = [NSError errorWithDomain:FTPErrorDomain 
@@ -814,7 +814,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				char *start = strchr(cmd,'|');
 				if ( !start || sscanf(start, "|||%d|", &port) != 1)
 				{
-					_serverSupport.canUseEPSV = NO;
+					_ftpFlags.canUseEPSV = NO;
 					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
 																	awaitState:ConnectionIdleState
 																	 sentState:FTPSettingEPRTState
@@ -1003,28 +1003,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				
 				if (lastState == FTPSettingEPSVState)
 				{
-					_serverSupport.canUseEPSV = NO;
+					_ftpFlags.canUseEPSV = NO;
 					[self closeDataStreams];
 					[self sendCommand:@"DATA_CON"];
 					[self pushCommandOnCommandQueue:last];
 				}
 				else if (lastState == FTPSettingEPRTState)
 				{
-					_serverSupport.canUseEPRT = NO;
+					_ftpFlags.canUseEPRT = NO;
 					[self closeDataStreams];
 					[self sendCommand:@"DATA_CON"];
 					[self pushCommandOnCommandQueue:last];
 				}
 				else if (lastState == FTPSettingActiveState)
 				{
-					_serverSupport.canUseActive = NO;
+					_ftpFlags.canUseActive = NO;
 					[self closeDataStreams];
 					[self sendCommand:@"DATA_CON"];
 					[self pushCommandOnCommandQueue:last];
 				}
 				else if (lastState == FTPSettingPassiveState)
 				{
-					_serverSupport.canUsePASV = NO;
+					_ftpFlags.canUsePASV = NO;
 					[self closeDataStreams];
 					[self sendCommand:@"DATA_CON"];
 					[self pushCommandOnCommandQueue:last];
@@ -1100,27 +1100,27 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == FTPSettingEPSVState)
 			{
-				_serverSupport.canUseEPSV = NO;
+				_ftpFlags.canUseEPSV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState)
 			{
-				_serverSupport.canUseEPRT = NO;
+				_ftpFlags.canUseEPRT = NO;
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState)
 			{
-				_serverSupport.canUseActive = NO;
+				_ftpFlags.canUseActive = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState)
 			{
-				_serverSupport.canUsePASV = NO;
+				_ftpFlags.canUsePASV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
@@ -1210,7 +1210,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 522:
 		{
-			_serverSupport.canUseEPRT = NO;
+			_ftpFlags.canUseEPRT = NO;
 			[self sendCommand:@"DATA_CON"];
 			break;
 		}
@@ -1522,28 +1522,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			/* Some servers when trying to test PASV can crap out and throw an error */
 			if (GET_STATE == FTPSettingEPSVState) 
 			{
-				_serverSupport.canUseEPSV = NO;
+				_ftpFlags.canUseEPSV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState) 
 			{
-				_serverSupport.canUseEPRT = NO;
+				_ftpFlags.canUseEPRT = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState) 
 			{
-				_serverSupport.canUseActive = NO;
+				_ftpFlags.canUseActive = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState) 
 			{
-				_serverSupport.canUsePASV = NO;
+				_ftpFlags.canUsePASV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
@@ -1581,25 +1581,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				
 				if (lastState == FTPSettingEPSVState) 
 				{
-					_serverSupport.canUseEPSV = NO;
+					_ftpFlags.canUseEPSV = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingEPRTState) 
 				{
-					_serverSupport.canUseEPRT = NO;
+					_ftpFlags.canUseEPRT = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingActiveState)
 				{
-					_serverSupport.canUseActive = NO;
+					_ftpFlags.canUseActive = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				}
 				else if (lastState == FTPSettingPassiveState) 
 				{
-					_serverSupport.canUseActive = NO;
+					_ftpFlags.canUseActive = NO;
 					[self sendCommand:@"DATA_CON"];
 				}
 			}
@@ -1643,7 +1643,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			KTLog(TransportDomain, KTLogDebug, @"FTP Data send stream opened");
 			
-			if (!_serverSupport.isActiveDataConn)
+			if (!_ftpFlags.isActiveDataConn)
 				[self setState:ConnectionIdleState];
 			break;
 		}
@@ -1659,28 +1659,28 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			/* Some servers when trying to test PASV can crap out and throw an error */
 			if (GET_STATE == FTPSettingEPSVState) 
 			{
-				_serverSupport.canUseEPSV = NO;
+				_ftpFlags.canUseEPSV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingEPRTState) 
 			{
-				_serverSupport.canUseEPRT = NO;
+				_ftpFlags.canUseEPRT = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingActiveState) 
 			{
-				_serverSupport.canUseActive = NO;
+				_ftpFlags.canUseActive = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
 			}
 			if (GET_STATE == FTPSettingPassiveState) 
 			{
-				_serverSupport.canUsePASV = NO;
+				_ftpFlags.canUsePASV = NO;
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
 				break;
@@ -1716,25 +1716,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				
 				if (lastState == FTPSettingEPSVState) 
 				{
-					_serverSupport.canUseEPSV = NO;
+					_ftpFlags.canUseEPSV = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingEPRTState) 
 				{
-					_serverSupport.canUseEPRT = NO;
+					_ftpFlags.canUseEPRT = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				} 
 				else if (lastState == FTPSettingActiveState)
 				{
-					_serverSupport.canUseActive = NO;
+					_ftpFlags.canUseActive = NO;
 					[self sendCommand:@"DATA_CON"];
 					break;
 				}
 				else if (lastState == FTPSettingPassiveState) 
 				{
-					_serverSupport.canUseActive = NO;
+					_ftpFlags.canUseActive = NO;
 					[self sendCommand:@"DATA_CON"];
 				}
 			}
@@ -1847,7 +1847,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[_writeHandle closeFile];
 		[self setWriteHandle:nil];
 		
-		if (_received226)
+		if (_ftpFlags.received226)
 		{
 			[self setState:ConnectionIdleState];
 		}
@@ -1870,7 +1870,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self setReadHandle:nil];
 		_transferSize = 0;
 		
-		if (_received226)
+		if (_ftpFlags.received226)
 		{
 			[self setState:ConnectionIdleState];
 		}
@@ -1895,7 +1895,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		[results release];
 		[_dataBuffer setLength:0];
-		if (_received226)
+		if (_ftpFlags.received226)
 		{
 			[self setState:ConnectionIdleState];
 		}
@@ -1922,7 +1922,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_noopTimer invalidate];
 	[_noopTimer release]; _noopTimer = nil;
 	
-	//_serverSupport.isActiveDataConn = NO;
+	//_ftpFlags.isActiveDataConn = NO;
 }
 
 - (void)openDataStreamsToHost:(NSHost *)aHost port:(int)aPort 
@@ -1990,25 +1990,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if (lastState == FTPSettingEPSVState) 
 	{
-		_serverSupport.canUseEPSV = NO;
+		_ftpFlags.canUseEPSV = NO;
 		[self closeDataStreams];
 		[self sendCommand:@"DATA_CON"];
 	}
 	else if (lastState == FTPSettingEPRTState) 
 	{
-		_serverSupport.canUseEPRT = NO;
+		_ftpFlags.canUseEPRT = NO;
 		[self closeDataStreams];
 		[self sendCommand:@"DATA_CON"];
 	}
 	else if (lastState == FTPSettingActiveState) 
 	{
-		_serverSupport.canUseActive = NO;
+		_ftpFlags.canUseActive = NO;
 		[self closeDataStreams];
 		[self sendCommand:@"DATA_CON"];
 	}
 	else if (lastState == FTPSettingPassiveState) 
 	{
-		_serverSupport.canUsePASV = NO;
+		_ftpFlags.canUsePASV = NO;
 		[self closeDataStreams];
 		[self sendCommand:@"DATA_CON"];
 	}			
@@ -2069,7 +2069,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self pushCommandOnHistoryQueue:com];
 	[self sendCommand:cmd];
 	// Not all servers return SITE in the FEAT request.
-	/*if (_serverSupport.hasSITE)
+	/*if (_ftpFlags.hasSITE)
 	{
 		unsigned long permissions = [perms unsignedLongValue];
 		NSString *cmd = [NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path];
@@ -2328,18 +2328,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   dependant:dataCmd
 												userInfo:nil];
 	
-	if (!_setTransferMode) {
+	if (!_ftpFlags.setTransferMode) {
 		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
-		_setTransferMode = YES;
+		_ftpFlags.setTransferMode = YES;
 	}
 	
 	
-	if (_serverSupport.hasSize)
+	if (_ftpFlags.hasSize)
 		[self queueCommand:size];
 	[self queueCommand:dataCmd];
 	[self queueCommand:retr];
@@ -2382,7 +2382,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   dependant:retr
 												userInfo:nil];
 	ConnectionCommand *size = nil;
-	if (_serverSupport.hasSize) {
+	if (_ftpFlags.hasSize) {
 		size = [ConnectionCommand command:[NSString stringWithFormat:@"SIZE %@", remotePath]
 							   awaitState:ConnectionIdleState 
 								sentState:ConnectionSentSizeState
@@ -2394,19 +2394,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 												 awaitState:ConnectionIdleState 
 												  sentState:ConnectionIdleState
-												  dependant:_serverSupport.hasSize ? size : rest
+												  dependant:_ftpFlags.hasSize ? size : rest
 												   userInfo:nil];
 	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	if (!_setTransferMode) {
+	if (!_ftpFlags.setTransferMode) {
 		[dataCmd addDependantCommand:bin];
 	}
 	
 	[self startBulkCommands];
 	[self queueCommand:dataCmd];
-	if (!_setTransferMode)
+	if (!_ftpFlags.setTransferMode)
 		[self queueCommand:bin];
-	if (_serverSupport.hasSize)
+	if (_ftpFlags.hasSize)
 		[self queueCommand:size];
 	[self queueCommand:rest];
 	[self queueCommand:retr];
@@ -2514,21 +2514,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (ConnectionCommand *)nextAvailableDataConnectionType
 {
 	ConnectionCommand *cmd = nil;
-	if (_serverSupport.canUsePASV) {
+	if (_ftpFlags.canUsePASV) {
 		cmd = [ConnectionCommand command:@"PASV" 
 							  awaitState:ConnectionIdleState
 							   sentState:FTPSettingPassiveState
 							   dependant:nil 
 								userInfo:nil];
 	}
-	else if (_serverSupport.canUseEPSV) {
+	else if (_ftpFlags.canUseEPSV) {
 		cmd = [ConnectionCommand command:@"EPSV" 
 							  awaitState:ConnectionIdleState
 							   sentState:FTPSettingEPSVState
 							   dependant:nil 
 								userInfo:nil];
 	}
-	else if (_serverSupport.canUseEPRT) {
+	else if (_ftpFlags.canUseEPRT) {
 		//we scan for this in the send command to setup the connection
 		cmd = [ConnectionCommand command:@"EPRT" 
 							  awaitState:ConnectionIdleState
@@ -2536,7 +2536,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							   dependant:nil 
 								userInfo:nil];
 	}
-	else if (_serverSupport.canUseActive) {
+	else if (_ftpFlags.canUseActive) {
 		//we scan for this in the send command to setup the connection
 		cmd = [ConnectionCommand command:@"PORT" 
 							  awaitState:ConnectionIdleState
@@ -2559,7 +2559,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							   dependant:nil
 								userInfo:nil];
 	}
-	_received226 = NO;
+	_ftpFlags.received226 = NO;
 	
 	return cmd;
 }
@@ -2676,7 +2676,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		KTLog(TransportDomain, KTLogError, @"Failed to setup EPRT socket, trying PORT");
 		//try doing a port command
-		_serverSupport.canUseEPRT = NO;
+		_ftpFlags.canUseEPRT = NO;
 		_state = FTPSettingActiveState;
 		return [self setupActiveConnection];
 	}
@@ -2800,14 +2800,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	[self startBulkCommands];
 	
-	if (!_setTransferMode) {
+	if (!_ftpFlags.setTransferMode) {
 		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
-		_setTransferMode = YES;
+		_ftpFlags.setTransferMode = YES;
 	}
 	
 	
