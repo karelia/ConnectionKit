@@ -498,7 +498,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						chunkLength = [chunk length];		// actual length of bytes read
 
 						NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
-						_transferSize = [size longValue];
+						_transferSize = [size unsignedLongLongValue];
 					}
 					
 					//kick start the transfer
@@ -670,7 +670,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					if ( [sizeScanner scanLocation] < [command length] )
 					{
 						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-						[sizeScanner scanLongLong:&_transferSize];
+						sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+							   "%llu", &_transferSize);
 					}
 				}
 				else
@@ -682,7 +683,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					if ( [sizeScanner scanLocation] < [command length] )
 					{
 						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-						[sizeScanner scanLongLong:&_transferSize];
+						sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+							   "%llu", &_transferSize);
 					}
 					else
 					{
