@@ -753,6 +753,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_ftpFlags.isActiveDataConn == YES) {
 				[self closeDataConnection];
 			}
+			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
+			{
+				if (_flags.cancel) {
+					[_forwarder connectionDidCancelTransfer:self];
+				}
+			}
 			if (_dataSendStream == nil || _dataReceiveStream == nil)
 			{
 				[self setState:ConnectionIdleState];
