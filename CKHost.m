@@ -364,9 +364,11 @@ static NSImage *sHostIcon = nil;
 			status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
 			
 			// length  may be zero, it just means a zero-length password
-			myPassword = [[NSString stringWithCString:pass length:length] retain];
-			SecKeychainItemFreeContent(&list, pass);
-			
+			if (status != userCanceledErr)
+			{
+				myPassword = [[NSString stringWithCString:pass length:length] retain];
+				SecKeychainItemFreeContent(&list, pass);
+			}
 		}
 		if (item) CFRelease(item);
 		if (search) CFRelease (search);
