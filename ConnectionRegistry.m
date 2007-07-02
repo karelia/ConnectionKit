@@ -650,6 +650,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		{
 			NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
 			id currentItem = nil;
+			[self beginGroupEditing];
 			while (currentItem = [itemsToMoveEnumerator nextObject])
 			{
 				//Make sure the item we dragged isn't attempting to be dragged into itself!
@@ -657,18 +658,22 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				{
 					if ([[currentItem className] isEqualToString:@"CKHost"])
 					{
-						//Moving a Host
-						if ([currentItem category])
+						BOOL hasRemoved = NO;
+						NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
+						CKHostCategory *currentCategory;
+						while (currentCategory = [allCategoriesEnumerator nextObject])
 						{
-							//Remove the host from the parent category
-							[[currentItem category] removeHost:currentItem];
+							if ([[currentCategory hosts] containsObject:currentItem])
+							{
+								[currentCategory removeHost:currentItem];
+								hasRemoved = YES;
+							}
 						}
-						else
+						if (!hasRemoved)
 						{
-							//Remove the host from the root.
 							[self removeHost:currentItem];
 						}
-						if (item == nil)
+						if (!item)
 						{
 							//Add new Host to the root.
 							[self addHost:currentItem];
@@ -681,15 +686,19 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 					}
 					else
 					{
-						//Moving a category
-						if ([currentItem category])
+						BOOL hasRemoved = NO;
+						NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
+						CKHostCategory *currentCategory;
+						while (currentCategory = [allCategoriesEnumerator nextObject])
 						{
-							//Remove the category from the parent category
-							[[currentItem category] removeChildCategory:currentItem];
+							if ([[currentCategory childCategories] containsObject:currentItem])
+							{
+								[currentCategory removeChildCategory:currentItem];
+								hasRemoved = YES;
+							}
 						}
-						else
+						if (!hasRemoved)
 						{
-							//Remove the category from the root
 							[self removeCategory:currentItem];
 						}
 						if (item == nil)
@@ -706,6 +715,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				}
 				[myDraggedItems removeAllObjects];
 			}
+			[self endGroupEditing];						
 		}
 	}
 	return YES;
