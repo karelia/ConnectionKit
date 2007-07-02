@@ -246,7 +246,7 @@
 "MB" = "MB";
 
 /* sftp last error */
-"Method not Supported" = "Mehode nicht unterstützt";
+"Method not Supported" = "Methode nicht unterstützt";
 
 /* new cat name */
 "New Category" = "Neue Kategorie";
@@ -405,7 +405,7 @@
 "Unknown Principle" = "Unbekanntes Prinzip";
 
 /* status message */
-"Uploading" = "Hochladen";
+"Uploading" = "Hochladen von";
 
 /* status */
 "Uploading %@" = "Hochladen von %@";
