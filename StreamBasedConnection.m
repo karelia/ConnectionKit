@@ -335,11 +335,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		NSLog(@"Failed to set tcp no delay setting");
 	}
-	opt = 240; // 2 minutes
-	if (setsockopt(sock, IPPROTO_TCP, TCP_KEEPALIVE, &opt, sizeof(opt)))
-	{
-		NSLog(@"Failed to set tcp keep alive setting");
-	}
 	
 	struct sockaddr_in addr;
 	bzero((char *) &addr, sizeof(addr));
