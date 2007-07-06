@@ -504,7 +504,7 @@ static NSImage *sHostIcon = nil;
 	{
 		[self willChangeValueForKey:@"icon"];
 		[myIcon autorelease];
-		myIcon = [icon copy];
+		myIcon = [icon retain];
 		[self didChangeValueForKey:@"icon"];
 		[self didChange];
 	}
