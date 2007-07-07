@@ -14,15 +14,28 @@ int main(int argc, char *argv[])
 
 @interface DropletLauncherDelegate : NSObject
 {
-	
+	BOOL myHasFilesToUpload;
 }
 
 @end
 
 @implementation DropletLauncherDelegate
 
+- (id)init
+{
+	if ((self != [super init]))
+	{
+		[self release];
+		return nil;
+	}
+	myHasFilesToUpload = NO;
+	
+	return self;
+}
+
 - (void)application:(NSApplication *)app openFiles:(NSArray *)files
 {
+	myHasFilesToUpload = YES;
 	NSString *dropletCreator = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CKApplication"];
 	NSString *applicationPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:dropletCreator];
 	NSString *dyldPath = [[applicationPath stringByAppendingPathComponent:@"Contents"] stringByAppendingPathComponent:@"Frameworks"];
@@ -50,6 +63,17 @@ int main(int argc, char *argv[])
 	
     [task release];
 	[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+}
+
+- (void)applicationDidFinishLaunching:(NSNotification *)aNotification
+{
+	if (!myHasFilesToUpload)
+	{
+		NSString *dropletCreator = [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CKApplication"];
+		NSString *applicationPath = [[NSWorkspace sharedWorkspace] absolutePathForAppBundleWithIdentifier:dropletCreator];
+		[[NSWorkspace sharedWorkspace] openFile:[[NSBundle mainBundle] pathForResource:@"configuration" ofType:@"ckhost"] withApplication:applicationPath];
+		[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.0];
+	}
 }
 
 @end
