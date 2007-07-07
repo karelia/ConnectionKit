@@ -1754,6 +1754,12 @@ int filenameSort(id obj1, id obj2, void *context)
 							  forKey:cxFilenameKey];
 					}			
 				}
+				NSString *fn = [d objectForKey:cxFilenameKey];
+				if ([fn isEqualToString:@"."] ||
+					[fn isEqualToString:@".."])
+				{
+					continue;
+				}
 				[attributedLines addObject:d];
 			}
 		}
