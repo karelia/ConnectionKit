@@ -238,7 +238,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	
 	while ((cur = [e nextObject]))
 	{
-		record = [CKTransferRecord recordForPath:chompedPath withRoot:cur];
+		record = [CKTransferRecord recursiveRecord:cur forPath:chompedPath];
 		if (record)
 		{
 			return record;
