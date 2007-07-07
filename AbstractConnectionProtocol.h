@@ -51,7 +51,8 @@ typedef struct __flags {
 	
 	unsigned permissions:1;
 	unsigned badPassword:1;
-	unsigned cancel:1;
+	unsigned cancel:1; // deprecated
+	unsigned didCancel:1;
 	unsigned changeDirectory:1;
 	unsigned createDirectory:1;
 	unsigned deleteDirectory:1;
@@ -82,7 +83,7 @@ typedef struct __flags {
 	unsigned isRecursiveDeleting:1;
 	unsigned didAuthenticate:1;
 	
-	unsigned padding:3;
+	unsigned padding:2;
 } connectionFlags;
 
 
@@ -294,7 +295,8 @@ typedef struct __flags {
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath;
-- (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con;
+- (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con; // this is deprecated. Use method below
+- (void)connection:(id <AbstractConnectionProtocol>)con didCancelTransfer:(NSString *)remotePath;
 
 - (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists;
 @end

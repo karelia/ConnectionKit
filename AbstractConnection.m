@@ -724,6 +724,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.permissions				= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:)];
 	_flags.badPassword				= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
 	_flags.cancel					= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
+	_flags.didCancel				= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
 	_flags.changeDirectory			= [del respondsToSelector:@selector(connection:didChangeToDirectory:)];
 	_flags.createDirectory			= [del respondsToSelector:@selector(connection:didCreateDirectory:)];
 	_flags.deleteDirectory			= [del respondsToSelector:@selector(connection:didDeleteDirectory:)];
