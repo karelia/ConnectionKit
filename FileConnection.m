@@ -167,20 +167,23 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)threadedAbort
 {
-	if ( _flags.cancel )
+	if (_flags.cancel)
 	{
 		[_forwarder connectionDidCancelTransfer:self];
+	}
+	if (_flags.didCancel)
+	{
+		NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
+		[_forwarder connection:self didCancelTransfer:remotePath];
 	}
 	[self processInvocations];
 }
 
 - (void)threadedCancelAll
 {
-	if ( _flags.cancel )
-	{
-		[_forwarder connectionDidCancelTransfer:self];
-	}
+	[self threadedAbort];
 }
+
 
 #pragma mark -
 #pragma mark Main Methods

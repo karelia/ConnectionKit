@@ -755,8 +755,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
 			{
-				if (_flags.cancel) {
+				if (_flags.cancel)
+				{
 					[_forwarder connectionDidCancelTransfer:self];
+				}
+				if (_flags.didCancel)
+				{
+					NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
+					[_forwarder connection:self didCancelTransfer:remotePath];
 				}
 			}
 			if (_dataSendStream == nil || _dataReceiveStream == nil)
@@ -1046,13 +1052,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 426: //con closed
 		{
-			//We don handle this here because we handle the data port connection closure in the 
+			//We don handle this here because we handle the data port connection closure in the
 			// NSStream event management.
 			// However, send our abort callback.
-			if (_flags.cancel) {
+			if (_flags.cancel)
+			{
 				[_forwarder connectionDidCancelTransfer:self];
 			}
-				
+			if (_flags.didCancel)
+			{
+				NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
+				[_forwarder connection:self didCancelTransfer:remotePath];
+			}
+			
 			break;
 		}
 		case 450: //file in use
