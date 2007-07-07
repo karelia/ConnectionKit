@@ -1472,6 +1472,13 @@ int filenameSort(id obj1, id obj2, void *context)
  "drwxrwxr-x               folder        2 May 10  1996 network"
 */
 
+#define CHECK_NAME NSString *fn = [d objectForKey:cxFilenameKey]; \
+if ([fn isEqualToString:@"."] || \
+	[fn isEqualToString:@".."]) \
+{ \
+	continue; \
+}
+
 // I have made a LIST -F which puts a / at the end of folders. This helps to determine symlinked folders or files.
 //warning TODO GREG: this also puts "*" at the end of executables!  YOU HAVE TO SEE IF IT'S EXECUTABLE, AND REMOVE THE "*" AT THE  END.
 + (NSArray *)attributedFilesFromListing:(NSString *)line
@@ -1550,6 +1557,7 @@ int filenameSort(id obj1, id obj2, void *context)
 				
 				[d setObject:[self fixFilename:filenameStr withAttributes:d]
 					  forKey:cxFilenameKey];
+				CHECK_NAME
 				[attributedLines addObject:d];
 			}
 			else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] &&
@@ -1571,6 +1579,7 @@ int filenameSort(id obj1, id obj2, void *context)
 				
 				[d setObject:[self fixFilename:filenameStr withAttributes:d]
 					  forKey:cxFilenameKey];
+				CHECK_NAME
 				[attributedLines addObject:d];
 			}
 			else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] && 	 
@@ -1591,6 +1600,7 @@ int filenameSort(id obj1, id obj2, void *context)
 				
 				[d setObject:[self fixFilename:filenameStr withAttributes:d]
 					  forKey:cxFilenameKey];
+				CHECK_NAME
 				[attributedLines addObject:d];
 			}
 			else if ([[words objectAtIndex:1] isEqualToString:@"FTP"] && [[words objectAtIndex:2] isEqualToString:@"User"]) // Trellix FTP Server
@@ -1637,6 +1647,7 @@ int filenameSort(id obj1, id obj2, void *context)
 					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
 						  forKey:cxFilenameKey];
 				}
+				CHECK_NAME
 				[attributedLines addObject:d];
 			}
 			else
@@ -1755,12 +1766,7 @@ int filenameSort(id obj1, id obj2, void *context)
 							  forKey:cxFilenameKey];
 					}			
 				}
-				NSString *fn = [d objectForKey:cxFilenameKey];
-				if ([fn isEqualToString:@"."] ||
-					[fn isEqualToString:@".."])
-				{
-					continue;
-				}
+				CHECK_NAME
 				[attributedLines addObject:d];
 			}
 		}
