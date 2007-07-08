@@ -150,6 +150,33 @@ static NSSize sFilesCollapsedSize = {375, 105};
 											  forKey:@"DisplayFiles"];
 }
 
+- (void)notifyGrowlOfSuccessfulUpload
+{
+	NSString *dropletName = [[NSProcessInfo processInfo] processName];
+	NSString *scriptSource = [NSString stringWithFormat:@"tell application \"System Events\"\n"
+		"set growlIsRunning to count of (every process whose name is \"GrowlHelperApp\") > 0\n"
+		"end tell\n"
+		"if growlIsRunning\n"
+		"tell application \"GrowlHelperApp\"\n"
+		"set the allNotificationsList to {\"Upload Complete\"}\n"
+		"set the enabledNotificationsList to {\"Upload Complete\"}\n"
+		"register as application \"Connection Droplet\" all notifications allNotificationsList default notifications enabledNotificationsList icon of application \"%@\"\n"
+		"notify with name \"Upload Complete\" title \"Upload Complete\" description \"The items have been uploaded successfully.\" application name \"Connection Droplet\"\n"
+		"end tell\n"		
+		"end if\n", dropletName];
+	NSDictionary *errorDictionary;
+	NSAppleEventDescriptor *returnDescriptor = nil;
+	
+	NSAppleScript *applescript = [[NSAppleScript alloc] initWithSource:scriptSource];
+	returnDescriptor = [applescript executeAndReturnError:&errorDictionary];
+	if (!returnDescriptor)
+	{
+		//error
+		NSLog(@"Applescript Error for Droplet Growl Notification: %@", errorDictionary);
+	}
+	[applescript release];
+}
+
 #pragma mark -
 #pragma mark NSWindow Delegate Methods
 
@@ -210,6 +237,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
 	[oStatus setStringValue:NSLocalizedString(@"Disconnected", @"status")];
+	[self notifyGrowlOfSuccessfulUpload];
 	[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.5];
 }
 
