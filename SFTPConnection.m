@@ -987,7 +987,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		[download retain];
 		[self dequeueDownload];
-		if (_flags.uploadFinished)
+		if (_flags.downloadFinished)
 		{
 			[_forwarder connection:self downloadDidFinish:remote];
 		}
