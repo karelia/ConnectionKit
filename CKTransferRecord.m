@@ -366,6 +366,12 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)setProperty:(id)property forKey:(NSString *)key
 {
+	/// Terrence added this NSLog since the exception doesn't log the key
+	if ( nil == property )
+	{
+		NSLog(@"attempted to set nil property for key %@", key);
+	}
+	
 	[myProperties setObject:property forKey:key];
 }
 
