@@ -1131,6 +1131,10 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 				dirbuf[c] = '\0';
 				NSMutableDictionary *at = [NSMutableDictionary dictionary];
 				NSString *filename = [NSString stringWithUTF8String:dirbuf];
+				if ([filename isEqualToString:@"."] || [filename isEqualToString:@".."])
+				{
+					continue;
+				}
 				[at setObject:filename forKey:cxFilenameKey];
 				if (attribs.flags & LIBSSH2_SFTP_ATTR_SIZE) 
 				{
