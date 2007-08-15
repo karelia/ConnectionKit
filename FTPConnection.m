@@ -2435,7 +2435,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)directoryContents
 {
-	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -FA" 
+	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -Fa" 
 											awaitState:ConnectionIdleState 
 											 sentState:ConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
@@ -2463,7 +2463,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												userInfo:nil];
 	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -FA" 
+	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -Fa" 
 											awaitState:ConnectionIdleState 
 											 sentState:ConnectionAwaitingDirectoryContentsState 
 											 dependant:dataCmd 
