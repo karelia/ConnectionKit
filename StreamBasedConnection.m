@@ -1091,6 +1091,76 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
+{	
+	//If any of these connections are nil, they were released by the didDisconnect method. We need them, however.
+	//In testing, this is because the host didn't support the number of additional concurrent connections we requested to open.
+	//To remedy this, we point the nil connection to its peer connection, who will perform that work as well.
+	
+	BOOL noConnectionsToContinue = NO;
+	
+	if ([_recursiveDeletionsQueue count] > 0)
+	{
+		//We are recursively deleting
+		if (_recursiveListingConnection == nil)
+		{
+			if (_recursiveDeletionConnection == nil)
+			{
+				noConnectionsToContinue = YES;
+			}
+			else
+			{
+				_recursiveListingConnection = [_recursiveDeletionConnection retain];
+				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			}
+		}
+		else if (_recursiveDeletionConnection == nil)
+		{
+			if (_recursiveListingConnection == nil)
+			{
+				noConnectionsToContinue = YES;
+			}
+			else
+			{
+				_recursiveDeletionConnection =  [_recursiveListingConnection retain];
+			}
+		}		
+	}
+	else if ([_recursiveDownloadQueue count] > 0)
+	{
+		//We are recursively downloading
+		if (_recursiveListingConnection == nil)
+		{
+			if (_recursiveDownloadConnection == nil)
+			{
+				noConnectionsToContinue = YES;
+			}
+			else
+			{
+				_recursiveListingConnection - [_recursiveDownloadConnection retain];
+				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			}
+		}
+		else if (_recursiveDownloadConnection == nil)
+		{
+			if (_recursiveListingConnection == nil)
+			{
+				noConnectionsToContinue = YES;
+			}
+			else
+			{
+				_recursiveDownloadConnection = [_recursiveListingConnection retain];
+			}
+		}
+	}
+	
+	if (noConnectionsToContinue)
+	{
+		//It seems we've got no connections we can use to do this operation. Error here, because we will fail the operation.
+		NSLog(@"Connections for operation were denied connectivity.");
+	}
+}
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
 	if (con == _fileCheckingConnection)
