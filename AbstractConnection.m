@@ -920,22 +920,27 @@ NSDictionary *sDataAttributes = nil;
 - (CKTransferRecord *)recursiveRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
 	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
+	if ([[root name] isEqualToString:first] || [[root path] isEqualToString:@"/"])
 	{
 		CKTransferRecord *child = nil;
 		NSEnumerator *e = [[root contents] objectEnumerator];
 		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
+		if (![[root path] isEqualToString:@"/"])
+		{
+			path = [path stringByDeletingFirstPathComponent];
+		}
 		if ([path isEqualToString:@"/"])
+		{
 			return root;
+		}
 		
 		while ((cur = [e nextObject]))
 		{
 			child = [self recursiveRecordWithPath:path root:cur];
 			if (child)
+			{
 				return child;
+			}
 		}
 		
 		// if we get here we need to create the record		
@@ -954,13 +959,12 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)_mergeRecord:(CKTransferRecord *)rec into:(CKTransferRecord *)root
 {
-	CKTransferRecord *parent = [self recursiveRecordWithPath:[[rec name] stringByDeletingLastPathComponent]
-														root:root];
+	CKTransferRecord *parent = [self recursiveRecordWithPath:[[rec name] stringByDeletingLastPathComponent] root:root];
+	[rec setName:[[rec name] lastPathComponent]];		
 	[parent addContent:rec];
-	[rec setName:[[rec name] lastPathComponent]];
 }
 
-- (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	CKTransferRecord *record;
@@ -992,11 +996,23 @@ NSDictionary *sDataAttributes = nil;
 								   toFile:remote
 					 checkRemoteExistence:NO
 								 delegate:nil];
-				[self _mergeRecord:record into:root];
+				if (![[root path] isEqualToString:@"/"])
+				{
+					[self _mergeRecord:record into:root];
+				}
+				else
+				{
+					CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
+					root = parent;
+					[root setName:[[root name] lastPathComponent]];		
+					[record setName:[[record name] lastPathComponent]];		
+					[root addContent:record];
+				}
 			}
 		}
 	}
-} 
+	return root;
+}
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
@@ -1020,12 +1036,20 @@ NSDictionary *sDataAttributes = nil;
 						   toFile:remote
 			 checkRemoteExistence:NO
 						 delegate:nil];
-		[self _mergeRecord:record into:root];
+		if (![[root path] isEqualToString:@"/"])
+		{
+			[self _mergeRecord:record into:root];
+		}
+		else
+		{
+			root = record;
+			[root setName:[[root name] lastPathComponent]];		
+		}
 	}
 	else
 	{
 		[self createDirectory:remotePath];
-		[self recursivelyUpload:localPath 
+		root = [self recursivelyUpload:localPath 
 							 to:[remotePath stringByAppendingPathComponent:[localPath lastPathComponent]] 
 						   root:root 
 					   rootPath:remotePath
