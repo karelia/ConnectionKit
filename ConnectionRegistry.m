@@ -66,8 +66,23 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		[myCenter addObserver:self
 					 selector:@selector(otherProcessChanged:)
 						 name:CKRegistryNotification
+		
 					   object:nil];
-		NSArray *hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		NSArray *hosts;
+		@try
+		{
+			hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		}
+		@catch (NSException *exception) 
+		{
+			//Registry was corrupted. 
+			//We will overwrite the corrupt registry with a fresh one. 
+			//Should we inform the user? In any case, log it.
+			NSLog(@"Unable to unarchive registry at path \"%@\". New Registry will be created to overwrite damaged one.", [self databaseFile]);
+			NSLog(@"Caught %@: %@", [exception name], [exception  reason]);
+			return self;
+		}
+		
 		[myConnections addObjectsFromArray:hosts];
 		NSEnumerator *e = [hosts objectEnumerator];
 		id cur;
@@ -209,6 +224,11 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 - (void)insertHost:(CKHost *)host atIndex:(unsigned)index
 {
+	if (index >= [myConnections count])
+	{
+		[self addHost:host];
+		return;
+	}
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(changed:)
 												 name:CKHostChanged
@@ -584,37 +604,31 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	
 	return YES;
 }
-
-- (NSDragOperation)outlineView:(NSOutlineView*)outlineView validateDrop:(id)info proposedItem:(id)item proposedChildIndex:(int)index
+- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
 {
-	NSArray *draggedItems = [[info draggingPasteboard] propertyListForType:NSFilenamesPboardType];
-	NSEnumerator *draggedItemsEnumerator = [draggedItems objectEnumerator];
-	NSString *currentItemPath;
-	BOOL canAcceptDrag = NO;
-	while ((currentItemPath = [draggedItemsEnumerator nextObject]) && !canAcceptDrag)
+	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
+	if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
 	{
-		if (item == nil && index == -1)
-		{
-			canAcceptDrag = YES;
-			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
-		}
-		else if ([[item className] isEqualToString:@"CKHostCategory"])
-		{
-			canAcceptDrag = YES;
-			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex+1];
-			break;
-		}
-		if ([[NSFileManager defaultManager] fileExistsAtPath:[currentItemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ![currentItemPath hasPrefix:@"/tmp/ck"])
-		{  
-			//Drag from Finder
-			canAcceptDrag = YES;
-			[outlineView setDropItem:item dropChildIndex:NSOutlineViewDropOnItemIndex];
-			break;
-		}
+		return NSDragOperationNone;
 	}
-	if (canAcceptDrag)
+	if ([[NSFileManager defaultManager] fileExistsAtPath:[itemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ! [itemPath hasPrefix:@"/tmp/ck"])
 	{
+		//Drag From Finder
+		if ([item isKindOfClass:[CKHostCategory class]])
+		{
+			[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+		}
+		else
+		{
+			[outlineView setDropItem:nil dropChildIndex:proposedChildIndex];
+		}
 		return NSDragOperationCopy;
+	}
+	else if (item == nil || [item isKindOfClass:[CKHostCategory class]])
+	{
+		//Drag to re-order
+		[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+		return NSDragOperationMove;
 	}
 	return NSDragOperationNone;
 }
@@ -637,12 +651,26 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				if ([[item className] isEqualToString:@"CKHostCategory"])
 				{
 					//Into a Category
-					[item addHost:dropletHost];
+					if (index == -1)
+					{
+						[item addHost:dropletHost];
+					}
+					else
+					{
+						[item insertHost:dropletHost atIndex:index];
+					}
 				}
 				else
 				{
 					//Into root
-					[self addHost:dropletHost];					
+					if (index == -1)
+					{
+						[self addHost:dropletHost];					
+					}
+					else
+					{
+						[self insertHost:dropletHost atIndex:index];
+					}
 				}
 			}
 		}
@@ -651,65 +679,98 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
 			id currentItem = nil;
 			[self beginGroupEditing];
-			while (currentItem = [itemsToMoveEnumerator nextObject])
+			while ((currentItem = [itemsToMoveEnumerator nextObject]))
 			{
 				//Make sure the item we dragged isn't attempting to be dragged into itself!
-				if (currentItem != item)
+				if (currentItem == item)
 				{
-					if ([[currentItem className] isEqualToString:@"CKHost"])
+					continue;
+				}
+				if ([[currentItem className] isEqualToString:@"CKHost"])
+				{
+					BOOL hasRemoved = NO;
+					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
+					CKHostCategory *currentCategory;
+					BOOL cameFromCategory = YES;
+					while (currentCategory = [allCategoriesEnumerator nextObject])
 					{
-						BOOL hasRemoved = NO;
-						NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
-						CKHostCategory *currentCategory;
-						while (currentCategory = [allCategoriesEnumerator nextObject])
+						if ([[currentCategory hosts] containsObject:currentItem])
 						{
-							if ([[currentCategory hosts] containsObject:currentItem])
-							{
-								[currentCategory removeHost:currentItem];
-								hasRemoved = YES;
-							}
+							[currentCategory removeHost:currentItem];
+							hasRemoved = YES;
 						}
-						if (!hasRemoved)
+					}
+					if (!hasRemoved)
+					{
+						cameFromCategory = NO;
+						[self removeHost:currentItem];
+					}
+					if (!item)
+					{
+						//Add new Host to the root.
+						if (index == -1)
 						{
-							[self removeHost:currentItem];
-						}
-						if (!item)
-						{
-							//Add new Host to the root.
 							[self addHost:currentItem];
 						}
 						else
 						{
-							//Add the Host to it's new parent category.
-							[item addHost:currentItem];
+							[self insertHost:currentItem atIndex: cameFromCategory ? index : index-1];
 						}
 					}
 					else
 					{
-						BOOL hasRemoved = NO;
-						NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
-						CKHostCategory *currentCategory;
-						while (currentCategory = [allCategoriesEnumerator nextObject])
+						//Add the Host to it's new parent category.
+						if (index == -1)
 						{
-							if ([[currentCategory childCategories] containsObject:currentItem])
-							{
-								[currentCategory removeChildCategory:currentItem];
-								hasRemoved = YES;
-							}
+							[item addHost:currentItem];
 						}
-						if (!hasRemoved)
+						else
 						{
-							[self removeCategory:currentItem];
+							[item insertHost:currentItem atIndex:index];
 						}
-						if (item == nil)
+					}
+				}
+				else
+				{
+					BOOL hasRemoved = NO;
+					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
+					CKHostCategory *currentCategory;
+					BOOL cameFromCategory = YES;
+					while (currentCategory = [allCategoriesEnumerator nextObject])
+					{
+						if ([[currentCategory childCategories] containsObject:currentItem])
 						{
-							//Add new category to the root.
+							[currentCategory removeChildCategory:currentItem];
+							hasRemoved = YES;
+						}
+					}
+					if (!hasRemoved)
+					{
+						cameFromCategory = NO;
+						[self removeCategory:currentItem];
+					}
+					if (!item)
+					{
+						//Add new category to the root.
+						if (index == -1)
+						{
 							[self addCategory:currentItem];
 						}
 						else
-						{		
-							//Add new category to its new parent category.
+						{
+							[self insertCategory:currentItem atIndex: cameFromCategory ? index : index-1];
+						}
+					}
+					else
+					{		
+						//Add new category to its new parent category.
+						if (index == -1)
+						{
 							[item addChildCategory:currentItem];
+						}
+						else
+						{
+							[item insertChildCategory:currentItem atIndex:index];
 						}
 					}
 				}

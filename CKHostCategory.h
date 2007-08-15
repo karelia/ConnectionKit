@@ -23,10 +23,12 @@
 - (NSString *)name;
 
 - (void)addChildCategory:(CKHostCategory *)cat;
+- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(unsigned)index;
 - (void)removeChildCategory:(CKHostCategory *)cat;
 - (NSArray *)childCategories;
 
 - (void)addHost:(CKHost *)host;
+- (void)insertHost:(CKHost *)host atIndex:(unsigned)index;
 - (void)removeHost:(CKHost *)host;
 - (NSArray *)hosts;
 
