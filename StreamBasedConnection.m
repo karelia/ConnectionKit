@@ -972,7 +972,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Recursive Deletion Support Methods
-
 - (void)processRecursiveDeletionQueue
 {
 	if (!_recursiveListingConnection)
@@ -981,17 +980,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveListingConnection setName:@"recursive listing"];
 		[_recursiveListingConnection setDelegate:self];
 		[_recursiveListingConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
+		[_recursiveListingConnection connect];
+	}
+	if (!_recursiveDeletionConnection)
+	{
 		_recursiveDeletionConnection = [self copy];
 		[_recursiveDeletionConnection setName:@"recursive deletion"];
 		[_recursiveDeletionConnection setDelegate:self];
 		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
-	}
-	if (![_recursiveListingConnection isConnected])
-	{
-		[_recursiveListingConnection connect];
-	}
-	if (![_recursiveDeletionConnection isConnected])
-	{
 		[_recursiveDeletionConnection connect];
 	}
 	[_deletionLock lock];
@@ -999,6 +995,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		_numberOfListingsRemaining++;
 		myStreamFlags.isDeleting = YES;
+		[_emptyDirectoriesToDelete addObject:[_recursiveDeletionsQueue objectAtIndex:0]];
 		[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 	}
 	[_deletionLock unlock];
@@ -1008,9 +1005,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	[_deletionLock lock];
 	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
-	[_emptyDirectoriesToDelete addObject:[path stringByStandardizingPath]];
-	[_deletionLock unlock];
-	
+	[_deletionLock unlock];	
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveDeletionQueue];
 }
 
@@ -1066,30 +1061,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Peer Connection Delegate Methods
-
-- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
-{
-	if (con == _fileCheckingConnection)
-	{
-		[_fileCheckingConnection release];
-		_fileCheckingConnection = nil;
-	}
-	else if (con == _recursiveListingConnection)
-	{
-		[_editingConnection release];
-		_editingConnection = nil;
-	}
-	else if (con == _recursiveDeletionConnection)
-	{
-		[_editingConnection release];
-		_editingConnection = nil;
-	}
-	else if (con == _recursiveListingConnection)
-	{
-		[_recursiveListingConnection release];
-		_recursiveListingConnection = nil;
-	}
-}
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
 {	
@@ -1158,6 +1129,30 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		//It seems we've got no connections we can use to do this operation. Error here, because we will fail the operation.
 		NSLog(@"Connections for operation were denied connectivity.");
+	}
+}
+
+- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+{
+	if (con == _fileCheckingConnection)
+	{
+		[_fileCheckingConnection release];
+		_fileCheckingConnection = nil;
+	}
+	else if (con == _recursiveListingConnection)
+	{
+		[_recursiveListingConnection release];
+		_recursiveListingConnection = nil;
+	}
+	else if (con == _recursiveDeletionConnection)
+	{
+		[_recursiveDeletionConnection release];
+		_recursiveDeletionConnection = nil;
+	}
+	else if (con == _recursiveDownloadConnection)
+	{
+		[_recursiveDownloadConnection release];
+		_recursiveDownloadConnection = nil;
 	}
 }
 
@@ -1250,11 +1245,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		// setup the local relative directory
 		NSString *relativePath = [dirPath substringFromIndex:[remote length]];
 		NSString *localDir = [local stringByAppendingPathComponent:relativePath];
+//		NSLog(@"recursivelyCreateDirectory: %@", localDir);
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:localDir attributes:nil];
 		
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
-				
+		
 		while ((cur = [e nextObject]))
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
@@ -1277,6 +1273,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		if (_downloadListingsRemaining == 0)
 		{
+			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
+			{
+				//We tried to download an entirely empty folder. We're finished.
+//				NSLog(@"Empty folder");
+				[_forwarder connection:self downloadDidFinish:dirPath];
+			}
 			[_recursiveDownloadLock lock];
 			myStreamFlags.isDownloading = NO;
 			[_recursiveDownloadQueue removeObjectAtIndex:0];
@@ -1323,16 +1325,31 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_deletionLock lock];
 		_numberOfDirDeletionsRemaining--;
 		[_deletionLock unlock];
-		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0 && _numberOfListingsRemaining == 0)
+		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
 		{
-			_numberOfDeletionsRemaining = 0;
-			myStreamFlags.isDeleting = NO;
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
-			if (_flags.deleteDirectory) {
+			if (_flags.deleteDirectory) 
+			{
 				[_forwarder connection:self didDeleteDirectory:dirPath];
+			}			
+			if ([_recursiveDeletionsQueue count] == 0)
+			{
+				_numberOfDeletionsRemaining = 0;
+				myStreamFlags.isDeleting = NO;
 			}
-		} else {
-			if (_flags.deleteDirectoryInAncestor) {
+			else
+			{
+				[_deletionLock lock];
+				[_emptyDirectoriesToDelete addObject:[_recursiveDeletionsQueue objectAtIndex:0]];
+				_numberOfListingsRemaining++;
+				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+				[_deletionLock unlock];
+			}
+		}
+		else
+		{
+			if (_flags.deleteDirectoryInAncestor)
+			{
 				[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 			}
 		}
