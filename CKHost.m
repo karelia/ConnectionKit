@@ -225,7 +225,7 @@ static NSImage *sHostIcon = nil;
 			
 			if (status == noErr)
 			{
-				if ((status = SecKeychainSearchCopyNext (search, &item)) == noErr) 
+				if ((status = SecKeychainSearchCopyNext (search, &item)) != errSecItemNotFound) 
 				{
 					status = SecKeychainItemDelete(item);
 				}
