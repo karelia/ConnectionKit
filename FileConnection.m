@@ -98,6 +98,19 @@ checkRemoteExistence:(NSNumber *)check;
 				  port:(NSString *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
+{
+	FileConnection *c = [[FileConnection alloc] initWithHost:host
+														port:port
+													username:username
+													password:password
+													   error:nil];
+	return [c autorelease];
+}
+
++ (id)connectionToHost:(NSString *)host
+				  port:(NSString *)port
+			  username:(NSString *)username
+			  password:(NSString *)password
 				 error:(NSError **)error
 {
 	FileConnection *c = [[FileConnection alloc] initWithHost:host
@@ -881,6 +894,12 @@ checkRemoteExistence:(NSNumber *)check;
 		[attribs setObject:cur forKey:cxFilenameKey];
 		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
 			NSString *target = [file stringByResolvingSymlinksInPath];
+			BOOL isDir;
+			[myFileManager fileExistsAtPath:target isDirectory:&isDir];
+			if (isDir && ![target hasSuffix:@"/"])
+			{
+				target = [target stringByAppendingString:@"/"];
+			}
 			[attribs setObject:target forKey:cxSymbolicLinkTargetKey];
 		}
 		
