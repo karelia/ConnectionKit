@@ -733,8 +733,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					_ftpFlags.isMicrosoft = NO;
 				}
-				[self sendCommand:@"FEAT"];
-				[self setState:ConnectionSentFeatureRequestState];
+				
+				// For some bizarre reason the Serv-U FTP Server doesn't accept the FEAT command here.
+				// It just hangs instead. So this is a special case to jump straight to login.
+				if ([command rangeOfString:@"Serv-U FTP Server"].location != NSNotFound)
+				{
+					[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+					[self setState:ConnectionSentUsernameState];
+				}
+				else
+				{
+					[self sendCommand:@"FEAT"];
+					[self setState:ConnectionSentFeatureRequestState];
+				}
 			}
 			break;
 		}
