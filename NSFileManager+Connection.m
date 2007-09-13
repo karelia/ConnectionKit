@@ -15,7 +15,7 @@
 {
 	BOOL isDir;
 	
-	if (![self fileExistsAtPath:path isDirectory:&isDir] && isDir)
+	if (![self fileExistsAtPath:path isDirectory:&isDir] || !isDir)
 	{
 		NSRange r = [path rangeOfString:@"/"];
 		while (r.location != NSNotFound)
