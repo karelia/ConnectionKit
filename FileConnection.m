@@ -210,8 +210,9 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		[_forwarder connection:self didChangeToDirectory:aDirectory];
 	}
+	
 	[myCurrentDirectory autorelease];
-	myCurrentDirectory = [[myFileManager currentDirectoryPath] copy];
+	myCurrentDirectory = [aDirectory copy];
 	[self setState:ConnectionIdleState];
 }
 
