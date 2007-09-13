@@ -40,10 +40,16 @@
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>
 #import <Connection/NSString+Connection.h>
+#import <Connection/NSPopUpButton+Connection.h>
+#import <Connection/NSTabView+Connection.h>
+#import <Connection/NSNumber+Connection.h>
 
 #import <Connection/CKTransferController.h>
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
+#import <Connection/CKDirectoryTreeController.h>
+#import <Connection/CKDirectoryNode.h>
+#import <Connection/CKTableBasedBrowser.h>
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>
@@ -57,4 +63,3 @@
 #import <Connection/CKBonjourCategory.h>
 #import <Connection/CKHost.h>
 #import <Connection/CKHostCell.h>
-
