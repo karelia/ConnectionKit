@@ -51,9 +51,9 @@
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
 		792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
 		792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
-		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; };
+		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
-		79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */; };
+		79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */; };
 		79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79420F510C94EDAD0002B99D /* browser_resizer.tiff */; };
 		794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E50C961B510002B99D /* container_triangle_selected.tiff */; };
