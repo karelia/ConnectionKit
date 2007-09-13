@@ -1148,6 +1148,11 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
+- (BOOL)isBusy
+{
+	return NO;
+}
+
 - (unsigned)numberOfTransfers
 {
 	return 0;
