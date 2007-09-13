@@ -300,32 +300,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 }
 
 #pragma mark -
-#pragma mark Abstract Connection Protocol
-
-- (void)httpDisconnect
-{
-	[self closeStreams];
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
-	[self setState:ConnectionNotConnectedState];
-}
-
-- (void)disconnect
-{
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(httpDisconnect)
-													  target:self
-												   arguments:[NSArray array]];
-	ConnectionCommand *cmd = [ConnectionCommand command:inv
-											 awaitState:ConnectionIdleState
-											  sentState:ConnectionSentQuitState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
-}
-
-#pragma mark -
 #pragma mark Stream Overrides
 
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent
