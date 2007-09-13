@@ -148,6 +148,11 @@ NSString *QueueDomain = @"Queuing";
 	[super threadedCancelAll];
 }
 
+- (BOOL)isBusy
+{
+	return ([self numberOfCommands] + [self numberOfDeletions] + [self numberOfPermissionChanges] + [self numberOfTransfers]) > 0;
+}
+
 #pragma mark -
 #pragma mark Command History
 

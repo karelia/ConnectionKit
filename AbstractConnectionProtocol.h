@@ -132,12 +132,13 @@ typedef struct __flags {
 
 - (void)connect;
 - (BOOL)isConnected;
+- (BOOL)isBusy;
 
 /* disconnect queues a disconnection where as forceDisconnect '
    will terminate at the next available opportunity. */
 - (void)disconnect;
 - (void)forceDisconnect;
-- (void) cleanupConnection;
+- (void)cleanupConnection;
 
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;

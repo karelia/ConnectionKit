@@ -449,6 +449,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_recursiveDownloadConnection cleanupConnection];
 }
 
+- (BOOL)isBusy
+{
+	return ([super isBusy] || [_recursiveListingConnection isBusy] || [_recursiveDownloadConnection isBusy] || [_recursiveDeletionConnection isBusy] || [_fileCheckingConnection isBusy]); 
+}
+
 #pragma mark -
 #pragma mark Stream Delegate Methods
 
