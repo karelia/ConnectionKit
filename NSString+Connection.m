@@ -66,7 +66,7 @@
 	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInThisBundle(@"bytes", @"filesize: bytes")];
 	NSString *suffix[] = {
 		LocalizedStringInThisBundle(@"bytes", @"filesize: bytes"),
-		LocalizedStringInThisBundle(@"Kilobytes", @"filesize: kilobytes"),
+		LocalizedStringInThisBundle(@"KB", @"filesize: kilobytes"),
 		LocalizedStringInThisBundle(@"MB", @"filesize: megabytes"),
 		LocalizedStringInThisBundle(@"GB", @"filesize: gigabytes"),
 		LocalizedStringInThisBundle(@"TB", @"filesize: terabytes"),
@@ -75,7 +75,14 @@
 	};
 	
 	int power = floor(log(size) / log(1024));
-	return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
+	if (power > 1)
+	{
+		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"%01.0lf %@", size / pow(1024, power), suffix[power]];
+	}
 }
 
 + (NSString *)formattedSpeed:(double)speed
