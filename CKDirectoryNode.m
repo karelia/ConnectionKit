@@ -1,0 +1,527 @@
+//
+//  CKDirectoryNode.m
+//  Connection
+//
+//  Created by Greg Hulands on 29/08/07.
+//  Copyright 2007 __MyCompanyName__. All rights reserved.
+//
+
+#import "CKDirectoryNode.h"
+#import "AbstractConnectionProtocol.h"
+#import "NSString+Connection.h"
+#import "NSNumber+Connection.h"
+
+@implementation CKDirectoryNode
+
+- (id)initWithName:(NSString *)name
+{
+	if ((self != [super init]))
+	{
+		[self release];
+		return nil;
+	}
+	myName = [name copy];
+	myContents = [[NSMutableArray alloc] initWithCapacity:32];
+	myProperties = [[NSMutableDictionary alloc] initWithCapacity:32];
+	
+	// by default we are a directory - this helps with the icons in the popup button for directories above the first directory returned (relative root)
+	[self setProperty:NSFileTypeDirectory forKey:NSFileType];
+	
+	return self;
+}
+
+- (void)dealloc
+{
+	[myName release];
+	[myContents release];
+	[myProperties release];
+	[myIcon release];
+	[myCachedContents release];
+	
+	[super dealloc];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	CKDirectoryNode *copy = [[CKDirectoryNode alloc] initWithName:myName];
+	
+	[copy setParent:myParent];
+	[copy setContents:myContents];
+	[copy setProperties:myProperties];
+	
+	return copy;
+}
+
++ (CKDirectoryNode *)nodeWithName:(NSString *)name
+{
+	return [[[CKDirectoryNode alloc] initWithName:name] autorelease];
+}
+
++ (CKDirectoryNode *)recursiveRecord:(CKDirectoryNode *)record forPath:(NSString *)path
+{
+	if ([[record name] isEqualToString:[path firstPathComponent]]) 
+	{
+		NSEnumerator *e = [[record contents] objectEnumerator];
+		CKDirectoryNode *cur;
+		CKDirectoryNode *child;
+		
+		NSString *newPath = [path stringByDeletingFirstPathComponent2];
+		if ([newPath isEqualToString:@""]) return record; // matched
+		
+		while ((cur = [e nextObject])) 
+		{
+			child = [CKDirectoryNode recursiveRecord:cur forPath:newPath];
+			if (child)
+			{
+				return child;
+			}
+		}
+	}
+	return nil;
+}
+
++ (CKDirectoryNode *)recordForPath:(NSString *)path withRoot:(CKDirectoryNode *)root
+{
+	if ([path isEqualToString:@""])
+		return root;
+	NSEnumerator *e = [[root contents] objectEnumerator];
+	CKDirectoryNode *cur;
+	CKDirectoryNode *child;
+	
+	while (cur = [e nextObject]) 
+	{
+		child = [self recursiveRecord:cur forPath:path];
+		if (child)
+		{
+			return child;
+		}
+	}
+	return nil;
+}
+
++ (CKDirectoryNode *)nodeForPath:(NSString *)path withRoot:(CKDirectoryNode *)root
+{
+	if ([path isEqualToString:@"/"]) return root;
+	if ([path isEqualToString:@""]) return root;
+	
+	return [CKDirectoryNode recordForPath:path withRoot:root];
+}
+
++ (CKDirectoryNode *)addContents:(NSArray *)contents withPath:(NSString *)file withRoot:(CKDirectoryNode *)root
+{
+	// see if we have a node already for this folder
+	CKDirectoryNode *rec = nil, *lastRec = root;
+	
+	rec = [CKDirectoryNode nodeForPath:file withRoot:root];
+	
+	if (rec)
+	{
+		[rec mergeContents:contents];
+		return rec;
+	}
+	
+	NSString *path = [file stringByDeletingLastPathComponent];
+	NSString *filename = [file lastPathComponent];
+	
+	NSEnumerator *pathCompEnum = [[path componentsSeparatedByString:@"/"] objectEnumerator];
+	NSString *builtupPath = [NSString stringWithString:@""];
+	NSString *cur;
+	
+	
+	while ((cur = [pathCompEnum nextObject]))
+	{
+		builtupPath = [builtupPath stringByAppendingPathComponent:cur];
+		rec = [CKDirectoryNode recordForPath:builtupPath withRoot:root];
+		if (!rec) 
+		{ 
+			//create a new record for the path
+			rec = [CKDirectoryNode nodeWithName:[builtupPath lastPathComponent]];
+			if (lastRec == nil) 
+			{
+				//we are at the root
+				[root addContent:rec];
+			} else 
+			{
+				[lastRec addContent:rec];
+			}
+		}
+		lastRec = rec;
+	}
+	//last rec will be the directory to add the file name to
+	rec = [CKDirectoryNode nodeWithName:filename];
+	[rec mergeContents:contents];
+	[lastRec addContent:rec];
+	return rec;
+}
+
+- (NSString *)name
+{
+	return myName;
+}
+
+int CKDirectoryContentsSort(id obj1, id obj2, void *context)
+{
+	CKDirectoryNode *n1 = (CKDirectoryNode *)obj1;
+	CKDirectoryNode *n2 = (CKDirectoryNode *)obj2;
+	
+	return [[n1 name] caseInsensitiveCompare:[n2 name]];
+}
+
+- (void)addContent:(CKDirectoryNode *)content
+{
+	[myContents addObject:content];
+	[content setParent:self];
+	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+}
+
+- (void)addContents:(NSArray *)contents
+{
+	[myContents addObjectsFromArray:contents];
+	[contents makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+}
+
+- (void)setContents:(NSArray *)contents
+{
+	[myContents removeAllObjects];
+	[myContents addObjectsFromArray:contents];
+	[contents makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+}
+
+- (BOOL)directory:(NSString *)dir existsIn:(NSArray *)entries
+{
+	NSEnumerator *e = [entries objectEnumerator];
+	CKDirectoryNode *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([[cur name] isEqualToString:dir])
+		{
+			return YES;
+		}
+	}
+	return NO;
+}
+
+- (void)mergeContents:(NSArray *)contents
+{
+	// this will not delete any subdirectories directories so it in effect caches the subdir contents
+	NSMutableArray *files = [NSMutableArray array];
+	NSEnumerator *e = [myContents objectEnumerator];
+	CKDirectoryNode *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if (![cur isDirectory])
+		{
+			[files addObject:cur];
+		}
+	}
+	
+	//remove the files from the contents
+	[myContents removeObjectsInArray:files];
+	
+	files = [NSMutableArray array];
+	e = [contents objectEnumerator];
+	
+	while ((cur = [e nextObject]))
+	{
+		if (![cur isDirectory] || ![self directory:[cur name] existsIn:myContents])
+		{
+			[files addObject:cur];
+		}
+	}
+	// update with new files
+	[myContents addObjectsFromArray:files];
+	[files makeObjectsPerformSelector:@selector(setParent:) withObject:self];
+	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+}
+
+- (NSArray *)contents
+{
+	return myContents;
+}
+
+- (unsigned)countIncludingHiddenFiles:(BOOL)flag
+{
+	if (flag)
+	{
+		return [myContents count];
+	}
+	else
+	{
+		unsigned i, c = 0;
+		CKDirectoryNode *cur;
+		
+		for (i = 0; i < [myContents count]; i++)
+		{
+			cur = [myContents objectAtIndex:i];
+			if (![[cur name] hasPrefix:@"."])
+			{
+				c++;
+			}
+		}
+		return c;
+	}
+}
+
+- (NSArray *)contentsIncludingHiddenFiles:(BOOL)flag
+{
+	if (flag)
+	{
+		return [NSArray arrayWithArray:myContents];
+	}
+	else
+	{
+		NSMutableArray *contents = [NSMutableArray array];
+		NSEnumerator *e = [myContents objectEnumerator];
+		CKDirectoryNode *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if (![[cur name] hasPrefix:@"."])
+			{
+				[contents addObject:cur];
+			}
+		}
+		return contents;
+	}
+}
+
+- (NSArray *)filteredContentsWithNamesLike:(NSString *)match includeHiddenFiles:(BOOL)flag
+{
+	NSArray *files = [self contentsIncludingHiddenFiles:flag];
+	NSMutableArray *filtered = [NSMutableArray arrayWithCapacity:[files count]];
+	NSEnumerator *e = [files objectEnumerator];
+	CKDirectoryNode *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([[cur name] rangeOfString:match options:NSCaseInsensitiveSearch].location != NSNotFound)
+		{
+			[filtered addObject:cur];
+		}
+	}
+	
+	return filtered;
+}
+
+- (BOOL)isDirectory
+{
+	return ([myContents count] > 0 || 
+			[[self propertyForKey:NSFileType] isEqualToString:NSFileTypeDirectory] ||
+			([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && [[self propertyForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]));
+}
+
+- (BOOL)isFilePackage
+{
+	return ([self isDirectory] && ![[[self name] pathExtension] isEqualToString:@""]);
+}
+
+- (void)setParent:(CKDirectoryNode *)parent
+{
+	myParent = parent;
+}
+
+- (CKDirectoryNode *)parent
+{
+	return myParent;
+}
+
+- (CKDirectoryNode *)root
+{
+	if (myParent)
+	{
+		return [myParent root];
+	}
+	return self;
+}
+
+- (NSString *)path
+{
+	if (myParent == nil)
+		return myName;
+	return [[myParent path] stringByAppendingPathComponent:myName];
+}
+
+- (unsigned long long)size
+{
+	unsigned long long size = [[self propertyForKey:NSFileSize] unsignedLongLongValue];
+	NSEnumerator *e = [myContents objectEnumerator];
+	CKDirectoryNode *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		size += [cur size];
+	}
+	return size;
+}
+
+- (NSString *)kind
+{	
+	NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+																	   (CFStringRef)[myName pathExtension],
+																	   NULL) autorelease];
+	NSString *desc = [(NSString *)UTTypeCopyDescription((CFStringRef)UTI) autorelease];	
+	if (!desc && [self isDirectory]) return LocalizedStringInThisBundle(@"Folder", @"directory kind");
+	if (!desc) return LocalizedStringInThisBundle(@"Document", @"unknown UTI name");
+	if ([desc isEqualToString:@"text"]) return LocalizedStringInThisBundle(@"Plain text document", @"mimic Finder naming conventions");
+	
+	return desc;
+}
+
+- (void)setProperty:(id)prop forKey:(NSString *)key
+{
+	[myProperties setObject:prop forKey:key];
+}
+
+- (id)propertyForKey:(NSString *)key
+{
+	return [myProperties objectForKey:key];
+}
+
+- (void)setProperties:(NSDictionary *)props
+{
+	[myProperties removeAllObjects];
+	[myProperties addEntriesFromDictionary:props];
+}
+
+- (NSDictionary *)properties
+{
+	return myProperties;
+}
+
+static NSImage *sFolderIcon = nil;
+static NSImage *sSymFolderIcon = nil;
+static NSImage *sSymFileIcon = nil;
+
+- (NSImage *)icon
+{
+	if (myIcon) return myIcon;
+	
+	NSImage *img = nil;
+	
+	if ([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeDirectory] &&
+		[[self kind] isEqualToString:LocalizedStringInThisBundle(@"Folder", @"directory kind")]) // this is for document bundles so they get their correct icon
+	{
+		if (!sFolderIcon)
+		{
+			sFolderIcon = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
+		}
+		
+		img = sFolderIcon;
+	}
+	else if ([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+	{
+		if (!sSymFolderIcon || !sSymFileIcon)
+		{
+			sSymFolderIcon = [[NSImage imageNamed:@"symlink_folder.tif"] retain];
+			sSymFileIcon = [[NSImage imageNamed:@"symlink_file.tif"] retain];
+		}
+		NSString *target = [self propertyForKey:cxSymbolicLinkTargetKey];
+		
+		if ([target characterAtIndex:[target length] - 1] == '/' || [target characterAtIndex:[target length] - 1] == '\\')
+			img = sSymFolderIcon;
+		else
+		{
+			NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[[self propertyForKey:cxFilenameKey] pathExtension]];
+			NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
+			[img setScalesWhenResized:YES];
+			[img setSize:NSMakeSize(16,16)];
+			[comp lockFocus];
+			[fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[sSymFileIcon drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[comp unlockFocus];
+			[comp autorelease];
+			img = comp;
+		}
+	}
+	// see if we are a command line tool
+	else if ([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeRegular] &&
+			 [[self propertyForKey:NSFilePosixPermissions] isExecutable])
+	{
+		img = [[NSWorkspace sharedWorkspace] iconForFileType:@"command"];
+	}
+	else
+	{
+		// see if we are an application wrapper and try and see if we are also on this machine and grab its icon
+		NSString *filename = [self propertyForKey:cxFilenameKey];
+		NSString *ext = [filename pathExtension];
+		
+		if ([ext isEqualToString:@"app"])
+		{
+			NSString *path = [[NSWorkspace sharedWorkspace] fullPathForApplication:[filename stringByDeletingPathExtension]];			
+			img = [[NSWorkspace sharedWorkspace] iconForFile:path];
+		}
+	}
+	if (!img)
+	{
+		img = [[NSWorkspace sharedWorkspace] iconForFileType:[[self propertyForKey:cxFilenameKey] pathExtension]];
+	}
+	
+	myIcon = [img retain];
+	
+	return myIcon;
+}
+
+- (NSImage *)iconWithSize:(NSSize)size
+{
+	NSImage *icon = [[self icon] copy];
+	
+	[icon setScalesWhenResized:YES];
+	[icon setSize:size];
+	
+	return [icon autorelease];
+}
+
+- (void)setCachedContents:(NSData *)contents
+{
+	[myCachedContents autorelease];
+	myCachedContents = [contents retain];
+}
+
+- (NSData *)cachedContents
+{
+	return myCachedContents;
+}
+
+- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
+{
+	int i;
+	for (i = 0; i < indent; i++)
+	{
+		[str appendString:@"\t"];
+	}	
+	[str appendFormat:@"\t%@", myName];
+	if ([self isDirectory])
+	{
+		[str appendString:@"/"];
+	}
+	[str appendString:@"\n"];
+	
+	NSEnumerator *e = [myContents objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		[cur appendToDescription:str indentation:indent+1];
+	}
+}
+
+- (NSString *)description
+{
+	return [self path];
+}
+
+- (NSString *)longDescription
+{
+	NSMutableString *str = [NSMutableString stringWithString:@"\n"];
+	[self appendToDescription:str indentation:0];
+	return str;
+}
+
+@end
+
+
+
