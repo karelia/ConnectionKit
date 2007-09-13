@@ -49,9 +49,18 @@
 		792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB50A806145001A00C6 /* CKHTTPRequest.m */; };
 		792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB60A806145001A00C6 /* CKHTTPResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
+		792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
+		792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
+		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; };
+		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
+		79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */; };
+		79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */; };
+		79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79420F510C94EDAD0002B99D /* browser_resizer.tiff */; };
+		794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E50C961B510002B99D /* container_triangle_selected.tiff */; };
+		794213E80C961B510002B99D /* container_triangle.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E60C961B510002B99D /* container_triangle.tiff */; };
 		7946B0FE0AC0F4A400CAE90F /* S3Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B0FC0AC0F4A400CAE90F /* S3Connection.h */; };
 		7946B0FF0AC0F4A400CAE90F /* S3Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B0FD0AC0F4A400CAE90F /* S3Connection.m */; };
-		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; };
+		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */; };
 		794DC3270A5A0EDC007157BE /* ConnectionThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 794DC3250A5A0EDC007157BE /* ConnectionThreadManager.h */; };
 		794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */; };
@@ -101,9 +110,9 @@
 		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
 		796291410B93909100C10BC6 /* folder.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EC09F7076200172CDD /* folder.png */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
-		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; };
+		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782780B4745DD008DBA01 /* NSArray+Connection.m */; };
-		797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782810B474765008DBA01 /* NSDictionary+Connection.h */; };
+		797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782810B474765008DBA01 /* NSDictionary+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		797782840B474765008DBA01 /* NSDictionary+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782820B474765008DBA01 /* NSDictionary+Connection.m */; };
 		7978FC150B117D7C0048168B /* bookmark.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7978FC140B117D7C0048168B /* bookmark.tif */; };
 		7978FC260B1183DE0048168B /* CKController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7978FC240B1183DE0048168B /* CKController.h */; };
@@ -125,7 +134,21 @@
 		7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */; };
 		79906BAF0B1175A800FE9681 /* host.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAD0B1175A800FE9681 /* host.png */; };
 		79906BB00B1175A800FE9681 /* bonjour.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAE0B1175A800FE9681 /* bonjour.png */; };
+		799173B90C83428100EFFC79 /* CKDirectoryTreeController.h in Headers */ = {isa = PBXBuildFile; fileRef = 799173B70C83428100EFFC79 /* CKDirectoryTreeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		799173BA0C83428100EFFC79 /* CKDirectoryTreeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 799173B80C83428100EFFC79 /* CKDirectoryTreeController.m */; };
+		799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799174950C83962D00EFFC79 /* CKDirectoryTree.nib */; };
 		799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */; };
+		79B09AA60C85CDFD00E7F1CC /* history_forward.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA10C85CDFD00E7F1CC /* history_forward.tiff */; };
+		79B09AA70C85CDFD00E7F1CC /* history_back.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA20C85CDFD00E7F1CC /* history_back.tiff */; };
+		79B09AA80C85CDFD00E7F1CC /* column_mode.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA30C85CDFD00E7F1CC /* column_mode.tiff */; };
+		79B09AA90C85CDFD00E7F1CC /* list_mode.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA40C85CDFD00E7F1CC /* list_mode.tiff */; };
+		79B09AAA0C85CDFD00E7F1CC /* icon_mode.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA50C85CDFD00E7F1CC /* icon_mode.tiff */; };
+		79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */; };
+		79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */; };
+		79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09C6A0C85E35100E7F1CC /* CKDirectoryNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09C6B0C85E35100E7F1CC /* CKDirectoryNode.m */; };
 		79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */; };
 		79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */; };
 		79B9CE580B1BC32100FBFDB3 /* CKTransferController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -197,7 +220,7 @@
 		79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79E17A0C0A659C1E009CA013 /* Passphrase.nib */; };
 		79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E17A130A659CEC009CA013 /* SSHPassphrase.m */; };
 		79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E17A140A659CEC009CA013 /* SSHPassphrase.h */; };
-		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; };
+		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
 		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
@@ -322,6 +345,13 @@
 		792CFCB50A806145001A00C6 /* CKHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPRequest.m; sourceTree = "<group>"; };
 		792CFCB60A806145001A00C6 /* CKHTTPResponse.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPResponse.h; sourceTree = "<group>"; };
 		792CFCB70A806145001A00C6 /* CKHTTPResponse.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPResponse.m; sourceTree = "<group>"; };
+		79420AD20C91CDE80002B99D /* NSNumber+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+Connection.h"; sourceTree = "<group>"; };
+		79420AD30C91CDE80002B99D /* NSNumber+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+Connection.m"; sourceTree = "<group>"; };
+		79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKTableBasedBrowser.h; sourceTree = "<group>"; };
+		79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKTableBasedBrowser.m; sourceTree = "<group>"; };
+		79420F510C94EDAD0002B99D /* browser_resizer.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = browser_resizer.tiff; sourceTree = "<group>"; };
+		794213E50C961B510002B99D /* container_triangle_selected.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = container_triangle_selected.tiff; sourceTree = "<group>"; };
+		794213E60C961B510002B99D /* container_triangle.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = container_triangle.tiff; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* S3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = S3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* S3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = S3Connection.m; sourceTree = "<group>"; };
 		7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSCalendarDate+Connection.h"; sourceTree = "<group>"; };
@@ -401,7 +431,21 @@
 		7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletPanel.m; sourceTree = "<group>"; };
 		79906BAD0B1175A800FE9681 /* host.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = host.png; sourceTree = "<group>"; };
 		79906BAE0B1175A800FE9681 /* bonjour.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bonjour.png; sourceTree = "<group>"; };
+		799173B70C83428100EFFC79 /* CKDirectoryTreeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryTreeController.h; sourceTree = "<group>"; };
+		799173B80C83428100EFFC79 /* CKDirectoryTreeController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryTreeController.m; sourceTree = "<group>"; };
+		799174960C83962D00EFFC79 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		799ED2AC0B635C3400B6F2BA /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		79B09AA10C85CDFD00E7F1CC /* history_forward.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = history_forward.tiff; sourceTree = "<group>"; };
+		79B09AA20C85CDFD00E7F1CC /* history_back.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = history_back.tiff; sourceTree = "<group>"; };
+		79B09AA30C85CDFD00E7F1CC /* column_mode.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = column_mode.tiff; sourceTree = "<group>"; };
+		79B09AA40C85CDFD00E7F1CC /* list_mode.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = list_mode.tiff; sourceTree = "<group>"; };
+		79B09AA50C85CDFD00E7F1CC /* icon_mode.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = icon_mode.tiff; sourceTree = "<group>"; };
+		79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSPopUpButton+Connection.h"; sourceTree = "<group>"; };
+		79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSPopUpButton+Connection.m"; sourceTree = "<group>"; };
+		79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTabView+Connection.h"; sourceTree = "<group>"; };
+		79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSTabView+Connection.m"; sourceTree = "<group>"; };
+		79B09C6A0C85E35100E7F1CC /* CKDirectoryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryNode.h; sourceTree = "<group>"; };
+		79B09C6B0C85E35100E7F1CC /* CKDirectoryNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryNode.m; sourceTree = "<group>"; };
 		79B5ECF20AC93B90007BC0AD /* CKSecureHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSecureHTTPConnection.h; sourceTree = "<group>"; };
 		79B5ECF30AC93B90007BC0AD /* CKSecureHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSecureHTTPConnection.m; sourceTree = "<group>"; };
 		79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKInternalTransferRecord.h; sourceTree = "<group>"; };
@@ -983,6 +1027,12 @@
 				797782820B474765008DBA01 /* NSDictionary+Connection.m */,
 				79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */,
 				79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */,
+				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
+				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
+				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
+				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
+				79420AD20C91CDE80002B99D /* NSNumber+Connection.h */,
+				79420AD30C91CDE80002B99D /* NSNumber+Connection.m */,
 				79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */,
 				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
 				79CA054A0B852037005BED50 /* CKCacheableHost.h */,
@@ -1006,6 +1056,13 @@
 				79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */,
 				79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */,
 				799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */,
+				79B09C6A0C85E35100E7F1CC /* CKDirectoryNode.h */,
+				79B09C6B0C85E35100E7F1CC /* CKDirectoryNode.m */,
+				799173B70C83428100EFFC79 /* CKDirectoryTreeController.h */,
+				799173B80C83428100EFFC79 /* CKDirectoryTreeController.m */,
+				79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */,
+				79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */,
+				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1013,6 +1070,14 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				794213E50C961B510002B99D /* container_triangle_selected.tiff */,
+				794213E60C961B510002B99D /* container_triangle.tiff */,
+				79420F510C94EDAD0002B99D /* browser_resizer.tiff */,
+				79B09AA10C85CDFD00E7F1CC /* history_forward.tiff */,
+				79B09AA20C85CDFD00E7F1CC /* history_back.tiff */,
+				79B09AA30C85CDFD00E7F1CC /* column_mode.tiff */,
+				79B09AA40C85CDFD00E7F1CC /* list_mode.tiff */,
+				79B09AA50C85CDFD00E7F1CC /* icon_mode.tiff */,
 				7978FC140B117D7C0048168B /* bookmark.tif */,
 				79906BAD0B1175A800FE9681 /* host.png */,
 				79906BAE0B1175A800FE9681 /* bonjour.png */,
@@ -1105,6 +1170,12 @@
 				790AD9190B6DD19D001FF53A /* openssl.h in Headers */,
 				79CA054C0B852038005BED50 /* CKCacheableHost.h in Headers */,
 				79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */,
+				799173B90C83428100EFFC79 /* CKDirectoryTreeController.h in Headers */,
+				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
+				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
+				79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */,
+				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
+				79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1301,6 +1372,17 @@
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */,
 				796291410B93909100C10BC6 /* folder.png in Resources */,
+				799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */,
+				79B09AA60C85CDFD00E7F1CC /* history_forward.tiff in Resources */,
+				79B09AA70C85CDFD00E7F1CC /* history_back.tiff in Resources */,
+				79B09AA80C85CDFD00E7F1CC /* column_mode.tiff in Resources */,
+				79B09AA90C85CDFD00E7F1CC /* list_mode.tiff in Resources */,
+				79B09AAA0C85CDFD00E7F1CC /* icon_mode.tiff in Resources */,
+				792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */,
+				792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */,
+				79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */,
+				794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */,
+				794213E80C961B510002B99D /* container_triangle.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1516,6 +1598,12 @@
 				790AD91B0B6DD19D001FF53A /* pem.c in Sources */,
 				79CA054D0B852038005BED50 /* CKCacheableHost.m in Sources */,
 				79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */,
+				799173BA0C83428100EFFC79 /* CKDirectoryTreeController.m in Sources */,
+				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
+				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
+				79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */,
+				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
+				79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1633,6 +1721,14 @@
 				CEF895020BD72A76002886AA /* zh_TW */,
 			);
 			name = DropletLauncher.nib;
+			sourceTree = "<group>";
+		};
+		799174950C83962D00EFFC79 /* CKDirectoryTree.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				799174960C83962D00EFFC79 /* en */,
+			);
+			name = CKDirectoryTree.nib;
 			sourceTree = "<group>";
 		};
 		799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */ = {
