@@ -37,6 +37,8 @@ static NSImage *sHostIcon = nil;
 
 @interface CKHost (private)
 - (NSString *)name;
+- (NSDictionary *)properties;
+- (void)setProperties:(NSDictionary *)properties;
 @end
 
 @implementation CKHost
@@ -87,6 +89,37 @@ static NSImage *sHostIcon = nil;
 	[myIcon release];
 	
 	[super dealloc];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	CKHost *copy = [[CKHost allocWithZone:zone] init];
+	
+	[copy setHost:[self host]];
+	[copy setPort:[self port]];
+	[copy setUsername:[self username]];
+	[copy setConnectionType:[self connectionType]];
+	[copy setInitialPath:[self initialPath]];
+	[copy setURL:[self url]];
+	[copy setAnnotation:[self annotation]];
+	[copy setIcon:[self icon]];
+	[copy setProperties:[self properties]];
+	
+	return copy;
+}
+
+- (BOOL)isEqual:(id)anObject
+{
+	if ([anObject isKindOfClass:[CKHost class]])
+	{
+		CKHost *other = (CKHost *)anObject;
+		return ([[self host] isEqualToString:[other host]] &&
+				[[self port] isEqualToString:[other port]] &&
+				[[self username] isEqualToString:[other username]] &&
+				[[self connectionType] isEqualToString:[other connectionType]] &&
+				[[self initialPath] isEqualToString:[other initialPath]]);
+	}
+	return NO;
 }
 
 - (id)initWithCoder:(NSCoder *)coder
@@ -546,6 +579,17 @@ static NSImage *sHostIcon = nil;
 - (id)propertyForKey:(NSString *)key
 {
 	return [myProperties objectForKey:key];
+}
+
+- (NSDictionary *)properties
+{
+	return myProperties;
+}
+
+- (void)setProperties:(NSDictionary *)properties
+{
+	[myProperties removeAllObjects];
+	[myProperties addEntriesFromDictionary:properties];
 }
 
 #pragma mark -
