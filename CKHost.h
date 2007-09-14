@@ -32,7 +32,7 @@
 @protocol AbstractConnectionProtocol;
 @class CKHostCategory;
 
-@interface CKHost : NSObject <NSCoding>
+@interface CKHost : NSObject <NSCoding, NSCopying>
 {
 	NSString	*myUUID;
 	NSString	*myHost;
