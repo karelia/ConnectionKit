@@ -71,7 +71,7 @@
 - (NSString *)password;
 - (NSString *)connectionType;
 - (NSString *)initialPath;
-- (NSURL *)url;
+- (NSURL *)URL;
 - (NSString *)annotation;
 - (id)userInfo;
 - (NSImage *)icon;

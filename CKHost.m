@@ -441,9 +441,49 @@ static NSImage *sHostIcon = nil;
 	return myInitialPath;
 }
 
+- (NSURL *)URL
+{
+	if (!myURL)
+	{
+		// build up the URL from the information
+		id <AbstractConnectionProtocol>con = [self connection];
+		if (con)
+		{
+			NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", [con urlScheme]];
+			if ([self username])
+			{
+				[url appendString:[self username]];
+				
+				if ([self password])
+				{
+					[url appendFormat:@":%@", [self password]];
+				}
+				
+				[url appendString:@"@"];
+			}
+			[url appendString:[self host]];
+			if ([self initialPath])
+			{
+				if (![[self initialPath] hasPrefix:@"/"])
+				{
+					[url appendString:@"/"];
+				}
+				[url appendString:[self initialPath]];
+			}
+			else
+			{
+				[url appendString:@"/"];
+			}
+			NSLog(@"%@", url);
+			return [NSURL URLWithString:url];
+		}
+	}
+	return myURL;
+}
+
 - (NSURL *)url
 {
-	return myURL;
+	return [self URL];
 }
 
 - (NSString *)annotation
