@@ -462,6 +462,8 @@ static NSImage *sHostIcon = nil;
 				[url appendString:@"@"];
 			}
 			[url appendString:[self host]];
+			[url appendFormat:@":%@", [con port]]; // use the con port incase it used the default port.
+			
 			if ([self initialPath])
 			{
 				if (![[self initialPath] hasPrefix:@"/"])
