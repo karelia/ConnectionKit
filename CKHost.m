@@ -441,46 +441,62 @@ static NSImage *sHostIcon = nil;
 	return myInitialPath;
 }
 
+- (NSString *)baseURLString
+{
+	id <AbstractConnectionProtocol>con = [self connection];
+	if (con)
+	{
+		NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", [con urlScheme]];
+		if ([self username])
+		{
+			[url appendString:[self username]];
+			
+			if ([self password])
+			{
+				[url appendFormat:@":%@", [self password]];
+			}
+			
+			[url appendString:@"@"];
+		}
+		[url appendString:[self host]];
+		[url appendFormat:@":%@", [con port]]; // use the con port incase it used the default port.
+		
+		return url;
+	}
+	return nil;
+}
+
+- (NSString *)urlString
+{
+	NSMutableString *url = [NSMutableString stringWithString:[self baseURLString]];
+	
+	if ([self initialPath])
+	{
+		if (![[self initialPath] hasPrefix:@"/"])
+		{
+			[url appendString:@"/"];
+		}
+		[url appendString:[self initialPath]];
+	}
+	else
+	{
+		[url appendString:@"/"];
+	}
+	
+	return url;
+}
+
+- (NSURL *)baseURL
+{
+	return [NSURL URLWithString:[self baseURLString]];
+}
+
 - (NSURL *)URL
 {
 	if (!myURL)
 	{
-		// build up the URL from the information
-		id <AbstractConnectionProtocol>con = [self connection];
-		if (con)
-		{
-			NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", [con urlScheme]];
-			if ([self username])
-			{
-				[url appendString:[self username]];
-				
-				if ([self password])
-				{
-					[url appendFormat:@":%@", [self password]];
-				}
-				
-				[url appendString:@"@"];
-			}
-			[url appendString:[self host]];
-			[url appendFormat:@":%@", [con port]]; // use the con port incase it used the default port.
-			
-			if ([self initialPath])
-			{
-				if (![[self initialPath] hasPrefix:@"/"])
-				{
-					[url appendString:@"/"];
-				}
-				[url appendString:[self initialPath]];
-			}
-			else
-			{
-				[url appendString:@"/"];
-			}
-			NSLog(@"created url dynamically: %@", url);
-			return [NSURL URLWithString:url];
-		}
+		return [NSURL URLWithString:[self urlString]];
 	}
-	NSLog(@"returning %@", myURL);
 	return myURL;
 }
 
