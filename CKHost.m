@@ -100,7 +100,7 @@ static NSImage *sHostIcon = nil;
 	[copy setUsername:[self username]];
 	[copy setConnectionType:[self connectionType]];
 	[copy setInitialPath:[self initialPath]];
-	[copy setURL:[self url]];
+	[copy setURL:myURL];
 	[copy setAnnotation:[self annotation]];
 	[copy setIcon:[self icon]];
 	[copy setProperties:[self properties]];
@@ -476,10 +476,11 @@ static NSImage *sHostIcon = nil;
 			{
 				[url appendString:@"/"];
 			}
-			NSLog(@"%@", url);
+			NSLog(@"created url dynamically: %@", url);
 			return [NSURL URLWithString:url];
 		}
 	}
+	NSLog(@"returning %@", myURL);
 	return myURL;
 }
 
