@@ -115,10 +115,11 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		[self release];
 		return nil;
 	}
-  //enforce default port for sftp
-  //
-  if (![port length])
-    port = @"22";
+	
+	if (!port || [port isEqualToString:@""])
+	{
+		port = @"22";
+	}
   
 	if (self = [super initWithHost:host port:port username:username password:password error:error]) {
 		
