@@ -99,6 +99,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		[self release];
 		return nil;
 	}
+	
+	if (!port || [port isEqualToString:@""])
+	{
+		port = @"80";
+	}
+	
 	if (self = [super initWithHost:host
                               port:port
                           username:username

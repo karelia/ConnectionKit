@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2004-2006, Greg Hulands <ghulands@framedphotographics.com>
+ Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
  
  Redistribution and use in source and binary forms, with or without modification, 
@@ -32,14 +32,14 @@
 
 @implementation WebDAVSecureConnection
 
-//+ (void)load
-//{
-//	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-//	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"443", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-//	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-//	[AbstractConnection registerConnectionClass:[WebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-//	[pool release];
-//}
++ (void)load
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"443", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
+	[AbstractConnection registerConnectionClass:[WebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
+	[pool release];
+}
 
 + (NSString *)name
 {
@@ -68,6 +68,11 @@
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
+	if (!port || [port isEqualToString:@""])
+	{
+		port = @"443";
+	}
+	
 	if (self = [super initWithHost:host
 							  port:port
 						  username:username

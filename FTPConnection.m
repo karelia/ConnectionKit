@@ -141,6 +141,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		return nil;
 	}
 	
+	if (!port || [port isEqualToString:@""])
+	{
+		port = @"21";
+	}
+	
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
 		[self setState:ConnectionNotConnectedState];

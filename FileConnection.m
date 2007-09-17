@@ -129,6 +129,8 @@ checkRemoteExistence:(NSNumber *)check;
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
+	port = @"0";
+	
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
