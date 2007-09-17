@@ -38,4 +38,15 @@
 @end
 
 extern NSString *CKHostCellStringValueKey;
+extern NSString *CKHostCellSecondaryStringValueKey;
 extern NSString *CKHostCellImageValueKey;
+
+@interface CKHostExtendedCell : CKHostCell
+{
+	NSString *mySecondaryString;
+}
+
+- (void)setSecondaryString:(NSString *)str;
+- (NSString *)secondaryString;
+
+@end

@@ -12,7 +12,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 NSString *CKHostCellStringValueKey = @"CKHostCellStringValueKey";
 NSString *CKHostCellImageValueKey = @"CKHostCellImageValueKey";
-
+NSString *CKHostCellSecondaryStringValueKey = @"CKHostCellSecondaryStringValueKey";
 
 @interface NSImage (Omni)
 - (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(float)delta;
@@ -408,3 +408,94 @@ textRect.origin.y += 1.0;
     [self drawFlippedInRect:rect operation:op fraction:1.0];
 }
 @end
+
+@implementation CKHostExtendedCell : CKHostCell
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	CKHostExtendedCell *copy = [super copyWithZone:zone];
+	
+	copy->mySecondaryString = [mySecondaryString copy];
+	
+	return copy;
+}
+
+- (void)dealloc
+{
+	[mySecondaryString release];
+	
+	[super dealloc];
+}
+
+- (void)setSecondaryString:(NSString *)str
+{
+	if (mySecondaryString != str)
+	{
+		[mySecondaryString autorelease];
+		mySecondaryString = [str copy];
+	}
+}
+
+- (NSString *)secondaryString
+{
+	return mySecondaryString;
+}
+
+- (void)setObjectValue:(id)obj
+{
+	[super setObjectValue:obj];
+	
+	if ([obj isKindOfClass:[NSDictionary class]]) 
+	{        
+        [self setSecondaryString:[obj objectForKey:CKHostCellSecondaryStringValueKey]];
+    }
+}
+
+// this drawing code is modified from http://www.martinkahr.com/2007/05/04/nscell-image-and-text-sample/
+
+- (void)drawWithFrame:(NSRect)cellFrame inView:(NSView *)controlView 
+{
+	[self setTextColor:[NSColor blackColor]];
+		
+	NSColor* primaryColor   = [NSColor textColor];
+	NSString* primaryText   = [self stringValue];
+	
+	NSDictionary* primaryTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys: primaryColor, NSForegroundColorAttributeName,
+		[NSFont systemFontOfSize:13], NSFontAttributeName, nil];	
+	[primaryText drawAtPoint:NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, cellFrame.origin.y) withAttributes:primaryTextAttributes];
+	
+	NSColor* secondaryColor = [self isHighlighted] ? [NSColor alternateSelectedControlTextColor] : [NSColor disabledControlTextColor];
+	NSString* secondaryText = [self secondaryString];
+	
+	NSDictionary* secondaryTextAttributes = [NSDictionary dictionaryWithObjectsAndKeys: secondaryColor, NSForegroundColorAttributeName,
+		[NSFont systemFontOfSize:10], NSFontAttributeName, nil];	
+	[secondaryText drawAtPoint:NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, cellFrame.origin.y+cellFrame.size.height/2) 
+				withAttributes:secondaryTextAttributes];
+	
+	
+	[[NSGraphicsContext currentContext] saveGraphicsState];
+	float yOffset = cellFrame.origin.y;
+	if ([controlView isFlipped]) {
+		NSAffineTransform* xform = [NSAffineTransform transform];
+		[xform translateXBy:0.0 yBy: cellFrame.size.height];
+		[xform scaleXBy:1.0 yBy:-1.0];
+		[xform concat];		
+		yOffset = 0-cellFrame.origin.y;
+	}	
+	NSImage* icon = [self icon];	
+	
+	NSImageInterpolation interpolation = [[NSGraphicsContext currentContext] imageInterpolation];
+	[[NSGraphicsContext currentContext] setImageInterpolation: NSImageInterpolationHigh];	
+	
+	[icon drawInRect:NSMakeRect(cellFrame.origin.x+5,yOffset+3,cellFrame.size.height-6, cellFrame.size.height-6)
+			fromRect:NSMakeRect(0,0,[icon size].width, [icon size].height)
+		   operation:NSCompositeSourceOver
+			fraction:1.0];
+	
+	[[NSGraphicsContext currentContext] setImageInterpolation: interpolation];
+	
+	[[NSGraphicsContext currentContext] restoreGraphicsState];	
+}
+
+@end
+

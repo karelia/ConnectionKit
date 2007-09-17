@@ -539,16 +539,24 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	else
 	{
-		NSString *val = nil;
-		if ([item annotation] && [[item annotation] length] > 0)
+		NSString *primary = [item annotation];
+		NSString *secondary = nil;
+		if (!primary)
 		{
-			val = [item annotation];
+			primary = [item name];
 		}
 		else
 		{
-			val = [item name];
+			secondary = [item name];
 		}
-		return [NSDictionary dictionaryWithObjectsAndKeys:val, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
+		
+		if ([primary isEqualToString:secondary])
+		{
+			secondary = nil;
+		}
+		
+		// annotation is last incase it is nil and finishes the dictionary there.
+		return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
 	}
 	return nil;
 }
