@@ -71,6 +71,7 @@
 - (NSString *)password;
 - (NSString *)connectionType;
 - (NSString *)initialPath;
+- (BOOL)isAbsoluteInitialPath;
 - (NSURL *)baseURL; // doesn't contain initialPath
 - (NSURL *)URL;
 - (NSString *)annotation;
