@@ -321,8 +321,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		myRootDirectory = [dir copy];
 		[self changeRelativeRootToPath:dir];	
 		
-		[oBrowser reloadData];
 		[oBrowser setPath:dir];
+		[oBrowser reloadData];
 		
 		if (dir)
 		{

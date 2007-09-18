@@ -441,6 +441,11 @@ static NSImage *sHostIcon = nil;
 	return myInitialPath;
 }
 
+- (BOOL)isAbsoluteInitialPath
+{
+	return [[self initialPath] hasPrefix:@"/"];
+}
+
 - (NSString *)baseURLString
 {
 	id <AbstractConnectionProtocol>con = [self connection];
