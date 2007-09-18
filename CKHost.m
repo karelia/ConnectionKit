@@ -102,7 +102,6 @@ static NSImage *sHostIcon = nil;
 	[copy setUsername:[self username]];
 	[copy setConnectionType:[self connectionType]];
 	[copy setInitialPath:[self initialPath]];
-	[copy setURL:myURL];
 	[copy setAnnotation:[self annotation]];
 	[copy setIcon:[self icon]];
 	[copy setProperties:[self properties]];
@@ -139,16 +138,6 @@ static NSImage *sHostIcon = nil;
 		myPort = [[coder decodeObjectForKey:@"port"] copy];
 		myUsername = [[coder decodeObjectForKey:@"username"] copy];
 		myConnectionType = [[coder decodeObjectForKey:@"type"] copy];
-		@try {
-			NSString *url = [coder decodeObjectForKey:@"url"];
-			if (url && [url length] > 0)
-			{
-				myURL = [[NSURL URLWithString:url] retain];
-			}
-		}
-		@catch (NSException *ex) {
-			
-		}
 		myDescription = [[coder decodeObjectForKey:@"description"] copy];
 		myInitialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
 		if (!myInitialPath)
@@ -182,7 +171,6 @@ static NSImage *sHostIcon = nil;
 	[coder encodeObject:myPort forKey:@"port"];
 	[coder encodeObject:myUsername forKey:@"username"];
 	[coder encodeObject:myConnectionType forKey:@"type"];
-	[coder encodeObject:[myURL absoluteString] forKey:@"url"];
 	[coder encodeObject:myDescription forKey:@"description"];
 	[coder encodeObject:myInitialPath forKey:@"initialPath"];
 	if (myIcon)
@@ -332,14 +320,12 @@ static NSImage *sHostIcon = nil;
 
 - (void)setURL:(NSURL *)url
 {
-	if (url != myURL)
-	{
-		[self willChangeValueForKey:@"url"];
-		[myURL autorelease];
-		myURL = [url copy];
-		[self didChangeValueForKey:@"url"];
-		[self didChange];
-	}
+	[self setHost:[url host]];
+	[self setUsername:[url user]];
+	[self setPassword:[url password]];
+	[self setInitialPath:[url path]];
+	[self setPort:[NSString stringWithFormat:@"%@",[url port]]];
+	[self setConnectionType:[url scheme]];
 }
 
 - (void)setAnnotation:(NSString *)description
@@ -405,7 +391,7 @@ static NSImage *sHostIcon = nil;
 												  strlen([myInitialPath UTF8String]),
 												  [myInitialPath UTF8String],
 												  [myPort intValue],
-												  [self _protocolTypeForString:@"ftp"],
+												  [self _protocolTypeForString:[AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort]],
 												  [self _authenticationTypeForString:@"dflt"],
 												  &length,
 												  &pass,
@@ -528,11 +514,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSURL *)URL
 {
-	if (!myURL)
-	{
-		return [NSURL URLWithString:[self urlString]];
-	}
-	return myURL;
+	return [NSURL URLWithString:[self urlString]];
 }
 
 - (NSURL *)url
@@ -606,7 +588,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)description
 {
-	return [NSString stringWithFormat:@"%@ %@://%@:xxxx@%@:%@/%@", myConnectionType, [AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort], myUsername, myHost, myPort, myInitialPath];
+	return [self urlString];
 }
 
 - (NSString *)name
