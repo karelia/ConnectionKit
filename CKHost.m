@@ -39,6 +39,8 @@ static NSImage *sHostIcon = nil;
 - (NSString *)name;
 - (NSDictionary *)properties;
 - (void)setProperties:(NSDictionary *)properties;
+- (SecProtocolType)_protocolTypeForString:(NSString *)value;
+- (SecAuthenticationType)_authenticationTypeForString:(NSString *)value;
 @end
 
 @implementation CKHost
@@ -388,46 +390,74 @@ static NSImage *sHostIcon = nil;
 		SecKeychainAttributeList list;
 		SecKeychainAttribute attributes[1];
 		OSErr result;
+		OSStatus status;
+		UInt32 length;
+		char *pass;
 		
-		attributes[0].tag = kSecAccountItemAttr;
-		attributes[0].data = (void *)[myUsername UTF8String];
-		attributes[0].length = strlen(attributes[0].data);
-		
-		list.count = 1;
-		list.attr = &attributes[0];
-		
-		result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
-		
-		if (result != noErr)
+		// try internet password first
+		status = SecKeychainFindInternetPassword (NULL,
+												  strlen([myHost UTF8String]),
+												  [myHost UTF8String],
+												  0,
+												  NULL,
+												  strlen([myUsername UTF8String]),
+												  [myUsername UTF8String],
+												  strlen([myInitialPath UTF8String]),
+												  [myInitialPath UTF8String],
+												  [myPort intValue],
+												  [self _protocolTypeForString:@"ftp"],
+												  [self _authenticationTypeForString:@"dflt"],
+												  &length,
+												  &pass,
+												  NULL);
+			
+		if (status != userCanceledErr)
 		{
-			NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
-		}
-		
-		if ((result = SecKeychainSearchCopyNext (search, &item)) == noErr) {
-			UInt32 length;
-			char *pass;
-			SecKeychainAttribute attributes[1];
-			SecKeychainAttributeList list;
-			OSStatus status;
-			
-			attributes[0].tag = kSecAccountItemAttr;
-			
-			list.count = 1;
-			list.attr = attributes;
-			
-			status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
-			
-			// length  may be zero, it just means a zero-length password
-			if (status != userCanceledErr)
+			myPassword = [[NSString stringWithCString:pass length:length] retain];
+			if (length) 
 			{
-				myPassword = [[NSString stringWithCString:pass length:length] retain];
-				SecKeychainItemFreeContent(&list, pass);
+				SecKeychainItemFreeContent(NULL, pass);
 			}
 		}
-		if (item) CFRelease(item);
-		if (search) CFRelease (search);
+		
+		if (!myPassword || [myPassword isEqualToString:@""])
+		{
+			attributes[0].tag = kSecAccountItemAttr;
+			attributes[0].data = (void *)[myUsername UTF8String];
+			attributes[0].length = strlen(attributes[0].data);
+			
+			list.count = 1;
+			list.attr = &attributes[0];
+			
+			result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
+			
+			if (result != noErr)
+			{
+				NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
+			}
+			
+			if ((result = SecKeychainSearchCopyNext (search, &item)) == noErr) {
+				SecKeychainAttribute attributes[1];
+				SecKeychainAttributeList list;
+				
+				attributes[0].tag = kSecAccountItemAttr;
+				
+				list.count = 1;
+				list.attr = attributes;
+				
+				status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
+				
+				// length  may be zero, it just means a zero-length password
+				if (status != userCanceledErr)
+				{
+					myPassword = [[NSString stringWithCString:pass length:length] retain];
+					SecKeychainItemFreeContent(&list, pass);
+				}
+			}
+			if (item) CFRelease(item);
+			if (search) CFRelease (search);
+		}
 	}
-	
 	return myPassword;
 }
 
@@ -767,6 +797,38 @@ static NSImage *sHostIcon = nil;
 		return [self performSelector:sel];
 	}
 	return nil;
+}
+
+- (SecProtocolType)_protocolTypeForString:(NSString *)protocolValue
+{
+    SecProtocolType protocol = 0;
+    
+    if ([protocolValue isEqualToString:@"ftp"])
+        protocol = kSecProtocolTypeFTP;
+    else if ([protocolValue isEqualToString:@"ftpa"])
+        protocol = kSecProtocolTypeFTPAccount;
+    else if ([protocolValue isEqualToString:@"ftps"])
+        protocol = kSecProtocolTypeFTPS;
+    else if ([protocolValue isEqualToString:@"ftpx"])
+        protocol = kSecProtocolTypeFTPProxy;
+	else if ([protocolValue isEqualToString:@"sftp"])
+		protocol = kSecProtocolTypeSSH;
+    return protocol;
+}
+
+- (SecAuthenticationType)_authenticationTypeForString:(NSString *)authenticationTypeValue
+{
+    SecAuthenticationType authenticationType = 0;
+    
+    if ([authenticationTypeValue isEqualToString:@"http"])
+        authenticationType = kSecAuthenticationTypeHTTPBasic;
+    else if ([authenticationTypeValue isEqualToString:@"httd"])
+        authenticationType = kSecAuthenticationTypeHTTPDigest;
+    else if ([authenticationTypeValue isEqualToString:@"form"])
+        authenticationType = kSecAuthenticationTypeHTMLForm;
+    else if ([authenticationTypeValue isEqualToString:@"dflt"])
+        authenticationType = kSecAuthenticationTypeDefault;
+    return authenticationType;
 }
 
 @end
