@@ -120,6 +120,7 @@
 
 - (void)setPath:(NSString *)path;
 - (NSString *)path;
+- (NSString *)pathSeparator;
 - (NSString *)pathToColumn:(unsigned)column;
 - (unsigned)columnToItem:(id)item;
 

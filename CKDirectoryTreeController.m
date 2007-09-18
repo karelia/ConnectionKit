@@ -705,6 +705,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self changeRelativeRootToPath:path];
 	[oOutlineView reloadData];
 	[oOutlineView deselectAll:self];
+	[oBrowser setPath:[oBrowser pathSeparator]];
 	[oBrowser reloadData];
 }
 
