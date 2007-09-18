@@ -38,7 +38,6 @@ static NSLock *sRegistryLock = nil;
 static BOOL sRegistryCanInit = NO;
 static ConnectionRegistry *sRegistry = nil;
 
-NSString *CKLocalRegistryPboardType = @"CKLocalRegistryPboardType";
 NSString *CKRegistryNotification = @"CKRegistryNotification";
 NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
@@ -604,7 +603,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
 	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
 									   forLocal:NO];
-	[pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, CKLocalRegistryPboardType, nil] owner:nil];
+	[pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
 	NSMutableArray *files = [NSMutableArray array];
 	NSEnumerator *e = [items objectEnumerator];
 	id cur;
@@ -629,10 +628,12 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		}
 	}
 	[pboard setPropertyList:files forType:NSFilenamesPboardType];
+	[myDraggedItems removeAllObjects];
 	[myDraggedItems addObjectsFromArray:items];
 	
 	return YES;
 }
+
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
 {
 	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
@@ -727,6 +728,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 						{
 							[currentCategory removeHost:currentItem];
 							hasRemoved = YES;
+							break;
 						}
 					}
 					if (!hasRemoved)
