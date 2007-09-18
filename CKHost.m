@@ -628,6 +628,14 @@ static NSImage *sHostIcon = nil;
 	return myIcon;
 }
 
+- (NSImage *)iconWithSize:(NSSize)size
+{
+	NSImage *copy = [[self icon] copy];
+	[copy setScalesWhenResized:YES];
+	[copy setSize:size];
+	return [copy autorelease];
+}
+
 - (void)setProperty:(id)property forKey:(NSString *)key
 {
 	[self willChangeValueForKey:key];

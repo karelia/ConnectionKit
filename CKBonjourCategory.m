@@ -43,9 +43,9 @@
 {
 	if ((self = [super initWithName:@"Bonjour"]))
 	{
-		myFTPCategory = [[CKHostCategory alloc] initWithName:@"ftp"];
-		mySFTPCategory = [[CKHostCategory alloc] initWithName:@"sftp"];
-		myHTTPCategory = [[CKHostCategory alloc] initWithName:@"webdav"];
+		myFTPCategory = [[CKHostCategory alloc] initWithName:@"FTP"];
+		mySFTPCategory = [[CKHostCategory alloc] initWithName:@"SFTP"];
+		myHTTPCategory = [[CKHostCategory alloc] initWithName:@"WebDAV"];
 		
 		[super addChildCategory:myFTPCategory];
 		[super addChildCategory:mySFTPCategory];

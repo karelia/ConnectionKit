@@ -242,10 +242,16 @@ static NSImage *sFolderImage = nil;
 		NSBundle *b = [NSBundle bundleForClass:[self class]];
 		NSString *p = [b pathForResource:@"folder" ofType:@"png"];
 		sFolderImage = [[NSImage alloc] initWithContentsOfFile:p];
-		[sFolderImage setScalesWhenResized:YES];
-		[sFolderImage setSize:NSMakeSize(16,16)];
 	}
 	return sFolderImage;
+}
+
+- (NSImage *)iconWithSize:(NSSize)size
+{
+	NSImage *copy = [[self icon] copy];
+	[copy setScalesWhenResized:YES];
+	[copy setSize:size];
+	return [copy autorelease];
 }
 
 - (BOOL)isEditable

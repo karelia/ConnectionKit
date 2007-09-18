@@ -76,6 +76,7 @@
 - (NSString *)annotation;
 - (id)userInfo;
 - (NSImage *)icon;
+- (NSImage *)iconWithSize:(NSSize)size;
 
 - (void)setCategory:(CKHostCategory *)cat;
 - (CKHostCategory *)category;
