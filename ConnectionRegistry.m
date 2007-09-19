@@ -37,6 +37,7 @@
 static NSLock *sRegistryLock = nil;
 static BOOL sRegistryCanInit = NO;
 static ConnectionRegistry *sRegistry = nil;
+static NSString *sRegistryDatabase = nil;
 
 NSString *CKRegistryNotification = @"CKRegistryNotification";
 NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
@@ -68,6 +69,21 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	return sRegistry;
 }
 
++ (void)setRegistryDatabase:(NSString *)file
+{
+	[sRegistryDatabase autorelease];
+	sRegistryDatabase = [file copy];
+}
+
++ (NSString *)registryDatabase
+{
+	if (sRegistryDatabase)
+	{
+		return [[sRegistryDatabase copy] autorelease];
+	}
+	return [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Preferences"] stringByAppendingPathComponent:@"com.connectionkit.registry"];
+}
+
 - (id)init
 {
 	if (!sRegistryCanInit)
@@ -80,6 +96,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		myCenter = [NSDistributedNotificationCenter defaultCenter];
 		myConnections = [[NSMutableArray alloc] init];
 		myDraggedItems = [[NSMutableArray alloc] init];
+		myDatabaseFile = [[ConnectionRegistry registryDatabase] copy];
 		myBonjour = [[CKBonjourCategory alloc] init];
 		[myConnections addObject:myBonjour];
 		
@@ -135,6 +152,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	[myBonjour release];
 	[myLock release];
 	[myConnections release];
+	[myDatabaseFile release];
 	
 	[super dealloc];
 }
@@ -167,7 +185,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 
 - (NSString *)databaseFile
 {
-	return [[[NSHomeDirectory() stringByAppendingPathComponent:@"Library"] stringByAppendingPathComponent:@"Preferences"] stringByAppendingPathComponent:@"com.connectionkit.registry"];
+	return myDatabaseFile;
 }
 
 - (void)otherProcessChanged:(NSNotification *)notification
@@ -300,7 +318,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 													name:CKHostChanged
 												  object:connection];
 	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObjectIdenticalTo:connection];
+	[myConnections removeObject:connection];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
