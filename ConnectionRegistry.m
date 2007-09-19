@@ -300,7 +300,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 													name:CKHostChanged
 												  object:connection];
 	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObject:connection];
+	[myConnections removeObjectIdenticalTo:connection];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
@@ -568,11 +568,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	else if ([item isKindOfClass:[CKHost class]])
 	{
-		NSURL *url = [NSURL URLWithString:object];
-		if (url)
-		{
-			[item setURL:url];
-		}
+		[((CKHost *)item) setAnnotation:object];
 	}
 }
 

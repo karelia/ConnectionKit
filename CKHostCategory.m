@@ -209,7 +209,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:host];
 	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories removeObject:host];
+	[myChildCategories removeObjectIdenticalTo:host];
 	[host setCategory:nil];
 	[self didChangeValueForKey:@"childCategories"];
 	[self didChange];
