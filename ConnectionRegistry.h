@@ -46,6 +46,7 @@
 {
 	NSMutableArray *myConnections;
 	NSMutableArray *myDraggedItems;
+	NSString *myDatabaseFile;
 	CKBonjourCategory *myBonjour;
 	NSDistributedNotificationCenter *myCenter;
 	NSLock *myLock;
@@ -56,6 +57,11 @@
 	
 	BOOL myIsGroupEditing;
 }
+
+// you can set a custom database if you don't want to use the default shared registry.
+// I don't recommend it, but there are situations where this is needed.
++ (void)setRegistryDatabase:(NSString *)file;
++ (NSString *)registryDatabase;
 
 + (id)sharedRegistry; //use this. DO NOT alloc one yourself
 
