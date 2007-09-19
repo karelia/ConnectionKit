@@ -39,8 +39,6 @@ static NSImage *sHostIcon = nil;
 - (NSString *)name;
 - (NSDictionary *)properties;
 - (void)setProperties:(NSDictionary *)properties;
-- (SecProtocolType)_protocolTypeForString:(NSString *)value;
-- (SecAuthenticationType)_authenticationTypeForString:(NSString *)value;
 @end
 
 @implementation CKHost
@@ -377,9 +375,9 @@ static NSImage *sHostIcon = nil;
 		SecKeychainAttribute attributes[1];
 		OSErr result;
 		OSStatus status;
-		UInt32 length;
-		char *pass;
-		
+		UInt32 length = 0;
+		char *pass = NULL;
+				
 		// try internet password first
 		status = SecKeychainFindInternetPassword (NULL,
 												  strlen([myHost UTF8String]),
@@ -391,13 +389,13 @@ static NSImage *sHostIcon = nil;
 												  strlen([myInitialPath UTF8String]),
 												  [myInitialPath UTF8String],
 												  [myPort intValue],
-												  [self _protocolTypeForString:[AbstractConnection urlSchemeForConnectionName:myConnectionType port:myPort]],
-												  [self _authenticationTypeForString:@"dflt"],
+												  kSecProtocolTypeFTP,
+												  kSecAuthenticationTypeDefault,
 												  &length,
-												  &pass,
+												  (void **)&pass,
 												  NULL);
 			
-		if (status != userCanceledErr)
+		if (status != errSecItemNotFound)
 		{
 			myPassword = [[NSString stringWithCString:pass length:length] retain];
 			if (length) 
@@ -464,27 +462,34 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)baseURLString
 {
-	id <AbstractConnectionProtocol>con = [self connection];
-	if (con)
+	NSString *scheme = [AbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
+	NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", scheme];
+	if ([self username])
 	{
-		NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", [con urlScheme]];
-		if ([self username])
-		{
-			[url appendString:[self username]];
-			
-			if ([self password])
-			{
-				[url appendFormat:@":%@", [self password]];
-			}
-			
-			[url appendString:@"@"];
-		}
-		[url appendString:[self host]];
-		[url appendFormat:@":%@", [con port]]; // use the con port incase it used the default port.
+		[url appendString:[self username]];
 		
-		return url;
+		if ([self password])
+		{
+			[url appendFormat:@":%@", [self password]];
+		}
+		
+		[url appendString:@"@"];
 	}
-	return nil;
+	[url appendString:[self host]];
+	
+	NSString *port = myPort;
+	if (!port || [port isEqualToString:@""])
+	{
+		port = [AbstractConnection registeredPortForConnectionType:[self connectionType]];
+	}
+	
+	if (port)
+	{
+		[url appendFormat:@":%@", port]; // use the con port incase it used the default port.
+	}
+	
+	
+	return url;
 }
 
 - (NSString *)urlString
@@ -497,9 +502,18 @@ static NSImage *sHostIcon = nil;
 		{
 			[url appendString:@"/"];
 		}
+		else
+		{
+			[url appendString:@"/%2F"];
+		}
 		[url appendString:[self initialPath]];
 	}
 	else
+	{
+		[url appendString:@"/"];
+	}
+	
+	if (![url hasSuffix:@"/"])
 	{
 		[url appendString:@"/"];
 	}
@@ -779,38 +793,6 @@ static NSImage *sHostIcon = nil;
 		return [self performSelector:sel];
 	}
 	return nil;
-}
-
-- (SecProtocolType)_protocolTypeForString:(NSString *)protocolValue
-{
-    SecProtocolType protocol = 0;
-    
-    if ([protocolValue isEqualToString:@"ftp"])
-        protocol = kSecProtocolTypeFTP;
-    else if ([protocolValue isEqualToString:@"ftpa"])
-        protocol = kSecProtocolTypeFTPAccount;
-    else if ([protocolValue isEqualToString:@"ftps"])
-        protocol = kSecProtocolTypeFTPS;
-    else if ([protocolValue isEqualToString:@"ftpx"])
-        protocol = kSecProtocolTypeFTPProxy;
-	else if ([protocolValue isEqualToString:@"sftp"])
-		protocol = kSecProtocolTypeSSH;
-    return protocol;
-}
-
-- (SecAuthenticationType)_authenticationTypeForString:(NSString *)authenticationTypeValue
-{
-    SecAuthenticationType authenticationType = 0;
-    
-    if ([authenticationTypeValue isEqualToString:@"http"])
-        authenticationType = kSecAuthenticationTypeHTTPBasic;
-    else if ([authenticationTypeValue isEqualToString:@"httd"])
-        authenticationType = kSecAuthenticationTypeHTTPDigest;
-    else if ([authenticationTypeValue isEqualToString:@"form"])
-        authenticationType = kSecAuthenticationTypeHTMLForm;
-    else if ([authenticationTypeValue isEqualToString:@"dflt"])
-        authenticationType = kSecAuthenticationTypeDefault;
-    return authenticationType;
 }
 
 @end
