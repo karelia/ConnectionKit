@@ -890,6 +890,7 @@ static Class sCellClass = nil;
 			[self updateScrollers];
 			
 			// scroll it to visible
+			lastColumnFrame.size.width += SCROLLER_WIDTH;
 			[self scrollRectToVisible:lastColumnFrame];
 		}
 	}
