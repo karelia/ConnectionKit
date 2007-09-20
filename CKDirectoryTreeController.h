@@ -73,6 +73,8 @@ typedef enum {
 	unsigned long long myCachedContentsThresholdSize;
 	
 	id myDelegate;
+	id myTarget;
+	SEL myAction;
 	
 	struct __ckdtc_flags {
 		unsigned isRemote: 1;
@@ -90,6 +92,11 @@ typedef enum {
 
 - (void)setDelegate:(id)delegate;
 - (id)delegate;
+
+- (void)setTarget:(id)target;
+- (id)target;
+- (void)setAction:(SEL)action;
+- (SEL)action;
 
 - (void)setContentIsRemote:(BOOL)flag;
 - (BOOL)contentIsRemote;
