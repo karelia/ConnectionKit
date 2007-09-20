@@ -39,6 +39,7 @@
 	Class myCellClass;
 	id myCellPrototype;
 	NSMutableArray *myColumns;
+	NSMutableDictionary *myColumnWidths;
 	NSMutableArray *mySelection;
 	
 	IBOutlet NSTextField *oPath;
@@ -46,6 +47,7 @@
 	float myMinColumnWidth;
 	float myMaxColumnWidth;
 	float myRowHeight;
+	float myDefaultColumnWidth;
 	
 	NSString *myAutosaveName;
 	

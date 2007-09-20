@@ -102,7 +102,9 @@ static Class sCellClass = nil;
 	
 	[self setCellClass:[CKTableBasedBrowser class]];
 	myColumns = [[NSMutableArray alloc] initWithCapacity:8];
+	myColumnWidths = [[NSMutableDictionary alloc] initWithCapacity:8];
 	mySelection = [[NSMutableArray alloc] initWithCapacity:32];
+	
 	myAutosaveName = @"Default";
 	myPathSeparator = @"/";
 	myCurrentPath = @"/";
@@ -110,6 +112,7 @@ static Class sCellClass = nil;
 	myMinColumnWidth = 180;
 	myMaxColumnWidth = -1;
 	myRowHeight = 18;
+	myDefaultColumnWidth = -1;
 	
 	myFlags.allowsMultipleSelection = NO;
 	myFlags.allowsResizing = YES;
@@ -122,6 +125,7 @@ static Class sCellClass = nil;
 - (void)dealloc
 {
 	[myColumns release];
+	[myColumnWidths release];
 	[mySelection release];
 	[myCellPrototype release];
 	[myAutosaveName release];
@@ -670,7 +674,7 @@ static Class sCellClass = nil;
 	
 	if (myLeafView)
 	{
-		maxX = NSMaxX([myLeafView frame]);
+		maxX = NSMaxX([[myLeafView enclosingScrollView] frame]);
 	}
 	else
 	{
@@ -707,6 +711,20 @@ static Class sCellClass = nil;
 	{
 		if (i >= [myColumns count])
 		{
+			// see if there is a custom width
+			if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:i]])
+			{
+				columnRect.size.width = [[myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:i]] floatValue];
+			}
+			else if (myDefaultColumnWidth > 0)
+			{
+				columnRect.size.width = myDefaultColumnWidth;
+			}
+			else
+			{
+				columnRect.size.width = myMinColumnWidth;
+			}
+			
 			// create the column
 			NSScrollView *col = [self createColumnWithRect:columnRect];
 			[self addSubview:col];
@@ -833,12 +851,33 @@ static Class sCellClass = nil;
 			NSRect lastColumnFrame = [[[myColumns lastObject] enclosingScrollView] frame];
 			lastColumnFrame.origin.x = NSMaxX(lastColumnFrame) + 1;
 			
-//			if (NSWidth([myLeafView frame]) > NSWidth(lastColumnFrame))
-//			{
-//				lastColumnFrame.size.width = NSWidth([myLeafView frame]);
-//			}
+			// get the custom width for the column
+			if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:[myColumns count]]])
+			{
+				lastColumnFrame.size.width = [[myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:[myColumns count]]] floatValue];
+			}
+			else if (myDefaultColumnWidth > 0)
+			{
+				lastColumnFrame.size.width = myDefaultColumnWidth;
+			}
+			else if (NSWidth([myLeafView frame]) > NSWidth(lastColumnFrame))
+			{
+				lastColumnFrame.size.width = NSWidth([myLeafView frame]);
+			}
+			
+			[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth(lastColumnFrame)] forKey:[NSNumber numberWithUnsignedInt:[myColumns count]]];
+			
+			// create a scroller for it as well
+			CKTableBrowserScrollView *scroller = [[CKTableBrowserScrollView alloc] initWithFrame:lastColumnFrame];
+			[scroller setHasVerticalScroller:YES];
+			[scroller setHasHorizontalScroller:NO];
+			[[scroller resizer] setDelegate:self];
+			[scroller setAutoresizingMask: NSViewHeightSizable];
+			[scroller setDocumentView:myLeafView];
+			
 			[myLeafView setFrame:lastColumnFrame];
-			[self addSubview:myLeafView];
+			[self addSubview:scroller];
+			[scroller release];
 			[self updateScrollers];
 			
 			// scroll it to visible
@@ -883,7 +922,7 @@ static Class sCellClass = nil;
 	}
 	
 	// remove the leaf view if it is visible
-	[myLeafView removeFromSuperview];
+	[[myLeafView enclosingScrollView] removeFromSuperview];
 	myLeafView = nil;
 	
 	// remove columns greater than the currently selected one
@@ -913,6 +952,20 @@ static Class sCellClass = nil;
 		// create a new column
 		NSRect lastColumnFrame = [[[myColumns lastObject] enclosingScrollView] frame];
 		lastColumnFrame.origin.x = NSMaxX(lastColumnFrame) + 1;
+		
+		// see if there is a custom column width
+		if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:[myColumns count]]])
+		{
+			lastColumnFrame.size.width = [[myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:[myColumns count]]] floatValue];
+		}
+		else if (myDefaultColumnWidth > 0)
+		{
+			lastColumnFrame.size.width = myDefaultColumnWidth;
+		}
+		else
+		{
+			lastColumnFrame.size.width = myMinColumnWidth;
+		}
 		
 		id newColumn = [self createColumnWithRect:lastColumnFrame];
 		[self addSubview:newColumn];
@@ -1087,7 +1140,29 @@ static Class sCellClass = nil;
 - (void)resizer:(CKResizingButton *)resizer ofScrollView:(CKTableBrowserScrollView *)scrollView  movedBy:(float)xDelta affectsAllColumns:(BOOL)flag;
 {
 	unsigned column = [self columnWithTable:[scrollView documentView]];
-	NSScrollView *scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+	NSScrollView *scroller = nil;
+	
+	if (column != NSNotFound)
+	{
+		scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+	}
+	else
+	{
+		// this is the scroller of the leaf view
+		scroller = [myLeafView enclosingScrollView];
+	}
+	
+	
+	if (flag)
+	{
+		// remove all custom sizes
+		[myColumnWidths removeAllObjects];
+		// set new default
+		myDefaultColumnWidth = NSWidth([scroller frame]) + xDelta;
+	}
+	
+	// set custom
+	[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
 	
 	// if resizing all, first set all columns to be the same size
 //	if (flag)
