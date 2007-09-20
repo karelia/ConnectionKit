@@ -193,6 +193,26 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return myDelegate;
 }
 
+- (void)setTarget:(id)target
+{
+	myTarget = target;
+}
+
+- (id)target
+{
+	return myTarget;
+}
+
+- (void)setAction:(SEL)action
+{
+	myAction = action;
+}
+
+- (SEL)action
+{
+	return myAction;
+}
+
 - (void)reloadViews
 {
 	// reload the data
@@ -539,6 +559,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oOutlineView scrollItemToTop:mySelectedNode];
 	
 	myFlags.isNavigatingToPath = NO;
+	
+	if ([self target] && [self action])
+	{
+		[[self target] performSelector:[self action] withObject:self];
+	}
 }
 
 - (void)changeRelativeRootToPath:(NSString *)path
