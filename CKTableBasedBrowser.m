@@ -78,6 +78,8 @@
 
 @end
 
+#define SCROLLER_WIDTH 16.0
+
 static Class sCellClass = nil;
 
 @implementation CKTableBasedBrowser
@@ -860,9 +862,9 @@ static Class sCellClass = nil;
 			{
 				lastColumnFrame.size.width = myDefaultColumnWidth;
 			}
-			else if (NSWidth([myLeafView frame]) > NSWidth(lastColumnFrame))
+			else if (NSWidth([myLeafView frame]) + SCROLLER_WIDTH > NSWidth(lastColumnFrame))
 			{
-				lastColumnFrame.size.width = NSWidth([myLeafView frame]);
+				lastColumnFrame.size.width = NSWidth([myLeafView frame]) + SCROLLER_WIDTH;
 			}
 			
 			[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth(lastColumnFrame)] forKey:[NSNumber numberWithUnsignedInt:[myColumns count]]];
@@ -873,9 +875,16 @@ static Class sCellClass = nil;
 			[scroller setHasHorizontalScroller:NO];
 			[[scroller resizer] setDelegate:self];
 			[scroller setAutoresizingMask: NSViewHeightSizable];
-			[scroller setDocumentView:myLeafView];
 			
+			if (NSHeight([myLeafView frame]) > NSHeight(lastColumnFrame))
+			{
+				lastColumnFrame.size.height = NSHeight([myLeafView frame]);
+			}
+			lastColumnFrame.size.width -= SCROLLER_WIDTH;
 			[myLeafView setFrame:lastColumnFrame];
+			
+			[scroller setDocumentView:myLeafView];
+			[myLeafView scrollRectToVisible:NSMakeRect(0,NSMaxY(lastColumnFrame) - 1,1,1)];
 			[self addSubview:scroller];
 			[scroller release];
 			[self updateScrollers];
@@ -1197,6 +1206,13 @@ static Class sCellClass = nil;
 	if (NSWidth(frame) < myMinColumnWidth)
 	{
 		frame.size.width = myMinColumnWidth;
+	}
+	if ([scroller documentView] == myLeafView)
+	{
+		if (NSWidth(frame) < NSWidth([myLeafView frame]) + SCROLLER_WIDTH)
+		{
+			frame.size.width = NSWidth([myLeafView frame]) + SCROLLER_WIDTH;
+		}
 	}
 	if (myMaxColumnWidth > 0 && NSWidth(frame) > myMaxColumnWidth)
 	{
