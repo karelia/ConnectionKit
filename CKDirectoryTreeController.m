@@ -464,8 +464,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		return [cur path];
 	}
-	
-	return nil;
+	// if nothing is selected, then the folder of the relative root should be returned
+	return myRelativeRootPath;
 }
 
 - (NSArray *)contentsOfSelectedFolder
