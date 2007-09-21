@@ -141,7 +141,19 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 														   object:cur];
 			}
 		}
-		
+		//Enumerate the categories so we can make sure the hosts know of their category
+		e = [[self allCategories] objectEnumerator];
+		CKHostCategory *currentCategory;
+		while ((currentCategory = [e nextObject]))
+		{
+			//Enumerate this categories hosts so we can set the category on it
+			NSEnumerator *hostEnum = [[currentCategory hosts] objectEnumerator];
+			CKHost *currentHost;
+			while ((currentHost = [hostEnum nextObject]))
+			{
+				[currentHost setCategory:currentCategory];
+			}
+		}
 	}
 	return self;
 }
@@ -650,6 +662,16 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
 {
+	if ([myDraggedItems count] > 0)
+	{
+		//Check if dragged item is part of an uneditable category
+		id draggedItem = [myDraggedItems objectAtIndex:0];
+		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]);
+		if (isNotEditable)
+		{
+			return NSDragOperationNone;
+		}
+	}
 	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
 	if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
 	{
