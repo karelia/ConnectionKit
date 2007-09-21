@@ -1474,7 +1474,7 @@ static NSImage *sResizeImage = nil;
 			[self selectRow:[self selectedRow] - 1 byExtendingSelection:NO];
 			[self scrollRowToVisible:[self selectedRow] - 1];
 			
-			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY];
+			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 		}
 	}
 	else if ([[theEvent characters] characterAtIndex:0] == NSDownArrowFunctionKey)
@@ -1486,7 +1486,7 @@ static NSImage *sResizeImage = nil;
 			[self selectRow:[self selectedRow] + 1 byExtendingSelection:NO];
 			[self scrollRowToVisible:[self selectedRow] + 1];
 			
-			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY];
+			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 		}
 	}
 	else
@@ -1501,7 +1501,7 @@ static NSImage *sResizeImage = nil;
 		{
 			[[self delegate] tableView:self didKeyPress:myQuickSearchString];
 		}
-		[self performSelector:@selector(searchConcatenationEnded) withObject:nil afterDelay:KEYPRESS_DELAY];
+		[self performSelector:@selector(searchConcatenationEnded) withObject:nil afterDelay:KEYPRESS_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 	}
 }
 
