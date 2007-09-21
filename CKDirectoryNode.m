@@ -462,7 +462,8 @@ static NSImage *sSymFileIcon = nil;
 	}
 	// see if we are a command line tool
 	else if ([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeRegular] &&
-			 [[self propertyForKey:NSFilePosixPermissions] isExecutable])
+			 [[self propertyForKey:NSFilePosixPermissions] isExecutable] &&
+			 (![[self propertyForKey:cxFilenameKey] pathExtension] || [[[self propertyForKey:cxFilenameKey] pathExtension] isEqualToString:@""]))
 	{
 		img = [[NSWorkspace sharedWorkspace] iconForFileType:@"command"];
 	}
