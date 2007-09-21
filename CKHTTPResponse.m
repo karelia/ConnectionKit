@@ -227,8 +227,11 @@ static NSMutableDictionary *responseMap = nil;
 				
 				lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
 										  range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
+				if (lengthRange.location == NSNotFound)
+				{
+					return packetRange;
+				}
 				lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
-#warning TODO -- Test for Range OK befre trying to make string; recover gracefully please!
 				scanner = [NSScanner scannerWithString:lengthString];
 				[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
 				[scanner scanHexInt:&chunkLength];

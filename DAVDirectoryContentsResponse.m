@@ -93,12 +93,15 @@
 		
 		@try {
 			// we could be a directory
-			NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
-			NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
-			
-			long long size;
-			[sizeScanner scanLongLong:&size];
-			[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
+			if ([[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] count] > 0)
+			{
+				NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
+				NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
+				
+				long long size;
+				[sizeScanner scanLongLong:&size];
+				[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
+			}
 		}
 		@catch (NSException *e) {
 			
