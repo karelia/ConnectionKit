@@ -68,6 +68,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 		int version = [coder decodeIntForKey:@"version"];
 #pragma unused (version)
 		myName = [[coder decodeObjectForKey:@"name"] copy];
+		myIsEditable = YES;
 		myChildCategories = [[NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"categories"]] retain];
 		
 		NSEnumerator *e = [myChildCategories objectEnumerator];
