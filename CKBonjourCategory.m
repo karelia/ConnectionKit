@@ -44,8 +44,11 @@
 	if ((self = [super initWithName:@"Bonjour"]))
 	{
 		myFTPCategory = [[CKHostCategory alloc] initWithName:@"FTP"];
+		[myFTPCategory setEditable:NO];
 		mySFTPCategory = [[CKHostCategory alloc] initWithName:@"SFTP"];
+		[mySFTPCategory setEditable:NO];
 		myHTTPCategory = [[CKHostCategory alloc] initWithName:@"WebDAV"];
+		[myHTTPCategory setEditable:NO];
 		
 		[super addChildCategory:myFTPCategory];
 		[super addChildCategory:mySFTPCategory];
@@ -195,9 +198,5 @@ static NSImage *sBonjourIcon = nil;
 
 @implementation CKBonjourHost
 
-- (CKHostCategory *)category
-{
-	return nil;
-}
 
 @end

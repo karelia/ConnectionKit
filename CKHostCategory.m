@@ -48,6 +48,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	if ((self = [super init]))
 	{
 		myName = [name copy];
+		myIsEditable = YES;
 		myChildCategories = [[NSMutableArray array] retain];
 	}
 	return self;
@@ -254,9 +255,14 @@ static NSImage *sFolderImage = nil;
 	return [copy autorelease];
 }
 
+- (void)setEditable:(BOOL)editableFlag
+{
+	myIsEditable = editableFlag;
+}
+
 - (BOOL)isEditable
 {
-	return YES;
+	return myIsEditable;
 }
 
 - (NSArray *)children

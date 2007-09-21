@@ -70,7 +70,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)setUpload:(BOOL)flag
 {
-	isUpload = YES;
+	isUpload = flag;
 }
 
 - (BOOL)isUpload

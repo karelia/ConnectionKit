@@ -34,6 +34,7 @@
 @interface CKHostCategory : NSObject <NSCoding>
 {
 	NSString *myName;
+	BOOL myIsEditable;
 	NSMutableArray *myChildCategories;
 	
 	CKHostCategory *myParentCategory; //not retained
@@ -57,7 +58,9 @@
 - (CKHostCategory *)category;
 
 - (NSImage *)icon;
+
 - (BOOL)isEditable;
+- (void)setEditable:(BOOL)editableFlag;
 
 @end
 
