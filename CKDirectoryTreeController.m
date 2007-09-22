@@ -1018,6 +1018,15 @@ static NSMutableParagraphStyle *sStyle = nil;
 	[pool release];
 }
 
+- (id)initTextCell:(NSString *)txt
+{
+	if ((self = [super initTextCell:txt]))
+	{
+		[self setFont:[NSFont systemFontOfSize:11]];
+	}
+	return self;
+}
+
 - (void)setObjectValue:(id)obj
 {
 	if ([obj isKindOfClass:[CKDirectoryNode class]])
@@ -1193,6 +1202,15 @@ static NSImage *sSelectedArrow = nil;
 	}
 	
 	[pool release];
+}
+
+- (id)initTextCell:(NSString *)txt
+{
+	if ((self = [super initTextCell:txt]))
+	{
+		[self setFont:[NSFont systemFontOfSize:11]];
+	}
+	return self;
 }
 
 - (void)dealloc
