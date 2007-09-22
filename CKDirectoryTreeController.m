@@ -471,25 +471,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSArray *)contentsOfSelectedFolder
 {
 	NSMutableArray *contents = [NSMutableArray array];
-	NSArray *items = [oBrowser selectedItems];
+
+	CKDirectoryNode *cur = [CKDirectoryNode nodeForPath:[self selectedFolderPath] withRoot:myRootNode];
+	NSEnumerator *e = [[cur contents] objectEnumerator];
+	CKDirectoryNode *node;
 	
-	if ([items count])
+	while ((node = [e nextObject]))
 	{
-		CKDirectoryNode *cur = [items objectAtIndex:0];
-		
-		if (![cur isDirectory])
-		{
-			cur = [cur parent];
-		}
-		
-		NSEnumerator *e = [[cur contents] objectEnumerator];
-		CKDirectoryNode *node;
-		
-		while ((node = [e nextObject]))
-		{
-			NSDictionary *d = [NSDictionary dictionaryWithDictionary:[node properties]];
-			[contents addObject:d];
-		}
+		NSDictionary *d = [NSDictionary dictionaryWithDictionary:[node properties]];
+		[contents addObject:d];
 	}
 	
 	return contents;
