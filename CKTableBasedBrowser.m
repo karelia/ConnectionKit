@@ -874,7 +874,6 @@ static Class sCellClass = nil;
 			[scroller setHasVerticalScroller:YES];
 			[scroller setHasHorizontalScroller:NO];
 			[[scroller resizer] setDelegate:self];
-			[scroller setAutoresizingMask: NSViewHeightSizable];
 			
 			if (NSHeight([myLeafView frame]) > NSHeight(lastColumnFrame))
 			{
@@ -1162,7 +1161,6 @@ static Class sCellClass = nil;
 		scroller = [myLeafView enclosingScrollView];
 	}
 	
-	
 	if (flag)
 	{
 		// remove all custom sizes
@@ -1246,9 +1244,9 @@ static Class sCellClass = nil;
 		lastFrame = frame;
 	}
 	
-	frame = [myLeafView frame];
+	frame = [[myLeafView enclosingScrollView] frame];
 	frame.origin.x = NSMaxX(lastFrame) + 1;
-	[myLeafView setFrame:frame];
+	[[myLeafView enclosingScrollView] setFrame:frame];
 	
 	[self setNeedsDisplay:YES];
 	[self updateScrollers];
