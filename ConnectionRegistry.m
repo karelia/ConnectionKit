@@ -562,9 +562,14 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
+	//We have a large icon here, we need to scale it to the nearest base 2 size, based on the rowheight of the outlineview.
+	float widthAndHeightDimension = pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
+	NSSize nearestSize = NSMakeSize(widthAndHeightDimension, widthAndHeightDimension);
+	NSImage *icon = [item iconWithSize:nearestSize];
+	
 	if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, nil];
+	{		
+		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, icon, CKHostCellImageValueKey, nil];
 	}
 	else
 	{
@@ -585,7 +590,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		}
 		
 		// annotation is last incase it is nil and finishes the dictionary there.
-		return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, [item icon], CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
+		return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, icon, CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
 	}
 	return nil;
 }
