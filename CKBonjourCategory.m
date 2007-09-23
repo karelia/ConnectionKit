@@ -43,26 +43,44 @@
 {
 	if ((self = [super initWithName:@"Bonjour"]))
 	{
-		myFTPCategory = [[CKHostCategory alloc] initWithName:@"FTP"];
-		[myFTPCategory setEditable:NO];
-		mySFTPCategory = [[CKHostCategory alloc] initWithName:@"SFTP"];
-		[mySFTPCategory setEditable:NO];
-		myHTTPCategory = [[CKHostCategory alloc] initWithName:@"WebDAV"];
-		[myHTTPCategory setEditable:NO];
+		NSUserDefaults *ud = [NSUserDefaults standardUserDefaults];
+		NSNumber *use;
 		
-		[super addChildCategory:myFTPCategory];
-		[super addChildCategory:mySFTPCategory];
-		[super addChildCategory:myHTTPCategory];
+		use = [ud objectForKey:@"CKBonjourBrowsesFTP"];
 		
-		myFTPBrowser = [[NSNetServiceBrowser alloc] init];
-		[myFTPBrowser setDelegate:self];
-		[myFTPBrowser searchForServicesOfType:@"_ftp._tcp." inDomain:@""];
-		mySFTPBrowser = [[NSNetServiceBrowser alloc] init];
-		[mySFTPBrowser setDelegate:self];
-		[mySFTPBrowser searchForServicesOfType:@"_sftp-ssh._tcp." inDomain:@""];
-		myHTTPBrowser = [[NSNetServiceBrowser alloc] init];
-		[myHTTPBrowser setDelegate:self];
-		[myHTTPBrowser searchForServicesOfType:@"_http._tcp." inDomain:@""];
+		if (!use || [use boolValue])
+		{
+			myFTPCategory = [[CKHostCategory alloc] initWithName:@"FTP"];
+			[myFTPCategory setEditable:NO];
+			[super addChildCategory:myFTPCategory];
+			myFTPBrowser = [[NSNetServiceBrowser alloc] init];
+			[myFTPBrowser setDelegate:self];
+			[myFTPBrowser searchForServicesOfType:@"_ftp._tcp." inDomain:@""];
+		}
+		
+		use = [ud objectForKey:@"CKBonjourBrowsesSFTP"];
+		
+		if (!use || [use boolValue])
+		{
+			mySFTPCategory = [[CKHostCategory alloc] initWithName:@"SFTP"];
+			[mySFTPCategory setEditable:NO];
+			[super addChildCategory:mySFTPCategory];
+			mySFTPBrowser = [[NSNetServiceBrowser alloc] init];
+			[mySFTPBrowser setDelegate:self];
+			[mySFTPBrowser searchForServicesOfType:@"_sftp-ssh._tcp." inDomain:@""];
+		}
+		
+		use = [ud objectForKey:@"CKBonjourBrowsesWebDAV"];
+		
+		if (!use || [use boolValue])
+		{
+			myHTTPCategory = [[CKHostCategory alloc] initWithName:@"WebDAV"];
+			[myHTTPCategory setEditable:NO];
+			[super addChildCategory:myHTTPCategory];
+			myHTTPBrowser = [[NSNetServiceBrowser alloc] init];
+			[myHTTPBrowser setDelegate:self];
+			[myHTTPBrowser searchForServicesOfType:@"_http._tcp." inDomain:@""];
+		}
 	}
 	return self;
 }
