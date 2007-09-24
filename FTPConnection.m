@@ -196,6 +196,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)sendCommand:(id)command
 {
+	NSString *stringOnlyCommand = command;
+	if ([command isKindOfClass:[NSInvocation class]])
+	{
+		stringOnlyCommand = NSStringFromSelector([command selector]);
+	}
+	
+	
+	
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
 	if ([command isKindOfClass:[NSInvocation class]])
@@ -1994,9 +2002,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_dataReceiveStream open];
 	[_dataSendStream open];
 	
-	KTLog(TransportDomain, KTLogDebug, @"Setting data connection timeout to 10 seconds");
+	unsigned dataConnectionTimeout = 10;
+	NSNumber *defaultsValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKFTPDataConnectionTimeoutValue"];
+	if (defaultsValue) {
+		dataConnectionTimeout = [defaultsValue unsignedIntValue];
+	}
+	
+	KTLog(TransportDomain, KTLogDebug, @"Setting data connection timeout to %u seconds", dataConnectionTimeout);
 	[_openStreamsTimeout invalidate];
-	_openStreamsTimeout = [[NSTimer scheduledTimerWithTimeInterval:10
+	_openStreamsTimeout = [[NSTimer scheduledTimerWithTimeInterval:dataConnectionTimeout
 															target:self
 														  selector:@selector(dataConnectionOpenTimedOut:) 
 														  userInfo:nil
