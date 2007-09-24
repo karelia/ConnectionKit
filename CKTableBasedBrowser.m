@@ -1155,6 +1155,7 @@ static Class sCellClass = nil;
 	if (column != NSNotFound)
 	{
 		scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+		[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
 	}
 	else
 	{
@@ -1169,10 +1170,7 @@ static Class sCellClass = nil;
 		// set new default
 		myDefaultColumnWidth = NSWidth([scroller frame]) + xDelta;
 	}
-	
-	// set custom
-	[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
-	
+		
 	// if resizing all, first set all columns to be the same size
 //	if (flag)
 //	{
@@ -1222,32 +1220,35 @@ static Class sCellClass = nil;
 	NSRect lastFrame = frame;
 	
 	// adjust views to the right
-	for ( column++; column < [myColumns count]; column++)
+	if (column != NSNotFound)
 	{
-		NSScrollView *scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
-		frame = [scroller frame];
-		frame.origin.x = NSMaxX(lastFrame) + 1;
-		if (flag)
+		for ( column++; column < [myColumns count]; column++)
 		{
-			frame.size.width += xDelta;
-			// apply constraints
-			if (NSWidth(frame) < myMinColumnWidth)
+			NSScrollView *scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+			frame = [scroller frame];
+			frame.origin.x = NSMaxX(lastFrame) + 1;
+			if (flag)
 			{
-				frame.size.width = myMinColumnWidth;
+				frame.size.width += xDelta;
+				// apply constraints
+				if (NSWidth(frame) < myMinColumnWidth)
+				{
+					frame.size.width = myMinColumnWidth;
+				}
+				if (myMaxColumnWidth > 0 && NSWidth(frame) > myMaxColumnWidth)
+				{
+					frame.size.width = myMaxColumnWidth;
+				}
 			}
-			if (myMaxColumnWidth > 0 && NSWidth(frame) > myMaxColumnWidth)
-			{
-				frame.size.width = myMaxColumnWidth;
-			}
+			
+			[scroller setFrame:frame];
+			lastFrame = frame;
 		}
 		
-		[scroller setFrame:frame];
-		lastFrame = frame;
+		frame = [[myLeafView enclosingScrollView] frame];
+		frame.origin.x = NSMaxX(lastFrame) + 1;
+		[[myLeafView enclosingScrollView] setFrame:frame];
 	}
-	
-	frame = [[myLeafView enclosingScrollView] frame];
-	frame.origin.x = NSMaxX(lastFrame) + 1;
-	[[myLeafView enclosingScrollView] setFrame:frame];
 	
 	[self setNeedsDisplay:YES];
 	[self updateScrollers];
