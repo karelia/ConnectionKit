@@ -382,6 +382,7 @@ static Class sCellClass = nil;
 
 - (void)setPath:(NSString *)path
 {
+	if ([path isEqualToString:[self path]]) return;
 	[mySelection removeAllObjects];
 	
 	if (path)
