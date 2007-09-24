@@ -362,6 +362,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		[myRootNode autorelease];
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
+		[oBrowser setPath:nil];
 		[oBrowser reloadData];
 		[oOutlineView reloadData];
 	}
