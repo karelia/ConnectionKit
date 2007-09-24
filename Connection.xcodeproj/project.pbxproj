@@ -31,6 +31,9 @@
 		3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* WebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* FTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* FTPConnection.h */; };
 		3C231A5E0A66ECBB00951F9E /* SFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* SFTPConnection.h */; };
+		7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999680CA8376B00A22156 /* gear_disabled.tiff */; };
+		7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999690CA8376B00A22156 /* gear_normal.tiff */; };
+		7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7909996A0CA8376B00A22156 /* gear_pressed.tiff */; };
 		790AD9180B6DD19D001FF53A /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = 790AD9120B6DD19D001FF53A /* openssl.c */; };
 		790AD9190B6DD19D001FF53A /* openssl.h in Headers */ = {isa = PBXBuildFile; fileRef = 790AD9130B6DD19D001FF53A /* openssl.h */; };
 		790AD91B0B6DD19D001FF53A /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = 790AD9150B6DD19D001FF53A /* pem.c */; };
@@ -58,6 +61,8 @@
 		79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79420F510C94EDAD0002B99D /* browser_resizer.tiff */; };
 		794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E50C961B510002B99D /* container_triangle_selected.tiff */; };
 		794213E80C961B510002B99D /* container_triangle.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E60C961B510002B99D /* container_triangle.tiff */; };
+		7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */; };
+		794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */; };
 		7946B0FE0AC0F4A400CAE90F /* S3Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B0FC0AC0F4A400CAE90F /* S3Connection.h */; };
 		7946B0FF0AC0F4A400CAE90F /* S3Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B0FD0AC0F4A400CAE90F /* S3Connection.m */; };
 		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -326,6 +331,9 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
+		790999680CA8376B00A22156 /* gear_disabled.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_disabled.tiff; sourceTree = "<group>"; };
+		790999690CA8376B00A22156 /* gear_normal.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_normal.tiff; sourceTree = "<group>"; };
+		7909996A0CA8376B00A22156 /* gear_pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_pressed.tiff; sourceTree = "<group>"; };
 		790AD9120B6DD19D001FF53A /* openssl.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = openssl.c; sourceTree = "<group>"; };
 		790AD9130B6DD19D001FF53A /* openssl.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = openssl.h; sourceTree = "<group>"; };
 		790AD9150B6DD19D001FF53A /* pem.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; path = pem.c; sourceTree = "<group>"; };
@@ -352,6 +360,8 @@
 		79420F510C94EDAD0002B99D /* browser_resizer.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = browser_resizer.tiff; sourceTree = "<group>"; };
 		794213E50C961B510002B99D /* container_triangle_selected.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = container_triangle_selected.tiff; sourceTree = "<group>"; };
 		794213E60C961B510002B99D /* container_triangle.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = container_triangle.tiff; sourceTree = "<group>"; };
+		7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCollectionBasedBookmarkController.h; sourceTree = "<group>"; };
+		7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCollectionBasedBookmarkController.m; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* S3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = S3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* S3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = S3Connection.m; sourceTree = "<group>"; };
 		7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSCalendarDate+Connection.h"; sourceTree = "<group>"; };
@@ -903,6 +913,8 @@
 				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
 				795AFF170B1157D3006905FA /* CKHostCell.h */,
 				795AFF180B1157D3006905FA /* CKHostCell.m */,
+				7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */,
+				7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */,
 			);
 			name = "Bookmark Registry";
 			sourceTree = "<group>";
@@ -1070,6 +1082,9 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				790999680CA8376B00A22156 /* gear_disabled.tiff */,
+				790999690CA8376B00A22156 /* gear_normal.tiff */,
+				7909996A0CA8376B00A22156 /* gear_pressed.tiff */,
 				794213E50C961B510002B99D /* container_triangle_selected.tiff */,
 				794213E60C961B510002B99D /* container_triangle.tiff */,
 				79420F510C94EDAD0002B99D /* browser_resizer.tiff */,
@@ -1176,6 +1191,7 @@
 				79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */,
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */,
+				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1384,6 +1400,9 @@
 				79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */,
 				794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */,
 				794213E80C961B510002B99D /* container_triangle.tiff in Resources */,
+				7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */,
+				7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */,
+				7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1605,6 +1624,7 @@
 				79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */,
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
 				79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */,
+				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
