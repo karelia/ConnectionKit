@@ -1594,3 +1594,70 @@ static NSImage *sSelectedArrow = nil;
 }
 
 @end
+
+@implementation CKTriStateButton
+
+- (id)initWithCoder:(NSCoder *)aDecoder
+{
+    if (self = [super initWithCoder:aDecoder])
+    {
+        [[self cell] setImageDimsWhenDisabled:NO];
+        
+        // save the normal button image
+        [self setNormalImage:[self image]];
+        
+        // locate the disabled image
+        NSBundle *thisBundle = [NSBundle bundleForClass:[self class]];
+        NSString *disabledImagePath = [thisBundle pathForImageResource:[self alternateTitle]];
+        if (![disabledImagePath isEqualToString:@""])
+        {
+            NSImage *anImage = [[[NSImage alloc] initByReferencingFile:disabledImagePath] autorelease];
+			
+            // save the disabled button image
+            [self setDisabledImage:anImage];
+        }
+        [self setAlternateTitle:@""];
+        if ([self isEnabled] == NO)
+		{
+			[self setImage:myDisabledImage];
+		}
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [myNormalImage release];
+    [myDisabledImage release];
+    [super dealloc];
+}
+
+- (void)setNormalImage:(NSImage *)image
+{
+    [image retain];
+    [myNormalImage release];
+    myNormalImage = image;
+}
+
+- (void)setDisabledImage:(NSImage *)image
+{
+    [image retain];
+    [myDisabledImage release];
+    myDisabledImage = image;
+}
+
+- (void)setEnabled:(BOOL)value
+{
+    if(value == YES)
+	{
+		[self setImage:myNormalImage];
+	}
+    else
+	{
+		[self setImage:myDisabledImage];
+	}
+    [super setEnabled:value];    
+}
+
+@end
+

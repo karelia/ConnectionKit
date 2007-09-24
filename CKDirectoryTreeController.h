@@ -196,3 +196,13 @@ typedef enum {
 
 @end
 
+@interface CKTriStateButton : NSButton
+{
+	NSImage *myNormalImage;
+    NSImage *myDisabledImage;
+}
+
+- (void)setNormalImage:(NSImage *)image;
+- (void)setDisabledImage:(NSImage *)image;
+
+@end
