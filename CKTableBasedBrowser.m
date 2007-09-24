@@ -382,6 +382,11 @@ static Class sCellClass = nil;
 
 - (void)setPath:(NSString *)path
 {
+	if (path == nil) 
+	{
+		[myColumns removeAllObjects];
+	}
+	
 	if ([path isEqualToString:[self path]]) return;
 	[mySelection removeAllObjects];
 	
