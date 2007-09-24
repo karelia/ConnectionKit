@@ -56,11 +56,13 @@
                 connectWindow = NSPanel; 
                 fileCheckLog = NSTextView; 
                 initialDirectory = NSTextField; 
+                localBrowserBox = NSBox; 
                 localPopup = NSPopUpButton; 
                 localTable = NSTableView; 
                 log = NSTextView; 
                 logDrawer = NSDrawer; 
                 oConMenu = NSPopUpButton; 
+                remoteBrowserBox = NSBox; 
                 remotePopup = NSPopUpButton; 
                 remoteTable = NSTableView; 
                 savedHosts = id; 

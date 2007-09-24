@@ -79,7 +79,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myFlags.outlineViewDoubleCallback = NO;
 	myFlags.filePackages = YES;
 	myFlags.showsFilePackageExtensions = NO;
-	
+	myFlags.canCreateFolders = NO;
 	myCachedContentsThresholdSize = 65536; // 64k threshold
 	
 	return self;
@@ -99,9 +99,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	[oPopup removeAllItems];
 	[oStyle selectSegmentWithTag:CKBrowserStyle];
+	[oStyle setLabel:nil forSegment:0];
+	[oStyle setLabel:nil forSegment:1];
 	[self viewStyleChanged:oStyle];
 	[oHistory setEnabled:NO forSegment:CKBackButton];
 	[oHistory setEnabled:NO forSegment:CKForwardButton];
+	
+	[oHistory setLabel:nil forSegment:CKBackButton];
+	[oHistory setLabel:nil forSegment:CKForwardButton];
 	
 	// create all the outline view columns
 	myOutlineViewColumns = [[NSMutableDictionary alloc] initWithCapacity:8];
@@ -165,6 +170,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oBrowser setAction:@selector(browserSelected:)];
 	[oBrowser setDelegate:self];
 	[oBrowser setDataSource:self];
+	
+	[oActionGear setDelegate:self];
 	
 	[oOutlineView setDataSource:self];
 	[oOutlineView setDelegate:self];
@@ -371,6 +378,16 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (unsigned long long)cachedContentsThresholdSize
 {
 	return myCachedContentsThresholdSize;
+}
+
+- (void)setCanCreateDirectories:(BOOL)flag
+{
+	myFlags.canCreateFolders = flag;
+}
+
+- (BOOL)canCreateDirectories
+{
+	return myFlags.canCreateFolders;
 }
 
 - (void)setContents:(NSArray *)contents forPath:(NSString *)path
@@ -996,6 +1013,75 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)togglePackageExtensions:(id)sender
 {
 	[self setShowsFilePackageExtensions:[sender state] == NSOffState];
+}
+
+- (void)newFolder:(id)sender
+{
+	[myDelegate performSelector:@selector(directoryTreeWantsNewFolderCreated:)
+					 withObject:self
+					 afterDelay:0.0
+						inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+}
+
+#pragma mark -
+#pragma mark Tri State Menu Delegate
+
+- (NSMenu *)triStateMenuButtonNeedsMenu:(CKTriStateMenuButton *)button
+{
+	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"action gear"];
+	NSMenuItem *item;
+	
+	if ([self canCreateDirectories] && [myDelegate respondsToSelector:@selector(directoryTreeWantsNewFolderCreated:)])
+	{
+		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"New Folder", @"tree controller action gear")
+										  action:@selector(newFolder:)
+								   keyEquivalent:@""];
+		[item setTarget:self];
+		[menu addItem:item];
+		[item release];
+		
+		[menu addItem:[NSMenuItem separatorItem]];
+	}
+	
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Refresh", @"tree controller action gear")
+									  action:@selector(refresh:)
+							   keyEquivalent:@""];
+	[item setTarget:self];
+	[menu addItem:item];
+	[item release];
+	
+	[menu addItem:[NSMenuItem separatorItem]];
+	
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Hidden Files", @"tree controller action gear")
+									  action:@selector(toggleHiddenFiles:)
+							   keyEquivalent:@""];
+	[item setTarget:self];
+	[item setState:[self showsHiddenFiles] ? NSOnState : NSOffState];
+	[menu addItem:item];
+	[item release];
+	
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Browse Packages", @"tree controller action gear")
+									  action:@selector(togglePackageBrowsing:)
+							   keyEquivalent:@""];
+	[item setTarget:self];
+	[item setState:[self treatsFilePackagesAsDirectories] ? NSOnState : NSOffState];
+	[menu addItem:item];
+	[item release];
+	
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Package Extensions", @"tree controller action gear")
+									  action:@selector(togglePackageExtensions:)
+							   keyEquivalent:@""];
+	[item setTarget:self];
+	[item setState:[self showsFilePackageExtensions] ? NSOnState : NSOffState];
+	[menu addItem:item];
+	[item release];
+	
+	if ([myDelegate respondsToSelector:@selector(directoryTreeController:willDisplayActionGearMenu:)])
+	{
+		[myDelegate directoryTreeController:self willDisplayActionGearMenu:menu];
+	}
+	
+	return [menu autorelease];
 }
 
 @end
@@ -1661,3 +1747,44 @@ static NSImage *sSelectedArrow = nil;
 
 @end
 
+@implementation CKTriStateMenuButton
+
+- (void)setDelegate:(id)delegate
+{
+	if (![delegate respondsToSelector:@selector(triStateMenuButtonNeedsMenu:)])
+	{
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:@"delegate must implement triStateMenuButtonNeedsMenu:"
+									 userInfo:nil];
+	}
+	myDelegate = delegate;
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	if ([self isEnabled])
+	{
+		NSMenu *menu = [myDelegate triStateMenuButtonNeedsMenu:self];
+		if (menu) {
+			NSImage *orig = [[self image] retain];
+			[self setImage:[self alternateImage]];
+			NSPoint p = [self frame].origin;
+			p = [[self superview] convertPoint:p toView:nil];
+			p.y -= 5;
+			NSEvent *e = [NSEvent mouseEventWithType:NSLeftMouseDown
+											location:p
+									   modifierFlags:0
+										   timestamp:[NSDate timeIntervalSinceReferenceDate]
+										windowNumber:[[self window] windowNumber]
+											 context:[NSGraphicsContext currentContext]
+										 eventNumber:0
+										  clickCount:0
+											pressure:0];
+			[NSMenu popUpContextMenu:menu withEvent:e forView:self];
+			[self setImage:orig];
+			[orig release];
+		} 
+	}
+}
+
+@end

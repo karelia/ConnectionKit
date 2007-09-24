@@ -31,7 +31,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@class CKDirectoryNode, CKTableBasedBrowser;
+@class CKDirectoryNode, CKTableBasedBrowser, CKTriStateMenuButton;
 
 typedef enum {
 	CKBrowserStyle = 0,
@@ -50,6 +50,8 @@ typedef enum {
 	IBOutlet NSSegmentedControl *oHistory;
 	IBOutlet NSSearchField *oSearch;
 	IBOutlet NSTabView *oStyles;
+	IBOutlet CKTriStateMenuButton *oActionGear;
+	
 	// Inspector panel
 	IBOutlet NSView *oInspectorView;
 	IBOutlet NSImageView *oIcon;
@@ -86,7 +88,8 @@ typedef enum {
 		unsigned isNavigatingToPath: 1;
 		unsigned filePackages: 1;
 		unsigned showsFilePackageExtensions: 1;
-		unsigned unused: 23;
+		unsigned canCreateFolders: 1;
+		unsigned unused: 22;
 	} myFlags;
 }
 
@@ -112,6 +115,9 @@ typedef enum {
 - (BOOL)treatsFilePackagesAsDirectories;
 - (void)setShowsFilePackageExtensions:(BOOL)flag;
 - (BOOL)showsFilePackageExtensions;
+
+- (void)setCanCreateDirectories:(BOOL)flag;
+- (BOOL)canCreateDirectories;
 
 - (void)setRootDirectory:(NSString *)dir;
 - (NSString *)rootDirectory;
@@ -145,6 +151,8 @@ typedef enum {
 - (void)directoryTree:(CKDirectoryTreeController *)controller needsContentsOfFile:(NSString *)file; 
 - (void)directoryTreeStartedLoadingContents:(CKDirectoryTreeController *)controller;
 - (void)directoryTreeFinishedLoadingContents:(CKDirectoryTreeController *)controller;
+- (void)directoryTreeWantsNewFolderCreated:(CKDirectoryTreeController *)controller;
+- (void)directoryTreeController:(CKDirectoryTreeController *)controller willDisplayActionGearMenu:(NSMenu *)menu; // allow custom items to be added
 
 @end
 
@@ -205,4 +213,17 @@ typedef enum {
 - (void)setNormalImage:(NSImage *)image;
 - (void)setDisabledImage:(NSImage *)image;
 
+@end
+
+@interface CKTriStateMenuButton : CKTriStateButton
+{
+	id myDelegate;
+}
+
+- (void)setDelegate:(id)delegate;
+
+@end
+
+@interface NSObject (CKTriStateMenuDelegate)
+- (NSMenu *)triStateMenuButtonNeedsMenu:(CKTriStateMenuButton *)button;
 @end
