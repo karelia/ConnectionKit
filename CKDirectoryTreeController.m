@@ -1027,6 +1027,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 						inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 }
 
+- (void)refresh:(id)sender
+{
+	NSString *folder = [self selectedFolderPath];
+	
+	myDirectoriesLoading++;
+	[myDelegate directoryTreeStartedLoadingContents:self];
+	[myDelegate directoryTree:self needsContentsForPath:folder];
+}
+
 #pragma mark -
 #pragma mark Tri State Menu Delegate
 
