@@ -575,13 +575,28 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	{
 		NSString *primary = [item annotation];
 		NSString *secondary = nil;
-		if (!primary)
+		BOOL useHostName = [[[NSUserDefaults standardUserDefaults] objectForKey:@"CKHostCellUsesHostName"] boolValue];
+		if (!primary || [primary isEqualToString:@""])
 		{
-			primary = [item name];
+			if (useHostName)
+			{
+				primary = [item host];
+			}
+			else
+			{
+				primary = [item name];
+			}
 		}
 		else
 		{
-			secondary = [item name];
+			if (useHostName)
+			{
+				secondary = [item host];
+			}
+			else
+			{
+				secondary = [item name];
+			}
 		}
 		
 		if ([primary isEqualToString:secondary])
