@@ -232,6 +232,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oBrowser reloadData];
 	if (![self isFiltering])
 	{
+		if (!browserPath) browserPath = @"/";
 		[oBrowser setPath:browserPath];
 	}
 }
@@ -363,8 +364,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[myRootNode autorelease];
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
 		[oBrowser setPath:nil];
-		[oBrowser reloadData];
 		[oOutlineView reloadData];
+		[self reloadViews];
 	}
 }
 
