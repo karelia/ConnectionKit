@@ -384,7 +384,25 @@ static Class sCellClass = nil;
 {
 	if (path == nil) 
 	{
+		NSEnumerator *e = [myColumns objectEnumerator];
+		NSTableView *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			NSScrollView *scroller = [cur enclosingScrollView];
+			[cur setDataSource:nil];
+			[scroller removeFromSuperview];
+		}
 		[myColumns removeAllObjects];
+		
+		if (myLeafView)
+		{
+			[[myLeafView enclosingScrollView] removeFromSuperview];
+			myLeafView = nil;
+		}
+		
+		[mySelection removeAllObjects];
+		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
 	}
 	
 	if ([path isEqualToString:[self path]]) return;

@@ -16,6 +16,7 @@
             CLASS = CKDirectoryTreeController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
+                oActionGear = CKTriStateMenuButton; 
                 oBrowser = CKTableBasedBrowser; 
                 oHistory = NSSegmentedControl; 
                 oIcon = NSImageView; 
@@ -54,6 +55,12 @@
             SUPERCLASS = NSView; 
         }, 
         {CLASS = CKTableHeaderView; LANGUAGE = ObjC; SUPERCLASS = NSTableHeaderView; }, 
+        {CLASS = CKTriStateButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
+        {
+            CLASS = CKTriStateMenuButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = CKTriStateButton; 
+        }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
