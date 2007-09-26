@@ -216,5 +216,9 @@ static NSImage *sBonjourIcon = nil;
 
 @implementation CKBonjourHost
 
+- (BOOL)isEditable
+{
+	return NO;
+}
 
 @end
