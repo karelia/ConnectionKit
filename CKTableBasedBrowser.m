@@ -75,6 +75,7 @@
 - (void)updateScrollers;
 - (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag;
 - (unsigned)rowForItem:(id)item;
+- (void)removeAllColumns;
 
 @end
 
@@ -304,6 +305,8 @@ static Class sCellClass = nil;
 - (void)setDefaultColumnWidth:(float)width
 {
 	myDefaultColumnWidth = width;
+	[self removeAllColumns];
+	[self reloadData];
 }
 
 - (void)setPathSeparator:(NSString *)sep
@@ -389,16 +392,7 @@ static Class sCellClass = nil;
 {
 	if (path == nil) 
 	{
-		NSEnumerator *e = [myColumns objectEnumerator];
-		NSTableView *cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			NSScrollView *scroller = [cur enclosingScrollView];
-			[cur setDataSource:nil];
-			[scroller removeFromSuperview];
-		}
-		[myColumns removeAllObjects];
+		[self removeAllColumns];
 		
 		if (myLeafView)
 		{
@@ -647,6 +641,20 @@ static Class sCellClass = nil;
 	
 	
 	return column;
+}
+
+- (void)removeAllColumns
+{
+	NSEnumerator *e = [myColumns objectEnumerator];
+	NSTableView *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		NSScrollView *scroller = [cur enclosingScrollView];
+		[cur setDataSource:nil];
+		[scroller removeFromSuperview];
+	}
+	[myColumns removeAllObjects];
 }
 
 - (id)createColumnWithRect:(NSRect)rect
