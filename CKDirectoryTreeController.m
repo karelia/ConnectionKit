@@ -52,6 +52,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (BOOL)isFiltering;
 @end
 
+@interface CKTableBasedBrowser (Private)
+- (void)setDefaultColumnWidth:(float)width;
+@end
+
 @interface NSOutlineView (CKScrollToTop)
 
 - (void)scrollItemToTop:(id)item;
@@ -159,7 +163,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oOutlineView setDoubleAction:@selector(outlineDoubleClicked:)];
 	
 	// set up the browser
-#define MAX_VISIBLE_COLUMNS 4
+#define MAX_VISIBLE_COLUMNS 3
 	//[oBrowser setMaxVisibleColumns:MAX_VISIBLE_COLUMNS];
     //[oBrowser setMinColumnWidth:NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS];
 	//[oBrowser setColumnResizingType:NSBrowserUserColumnResizing];
@@ -189,6 +193,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 	[oOutlineView setDataSource:self];
 	[oOutlineView setDelegate:self];
+}
+
+- (void)setupBrowserDefaultColumnWidth
+{
+	[oBrowser setDefaultColumnWidth:NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS];
 }
 
 - (void)setDelegate:(id)delegate
