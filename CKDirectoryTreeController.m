@@ -171,8 +171,22 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oBrowser setDelegate:self];
 	[oBrowser setDataSource:self];
 	
-	[oActionGear setDelegate:self];
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(gearActionMenuWillDisplay:)
+												 name:NSPopUpButtonWillPopUpNotification
+											   object:oActionGear];
 	
+	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"gear"];
+	NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+	NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"gear" ofType:@"tiff"];
+	NSImage *icon = [[NSImage alloc] initWithContentsOfFile:path];
+	[item setImage:icon];
+	[icon release];
+	[menu insertItem:item atIndex:0];
+	[item release];
+	[oActionGear setMenu:menu];
+	[menu release];
+		
 	[oOutlineView setDataSource:self];
 	[oOutlineView setDelegate:self];
 }
@@ -1038,6 +1052,19 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 #pragma mark -
 #pragma mark Tri State Menu Delegate
+
+- (void)gearActionMenuWillDisplay:(NSNotification *)notification
+{
+	NSMenu *menu = [self triStateMenuButtonNeedsMenu:nil];
+	NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
+	NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"gear" ofType:@"tiff"];
+	NSImage *icon = [[NSImage alloc] initWithContentsOfFile:path];
+	[item setImage:icon];
+	[icon release];
+	[menu insertItem:item atIndex:0];
+	[item release];
+	[oActionGear setMenu:menu];
+}
 
 - (NSMenu *)triStateMenuButtonNeedsMenu:(CKTriStateMenuButton *)button
 {
