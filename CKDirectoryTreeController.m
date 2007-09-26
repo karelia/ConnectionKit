@@ -197,7 +197,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)setupBrowserDefaultColumnWidth
 {
-	[oBrowser setDefaultColumnWidth:NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS];
+	[oBrowser setDefaultColumnWidth:(NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS) - 1];
 }
 
 - (void)setDelegate:(id)delegate
