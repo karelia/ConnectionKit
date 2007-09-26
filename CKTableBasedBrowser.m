@@ -301,6 +301,11 @@ static Class sCellClass = nil;
 	return myMaxColumnWidth;
 }
 
+- (void)setDefaultColumnWidth:(float)width
+{
+	myDefaultColumnWidth = width;
+}
+
 - (void)setPathSeparator:(NSString *)sep
 {
 	if (myPathSeparator != sep)
