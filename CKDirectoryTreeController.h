@@ -50,7 +50,7 @@ typedef enum {
 	IBOutlet NSSegmentedControl *oHistory;
 	IBOutlet NSSearchField *oSearch;
 	IBOutlet NSTabView *oStyles;
-	IBOutlet CKTriStateMenuButton *oActionGear;
+	IBOutlet NSPopUpButton *oActionGear;
 	
 	// Inspector panel
 	IBOutlet NSView *oInspectorView;

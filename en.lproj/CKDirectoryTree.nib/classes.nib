@@ -16,7 +16,7 @@
             CLASS = CKDirectoryTreeController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                oActionGear = CKTriStateMenuButton; 
+                oActionGear = NSPopUpButton; 
                 oBrowser = CKTableBasedBrowser; 
                 oHistory = NSSegmentedControl; 
                 oIcon = NSImageView; 
