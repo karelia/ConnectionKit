@@ -54,6 +54,7 @@
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
 		792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
 		792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
+		79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79318F2E0CA9F3A1005C4AB6 /* gear.tiff */; };
 		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
 		79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -353,6 +354,7 @@
 		792CFCB50A806145001A00C6 /* CKHTTPRequest.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPRequest.m; sourceTree = "<group>"; };
 		792CFCB60A806145001A00C6 /* CKHTTPResponse.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKHTTPResponse.h; sourceTree = "<group>"; };
 		792CFCB70A806145001A00C6 /* CKHTTPResponse.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPResponse.m; sourceTree = "<group>"; };
+		79318F2E0CA9F3A1005C4AB6 /* gear.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear.tiff; sourceTree = "<group>"; };
 		79420AD20C91CDE80002B99D /* NSNumber+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+Connection.h"; sourceTree = "<group>"; };
 		79420AD30C91CDE80002B99D /* NSNumber+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+Connection.m"; sourceTree = "<group>"; };
 		79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = CKTableBasedBrowser.h; sourceTree = "<group>"; };
@@ -1082,6 +1084,7 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				79318F2E0CA9F3A1005C4AB6 /* gear.tiff */,
 				790999680CA8376B00A22156 /* gear_disabled.tiff */,
 				790999690CA8376B00A22156 /* gear_normal.tiff */,
 				7909996A0CA8376B00A22156 /* gear_pressed.tiff */,
@@ -1317,7 +1320,6 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */;
-			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				en,
@@ -1403,6 +1405,7 @@
 				7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */,
 				7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */,
 				7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */,
+				79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
