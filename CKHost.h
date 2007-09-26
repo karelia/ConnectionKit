@@ -76,6 +76,7 @@
 - (NSURL *)URL;
 - (NSString *)annotation;
 - (id)userInfo;
+- (BOOL)isEditable;
 - (NSImage *)icon;
 - (NSImage *)iconWithSize:(NSSize)size;
 

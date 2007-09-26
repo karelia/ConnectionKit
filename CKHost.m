@@ -546,6 +546,11 @@ static NSImage *sHostIcon = nil;
 	return myUserInfo;
 }
 
+- (BOOL)isEditable
+{
+	return YES;
+}
+
 - (void)setCategory:(CKHostCategory *)cat
 {
 	if (cat != myCategory)
