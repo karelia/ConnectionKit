@@ -235,6 +235,12 @@ static NSImage *sHostIcon = nil;
 		
 		//save to keychain
 		@try {
+			if ([myHost isEqualToString:@""] ||
+				[myUsername isEqualToString:@""])
+			{
+				return;
+			}
+			
 			SecKeychainAttribute attributes[4];
 			SecKeychainAttributeList list;
 			SecKeychainItemRef item = nil;
@@ -260,28 +266,56 @@ static NSImage *sHostIcon = nil;
 			
 			list.count = 4;
 			list.attr = attributes;
-			
+						
 			// see if it already exists
-			SecKeychainSearchRef search = nil;
-			status = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
+			status = SecKeychainFindInternetPassword (NULL,
+													  strlen([myHost UTF8String]),
+													  [myHost UTF8String],
+													  0,
+													  NULL,
+													  strlen([myUsername UTF8String]),
+													  [myUsername UTF8String],
+													  strlen([myInitialPath UTF8String]),
+													  [myInitialPath UTF8String],
+													  [myPort intValue],
+													  kSecProtocolTypeFTP,
+													  kSecAuthenticationTypeDefault,
+													  NULL,
+													  NULL,
+													  &item);
 			
 			if (status == noErr)
 			{
-				if ((status = SecKeychainSearchCopyNext (search, &item)) != errSecItemNotFound) 
-				{
-					status = SecKeychainItemDelete(item);
-				}
-				if (item) CFRelease(item);
-
-				char *passphraseUTF8 = (char *)[myPassword UTF8String];
-				status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
-				if (status != 0) 
-				{
-					NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
-				}
-				if (item) CFRelease(item);
+				status = SecKeychainItemDelete(item);
+				CFRelease(item); item = NULL;
 			}
-			if (search) CFRelease(search);
+			else
+			{
+				SecKeychainSearchRef search = nil;
+				status = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
+				
+				if (status == noErr)
+				{
+					if ((status = SecKeychainSearchCopyNext (search, &item)) != errSecItemNotFound) 
+					{
+						status = SecKeychainItemDelete(item);
+						if (status != noErr)
+						{
+							NSLog(@"Error deleting keychain item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
+						}
+					}
+					if (item) CFRelease(item); item = NULL;
+				}
+				if (search) CFRelease(search);
+			}
+			char *passphraseUTF8 = (char *)[myPassword UTF8String];
+			status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
+			if (status != 0) 
+			{
+				NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
+			}
+			if (item) CFRelease(item);
+			
 		}
 		@catch (id error) {
 			
@@ -369,10 +403,15 @@ static NSImage *sHostIcon = nil;
 {
 	if (!myPassword)
 	{
+		if ([myHost isEqualToString:@""] ||
+			[myUsername isEqualToString:@""])
+		{
+			return nil;
+		}
 		SecKeychainSearchRef search = nil;
 		SecKeychainItemRef item = nil;
 		SecKeychainAttributeList list;
-		SecKeychainAttribute attributes[1];
+		SecKeychainAttribute attributes[4];
 		OSErr result;
 		OSStatus status;
 		UInt32 length = 0;
@@ -406,11 +445,26 @@ static NSImage *sHostIcon = nil;
 		
 		if (!myPassword || [myPassword isEqualToString:@""])
 		{
+			char *desc = "ConnectionKit Password";
+			NSString *label = [self name];
+			
 			attributes[0].tag = kSecAccountItemAttr;
 			attributes[0].data = (void *)[myUsername UTF8String];
 			attributes[0].length = strlen(attributes[0].data);
 			
-			list.count = 1;
+			attributes[1].tag = kSecCommentItemAttr;
+			attributes[1].data = (void *)[label UTF8String];
+			attributes[1].length = strlen(attributes[1].data);
+			
+			attributes[2].tag = kSecDescriptionItemAttr;
+			attributes[2].data = (void *)desc;
+			attributes[2].length = strlen(desc);
+			
+			attributes[3].tag = kSecLabelItemAttr;
+			attributes[3].data = (void *)[label UTF8String];
+			attributes[3].length = strlen(attributes[3].data);
+			
+			list.count = 4;
 			list.attr = &attributes[0];
 			
 			result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
