@@ -398,104 +398,107 @@ static NSImage *sHostIcon = nil;
 {
 	return myUsername;
 }
-
 - (NSString *)password
 {
-	if (!myPassword)
+	if (myPassword)
 	{
-		if ([myHost isEqualToString:@""] ||
-			[myUsername isEqualToString:@""])
+		return myPassword;
+	}
+	//Need to get the password from keychain
+	if ([myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
+	{
+		//We don't have anything to base our keychain search from, we have no chance.
+		return nil;
+	}
+	OSStatus status;
+	UInt32 length = 0;
+	char *pass = NULL;
+	
+	// Try searching for an internet password first
+	status = SecKeychainFindInternetPassword (NULL, strlen([myHost UTF8String]), [myHost UTF8String], 0, NULL, strlen([myUsername UTF8String]), [myUsername UTF8String], strlen([myInitialPath UTF8String]), [myInitialPath UTF8String], [myPort intValue], kSecProtocolTypeFTP, kSecAuthenticationTypeDefault, &length, (void **)&pass, NULL);	
+	if (status != errSecItemNotFound)
+	{
+		//Found an internet password
+		myPassword = [[NSString stringWithCString:pass length:length] retain];
+		if (length)
 		{
-			return nil;
+			SecKeychainItemFreeContent(NULL, pass);
 		}
-		SecKeychainSearchRef search = nil;
-		SecKeychainItemRef item = nil;
-		SecKeychainAttributeList list;
-		SecKeychainAttribute attributes[4];
-		OSErr result;
-		OSStatus status;
-		UInt32 length = 0;
-		char *pass = NULL;
-				
-		// try internet password first
-		status = SecKeychainFindInternetPassword (NULL,
-												  strlen([myHost UTF8String]),
-												  [myHost UTF8String],
-												  0,
-												  NULL,
-												  strlen([myUsername UTF8String]),
-												  [myUsername UTF8String],
-												  strlen([myInitialPath UTF8String]),
-												  [myInitialPath UTF8String],
-												  [myPort intValue],
-												  kSecProtocolTypeFTP,
-												  kSecAuthenticationTypeDefault,
-												  &length,
-												  (void **)&pass,
-												  NULL);
-			
-		if (status != errSecItemNotFound)
+		if (myPassword && ![myPassword isEqualToString:@""])
 		{
-			myPassword = [[NSString stringWithCString:pass length:length] retain];
-			if (length) 
-			{
-				SecKeychainItemFreeContent(NULL, pass);
-			}
-		}
-		
-		if (!myPassword || [myPassword isEqualToString:@""])
-		{
-			char *desc = "ConnectionKit Password";
-			NSString *label = [self name];
-			
-			attributes[0].tag = kSecAccountItemAttr;
-			attributes[0].data = (void *)[myUsername UTF8String];
-			attributes[0].length = strlen(attributes[0].data);
-			
-			attributes[1].tag = kSecCommentItemAttr;
-			attributes[1].data = (void *)[label UTF8String];
-			attributes[1].length = strlen(attributes[1].data);
-			
-			attributes[2].tag = kSecDescriptionItemAttr;
-			attributes[2].data = (void *)desc;
-			attributes[2].length = strlen(desc);
-			
-			attributes[3].tag = kSecLabelItemAttr;
-			attributes[3].data = (void *)[label UTF8String];
-			attributes[3].length = strlen(attributes[3].data);
-			
-			list.count = 4;
-			list.attr = &attributes[0];
-			
-			result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
-			
-			if (result != noErr)
-			{
-				NSLog (@"status %d from SecKeychainSearchCreateFromAttributes\n", result);
-			}
-			
-			if ((result = SecKeychainSearchCopyNext (search, &item)) == noErr) {
-				SecKeychainAttribute attributes[1];
-				SecKeychainAttributeList list;
-				
-				attributes[0].tag = kSecAccountItemAttr;
-				
-				list.count = 1;
-				list.attr = attributes;
-				
-				status = SecKeychainItemCopyContent (item, NULL, &list, &length, (void **)&pass);
-				
-				// length  may be zero, it just means a zero-length password
-				if (status != userCanceledErr)
-				{
-					myPassword = [[NSString stringWithCString:pass length:length] retain];
-					SecKeychainItemFreeContent(&list, pass);
-				}
-			}
-			if (item) CFRelease(item);
-			if (search) CFRelease (search);
+			return myPassword;
 		}
 	}
+	
+	//Didn't find an internet password, let's look elsewhere
+	SecKeychainSearchRef search = nil;
+	SecKeychainItemRef item = nil;
+	SecKeychainAttributeList list;
+	SecKeychainAttribute attributes[4];
+	OSErr result;
+	
+	char *description = "ConnectionKit Password";
+	NSString *label = [self name];
+	
+	
+	attributes[0].tag = kSecAccountItemAttr;
+	attributes[0].data = (void *)[myUsername UTF8String];
+	attributes[0].length = strlen(attributes[0].data);
+	
+	attributes[1].tag = kSecCommentItemAttr;
+	attributes[1].data = (void *)[label UTF8String];
+	attributes[1].length = strlen(attributes[1].data);
+	
+	attributes[2].tag = kSecDescriptionItemAttr;
+	attributes[2].data = (void *)description;
+	attributes[2].length = strlen(description);
+	
+	attributes[3].tag = kSecLabelItemAttr;
+	attributes[3].data = (void *)[label UTF8String];
+	attributes[3].length = strlen(attributes[3].data);
+	
+	//We start out with very stringent attribute specifications. 
+	//As we continue to not find a password, we scale back the requirements from the attributes.
+	unsigned int attributeCountRequirement = 4;
+	while (attributeCountRequirement > 0)
+	{
+		list.count = attributeCountRequirement;
+		list.attr = &attributes[0];
+		
+		result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
+		if (result != noErr)
+		{
+			//Ran into some error, log it
+			NSLog(@"Status %d from SecKeychainSearchCreateFromAttributes", result);
+		}
+		result = SecKeychainSearchCopyNext(search, &item);
+		if (result == noErr)
+		{
+			//We found something
+			SecKeychainAttribute attributes[1];
+			SecKeychainAttributeList list;
+			
+			attributes[0].tag = kSecAccountItemAttr;
+			
+			list.count = 1;
+			list.attr = attributes;
+			
+			status = SecKeychainItemCopyContent(item, NULL, &list, &length, (void **)&pass);
+			if (status != userCanceledErr)
+			{
+				myPassword = [[NSString stringWithCString:pass length:length] retain];
+				SecKeychainItemFreeContent(&list, pass);
+			}
+			break;
+		}
+		attributes[attributeCountRequirement-1].tag = nil;
+		attributes[attributeCountRequirement-1].data = nil;
+		attributes[attributeCountRequirement-1].length = nil;		
+		attributeCountRequirement--;
+	}
+	//Clean up
+	if (item) CFRelease(item);
+	if (search) CFRelease(search);
 	return myPassword;
 }
 
