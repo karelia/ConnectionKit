@@ -449,13 +449,13 @@ static NSImage *sHostIcon = nil;
 	attributes[1].data = (void *)[label UTF8String];
 	attributes[1].length = strlen(attributes[1].data);
 	
-	attributes[2].tag = kSecDescriptionItemAttr;
-	attributes[2].data = (void *)description;
-	attributes[2].length = strlen(description);
-	
-	attributes[3].tag = kSecLabelItemAttr;
-	attributes[3].data = (void *)[label UTF8String];
-	attributes[3].length = strlen(attributes[3].data);
+	attributes[2].tag = kSecLabelItemAttr;
+	attributes[2].data = (void *)[label UTF8String];
+	attributes[2].length = strlen(attributes[3].data);
+
+	attributes[3].tag = kSecDescriptionItemAttr;
+	attributes[3].data = (void *)description;
+	attributes[3].length = strlen(description);	
 	
 	//We start out with very stringent attribute specifications. 
 	//As we continue to not find a password, we scale back the requirements from the attributes.
@@ -491,9 +491,6 @@ static NSImage *sHostIcon = nil;
 			}
 			break;
 		}
-		attributes[attributeCountRequirement-1].tag = nil;
-		attributes[attributeCountRequirement-1].data = nil;
-		attributes[attributeCountRequirement-1].length = nil;		
 		attributeCountRequirement--;
 	}
 	//Clean up
