@@ -687,7 +687,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	[self changeRelativeRootToPath:path];
 	[oOutlineView reloadData];
-	[oBrowser reloadData];
+    [oBrowser setPath:nil];
+    [oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
 	// this pushes a history object and fetches the contents
 	[self navigateToPath:path];
 }
@@ -747,7 +748,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	[oOutlineView scrollItemToTop:node];
-	[oBrowser setPath:[fullPath substringFromIndex:[relPath length]]];
+    NSString *relativePath = [fullPath substringFromIndex:[relPath length]];
+    if (![relativePath hasPrefix:@"/"])
+    {
+        relativePath = [@"/" stringByAppendingString:relativePath];
+    }
+	[oBrowser setPath:relativePath checkPath:NO];
 	
 	// update the forward/back buttons
 	[oHistory setEnabled:(myHistoryIndex > 0) forSegment:CKBackButton];
