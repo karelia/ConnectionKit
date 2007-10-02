@@ -471,25 +471,49 @@ static NSImage *sHostIcon = nil;
 			//Ran into some error, log it
 			NSLog(@"Status %d from SecKeychainSearchCreateFromAttributes", result);
 		}
-		result = SecKeychainSearchCopyNext(search, &item);
-		if (result == noErr)
+        
+		while ((result = SecKeychainSearchCopyNext(search, &item)) == noErr && 
+               item != NULL && 
+               myPassword == nil)
 		{
-			//We found something
-			SecKeychainAttribute attributes[1];
-			SecKeychainAttributeList list;
-			
-			attributes[0].tag = kSecAccountItemAttr;
-			
-			list.count = 1;
-			list.attr = attributes;
-			
-			status = SecKeychainItemCopyContent(item, NULL, &list, &length, (void **)&pass);
-			if (status != userCanceledErr)
-			{
-				myPassword = [[NSString stringWithCString:pass length:length] retain];
-				SecKeychainItemFreeContent(&list, pass);
-			}
-			break;
+			//We found something, but is it anything for this server
+			SecKeychainAttributeInfo info;
+            UInt32 infoFormats[3] = { 0, 0, 0 };
+            UInt32 infoTags[3] = { kSecCommentItemAttr, kSecDescriptionItemAttr, kSecLabelItemAttr };
+            
+            SecItemClass itemClass;
+            SecKeychainAttributeList *attributesList = NULL;
+    
+            info.count = 1;
+            info.tag = &infoTags[0];
+            info.format = &infoFormats[0];
+            
+            // don't get the password otherwise keychain will put up a dialog for each item we enumerate over
+            status = SecKeychainItemCopyAttributesAndData(item, &info, &itemClass, &attributesList, NULL, NULL);
+            
+            if (status == noErr)
+            {
+                unsigned i;
+                for (i = 0; i < attributesList->count; i++)
+                {
+                    SecKeychainAttribute attrib = attributesList->attr[i];
+                    
+                    NSString *str = [[[NSString alloc] initWithCString:attrib.data length:attrib.length] autorelease];
+                    
+                    if ([str rangeOfString:myHost].location != NSNotFound)
+                    {
+                        status = SecKeychainItemCopyContent(item, NULL, &list, &length, (void **)&pass);
+                        if (status != userCanceledErr)
+                        {
+                            myPassword = [[NSString stringWithCString:pass length:length] retain];
+                            SecKeychainItemFreeContent(&list, pass);
+                        }
+                        break;
+                    }
+                }
+            }
+            status = SecKeychainItemFreeAttributesAndData(attributesList, NULL);
+            CFRelease(item); item = NULL;
 		}
 		attributeCountRequirement--;
 	}
