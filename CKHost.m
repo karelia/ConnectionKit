@@ -440,7 +440,6 @@ static NSImage *sHostIcon = nil;
 	char *description = "ConnectionKit Password";
 	NSString *label = [self name];
 	
-	
 	attributes[0].tag = kSecAccountItemAttr;
 	attributes[0].data = (void *)[myUsername UTF8String];
 	attributes[0].length = strlen(attributes[0].data);
@@ -451,7 +450,7 @@ static NSImage *sHostIcon = nil;
 	
 	attributes[2].tag = kSecLabelItemAttr;
 	attributes[2].data = (void *)[label UTF8String];
-	attributes[2].length = strlen(attributes[3].data);
+	attributes[2].length = strlen(attributes[2].data);
 
 	attributes[3].tag = kSecDescriptionItemAttr;
 	attributes[3].data = (void *)description;
