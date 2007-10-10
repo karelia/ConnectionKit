@@ -73,7 +73,8 @@
 - (NSString *)parentPathOfItem:(id)item;
 - (id)parentOfItem:(id)item;
 - (void)updateScrollers;
-- (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag;
+- (void)leafInspectItem:(id)item scrollToVisible:(BOOL)showColumn;
+- (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag scrollToVisible:(BOOL)showColumn;
 - (unsigned)rowForItem:(id)item;
 - (void)removeAllColumns;
 - (NSRect)nextColumnBounds;
@@ -380,7 +381,7 @@ static Class sCellClass = nil;
 			if (column == firstSelectedItemColumn) // we can only multiselect in the same column
 			{
 				[column selectRow:row byExtendingSelection:myFlags.allowsMultipleSelection];
-				[self tableSelectedCell:column notifyTarget:NO];
+				[self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
 			}
 		}
 	}
@@ -393,89 +394,67 @@ static Class sCellClass = nil;
 
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag
 {    
-    if (flag && [path isEqualToString:[self path]])
+    BOOL showColumn = [path isEqualToString:[self path]];
+    [self removeAllColumns];
+    [mySelection removeAllObjects];
+    id item = [myDataSource tableBrowser:self itemForPath:path];
+    if (item)
     {
-        return;
-    }
-	else if (path == nil || [path isEqualToString:@""]) 
-	{
-		[self removeAllColumns];
-		
-		[mySelection removeAllObjects];
-		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
+        // push it on as a selection so the reloading of the tables picks up the correct source
+        [mySelection addObject:item];
         
-        // add the root column back
-        NSRect r = [self nextColumnBounds];
-        NSScrollView *column = [self createColumnWithRect:r];
-        [self addSubview:column];
-        [self updateScrollers];
-	}
-	else
-	{
-        [self removeAllColumns];
-        [mySelection removeAllObjects];
-		id item = [myDataSource tableBrowser:self itemForPath:path];
-		if (item)
-		{
-            // push it on as a selection so the reloading of the tables picks up the correct source
-            [mySelection addObject:item];
+        // enumerate over the path and simulate table clicks
+        NSString *separator = [self pathSeparator];
+        NSRange r = [path rangeOfString:separator];
+        unsigned row, col;
+        
+        while (r.location != NSNotFound)
+        {
+            NSString *bit = [path substringToIndex:r.location];
+            [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
             
-			// enumerate over the path and simulate table clicks
-			NSString *separator = [self pathSeparator];
-			NSRange r = [path rangeOfString:separator];
-			unsigned row, col;
-			
-			while (r.location != NSNotFound)
-			{
-				NSString *bit = [path substringToIndex:r.location];
-				[self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+            if (col == NSNotFound)
+            {
+                NSRect r = [self nextColumnBounds];
+                NSScrollView *column = [self createColumnWithRect:r];
+                [self addSubview:column];
+                [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+            }
+            
+            if (col != NSNotFound && row != NSNotFound)
+            {
+                NSTableView *column = nil;
                 
-                if (col == NSNotFound)
+                if (col < [myColumns count])
                 {
-                    NSLog(@"no col, adding one");
-                    NSRect r = [self nextColumnBounds];
-                    NSScrollView *column = [self createColumnWithRect:r];
-                    [self addSubview:column];
-                    [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+                    column = [myColumns objectAtIndex:col];
                 }
-                
-                NSLog(@"column for %@: %d, %d", bit, col, row);
-				
-				if (col != NSNotFound && row != NSNotFound)
-				{
-					NSTableView *column = nil;
-                    
-                    if (col < [myColumns count])
-                    {
-                        column = [myColumns objectAtIndex:col];
-                    }
-                    else
-                    {
-                        column = [self createColumnWithRect:[self nextColumnBounds]];
-                        [self addSubview:column];
-                        column = [(NSScrollView *)column documentView];
-                    }
-                    [column reloadData];
-					[column selectRow:row byExtendingSelection:NO];
-					[self tableSelectedCell:column notifyTarget:NO];
-					[column scrollRowToVisible:row];
-				}
-				
-				r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
-			}
-			// now do the last path component
-			[self column:&col row:&row forItem:item];
-			if (col != NSNotFound && row != NSNotFound)
-			{
-				NSTableView *column = [myColumns objectAtIndex:col];
-				[column selectRow:row byExtendingSelection:NO];
-				[self tableSelectedCell:column notifyTarget:NO];
-				[column scrollRowToVisible:row];
-				[[self window] makeFirstResponder:column];
-			}
-            [self updateScrollers];
-		}
-	}
+                else
+                {
+                    column = [self createColumnWithRect:[self nextColumnBounds]];
+                    [self addSubview:column];
+                    column = [(NSScrollView *)column documentView];
+                }
+                [column reloadData];
+                [column selectRow:row byExtendingSelection:NO];
+                [self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
+                [column scrollRowToVisible:row];
+            }
+            
+            r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
+        }
+        // now do the last path component
+        [self column:&col row:&row forItem:item];
+        if (col != NSNotFound && row != NSNotFound)
+        {
+            NSTableView *column = [myColumns objectAtIndex:col];
+            [column selectRow:row byExtendingSelection:NO];
+            [self tableSelectedCell:column notifyTarget:NO scrollToVisible:showColumn];
+            [column scrollRowToVisible:row];
+            [[self window] makeFirstResponder:column];
+        }
+        [self updateScrollers];
+    }
 }
 
 - (void)setPath:(NSString *)path
@@ -946,7 +925,7 @@ static Class sCellClass = nil;
 	return NSZeroRect;
 }
 
-- (void)leafInspectItem:(id)item
+- (void)leafInspectItem:(id)item scrollToVisible:(BOOL)showColumn
 {
 	if (myDelegateFlags.leafViewWithItem)
 	{
@@ -992,13 +971,16 @@ static Class sCellClass = nil;
 			[self updateScrollers];
 			
 			// scroll it to visible
-			lastColumnFrame.size.width += SCROLLER_WIDTH;
-			[self scrollRectToVisible:lastColumnFrame];
+            if (showColumn)
+            {
+                lastColumnFrame.size.width += SCROLLER_WIDTH;
+                [self scrollRectToVisible:lastColumnFrame];
+            }
 		}
 	}
 }
 
-- (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag
+- (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag scrollToVisible:(BOOL)showColumn
 {
 	id lastSelectedItem = [mySelection lastObject];
 	
@@ -1009,13 +991,21 @@ static Class sCellClass = nil;
 	
 	int column = [self columnWithTable:sender];
 	int row = [sender selectedRow];
+    
+    if (row < 0 || row == NSNotFound)
+    {
+        return;
+    }
 	
 	NSString *path = [self pathToColumn:column];
-	id containerItem = [myDataSource tableBrowser:self itemForPath:path];
-	id item = [myDataSource tableBrowser:self child:row ofItem:containerItem];
-	BOOL isDirectory = [myDataSource tableBrowser:self isItemExpandable:item];
+	id containerItem = nil;
+	id item = nil;
+	BOOL isDirectory = NO;
 	
-	//NSLog(@"%d = %@", column, [item path]);
+    containerItem = [myDataSource tableBrowser:self itemForPath:path];
+    item = [myDataSource tableBrowser:self child:row ofItem:containerItem];
+    isDirectory = [myDataSource tableBrowser:self isItemExpandable:item];
+
 	/*
 	 Selection Changes handled
 	 - selection is going to drill down into a directory
@@ -1068,14 +1058,19 @@ static Class sCellClass = nil;
 		[self addSubview:newColumn];
 		[self updateScrollers];
 		
-		[self scrollRectToVisible:lastColumnFrame];
+        if (showColumn)
+        {
+            [self scrollRectToVisible:lastColumnFrame];
+        }
 	}
 	else
 	{
 		// add to the current selection
-		[mySelection addObject:item];
-		
-		[self leafInspectItem:item];
+        if (item)
+        {
+            [mySelection addObject:item];
+            [self leafInspectItem:item scrollToVisible:showColumn];
+        }
 	}
 	
 	if (flag)
@@ -1089,7 +1084,7 @@ static Class sCellClass = nil;
 
 - (void)tableSelectedCell:(id)sender
 {
-	[self tableSelectedCell:sender notifyTarget:YES];
+	[self tableSelectedCell:sender notifyTarget:YES scrollToVisible:YES];
 }
 
 #pragma mark -
@@ -1110,9 +1105,7 @@ static Class sCellClass = nil;
 	unsigned columnIndex = [self columnWithTable:aTableView];
 	NSString *path = [self pathToColumn:columnIndex];
 	id item = [myDataSource tableBrowser:self itemForPath:path];
-	
-	//NSLog(@"%@%@", NSStringFromSelector(_cmd), [item path]);
-	
+		
 	return [myDataSource tableBrowser:self child:rowIndex ofItem:item];
 }
 
@@ -1615,7 +1608,7 @@ static NSImage *sResizeImage = nil;
 		int row = [self rowAtPoint:[self convertPoint:[theEvent locationInWindow] fromView:nil]];
 		id item = nil;
 		
-		if (row != NSNotFound)
+		if (row > 0)
 		{
 			item = [[self dataSource] tableView:self objectValueForTableColumn:[[self tableColumns] objectAtIndex:0] row:row];
 		}
