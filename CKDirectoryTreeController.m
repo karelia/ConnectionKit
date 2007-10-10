@@ -384,6 +384,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	if (!dir)
 	{
+        if (myDirectoriesLoading > 0)
+        {
+            myDirectoriesLoading = 0;
+            [myDelegate directoryTreeFinishedLoadingContents:self];
+        }
 		[myRootNode autorelease];
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
 		[oBrowser setPath:nil];
