@@ -543,11 +543,13 @@ static NSImage *sHostIcon = nil;
 	NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", scheme];
 	if ([self username])
 	{
-		[url appendString:[self username]];
+        NSString *escapedUsername = [(NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[self username], NULL, CFSTR("?=&+/@!"), kCFStringEncodingUTF8) autorelease];
+		[url appendString:escapedUsername];
 		
 		if ([self password])
 		{
-			[url appendFormat:@":%@", [self password]];
+            NSString *escapedPassword = [(NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[self password], NULL, CFSTR("?=&+/@!"), kCFStringEncodingUTF8) autorelease];
+			[url appendFormat:@":%@", escapedPassword];
 		}
 		
 		[url appendString:@"@"];
@@ -564,7 +566,6 @@ static NSImage *sHostIcon = nil;
 	{
 		[url appendFormat:@":%@", port]; // use the con port incase it used the default port.
 	}
-	
 	
 	return url;
 }
