@@ -459,7 +459,7 @@ static NSImage *sHostIcon = nil;
 	//We start out with very stringent attribute specifications. 
 	//As we continue to not find a password, we scale back the requirements from the attributes.
 	unsigned int attributeCountRequirement = 4;
-	while (attributeCountRequirement > 0)
+	while (attributeCountRequirement > 0 && myPassword == nil)
 	{
 		list.count = attributeCountRequirement;
 		list.attr = &attributes[0];
