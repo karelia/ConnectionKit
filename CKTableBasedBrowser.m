@@ -397,63 +397,77 @@ static Class sCellClass = nil;
     BOOL showColumn = [path isEqualToString:[self path]];
     [self removeAllColumns];
     [mySelection removeAllObjects];
-    id item = [myDataSource tableBrowser:self itemForPath:path];
-    if (item)
-    {
-        // push it on as a selection so the reloading of the tables picks up the correct source
-        [mySelection addObject:item];
+    
+    if (path == nil || [path isEqualToString:@""]) 
+	{
+		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
         
-        // enumerate over the path and simulate table clicks
-        NSString *separator = [self pathSeparator];
-        NSRange r = [path rangeOfString:separator];
-        unsigned row, col;
-        
-        while (r.location != NSNotFound)
+        // add the root column back
+        NSRect r = [self nextColumnBounds];
+        NSScrollView *column = [self createColumnWithRect:r];
+        [self addSubview:column];
+        [self updateScrollers];
+	}
+	else
+	{
+        id item = [myDataSource tableBrowser:self itemForPath:path];
+        if (item)
         {
-            NSString *bit = [path substringToIndex:r.location];
-            [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+            // push it on as a selection so the reloading of the tables picks up the correct source
+            [mySelection addObject:item];
             
-            if (col == NSNotFound)
+            // enumerate over the path and simulate table clicks
+            NSString *separator = [self pathSeparator];
+            NSRange r = [path rangeOfString:separator];
+            unsigned row, col;
+            
+            while (r.location != NSNotFound)
             {
-                NSRect r = [self nextColumnBounds];
-                NSScrollView *column = [self createColumnWithRect:r];
-                [self addSubview:column];
+                NSString *bit = [path substringToIndex:r.location];
                 [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+                
+                if (col == NSNotFound)
+                {
+                    NSRect r = [self nextColumnBounds];
+                    NSScrollView *column = [self createColumnWithRect:r];
+                    [self addSubview:column];
+                    [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
+                }
+                
+                if (col != NSNotFound && row != NSNotFound)
+                {
+                    NSTableView *column = nil;
+                    
+                    if (col < [myColumns count])
+                    {
+                        column = [myColumns objectAtIndex:col];
+                    }
+                    else
+                    {
+                        column = [self createColumnWithRect:[self nextColumnBounds]];
+                        [self addSubview:column];
+                        column = [(NSScrollView *)column documentView];
+                    }
+                    [column reloadData];
+                    [column selectRow:row byExtendingSelection:NO];
+                    [self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
+                    [column scrollRowToVisible:row];
+                }
+                
+                r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
             }
-            
+            // now do the last path component
+            [self column:&col row:&row forItem:item];
             if (col != NSNotFound && row != NSNotFound)
             {
-                NSTableView *column = nil;
-                
-                if (col < [myColumns count])
-                {
-                    column = [myColumns objectAtIndex:col];
-                }
-                else
-                {
-                    column = [self createColumnWithRect:[self nextColumnBounds]];
-                    [self addSubview:column];
-                    column = [(NSScrollView *)column documentView];
-                }
-                [column reloadData];
+                NSTableView *column = [myColumns objectAtIndex:col];
                 [column selectRow:row byExtendingSelection:NO];
-                [self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
+                [self tableSelectedCell:column notifyTarget:NO scrollToVisible:showColumn];
                 [column scrollRowToVisible:row];
+                [[self window] makeFirstResponder:column];
             }
-            
-            r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
+            [self updateScrollers];
         }
-        // now do the last path component
-        [self column:&col row:&row forItem:item];
-        if (col != NSNotFound && row != NSNotFound)
-        {
-            NSTableView *column = [myColumns objectAtIndex:col];
-            [column selectRow:row byExtendingSelection:NO];
-            [self tableSelectedCell:column notifyTarget:NO scrollToVisible:showColumn];
-            [column scrollRowToVisible:row];
-            [[self window] makeFirstResponder:column];
-        }
-        [self updateScrollers];
     }
 }
 
