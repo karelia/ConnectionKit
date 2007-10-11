@@ -584,7 +584,8 @@ static NSImage *sHostIcon = nil;
 		{
 			[url appendString:@"/%2F"];
 		}
-		[url appendString:[self initialPath]];
+        NSString *escapedPath = [(NSString *)CFURLCreateStringByAddingPercentEscapes(kCFAllocatorDefault, (CFStringRef)[self initialPath], NULL, CFSTR("?=&+@!"), kCFStringEncodingUTF8) autorelease];
+		[url appendString:escapedPath];
 	}
 	else
 	{
