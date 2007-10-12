@@ -706,6 +706,8 @@ static Class sCellClass = nil;
 	[table setAutoresizingMask:NSViewHeightSizable];
 	[table setColumnAutoresizingStyle:NSTableViewLastColumnOnlyAutoresizingStyle];
 	[table release];
+    
+    [[scroller contentView] setCopiesOnScroll:NO];
 	
 	// configure table
 	NSTableColumn *col = [[NSTableColumn alloc] initWithIdentifier:@"ckbrowser"];
