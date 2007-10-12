@@ -1510,6 +1510,12 @@ static NSImage *sResizeImage = nil;
 	}
 }
 
+- (void)reflectScrolledClipView:(NSClipView *)aClipView
+{
+    [aClipView setCopiesOnScroll:NO];
+    [super reflectScrolledClipView:aClipView];
+}
+
 @end
 
 @implementation CKBrowserTableView
