@@ -258,6 +258,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
 	[pid release];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
+    [myOutlineView reloadData];
 }
 
 - (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
