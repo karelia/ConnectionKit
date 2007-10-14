@@ -161,9 +161,13 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[header release];
 	
 	[oOutlineView addTableColumn:[myOutlineViewColumns objectForKey:@"name"]];
-	[oOutlineView setOutlineTableColumn:[myOutlineViewColumns objectForKey:@"name"]];
-	[oOutlineView removeTableColumn:[oOutlineView tableColumnWithIdentifier:@"placeholder"]];
-	[oOutlineView setDoubleAction:@selector(outlineDoubleClicked:)];
+    [oOutlineView setOutlineTableColumn:[myOutlineViewColumns objectForKey:@"name"]];
+    [oOutlineView removeTableColumn:[oOutlineView tableColumnWithIdentifier:@"placeholder"]];
+    [oOutlineView addTableColumn:[myOutlineViewColumns objectForKey:@"size"]];
+    [oOutlineView addTableColumn:[myOutlineViewColumns objectForKey:@"modified"]];
+    [oOutlineView addTableColumn:[myOutlineViewColumns objectForKey:@"kind"]];
+    [oOutlineView sizeToFit];
+    [oOutlineView setDoubleAction:@selector(outlineDoubleClicked:)];
 	
 	// set up the browser
 #define MAX_VISIBLE_COLUMNS 3
