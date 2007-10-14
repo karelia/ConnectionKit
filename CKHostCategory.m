@@ -161,8 +161,8 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:cat];
 	[self willChangeValueForKey:@"childCategories"];
+    [cat setCategory:nil];
 	[myChildCategories removeObject:cat];
-	[cat setCategory:nil];
 	[self didChangeValueForKey:@"childCategories"];
 	[self didChange];
 }
