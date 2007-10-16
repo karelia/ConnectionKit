@@ -726,6 +726,7 @@ static Class sCellClass = nil;
 	[table setHeaderView:nil];
 	[table addTableColumn:col];
 	[col setWidth:NSWidth([table frame])];
+    [table sizeToFit];
 	[table setTarget:self];
 	[table setAction:@selector(tableSelectedCell:)];
 	[table setAllowsColumnResizing:NO];
