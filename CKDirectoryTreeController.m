@@ -438,28 +438,31 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	// convert contents to CKDirectoryNodes
-	NSMutableArray *nodes = [NSMutableArray array];
-	NSEnumerator *e = [contents objectEnumerator];
-	NSDictionary *cur;
-	CKDirectoryNode *node;
-	
-	while ((cur = [e nextObject]))
-	{
-		node = [CKDirectoryNode nodeWithName:[cur objectForKey:cxFilenameKey]];
-		[node setProperties:cur];
-		[nodes addObject:node];
-	}
-	
-	[CKDirectoryNode addContents:nodes withPath:path withRoot:myRootNode];
-	
-	if (!mySelectedNode)
-	{
-		mySelectedNode = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
-	}
-	
-	[self changeRelativeRootToPath:myRelativeRootPath];
-	
-	[self reloadViews];
+    if (contents)
+    {
+        NSMutableArray *nodes = [NSMutableArray array];
+        NSEnumerator *e = [contents objectEnumerator];
+        NSDictionary *cur;
+        CKDirectoryNode *node;
+        
+        while ((cur = [e nextObject]))
+        {
+            node = [CKDirectoryNode nodeWithName:[cur objectForKey:cxFilenameKey]];
+            [node setProperties:cur];
+            [nodes addObject:node];
+        }
+        
+        [CKDirectoryNode addContents:nodes withPath:path withRoot:myRootNode];
+        
+        if (!mySelectedNode)
+        {
+            mySelectedNode = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
+        }
+        
+        [self changeRelativeRootToPath:myRelativeRootPath];
+        
+        [self reloadViews];
+    }
 }
 
 - (void)setContents:(NSData *)contents forFile:(NSString *)file
