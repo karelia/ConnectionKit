@@ -118,14 +118,14 @@ static NSImage *sBonjourIcon = nil;
 - (void)addChildCategory:(CKHostCategory *)cat
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:LocalizedStringInThisBundle(@"You can not add a child category to the Bonjour category.",@"Bonjour Error")
+								   reason:LocalizedStringInConnectionKitBundle(@"You can not add a child category to the Bonjour category.",@"Bonjour Error")
 								 userInfo:nil];
 }
 
 - (void)addHost:(CKHost *)host
 {
 	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:LocalizedStringInThisBundle(@"You can not add a new host to the Bonjour category.",@"Bonjour Error")
+								   reason:LocalizedStringInConnectionKitBundle(@"You can not add a new host to the Bonjour category.",@"Bonjour Error")
 								 userInfo:nil];
 }
 

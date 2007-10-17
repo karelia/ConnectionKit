@@ -88,7 +88,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			NSError *err = [NSError errorWithDomain:S3ErrorDomain
 											   code:ConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username and Password are required for S3 connections", @"No username or password")
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username and Password are required for S3 connections", @"No username or password")
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}

@@ -84,15 +84,15 @@
 
 + (NSString *)formattedFileSize:(double)size
 {
-	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInThisBundle(@"bytes", @"filesize: bytes")];
+	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];
 	NSString *suffix[] = {
-		LocalizedStringInThisBundle(@"bytes", @"filesize: bytes"),
-		LocalizedStringInThisBundle(@"KB", @"filesize: kilobytes"),
-		LocalizedStringInThisBundle(@"MB", @"filesize: megabytes"),
-		LocalizedStringInThisBundle(@"GB", @"filesize: gigabytes"),
-		LocalizedStringInThisBundle(@"TB", @"filesize: terabytes"),
-		LocalizedStringInThisBundle(@"PB", @"filesize: petabytes"),
-		LocalizedStringInThisBundle(@"EB", @"filesize: exabytes")
+		LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes"),
+		LocalizedStringInConnectionKitBundle(@"KB", @"filesize: kilobytes"),
+		LocalizedStringInConnectionKitBundle(@"MB", @"filesize: megabytes"),
+		LocalizedStringInConnectionKitBundle(@"GB", @"filesize: gigabytes"),
+		LocalizedStringInConnectionKitBundle(@"TB", @"filesize: terabytes"),
+		LocalizedStringInConnectionKitBundle(@"PB", @"filesize: petabytes"),
+		LocalizedStringInConnectionKitBundle(@"EB", @"filesize: exabytes")
 	};
 	
 	int power = floor(log(size) / log(1024));
@@ -108,7 +108,7 @@
 
 + (NSString *)formattedSpeed:(double)speed
 {
-	return [NSString stringWithFormat:@"%@/%@", [NSString formattedFileSize:speed], LocalizedStringInThisBundle(@"s", @"abbreviation for seconds, e.g. 12 MB/s")];
+	return [NSString stringWithFormat:@"%@/%@", [NSString formattedFileSize:speed], LocalizedStringInConnectionKitBundle(@"s", @"abbreviation for seconds, e.g. 12 MB/s")];
 }
 
 + (id)uuid

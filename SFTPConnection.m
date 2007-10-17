@@ -109,7 +109,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		{
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain
 											   code:ConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username is required for SFTP connections", @"No username or password")
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username is required for SFTP connections", @"No username or password")
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
@@ -180,7 +180,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		{
 			if (_flags.authorizeConnection)
 			{
-				NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"%@'s fingerprint does not match the one on record. If the server has changed its key, then this is to be expected. If not then you should check with the system administrator before proceeding.\nThe new fingerprint is %@.\nDo you wish to connect to the server?", @"ssh host key changed"), [self host], fp];
+				NSString *localised = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"%@'s fingerprint does not match the one on record. If the server has changed its key, then this is to be expected. If not then you should check with the system administrator before proceeding.\nThe new fingerprint is %@.\nDo you wish to connect to the server?", @"ssh host key changed"), [self host], fp];
 				mySFTPFlags.authorized = NO;
 				[_forwarder connection:self authorizeConnectionToHost:[self host] message:localised];
 				if (mySFTPFlags.authorized)
@@ -203,7 +203,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		if (_flags.authorizeConnection)
 		{
 			mySFTPFlags.authorized = NO;
-			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?", @"ssh authorise remote host fingerprint"), [self host], fp];
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"This is the first time connecting to %@. It has a fingerprint of \n%@. Do you wish to connect?", @"ssh authorise remote host fingerprint"), [self host], fp];
 			[_forwarder connection:self authorizeConnectionToHost:[self host] message:localised];
 			if (mySFTPFlags.authorized)
 			{
@@ -245,9 +245,9 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			NSError *error = [NSError errorWithDomain: SFTPErrorDomain
 												 code: libssh2_session_last_error(mySession,nil,nil,0)
 											 userInfo: [NSDictionary dictionaryWithObjectsAndKeys:
-				LocalizedStringInThisBundle(@"Secure Shell Connection Error", @""), NSLocalizedDescriptionKey,
+				LocalizedStringInConnectionKitBundle(@"Secure Shell Connection Error", @""), NSLocalizedDescriptionKey,
 				[NSString stringWithFormat:
-					LocalizedStringInThisBundle(@"The SSH manager returned the following error message:\n\n%@",@""), [self error]],
+					LocalizedStringInConnectionKitBundle(@"The SSH manager returned the following error message:\n\n%@",@""), [self error]],
 												 NSLocalizedRecoverySuggestionErrorKey,	// to force the reason behind the error to show up on the alert message, even though it seems really more appropriate to be NSLocalizedFailureReasonErrorKey
 												 nil]];
 			[_forwarder connection:self didReceiveError: error];
@@ -299,7 +299,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		{
 			if (_flags.error)
 			{
-				NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey.", @"failed to find the id_dsa.pub"), publicKey];
+				NSString *localised = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to find public key in %@. If you have a custom named key, please set the User Default key SSHPublicKey.", @"failed to find the id_dsa.pub"), publicKey];
 				NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
 				[_forwarder connection:self didReceiveError:err];
 			}
@@ -318,7 +318,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 		{
 			if (_flags.error)
 			{
-				NSString *localised = LocalizedStringInThisBundle(@"Authentication by Public Key Failed", @"failed pk authentication for ssh");
+				NSString *localised = LocalizedStringInConnectionKitBundle(@"Authentication by Public Key Failed", @"failed pk authentication for ssh");
 				NSString *error = [self error];
 				NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
 				[_forwarder connection:self didReceiveError:err];
@@ -337,7 +337,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		if (_flags.error)
 		{
-			NSString *localised = LocalizedStringInThisBundle(@"Authentication Failed. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
+			NSString *localised = LocalizedStringInConnectionKitBundle(@"Authentication Failed. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
 			NSString *error = [self error];
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
@@ -376,7 +376,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		if (_flags.error)
 		{
-			NSString *localised = LocalizedStringInThisBundle(@"Failed to initialize SFTP Subsystem. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
+			NSString *localised = LocalizedStringInConnectionKitBundle(@"Failed to initialize SFTP Subsystem. Do you have permission to access this server via SFTP?", @"failed authentication for ssh");
 			NSString *error = [self error];
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorAuthentication userInfo:[NSDictionary dictionaryWithObjectsAndKeys:localised, NSLocalizedDescriptionKey, error, NSUnderlyingErrorKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
@@ -449,31 +449,31 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	unsigned long err = libssh2_sftp_last_error(mySFTPChannel);
 	switch (err)
 	{
-		case LIBSSH2_FX_OK: return LocalizedStringInThisBundle(@"OK", @"sftp last error");
-		case LIBSSH2_FX_EOF: return LocalizedStringInThisBundle(@"End of File", @"sftp last error");
-		case LIBSSH2_FX_NO_SUCH_FILE: return LocalizedStringInThisBundle(@"No such file", @"sftp last error");
-		case LIBSSH2_FX_PERMISSION_DENIED: return LocalizedStringInThisBundle(@"Permission Denied", @"sftp last error");
-		case LIBSSH2_FX_FAILURE: return LocalizedStringInThisBundle(@"Failure", @"sftp last error");
-		case LIBSSH2_FX_BAD_MESSAGE: return LocalizedStringInThisBundle(@"Bad Message", @"sftp last error");
-		case LIBSSH2_FX_NO_CONNECTION: return LocalizedStringInThisBundle(@"No Connection", @"sftp last error");
-		case LIBSSH2_FX_CONNECTION_LOST: return LocalizedStringInThisBundle(@"Connection Lost", @"sftp last error");
-		case LIBSSH2_FX_OP_UNSUPPORTED: return LocalizedStringInThisBundle(@"Operation Unsupported", @"sftp last error");
-		case LIBSSH2_FX_INVALID_HANDLE: return LocalizedStringInThisBundle(@"Invalid Handle", @"sftp last error");
-		case LIBSSH2_FX_NO_SUCH_PATH: return LocalizedStringInThisBundle(@"No such path", @"sftp last error");
-		case LIBSSH2_FX_FILE_ALREADY_EXISTS: return LocalizedStringInThisBundle(@"File already exists", @"sftp last error");
-		case LIBSSH2_FX_WRITE_PROTECT: return LocalizedStringInThisBundle(@"Write Protected", @"sftp last error");
-		case LIBSSH2_FX_NO_MEDIA: return LocalizedStringInThisBundle(@"No Media", @"sftp last error");
-		case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM: return LocalizedStringInThisBundle(@"No space left on remote machine", @"sftp last error");
-		case LIBSSH2_FX_QUOTA_EXCEEDED: return LocalizedStringInThisBundle(@"Quota exceeded", @"sftp last error");
-		case LIBSSH2_FX_UNKNOWN_PRINCIPLE: return LocalizedStringInThisBundle(@"Unknown Principle", @"sftp last error");
-		case LIBSSH2_FX_LOCK_CONFlICT: return LocalizedStringInThisBundle(@"Lock Conflict", @"sftp last error");
-		case LIBSSH2_FX_DIR_NOT_EMPTY: return LocalizedStringInThisBundle(@"Directory not empty", @"sftp last error");
-		case LIBSSH2_FX_NOT_A_DIRECTORY: return LocalizedStringInThisBundle(@"Not a directory", @"sftp last error");
-		case LIBSSH2_FX_INVALID_FILENAME: return LocalizedStringInThisBundle(@"Invalid filename", @"sftp last error");
-		case LIBSSH2_FX_LINK_LOOP: return LocalizedStringInThisBundle(@"Link Loop", @"sftp last error");
-		case LIBSSH2_ERROR_REQUEST_DENIED: return LocalizedStringInThisBundle(@"Request Denied", @"sftp last error");
-		case LIBSSH2_ERROR_METHOD_NOT_SUPPORTED: return LocalizedStringInThisBundle(@"Method not Supported", @"sftp last error");
-		case LIBSSH2_ERROR_INVAL: return LocalizedStringInThisBundle(@"Error INVAL", @"sftp last error");
+		case LIBSSH2_FX_OK: return LocalizedStringInConnectionKitBundle(@"OK", @"sftp last error");
+		case LIBSSH2_FX_EOF: return LocalizedStringInConnectionKitBundle(@"End of File", @"sftp last error");
+		case LIBSSH2_FX_NO_SUCH_FILE: return LocalizedStringInConnectionKitBundle(@"No such file", @"sftp last error");
+		case LIBSSH2_FX_PERMISSION_DENIED: return LocalizedStringInConnectionKitBundle(@"Permission Denied", @"sftp last error");
+		case LIBSSH2_FX_FAILURE: return LocalizedStringInConnectionKitBundle(@"Failure", @"sftp last error");
+		case LIBSSH2_FX_BAD_MESSAGE: return LocalizedStringInConnectionKitBundle(@"Bad Message", @"sftp last error");
+		case LIBSSH2_FX_NO_CONNECTION: return LocalizedStringInConnectionKitBundle(@"No Connection", @"sftp last error");
+		case LIBSSH2_FX_CONNECTION_LOST: return LocalizedStringInConnectionKitBundle(@"Connection Lost", @"sftp last error");
+		case LIBSSH2_FX_OP_UNSUPPORTED: return LocalizedStringInConnectionKitBundle(@"Operation Unsupported", @"sftp last error");
+		case LIBSSH2_FX_INVALID_HANDLE: return LocalizedStringInConnectionKitBundle(@"Invalid Handle", @"sftp last error");
+		case LIBSSH2_FX_NO_SUCH_PATH: return LocalizedStringInConnectionKitBundle(@"No such path", @"sftp last error");
+		case LIBSSH2_FX_FILE_ALREADY_EXISTS: return LocalizedStringInConnectionKitBundle(@"File already exists", @"sftp last error");
+		case LIBSSH2_FX_WRITE_PROTECT: return LocalizedStringInConnectionKitBundle(@"Write Protected", @"sftp last error");
+		case LIBSSH2_FX_NO_MEDIA: return LocalizedStringInConnectionKitBundle(@"No Media", @"sftp last error");
+		case LIBSSH2_FX_NO_SPACE_ON_FILESYSTEM: return LocalizedStringInConnectionKitBundle(@"No space left on remote machine", @"sftp last error");
+		case LIBSSH2_FX_QUOTA_EXCEEDED: return LocalizedStringInConnectionKitBundle(@"Quota exceeded", @"sftp last error");
+		case LIBSSH2_FX_UNKNOWN_PRINCIPLE: return LocalizedStringInConnectionKitBundle(@"Unknown Principle", @"sftp last error");
+		case LIBSSH2_FX_LOCK_CONFlICT: return LocalizedStringInConnectionKitBundle(@"Lock Conflict", @"sftp last error");
+		case LIBSSH2_FX_DIR_NOT_EMPTY: return LocalizedStringInConnectionKitBundle(@"Directory not empty", @"sftp last error");
+		case LIBSSH2_FX_NOT_A_DIRECTORY: return LocalizedStringInConnectionKitBundle(@"Not a directory", @"sftp last error");
+		case LIBSSH2_FX_INVALID_FILENAME: return LocalizedStringInConnectionKitBundle(@"Invalid filename", @"sftp last error");
+		case LIBSSH2_FX_LINK_LOOP: return LocalizedStringInConnectionKitBundle(@"Link Loop", @"sftp last error");
+		case LIBSSH2_ERROR_REQUEST_DENIED: return LocalizedStringInConnectionKitBundle(@"Request Denied", @"sftp last error");
+		case LIBSSH2_ERROR_METHOD_NOT_SUPPORTED: return LocalizedStringInConnectionKitBundle(@"Method not Supported", @"sftp last error");
+		case LIBSSH2_ERROR_INVAL: return LocalizedStringInConnectionKitBundle(@"Error INVAL", @"sftp last error");
 	}
 	return @"";
 }
@@ -483,7 +483,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	char *errmsg;
 	int len;
 	int err = libssh2_session_last_error(mySession,&errmsg,&len,0);
-	NSMutableString *str = [NSMutableString stringWithString:LocalizedStringInThisBundle(@"There was an error with the SSH subsystem: ", @"sftp error")];
+	NSMutableString *str = [NSMutableString stringWithString:LocalizedStringInConnectionKitBundle(@"There was an error with the SSH subsystem: ", @"sftp error")];
 	if (err == LIBSSH2_ERROR_SFTP_PROTOCOL)
 	{
 		[str appendString:[self sftpError]];
@@ -519,7 +519,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		if (_flags.error)
 		{
-			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The directory (%@) does not exist", @"sftp bad directory"), dirPath];
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"The directory (%@) does not exist", @"sftp bad directory"), dirPath];
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}
@@ -571,7 +571,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 			int errcode = libssh2_session_last_error(mySession,&msg,&msglen,0);
 			NSMutableDictionary *ui = [NSMutableDictionary dictionary];
 			[ui setObject:[NSString stringWithCString:msg length:msglen] forKey:NSUnderlyingErrorKey];
-			[ui setObject:LocalizedStringInThisBundle(@"Failed to create directory", @"sftp failure to create dir") forKey:NSLocalizedDescriptionKey];
+			[ui setObject:LocalizedStringInConnectionKitBundle(@"Failed to create directory", @"sftp failure to create dir") forKey:NSLocalizedDescriptionKey];
 			if (errcode == LIBSSH2_ERROR_SFTP_PROTOCOL)
 			{
 				[ui setObject:[self sftpError] forKey:NSLocalizedDescriptionKey];
@@ -698,7 +698,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 //		NSError *error = [NSError errorWithDomain:SFTPErrorDomain
 //											 code:SFTPErrorWrite
-//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
+//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
 //		if (_flags.error)
 //		{
 //			[_forwarder connection:self didReceiveError:error];
@@ -843,7 +843,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 //		NSError *error = [NSError errorWithDomain:SFTPErrorDomain
 //											 code:SFTPErrorWrite
-//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
+//										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Failed to write all data", @"sftp error"), NSLocalizedDescriptionKey, nil]];
 //		if (_flags.error)
 //		{
 //			[_forwarder connection:self didReceiveError:error];
@@ -1116,7 +1116,7 @@ static int ssh_read(uint8_t *buffer, int length, LIBSSH2_SESSION *session, void 
 	{
 		if (_flags.error)
 		{
-			NSString *localised = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The directory (%@) does not exist", @"sftp bad directory"), directory];
+			NSString *localised = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"The directory (%@) does not exist", @"sftp bad directory"), directory];
 			NSError *err = [NSError errorWithDomain:SFTPErrorDomain code:SFTPErrorDirectoryDoesNotExist userInfo:[NSDictionary dictionaryWithObject:localised forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:err];
 		}

@@ -29,7 +29,7 @@
  */
 #import <Cocoa/Cocoa.h>
 
-#define LocalizedStringInThisBundle(key, comment) \
+#define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
 @class CKTransferRecord;

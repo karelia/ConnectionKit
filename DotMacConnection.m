@@ -156,7 +156,7 @@
 			{
 				NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
 												   code:ConnectionNoUsernameOrPassword
-											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
+											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
 																					forKey:NSLocalizedDescriptionKey]];
 				*error = err;
 			}
@@ -202,7 +202,7 @@
 				}
 				case 404:
 				{		
-					err = [NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"There is no .Mac access to the directory", @".Mac Directory Contents Error"), [dav path]];
+					err = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no .Mac access to the directory", @".Mac Directory Contents Error"), [dav path]];
 				}
 				default: 
 				{
@@ -243,7 +243,7 @@
 				}
 				case 403:
 				{		
-					err = LocalizedStringInThisBundle(@"The server does not allow the creation of directories at the current location", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @".Mac Create Directory Error");
 						//we fake the directory exists as this is usually the case if it is the root directory
 					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
@@ -252,29 +252,29 @@
 				{		
 					if (_flags.isRecursiveUploading)
 					{
-						err = LocalizedStringInThisBundle(@"The directory already exists", @".Mac Create Directory Error");
+						err = LocalizedStringInConnectionKitBundle(@"The directory already exists", @".Mac Create Directory Error");
 						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					}
 					break;
 				}
 				case 409:
 				{
-					err = LocalizedStringInThisBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @".Mac Create Directory Error");
 					break;
 				}
 				case 415:
 				{
-					err = LocalizedStringInThisBundle(@"The body of the request is not supported", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @".Mac Create Directory Error");
 					break;
 				}
 				case 507:
 				{
-					err = LocalizedStringInThisBundle(@"Insufficient storage space available", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @".Mac Create Directory Error");
 					break;
 				}
 				default: 
 				{
-					err = LocalizedStringInThisBundle(@"An unknown error occured", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @".Mac Create Directory Error");
 					break;
 				}
 			}
@@ -315,7 +315,7 @@
 				{		
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Parent Folder does not exist", @".Mac File Uploading Error")
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @".Mac File Uploading Error")
 																					 forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -352,7 +352,7 @@
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete file", @".Mac file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @".Mac file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -388,7 +388,7 @@
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete directory", @".Mac Directory Deletion Error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] 
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @".Mac Directory Deletion Error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] 
 							   forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];

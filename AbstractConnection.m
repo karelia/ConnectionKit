@@ -327,7 +327,7 @@ NSDictionary *sDataAttributes = nil;
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
 										   code:ConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(
+									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(
 				@"No connection available for requested connection type", @"failed to find a connection class"),
 										   NSLocalizedDescriptionKey,
 										   [(*error) localizedDescription],
@@ -436,7 +436,7 @@ NSDictionary *sDataAttributes = nil;
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
 										   code:ConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested port", @"failed to find a connection class")
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"No connection available for requested port", @"failed to find a connection class")
 																			forKey:NSLocalizedDescriptionKey]];
 		*error = err;
 	}
@@ -543,7 +543,7 @@ NSDictionary *sDataAttributes = nil;
 	{
 		NSError *err = [NSError errorWithDomain:ConnectionErrorDomain
 										   code:ConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"No connection available for requested protocol", @"failed to find a connection class")
+									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"No connection available for requested protocol", @"failed to find a connection class")
 																			forKey:NSLocalizedDescriptionKey]];
 		*error = err;
 	}
@@ -1529,7 +1529,7 @@ if ([fn isEqualToString:@"."] || \
 		{
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain
 												 code:ConnectionErrorParsingDirectoryListing
-											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Error parsing directory listing", @"Directory Parsing Error")
+											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error")
 																				  forKey:NSLocalizedDescriptionKey]];
 			
 			KTLog(ParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");

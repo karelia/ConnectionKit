@@ -758,8 +758,8 @@
 		
 		NSString *informativeText = [error localizedDescription];
 		
-		NSAlert *a = [NSAlert alertWithMessageText:LocalizedStringInThisBundle(@"A Connection Error Occurred", @"ConnectionOpenPanel")
-									 defaultButton:LocalizedStringInThisBundle(@"OK", @"OK")
+		NSAlert *a = [NSAlert alertWithMessageText:LocalizedStringInConnectionKitBundle(@"A Connection Error Occurred", @"ConnectionOpenPanel")
+									 defaultButton:LocalizedStringInConnectionKitBundle(@"OK", @"OK")
 								   alternateButton:nil
 									   otherButton:nil
 						 informativeTextWithFormat: informativeText];
