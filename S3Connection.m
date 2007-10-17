@@ -38,7 +38,6 @@
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
 #import "NSFileManager+Connection.h"
-#import "KTLog.h"
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
 NSString *S3StorageClassKey = @"S3StorageClassKey";

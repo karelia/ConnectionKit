@@ -42,7 +42,6 @@
 #import "NSString+Connection.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
-#import "KTLog.h"
 
 NSString *SFTPException = @"SFTPException";
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
