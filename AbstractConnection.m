@@ -29,12 +29,12 @@
  */
 
 #import "AbstractConnection.h"
-#import "AbstractQueueConnection.h" 
 #import "CKTransferRecord.h"
 #import "UKKQueue.h"
 #import "RunLoopForwarder.h"
 #import "ConnectionThreadManager.h"
 #import "NSString+Connection.h"
+#import "KTLog.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
