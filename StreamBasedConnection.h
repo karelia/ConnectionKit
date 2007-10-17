@@ -45,6 +45,7 @@
  *		FileCheckingTranscript
  *
  */
+@protocol OutputStream, InputStream;
 
 @interface StreamBasedConnection : AbstractQueueConnection 
 {

@@ -28,7 +28,7 @@
  */
 
 #import "WebDAVSecureConnection.h"
-
+#import "AbstractConnectionProtocol.h"
 
 @implementation WebDAVSecureConnection
 

@@ -28,7 +28,7 @@
  */
 
 #import "CKTransferRecord.h"
-#import <Connection/NSString+Connection.h>
+#import "NSString+Connection.h"
 
 NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";
 

@@ -28,7 +28,7 @@
  */
 
 #import "MultipleConnection.h"
-
+#import "AbstractConnectionProtocol.h"
 
 @implementation MultipleConnection
 

@@ -35,6 +35,7 @@
 #import "ConnectionThreadManager.h"
 #import "NSString+Connection.h"
 #import "KTLog.h"
+#import "AbstractConnectionProtocol.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
