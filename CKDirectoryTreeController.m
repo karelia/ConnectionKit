@@ -628,7 +628,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 								   keyEquivalent:@""];
 		[item setRepresentedObject:walk];
 		[item setImage:[walk iconWithSize:NSMakeSize(16,16)]];
-		[menu insertItem:item atIndex:0];
+		[menu addItem:item];
 		[item release];
 		walk = [walk parent];
 	}
