@@ -31,6 +31,7 @@
 #import "AbstractQueueConnection.h"
 #import "NSObject+Connection.h"
 #import "ConnectionThreadManager.h"
+#import "KTLog.h"
 
 //Download Queue Keys
 NSString *QueueDownloadDestinationFileKey = @"QueueDownloadDestinationFileKey";

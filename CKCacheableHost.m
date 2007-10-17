@@ -29,6 +29,7 @@
 
 #import "CKCacheableHost.h"
 #import "AbstractConnection.h"
+#import "KTLog.h"
 
 static NSMutableDictionary *sCachedHosts = nil;
 static NSLock *sCacheLock = nil;

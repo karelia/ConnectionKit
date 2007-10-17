@@ -46,6 +46,7 @@
 #import "NSString+Connection.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
+#import "KTLog.h"
 
 @interface WebDAVConnection (DotMac)
 - (void)processResponse:(DAVResponse *)response;
