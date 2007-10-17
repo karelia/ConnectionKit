@@ -387,9 +387,9 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 																	   (CFStringRef)[myName pathExtension],
 																	   NULL) autorelease];
 	NSString *desc = [(NSString *)UTTypeCopyDescription((CFStringRef)UTI) autorelease];	
-	if (!desc && [self isDirectory]) return LocalizedStringInThisBundle(@"Folder", @"directory kind");
-	if (!desc) return LocalizedStringInThisBundle(@"Document", @"unknown UTI name");
-	if ([desc isEqualToString:@"text"]) return LocalizedStringInThisBundle(@"Plain text document", @"mimic Finder naming conventions");
+	if (!desc && [self isDirectory]) return LocalizedStringInConnectionKitBundle(@"Folder", @"directory kind");
+	if (!desc) return LocalizedStringInConnectionKitBundle(@"Document", @"unknown UTI name");
+	if ([desc isEqualToString:@"text"]) return LocalizedStringInConnectionKitBundle(@"Plain text document", @"mimic Finder naming conventions");
 	
 	return desc;
 }
@@ -426,7 +426,7 @@ static NSImage *sSymFileIcon = nil;
 	NSImage *img = nil;
 	
 	if ([[self propertyForKey:NSFileType] isEqualToString:NSFileTypeDirectory] &&
-		[[self kind] isEqualToString:LocalizedStringInThisBundle(@"Folder", @"directory kind")]) // this is for document bundles so they get their correct icon
+		[[self kind] isEqualToString:LocalizedStringInConnectionKitBundle(@"Folder", @"directory kind")]) // this is for document bundles so they get their correct icon
 	{
 		if (!sFolderIcon)
 		{

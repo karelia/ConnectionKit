@@ -480,7 +480,7 @@ static NSSize closedSize = { 452, 152 };
 	NSRect r = [[self window] frame];
 	BOOL showing = [sender state] == NSOnState;
 	NSSize newSize = showing ? openedSize : closedSize;
-	NSString *name = showing ? LocalizedStringInThisBundle(@"Hide Files", @"transfer controller") : LocalizedStringInThisBundle(@"Show Files", @"transfer controller");
+	NSString *name = showing ? LocalizedStringInConnectionKitBundle(@"Hide Files", @"transfer controller") : LocalizedStringInConnectionKitBundle(@"Show Files", @"transfer controller");
 	r.origin.y -= newSize.height - r.size.height;
 	r.size = newSize;
 	
@@ -954,10 +954,10 @@ static NSSize closedSize = { 452, 152 };
 		NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 											 code:CKPasswordError
 										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-											 LocalizedStringInThisBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
+											 LocalizedStringInConnectionKitBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
 		[self setFatalError:error];
 		myReturnStatus = CKFatalErrorStatus;
-		[self setStatusMessage:LocalizedStringInThisBundle(@"Password was not accepted.", @"")];
+		[self setStatusMessage:LocalizedStringInConnectionKitBundle(@"Password was not accepted.", @"")];
 		
 		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
 		[self forceDisconnectAll];
@@ -977,7 +977,7 @@ static NSSize closedSize = { 452, 152 };
 		myConnectionStatus = CKConnectedStatus;
 		[self postABogusEvent];
 		
-		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Connected to %@", @"transfer controller"), host]];
+		[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Connected to %@", @"transfer controller"), host]];
 	}
 }
 
@@ -1005,7 +1005,7 @@ static NSSize closedSize = { 452, 152 };
 			return;
 		}
 	}
-	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInThisBundle(@"Disconnected from %@", @"transfer controller"), host]];
+	[self setStatusMessage:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Disconnected from %@", @"transfer controller"), host]];
 
 	if (myFlags.delegateDidFinish)
 	{
@@ -1025,7 +1025,7 @@ static NSSize closedSize = { 452, 152 };
 				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 													 code:CKTooManyErrorsError
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
+LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
 			
 				[self setFatalError:error];
 				myReturnStatus = CKFatalErrorStatus;
@@ -1041,11 +1041,11 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
 {
-	NSAlert *alert = [NSAlert alertWithMessageText:LocalizedStringInThisBundle(@"Authorize Connection?", @"authorise")
-									 defaultButton:LocalizedStringInThisBundle(@"Authorize", @"authorise")
-								   alternateButton:LocalizedStringInThisBundle(@"Cancel", @"authorise")
+	NSAlert *alert = [NSAlert alertWithMessageText:LocalizedStringInConnectionKitBundle(@"Authorize Connection?", @"authorise")
+									 defaultButton:LocalizedStringInConnectionKitBundle(@"Authorize", @"authorise")
+								   alternateButton:LocalizedStringInConnectionKitBundle(@"Cancel", @"authorise")
 									   otherButton:nil
-						 informativeTextWithFormat:LocalizedStringInThisBundle(@"%@\nWhat would you like to do?", @"authorise"), message];
+						 informativeTextWithFormat:LocalizedStringInConnectionKitBundle(@"%@\nWhat would you like to do?", @"authorise"), message];
 	
 	if ([alert runModal] == NSOKButton)
 	{
@@ -1110,7 +1110,7 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 	}
 	else
 	{
-		[msg appendString:LocalizedStringInThisBundle(@"Uploading", @"status message")];
+		[msg appendString:LocalizedStringInConnectionKitBundle(@"Uploading", @"status message")];
 	}
 	[msg appendFormat:@" %@", [remotePath lastPathComponent]];
 	[self setStatusMessage:msg];
@@ -1145,7 +1145,7 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 					else
 					{
 						KTLog(ControllerDomain, KTLogDebug, @"ERROR 0 file size %@", [cur path]);
-						NSString *msg = [NSString stringWithFormat:LocalizedStringInThisBundle(@"The transferred file has a size of 0.", @"error transferring"), [cur path]]; 
+						NSString *msg = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"The transferred file has a size of 0.", @"error transferring"), [cur path]]; 
 						NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 															 code:CKFailedVerificationError
 														 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];
@@ -1156,7 +1156,7 @@ LocalizedStringInThisBundle(@"Too many files had transfer problems", @"Transfer 
 			if (!didFind)
 			{
 				KTLog(ControllerDomain, KTLogDebug, @"Failed to verify file transferred %@", [cur path]);
-				NSString *msg = [NSString stringWithFormat:LocalizedStringInThisBundle(@"Failed to verify file transferred successfully", @"error transferring")]; 
+				NSString *msg = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to verify file transferred successfully", @"error transferring")]; 
 				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 													 code:CKFailedVerificationError
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];

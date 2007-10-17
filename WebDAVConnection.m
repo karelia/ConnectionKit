@@ -93,7 +93,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		{
 			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
 											   code:ConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Username and Password are required for WebDAV connections", @"No username or password")
+										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username and Password are required for WebDAV connections", @"No username or password")
 																				forKey:NSLocalizedDescriptionKey]];
 			*error = err;
 		}
@@ -156,11 +156,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 404:
 				{		
-					err = [NSString stringWithFormat: @"%@: %@", LocalizedStringInThisBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
+					err = [NSString stringWithFormat: @"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
 				}
 				default: 
 				{
-					err = LocalizedStringInThisBundle(@"Unknown Error Occurred", @"WebDAV Error");
+					err = LocalizedStringInConnectionKitBundle(@"Unknown Error Occurred", @"WebDAV Error");
 				}
 			}
 			if (err)
@@ -196,7 +196,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 403:
 				{		
-					err = LocalizedStringInThisBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
 						//we fake the directory exists as this is usually the case if it is the root directory
 					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
@@ -205,29 +205,29 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				{		
 					if (!_flags.isRecursiveUploading)
 					{
-						err = LocalizedStringInThisBundle(@"The directory already exists", @"WebDAV Create Directory Error");
+						err = LocalizedStringInConnectionKitBundle(@"The directory already exists", @"WebDAV Create Directory Error");
 						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					}
 					break;
 				}
 				case 409:
 				{
-					err = LocalizedStringInThisBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
 					break;
 				}
 				case 415:
 				{
-					err = LocalizedStringInThisBundle(@"The body of the request is not supported", @"WebDAV Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @"WebDAV Create Directory Error");
 					break;
 				}
 				case 507:
 				{
-					err = LocalizedStringInThisBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
 					break;
 				}
 				default: 
 				{
-					err = LocalizedStringInThisBundle(@"An unknown error occured", @"WebDAV Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"WebDAV Create Directory Error");
 					break;
 				}
 			}
@@ -272,7 +272,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				{		
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error")
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error")
 																					 forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -308,7 +308,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete file", @"WebDAV File Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"WebDAV File Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -343,7 +343,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInThisBundle(@"Failed to delete directory", @"WebDAV Directory Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"WebDAV Directory Deletion Error"), [self currentDeletion]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						

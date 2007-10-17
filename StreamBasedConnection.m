@@ -295,7 +295,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
-				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInThisBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
+				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
 					_connectionHost, @"host", nil]];
             [_forwarder connection:self didReceiveError:error];
 		}
@@ -367,7 +367,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		if (_flags.error) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Stream Unavailable", @"Error creating stream")
+											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream")
 																				  forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:error];
 		}
@@ -645,7 +645,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 //				{
 //					NSError *error = [NSError errorWithDomain:StreamBasedErrorDomain
 //														 code:StreamErrorTimedOut
-//													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInThisBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
+//													 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out") forKey:NSLocalizedDescriptionKey]];
 //					[_forwarder connection:self didReceiveError:error];
 //				}
 //				return 0;
@@ -713,7 +713,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
+										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
 																			 forKey:NSLocalizedDescriptionKey]];
 			}
 			else
@@ -826,7 +826,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInThisBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
+										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
 																			 forKey:NSLocalizedDescriptionKey]];
 			}
 			else 

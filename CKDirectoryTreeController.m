@@ -118,14 +118,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	col = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 	[col setEditable:NO];
-	[[col headerCell] setTitle:LocalizedStringInThisBundle(@"Name", @"outline view column header name")];
+	[[col headerCell] setTitle:LocalizedStringInConnectionKitBundle(@"Name", @"outline view column header name")];
 	[col setDataCell:[[[CKDirectoryCell alloc] initTextCell:@""] autorelease]];
 	[myOutlineViewColumns setObject:col forKey:@"name"];
 	[col release];
 	
 	col = [[NSTableColumn alloc] initWithIdentifier:@"modified"];
 	[col setEditable:NO];
-	[[col headerCell] setTitle:LocalizedStringInThisBundle(@"Date Modified", @"outline view column header name")];
+	[[col headerCell] setTitle:LocalizedStringInConnectionKitBundle(@"Date Modified", @"outline view column header name")];
 	CKDynamicDateFormattingCell *modifiedCell = [[[CKDynamicDateFormattingCell alloc] initTextCell:@""] autorelease];
     [modifiedCell setFont:[NSFont systemFontOfSize:11]];
 	[col setDataCell:modifiedCell];
@@ -135,7 +135,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	col = [[NSTableColumn alloc] initWithIdentifier:@"size"];
 	[col setEditable:NO];
-	[[col headerCell] setTitle:LocalizedStringInThisBundle(@"Size", @"outline view column header name")];
+	[[col headerCell] setTitle:LocalizedStringInConnectionKitBundle(@"Size", @"outline view column header name")];
 	NSTextFieldCell *sizeCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
     [sizeCell setFont:[NSFont systemFontOfSize:11]];
 	[sizeCell setAlignment:NSRightTextAlignment];
@@ -147,7 +147,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	col = [[NSTableColumn alloc] initWithIdentifier:@"kind"];
 	[col setEditable:NO];
-	[[col headerCell] setTitle:LocalizedStringInThisBundle(@"Kind", @"outline view column header name")];
+	[[col headerCell] setTitle:LocalizedStringInConnectionKitBundle(@"Kind", @"outline view column header name")];
 	NSTextFieldCell *kindCell = [[[NSTextFieldCell alloc] initTextCell:@""] autorelease];
     [kindCell setFont:[NSFont systemFontOfSize:11]];
 	[col setDataCell:kindCell];
@@ -458,11 +458,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
         {
             mySelectedNode = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
         }
-        
-        [self changeRelativeRootToPath:myRelativeRootPath];
-        
-        [self reloadViews];
     }
+    else
+    {
+        // setting nil removes the subcontents of the path
+        CKDirectoryNode *node = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
+        [node setContents:[NSArray array]];
+    }
+    [self changeRelativeRootToPath:myRelativeRootPath];
+    [self reloadViews];
 }
 
 - (void)setContents:(NSData *)contents forFile:(NSString *)file
@@ -1018,7 +1022,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir options"];
 	NSMenuItem *item;
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Hidden Files", @"context menu")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Hidden Files", @"context menu")
 									  action:@selector(toggleHiddenFiles:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1026,7 +1030,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Browse Packages", @"context menu")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Browse Packages", @"context menu")
 									  action:@selector(togglePackageBrowsing:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1034,7 +1038,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Package Extensions", @"context menu")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Package Extensions", @"context menu")
 									  action:@selector(togglePackageExtensions:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1103,7 +1107,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	if ([self canCreateDirectories] && [myDelegate respondsToSelector:@selector(directoryTreeWantsNewFolderCreated:)])
 	{
-		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"New Folder", @"tree controller action gear")
+		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"New Folder", @"tree controller action gear")
 										  action:@selector(newFolder:)
 								   keyEquivalent:@""];
 		[item setTarget:self];
@@ -1113,7 +1117,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[menu addItem:[NSMenuItem separatorItem]];
 	}
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Refresh", @"tree controller action gear")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Refresh", @"tree controller action gear")
 									  action:@selector(refresh:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1122,7 +1126,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	[menu addItem:[NSMenuItem separatorItem]];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Hidden Files", @"tree controller action gear")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Hidden Files", @"tree controller action gear")
 									  action:@selector(toggleHiddenFiles:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1130,7 +1134,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Browse Packages", @"tree controller action gear")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Browse Packages", @"tree controller action gear")
 									  action:@selector(togglePackageBrowsing:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1138,7 +1142,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Package Extensions", @"tree controller action gear")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Package Extensions", @"tree controller action gear")
 									  action:@selector(togglePackageExtensions:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1509,7 +1513,7 @@ static NSImage *sSelectedArrow = nil;
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"columns"];
 	NSMenuItem *item;
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Name", @"outline view column context menu item")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Name", @"outline view column context menu item")
 									  action:nil
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1518,7 +1522,7 @@ static NSImage *sSelectedArrow = nil;
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Date Modified", @"outline view column context menu item")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Date Modified", @"outline view column context menu item")
 									  action:@selector(toggleColumn:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1527,7 +1531,7 @@ static NSImage *sSelectedArrow = nil;
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Size", @"outline view column context menu item")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Size", @"outline view column context menu item")
 									  action:@selector(toggleColumn:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1536,7 +1540,7 @@ static NSImage *sSelectedArrow = nil;
 	[menu addItem:item];
 	[item release];
 	
-	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Kind", @"outline view column context menu item")
+	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Kind", @"outline view column context menu item")
 									  action:@selector(toggleColumn:)
 							   keyEquivalent:@""];
 	[item setTarget:self];
@@ -1665,7 +1669,7 @@ static NSImage *sSelectedArrow = nil;
 	
 	if ([[self dataSource] respondsToSelector:@selector(outlineViewIsShowingHiddenFiles:)])
 	{
-		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Hidden Files", @"context menu")
+		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Hidden Files", @"context menu")
 										  action:@selector(toggleHiddenFiles:)
 								   keyEquivalent:@""];
 		[item setTarget:self];
@@ -1676,7 +1680,7 @@ static NSImage *sSelectedArrow = nil;
 	
 	if ([[self dataSource] respondsToSelector:@selector(outlineViewCanBrowseFilePackages:)])
 	{
-		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Browse Packages", @"context menu")
+		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Browse Packages", @"context menu")
 										  action:@selector(togglePackageBrowsing:)
 								   keyEquivalent:@""];
 		[item setTarget:self];
@@ -1687,7 +1691,7 @@ static NSImage *sSelectedArrow = nil;
 	
 	if ([[self dataSource] respondsToSelector:@selector(outlineViewShowsFilePackageExtensions:)])
 	{
-		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInThisBundle(@"Show Package Extensions", @"context menu")
+		item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Package Extensions", @"context menu")
 										  action:@selector(togglePackageExtensions:)
 								   keyEquivalent:@""];
 		[item setTarget:self];
