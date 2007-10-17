@@ -36,6 +36,7 @@
 #import "CKTransferRecord.h"
 #import "AbstractQueueConnection.h"
 #import "NSFileManager+Connection.h"
+#import "AbstractConnectionProtocol.h"
 
 NSString *FileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
