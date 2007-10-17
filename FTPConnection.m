@@ -38,7 +38,6 @@
 #import "CKTransferRecord.h"
 #import "NSObject+Connection.h"
 #import "CKCacheableHost.h"
-#import "KTLog.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 

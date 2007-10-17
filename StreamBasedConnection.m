@@ -42,7 +42,6 @@
 #import "RunLoopForwarder.h"
 #import "CKCacheableHost.h"
 #import "CKTransferRecord.h"
-#import "KTLog.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
