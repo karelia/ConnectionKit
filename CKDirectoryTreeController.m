@@ -431,7 +431,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)setContents:(NSArray *)contents forPath:(NSString *)path
 {
-	myDirectoriesLoading--;
+    if (myDirectoriesLoading > 0)
+    {
+        myDirectoriesLoading--;
+    }
 	if (myDirectoriesLoading == 0)
 	{
 		[myDelegate directoryTreeFinishedLoadingContents:self];
@@ -451,7 +454,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
             [node setProperties:cur];
             [nodes addObject:node];
         }
-        
+
         [CKDirectoryNode addContents:nodes withPath:path withRoot:myRootNode];
         
         if (!mySelectedNode)
@@ -583,7 +586,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	if ([myHistory count] > 0 && myHistoryIndex < ([myHistory count] - 1))
 	{
 		// we have used the history buttons and are now taking a new path so we need to remove history from this point forward
-		NSRange oldPathRange = NSMakeRange(myHistoryIndex, [myHistory count] - 1 - myHistoryIndex);
+		NSRange oldPathRange = NSMakeRange(myHistoryIndex + 1, [myHistory count] - 1 - myHistoryIndex);
 		[myHistory removeObjectsInRange:oldPathRange];
 	}
 	
@@ -696,7 +699,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)viewStyleChanged:(id)sender
 {
-	[oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
+    if ([oStyles indexOfSelectedTabViewItem] != [oStyle selectedSegment])
+    {
+        [oSearch setStringValue:@""];
+        [self reloadViews];
+        [oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
+    }
 }
 
 - (IBAction)popupChanged:(id)sender
@@ -726,6 +734,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)filterChanged:(id)sender
 {
+    //only show filtered results in the outline view
+    [oStyles selectTabViewItemAtIndex:CKOutlineViewStyle];
+    [oStyle selectSegmentWithTag:CKOutlineViewStyle];
 	[self reloadViews];
 }
 
@@ -743,7 +754,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSDictionary *rec = [myHistory objectAtIndex:myHistoryIndex];
 	NSString *relPath = [rec objectForKey:@"rp"];
 	NSString *fullPath = [rec objectForKey:@"fp"];
-	
+	//NSLog(@"%d %@\n%@", myHistoryIndex, rec, myHistory);
 	[self changeRelativeRootToPath:relPath];
 	
 	CKDirectoryNode *node = [CKDirectoryNode nodeForPath:[rec objectForKey:@"fp"] withRoot:myRootNode];
@@ -865,6 +876,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	NSString *ident = [tableColumn identifier];
 	
+    [item setProperty:[NSNumber numberWithBool:[self outlineView:outlineView isItemExpandable:item]] forKey:@"isExpandable"];
+    
 	if ([ident isEqualToString:@"name"])
 	{
 		NSString *name = [item name];
@@ -976,7 +989,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (id)tableBrowser:(CKTableBasedBrowser *)browser child:(unsigned)index ofItem:(id)item
 {
-	return [self outlineView:nil child:index ofItem:item];
+    CKDirectoryNode *node = [self outlineView:nil child:index ofItem:item];
+    [node setProperty:[NSNumber numberWithBool:[self tableBrowser:browser isItemExpandable:node]] forKey:@"isExpandable"];
+	return node;
 }
 
 - (BOOL)tableBrowser:(CKTableBasedBrowser *)browser isItemExpandable:(id)item
@@ -1192,7 +1207,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 	if ([obj isKindOfClass:[CKDirectoryNode class]])
 	{
 		myNode = obj;
-		[self setLeaf:![myNode isDirectory]];
+		[self setLeaf:![[myNode propertyForKey:@"isExpandable"] boolValue]];
 		[self setEnabled:YES];
 		[super setObjectValue:[obj name]];
 	}
