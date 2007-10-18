@@ -227,9 +227,29 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	return NO;
 }
 
+- (BOOL)entry:(CKDirectoryNode *)entry existsIn:(NSArray *)files
+{
+    NSEnumerator *e = [files objectEnumerator];
+    CKDirectoryNode *cur;
+    
+    NSString *name = [entry propertyForKey:cxFilenameKey];
+    NSString *type = [entry propertyForKey:NSFileType];
+    
+    while ((cur = [e nextObject]))
+    {        
+        if ([[cur propertyForKey:cxFilenameKey] isEqualToString:name] &&
+            [[cur propertyForKey:NSFileType] isEqualToString:type])
+        {
+            return YES;
+        }
+    }
+    
+    return NO;
+}
+
 - (void)mergeContents:(NSArray *)contents
 {
-	// this will not delete any subdirectories directories so it in effect caches the subdir contents
+    NSMutableArray *originals = [NSMutableArray arrayWithArray:myContents];
 	NSMutableArray *files = [NSMutableArray array];
 	NSEnumerator *e = [myContents objectEnumerator];
 	CKDirectoryNode *cur;
@@ -244,7 +264,8 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	
 	//remove the files from the contents
 	[myContents removeObjectsInArray:files];
-	
+	[originals removeObjectsInArray:files];
+    
 	files = [NSMutableArray array];
 	e = [contents objectEnumerator];
 	
@@ -259,6 +280,20 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	[myContents addObjectsFromArray:files];
 	[files makeObjectsPerformSelector:@selector(setParent:) withObject:self];
 	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+    
+    // remove any folders that have been removed
+    files = [NSMutableArray array];
+    e = [originals objectEnumerator];
+    
+    while ((cur = [e nextObject]))
+    {
+        if (![self entry:cur existsIn:contents])
+        {
+            [files addObject:cur];
+        }
+    }
+    //[files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+    [myContents removeObjectsInArray:files];
 }
 
 - (NSArray *)contents
@@ -439,8 +474,9 @@ static NSImage *sSymFileIcon = nil;
 	{
 		if (!sSymFolderIcon || !sSymFileIcon)
 		{
-			sSymFolderIcon = [[NSImage imageNamed:@"symlink_folder.tif"] retain];
-			sSymFileIcon = [[NSImage imageNamed:@"symlink_file.tif"] retain];
+            NSBundle *bndl = [NSBundle bundleForClass:[self class]];
+			sSymFolderIcon = [[NSImage alloc] initWithContentsOfFile:[bndl pathForResource:@"symlink_folder" ofType:@"tif"]];
+			sSymFileIcon = [[NSImage alloc] initWithContentsOfFile:[bndl pathForResource:@"symlink_file" ofType:@"tif"]];
 		}
 		NSString *target = [self propertyForKey:cxSymbolicLinkTargetKey];
 		
@@ -449,12 +485,12 @@ static NSImage *sSymFileIcon = nil;
 		else
 		{
 			NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[[self propertyForKey:cxFilenameKey] pathExtension]];
-			NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
-			[img setScalesWhenResized:YES];
-			[img setSize:NSMakeSize(16,16)];
+			NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(128,128)];
+			[fileType setScalesWhenResized:YES];
+			[fileType setSize:NSMakeSize(128,128)];
 			[comp lockFocus];
-			[fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-			[sSymFileIcon drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[fileType drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[sSymFileIcon drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
 			[comp unlockFocus];
 			[comp autorelease];
 			img = comp;

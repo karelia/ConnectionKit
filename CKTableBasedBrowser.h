@@ -40,6 +40,7 @@
 	id myCellPrototype;
 	NSMutableArray *myColumns;
 	NSMutableDictionary *myColumnWidths;
+    NSMutableDictionary *myColumnSelectedCells;
 	NSMutableArray *mySelection;
 	
 	IBOutlet NSTextField *oPath;

@@ -110,6 +110,7 @@ static Class sCellClass = nil;
 	[self setCellClass:[CKTableBasedBrowser class]];
 	myColumns = [[NSMutableArray alloc] initWithCapacity:8];
 	myColumnWidths = [[NSMutableDictionary alloc] initWithCapacity:8];
+    myColumnSelectedCells = [[NSMutableDictionary alloc] initWithCapacity:8];
 	mySelection = [[NSMutableArray alloc] initWithCapacity:32];
 	
 	myAutosaveName = @"Default";
@@ -133,6 +134,7 @@ static Class sCellClass = nil;
 {
 	[myColumns release];
 	[myColumnWidths release];
+    [myColumnSelectedCells release];
 	[mySelection release];
 	[myCellPrototype release];
 	[myAutosaveName release];
@@ -395,11 +397,11 @@ static Class sCellClass = nil;
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag
 {    
     BOOL showColumn = [path isEqualToString:[self path]];
-    [self removeAllColumns];
-    [mySelection removeAllObjects];
     
     if (path == nil || [path isEqualToString:@""]) 
 	{
+        [self removeAllColumns];
+        [mySelection removeAllObjects];
 		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
         
         // add the root column back
@@ -410,6 +412,9 @@ static Class sCellClass = nil;
 	}
 	else
 	{
+        NSLog(@"%@ %@", myCurrentPath, path);
+        // the last selected item is going to be what is visible, let's see if we can optimise the reload
+        
         id item = [myDataSource tableBrowser:self itemForPath:path];
         if (item)
         {
@@ -1011,6 +1016,36 @@ static Class sCellClass = nil;
     
     if (row < 0 || row == NSNotFound)
     {
+        // if we were a folder then we need to remove the column to the right
+        int rowSelectedBeforeThisEvent = [[myColumnSelectedCells objectForKey:[NSNumber numberWithInt:column]] intValue];
+        id lastSelected = [myDataSource tableBrowser:self child:rowSelectedBeforeThisEvent ofItem:[myDataSource tableBrowser:self itemForPath:[self pathToColumn:column]]];
+        if ([myDataSource tableBrowser:self isItemExpandable:lastSelected])
+        {
+            int i;
+            for (i = column + 1; i < [myColumns count]; i++)
+            {
+                NSTableView *table = [myColumns objectAtIndex:i];
+                NSScrollView *scroller = [table enclosingScrollView];
+                [table setDataSource:nil];
+                [scroller removeFromSuperview];
+            }
+            NSRange r = NSMakeRange(column + 1, i - column - 1);
+            [myColumns removeObjectsInRange:r];
+        }
+        if (myLeafView)
+        {
+            [[myLeafView enclosingScrollView] removeFromSuperview];
+            myLeafView = nil;
+        }
+        
+        if (flag)
+        {
+            if (myTarget && myAction)
+            {
+                [myTarget performSelector:myAction withObject:self];
+            }
+        }
+        
         return;
     }
 	
@@ -1058,6 +1093,8 @@ static Class sCellClass = nil;
 		NSRange r = NSMakeRange(column + 1, i - column - 1);
 		[myColumns removeObjectsInRange:r];
 	}
+    
+    [myColumnSelectedCells setObject:[NSNumber numberWithInt:row] forKey:[NSNumber numberWithInt:column]];
 	
 	if (isDirectory)
 	{
@@ -1089,7 +1126,7 @@ static Class sCellClass = nil;
             [self leafInspectItem:item scrollToVisible:showColumn];
         }
 	}
-	
+    	
 	if (flag)
 	{
 		if (myTarget && myAction)
