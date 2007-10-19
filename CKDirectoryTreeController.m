@@ -991,6 +991,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
     CKDirectoryNode *node = [self outlineView:nil child:index ofItem:item];
     [node setProperty:[NSNumber numberWithBool:[self tableBrowser:browser isItemExpandable:node]] forKey:@"isExpandable"];
+    [node setProperty:[NSNumber numberWithBool:[self showsFilePackageExtensions]] forKey:@"showBundleExtension"];
 	return node;
 }
 
@@ -1209,7 +1210,12 @@ static NSMutableParagraphStyle *sStyle = nil;
 		myNode = obj;
 		[self setLeaf:![[myNode propertyForKey:@"isExpandable"] boolValue]];
 		[self setEnabled:YES];
-		[super setObjectValue:[obj name]];
+        NSString *name = [obj name];
+        if (![[myNode propertyForKey:@"showBundleExtension"] boolValue] && [myNode isFilePackage])
+        {
+            name = [name stringByDeletingPathExtension];
+        }
+		[super setObjectValue:name];
 	}
 	else
 	{
