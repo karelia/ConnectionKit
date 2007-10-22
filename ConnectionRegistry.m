@@ -331,7 +331,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 													name:CKHostChanged
 												  object:connection];
 	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObject:connection];
+	[myConnections removeObjectIdenticalTo:connection];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
