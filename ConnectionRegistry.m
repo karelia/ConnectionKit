@@ -563,51 +563,64 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-	//We have a large icon here, we need to scale it to the nearest base 2 size, based on the rowheight of the outlineview.
-	float widthAndHeightDimension = pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
-	NSSize nearestSize = NSMakeSize(widthAndHeightDimension, widthAndHeightDimension);
-	NSImage *icon = [item iconWithSize:nearestSize];
+    NSString *ident = [tableColumn identifier];
+    
+    if ([ident isEqualToString:@"connType"])
+    {
+        if ([item isKindOfClass:[CKHost class]])
+        {
+            return [item connectionType];
+        }
+    }
+    else
+    {
+        //We have a large icon here, we need to scale it to the nearest base 2 size, based on the rowheight of the outlineview.
+        float widthAndHeightDimension = pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
+        NSSize nearestSize = NSMakeSize(widthAndHeightDimension, widthAndHeightDimension);
+        NSImage *icon = [item iconWithSize:nearestSize];
+        
+        if ([item isKindOfClass:[CKHostCategory class]])
+        {		
+            return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, icon, CKHostCellImageValueKey, nil];
+        }
+        else
+        {
+            NSString *primary = [item annotation];
+            NSString *secondary = nil;
+            BOOL useHostName = [[[NSUserDefaults standardUserDefaults] objectForKey:@"CKHostCellUsesHostName"] boolValue];
+            if (!primary || [primary isEqualToString:@""])
+            {
+                if (useHostName)
+                {
+                    primary = [item host];
+                }
+                else
+                {
+                    primary = [item name];
+                }
+            }
+            else
+            {
+                if (useHostName)
+                {
+                    secondary = [item host];
+                }
+                else
+                {
+                    secondary = [item name];
+                }
+            }
+            
+            if ([primary isEqualToString:secondary])
+            {
+                secondary = nil;
+            }
+            
+            // annotation is last incase it is nil and finishes the dictionary there.
+            return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, icon, CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
+        }
+    }
 	
-	if ([item isKindOfClass:[CKHostCategory class]])
-	{		
-		return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, icon, CKHostCellImageValueKey, nil];
-	}
-	else
-	{
-		NSString *primary = [item annotation];
-		NSString *secondary = nil;
-		BOOL useHostName = [[[NSUserDefaults standardUserDefaults] objectForKey:@"CKHostCellUsesHostName"] boolValue];
-		if (!primary || [primary isEqualToString:@""])
-		{
-			if (useHostName)
-			{
-				primary = [item host];
-			}
-			else
-			{
-				primary = [item name];
-			}
-		}
-		else
-		{
-			if (useHostName)
-			{
-				secondary = [item host];
-			}
-			else
-			{
-				secondary = [item name];
-			}
-		}
-		
-		if ([primary isEqualToString:secondary])
-		{
-			secondary = nil;
-		}
-		
-		// annotation is last incase it is nil and finishes the dictionary there.
-		return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, icon, CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
-	}
 	return nil;
 }
 
