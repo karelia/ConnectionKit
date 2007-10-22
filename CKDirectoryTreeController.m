@@ -82,7 +82,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myFlags.isNavigatingToPath = NO;
 	myFlags.outlineViewDoubleCallback = NO;
 	myFlags.filePackages = YES;
-	myFlags.showsFilePackageExtensions = NO;
+	myFlags.showsFilePackageExtensions = YES;
 	myFlags.canCreateFolders = NO;
 	myCachedContentsThresholdSize = 65536; // 64k threshold
 	
@@ -809,7 +809,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-	//NSLog(@"%@%@", NSStringFromSelector(_cmd), [item path]);
 	int result = 0;
 	
 	if (item == nil)
@@ -820,8 +819,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		}
 		item = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 	}
-	
-	result = [item countIncludingHiddenFiles:myFlags.showsHiddenFiles];
+    
+    if (![self treatsFilePackagesAsDirectories] && [item isFilePackage])
+    {
+        result = 0;
+    }
+	else
+    {
+        result = [item countIncludingHiddenFiles:myFlags.showsHiddenFiles];
+    }
 	
 	return result;
 }
@@ -1035,7 +1041,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (NSMenu *)tableBrowser:(CKTableBasedBrowser *)browser contextMenuWithItem:(id)selectedItem
 {
-	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir options"];
+/*	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir options"];
 	NSMenuItem *item;
 	
 	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Hidden Files", @"context menu")
@@ -1062,7 +1068,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 		
-	return [menu autorelease];
+	return [menu autorelease];*/
+    return nil;
 }
 
 #pragma mark -
@@ -1140,6 +1147,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[menu addItem:item];
 	[item release];
 	
+    /*
 	[menu addItem:[NSMenuItem separatorItem]];
 	
 	item = [[NSMenuItem alloc] initWithTitle:LocalizedStringInConnectionKitBundle(@"Show Hidden Files", @"tree controller action gear")
@@ -1165,7 +1173,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[item setState:[self showsFilePackageExtensions] ? NSOnState : NSOffState];
 	[menu addItem:item];
 	[item release];
-	
+	*/
 	if ([myDelegate respondsToSelector:@selector(directoryTreeController:willDisplayActionGearMenu:)])
 	{
 		[myDelegate directoryTreeController:self willDisplayActionGearMenu:menu];
@@ -1685,6 +1693,7 @@ static NSImage *sSelectedArrow = nil;
 
 - (NSMenu *)menuForEvent:(NSEvent *)theEvent
 {
+    /*
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir options"];
 	NSMenuItem *item;
 	
@@ -1721,7 +1730,8 @@ static NSImage *sSelectedArrow = nil;
 		[item release];
 	}	
 
-	return [menu autorelease];
+	return [menu autorelease];*/
+    return nil;
 }
 
 - (void)toggleHiddenFiles:(id)sender
