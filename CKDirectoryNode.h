@@ -64,6 +64,7 @@
 - (unsigned long long)size;
 - (BOOL)isDirectory;
 - (BOOL)isFilePackage;
+- (BOOL)isChildOfFilePackage;
 
 - (void)setParent:(CKDirectoryNode *)parent;
 - (CKDirectoryNode *)parent;
