@@ -10,7 +10,7 @@
     
 	AUTHORS:	M. Uli Kusterer - UK
     
-    LICENSES:   MIT Licenseâ
+    LICENSES:   MIT License
 
 	REVISIONS:
 		2006-03-13	UK	Clarified license.
