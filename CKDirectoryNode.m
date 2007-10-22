@@ -377,6 +377,21 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	return ([self isDirectory] && ![[[self name] pathExtension] isEqualToString:@""]);
 }
 
+- (BOOL)isChildOfFilePackage
+{
+    CKDirectoryNode *parent = [self parent];
+    
+    while (parent)
+    {
+        if ([parent isFilePackage])
+        {
+            return YES;
+        }
+        parent = [parent parent];
+    }
+    return NO;
+}
+
 - (void)setParent:(CKDirectoryNode *)parent
 {
 	myParent = parent;
