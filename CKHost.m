@@ -405,7 +405,7 @@ static NSImage *sHostIcon = nil;
 		return myPassword;
 	}
 	//Need to get the password from keychain
-	if ([myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
+	if (!myHost || !myUsername || [myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
 	{
 		//We don't have anything to base our keychain search from, we have no chance.
 		return nil;
