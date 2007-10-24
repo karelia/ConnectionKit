@@ -39,6 +39,7 @@
 	Class myCellClass;
 	id myCellPrototype;
 	NSMutableArray *myColumns;
+    NSMutableArray *myScrollers;
 	NSMutableDictionary *myColumnWidths;
     NSMutableDictionary *myColumnSelectedCells;
 	NSMutableArray *mySelection;
@@ -49,6 +50,7 @@
 	float myMaxColumnWidth;
 	float myRowHeight;
 	float myDefaultColumnWidth;
+    unsigned myMinVisibleColumns;
 	
 	NSString *myAutosaveName;
 	

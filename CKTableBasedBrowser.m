@@ -77,9 +77,11 @@
 - (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag scrollToVisible:(BOOL)showColumn;
 - (unsigned)rowForItem:(id)item;
 - (void)removeAllColumns;
-- (NSRect)nextColumnBounds;
-- (id)createColumnWithRect:(NSRect)r;
+- (NSRect)boundsForColumn:(unsigned)col;
+- (CKTableBrowserScrollView *)createScrollerWithRect:(NSRect)rect;
+- (id)createColumn:(unsigned)colIndex;
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag;
+- (void)removeLeafView;
 
 @end
 
@@ -109,6 +111,7 @@ static Class sCellClass = nil;
 	
 	[self setCellClass:[CKTableBasedBrowser class]];
 	myColumns = [[NSMutableArray alloc] initWithCapacity:8];
+    myScrollers = [[NSMutableArray alloc] initWithCapacity:8];
 	myColumnWidths = [[NSMutableDictionary alloc] initWithCapacity:8];
     myColumnSelectedCells = [[NSMutableDictionary alloc] initWithCapacity:8];
 	mySelection = [[NSMutableArray alloc] initWithCapacity:32];
@@ -133,6 +136,7 @@ static Class sCellClass = nil;
 - (void)dealloc
 {
 	[myColumns release];
+    [myScrollers release];
 	[myColumnWidths release];
     [myColumnSelectedCells release];
 	[mySelection release];
@@ -311,7 +315,35 @@ static Class sCellClass = nil;
 - (void)setDefaultColumnWidth:(float)width
 {
 	myDefaultColumnWidth = width;
-	[self removeAllColumns];
+    
+    // remove all existing scrollers
+    NSEnumerator *e = [myScrollers objectEnumerator];
+    NSScroller *cur;
+    
+    while ((cur = [e nextObject]))
+    {
+        [cur removeFromSuperviewWithoutNeedingDisplay];
+    }
+    [myScrollers removeAllObjects];
+    [self removeAllColumns];
+    
+    // add in scrollers to fit the width
+    unsigned i = 0;
+    NSRect bounds = [[self enclosingScrollView] documentVisibleRect];
+    CKTableBrowserScrollView *scroller = [self createScrollerWithRect:[self boundsForColumn:i]];
+    NSRect r = [scroller frame];
+    [self addSubview:scroller];
+    i++;
+    
+    while (NSMaxX(r) < NSMaxX(bounds) - 1)
+    {
+        scroller = [self createScrollerWithRect:[self boundsForColumn:i]];
+        r = [scroller frame];
+        [self addSubview:scroller];
+        i++;
+    }
+    
+    myMinVisibleColumns = [myScrollers count];
 	[self reloadData];
 }
 
@@ -396,34 +428,41 @@ static Class sCellClass = nil;
 
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag
 {    
+    NSString *currentPathDisplayed = [[[self path] copy] autorelease];
+    if (!currentPathDisplayed) currentPathDisplayed = [self pathSeparator];
+    
     BOOL showColumn = [path isEqualToString:[self path]];
     
-    if (path == nil || [path isEqualToString:@""]) 
+    if (path == nil || [path isEqualToString:@""] || [path isEqualToString:[self pathSeparator]]) 
 	{
         [self removeAllColumns];
         [mySelection removeAllObjects];
 		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
         
         // add the root column back
-        NSRect r = [self nextColumnBounds];
-        NSScrollView *column = [self createColumnWithRect:r];
+        NSScrollView *column = [self createColumn:0];
         [self addSubview:column];
         [self updateScrollers];
 	}
 	else
-	{
-        NSLog(@"%@ %@", myCurrentPath, path);
-        // the last selected item is going to be what is visible, let's see if we can optimise the reload
-        
+	{        
         id item = [myDataSource tableBrowser:self itemForPath:path];
         if (item)
         {
             // push it on as a selection so the reloading of the tables picks up the correct source
-            [mySelection addObject:item];
+            [mySelection addObject:[[path copy] autorelease]];
             
             // enumerate over the path and simulate table clicks
             NSString *separator = [self pathSeparator];
-            NSRange r = [path rangeOfString:separator];
+            NSRange r = [path rangeOfString:currentPathDisplayed];
+            if (r.location == NSNotFound)
+            {
+                r = [path rangeOfString:separator];
+            }
+            else
+            {
+                r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
+            }
             unsigned row, col;
             
             while (r.location != NSNotFound)
@@ -433,8 +472,7 @@ static Class sCellClass = nil;
                 
                 if (col == NSNotFound)
                 {
-                    NSRect r = [self nextColumnBounds];
-                    NSScrollView *column = [self createColumnWithRect:r];
+                    NSScrollView *column = [self createColumn:[myColumns count]];
                     [self addSubview:column];
                     [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
                 }
@@ -449,7 +487,7 @@ static Class sCellClass = nil;
                     }
                     else
                     {
-                        column = [self createColumnWithRect:[self nextColumnBounds]];
+                        column = [self createColumn:[myColumns count]];
                         [self addSubview:column];
                         column = [(NSScrollView *)column documentView];
                     }
@@ -471,7 +509,17 @@ static Class sCellClass = nil;
                 [column scrollRowToVisible:row];
                 [[self window] makeFirstResponder:column];
             }
+            else
+            {
+                // reload just the last column
+                [[myColumns lastObject] reloadData];
+            }
             [self updateScrollers];
+        }
+        else
+        {
+            // the path doesn't exist anymore so we should get the parent path
+            NSLog(@"path no long exists");
         }
     }
 }
@@ -485,15 +533,7 @@ static Class sCellClass = nil;
 {
 	if ([mySelection count] == 0) return nil;
 	
-	id item = [mySelection lastObject];
-	NSString *path = nil;
-	
-	if (item)
-	{
-		path = [myDataSource tableBrowser:self pathForItem:item];
-	}
-	
-	return path;
+	return [mySelection lastObject];
 }
 
 - (void)setTarget:(id)target
@@ -686,25 +726,39 @@ static Class sCellClass = nil;
 	{
 		NSScrollView *scroller = [cur enclosingScrollView];
 		[cur setDataSource:nil];
-		[scroller removeFromSuperview];
+        [scroller setDocumentView:nil];
 	}
 	[myColumns removeAllObjects];
     
-    if (myLeafView)
-    {
-        [[myLeafView enclosingScrollView] removeFromSuperview];
-        myLeafView = nil;
-    }
+    [self removeLeafView];
 }
 
-- (id)createColumnWithRect:(NSRect)rect
+- (CKTableBrowserScrollView *)createScrollerWithRect:(NSRect)rect
 {
-	CKTableBrowserScrollView *scroller = [[CKTableBrowserScrollView alloc] initWithFrame:rect];
+    CKTableBrowserScrollView *scroller = [[CKTableBrowserScrollView alloc] initWithFrame:rect];
 	[scroller setHasVerticalScroller:YES];
 	[scroller setHasHorizontalScroller:NO];
 	[[scroller resizer] setDelegate:self];
 	[scroller setAutoresizingMask: NSViewHeightSizable];
-	
+    [myScrollers addObject:scroller];
+    
+    return [scroller autorelease];
+}
+
+- (id)createColumn:(unsigned)colIndex
+{
+    NSRect rect = [self boundsForColumn:colIndex];
+	CKTableBrowserScrollView *scroller = nil;
+    
+    if ([myScrollers count] > colIndex)
+    {
+        scroller = [myScrollers objectAtIndex:colIndex];
+    }
+    else
+    {
+        scroller = [self createScrollerWithRect:rect];
+    }
+    
 	CKBrowserTableView *table = [[CKBrowserTableView alloc] initWithFrame:[scroller documentVisibleRect]];
 	[scroller setDocumentView:table];
 	[myColumns addObject:table];
@@ -749,24 +803,45 @@ static Class sCellClass = nil;
 	return scroller;
 }
 
-- (NSRect)nextColumnBounds
+- (NSRect)boundsForColumn:(unsigned)col
 {
     NSRect bounds = [[self enclosingScrollView] documentVisibleRect];
 	NSRect columnRect = NSMakeRect(0, 0, myMinColumnWidth, NSHeight(bounds));
     
-    NSTableView *lastColumn = [myColumns lastObject];
-    unsigned i = (lastColumn != nil) ? [myColumns indexOfObject:lastColumn] : 0;
+    NSTableView *lastColumn = nil;
+    
+    if ([myColumns count] > col)
+    {
+        lastColumn = [myColumns objectAtIndex:col];
+    }
     
     if (lastColumn)
     {
         NSScrollView *scroller = [lastColumn enclosingScrollView];
         columnRect.origin.x = NSMaxX([scroller frame]) + 1;
     }
+    else
+    {
+        // see if there is a scroller already created for this column and use it
+        if ([myScrollers count] > col)
+        {
+            columnRect = [[myScrollers objectAtIndex:col] frame];
+            return columnRect;
+        }
+        else
+        {
+            // try the last scroller
+            if ([myScrollers lastObject])
+            {
+                columnRect.origin.x = NSMaxX([[myScrollers lastObject] frame]) + 1;
+            }
+        }
+    }
     
     // see if there is a custom width
-    if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:i]])
+    if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:col]])
     {
-        columnRect.size.width = [[myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:i]] floatValue];
+        columnRect.size.width = [[myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:col]] floatValue];
     }
     else if (myDefaultColumnWidth > 0)
     {
@@ -785,14 +860,7 @@ static Class sCellClass = nil;
 	// get the total width of the subviews
 	float maxX = 0;
 	
-	if (myLeafView)
-	{
-		maxX = NSMaxX([[myLeafView enclosingScrollView] frame]);
-	}
-	else
-	{
-		maxX = NSMaxX([[[myColumns lastObject] enclosingScrollView] frame]);
-	}
+	maxX = NSMaxX([[myScrollers lastObject] frame]);
 
 	NSRect docArea = [[self enclosingScrollView] documentVisibleRect];
 	NSRect bounds = NSMakeRect(0, 0, maxX, NSHeight(docArea));
@@ -808,11 +876,9 @@ static Class sCellClass = nil;
 - (void)reloadData
 {
 	// load the first column and then subsequent columns based on the myCurrentPath
-	NSRect bounds = [[self enclosingScrollView] documentVisibleRect];
-	NSRect columnRect = NSMakeRect(0, 0, myMinColumnWidth, NSHeight(bounds));
 	
 	// if required create column, then reload the data
-	NSArray *pathComponents = [myCurrentPath componentsSeparatedByString:[self pathSeparator]];
+/*	NSArray *pathComponents = [myCurrentPath componentsSeparatedByString:[self pathSeparator]];
 	if ([myCurrentPath isEqualToString:[self pathSeparator]])
 	{
 		pathComponents = [pathComponents subarrayWithRange:NSMakeRange(1, [pathComponents count] - 1)];
@@ -823,11 +889,9 @@ static Class sCellClass = nil;
 	for (i = 0; i < c; i++)
 	{
 		if (i >= [myColumns count])
-		{
-			columnRect = [self nextColumnBounds];
-			
+		{			
 			// create the column
-			NSScrollView *col = [self createColumnWithRect:columnRect];
+			NSScrollView *col = [self createColumn:i];
 			[self addSubview:col];
 		}
 		NSTableView *column = [myColumns objectAtIndex:i];
@@ -844,14 +908,10 @@ static Class sCellClass = nil;
 		[col removeFromSuperview];
 	}
     
-    if (myLeafView)
-    {
-        [[myLeafView enclosingScrollView] removeFromSuperview];
-        myLeafView = nil;
-    }
+    [self removeLeafView];
 	[myColumns removeObjectsInRange:NSMakeRange(c, [myColumns count] - c)];
 	
-	[self updateScrollers];
+	[self updateScrollers];*/
 }
 
 - (void)reloadItem:(id)item
@@ -954,8 +1014,16 @@ static Class sCellClass = nil;
 		myLeafView = [myDelegate tableBrowser:self leafViewWithItem:item];
 		if (myLeafView)
 		{
-			NSRect lastColumnFrame = [[[myColumns lastObject] enclosingScrollView] frame];
-			lastColumnFrame.origin.x = NSMaxX(lastColumnFrame) + 1;
+            CKTableBrowserScrollView *scroller = nil;
+            if ([myScrollers count] > [myColumns count])
+            {
+                scroller = [myScrollers objectAtIndex:[myColumns count]];
+            }
+            else
+            {
+                scroller = [self createScrollerWithRect:[self boundsForColumn:[myColumns count]]];
+            }
+			NSRect lastColumnFrame = [scroller frame];
 			
 			// get the custom width for the column
 			if ([myColumnWidths objectForKey:[NSNumber numberWithUnsignedInt:[myColumns count]]])
@@ -973,12 +1041,6 @@ static Class sCellClass = nil;
 			
 			[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth(lastColumnFrame)] forKey:[NSNumber numberWithUnsignedInt:[myColumns count]]];
 			
-			// create a scroller for it as well
-			CKTableBrowserScrollView *scroller = [[CKTableBrowserScrollView alloc] initWithFrame:lastColumnFrame];
-			[scroller setHasVerticalScroller:YES];
-			[scroller setHasHorizontalScroller:NO];
-			[[scroller resizer] setDelegate:self];
-			
 			if (NSHeight([myLeafView frame]) > NSHeight(lastColumnFrame))
 			{
 				lastColumnFrame.size.height = NSHeight([myLeafView frame]);
@@ -989,7 +1051,6 @@ static Class sCellClass = nil;
 			[scroller setDocumentView:myLeafView];
 			[myLeafView scrollRectToVisible:NSMakeRect(0,NSMaxY(lastColumnFrame) - 1,1,1)];
 			[self addSubview:scroller];
-			[scroller release];
 			[self updateScrollers];
 			
 			// scroll it to visible
@@ -1002,9 +1063,25 @@ static Class sCellClass = nil;
 	}
 }
 
+- (void)removeLeafView
+{
+    if (myLeafView)
+    {
+        // there is a bug when setting the document view to nil the scroller still appears
+        NSRect origRect = [myLeafView frame];
+        NSRect docRect = [[myLeafView enclosingScrollView] documentVisibleRect];
+        [myLeafView setFrame:NSMakeRect(0,0,NSWidth(docRect),NSHeight(docRect))];
+        [[myLeafView enclosingScrollView] setDocumentView:nil];
+        [[myLeafView enclosingScrollView] setNeedsDisplay:YES];
+        [myLeafView setFrame:origRect];
+        myLeafView = nil;
+        [self setNeedsDisplay:YES];
+    }
+}
+
 - (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag scrollToVisible:(BOOL)showColumn
 {
-	id lastSelectedItem = [mySelection lastObject];
+	NSString *lastSelectedPath = [[mySelection lastObject] copy];
 	
 	if (!myFlags.allowsMultipleSelection)
 	{
@@ -1014,38 +1091,42 @@ static Class sCellClass = nil;
 	int column = [self columnWithTable:sender];
 	int row = [sender selectedRow];
     
-    if (row < 0 || row == NSNotFound)
+    if ((row < 0 || row == NSNotFound))
     {
-        // if we were a folder then we need to remove the column to the right
         int rowSelectedBeforeThisEvent = [[myColumnSelectedCells objectForKey:[NSNumber numberWithInt:column]] intValue];
         id lastSelected = [myDataSource tableBrowser:self child:rowSelectedBeforeThisEvent ofItem:[myDataSource tableBrowser:self itemForPath:[self pathToColumn:column]]];
-        if ([myDataSource tableBrowser:self isItemExpandable:lastSelected])
-        {
-            int i;
-            for (i = column + 1; i < [myColumns count]; i++)
-            {
-                NSTableView *table = [myColumns objectAtIndex:i];
-                NSScrollView *scroller = [table enclosingScrollView];
-                [table setDataSource:nil];
-                [scroller removeFromSuperview];
-            }
-            NSRange r = NSMakeRange(column + 1, i - column - 1);
-            [myColumns removeObjectsInRange:r];
-        }
-        if (myLeafView)
-        {
-            [[myLeafView enclosingScrollView] removeFromSuperview];
-            myLeafView = nil;
-        }
         
-        if (flag)
+        if ([myColumns count] - 1 != column)
         {
-            if (myTarget && myAction)
+            // if we were a folder then we need to remove the column to the right
+            if ([myDataSource tableBrowser:self isItemExpandable:lastSelected])
             {
-                [myTarget performSelector:myAction withObject:self];
+                int i;
+                for (i = column + 1; i < [myColumns count]; i++)
+                {
+                    NSTableView *table = [myColumns objectAtIndex:i];
+                    NSScrollView *scroller = [table enclosingScrollView];
+                    [table setDataSource:nil];
+                    [scroller setDocumentView:nil];
+                }
+                NSRange r = NSMakeRange(column + 1, i - column - 1);
+                [myColumns removeObjectsInRange:r];
+            }
+            [self removeLeafView];
+            
+            if (flag)
+            {
+                if (myTarget && myAction)
+                {
+                    [myTarget performSelector:myAction withObject:self];
+                }
             }
         }
-        
+        else
+        {
+            // we are the last table so it is a leaf that was selected
+            [self removeLeafView];
+        }
         return;
     }
 	
@@ -1066,6 +1147,8 @@ static Class sCellClass = nil;
 	 - multiple selection is maintained to the last column
 	 */
 	id currentContainerItem = nil;
+    id lastSelectedItem = [myDataSource tableBrowser:self itemForPath:lastSelectedPath];
+    
 	if (lastSelectedItem)
 	{
 		currentContainerItem = [self parentOfItem:lastSelectedItem];
@@ -1076,8 +1159,7 @@ static Class sCellClass = nil;
 	}
 	
 	// remove the leaf view if it is visible
-	[[myLeafView enclosingScrollView] removeFromSuperview];
-	myLeafView = nil;
+	[self removeLeafView];
 	
 	// remove columns greater than the currently selected one
 	unsigned i;
@@ -1088,11 +1170,24 @@ static Class sCellClass = nil;
 			NSTableView *table = [myColumns objectAtIndex:i];
 			NSScrollView *scroller = [table enclosingScrollView];
 			[table setDataSource:nil];
-			[scroller removeFromSuperview];
+			[scroller setDocumentView:nil];
 		}
 		NSRange r = NSMakeRange(column + 1, i - column - 1);
 		[myColumns removeObjectsInRange:r];
 	}
+    
+    // leave 2 empty scrollers 
+    if ([myScrollers count] > [myColumns count] + 2)
+    {
+        unsigned i = [myColumns count] + 2;
+        
+        for (; i < [myScrollers count]; i++)
+        {
+            [[myScrollers objectAtIndex:i] removeFromSuperviewWithoutNeedingDisplay];
+        }
+        i = [myColumns count] + 2;
+        [myScrollers removeObjectsInRange:NSMakeRange(i, [myScrollers count] - i)];
+    }
     
     [myColumnSelectedCells setObject:[NSNumber numberWithInt:row] forKey:[NSNumber numberWithInt:column]];
 	
@@ -1103,13 +1198,12 @@ static Class sCellClass = nil;
 		
 		// since we have gone into a new dir, any selections, even in a multi selection are now invalid
 		[mySelection removeAllObjects];
-		[mySelection addObject:item];
+		[mySelection addObject:[[myCurrentPath copy] autorelease]];
 		
-		// create a new column
-		NSRect lastColumnFrame = [self nextColumnBounds];
-		
-		id newColumn = [self createColumnWithRect:lastColumnFrame];
-		[self addSubview:newColumn];
+		// create a new column		
+		id newColumn = [self createColumn:[myColumns count]];
+		NSRect lastColumnFrame = [newColumn frame];
+        [self addSubview:newColumn];
 		[self updateScrollers];
 		
         if (showColumn)
@@ -1122,7 +1216,7 @@ static Class sCellClass = nil;
 		// add to the current selection
         if (item)
         {
-            [mySelection addObject:item];
+            [mySelection addObject:[myDataSource tableBrowser:self pathForItem:item]];
             [self leafInspectItem:item scrollToVisible:showColumn];
         }
 	}
