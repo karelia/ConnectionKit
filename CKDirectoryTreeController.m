@@ -50,6 +50,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)changeRelativeRootToPath:(NSString *)path;
 - (void)setupInspectorView:(CKDirectoryNode *)node;
 - (BOOL)isFiltering;
+- (void)updatePopUpToPath:(NSString *)path;
 @end
 
 @interface CKTableBasedBrowser (Private)
@@ -389,15 +390,25 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			[myDelegate directoryTree:self needsContentsForPath:dir];
 		}
 	}
-	if (!dir)
+	if (dir)
 	{
-        if (myDirectoriesLoading > 0)
+        CKDirectoryNode *node = [CKDirectoryNode nodeForPath:dir withRoot:myRootNode];
+		if (!node)
+		{
+			[CKDirectoryNode addContents:[NSArray array] withPath:dir withRoot:myRootNode];
+		}
+		[self updatePopUpToPath:dir];
+	}
+	else
+	{
+		if (myDirectoriesLoading > 0)
         {
             myDirectoriesLoading = 0;
             [myDelegate directoryTreeFinishedLoadingContents:self];
         }
 		[myRootNode autorelease];
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
+		[self updatePopUpToPath:@"/"];
 		[oBrowser setPath:nil];
 		[oOutlineView reloadData];
 		[self reloadViews];
@@ -468,7 +479,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
         CKDirectoryNode *node = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
         [node setContents:[NSArray array]];
     }
-    [self changeRelativeRootToPath:myRelativeRootPath];
     [self reloadViews];
 }
 
@@ -622,12 +632,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 }
 
-- (void)changeRelativeRootToPath:(NSString *)path
+- (void)updatePopUpToPath:(NSString *)path
 {
-	[myRelativeRootPath autorelease];
-	myRelativeRootPath = [path copy];
-	
-	CKDirectoryNode *walk = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
+	CKDirectoryNode *selected = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
+	CKDirectoryNode *walk = selected;
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir structure"];
 	NSMenuItem *item;
 	
@@ -642,10 +650,24 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[item release];
 		walk = [walk parent];
 	}
+	
+	if (![selected isDirectory] && [menu numberOfItems] > 0)
+	{
+		// don't put a leaf node in the popup, only directories
+		[menu removeItemAtIndex:0];
+	}
 	[oPopup setMenu:menu];
 	[menu release];
 	
-	[oPopup selectItemWithRepresentedObject:[CKDirectoryNode nodeForPath:path withRoot:myRootNode]];
+	[oPopup selectItemWithRepresentedObject:selected];
+}
+
+- (void)changeRelativeRootToPath:(NSString *)path
+{
+	[myRelativeRootPath autorelease];
+	myRelativeRootPath = [path copy];
+	
+	[self updatePopUpToPath:path];
 }
 
 - (BOOL)isFiltering
@@ -712,10 +734,21 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
 	
-	[self changeRelativeRootToPath:path];
-	[oOutlineView reloadData];
-    [oBrowser setPath:nil];
-    [oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
+	NSLog(@"%s %@ %@", _cmd, myRelativeRootPath, path);
+	
+	if ([path hasPrefix:myRelativeRootPath])
+	{
+		NSString *selectablePath = [path substringFromIndex:[myRelativeRootPath length]];
+		[oBrowser setPath:selectablePath];
+	}
+	else
+	{
+		[self changeRelativeRootToPath:path];
+		[oOutlineView reloadData];
+		[oBrowser setPath:nil];
+		[oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
+	}
+	
 	// this pushes a history object and fetches the contents
 	[self navigateToPath:path];
 }
@@ -724,12 +757,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	NSString *fullPath = [[oOutlineView itemAtRow:[oOutlineView selectedRow]] path];
 	[self navigateToPath:fullPath];
+	[self updatePopUpToPath:fullPath];
 }
 
 - (IBAction)browserSelected:(id)sender
 {
 	NSString *fullPath = [myRelativeRootPath stringByAppendingPathComponent:[oBrowser path]];
 	[self navigateToPath:fullPath];
+	[self updatePopUpToPath:fullPath];
 }
 
 - (IBAction)filterChanged:(id)sender
