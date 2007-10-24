@@ -1095,7 +1095,10 @@ static Class sCellClass = nil;
     {
         int rowSelectedBeforeThisEvent = [[myColumnSelectedCells objectForKey:[NSNumber numberWithInt:column]] intValue];
         id lastSelected = [myDataSource tableBrowser:self child:rowSelectedBeforeThisEvent ofItem:[myDataSource tableBrowser:self itemForPath:[self pathToColumn:column]]];
-        
+		id parentLastSelected = [self parentOfItem:lastSelected];
+		NSString *parentPath = [myDataSource tableBrowser:self pathForItem:parentLastSelected];
+		[mySelection addObject:parentPath];
+		
         if ([myColumns count] - 1 != column)
         {
             // if we were a folder then we need to remove the column to the right
