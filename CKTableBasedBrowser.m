@@ -423,7 +423,19 @@ static Class sCellClass = nil;
 
 - (NSArray *)selectedItems
 {
-	return [NSArray arrayWithArray:mySelection];
+	NSMutableArray *items = [NSMutableArray array];
+	NSEnumerator *e = [mySelection objectEnumerator];
+	NSString *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		id item = [myDataSource tableBrowser:self itemForPath:cur];
+		if (item)
+		{
+			[items addObject:item];
+		}
+	}
+	return items;
 }
 
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag
