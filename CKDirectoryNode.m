@@ -232,12 +232,12 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
     NSEnumerator *e = [files objectEnumerator];
     CKDirectoryNode *cur;
     
-    NSString *name = [entry propertyForKey:cxFilenameKey];
+    NSString *name = [entry name];
     NSString *type = [entry propertyForKey:NSFileType];
     
     while ((cur = [e nextObject]))
     {        
-        if ([[cur propertyForKey:cxFilenameKey] isEqualToString:name] &&
+        if ([[cur name] isEqualToString:name] &&
             [[cur propertyForKey:NSFileType] isEqualToString:type])
         {
             return YES;
@@ -292,7 +292,7 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
             [files addObject:cur];
         }
     }
-    //[files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+    [files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
     [myContents removeObjectsInArray:files];
 }
 
