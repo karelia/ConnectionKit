@@ -733,9 +733,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
-	
-	NSLog(@"%s %@ %@", _cmd, myRelativeRootPath, path);
-	
+		
 	if ([path hasPrefix:myRelativeRootPath])
 	{
 		NSString *selectablePath = [path substringFromIndex:[myRelativeRootPath length]];
