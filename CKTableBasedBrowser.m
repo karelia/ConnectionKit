@@ -450,6 +450,12 @@ static Class sCellClass = nil;
         [self removeAllColumns];
         [mySelection removeAllObjects];
 		[myCurrentPath autorelease]; myCurrentPath = [[self pathSeparator] copy];
+		
+		// remove all scrollers except for the myMinVisibleColumns ones
+		if ([myScrollers count] > myMinVisibleColumns)
+		{
+			[myScrollers removeObjectsInRange:NSMakeRange(myMinVisibleColumns, [myScrollers count] - myMinVisibleColumns)];
+		}
         
         // add the root column back
         NSScrollView *column = [self createColumn:0];
