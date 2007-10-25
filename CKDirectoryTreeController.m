@@ -738,6 +738,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		NSString *selectablePath = [path substringFromIndex:[myRelativeRootPath length]];
 		[oBrowser setPath:selectablePath];
+		// scroll it to the right
+		[oBrowser scrollRectToVisible:NSMakeRect(NSMaxX([oBrowser bounds]) - 1, 0, 1, 1)];
 	}
 	else
 	{
