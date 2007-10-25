@@ -630,10 +630,6 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	{
 		[((CKHostCategory *)item) setName:object];
 	}
-	else if ([item isKindOfClass:[CKHost class]])
-	{
-		[((CKHost *)item) setAnnotation:object];
-	}
 }
 
 - (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path
