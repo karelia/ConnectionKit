@@ -705,6 +705,13 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		{
 			return NSDragOperationNone;
 		}
+		if ([draggedItem isKindOfClass:[CKHostCategory class]])
+		{
+			if ([item isChildOf:draggedItem])
+			{
+				return NSDragOperationNone;
+			}
+		}
 	}
 	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
 	if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])

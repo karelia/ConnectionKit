@@ -392,6 +392,21 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
     return NO;
 }
 
+- (BOOL)isChildOf:(CKDirectoryNode *)node
+{
+    CKDirectoryNode *parent = [self parent];
+    
+    while (parent)
+    {
+        if (parent == node)
+        {
+            return YES;
+        }
+        parent = [parent parent];
+    }
+    return NO;
+}
+
 - (void)setParent:(CKDirectoryNode *)parent
 {
 	myParent = parent;

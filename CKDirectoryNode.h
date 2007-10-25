@@ -68,6 +68,7 @@
 
 - (void)setParent:(CKDirectoryNode *)parent;
 - (CKDirectoryNode *)parent;
+- (BOOL)isChildOf:(CKDirectoryNode *)node;
 - (CKDirectoryNode *)root;
 - (NSString *)path;
 

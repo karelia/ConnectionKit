@@ -236,6 +236,21 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	return myParentCategory;
 }
 
+- (BOOL)isChildOf:(CKHostCategory *)cat
+{
+    CKHostCategory *parent = [self category];
+    
+    while (parent)
+    {
+        if (parent == cat)
+        {
+            return YES;
+        }
+        parent = [parent category];
+    }
+    return NO;
+}
+
 static NSImage *sFolderImage = nil;
 - (NSImage *)icon
 {
