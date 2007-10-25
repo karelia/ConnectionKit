@@ -746,6 +746,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oBrowser setPath:nil];
 		[oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
 	}
+	[self updatePopUpToPath:path];
 	
 	// this pushes a history object and fetches the contents
 	[self navigateToPath:path];
