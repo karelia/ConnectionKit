@@ -34,6 +34,8 @@
 #import "NSString+Connection.h"
 #import "NSNumber+Connection.h"
 
+NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemoveNodesNotification";
+
 @implementation CKDirectoryNode
 
 - (id)initWithName:(NSString *)name
@@ -292,8 +294,13 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
             [files addObject:cur];
         }
     }
-    [files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
-    [myContents removeObjectsInArray:files];
+	if ([files count] > 0)
+	{
+		// need to post the notification so the path is still correct
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKDirectoryNodeDidRemoveNodesNotification object:files];
+		[files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+		[myContents removeObjectsInArray:files];
+	}
 }
 
 - (NSArray *)contents
