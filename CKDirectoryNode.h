@@ -81,3 +81,5 @@
 - (NSData *)cachedContents;
 
 @end
+
+extern NSString *CKDirectoryNodeDidRemoveNodesNotification;

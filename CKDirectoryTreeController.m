@@ -55,6 +55,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 @interface CKTableBasedBrowser (Private)
 - (void)setDefaultColumnWidth:(float)width;
+- (void)refreshColumn:(unsigned)col;
 @end
 
 @interface NSOutlineView (CKScrollToTop)
@@ -87,11 +88,18 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myFlags.canCreateFolders = NO;
 	myCachedContentsThresholdSize = 65536; // 64k threshold
 	
+	[[NSNotificationCenter defaultCenter] addObserver:self
+											 selector:@selector(nodesRemovedInMerge:)
+												 name:CKDirectoryNodeDidRemoveNodesNotification
+											   object:nil];
+	
 	return self;
 }
 
 - (void)dealloc
 {
+	[[NSNotificationCenter defaultCenter] removeObserver:self];
+	
 	[myRootNode release];
 	[myRootDirectory release];
 	[mySelectedDirectory release];
@@ -480,6 +488,40 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
         [node setContents:[NSArray array]];
     }
     [self reloadViews];
+}
+
+- (void)nodesRemovedInMerge:(NSNotification *)n
+{
+	NSArray *nodes = [n object];
+	
+	NSEnumerator *e = [nodes objectEnumerator];
+	CKDirectoryNode *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		// go through and see if we were visible
+		NSString *path = [cur path];
+		
+		if ([path hasPrefix:myRelativeRootPath])
+		{
+			unsigned col = [oBrowser columnToItem:[cur parent]];
+			col++;
+
+			if (col != NSNotFound)
+			{
+				[self performSelector:@selector(delayedColumnRefresh:) 
+						   withObject:[NSNumber numberWithUnsignedInt:col] 
+						   afterDelay:0 
+							  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+				[self updatePopUpToPath:[[cur parent] path]];
+			}
+		}
+	}
+}
+
+- (void)delayedColumnRefresh:(NSNumber *)col
+{
+	[oBrowser refreshColumn:[col unsignedIntValue]];
 }
 
 - (void)setContents:(NSData *)contents forFile:(NSString *)file

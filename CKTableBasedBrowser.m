@@ -891,6 +891,14 @@ static Class sCellClass = nil;
 	[self setFrameSize:bounds.size];
 }
 
+- (void)refreshColumn:(unsigned)col
+{
+	if (col < [myColumns count])
+	{
+		[[myColumns objectAtIndex:col] reloadData];
+	}
+}
+
 - (void)reloadData
 {
 	// load the first column and then subsequent columns based on the myCurrentPath
