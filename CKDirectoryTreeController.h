@@ -89,7 +89,8 @@ typedef enum {
 		unsigned filePackages: 1;
 		unsigned showsFilePackageExtensions: 1;
 		unsigned canCreateFolders: 1;
-		unsigned unused: 22;
+		unsigned isReloading: 1;
+		unsigned unused: 21;
 	} myFlags;
 }
 

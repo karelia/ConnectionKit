@@ -262,6 +262,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)reloadViews
 {
 	// reload the data
+	myFlags.isReloading = YES;
 	id selectedItem = [oOutlineView itemAtRow:[oOutlineView selectedRow]];
 	[oOutlineView reloadData];
 	[oOutlineView scrollItemToTop:selectedItem];
@@ -274,6 +275,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		if (!browserPath) browserPath = @"/";
 		[oBrowser setPath:browserPath];
 	}
+	myFlags.isReloading = NO;
 }
 
 - (void)setContentIsRemote:(BOOL)flag
@@ -610,6 +612,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	// stop being re-entrant from the outlineview's shouldExpandItem: delegate method
 	if(myFlags.isNavigatingToPath) return;
+	if (myFlags.isReloading) return;
 	myFlags.isNavigatingToPath = YES;
 	
 	//NSLog(@"%@%@", NSStringFromSelector(_cmd), path);
