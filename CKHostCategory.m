@@ -61,6 +61,65 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[super dealloc];
 }
 
+- (id)initWithDictionary:(NSDictionary *)dictionary
+{
+	if ((self = [super init]))
+	{
+		myName = [[dictionary objectForKey:@"name"] copy];
+		myIsEditable = YES;
+		myChildCategories = [[NSMutableArray alloc] init];
+		
+		NSArray *cats = [dictionary objectForKey:@"categories"];
+		NSEnumerator *e = [cats objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([[cur objectForKey:@"class"] isEqualToString:@"category"])
+			{
+				CKHostCategory *cat = [[CKHostCategory alloc] initWithDictionary:cur];
+				[myChildCategories addObject:cat];
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(childChanged:)
+															 name:CKHostCategoryChanged
+														   object:cat];
+				[cat release];
+			}
+			else
+			{
+				CKHost *host = [[CKHost alloc] initWithDictionary:cur];
+				[myChildCategories addObject:host];
+				[[NSNotificationCenter defaultCenter] addObserver:self
+														 selector:@selector(hostChanged:)
+															 name:CKHostChanged
+														   object:host];
+				[host release];
+			}
+		}
+	}
+	return self;
+}
+
+- (NSDictionary *)plistRepresentation
+{
+	NSMutableDictionary *plist = [NSMutableDictionary dictionary];
+	
+	[plist setObject:@"category" forKey:@"class"];
+	[plist setObject:[NSNumber numberWithInt:[CKHostCategory version]] forKey:@"version"];
+	[plist setObject:myName forKey:@"name"];
+	NSMutableArray *cats = [NSMutableArray array];
+	NSEnumerator *e = [myChildCategories objectEnumerator];
+	id cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		[cats addObject:[cur plistRepresentation]];
+	}
+	[plist setObject:cats forKey:@"categories"];
+	
+	return plist;
+}
+
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if (self = [super init])

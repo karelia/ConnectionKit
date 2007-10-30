@@ -46,6 +46,8 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 - (void)otherProcessChanged:(NSNotification *)notification;
 - (NSString *)databaseFile;
 - (void)changed:(NSNotification *)notification;
+- (NSArray *)hostsFromDatabaseFile;
+
 @end
 
 @implementation ConnectionRegistry
@@ -105,20 +107,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 						 name:CKRegistryNotification
 		
 					   object:nil];
-		NSArray *hosts;
-		@try
-		{
-			hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
-		}
-		@catch (NSException *exception) 
-		{
-			//Registry was corrupted. 
-			//We will overwrite the corrupt registry with a fresh one. 
-			//Should we inform the user? In any case, log it.
-			NSLog(@"Unable to unarchive registry at path \"%@\". New Registry will be created to overwrite damaged one.", [self databaseFile]);
-			NSLog(@"Caught %@: %@", [exception name], [exception  reason]);
-			return self;
-		}
+		NSArray *hosts = [self hostsFromDatabaseFile];
 		
 		[myConnections addObjectsFromArray:hosts];
 		NSEnumerator *e = [hosts objectEnumerator];
@@ -200,6 +189,56 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	return myDatabaseFile;
 }
 
+- (NSArray *)hostsFromDatabaseFile
+{
+	NSArray *hosts = nil;
+	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
+	{
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[self databaseFile]])
+		{
+			hosts = [NSArray arrayWithContentsOfFile:[self databaseFile]];
+			
+			// convert to classes
+			NSMutableArray *cats = [NSMutableArray array];
+			NSEnumerator *e = [hosts objectEnumerator];
+			id cur;
+			
+			while ((cur = [e nextObject]))
+			{
+				if ([[cur objectForKey:@"class"] isEqualToString:@"category"])
+				{
+					CKHostCategory *cat = [[CKHostCategory alloc] initWithDictionary:cur];
+					[cats addObject:cat];
+					[cat release];
+				}
+				else
+				{
+					CKHost *host = [[CKHost alloc] initWithDictionary:cur];
+					[cats addObject:host];
+					[host release];
+				}
+			}
+			hosts = [NSArray arrayWithArray:cats];
+		}
+	}
+	else
+	{
+		@try
+		{
+			hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		}
+		@catch (NSException *exception) 
+		{
+			//Registry was corrupted. 
+			//We will overwrite the corrupt registry with a fresh one. 
+			//Should we inform the user? In any case, log it.
+			NSLog(@"Unable to unarchive registry at path \"%@\". New Registry will be created to overwrite damaged one.", [self databaseFile]);
+			NSLog(@"Caught %@: %@", [exception name], [exception  reason]);
+		}
+	}
+	return hosts;
+}
+
 - (void)otherProcessChanged:(NSNotification *)notification
 {
 	if ([[NSProcessInfo processInfo] processIdentifier] != [[notification object] intValue])
@@ -207,7 +246,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 		[self willChangeValueForKey:@"connections"];
 		unsigned idx = [myConnections indexOfObject:myBonjour];
 		[myConnections removeAllObjects];
-		NSArray *hosts = [NSKeyedUnarchiver unarchiveObjectWithFile:[self databaseFile]];
+		NSArray *hosts = [self hostsFromDatabaseFile];
 		[myConnections addObjectsFromArray:hosts];
 		NSEnumerator *e = [hosts objectEnumerator];
 		id cur;
@@ -250,7 +289,28 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
 	unsigned idx = [myConnections indexOfObject:myBonjour];
 	[myConnections removeObject:myBonjour];
-	[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
+	// write to the database
+	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
+	{
+		NSMutableArray *plist = [NSMutableArray array];
+		NSEnumerator *e = [myConnections objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			[plist addObject:[cur plistRepresentation]];
+		}
+		NSString *err = nil;
+		[[NSPropertyListSerialization dataFromPropertyList:plist format:NSPropertyListXMLFormat_v1_0 errorDescription:&err] writeToFile:[self databaseFile] atomically:YES];
+		if (err)
+		{
+			NSLog(@"%@", err);
+		}
+	}
+	else
+	{
+		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
+	}
 	[myConnections insertObject:myBonjour atIndex:idx];
 	[fm removeFileAtPath:lockPath handler:nil];
 	

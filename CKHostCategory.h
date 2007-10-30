@@ -41,6 +41,10 @@
 }
 
 - (id)initWithName:(NSString *)name;
+
+- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (NSDictionary *)plistRepresentation;
+
 - (void)setName:(NSString *)name;
 - (NSString *)name;
 
