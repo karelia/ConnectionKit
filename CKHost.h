@@ -53,6 +53,9 @@
 
 - (id)init;
 
+- (id)initWithDictionary:(NSDictionary *)dictionary;
+- (NSDictionary *)plistRepresentation;
+
 - (void)setHost:(NSString *)host;
 - (void)setPort:(NSString *)port;
 - (void)setUsername:(NSString *)username;

@@ -121,6 +121,89 @@ static NSImage *sHostIcon = nil;
 	return NO;
 }
 
+- (id)initWithDictionary:(NSDictionary *)dictionary
+{
+	if ((self = [super init]))
+	{
+		int version = [[dictionary objectForKey:@"version"] intValue];
+#pragma unused (version)
+		myUUID = [[dictionary objectForKey:@"uuid"] copy];
+		if (!myUUID)
+		{
+			myUUID = [[NSString uuid] retain];
+		}
+		myHost = [[dictionary objectForKey:@"host"] copy];
+		myPort = [[dictionary objectForKey:@"port"] copy];
+		myUsername = [[dictionary objectForKey:@"username"] copy];
+		myConnectionType = [[dictionary objectForKey:@"type"] copy];
+		myDescription = [[dictionary objectForKey:@"description"] copy];
+		myInitialPath = [[dictionary objectForKey:@"initialPath"] copy];
+		if (!myInitialPath)
+		{
+			myInitialPath = @"";
+		}
+		NSData *data = [dictionary objectForKey:@"icon"];
+		if (data)
+		{
+			myIcon = [[NSImage alloc] initWithData:data];
+		}
+		else
+		{
+			myIcon = [sHostIcon retain];
+		}
+		NSDictionary *props = [dictionary objectForKey:@"properties"];
+		myProperties = [[NSMutableDictionary alloc] init];
+		if (props)
+		{
+			[myProperties addEntriesFromDictionary:props];
+		}
+	}
+	return self;
+}
+
+- (NSDictionary *)plistRepresentation
+{
+	NSMutableDictionary *plist = [NSMutableDictionary dictionary];
+	
+	[plist setObject:@"host" forKey:@"class"];
+	[plist setObject:[NSNumber numberWithInt:[CKHost version]] forKey:@"version"];
+	[plist setObject:myUUID forKey:@"uuid"];
+	if (myHost)
+	{
+		[plist setObject:myHost forKey:@"host"];
+	}
+	if (myPort)
+	{
+		[plist setObject:myPort forKey:@"port"];
+	}
+	if (myUsername)
+	{
+		[plist setObject:myUsername forKey:@"username"];
+	}
+	if (myConnectionType)
+	{
+		[plist setObject:myConnectionType forKey:@"type"];
+	}
+	if (myDescription)
+	{
+		[plist setObject:myDescription forKey:@"description"];
+	}
+	if (myInitialPath)
+	{
+		[plist setObject:myInitialPath forKey:@"initialPath"];
+	}
+	if (myIcon)
+	{
+		[plist setObject:[myIcon TIFFRepresentation] forKey:@"icon"];
+	}
+	if (myProperties)
+	{
+		[plist setObject:myProperties forKey:@"properties"];
+	}
+	
+	return plist;
+}
+
 - (id)initWithCoder:(NSCoder *)coder
 {
 	if ((self = [super init]))
