@@ -1116,7 +1116,7 @@ static Class sCellClass = nil;
 	
 	int column = [self columnWithTable:sender];
 	int row = [sender selectedRow];
-    
+		
     if ((row < 0 || row == NSNotFound))
     {
         int rowSelectedBeforeThisEvent = [[myColumnSelectedCells objectForKey:[NSNumber numberWithInt:column]] intValue];
@@ -1249,7 +1249,7 @@ static Class sCellClass = nil;
             [self leafInspectItem:item scrollToVisible:showColumn];
         }
 	}
-    	
+
 	if (flag)
 	{
 		if (myTarget && myAction)
@@ -1259,9 +1259,16 @@ static Class sCellClass = nil;
 	}
 }
 
-- (void)tableSelectedCell:(id)sender
+- (void)delayedTableSelectedCell:(id)sender
 {
 	[self tableSelectedCell:sender notifyTarget:YES scrollToVisible:YES];
+}
+
+- (void)tableSelectedCell:(id)sender
+{
+	[self delayedTableSelectedCell:sender];
+//	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(delayedTableSelectedCell:) object:nil];
+//	[self performSelector:@selector(delayedTableSelectedCell:) withObject:sender afterDelay:0.1 inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 }
 
 #pragma mark -
@@ -1406,12 +1413,12 @@ static Class sCellClass = nil;
 
 - (void)resizer:(CKResizingButton *)resizer ofScrollView:(CKTableBrowserScrollView *)scrollView  movedBy:(float)xDelta affectsAllColumns:(BOOL)flag;
 {
-	unsigned column = [self columnWithTable:[scrollView documentView]];
+	unsigned column = [myScrollers indexOfObject:scrollView];
 	NSScrollView *scroller = nil;
 	
 	if (column != NSNotFound)
 	{
-		scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+		scroller = [myScrollers objectAtIndex:column];
 		[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
 	}
 	else
@@ -1479,9 +1486,9 @@ static Class sCellClass = nil;
 	// adjust views to the right
 	if (column != NSNotFound)
 	{
-		for ( column++; column < [myColumns count]; column++)
+		for ( column++; column < [myScrollers count]; column++)
 		{
-			NSScrollView *scroller = [[myColumns objectAtIndex:column] enclosingScrollView];
+			NSScrollView *scroller = [myScrollers objectAtIndex:column];
 			frame = [scroller frame];
 			frame.origin.x = NSMaxX(lastFrame) + 1;
 			if (flag)
@@ -1682,7 +1689,7 @@ static NSImage *sResizeImage = nil;
 @implementation CKBrowserTableView
 
 #define KEYPRESS_DELAY 0.25
-#define ARROW_NAVIGATION_DELAY 0.1
+#define ARROW_NAVIGATION_DELAY 0.25
 
 - (void)dealloc
 {
@@ -1737,6 +1744,7 @@ static NSImage *sResizeImage = nil;
 			[self selectRow:[self selectedRow] - 1 byExtendingSelection:NO];
 			[self scrollRowToVisible:[self selectedRow] - 1];
 			
+			//[self delayedSelectionChange];
 			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 		}
 	}
@@ -1749,6 +1757,7 @@ static NSImage *sResizeImage = nil;
 			[self selectRow:[self selectedRow] + 1 byExtendingSelection:NO];
 			[self scrollRowToVisible:[self selectedRow] + 1];
 			
+			//[self delayedSelectionChange];
 			[self performSelector:@selector(delayedSelectionChange) withObject:nil afterDelay:ARROW_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 		}
 	}
