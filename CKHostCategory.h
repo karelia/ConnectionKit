@@ -60,6 +60,7 @@
 
 - (void)setCategory:(CKHostCategory *)parent;
 - (CKHostCategory *)category;
+- (BOOL)isChildOf:(CKHostCategory *)cat;
 
 - (NSImage *)icon;
 

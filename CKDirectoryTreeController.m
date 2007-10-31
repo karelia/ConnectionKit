@@ -56,12 +56,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 @interface CKTableBasedBrowser (Private)
 - (void)setDefaultColumnWidth:(float)width;
 - (void)refreshColumn:(unsigned)col;
+- (void)setPath:(NSString *)path checkPath:(BOOL)flag;
 @end
 
 @interface NSOutlineView (CKScrollToTop)
-
 - (void)scrollItemToTop:(id)item;
+@end
 
+@interface CKDirectoryNode (Private)
+- (void)setName:(NSString *)name;
 @end
 
 @implementation CKDirectoryTreeController
@@ -796,6 +799,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		if (row != NSNotFound)
 		{
 			[oOutlineView selectRow:row byExtendingSelection:NO];
+			[oOutlineView scrollRowToVisible:row];
 		}
 	}
 	else
@@ -976,7 +980,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	NSString *ident = [tableColumn identifier];
 	
-    [item setProperty:[NSNumber numberWithBool:[self outlineView:outlineView isItemExpandable:item]] forKey:@"isExpandable"];
+    [(CKDirectoryNode *)item setProperty:[NSNumber numberWithBool:[self outlineView:outlineView isItemExpandable:item]] forKey:@"isExpandable"];
     
 	if ([ident isEqualToString:@"name"])
 	{
@@ -1687,6 +1691,9 @@ static NSImage *sSelectedArrow = nil;
 
 @end
 
+@interface NSObject(CKDirectoryOutlineViewDeleteableDataSource)
+- (void)tableView:(NSTableView *)tableView deleteRows:(NSArray *)rows;
+@end
 
 @implementation CKDirectoryOutlineView
 
