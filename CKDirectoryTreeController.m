@@ -791,10 +791,17 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oBrowser setPath:selectablePath];
 		// scroll it to the right
 		[oBrowser scrollRectToVisible:NSMakeRect(NSMaxX([oBrowser bounds]) - 1, 0, 1, 1)];
+		[oOutlineView deselectAll:self];
+		int row = [oOutlineView rowForItem:node];
+		if (row != NSNotFound)
+		{
+			[oOutlineView selectRow:row byExtendingSelection:NO];
+		}
 	}
 	else
 	{
 		[self changeRelativeRootToPath:path];
+		[oOutlineView deselectAll:self];
 		[oOutlineView reloadData];
 		[oBrowser setPath:nil];
 		[oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
