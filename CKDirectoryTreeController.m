@@ -416,9 +416,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
             myDirectoriesLoading = 0;
             [myDelegate directoryTreeFinishedLoadingContents:self];
         }
+		// reset everything
 		[myRootNode autorelease];
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
 		[self updatePopUpToPath:@"/"];
+		[myHistory removeAllObjects];
+		myHistoryIndex = 0;
+		[oHistory setEnabled:NO forSegment:CKBackButton];
+		[oHistory setEnabled:NO forSegment:CKForwardButton];
+		[oSearch setStringValue:@""];
 		[oBrowser setPath:nil];
 		[oOutlineView reloadData];
 		[self reloadViews];
