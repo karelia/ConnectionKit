@@ -82,6 +82,7 @@
 - (id)createColumn:(unsigned)colIndex;
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag;
 - (void)removeLeafView;
+- (void)tableSelectedCell:(id)sender;
 
 @end
 
@@ -896,6 +897,7 @@ static Class sCellClass = nil;
 	if (col < [myColumns count])
 	{
 		[[myColumns objectAtIndex:col] reloadData];
+		[self tableSelectedCell:[myColumns objectAtIndex:col]];
 	}
 }
 

@@ -77,6 +77,20 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	return copy;
 }
 
+- (BOOL)isEqual:(id)obj
+{
+	if ([obj isKindOfClass:[CKDirectoryNode class]])
+	{
+		return [[self path] isEqualToString:[obj path]];
+	}
+	return NO;
+}
+
+- (unsigned)hash
+{
+	return [[self path] hash];
+}
+
 + (CKDirectoryNode *)nodeWithName:(NSString *)name
 {
 	return [[[CKDirectoryNode alloc] initWithName:name] autorelease];
@@ -265,6 +279,7 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	}
 	
 	//remove the files from the contents
+	NSMutableSet *filesDeleted = [NSMutableSet setWithArray:files];
 	[myContents removeObjectsInArray:files];
 	[originals removeObjectsInArray:files];
     
@@ -282,6 +297,14 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	[myContents addObjectsFromArray:files];
 	[files makeObjectsPerformSelector:@selector(setParent:) withObject:self];
 	[myContents sortUsingFunction:CKDirectoryContentsSort context:nil];
+	[filesDeleted minusSet:[NSSet setWithArray:files]];
+	
+	if ([filesDeleted count] > 0)
+	{
+		// need to post the notification so the path is still correct
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKDirectoryNodeDidRemoveNodesNotification object:[filesDeleted allObjects]];
+		[files makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
+	}
     
     // remove any folders that have been removed
     files = [NSMutableArray array];
