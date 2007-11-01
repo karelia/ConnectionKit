@@ -1493,25 +1493,12 @@ static Class sCellClass = nil;
 			frame.origin.x = NSMaxX(lastFrame) + 1;
 			if (flag)
 			{
-				frame.size.width += xDelta;
-				// apply constraints
-				if (NSWidth(frame) < myMinColumnWidth)
-				{
-					frame.size.width = myMinColumnWidth;
-				}
-				if (myMaxColumnWidth > 0 && NSWidth(frame) > myMaxColumnWidth)
-				{
-					frame.size.width = myMaxColumnWidth;
-				}
+				frame.size.width = myDefaultColumnWidth;
 			}
 			
 			[scroller setFrame:frame];
 			lastFrame = frame;
 		}
-		
-		frame = [[myLeafView enclosingScrollView] frame];
-		frame.origin.x = NSMaxX(lastFrame) + 1;
-		[[myLeafView enclosingScrollView] setFrame:frame];
 	}
 	
 	[self setNeedsDisplay:YES];
