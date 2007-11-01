@@ -768,6 +768,11 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				return NSDragOperationNone;
 			}
 		}
+		// don't allow items to be dragged above bonjour
+		if ([[myConnections objectAtIndex:0] isKindOfClass:[CKBonjourCategory class]] && item == nil && proposedChildIndex == 0)
+		{
+			return NSDragOperationNone;
+		}
 	}
 	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
 	if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
@@ -878,7 +883,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 						}
 						else
 						{
-							[self insertHost:currentItem atIndex: cameFromCategory ? index : index-1];
+							[self insertHost:currentItem atIndex: index];
 						}
 					}
 					else
