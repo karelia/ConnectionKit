@@ -835,6 +835,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self updatePopUpToPath:fullPath];
 }
 
+- (CKDirectoryNode *)nodeToFilter
+{
+	return [[oPopup selectedItem] representedObject];
+}
+
 - (IBAction)filterChanged:(id)sender
 {
     //only show filtered results in the outline view
@@ -918,7 +923,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		if ([self isFiltering])
 		{
-			return [[[CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] count];
+			return [[[self nodeToFilter] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] count];
 		}
 		item = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 	}
@@ -944,7 +949,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		if ([self isFiltering])
 		{
-			return [[[CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:index];
+			return [[[self nodeToFilter] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:index];
 		}
 		item = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 	}
