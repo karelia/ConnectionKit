@@ -69,7 +69,7 @@ typedef enum {
 	NSString *mySelectedDirectory;
 	CKDirectoryNode *mySelectedNode; // not retained
 	NSMutableArray *myHistory;
-	unsigned myHistoryIndex;
+	int myHistoryIndex;
 	NSString *myFilter;
 	unsigned myDirectoriesLoading;
 	unsigned long long myCachedContentsThresholdSize;

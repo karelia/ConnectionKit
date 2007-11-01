@@ -398,6 +398,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		if (dir)
 		{
+			// fake the history selection
+			NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:dir, @"fp", dir, @"rp", nil];
+			[myHistory addObject:d];
+			myHistoryIndex = 0;
+			
 			[myDelegate directoryTreeStartedLoadingContents:self];
 			myDirectoriesLoading++;
 			[myDelegate directoryTree:self needsContentsForPath:dir];
@@ -424,7 +429,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
 		[self updatePopUpToPath:@"/"];
 		[myHistory removeAllObjects];
-		myHistoryIndex = 0;
+		myHistoryIndex = -1;
 		[oHistory setEnabled:NO forSegment:CKBackButton];
 		[oHistory setEnabled:NO forSegment:CKForwardButton];
 		[oSearch setStringValue:@""];
@@ -862,10 +867,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSDictionary *rec = [myHistory objectAtIndex:myHistoryIndex];
 	NSString *relPath = [rec objectForKey:@"rp"];
 	NSString *fullPath = [rec objectForKey:@"fp"];
-	//NSLog(@"%d %@\n%@", myHistoryIndex, rec, myHistory);
+
 	[self changeRelativeRootToPath:relPath];
 	
-	CKDirectoryNode *node = [CKDirectoryNode nodeForPath:[rec objectForKey:@"fp"] withRoot:myRootNode];
+	CKDirectoryNode *node = [CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode];
 	NSMutableArray *nodes = [NSMutableArray arrayWithObject:node];
 	CKDirectoryNode *parent = [node parent];
 	
@@ -885,17 +890,21 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oOutlineView expandItem:cur];
 	}
 	
+	[oOutlineView deselectAll:self];
+	[oOutlineView selectRow:[oOutlineView rowForItem:node] byExtendingSelection:NO];
 	[oOutlineView scrollItemToTop:node];
+	
     NSString *relativePath = [fullPath substringFromIndex:[relPath length]];
     if (![relativePath hasPrefix:@"/"])
     {
         relativePath = [@"/" stringByAppendingString:relativePath];
     }
 	[oBrowser setPath:relativePath checkPath:NO];
+	[self updatePopUpToPath:fullPath];
 	
 	// update the forward/back buttons
 	[oHistory setEnabled:(myHistoryIndex > 0) forSegment:CKBackButton];
-	[oHistory setEnabled:(myHistoryIndex < [myHistory count] - 1) forSegment:CKForwardButton];
+	[oHistory setEnabled:(myHistoryIndex < (int)[myHistory count] - 1) forSegment:CKForwardButton];
 }
 
 - (IBAction)outlineDoubleClicked:(id)sender
