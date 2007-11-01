@@ -532,7 +532,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)delayedColumnRefresh:(NSNumber *)col
 {
-	[oBrowser refreshColumn:[col unsignedIntValue]];
+	@try {
+		[oBrowser refreshColumn:[col unsignedIntValue]];
+	}
+	@catch (NSException *ex) {
+		
+	}
 }
 
 - (void)setContents:(NSData *)contents forFile:(NSString *)file
