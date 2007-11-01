@@ -581,7 +581,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (void)handleFilterableOutlineView:(NSOutlineView *)view
 {
-	myOutlineView = view;
+	myOutlineView = [view retain];
 	[myOutlineView setDataSource:self];
 }
 
@@ -813,32 +813,33 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			//Drag to import
 			NSString *configurationFilePath = [currentDropletPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
 			CKHost *dropletHost = [NSKeyedUnarchiver unarchiveObjectWithFile:configurationFilePath];
-			if (dropletHost)
+			if (!dropletHost)
 			{
-				//Dragged a Bookmark
-				if ([[item className] isEqualToString:@"CKHostCategory"])
+				continue;
+			}
+			//Dragged a Bookmark
+			if ([[item className] isEqualToString:@"CKHostCategory"])
+			{
+				//Into a Category
+				if (index == -1)
 				{
-					//Into a Category
-					if (index == -1)
-					{
-						[item addHost:dropletHost];
-					}
-					else
-					{
-						[item insertHost:dropletHost atIndex:index];
-					}
+					[item addHost:dropletHost];
 				}
 				else
 				{
-					//Into root
-					if (index == -1)
-					{
-						[self addHost:dropletHost];					
-					}
-					else
-					{
-						[self insertHost:dropletHost atIndex:index];
-					}
+					[item insertHost:dropletHost atIndex:index];
+				}
+			}
+			else
+			{
+				//Into root
+				if (index == -1)
+				{
+					[self addHost:dropletHost];					
+				}
+				else
+				{
+					[self insertHost:dropletHost atIndex:index];
 				}
 			}
 		}
@@ -856,6 +857,9 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				}
 				if ([[currentItem className] isEqualToString:@"CKHost"])
 				{
+					//We are dragging a CKHost
+					
+					//Remove it from where it is in the registry now.
 					BOOL hasRemoved = NO;
 					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
 					CKHostCategory *currentCategory;
@@ -874,6 +878,8 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 						cameFromCategory = NO;
 						[self removeHost:currentItem];
 					}
+					
+					//Add it in its new location
 					if (!item)
 					{
 						//Add new Host to the root.
@@ -883,7 +889,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 						}
 						else
 						{
-							[self insertHost:currentItem atIndex: index];
+                            [self insertHost:currentItem atIndex:index];
 						}
 					}
 					else
@@ -895,12 +901,13 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 						}
 						else
 						{
-							[item insertHost:currentItem atIndex:index];
+							[item insertHost:currentItem atIndex: (cameFromCategory) ? index : index-1];
 						}
 					}
 				}
 				else
 				{
+					//We are dragging a CKHostCategory
 					BOOL hasRemoved = NO;
 					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
 					CKHostCategory *currentCategory;
