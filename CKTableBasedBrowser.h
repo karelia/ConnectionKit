@@ -185,7 +185,7 @@
 - (BOOL)tableBrowser:(CKTableBasedBrowser *)browser shouldSelectItem:(id)item;
 
 // display
-- (void)tableBrowser:(CKTableBasedBrowser *)browser willDisplayCell:(id)cell item:(id)item;
+- (void)tableBrowser:(CKTableBasedBrowser *)browser willDisplayCell:(id)cell;
 - (NSString *)tableBrowser:(CKTableBasedBrowser *)browser toolTipForCell:(NSCell *)cell rect:(NSRectPointer)rect item:(id)item mouseLocation:(NSPoint)mouseLocation;
 
 // editing

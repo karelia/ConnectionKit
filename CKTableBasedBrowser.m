@@ -394,32 +394,29 @@ static Class sCellClass = nil;
 		unsigned col, row;
 		id item = [items objectAtIndex:0];
 		
-		[self column:&col row:&row forItem:item];
-		
-		if (col != NSNotFound)
-		{
-			firstSelectedItemColumn = [myColumns objectAtIndex:col];
-			[firstSelectedItemColumn deselectAll:self];
-		}
+		// set the path based on the first item
+		NSString *path = [myDataSource tableBrowser:self pathForItem:item];
+		[self setPath:path];
+		path = [myDataSource tableBrowser:self pathForItem:item];
 	}
 	
-	for (i = 0; i < c; i++)
-	{
-		id item = [items objectAtIndex:i];
-		unsigned col, row;
-		
-		[self column:&col row:&row forItem:item];
-		
-		if (col != NSNotFound)
-		{
-			NSTableView *column = [myColumns objectAtIndex:col];
-			if (column == firstSelectedItemColumn) // we can only multiselect in the same column
-			{
-				[column selectRow:row byExtendingSelection:myFlags.allowsMultipleSelection];
-				[self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
-			}
-		}
-	}
+//	for (i = 0; i < c; i++)
+//	{
+//		id item = [items objectAtIndex:i];
+//		unsigned col, row;
+//		
+//		[self column:&col row:&row forItem:item];
+//		
+//		if (col != NSNotFound)
+//		{
+//			NSTableView *column = [myColumns objectAtIndex:col];
+//			if (column == firstSelectedItemColumn) // we can only multiselect in the same column
+//			{
+//				[column selectRow:row byExtendingSelection:myFlags.allowsMultipleSelection];
+//				[self tableSelectedCell:column notifyTarget:NO scrollToVisible:NO];
+//			}
+//		}
+//	}
 }
 
 - (NSArray *)selectedItems
@@ -441,6 +438,7 @@ static Class sCellClass = nil;
 
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag
 {    
+	NSLog(@"%s%@", _cmd, path);
     NSString *currentPathDisplayed = [[[self path] copy] autorelease];
     if (!currentPathDisplayed) currentPathDisplayed = [self pathSeparator];
     
@@ -489,6 +487,9 @@ static Class sCellClass = nil;
                 NSString *bit = [path substringToIndex:r.location];
                 [self column:&col row:&row forItem:[myDataSource tableBrowser:self itemForPath:bit]];
                 
+				NSLog(@"%@ r=%d c=%d", bit, row, col);
+				
+				// TODO: this might be a leaf node.
                 if (col == NSNotFound)
                 {
                     NSScrollView *column = [self createColumn:[myColumns count]];
@@ -639,7 +640,7 @@ static Class sCellClass = nil;
 {
 	myDelegateFlags.shouldExpandItem = [delegate respondsToSelector:@selector(tableBrowser:shouldExpandItem:)];
 	myDelegateFlags.shouldSelectItem = [delegate respondsToSelector:@selector(tableBrowser:shouldSelectItem:)];
-	myDelegateFlags.willDisplayCell = [delegate respondsToSelector:@selector(tableBrowser:willDisplayCell:item:)];
+	myDelegateFlags.willDisplayCell = [delegate respondsToSelector:@selector(tableBrowser:willDisplayCell:)];
 	myDelegateFlags.tooltipForCell = [delegate respondsToSelector:@selector(tableBrowser:toolTipForCell:rect:item:mouseLocation:)];
 	myDelegateFlags.shouldEditItem = [delegate respondsToSelector:@selector(tableBrowser:shouldEditItem:)];
 	myDelegateFlags.leafViewWithItem = [delegate respondsToSelector:@selector(tableBrowser:leafViewWithItem:)];
@@ -1318,6 +1319,15 @@ static Class sCellClass = nil;
 #pragma mark -
 #pragma mark NSTableView Delegate
 
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+{
+	if (myDelegateFlags.willDisplayCell)
+	{
+		// - (void)tableBrowser:(CKTableBasedBrowser *)browser willDisplayCell:(id)cell
+		[myDelegate tableBrowser:self willDisplayCell:aCell];
+	}
+}
+
 - (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
 {
 	if (myFlags.isEnabled)
@@ -1416,18 +1426,10 @@ static Class sCellClass = nil;
 - (void)resizer:(CKResizingButton *)resizer ofScrollView:(CKTableBrowserScrollView *)scrollView  movedBy:(float)xDelta affectsAllColumns:(BOOL)flag;
 {
 	unsigned column = [myScrollers indexOfObject:scrollView];
-	NSScrollView *scroller = nil;
+	NSScrollView *scroller = [myScrollers objectAtIndex:column];
 	
-	if (column != NSNotFound)
-	{
-		scroller = [myScrollers objectAtIndex:column];
-		[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
-	}
-	else
-	{
-		// this is the scroller of the leaf view
-		scroller = [myLeafView enclosingScrollView];
-	}
+	NSLog(@"%d %f", column, xDelta);
+	[myColumnWidths setObject:[NSNumber numberWithFloat:NSWidth([scroller frame]) + xDelta] forKey:[NSNumber numberWithUnsignedInt:column]];
 	
 	if (flag)
 	{
@@ -1436,33 +1438,6 @@ static Class sCellClass = nil;
 		// set new default
 		myDefaultColumnWidth = NSWidth([scroller frame]) + xDelta;
 	}
-		
-	// if resizing all, first set all columns to be the same size
-//	if (flag)
-//	{
-//		NSRect initialFrame = [scroller frame];
-//		float initialWidth = NSWidth(initialFrame);
-//		
-//		unsigned i, c = [myColumns count];
-//		NSScroller *cur;
-//		NSRect iFrame, lastIFrame;
-//		
-//		cur = [myColumns objectAtIndex:0];
-//		iFrame = [cur frame];
-//		iFrame.size.width = initialWidth;
-//		[cur setFrame:iFrame];
-//		lastIFrame = iFrame;
-//		
-//		for (i = 1; i < c; i++)
-//		{
-//			cur = [myColumns objectAtIndex:i];
-//			iFrame = [cur frame];
-//			initialFrame.origin.x += (NSWidth(iFrame) - initialWidth);
-//			iFrame.origin.x = NSMaxX(lastIFrame) + 1;
-//			iFrame.size.width = initialWidth;
-//			[cur setFrame:iFrame];
-//		}
-//	}
 	
 	NSRect frame = [scroller frame];
 	frame.size.width += xDelta;
@@ -1471,7 +1446,7 @@ static Class sCellClass = nil;
 	{
 		frame.size.width = myMinColumnWidth;
 	}
-	if ([scroller documentView] == myLeafView)
+	if (myLeafView && [scroller documentView] == myLeafView)
 	{
 		if (NSWidth(frame) < NSWidth([myLeafView frame]) + SCROLLER_WIDTH)
 		{
@@ -1486,21 +1461,27 @@ static Class sCellClass = nil;
 	NSRect lastFrame = frame;
 	
 	// adjust views to the right
-	if (column != NSNotFound)
+	for ( ++column; column < [myScrollers count]; column++)
 	{
-		for ( column++; column < [myScrollers count]; column++)
+		NSScrollView *scroller = [myScrollers objectAtIndex:column];
+		frame = [scroller frame];
+		frame.origin.x = NSMaxX(lastFrame) + 1;
+		
+		if (flag)
 		{
-			NSScrollView *scroller = [myScrollers objectAtIndex:column];
-			frame = [scroller frame];
-			frame.origin.x = NSMaxX(lastFrame) + 1;
-			if (flag)
-			{
-				frame.size.width = myDefaultColumnWidth;
-			}
+			frame.size.width = myDefaultColumnWidth;
 			
-			[scroller setFrame:frame];
-			lastFrame = frame;
+			if ([scroller documentView] == myLeafView)
+			{
+				if (NSWidth(frame) < NSWidth([myLeafView frame]) + SCROLLER_WIDTH)
+				{
+					frame.size.width = NSWidth([myLeafView frame]) + SCROLLER_WIDTH;
+				}
+			}
 		}
+		
+		[scroller setFrame:frame];
+		lastFrame = frame;
 	}
 	
 	[self setNeedsDisplay:YES];
@@ -1566,18 +1547,25 @@ static NSImage *sResizeImage = nil;
 {
 	NSPoint point = [theEvent locationInWindow]; 
 	BOOL allCols = ((GetCurrentKeyModifiers() & (optionKey | rightOptionKey)) != 0) ? YES : NO;
-		
+	float lastDelta = 0;
+	
 	while (1)
 	{
 		theEvent = [[self window] nextEventMatchingMask:(NSLeftMouseDraggedMask | NSLeftMouseUpMask)];
-		NSPoint thisPoint = [theEvent locationInWindow]; 
+		NSPoint thisPoint = [theEvent locationInWindow];
+		float thisDelta = thisPoint.x - point.x;
 		
-		//if (NSPointInRect([[self superview] convertPoint:thisPoint fromView:nil], [self frame]))
+		// need to see if there was a direction change then we need to come back through the control to go the other way
+		if ((thisDelta > 0 && lastDelta < 0) ||
+			(thisDelta < 0 && lastDelta > 0))
 		{
-			[myDelegate resizer:self ofScrollView:(CKTableBrowserScrollView *)[self superview] movedBy:thisPoint.x - point.x affectsAllColumns:allCols];
+			
 		}
+		
+		[myDelegate resizer:self ofScrollView:(CKTableBrowserScrollView *)[self superview] movedBy:thisDelta affectsAllColumns:allCols];
 			
 		point = thisPoint;
+		lastDelta = thisDelta;
 		
 		if ([theEvent type] == NSLeftMouseUp) {
             break;
@@ -1600,7 +1588,6 @@ static NSImage *sResizeImage = nil;
 	}
 	
 	myResizer = [[CKResizingButton alloc] initWithFrame:NSMakeRect(0, 0, RESIZER_KNOB_SIZE, RESIZER_KNOB_SIZE)];
-	[self addSubview:myResizer];
 	
 	return self;
 }
@@ -1637,19 +1624,27 @@ static NSImage *sResizeImage = nil;
 {
 	[super tile];
 	
-	NSScroller *vert = [self verticalScroller];
-	NSRect frame = [vert frame];
-	frame.size.height -= RESIZER_KNOB_SIZE;
-	
-	[vert setFrame:frame];
-	
-	NSRect resizerRect = [myResizer frame];
-	resizerRect.origin.x = NSMinX(frame);
-	resizerRect.origin.y = NSMaxY(frame) ;
-	resizerRect.size.width = RESIZER_KNOB_SIZE;
-	resizerRect.size.height = RESIZER_KNOB_SIZE;
-	
-	[myResizer setFrame:resizerRect];
+	if ([self documentView])
+	{
+		NSScroller *vert = [self verticalScroller];
+		NSRect frame = [vert frame];
+		frame.size.height -= RESIZER_KNOB_SIZE;
+		
+		[vert setFrame:frame];
+		
+		NSRect resizerRect = [myResizer frame];
+		resizerRect.origin.x = NSMinX(frame);
+		resizerRect.origin.y = NSMaxY(frame) ;
+		resizerRect.size.width = RESIZER_KNOB_SIZE;
+		resizerRect.size.height = RESIZER_KNOB_SIZE;
+		
+		[myResizer setFrame:resizerRect];
+		[self addSubview:myResizer];
+	}
+	else
+	{
+		[myResizer removeFromSuperview];
+	}
 }
 
 - (void)scrollWheel:(NSEvent *)theEvent

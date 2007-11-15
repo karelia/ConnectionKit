@@ -45,6 +45,7 @@ typedef enum {
 	IBOutlet NSView *oView;
 	IBOutlet NSOutlineView *oOutlineView;
 	IBOutlet CKTableBasedBrowser *oBrowser;
+	IBOutlet NSBrowser *oStandardBrowser;
 	IBOutlet NSPopUpButton *oPopup;
 	IBOutlet NSSegmentedControl *oStyle;
 	IBOutlet NSSegmentedControl *oHistory;
@@ -68,6 +69,7 @@ typedef enum {
 	NSString *myRelativeRootPath;
 	NSString *mySelectedDirectory;
 	CKDirectoryNode *mySelectedNode; // not retained
+	NSMutableSet *mySelection;
 	NSMutableArray *myHistory;
 	int myHistoryIndex;
 	NSString *myFilter;
@@ -90,7 +92,8 @@ typedef enum {
 		unsigned showsFilePackageExtensions: 1;
 		unsigned canCreateFolders: 1;
 		unsigned isReloading: 1;
-		unsigned unused: 21;
+		unsigned outlineViewIsCollapsing: 1;
+		unsigned unused: 20;
 	} myFlags;
 }
 
@@ -120,8 +123,8 @@ typedef enum {
 - (void)setCanCreateDirectories:(BOOL)flag;
 - (BOOL)canCreateDirectories;
 
-- (void)setRootDirectory:(NSString *)dir;
-- (NSString *)rootDirectory;
+- (void)setBaseViewDirectory:(NSString *)dir;
+- (NSString *)baseViewDirectory;
 
 - (NSArray *)selectedPaths;
 - (NSString *)selectedPath;
@@ -160,12 +163,10 @@ typedef enum {
 // these cells are passed an NSDictionary with keys name and icon to the objectValue of the cell
 @interface CKDirectoryBrowserCell : NSBrowserCell
 {
-	CKDirectoryNode *myNode;
 	BOOL myMakingDragImage;
 }
 
 - (void)setMakeDragImage:(BOOL)flag;
-- (NSString *)path;
 
 @end
 
