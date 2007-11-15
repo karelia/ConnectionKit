@@ -38,6 +38,10 @@
 #import "NSNumber+Connection.h"
 #import "CKTableBasedBrowser.h"
 
+#define USE_NSBROWSER 1
+
+#define FILE_NAVIGATION_DELAY 0.2
+
 enum {
 	CKBackButton = 0,
 	CKForwardButton
@@ -47,10 +51,19 @@ NSString *cxRemoteFilenamesPBoardType = @"cxRemoteFilenamesPBoardType";
 NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 @interface CKDirectoryTreeController (Private)
-- (void)changeRelativeRootToPath:(NSString *)path;
-- (void)setupInspectorView:(CKDirectoryNode *)node;
-- (BOOL)isFiltering;
-- (void)updatePopUpToPath:(NSString *)path;
+- (void)_changeRelativeRootToPath:(NSString *)path;
+- (NSString *)_browserPathForPath:(NSString *)path;
+- (void)_setupInspectorView:(CKDirectoryNode *)node;
+- (BOOL)_isFiltering;
+- (void)_updatePopUpToPath:(NSString *)path;
+- (void)_pruneHistoryWithPath:(NSString *)path;
+- (void)_navigateToPath:(NSString *)path;
+- (NSArray *)_selectedItems;
+- (void)_updateHistoryButtons;
+- (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node;
+@end
+
+@interface CKDirectoryBrowserMatrix : NSMatrix
 @end
 
 @interface CKTableBasedBrowser (Private)
@@ -67,6 +80,249 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)setName:(NSString *)name;
 @end
 
+@implementation CKDirectoryTreeController (Private)
+
+- (void)_changeRelativeRootToPath:(NSString *)path
+{
+	[myRelativeRootPath autorelease];
+	myRelativeRootPath = [path copy];
+	
+	[self _updatePopUpToPath:myRelativeRootPath];
+}
+
+// this method is expected to be called only on paths that exist for the current browser, otherwise it will return nil
+- (NSString *)_browserPathForPath:(NSString *)path
+{
+	if ([path isEqualToString:myRelativeRootPath])
+		return @"/";
+	else
+	if ([path hasPrefix:myRelativeRootPath])
+	{
+		NSString *browserPath = @"/";
+		// we start with / and add on whatever directories exist past myRelativeRootPath in path
+		browserPath = [browserPath stringByAppendingPathComponent:[path substringFromIndex:[myRelativeRootPath length]]];
+		return browserPath;
+	}
+	// this will cause problems if returned and used to setPath on NSBrowser
+	return @"";
+}
+
+- (void)_setupInspectorView:(CKDirectoryNode *)node
+{
+	// reset everything
+	[oIcon setImage:nil];
+	[oName setStringValue:@"-"];
+	[oSize setStringValue:@"-"];
+	[oKind setStringValue:@"-"];
+	[oModified setStringValue:@"-"];
+	[oPermissions setStringValue:@"-"];
+	
+	// try to update the inspector preview if it is an image
+	if (![mySelectedNode cachedContents])
+	{
+		if ([[mySelectedNode propertyForKey:NSFileSize] unsignedLongLongValue] <= myCachedContentsThresholdSize)
+		{
+			if ([myDelegate respondsToSelector:@selector(directoryTree:needsContentsOfFile:)])
+			{
+				[myDelegate directoryTree:self needsContentsOfFile:[mySelectedNode path]];
+			}
+		}
+	}
+	
+	NSImage *img = [[[NSImage alloc] initWithData:[node cachedContents]] autorelease];
+	if (!img)
+	{
+		img = [node iconWithSize:NSMakeSize(128,128)];
+	}
+	
+	if (img)
+	{
+		[oIcon setImage:img];
+	}
+	
+	[oName setStringValue:[node name]];
+	[oSize setStringValue:[NSString formattedFileSize:[node size]]];
+	[oKind setStringValue:[node kind]];
+	[oModified setObjectValue:[node propertyForKey:NSFileModificationDate]];
+	[oPermissions setStringValue:[[node propertyForKey:NSFilePosixPermissions] permissionsStringValue]];
+}
+
+- (BOOL)_isFiltering
+{
+	NSString *filterString = [oSearch stringValue];
+	return (filterString && ![filterString isEqualToString:@""]);
+}
+
+- (void)_updatePopUpToPath:(NSString *)path
+{
+	CKDirectoryNode *selected = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
+	CKDirectoryNode *walk = selected;
+	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir structure"];
+	NSMenuItem *item;
+	
+	while (walk)
+	{
+		item = [[NSMenuItem alloc] initWithTitle:[self _cellDisplayNameWithNode:walk] 
+										  action:nil
+								   keyEquivalent:@""];
+		[item setRepresentedObject:walk];
+		[item setImage:[walk iconWithSize:NSMakeSize(16,16)]];
+		[menu addItem:item];
+		[item release];
+		walk = [walk parent];
+	}
+	
+	if (![selected isDirectory] && [menu numberOfItems] > 0)
+	{
+		// don't put a leaf node in the popup, only directories
+		[menu removeItemAtIndex:0];
+	}
+	[oPopup setMenu:menu];
+	[menu release];
+	
+	[oPopup selectItemWithRepresentedObject:selected];
+}
+
+- (void)_pruneHistoryWithPath:(NSString *)path
+{
+	// we need to prune the history as well so the user doesn't go back to a path that doesn't exist
+	// we need to keep the myHistoryIndex correct
+	NSMutableArray *invalidHistory = [NSMutableArray array];
+	NSDictionary *cur;
+	unsigned i;
+	
+	for (i = 0; i < [myHistory count]; i++)
+	{
+		cur = [myHistory objectAtIndex:i];
+		if ([[cur objectForKey:@"fp"] hasPrefix:path])
+		{
+			[invalidHistory addObject:cur];
+			if (i < myHistoryIndex)
+			{
+				myHistoryIndex--;
+			}
+		}
+	}
+	
+	[myHistory removeObjectsInArray:invalidHistory];
+	
+	// after pruning there could be 2 selections that have been moved together so we need to delete them out
+	if ([myHistory count] >= 2)
+	{
+		NSMutableArray *duplicates = [NSMutableArray array];
+		NSDictionary *previous = [myHistory objectAtIndex:0];
+		
+		for (i = 1; i < [myHistory count]; i++)
+		{
+			cur = [myHistory objectAtIndex:i];
+			
+			if ([[cur objectForKey:@"fp"] isEqualToString:[previous objectForKey:@"fp"]])
+			{
+				[duplicates addObject:cur];
+			}
+			
+			previous = cur;
+		}
+		
+		NSEnumerator *e = [duplicates objectEnumerator];
+		
+		while ((cur = [e nextObject]))
+		{
+			[myHistory removeObjectIdenticalTo:cur];
+		}
+	}
+		
+	[self _updateHistoryButtons];	
+}
+
+- (void)_navigateToPath:(NSString *)path
+{
+	// stop being re-entrant from the outlineview's shouldExpandItem: delegate method
+	if(myFlags.isNavigatingToPath) return;
+	if (myFlags.isReloading) return;
+	myFlags.isNavigatingToPath = YES;
+	
+	// we only want to put directory selection on the history stack
+	mySelectedNode = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
+	
+	if ([mySelectedNode isDirectory])
+	{
+		[mySelectedDirectory autorelease];
+		mySelectedDirectory = [path copy];
+		
+		// fetch the contents from the delegate
+		myDirectoriesLoading++;
+		[myDelegate directoryTreeStartedLoadingContents:self];
+		[myDelegate directoryTree:self needsContentsForPath:path];
+		
+		// expand the folder in the outline view
+		if (myFlags.outlineViewIsCollapsing)
+		{
+			myFlags.outlineViewIsCollapsing = NO;
+		}
+		else
+		{
+			[oOutlineView expandItem:mySelectedNode];
+		}
+	}
+	
+	// handle the history
+	if ([myHistory count] > 0 && myHistoryIndex < ([myHistory count] - 1))
+	{
+		// we have used the history buttons and are now taking a new path so we need to remove history from this point forward
+		NSRange oldPathRange = NSMakeRange(myHistoryIndex + 1, [myHistory count] - 1 - myHistoryIndex);
+		[myHistory removeObjectsInRange:oldPathRange];
+	}
+	
+	// push the new navigation item on the stack if the last item is not the same as this one
+	if (![[[myHistory lastObject] objectForKey:@"fp"] isEqualToString:path])
+	{
+		[myHistory addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, @"fp", myRelativeRootPath, @"rp", nil]];
+		myHistoryIndex++;
+	}
+	
+	[self _updateHistoryButtons];
+	
+	// make sure the views are in sync
+	[oOutlineView scrollItemToTop:mySelectedNode];
+	
+	// we are assuming here that the path will never be less than myRelativeRootPath 
+	[oStandardBrowser setPath:[self _browserPathForPath:path]];
+	
+	[oBrowser setPath:[self _browserPathForPath:path]];
+	//[oBrowser scrollColumnToVisible:[[[[mySelectedNode path] substringFromIndex:[myRelativeRootPath length]] componentsSeparatedByString:@"/"] count]];
+	
+	myFlags.isNavigatingToPath = NO;
+	
+	if ([self target] && [self action])
+	{
+		[[self target] performSelector:[self action] withObject:self];
+	}
+}
+
+- (NSArray *)_selectedItems
+{
+	return [mySelection allObjects];
+}
+
+- (void)_updateHistoryButtons
+{
+	[oHistory setEnabled:(myHistoryIndex > 0) forSegment:CKBackButton];
+	[oHistory setEnabled:(myHistoryIndex < (int)[myHistory count] - 1) forSegment:CKForwardButton];
+}
+
+- (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node
+{
+	NSString *name = [node name];
+	if ([self showsFilePackageExtensions] && [node isFilePackage])
+	{
+		name = [name stringByDeletingPathExtension];
+	}
+	return name;
+}
+
+@end
+
 @implementation CKDirectoryTreeController
 
 - (id)init
@@ -81,6 +337,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
 	myHistory = [[NSMutableArray alloc] initWithCapacity:32];
 	myHistoryIndex = -1;
+	mySelection = [[NSMutableSet alloc] initWithCapacity:8];
 	
 	myFlags.allowsDrags = YES;
 	myFlags.allowsDrops = NO;
@@ -107,6 +364,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[myRootDirectory release];
 	[mySelectedDirectory release];
 	[myHistory release];
+	[mySelection release];
 	
 	[super dealloc];
 }
@@ -181,14 +439,17 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     [oOutlineView sizeToFit];
     [oOutlineView setDoubleAction:@selector(outlineDoubleClicked:)];
 	
-	// set up the browser
 #define MAX_VISIBLE_COLUMNS 3
-	//[oBrowser setMaxVisibleColumns:MAX_VISIBLE_COLUMNS];
-    //[oBrowser setMinColumnWidth:NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS];
-	//[oBrowser setColumnResizingType:NSBrowserUserColumnResizing];
+	// set up NSBrowser
+	[oStandardBrowser setCellClass:[CKDirectoryBrowserCell class]];
+	[oStandardBrowser setMatrixClass:[CKDirectoryBrowserMatrix class]];
+	[oStandardBrowser setDelegate:self];
+    [oStandardBrowser setTarget:self];
+    [oStandardBrowser setAction: @selector(standardBrowserSelectedWithDelay:)];
+	//[oStandardBrowser loadColumnZero]; // TODO: is this necessary? How do we reset the browser view to default empty
+
+	// set up the browser
 	[oBrowser setCellClass:[CKDirectoryBrowserCell class]];
-	//[oBrowser setMatrixClass:[CKDirectoryBrowserMatrix class]];
-	//[oBrowser setSeparatesColumns:YES];
 	[oBrowser setTarget:self];
 	[oBrowser setAction:@selector(browserSelected:)];
 	[oBrowser setDelegate:self];
@@ -266,18 +527,70 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	// reload the data
 	myFlags.isReloading = YES;
-	id selectedItem = [oOutlineView itemAtRow:[oOutlineView selectedRow]];
-	[oOutlineView reloadData];
-	[oOutlineView scrollItemToTop:selectedItem];
-	[oOutlineView selectRow:[oOutlineView rowForItem:selectedItem] byExtendingSelection:NO];
 	
-	NSString *browserPath = [oBrowser path];
-	[oBrowser reloadData];
-	if (![self isFiltering])
+	if ([[self _selectedItems] count] == 0)
 	{
-		if (!browserPath) browserPath = @"/";
-		[oBrowser setPath:browserPath];
+		// we have nothing selected so make sure all views are unselected
+		[oOutlineView deselectAll:self];
+		[oStandardBrowser loadColumnZero];
+		[oBrowser setPath:nil];
 	}
+	
+	[oOutlineView reloadData];
+
+	// loop over and select everything
+	NSEnumerator *e = [[self _selectedItems] objectEnumerator];
+	CKDirectoryNode *cur;
+	BOOL didScroll = NO;
+	BOOL didSetBrowserPath = NO;
+	
+	while ((cur = [e nextObject]))
+	{
+		// do the outline view
+		if ([oStyles indexOfSelectedTabViewItem] != CKOutlineViewStyle)
+		{
+			// make sure all the parents are expanded in the outline view
+			NSMutableArray *nodesToExpand = [NSMutableArray array];
+			CKDirectoryNode *parent = [cur parent];
+			
+			while ((parent))
+			{
+				[nodesToExpand addObject:parent];
+				parent = [parent parent];
+			}
+			
+			NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
+			
+			while ((parent = [g nextObject]))
+			{
+				[oOutlineView expandItem:parent];
+			}
+			
+			[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
+			if (!didScroll)
+			{
+				// only scroll if we aren't the active view
+				[oOutlineView scrollItemToTop:cur];
+				didScroll = YES;
+			}
+		}
+		
+		// do the NSBrowser
+		if (!didSetBrowserPath)
+		{
+			[oStandardBrowser setPath:[self _browserPathForPath:[cur path]]];
+			[oStandardBrowser reloadColumn:[oStandardBrowser lastColumn]];
+			didSetBrowserPath = YES;
+		}
+		
+		// TODO: This does not work with multi selection
+		//int browserRow = [[[cur parent] contents] indexOfObject:cur];
+		//[oStandardBrowser selectRow:browserRow inColumn:[oStandardBrowser lastColumn]];
+	}
+	
+	// do the table browser
+	[oBrowser selectItems:[self _selectedItems]];
+	
 	myFlags.isReloading = NO;
 }
 
@@ -331,6 +644,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oPopup setEnabled:YES];
 		[oSearch setEnabled:YES];
 		[oBrowser setEnabled:YES];
+		[oStandardBrowser setEnabled:YES];
 		[oOutlineView setEnabled:YES];
 	}
 	else
@@ -340,6 +654,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oPopup setEnabled:NO];
 		[oSearch setEnabled:NO];
 		[oBrowser setEnabled:NO];
+		[oStandardBrowser setEnabled:NO];
 		[oOutlineView setEnabled:NO];
 	}
 }
@@ -385,16 +700,39 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return myFlags.showsFilePackageExtensions;
 }
 
-- (void)setRootDirectory:(NSString *)dir
+- (void)setBaseViewDirectory:(NSString *)dir
 {
+	if (dir == nil)
+	{
+		if (myDirectoriesLoading > 0)
+        {
+            myDirectoriesLoading = 0;
+            [myDelegate directoryTreeFinishedLoadingContents:self];
+        }
+		// reset everything
+		[myRootNode autorelease];
+		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
+		[self _updatePopUpToPath:@"/"];
+		[myHistory removeAllObjects];
+		myHistoryIndex = -1;
+		[self _updateHistoryButtons];
+		[oSearch setStringValue:@""];
+		[oStandardBrowser loadColumnZero];
+		[oBrowser setPath:nil];
+		[oOutlineView reloadData];
+		[mySelection removeAllObjects];
+		
+		[self reloadViews];
+	}
+	
 	if (dir != myRootDirectory)
 	{
 		[myRootDirectory autorelease];
 		myRootDirectory = [dir copy];
-		[self changeRelativeRootToPath:dir];	
-		
-		[oBrowser setPath:dir];
-		[oBrowser reloadData];
+		[self _changeRelativeRootToPath:dir];	
+		[mySelection removeAllObjects];
+
+		[self reloadViews]; // not sure if we should be doing more than just this to reset the data for the browser
 		
 		if (dir)
 		{
@@ -415,31 +753,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		{
 			[CKDirectoryNode addContents:[NSArray array] withPath:dir withRoot:myRootNode];
 		}
-		[self updatePopUpToPath:dir];
-	}
-	else
-	{
-		if (myDirectoriesLoading > 0)
-        {
-            myDirectoriesLoading = 0;
-            [myDelegate directoryTreeFinishedLoadingContents:self];
-        }
-		// reset everything
-		[myRootNode autorelease];
-		myRootNode = [[CKDirectoryNode nodeWithName:@"/"] retain];
-		[self updatePopUpToPath:@"/"];
-		[myHistory removeAllObjects];
-		myHistoryIndex = -1;
-		[oHistory setEnabled:NO forSegment:CKBackButton];
-		[oHistory setEnabled:NO forSegment:CKForwardButton];
-		[oSearch setStringValue:@""];
-		[oBrowser setPath:nil];
-		[oOutlineView reloadData];
-		[self reloadViews];
+		[self _updatePopUpToPath:dir];
 	}
 }
 
-- (NSString *)rootDirectory
+- (NSString *)baseViewDirectory
 {
 	return myRootDirectory;
 }
@@ -502,6 +820,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
         // setting nil removes the subcontents of the path
         CKDirectoryNode *node = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
         [node setContents:[NSArray array]];
+		
+		[self _pruneHistoryWithPath:path];
     }
     [self reloadViews];
 }
@@ -515,21 +835,32 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	while ((cur = [e nextObject]))
 	{
+		// remove it from the selection
+		[mySelection removeObject:cur];
+		
 		// go through and see if we were visible
 		NSString *path = [cur path];
+		NSString *parentPath = [[cur parent] path];
 		
-		if ([path hasPrefix:myRelativeRootPath])
+		[self _pruneHistoryWithPath:path];
+		
+		if ([parentPath hasPrefix:myRelativeRootPath])
 		{
-			unsigned col = [oBrowser columnToItem:[cur parent]];
-			col++;
-
-			if (col != NSNotFound)
+			NSString *fullPath = [myRelativeRootPath stringByAppendingPathComponent:[self selectedPath]];
+			
+			if ([fullPath hasPrefix:parentPath])
 			{
-				[self performSelector:@selector(delayedColumnRefresh:) 
-						   withObject:[NSNumber numberWithUnsignedInt:col] 
-						   afterDelay:0 
-							  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
-				[self updatePopUpToPath:[[cur parent] path]];
+				unsigned col = [[[self _browserPathForPath:parentPath] pathComponents] count] - 1;
+				
+				if (col >= 0 && col <= [oStandardBrowser lastColumn])
+				{
+					[self performSelector:@selector(delayedColumnRefresh:) 
+							   withObject:[NSNumber numberWithUnsignedInt:col] 
+							   afterDelay:0 
+								  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+					//[oStandardBrowser setPath:parentPath]; // This seems to have solved a crash when trying to get path from the NSBrowser, after deleting a folder high up in the selection and doing refresh
+					[self _updatePopUpToPath:parentPath];
+				}
 			}
 		}
 	}
@@ -539,6 +870,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	@try {
 		[oBrowser refreshColumn:[col unsignedIntValue]];
+		if ([col intValue] == 0)
+		{
+			[oStandardBrowser loadColumnZero];
+		}
+		else
+		{
+			[oStandardBrowser reloadColumn:[col unsignedIntValue]];
+		}
 	}
 	@catch (NSException *ex) {
 		
@@ -552,7 +891,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	if (node == mySelectedNode)
 	{
-		[self setupInspectorView:mySelectedNode];
+		[self _setupInspectorView:mySelectedNode];
 	}
 }
 
@@ -564,7 +903,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSArray *)selectedPaths
 {
 	NSMutableArray *paths = [NSMutableArray array];
-	NSArray *items = [oBrowser selectedItems];
+	NSArray *items = [self _selectedItems];
 	NSEnumerator *e = [items objectEnumerator];
 	CKDirectoryNode *cur;
 	
@@ -577,7 +916,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 }
 
 - (NSString *)selectedPath
-{
+{	
 	NSArray *paths = [self selectedPaths];
 	
 	if ([paths count] > 0)
@@ -585,12 +924,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		return [paths objectAtIndex:0];
 	}
 	
-	return nil;
+	return [oBrowser pathSeparator]; //TODO: check table browser still works with this return type
 }
 
 - (NSString *)selectedFolderPath
 {
-	NSArray *items = [oBrowser selectedItems];
+	NSArray *items = [self _selectedItems];
 	
 	if ([items count])
 	{
@@ -625,162 +964,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 }
 
 #pragma mark -
-#pragma mark Interface Helper Methods
-
-- (void)navigateToPath:(NSString *)path
-{
-	// stop being re-entrant from the outlineview's shouldExpandItem: delegate method
-	if(myFlags.isNavigatingToPath) return;
-	if (myFlags.isReloading) return;
-	myFlags.isNavigatingToPath = YES;
-	
-	//NSLog(@"%@%@", NSStringFromSelector(_cmd), path);
-	
-	// we only want to put directory selection on the history stack
-	mySelectedNode = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
-		
-	if ([mySelectedNode isDirectory])
-	{
-		[mySelectedDirectory autorelease];
-		mySelectedDirectory = [path copy];
-		
-		// fetch the contents from the delegate
-		myDirectoriesLoading++;
-		[myDelegate directoryTreeStartedLoadingContents:self];
-		[myDelegate directoryTree:self needsContentsForPath:path];
-		
-		// expand the folder in the outline view only if it isn't the active view
-		if ([oStyles indexOfSelectedTabViewItem] != CKOutlineViewStyle)
-		{
-			[oOutlineView expandItem:mySelectedNode];
-		}
-	}
-	
-	// handle the history
-	if ([myHistory count] > 0 && myHistoryIndex < ([myHistory count] - 1))
-	{
-		// we have used the history buttons and are now taking a new path so we need to remove history from this point forward
-		NSRange oldPathRange = NSMakeRange(myHistoryIndex + 1, [myHistory count] - 1 - myHistoryIndex);
-		[myHistory removeObjectsInRange:oldPathRange];
-	}
-	
-	// push the new navigation item on the stack
-	[myHistory addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, @"fp", myRelativeRootPath, @"rp", nil]];
-	myHistoryIndex++;
-	
-	// update the forward/back buttons
-	[oHistory setEnabled:([myHistory count] > 0) forSegment:CKBackButton];
-	[oHistory setEnabled:NO forSegment:CKForwardButton]; // a new path is pushed on so no other objects are in front of this one
-	
-	// make sure the views are in sync
-	if ([oStyles indexOfSelectedTabViewItem] != CKBrowserStyle)
-	{
-		if ([path isEqualToString:myRelativeRootPath])
-		{
-			[oBrowser setPath:@"/"];
-		}
-		else
-		{
-			[oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
-		}
-		//[oBrowser scrollColumnToVisible:[[[[mySelectedNode path] substringFromIndex:[myRelativeRootPath length]] componentsSeparatedByString:@"/"] count]];
-	}
-	
-	[oOutlineView scrollItemToTop:mySelectedNode];
-	
-	myFlags.isNavigatingToPath = NO;
-	
-	if ([self target] && [self action])
-	{
-		[[self target] performSelector:[self action] withObject:self];
-	}
-}
-
-- (void)updatePopUpToPath:(NSString *)path
-{
-	CKDirectoryNode *selected = [CKDirectoryNode nodeForPath:path withRoot:myRootNode];
-	CKDirectoryNode *walk = selected;
-	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"dir structure"];
-	NSMenuItem *item;
-	
-	while (walk)
-	{
-		item = [[NSMenuItem alloc] initWithTitle:[walk name] 
-										  action:nil
-								   keyEquivalent:@""];
-		[item setRepresentedObject:walk];
-		[item setImage:[walk iconWithSize:NSMakeSize(16,16)]];
-		[menu addItem:item];
-		[item release];
-		walk = [walk parent];
-	}
-	
-	if (![selected isDirectory] && [menu numberOfItems] > 0)
-	{
-		// don't put a leaf node in the popup, only directories
-		[menu removeItemAtIndex:0];
-	}
-	[oPopup setMenu:menu];
-	[menu release];
-	
-	[oPopup selectItemWithRepresentedObject:selected];
-}
-
-- (void)changeRelativeRootToPath:(NSString *)path
-{
-	[myRelativeRootPath autorelease];
-	myRelativeRootPath = [path copy];
-	
-	[self updatePopUpToPath:path];
-}
-
-- (BOOL)isFiltering
-{
-	NSString *filterString = [oSearch stringValue];
-	return (filterString && ![filterString isEqualToString:@""]);
-}
-
-- (void)setupInspectorView:(CKDirectoryNode *)node
-{
-	// reset everything
-	[oIcon setImage:nil];
-	[oName setStringValue:@"-"];
-	[oSize setStringValue:@"-"];
-	[oKind setStringValue:@"-"];
-	[oModified setStringValue:@"-"];
-	[oPermissions setStringValue:@"-"];
-	
-	// try to update the inspector preview if it is an image
-	if (![mySelectedNode cachedContents])
-	{
-		if ([[mySelectedNode propertyForKey:NSFileSize] unsignedLongLongValue] <= myCachedContentsThresholdSize)
-		{
-			if ([myDelegate respondsToSelector:@selector(directoryTree:needsContentsOfFile:)])
-			{
-				[myDelegate directoryTree:self needsContentsOfFile:[mySelectedNode path]];
-			}
-		}
-	}
-	
-	NSImage *img = [[[NSImage alloc] initWithData:[node cachedContents]] autorelease];
-	if (!img)
-	{
-		img = [node iconWithSize:NSMakeSize(128,128)];
-	}
-	
-	if (img)
-	{
-		[oIcon setImage:img];
-	}
-	
-	[oName setStringValue:[node name]];
-	[oSize setStringValue:[NSString formattedFileSize:[node size]]];
-	[oKind setStringValue:[node kind]];
-	[oModified setObjectValue:[node propertyForKey:NSFileModificationDate]];
-	[oPermissions setStringValue:[[node propertyForKey:NSFilePosixPermissions] permissionsStringValue]];
-}
-
-#pragma mark -
 #pragma mark UI Actions
 
 - (IBAction)viewStyleChanged:(id)sender
@@ -797,13 +980,16 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
-		
+	
+	// ignore the selection if the user has selected the currently selected node
+	if ([sender indexOfSelectedItem] == 0) return;
+	
+	// empty the selection
+	[mySelection removeAllObjects];
+	[mySelection addObject:node];
+	
 	if ([path hasPrefix:myRelativeRootPath])
 	{
-		NSString *selectablePath = [path substringFromIndex:[myRelativeRootPath length]];
-		[oBrowser setPath:selectablePath];
-		// scroll it to the right
-		[oBrowser scrollRectToVisible:NSMakeRect(NSMaxX([oBrowser bounds]) - 1, 0, 1, 1)];
 		[oOutlineView deselectAll:self];
 		int row = [oOutlineView rowForItem:node];
 		if (row != NSNotFound)
@@ -811,33 +997,89 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			[oOutlineView selectRow:row byExtendingSelection:NO];
 			[oOutlineView scrollRowToVisible:row];
 		}
+		
+		// TODO: test, was Failing for myRelativeRootPath = / (ex /, /Users/bhansen, ended up selectablePath == Users/bhansen
+		[oStandardBrowser setPath:[self _browserPathForPath:path]];
+		//[oStandardBrowser scrollColumnToVisible:???]; // Do we need to scroll manually?
+		
+		[oBrowser setPath:[self _browserPathForPath:path]];
+		[oBrowser scrollRectToVisible:NSMakeRect(NSMaxX([oBrowser bounds]) - 1, 0, 1, 1)];
 	}
 	else
 	{
-		[self changeRelativeRootToPath:path];
+		[self _changeRelativeRootToPath:path];
+		
 		[oOutlineView deselectAll:self];
 		[oOutlineView reloadData];
+		
+		[oStandardBrowser loadColumnZero];
+		[oStandardBrowser setPath:[self _browserPathForPath:path]];
+		
 		[oBrowser setPath:nil];
-		[oBrowser setPath:[path substringFromIndex:[myRelativeRootPath length]]];
+		[oBrowser setPath:[self _browserPathForPath:path]];
 	}
-	[self updatePopUpToPath:path];
+	[self _updatePopUpToPath:path];
 	
 	// this pushes a history object and fetches the contents
-	[self navigateToPath:path];
+	[self _navigateToPath:path];
 }
 
 - (IBAction)outlineViewSelected:(id)sender
+{	
+	NSString *fullPath = nil;
+	// update our internal selection tracking
+	/* TODO: we may need to limit multi selection to just the one directory as they 
+	 can expand folders and have non-concurrent selections, which might mess up the browsers.
+	 The finder trims the selection on a view change */
+	[mySelection removeAllObjects];
+	NSEnumerator *e = [oOutlineView selectedRowEnumerator];
+	NSNumber *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		CKDirectoryNode *node = [oOutlineView itemAtRow:[cur intValue]];
+		[mySelection addObject:node];
+		fullPath = [node path];
+	}
+		
+	[self _navigateToPath:fullPath];
+	[self _updatePopUpToPath:fullPath];
+}
+
+- (IBAction)standardBrowserSelectedWithDelay:(id)sender
 {
-	NSString *fullPath = [[oOutlineView itemAtRow:[oOutlineView selectedRow]] path];
-	[self navigateToPath:fullPath];
-	[self updatePopUpToPath:fullPath];
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_standardBrowserSelected:) object:nil];
+	[self performSelector:@selector(standardBrowserSelected:) withObject:nil afterDelay:FILE_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+}
+
+- (IBAction)standardBrowserSelected:(id)sender
+{
+	TRACE;
+	// update our internal selection tracking
+	[mySelection removeAllObjects];
+	NSEnumerator *e = [[oStandardBrowser selectedCells] objectEnumerator];
+	CKDirectoryBrowserCell *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		[mySelection addObject:[cur representedObject]];
+	}
+	
+	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
+	[self _navigateToPath:fullPath];
+	[self _updatePopUpToPath:fullPath];
 }
 
 - (IBAction)browserSelected:(id)sender
 {
 	NSString *fullPath = [myRelativeRootPath stringByAppendingPathComponent:[oBrowser path]];
-	[self navigateToPath:fullPath];
-	[self updatePopUpToPath:fullPath];
+	
+	// update our internal selection tracking
+	[mySelection removeAllObjects];
+	[mySelection addObjectsFromArray:[oBrowser selectedItems]];
+	
+	[self _navigateToPath:fullPath];
+	[self _updatePopUpToPath:fullPath];
 }
 
 - (CKDirectoryNode *)nodeToFilter
@@ -868,7 +1110,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSString *relPath = [rec objectForKey:@"rp"];
 	NSString *fullPath = [rec objectForKey:@"fp"];
 
-	[self changeRelativeRootToPath:relPath];
+	[self _changeRelativeRootToPath:relPath];
+	[oStandardBrowser loadColumnZero];
+	[oStandardBrowser setPath:[self _browserPathForPath:fullPath]]; // TODO: checkpath:NO?
+	[oBrowser setPath:[self _browserPathForPath:fullPath] checkPath:NO];
 	
 	CKDirectoryNode *node = [CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode];
 	NSMutableArray *nodes = [NSMutableArray arrayWithObject:node];
@@ -885,7 +1130,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	while ((cur = [e nextObject]))
 	{
-		// this stops the navigateToPath: stuff being called.
+		// this stops the _navigateToPath: stuff being called.
 		myFlags.outlineViewDoubleCallback = YES;
 		[oOutlineView expandItem:cur];
 	}
@@ -894,17 +1139,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oOutlineView selectRow:[oOutlineView rowForItem:node] byExtendingSelection:NO];
 	[oOutlineView scrollItemToTop:node];
 	
-    NSString *relativePath = [fullPath substringFromIndex:[relPath length]];
-    if (![relativePath hasPrefix:@"/"])
-    {
-        relativePath = [@"/" stringByAppendingString:relativePath];
-    }
-	[oBrowser setPath:relativePath checkPath:NO];
-	[self updatePopUpToPath:fullPath];
+	[self _updatePopUpToPath:fullPath];
 	
-	// update the forward/back buttons
-	[oHistory setEnabled:(myHistoryIndex > 0) forSegment:CKBackButton];
-	[oHistory setEnabled:(myHistoryIndex < (int)[myHistory count] - 1) forSegment:CKForwardButton];
+	// refetch contents
+	myDirectoriesLoading++;
+	[myDelegate directoryTreeStartedLoadingContents:self];
+	[myDelegate directoryTree:self needsContentsForPath:fullPath];
+	
+	[self _updateHistoryButtons];
 }
 
 - (IBAction)outlineDoubleClicked:(id)sender
@@ -914,11 +1156,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	if ([node isFilePackage] && ![self treatsFilePackagesAsDirectories]) return;
 	
 	NSString *path = [node path];
-	[self changeRelativeRootToPath:path];
+	[self _changeRelativeRootToPath:path];
 	[oOutlineView reloadData];
 	[oOutlineView deselectAll:self];
 	[oBrowser setPath:[oBrowser pathSeparator]];
 	[oBrowser reloadData];
+	[oStandardBrowser loadColumnZero];
 }
 
 #pragma mark -
@@ -930,18 +1173,19 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	if (item == nil)
 	{
-		if ([self isFiltering])
+		if ([self _isFiltering])
 		{
 			return [[[self nodeToFilter] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] count];
 		}
 		item = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 	}
-    
-    if (![self treatsFilePackagesAsDirectories] && [item isFilePackage])
-    {
-        result = 0;
-    }
-	else
+
+// TODO: Check why this is here... the logic in the isExpandable should be enough
+//    if (![self treatsFilePackagesAsDirectories] && [item isFilePackage])
+//    {
+//        result = 0;
+//    }
+//	else
     {
         result = [item countIncludingHiddenFiles:myFlags.showsHiddenFiles];
     }
@@ -951,12 +1195,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
 {
-	//NSLog(@"%@%@", NSStringFromSelector(_cmd), [item path]);
 	id child = nil;
 	
 	if (item == nil)
 	{
-		if ([self isFiltering])
+		if ([self _isFiltering])
 		{
 			return [[[self nodeToFilter] filteredContentsWithNamesLike:[oSearch stringValue] includeHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:index];
 		}
@@ -971,6 +1214,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
 	BOOL result = NO;
+	
+	if ([self _isFiltering]) return result;
 	
 	if (item == nil)
 	{
@@ -998,9 +1243,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
 	NSString *ident = [tableColumn identifier];
-	
-    [(CKDirectoryNode *)item setProperty:[NSNumber numberWithBool:[self outlineView:outlineView isItemExpandable:item]] forKey:@"isExpandable"];
-    
+	    
 	if ([ident isEqualToString:@"name"])
 	{
 		NSString *name = [item name];
@@ -1096,10 +1339,61 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		myFlags.outlineViewDoubleCallback = YES;
 		// need to fetch from the delegate
-		[self navigateToPath:[item path]];
+		[self _navigateToPath:[item path]];
 	}
 	
 	return YES;
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item
+{
+	// collapsing doesn't trigger the target/action
+	myFlags.outlineViewIsCollapsing = YES;
+	
+	[self performSelector:@selector(outlineViewSelected:)
+			   withObject:oOutlineView
+			   afterDelay:0
+				  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+	
+	return YES;
+}
+
+#pragma mark -
+#pragma mark NSBrowser Delegate DataSource
+
+- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column {
+	CKDirectoryNode *node = nil;
+	if (column == 0)
+	{
+		node = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
+	}
+	else
+	{
+		node = [[oStandardBrowser selectedCellInColumn:column - 1] representedObject];
+	}
+	
+	return [node countIncludingHiddenFiles:myFlags.showsHiddenFiles];
+}
+
+- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(int)row column:(int)column 
+{
+	CKDirectoryNode *parent = nil;
+	
+	if (column == 0)
+	{
+		parent = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
+	}
+	else
+	{
+		parent = [[oStandardBrowser selectedCellInColumn:column - 1] representedObject];
+	}
+	
+	CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
+			
+	[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
+	
+	[cell setRepresentedObject:node];
+	[cell setTitle:[self _cellDisplayNameWithNode:node]];
 }
 
 #pragma mark -
@@ -1112,10 +1406,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (id)tableBrowser:(CKTableBasedBrowser *)browser child:(unsigned)index ofItem:(id)item
 {
-    CKDirectoryNode *node = [self outlineView:nil child:index ofItem:item];
-    [node setProperty:[NSNumber numberWithBool:[self tableBrowser:browser isItemExpandable:node]] forKey:@"isExpandable"];
-    [node setProperty:[NSNumber numberWithBool:[self showsFilePackageExtensions]] forKey:@"showBundleExtension"];
-	return node;
+    return [self outlineView:nil child:index ofItem:item];
 }
 
 - (BOOL)tableBrowser:(CKTableBasedBrowser *)browser isItemExpandable:(id)item
@@ -1152,7 +1443,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSView *)tableBrowser:(CKTableBasedBrowser *)browser leafViewWithItem:(id)item
 {
 	mySelectedNode = item;
-	[self setupInspectorView:item];
+	[self _setupInspectorView:item];
 	return oInspectorView;
 }
 
@@ -1187,6 +1478,19 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 	return [menu autorelease];*/
     return nil;
+}
+
+#pragma mark -
+#pragma mark Table Browser Delegate Methods
+
+- (void)tableBrowser:(CKTableBasedBrowser *)browser willDisplayCell:(id)cell
+{
+	CKDirectoryBrowserCell *nodeCell = (CKDirectoryBrowserCell *)cell;
+	CKDirectoryNode *node = [nodeCell representedObject];
+	
+	[nodeCell setLeaf:![self tableBrowser:browser isItemExpandable:node]];
+	
+	[cell setTitle:[self _cellDisplayNameWithNode:node]];
 }
 
 #pragma mark -
@@ -1301,6 +1605,25 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 @end
 
+
+@implementation CKDirectoryBrowserMatrix
+
+- (void)selectCellAtRow:(int)row column:(int)column
+{
+	TRACE;
+	[super selectCellAtRow:row column:column];
+}
+
+- (void)mouseDown:(NSEvent *)theEvent
+{
+	[super mouseDown:theEvent];
+}
+
+@end
+
+#pragma mark -
+#pragma mark CKDirectoryBrowserCell
+
 static NSMutableParagraphStyle *sStyle = nil;
 #define PADDING 5
 
@@ -1319,48 +1642,15 @@ static NSMutableParagraphStyle *sStyle = nil;
 	[pool release];
 }
 
-- (id)initTextCell:(NSString *)txt
-{
-	if ((self = [super initTextCell:txt]))
-	{
-		[self setFont:[NSFont systemFontOfSize:11]];
-	}
-	return self;
-}
-
-- (void)setObjectValue:(id)obj
-{
-	if ([obj isKindOfClass:[CKDirectoryNode class]])
-	{
-		myNode = obj;
-		[self setLeaf:![[myNode propertyForKey:@"isExpandable"] boolValue]];
-		[self setEnabled:YES];
-        NSString *name = [obj name];
-        if (![[myNode propertyForKey:@"showBundleExtension"] boolValue] && [myNode isFilePackage])
-        {
-            name = [name stringByDeletingPathExtension];
-        }
-		[super setObjectValue:name];
-	}
-	else
-	{
-		[super setObjectValue:obj];
-	}
-}
-
-- (id)objectValue
-{
-	return [myNode name];
-}
-
+// This is required because NSBrowser when asked for its path uses the cells stringValue to build up the path. 
+// If extensions are hidden it gets screwed up.
 - (NSString *)stringValue
 {
-	return [myNode name];
-}
-
-- (NSString *)path
-{
-	return [myNode path];
+	if ([self representedObject])
+	{
+		return [[self representedObject] name];
+	}
+	return @"";
 }
 
 #define ICON_SIZE 16.0
@@ -1378,12 +1668,60 @@ static NSMutableParagraphStyle *sStyle = nil;
 	myMakingDragImage = flag;
 }
 
+// MERGE: I have kept Greg's drawing code!
+
+#define ICON_INSET_VERT		2.0	/* The size of empty space between the icon end the top/bottom of the cell */ 
+#define ICON_SIZE 		16.0	/* Our Icons are ICON_SIZE x ICON_SIZE */
+#define ICON_INSET_HORIZ	4.0	/* Distance to inset the icon from the left edge. */
+#define ICON_TEXT_SPACING	2.0	/* Distance between the end of the icon and the text part */
+
 #define ARROW_SIZE 7.0
 static NSImage *sArrow = nil;
 static NSImage *sSelectedArrow = nil;
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
-{		
+{
+	NSImage *iconImage = [[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
+	if (iconImage != nil) {
+        NSSize imageSize = [iconImage size];
+        NSRect imageFrame, highlightRect, textFrame;
+		
+		// Divide the cell into 2 parts, the image part (on the left) and the text part.
+		NSDivideRect(cellFrame, &imageFrame, &textFrame, ICON_INSET_HORIZ + ICON_TEXT_SPACING + imageSize.width, NSMinXEdge);
+        imageFrame.origin.x += ICON_INSET_HORIZ;
+        imageFrame.size = imageSize;
+		
+		// Adjust the image frame top account for the fact that we may or may not be in a flipped control view, since when compositing the online documentation states: "The image will have the orientation of the base coordinate system, regardless of the destination coordinates".
+        if ([controlView isFlipped]) {
+            imageFrame.origin.y += ceil((textFrame.size.height + imageFrame.size.height) / 2);
+        } else {
+            imageFrame.origin.y += ceil((textFrame.size.height - imageFrame.size.height) / 2);
+        }
+		
+        // We don't draw the background when creating the drag and drop image
+		BOOL drawsBackground = YES;
+        if (drawsBackground) {
+            // If we are highlighted, or we are selected (ie: the state isn't 0), then draw the highlight color
+            if ([self isHighlighted] || [self state] != 0) {
+                // The return value from highlightColorInView will return the appropriate one for you. 
+                [[self highlightColorInView:controlView] set];
+                // Draw the highlight, but only the portion that won't be caught by the call to [super drawInteriorWithFrame:...] below.  
+                highlightRect = NSMakeRect(NSMinX(cellFrame), NSMinY(cellFrame), NSWidth(cellFrame) - NSWidth(textFrame), NSHeight(cellFrame));
+                NSRectFill(highlightRect);
+            }
+        }
+		
+        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0];
+		
+		// Have NSBrowserCell kindly draw the text part, since it knows how to do that for us, no need to re-invent what it knows how to do.
+		[super drawInteriorWithFrame:textFrame inView:controlView];
+    } else {
+		// At least draw something if we couldn't find an icon. You may want to do something more intelligent.
+    	[super drawInteriorWithFrame:cellFrame inView:controlView];
+    }
+	
+	return;
+	
 	NSRect imageRect = NSMakeRect(NSMinX(cellFrame), NSMidY(cellFrame) - (ICON_SIZE / 2.0), ICON_SIZE, ICON_SIZE);
 	NSRect arrowRect = NSMakeRect(NSMaxX(cellFrame) - ARROW_SIZE - PADDING, NSMidY(cellFrame) - (ARROW_SIZE / 2.0), ARROW_SIZE, ARROW_SIZE);
 	
@@ -1422,10 +1760,10 @@ static NSImage *sSelectedArrow = nil;
 		imageRect.origin.y = 0;
 	}
 	
-	[[myNode iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)] drawInRect:imageRect
-															  fromRect:NSZeroRect
-															 operation:NSCompositeSourceOver
-															  fraction:1.0];
+	[[[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)] drawInRect:imageRect
+																				fromRect:NSZeroRect
+																			   operation:NSCompositeSourceOver
+																				fraction:1.0];
 	
 	if ([controlView isFlipped]) 
 	{
@@ -1454,7 +1792,7 @@ static NSImage *sSelectedArrow = nil;
 	[label release];
 	
 	if (![self isLeaf])
-	{
+	{		
 		if (!sArrow)
 		{
 			NSBundle *b = [NSBundle bundleForClass:[self class]];
