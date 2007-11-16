@@ -93,7 +93,8 @@ typedef enum {
 		unsigned canCreateFolders: 1;
 		unsigned isReloading: 1;
 		unsigned outlineViewIsCollapsing: 1;
-		unsigned unused: 20;
+		unsigned firstTimeWithOutlineView: 1;
+		unsigned unused: 19;
 	} myFlags;
 }
 
