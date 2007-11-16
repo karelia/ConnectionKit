@@ -347,6 +347,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myFlags.showsFilePackageExtensions = YES;
 	myFlags.canCreateFolders = NO;
 	myCachedContentsThresholdSize = 65536; // 64k threshold
+	myFlags.firstTimeWithOutlineView = YES;
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
 											 selector:@selector(nodesRemovedInMerge:)
@@ -446,7 +447,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oStandardBrowser setDelegate:self];
     [oStandardBrowser setTarget:self];
     [oStandardBrowser setAction: @selector(standardBrowserSelectedWithDelay:)];
-	//[oStandardBrowser loadColumnZero]; // TODO: is this necessary? How do we reset the browser view to default empty
 
 	// set up the browser
 	[oBrowser setCellClass:[CKDirectoryBrowserCell class]];
@@ -972,6 +972,17 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     {
         [oSearch setStringValue:@""];
         [self reloadViews];
+		//setup the outline view columns to start off nicely sized
+		if (myFlags.firstTimeWithOutlineView && [oStyle selectedSegment] == CKOutlineViewStyle)
+		{
+			myFlags.firstTimeWithOutlineView = NO;
+			float width = NSWidth([oOutlineView bounds]);
+			NSArray *cols = [oOutlineView tableColumns];
+			[[cols objectAtIndex:0] setWidth:width * 0.403426791277259];
+			[[cols objectAtIndex:1] setWidth:width * 0.124610591900312];
+			[[cols objectAtIndex:2] setWidth:width * 0.233644859813084];
+			[[cols objectAtIndex:3] setWidth:width * 0.238317757009346];
+		}
         [oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
     }
 }
@@ -981,47 +992,22 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
 	
-	// ignore the selection if the user has selected the currently selected node
-	if ([sender indexOfSelectedItem] == 0) return;
-	
 	// empty the selection
 	[mySelection removeAllObjects];
 	[mySelection addObject:node];
 	
-	if ([path hasPrefix:myRelativeRootPath])
-	{
-		[oOutlineView deselectAll:self];
-		int row = [oOutlineView rowForItem:node];
-		if (row != NSNotFound)
-		{
-			[oOutlineView selectRow:row byExtendingSelection:NO];
-			[oOutlineView scrollRowToVisible:row];
-		}
-		
-		// TODO: test, was Failing for myRelativeRootPath = / (ex /, /Users/bhansen, ended up selectablePath == Users/bhansen
-		[oStandardBrowser setPath:[self _browserPathForPath:path]];
-		//[oStandardBrowser scrollColumnToVisible:???]; // Do we need to scroll manually?
-		
-		[oBrowser setPath:[self _browserPathForPath:path]];
-		[oBrowser scrollRectToVisible:NSMakeRect(NSMaxX([oBrowser bounds]) - 1, 0, 1, 1)];
-	}
-	else
+	if (![path hasPrefix:myRelativeRootPath])
 	{
 		[self _changeRelativeRootToPath:path];
-		
-		[oOutlineView deselectAll:self];
-		[oOutlineView reloadData];
-		
-		[oStandardBrowser loadColumnZero];
-		[oStandardBrowser setPath:[self _browserPathForPath:path]];
-		
-		[oBrowser setPath:nil];
-		[oBrowser setPath:[self _browserPathForPath:path]];
 	}
+
 	[self _updatePopUpToPath:path];
 	
 	// this pushes a history object and fetches the contents
 	[self _navigateToPath:path];
+
+	// sync all the views
+	[self reloadViews];
 }
 
 - (IBAction)outlineViewSelected:(id)sender
