@@ -39,6 +39,7 @@
 	NSMutableArray *myContents;
 	NSMutableDictionary *myProperties;
 	NSImage *myIcon;
+	NSMutableDictionary *myCachedIcons;
 	NSData *myCachedContents;
 }
 

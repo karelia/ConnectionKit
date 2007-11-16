@@ -48,7 +48,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	myName = [name copy];
 	myContents = [[NSMutableArray alloc] initWithCapacity:32];
 	myProperties = [[NSMutableDictionary alloc] initWithCapacity:32];
-	
+	myCachedIcons = [[NSMutableDictionary alloc] initWithCapacity:8];
 	// by default we are a directory - this helps with the icons in the popup button for directories above the first directory returned (relative root)
 	[self setProperty:NSFileTypeDirectory forKey:NSFileType];
 	
@@ -61,6 +61,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	[myContents release];
 	[myProperties release];
 	[myIcon release];
+	[myCachedIcons release];
 	[myCachedContents release];
 	
 	[super dealloc];
@@ -587,12 +588,19 @@ static NSImage *sSymFileIcon = nil;
 
 - (NSImage *)iconWithSize:(NSSize)size
 {
-	NSImage *icon = [[self icon] copy];
+	NSImage *icon = [myCachedIcons objectForKey:NSStringFromSize(size)];
 	
-	[icon setScalesWhenResized:YES];
-	[icon setSize:size];
+	if (!icon)
+	{
+		icon = [[self icon] copy];
+		[icon setScalesWhenResized:YES];
+		[icon setSize:size];
+		
+		[myCachedIcons setObject:icon forKey:NSStringFromSize(size)];
+		[icon release];
+	}
 	
-	return [icon autorelease];
+	return icon;
 }
 
 - (void)setCachedContents:(NSData *)contents
