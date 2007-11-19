@@ -112,7 +112,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 - (unsigned long long)size
 {
 	unsigned long long size = mySize;
-	NSEnumerator *e = [myContents objectEnumerator];
+	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
 	while ((cur = [e nextObject]))
@@ -134,7 +134,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	if ([self isDirectory]) 
 	{
 		unsigned long long rem = 0;
-		NSEnumerator *e = [myContents objectEnumerator];
+		NSEnumerator *e = [[self contents] objectEnumerator];
 		CKTransferRecord *cur;
 		
 		while ((cur = [e nextObject])) 
@@ -248,7 +248,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	else
 	{
 		// check children for errors
-		NSEnumerator *e = [myContents objectEnumerator];
+		NSEnumerator *e = [[self contents] objectEnumerator];
 		CKTransferRecord *cur;
 		
 		while ((cur = [e nextObject]))
@@ -265,7 +265,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	if (!ret)
 	{
 		// check children for errors
-		NSEnumerator *e = [myContents objectEnumerator];
+		NSEnumerator *e = [[self contents] objectEnumerator];
 		CKTransferRecord *cur;
 		
 		while ((cur = [e nextObject]))
@@ -352,7 +352,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (NSArray *)contents
 {
-	return myContents;
+	return [[myContents copy] autorelease];
 }
 
 - (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
@@ -369,7 +369,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	}
 	[str appendFormat:@"\t(%lld of %lld bytes - %@%%)\n", [self transferred], [self size], [self progress]];
 
-	NSEnumerator *e = [myContents objectEnumerator];
+	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
 	while ((cur = [e nextObject]))
