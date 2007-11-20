@@ -233,7 +233,7 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 			//We will overwrite the corrupt registry with a fresh one. 
 			//Should we inform the user? In any case, log it.
 			NSLog(@"Unable to unarchive registry at path \"%@\". New Registry will be created to overwrite damaged one.", [self databaseFile]);
-			NSLog(@"Caught %@: %@", [exception name], [exception  reason]);
+			NSLog(@"Caught %@: %@", [exception name], [exception reason]);
 		}
 	}
 	return hosts;

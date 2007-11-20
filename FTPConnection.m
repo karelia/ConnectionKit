@@ -1463,8 +1463,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSRange newLinePosition;
 
-	NSString *str = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-	[_commandBuffer appendString:str];
+	
+	NSString *str = [[NSString alloc] initWithData:data encoding:NSASCIIStringEncoding];
+	if (str)
+	{
+		[_commandBuffer appendString:str];
+	}
 	[str release];
 				
 	while ((newLinePosition=[_commandBuffer rangeOfString:@"\r\n"]).location != NSNotFound ||
