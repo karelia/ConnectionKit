@@ -1040,7 +1040,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)standardBrowserSelected:(id)sender
 {
-	TRACE;
 	// update our internal selection tracking
 	[mySelection removeAllObjects];
 	NSEnumerator *e = [[oStandardBrowser selectedCells] objectEnumerator];
@@ -1596,7 +1595,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)selectCellAtRow:(int)row column:(int)column
 {
-	TRACE;
 	[super selectCellAtRow:row column:column];
 }
 
