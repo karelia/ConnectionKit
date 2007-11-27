@@ -343,6 +343,11 @@ static Class sCellClass = nil;
         [self addSubview:scroller];
         i++;
     }
+	
+	if (myDefaultColumnWidth < myMinColumnWidth)
+	{
+		myMinColumnWidth = myDefaultColumnWidth;
+	}
     
     myMinVisibleColumns = [myScrollers count];
 	[self reloadData];

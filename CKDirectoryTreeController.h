@@ -171,6 +171,28 @@ typedef enum {
 
 @end
 
+@interface CKDirectoryTableBrowserCell : NSBrowserCell
+{
+	NSString *myTitle;
+}
+
+@end
+
+@interface CKDirectoryNodeFormatter : NSFormatter
+{
+	id myDelegate;
+}
+
+- (void)setDelegate:(id)delegate;
+
+@end
+
+@interface NSObject (CKDirectoryNodeFormatterDelegate) 
+
+- (NSString *)directoryNodeFormatter:(CKDirectoryNodeFormatter *)formatter stringRepresentationWithNode:(CKDirectoryNode *)node;
+
+@end
+
 @interface CKDirectoryCell : NSCell
 {
 	NSImage *myIcon;
