@@ -57,7 +57,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (BOOL)_isFiltering;
 - (void)_updatePopUpToPath:(NSString *)path;
 - (void)_pruneHistoryWithPath:(NSString *)path;
-- (void)_navigateToPath:(NSString *)path;
+- (void)_navigateToPath:(NSString *)path pushToHistoryStack:(BOOL)flag;
 - (NSArray *)_selectedItems;
 - (void)_updateHistoryButtons;
 - (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node;
@@ -235,7 +235,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self _updateHistoryButtons];	
 }
 
-- (void)_navigateToPath:(NSString *)path
+- (void)_navigateToPath:(NSString *)path pushToHistoryStack:(BOOL)flag
 {
 	// stop being re-entrant from the outlineview's shouldExpandItem: delegate method
 	if(myFlags.isNavigatingToPath) return;
@@ -266,22 +266,25 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		}
 	}
 	
-	// handle the history
-	if ([myHistory count] > 0 && myHistoryIndex < ([myHistory count] - 1))
+	if (flag)
 	{
-		// we have used the history buttons and are now taking a new path so we need to remove history from this point forward
-		NSRange oldPathRange = NSMakeRange(myHistoryIndex + 1, [myHistory count] - 1 - myHistoryIndex);
-		[myHistory removeObjectsInRange:oldPathRange];
+		// handle the history
+		if ([myHistory count] > 0 && myHistoryIndex < ([myHistory count] - 1))
+		{
+			// we have used the history buttons and are now taking a new path so we need to remove history from this point forward
+			NSRange oldPathRange = NSMakeRange(myHistoryIndex + 1, [myHistory count] - 1 - myHistoryIndex);
+			[myHistory removeObjectsInRange:oldPathRange];
+		}
+		
+		// push the new navigation item on the stack if the last item is not the same as this one
+		if (![[[myHistory lastObject] objectForKey:@"fp"] isEqualToString:path])
+		{
+			[myHistory addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, @"fp", myRelativeRootPath, @"rp", nil]];
+			myHistoryIndex++;
+		}
+		
+		[self _updateHistoryButtons];
 	}
-	
-	// push the new navigation item on the stack if the last item is not the same as this one
-	if (![[[myHistory lastObject] objectForKey:@"fp"] isEqualToString:path])
-	{
-		[myHistory addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, @"fp", myRelativeRootPath, @"rp", nil]];
-		myHistoryIndex++;
-	}
-	
-	[self _updateHistoryButtons];
 	
 	// make sure the views are in sync
 	[oOutlineView scrollItemToTop:mySelectedNode];
@@ -449,7 +452,13 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     [oStandardBrowser setAction: @selector(standardBrowserSelectedWithDelay:)];
 
 	// set up the browser
-	[oBrowser setCellClass:[CKDirectoryBrowserCell class]];
+	CKDirectoryTableBrowserCell *tableCell = [[CKDirectoryTableBrowserCell alloc] initTextCell:@""];
+	CKDirectoryNodeFormatter *formatter = [[CKDirectoryNodeFormatter alloc] init];
+	[formatter setDelegate:self];
+	[tableCell setFormatter:formatter];
+	[formatter release];
+	[oBrowser setCellPrototype:tableCell];
+	[tableCell release];
 	[oBrowser setTarget:self];
 	[oBrowser setAction:@selector(browserSelected:)];
 	[oBrowser setDelegate:self];
@@ -525,6 +534,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)reloadViews
 {
+	NSLog(@"%s", _cmd);
 	// reload the data
 	myFlags.isReloading = YES;
 	
@@ -541,38 +551,37 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	// loop over and select everything
 	NSEnumerator *e = [[self _selectedItems] objectEnumerator];
 	CKDirectoryNode *cur;
-	BOOL didScroll = NO;
-	BOOL didSetBrowserPath = NO;
+	BOOL didScroll = NO, didSetBrowserPath = NO;
 	
 	while ((cur = [e nextObject]))
 	{
 		// do the outline view
-		if ([oStyles indexOfSelectedTabViewItem] != CKOutlineViewStyle)
+		NSMutableArray *nodesToExpand = [NSMutableArray array];
+		if ([self outlineView:oOutlineView isItemExpandable:cur])
 		{
-			// make sure all the parents are expanded in the outline view
-			NSMutableArray *nodesToExpand = [NSMutableArray array];
-			CKDirectoryNode *parent = [cur parent];
-			
-			while ((parent))
-			{
-				[nodesToExpand addObject:parent];
-				parent = [parent parent];
-			}
-			
-			NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
-			
-			while ((parent = [g nextObject]))
-			{
-				[oOutlineView expandItem:parent];
-			}
-			
-			[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
-			if (!didScroll)
-			{
-				// only scroll if we aren't the active view
-				[oOutlineView scrollItemToTop:cur];
-				didScroll = YES;
-			}
+			[nodesToExpand addObject:cur];
+		}
+		CKDirectoryNode *parent = [cur parent];
+		
+		while ((parent))
+		{
+			[nodesToExpand addObject:parent];
+			parent = [parent parent];
+		}
+		
+		NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
+		
+		while ((parent = [g nextObject]))
+		{
+			[oOutlineView expandItem:parent];
+		}
+		
+		[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
+		if (!didScroll)
+		{
+			// only scroll if we aren't the active view
+			[oOutlineView scrollItemToTop:cur];
+			didScroll = YES;
 		}
 		
 		// do the NSBrowser
@@ -973,17 +982,20 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
         [oSearch setStringValue:@""];
         [self reloadViews];
 		//setup the outline view columns to start off nicely sized
-		if (myFlags.firstTimeWithOutlineView && [oStyle selectedSegment] == CKOutlineViewStyle)
+		if ([oStyle selectedSegment] == CKOutlineViewStyle)
 		{
-			myFlags.firstTimeWithOutlineView = NO;
-			float width = NSWidth([oOutlineView bounds]);
-			NSArray *cols = [oOutlineView tableColumns];
-			[[cols objectAtIndex:0] setWidth:width * 0.403426791277259];
-			[[cols objectAtIndex:1] setWidth:width * 0.124610591900312];
-			[[cols objectAtIndex:2] setWidth:width * 0.233644859813084];
-			[[cols objectAtIndex:3] setWidth:width * 0.238317757009346];
+			if (myFlags.firstTimeWithOutlineView)
+			{
+				myFlags.firstTimeWithOutlineView = NO;
+				float width = NSWidth([oOutlineView bounds]);
+				NSArray *cols = [oOutlineView tableColumns];
+				[[cols objectAtIndex:0] setWidth:width * 0.403426791277259];
+				[[cols objectAtIndex:1] setWidth:width * 0.124610591900312];
+				[[cols objectAtIndex:2] setWidth:width * 0.233644859813084];
+				[[cols objectAtIndex:3] setWidth:width * 0.228317757009346];
+			}
 		}
-        [oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
+		[oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
     }
 }
 
@@ -1004,7 +1016,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self _updatePopUpToPath:path];
 	
 	// this pushes a history object and fetches the contents
-	[self _navigateToPath:path];
+	[self _navigateToPath:path pushToHistoryStack:YES];
 
 	// sync all the views
 	[self reloadViews];
@@ -1028,7 +1040,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		fullPath = [node path];
 	}
 		
-	[self _navigateToPath:fullPath];
+	[self _navigateToPath:fullPath pushToHistoryStack:YES];
 	[self _updatePopUpToPath:fullPath];
 }
 
@@ -1051,19 +1063,18 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
-	[self _navigateToPath:fullPath];
+	[self _navigateToPath:fullPath pushToHistoryStack:YES];
 	[self _updatePopUpToPath:fullPath];
 }
 
 - (IBAction)browserSelected:(id)sender
-{
-	NSString *fullPath = [myRelativeRootPath stringByAppendingPathComponent:[oBrowser path]];
-	
+{	
 	// update our internal selection tracking
 	[mySelection removeAllObjects];
 	[mySelection addObjectsFromArray:[oBrowser selectedItems]];
 	
-	[self _navigateToPath:fullPath];
+	NSString *fullPath = [[[oBrowser selectedItems] lastObject] path];
+	[self _navigateToPath:fullPath pushToHistoryStack:YES];
 	[self _updatePopUpToPath:fullPath];
 }
 
@@ -1096,42 +1107,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSString *fullPath = [rec objectForKey:@"fp"];
 
 	[self _changeRelativeRootToPath:relPath];
-	[oStandardBrowser loadColumnZero];
-	[oStandardBrowser setPath:[self _browserPathForPath:fullPath]]; // TODO: checkpath:NO?
-	[oBrowser setPath:[self _browserPathForPath:fullPath] checkPath:NO];
-	
-	CKDirectoryNode *node = [CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode];
-	NSMutableArray *nodes = [NSMutableArray arrayWithObject:node];
-	CKDirectoryNode *parent = [node parent];
-	
-	while ((parent))
-	{
-		[nodes addObject:parent];
-		parent = [parent parent];
-	}
-	
-	NSEnumerator *e = [nodes reverseObjectEnumerator];
-	CKDirectoryNode *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		// this stops the _navigateToPath: stuff being called.
-		myFlags.outlineViewDoubleCallback = YES;
-		[oOutlineView expandItem:cur];
-	}
-	
-	[oOutlineView deselectAll:self];
-	[oOutlineView selectRow:[oOutlineView rowForItem:node] byExtendingSelection:NO];
-	[oOutlineView scrollItemToTop:node];
-	
+	[self _navigateToPath:fullPath pushToHistoryStack:NO];
 	[self _updatePopUpToPath:fullPath];
-	
-	// refetch contents
-	myDirectoriesLoading++;
-	[myDelegate directoryTreeStartedLoadingContents:self];
-	[myDelegate directoryTree:self needsContentsForPath:fullPath];
-	
 	[self _updateHistoryButtons];
+	
+	[self reloadViews];
 }
 
 - (IBAction)outlineDoubleClicked:(id)sender
@@ -1324,7 +1304,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		myFlags.outlineViewDoubleCallback = YES;
 		// need to fetch from the delegate
-		[self _navigateToPath:[item path]];
+		[self _navigateToPath:[item path] pushToHistoryStack:YES];
 	}
 	
 	return YES;
@@ -1346,7 +1326,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark NSBrowser Delegate DataSource
 
-- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column {
+- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column 
+{
+	NSLog(@"%s %d", _cmd, column);
 	CKDirectoryNode *node = nil;
 	if (column == 0)
 	{
@@ -1374,10 +1356,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
-			
+	NSLog(@"%s%@", _cmd, node);
 	[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
-	
-	[cell setRepresentedObject:node];
+	[cell setRepresentedObject:[node retain]];
 	[cell setTitle:[self _cellDisplayNameWithNode:node]];
 }
 
@@ -1401,17 +1382,25 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (id)tableBrowser:(CKTableBasedBrowser *)browser objectValueByItem:(id)item
 {
-	return [item name];
+	return item;
 }
 
 - (void)tableBrowser:(CKTableBasedBrowser *)browser setObjectValue:(id)object byItem:(id)item
 {
-	[(CKDirectoryNode *)item setName:object];
+	//[(CKDirectoryNode *)item setName:object];
 }
 
 - (NSString *)tableBrowser:(CKTableBasedBrowser *)browser pathForItem:(id)item
 {
-	NSString *path = [[item path] substringFromIndex:[myRelativeRootPath length]];
+	NSString *fullPath = [item path];
+	
+	if ([fullPath length] < [myRelativeRootPath length])
+	{
+		// we have an orphaned object hanging around
+		return nil;
+	}
+	
+	NSString *path = [fullPath substringFromIndex:[myRelativeRootPath length]];
 	if (![path hasPrefix:@"/"])
 	{
 		path = [NSString stringWithFormat:@"/%@", path];
@@ -1470,12 +1459,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)tableBrowser:(CKTableBasedBrowser *)browser willDisplayCell:(id)cell
 {
-	CKDirectoryBrowserCell *nodeCell = (CKDirectoryBrowserCell *)cell;
-	CKDirectoryNode *node = [nodeCell representedObject];
+	CKDirectoryNode *node = [cell objectValue];
 	
-	[nodeCell setLeaf:![self tableBrowser:browser isItemExpandable:node]];
-	
+	[cell setLeaf:![self tableBrowser:browser isItemExpandable:node]];
 	[cell setTitle:[self _cellDisplayNameWithNode:node]];
+}
+
+- (NSString *)directoryNodeFormatter:(CKDirectoryNodeFormatter *)formatter stringRepresentationWithNode:(CKDirectoryNode *)node
+{
+	return [self _cellDisplayNameWithNode:node];
 }
 
 #pragma mark -
@@ -1652,19 +1644,16 @@ static NSMutableParagraphStyle *sStyle = nil;
 	myMakingDragImage = flag;
 }
 
-// MERGE: I have kept Greg's drawing code!
-
 #define ICON_INSET_VERT		2.0	/* The size of empty space between the icon end the top/bottom of the cell */ 
-#define ICON_SIZE 		16.0	/* Our Icons are ICON_SIZE x ICON_SIZE */
+#define ICON_SIZE			16.0/* Our Icons are ICON_SIZE x ICON_SIZE */
 #define ICON_INSET_HORIZ	4.0	/* Distance to inset the icon from the left edge. */
 #define ICON_TEXT_SPACING	2.0	/* Distance between the end of the icon and the text part */
 
 #define ARROW_SIZE 7.0
-static NSImage *sArrow = nil;
-static NSImage *sSelectedArrow = nil;
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
-{
+{	
+	NSLog(@"%s: %@", _cmd, [self representedObject]);
 	NSImage *iconImage = [[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
 	if (iconImage != nil) {
         NSSize imageSize = [iconImage size];
@@ -1703,116 +1692,112 @@ static NSImage *sSelectedArrow = nil;
 		// At least draw something if we couldn't find an icon. You may want to do something more intelligent.
     	[super drawInteriorWithFrame:cellFrame inView:controlView];
     }
-	
-	return;
-	
-	NSRect imageRect = NSMakeRect(NSMinX(cellFrame), NSMidY(cellFrame) - (ICON_SIZE / 2.0), ICON_SIZE, ICON_SIZE);
-	NSRect arrowRect = NSMakeRect(NSMaxX(cellFrame) - ARROW_SIZE - PADDING, NSMidY(cellFrame) - (ARROW_SIZE / 2.0), ARROW_SIZE, ARROW_SIZE);
-	
-	imageRect = NSOffsetRect(imageRect, PADDING, 0);
-	
-	BOOL highlighted = [self isHighlighted];
-	
-	if (highlighted) 
+}
+
+@end
+
+@implementation CKDirectoryNodeFormatter : NSFormatter
+
+- (void)setDelegate:(id)delegate
+{
+	if (![delegate respondsToSelector:@selector(directoryNodeFormatter:stringRepresentationWithNode:)])
 	{
-	    [[self highlightColorInView: controlView] set];
-	} 
-	else 
-	{
-		if (!myMakingDragImage)
-		{
-			[[NSColor controlBackgroundColor] set];
-		}
-	    else
-		{
-			[[NSColor clearColor] set];
-		}
+		@throw [NSException exceptionWithName:NSInvalidArgumentException
+									   reason:[NSString stringWithFormat:@"-[%@ %@] delegate must implement directoryNodeFormatter:stringRepresentationWithNode:", [self className], NSStringFromSelector(_cmd)]
+									 userInfo:nil];
 	}
 	
-	NSRect highlightRect = NSMakeRect(NSMinX(cellFrame), NSMinY(cellFrame), NSWidth(cellFrame), NSHeight(cellFrame));
-	NSRectFill(highlightRect);
-	
-	NSAffineTransform *flip;
-	
-	if ([controlView isFlipped]) 
+	myDelegate = delegate;
+}
+
+- (NSString *)stringForObjectValue:(id)anObject
+{
+	if ([anObject isKindOfClass:[CKDirectoryNode class]])
 	{
-		[[NSGraphicsContext currentContext] saveGraphicsState];
-		flip = [NSAffineTransform transform];
-		[flip translateXBy:0 yBy:NSMaxY(imageRect)];
-		[flip scaleXBy:1 yBy:-1];
-		[flip concat];
-		imageRect.origin.y = 0;
+		return [myDelegate directoryNodeFormatter:self stringRepresentationWithNode:anObject];
 	}
-	
-	[[[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)] drawInRect:imageRect
-																				fromRect:NSZeroRect
-																			   operation:NSCompositeSourceOver
-																				fraction:1.0];
-	
-	if ([controlView isFlipped]) 
+	return @"";
+}
+
+@end
+
+// NSTable sets a cells objectValue, the tree controller calls setTitle which then clears the objectValue (the node) to be a string.
+// we have to have an ivar of the title and override those methods
+@implementation CKDirectoryTableBrowserCell
+
+- (void)dealloc
+{
+	[myTitle release];
+	[super dealloc];
+}
+
+- (void)setTitle:(NSString *)title
+{
+	if (title != myTitle)
 	{
-		[flip invert];
-		[flip concat];
-		[[NSGraphicsContext currentContext] restoreGraphicsState];
+		[myTitle release];
+		myTitle = [title copy];
 	}
-	
-	NSMutableAttributedString *label = [[NSMutableAttributedString alloc] initWithAttributedString:[self attributedStringValue]];
-	NSRange labelRange = NSMakeRange(0, [label length]);
-	NSColor *highlightColor = [self highlightColorInView:controlView];
-	
-	if (highlighted && [highlightColor isEqual:[NSColor alternateSelectedControlColor]]) 
-	{
-		// add the alternate text color attribute.
-		[label addAttribute:NSForegroundColorAttributeName value:[NSColor alternateSelectedControlTextColor] range:labelRange];
-	}
-	
-	[label addAttribute:NSParagraphStyleAttributeName value:sStyle range:labelRange];
-	NSSize labelSize = [label size];
-	NSRect labelRect = NSMakeRect(NSMaxX(imageRect) + PADDING,  
-								  NSMidY(cellFrame) - (labelSize.height / 2),
-								  NSMinX(arrowRect) - NSMaxX(imageRect) - (2 * PADDING),
-								  labelSize.height);
-	[label drawInRect:labelRect];
-	[label release];
-	
-	if (![self isLeaf])
-	{		
-		if (!sArrow)
-		{
-			NSBundle *b = [NSBundle bundleForClass:[self class]];
-			NSString *path = [b pathForResource:@"container_triangle" ofType:@"tiff"];
-			sArrow = [[NSImage alloc] initWithContentsOfFile:path];
-			path = [b pathForResource:@"container_triangle_selected" ofType:@"tiff"];
-			sSelectedArrow = [[NSImage alloc] initWithContentsOfFile:path];
-		}
+}
+
+- (NSString *)title
+{
+	return myTitle;
+}
+
+- (NSString *)stringValue
+{
+	return myTitle;
+}
+
+- (NSSize)cellSizeForBounds:(NSRect)aRect 
+{
+    NSSize s = [super cellSizeForBounds:aRect];
+    s.height += 1.0 * 2.0;
+	s.width += NSWidth(aRect);
+    return s;
+}
+
+- (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
+{
+	NSImage *iconImage = [[self objectValue] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
+	if (iconImage != nil) {
+        NSSize imageSize = [iconImage size];
+        NSRect imageFrame, highlightRect, textFrame;
 		
-		NSImage *arrow = sArrow;
-		if (highlighted) arrow = sSelectedArrow;
+		// Divide the cell into 2 parts, the image part (on the left) and the text part.
+		NSDivideRect(cellFrame, &imageFrame, &textFrame, ICON_INSET_HORIZ + ICON_TEXT_SPACING + imageSize.width, NSMinXEdge);
+        imageFrame.origin.x += ICON_INSET_HORIZ;
+        imageFrame.size = imageSize;
 		
-		NSAffineTransform *flip;
+		// Adjust the image frame top account for the fact that we may or may not be in a flipped control view, since when compositing the online documentation states: "The image will have the orientation of the base coordinate system, regardless of the destination coordinates".
+        if ([controlView isFlipped]) {
+            imageFrame.origin.y += ceil((textFrame.size.height + imageFrame.size.height) / 2);
+        } else {
+            imageFrame.origin.y += ceil((textFrame.size.height - imageFrame.size.height) / 2);
+        }
 		
-		if ([controlView isFlipped]) 
-		{
-			[[NSGraphicsContext currentContext] saveGraphicsState];
-			flip = [NSAffineTransform transform];
-			[flip translateXBy:0 yBy:NSMaxY(arrowRect)];
-			[flip scaleXBy:1 yBy:-1];
-			[flip concat];
-			arrowRect.origin.y = 0;
-		}
+        // We don't draw the background when creating the drag and drop image
+		BOOL drawsBackground = YES;
+        if (drawsBackground) {
+            // If we are highlighted, or we are selected (ie: the state isn't 0), then draw the highlight color
+            if ([self isHighlighted] || [self state] != 0) {
+                // The return value from highlightColorInView will return the appropriate one for you. 
+                [[self highlightColorInView:controlView] set];
+                // Draw the highlight, but only the portion that won't be caught by the call to [super drawInteriorWithFrame:...] below.  
+                highlightRect = NSMakeRect(NSMinX(cellFrame), NSMinY(cellFrame), NSWidth(cellFrame) - NSWidth(textFrame), NSHeight(cellFrame));
+                NSRectFill(highlightRect);
+            }
+        }
 		
-		[arrow drawInRect:arrowRect
-				 fromRect:NSZeroRect
-				operation:NSCompositeSourceOver
-				 fraction:1.0];
+        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0];
 		
-		if ([controlView isFlipped]) 
-		{
-			[flip invert];
-			[flip concat];
-			[[NSGraphicsContext currentContext] restoreGraphicsState];
-		}
-	}
+		// Have NSBrowserCell kindly draw the text part, since it knows how to do that for us, no need to re-invent what it knows how to do.
+		[super drawInteriorWithFrame:textFrame inView:controlView];
+    } else {
+		// At least draw something if we couldn't find an icon. You may want to do something more intelligent.
+    	[super drawInteriorWithFrame:cellFrame inView:controlView];
+    }
 }
 
 @end

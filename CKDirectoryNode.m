@@ -58,6 +58,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 - (void)dealloc
 {
 	[myName release];
+	[myContents makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
 	[myContents release];
 	[myProperties release];
 	[myIcon release];
