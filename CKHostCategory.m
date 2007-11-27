@@ -186,44 +186,87 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[self didChange];
 }
 
-- (void)addChildCategory:(CKHostCategory *)cat
+- (void)addItem:(id)item
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(childChanged:) 
-												 name:CKHostCategoryChanged 
-											   object:cat];
-	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories addObject:cat];
-	[cat setCategory:self];
-	[self didChangeValueForKey:@"childCategories"];
-	[self didChange];
-}
-- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(unsigned)index
-{
-	if (index >= [myChildCategories count])
+	if ([item isKindOfClass:[CKHost class]])
 	{
-		[self addChildCategory:cat];
-		return;
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(hostChanged:)
+													 name:CKHostChanged
+												   object:item];
 	}
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(childChanged:) 
-												 name:CKHostCategoryChanged 
-											   object:cat];
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(childChanged:) 
+													 name:CKHostCategoryChanged 
+												   object:item];
+	}
 	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories insertObject:cat atIndex:index];
-	[cat setCategory:self];
+	[myChildCategories addObject:item];
+	[item setCategory:self];
 	[self didChangeValueForKey:@"childCategories"];
 	[self didChange];
 }
 
-- (void)removeChildCategory:(CKHostCategory *)cat
+- (void)insertItem:(id)item atIndex:(unsigned)index
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:cat];
+	if (index >= [myChildCategories count])
+	{
+		[self addChildCategory:item];
+		return;
+	}
+	if ([item isKindOfClass:[CKHost class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(hostChanged:)
+													 name:CKHostChanged
+												   object:item];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(childChanged:) 
+													 name:CKHostCategoryChanged 
+												   object:item];
+	}
 	[self willChangeValueForKey:@"childCategories"];
-    [cat setCategory:nil];
-	[myChildCategories removeObject:cat];
+	[myChildCategories insertObject:item atIndex:index];
+	[item setCategory:self];
 	[self didChangeValueForKey:@"childCategories"];
 	[self didChange];
+}
+
+- (void)removeItem:(id)item
+{
+	if ([item isKindOfClass:[CKHost class]])
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostChanged object:item];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
+	}
+	[self willChangeValueForKey:@"childCategories"];
+    [item setCategory:nil];
+	[myChildCategories removeObject:item];
+	[self didChangeValueForKey:@"childCategories"];
+	[self didChange];
+}
+
+- (void)addChildCategory:(CKHostCategory *)cat
+{
+	[self addItem:cat];
+}
+
+- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(unsigned)index
+{
+	[self insertItem:cat atIndex:index];
+}
+
+- (void)removeChildCategory:(CKHostCategory *)cat
+{
+	[self removeItem:cat];
 }
 
 - (NSArray *)childCategories
@@ -238,42 +281,17 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
 - (void)addHost:(CKHost *)host
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(hostChanged:)
-												 name:CKHostCategoryChanged
-											   object:host];
-	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories addObject:host];
-	[host setCategory:self];
-	[self didChangeValueForKey:@"childCategories"];
-	[self didChange];
+	[self addItem:host];
 }
+
 - (void)insertHost:(CKHost *)host atIndex:(unsigned)index
 {
-	if (index >= [myChildCategories count])
-	{
-		[self addHost:host];
-		return;
-	}
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(hostChanged:)
-												 name:CKHostCategoryChanged
-											   object:host];
-	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories insertObject:host atIndex:index];
-	[host setCategory:self];
-	[self didChangeValueForKey:@"childCategories"];
-	[self didChange];
+	[self insertItem:host atIndex:index];
 }
 
 - (void)removeHost:(CKHost *)host
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:host];
-	[self willChangeValueForKey:@"childCategories"];
-	[myChildCategories removeObjectIdenticalTo:host];
-	[host setCategory:nil];
-	[self didChangeValueForKey:@"childCategories"];
-	[self didChange];
+	[self removeItem:host];
 }
 
 - (NSArray *)hosts
