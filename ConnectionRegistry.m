@@ -31,6 +31,7 @@
 #import "CKHostCategory.h"
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
+#import "AbstractConnectionProtocol.h"
 #import "AbstractConnection.h"
 #import "CKHostCell.h"
 
@@ -41,6 +42,7 @@ static NSString *sRegistryDatabase = nil;
 
 NSString *CKRegistryNotification = @"CKRegistryNotification";
 NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
+NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 @interface ConnectionRegistry (Private)
 - (void)otherProcessChanged:(NSNotification *)notification;
@@ -321,79 +323,94 @@ NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
     [myOutlineView reloadData];
 }
 
-- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
+- (void)insertItem:(id)item atIndex:(unsigned)index
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(changed:)
-												 name:CKHostCategoryChanged
-											   object:category];
+	if ([item isKindOfClass:[CKHost class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:)
+													 name:CKHostChanged
+												   object:item];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:) 
+													 name:CKHostCategoryChanged 
+												   object:item];
+	}
 	[self willChangeValueForKey:@"connections"];
-	[myConnections insertObject:category atIndex:index];
+	[myConnections insertObject:item atIndex:index];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
 
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+- (void)addItem:(id)item
 {
-	if (index >= [myConnections count])
+	if ([item isKindOfClass:[CKHost class]])
 	{
-		[self addHost:host];
-		return;
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:)
+													 name:CKHostChanged
+												   object:item];
 	}
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(changed:)
-												 name:CKHostChanged
-											   object:host];
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:) 
+													 name:CKHostCategoryChanged 
+												   object:item];
+	}
 	[self willChangeValueForKey:@"connections"];
-	[myConnections insertObject:host atIndex:index];
+	[myConnections addObject:item];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
+}
+
+- (void)removeItem:(id)item
+{
+	if ([item isKindOfClass:[CKHost class]])
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostChanged object:item];
+	}
+	else if ([item isKindOfClass:[CKHostCategory class]])
+	{
+		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
+	}
+	[self willChangeValueForKey:@"connections"];
+	[myConnections removeObject:item];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
+- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
+{
+	[self insertItem:category atIndex:index];
 }
 
 - (void)addCategory:(CKHostCategory *)category
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(changed:)
-												 name:CKHostCategoryChanged
-											   object:category];
-	[self willChangeValueForKey:@"connections"];
-	[myConnections addObject:category];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
+	[self addItem:category];
 }
 
 - (void)removeCategory:(CKHostCategory *)category
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self
-													name:CKHostCategoryChanged
-												  object:category];
-	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObject:category];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
+	[self removeItem:category];
+}
+
+- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+{
+	[self insertItem:host atIndex:index];
 }
 
 - (void)addHost:(CKHost *)connection
 {
-	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(changed:)
-												 name:CKHostChanged
-											   object:connection];
-	[self willChangeValueForKey:@"connections"];
-	[myConnections addObject:connection];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
+	[self addItem:connection];
 }
 
 - (void)removeHost:(CKHost *)connection
 {
-	[[NSNotificationCenter defaultCenter] removeObserver:self
-													name:CKHostChanged
-												  object:connection];
-	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObjectIdenticalTo:connection];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
+	[self removeItem:connection];
 }
 
 - (NSArray *)connections
@@ -583,6 +600,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 {
 	myOutlineView = [view retain];
 	[myOutlineView setDataSource:self];
+	[myOutlineView registerForDraggedTypes:[NSArray arrayWithObjects:CKDraggedBookmarksPboardType, NSFilenamesPboardType, nil]];
 }
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
@@ -714,36 +732,54 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView writeItems:(NSArray *)items toPasteboard:(NSPasteboard *)pboard
 {
+	BOOL skipDroplets = NO;
+	NSNumber *skipDropletPref = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKSkipHostDropletCreation"];
+	if (skipDropletPref)
+	{
+		skipDroplets = [skipDropletPref boolValue];
+	}
+	
 	// we write out all the hosts /tmp
 	NSString *wd = [NSString stringWithFormat:@"/tmp/ck"];
 	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
 	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
 									   forLocal:NO];
-	[pboard declareTypes:[NSArray arrayWithObjects:NSFilenamesPboardType, nil] owner:nil];
-	NSMutableArray *files = [NSMutableArray array];
-	NSEnumerator *e = [items objectEnumerator];
-	id cur;
-	
-	while ((cur = [e nextObject]))
+	NSMutableArray *types = [NSMutableArray arrayWithObject:CKDraggedBookmarksPboardType];
+	if (!skipDroplets)
 	{
-		if ([cur isKindOfClass:[CKHost class]])
-		{
-			@try {
-				[files addObject:[cur createDropletAtPath:wd]];
-			}
-			@catch (NSException *ex) {
-				
-			}
-		}
-		else
-		{
-			NSString *catDir = [wd stringByAppendingPathComponent:[cur name]];
-			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
-			[files addObject:catDir];
-			[self recursivelyWrite:cur to:catDir];
-		}
+		[types addObject:NSFilenamesPboardType];
 	}
-	[pboard setPropertyList:files forType:NSFilenamesPboardType];
+	[pboard declareTypes:types owner:nil];
+	
+	if (!skipDroplets)
+	{
+		NSMutableArray *files = [NSMutableArray array];
+		NSEnumerator *e = [items objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			if ([cur isKindOfClass:[CKHost class]])
+			{
+				@try {
+					[files addObject:[cur createDropletAtPath:wd]];
+				}
+				@catch (NSException *ex) {
+					
+				}
+			}
+			else
+			{
+				NSString *catDir = [wd stringByAppendingPathComponent:[cur name]];
+				[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+				[files addObject:catDir];
+				[self recursivelyWrite:cur to:catDir];
+			}
+		}
+		[pboard setPropertyList:files forType:NSFilenamesPboardType];
+	}
+	
+	[pboard setPropertyList:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"InitiatedByDrag"] forType:CKDraggedBookmarksPboardType];
 	[myDraggedItems removeAllObjects];
 	[myDraggedItems addObjectsFromArray:items];
 	
@@ -752,18 +788,21 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
 {
-	if ([myDraggedItems count] > 0)
+	NSPasteboard *pboard = [dropInfo draggingPasteboard];
+	
+	if ([[pboard types] indexOfObject:CKDraggedBookmarksPboardType] != NSNotFound)
 	{
 		//Check if dragged item is part of an uneditable category
 		id draggedItem = [myDraggedItems objectAtIndex:0];
-		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]);
+		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]) || ([item isKindOfClass:[CKHostCategory class]] && ![item isEditable]);
 		if (isNotEditable)
 		{
 			return NSDragOperationNone;
 		}
+		// don't allow a recursive drop
 		if ([draggedItem isKindOfClass:[CKHostCategory class]])
 		{
-			if ([item isChildOf:draggedItem])
+			if ([item isKindOfClass:[CKHostCategory class]] && [item isChildOf:draggedItem])
 			{
 				return NSDragOperationNone;
 			}
@@ -773,188 +812,126 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		{
 			return NSDragOperationNone;
 		}
-	}
-	NSString *itemPath = [[[dropInfo draggingPasteboard] propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
-	if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
-	{
-		return NSDragOperationNone;
-	}
-	if ([[NSFileManager defaultManager] fileExistsAtPath:[itemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ! [itemPath hasPrefix:@"/tmp/ck"])
-	{
-		//Drag From Finder
-		if ([item isKindOfClass:[CKHostCategory class]])
+		// don't allow a host to get dropped on another host
+		if ([item isKindOfClass:[CKHost class]])
 		{
-			[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+			return NSDragOperationNone;
 		}
-		else
-		{
-			[outlineView setDropItem:nil dropChildIndex:proposedChildIndex];
-		}
-		return NSDragOperationCopy;
-	}
-	else if (item == nil || [item isKindOfClass:[CKHostCategory class]])
-	{
-		//Drag to re-order
-		[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+		
 		return NSDragOperationMove;
+	}
+	else if ([[pboard types] indexOfObject:NSFilenamesPboardType] != NSNotFound)
+	{
+		NSString *itemPath = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
+		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
+		{
+			return NSDragOperationNone;
+		}
+		if ([[NSFileManager defaultManager] fileExistsAtPath:[itemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ! [itemPath hasPrefix:@"/tmp/ck"])
+		{
+			//Drag From Finder
+			if ([item isKindOfClass:[CKHostCategory class]])
+			{
+				[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+			}
+			else
+			{
+				[outlineView setDropItem:nil dropChildIndex:proposedChildIndex];
+			}
+			return NSDragOperationCopy;
+		}
+		else if (item == nil || [item isKindOfClass:[CKHostCategory class]])
+		{
+			//Drag to re-order
+			[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
+			return NSDragOperationMove;
+		}
 	}
 	return NSDragOperationNone;
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(int)index
 {
-	NSArray *dropletPaths = [[info draggingPasteboard] propertyListForType:NSFilenamesPboardType];
-	NSEnumerator *dropletPathEnumerator = [dropletPaths objectEnumerator];
-	NSString *currentDropletPath;
-	while (currentDropletPath = [dropletPathEnumerator nextObject])
+	NSPasteboard *pboard = [info draggingPasteboard];
+	NSEnumerator *itemEnumerator = nil;
+	
+	if ([[pboard types] indexOfObject:CKDraggedBookmarksPboardType] == NSNotFound)
 	{
-		if (![currentDropletPath hasPrefix:@"/tmp/ck"])
+		// this is a drag of a droplet back in
+		NSMutableArray *unarchivedHosts = [NSMutableArray array];
+		NSArray *dropletPaths = [pboard propertyListForType:NSFilenamesPboardType];
+		NSEnumerator *e = [dropletPaths objectEnumerator];
+		NSString *cur;
+		
+		while ((cur = [e nextObject]))
 		{
-			//Drag to import
-			NSString *configurationFilePath = [currentDropletPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
+			NSString *configurationFilePath = [cur stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"];
 			CKHost *dropletHost = [NSKeyedUnarchiver unarchiveObjectWithFile:configurationFilePath];
-			if (!dropletHost)
+			
+			if (!dropletHost) continue;
+			[unarchivedHosts addObject:dropletHost];
+		}
+		itemEnumerator = [unarchivedHosts objectEnumerator];
+	}
+	else
+	{
+		itemEnumerator = [myDraggedItems objectEnumerator];
+	}
+	
+	NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
+	id currentItem = nil;
+	[self beginGroupEditing];
+	while ((currentItem = [itemsToMoveEnumerator nextObject]))
+	{
+		CKHostCategory *currentCategory = [currentItem category];
+		unsigned currentIndex = NSNotFound;
+		
+		if (currentCategory)
+		{
+			currentIndex = [[currentCategory hosts] indexOfObjectIdenticalTo:currentItem];
+			[currentCategory removeHost:currentItem];
+		}
+		else
+		{
+			currentIndex = [myConnections indexOfObjectIdenticalTo:currentItem];
+			[self removeHost:currentItem];
+		}
+		
+		// if we are moving around in the same category, then the index can get offset from the removal
+		if (currentCategory == item)
+		{
+			if (currentIndex < index) index--;
+		}
+		
+		//Add it in its new location
+		if (!item)
+		{
+			//Add new Host to the root.
+			if (index == -1)
 			{
-				continue;
-			}
-			//Dragged a Bookmark
-			if ([[item className] isEqualToString:@"CKHostCategory"])
-			{
-				//Into a Category
-				if (index == -1)
-				{
-					[item addHost:dropletHost];
-				}
-				else
-				{
-					[item insertHost:dropletHost atIndex:index];
-				}
+				[self addHost:currentItem];
 			}
 			else
 			{
-				//Into root
-				if (index == -1)
-				{
-					[self addHost:dropletHost];					
-				}
-				else
-				{
-					[self insertHost:dropletHost atIndex:index];
-				}
+				[self insertHost:currentItem atIndex:index];
 			}
 		}
 		else
 		{
-			NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
-			id currentItem = nil;
-			[self beginGroupEditing];
-			while ((currentItem = [itemsToMoveEnumerator nextObject]))
+			//Add the Host to it's new parent category.
+			if (index == -1)
 			{
-				//Make sure the item we dragged isn't attempting to be dragged into itself!
-				if (currentItem == item)
-				{
-					continue;
-				}
-				if ([[currentItem className] isEqualToString:@"CKHost"])
-				{
-					//We are dragging a CKHost
-					
-					//Remove it from where it is in the registry now.
-					BOOL hasRemoved = NO;
-					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
-					CKHostCategory *currentCategory;
-					BOOL cameFromCategory = YES;
-					while (currentCategory = [allCategoriesEnumerator nextObject])
-					{
-						if ([[currentCategory hosts] containsObject:currentItem])
-						{
-							[currentCategory removeHost:currentItem];
-							hasRemoved = YES;
-							break;
-						}
-					}
-					if (!hasRemoved)
-					{
-						cameFromCategory = NO;
-						[self removeHost:currentItem];
-					}
-					
-					//Add it in its new location
-					if (!item)
-					{
-						//Add new Host to the root.
-						if (index == -1)
-						{
-							[self addHost:currentItem];
-						}
-						else
-						{
-                            [self insertHost:currentItem atIndex:index];
-						}
-					}
-					else
-					{
-						//Add the Host to it's new parent category.
-						if (index == -1)
-						{
-							[item addHost:currentItem];
-						}
-						else
-						{
-							[item insertHost:currentItem atIndex: (cameFromCategory) ? index : index-1];
-						}
-					}
-				}
-				else
-				{
-					//We are dragging a CKHostCategory
-					BOOL hasRemoved = NO;
-					NSEnumerator *allCategoriesEnumerator = [[self allCategories] objectEnumerator];
-					CKHostCategory *currentCategory;
-					BOOL cameFromCategory = YES;
-					while (currentCategory = [allCategoriesEnumerator nextObject])
-					{
-						if ([[currentCategory childCategories] containsObject:currentItem])
-						{
-							[currentCategory removeChildCategory:currentItem];
-							hasRemoved = YES;
-						}
-					}
-					if (!hasRemoved)
-					{
-						cameFromCategory = NO;
-						[self removeCategory:currentItem];
-					}
-					if (!item)
-					{
-						//Add new category to the root.
-						if (index == -1)
-						{
-							[self addCategory:currentItem];
-						}
-						else
-						{
-							[self insertCategory:currentItem atIndex: cameFromCategory ? index : index-1];
-						}
-					}
-					else
-					{		
-						//Add new category to its new parent category.
-						if (index == -1)
-						{
-							[item addChildCategory:currentItem];
-						}
-						else
-						{
-							[item insertChildCategory:currentItem atIndex:index];
-						}
-					}
-				}
-				[myDraggedItems removeAllObjects];
+				[item addHost:currentItem];
 			}
-			[self endGroupEditing];						
+			else
+			{
+				[item insertHost:currentItem atIndex: index];
+			}
 		}
 	}
+	[myDraggedItems removeAllObjects];
+	[self endGroupEditing];
+	
 	return YES;
 }
 
