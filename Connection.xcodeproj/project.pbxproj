@@ -94,27 +94,6 @@
 		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
 		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
 		796291410B93909100C10BC6 /* folder.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EC09F7076200172CDD /* folder.png */; };
-		796CFEA10CB046ED006EA008 /* channel.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE8C0CB046ED006EA008 /* channel.c */; };
-		796CFEA20CB046ED006EA008 /* comp.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE8D0CB046ED006EA008 /* comp.c */; };
-		796CFEA30CB046ED006EA008 /* crypt.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE8E0CB046ED006EA008 /* crypt.c */; };
-		796CFEA40CB046ED006EA008 /* hostkey.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE8F0CB046ED006EA008 /* hostkey.c */; };
-		796CFEA50CB046ED006EA008 /* kex.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE900CB046ED006EA008 /* kex.c */; };
-		796CFEA60CB046ED006EA008 /* libssh2_config.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE910CB046ED006EA008 /* libssh2_config.h */; };
-		796CFEA70CB046ED006EA008 /* libssh2_priv.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE920CB046ED006EA008 /* libssh2_priv.h */; };
-		796CFEA80CB046ED006EA008 /* libssh2_publickey.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE930CB046ED006EA008 /* libssh2_publickey.h */; };
-		796CFEA90CB046ED006EA008 /* libssh2_sftp.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE940CB046ED006EA008 /* libssh2_sftp.h */; };
-		796CFEAA0CB046ED006EA008 /* libssh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE950CB046ED006EA008 /* libssh2.h */; };
-		796CFEAB0CB046ED006EA008 /* mac.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE960CB046ED006EA008 /* mac.c */; };
-		796CFEAC0CB046ED006EA008 /* misc.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE970CB046ED006EA008 /* misc.c */; };
-		796CFEAD0CB046ED006EA008 /* openssl.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE980CB046ED006EA008 /* openssl.c */; };
-		796CFEAE0CB046ED006EA008 /* openssl.h in Headers */ = {isa = PBXBuildFile; fileRef = 796CFE990CB046ED006EA008 /* openssl.h */; };
-		796CFEAF0CB046ED006EA008 /* packet.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9A0CB046ED006EA008 /* packet.c */; };
-		796CFEB00CB046ED006EA008 /* pem.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9B0CB046ED006EA008 /* pem.c */; };
-		796CFEB10CB046ED006EA008 /* publickey.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9C0CB046ED006EA008 /* publickey.c */; };
-		796CFEB20CB046ED006EA008 /* scp.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9D0CB046ED006EA008 /* scp.c */; };
-		796CFEB30CB046ED006EA008 /* session.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9E0CB046ED006EA008 /* session.c */; };
-		796CFEB40CB046ED006EA008 /* sftp.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFE9F0CB046ED006EA008 /* sftp.c */; };
-		796CFEB50CB046ED006EA008 /* userauth.c in Sources */ = {isa = PBXBuildFile; fileRef = 796CFEA00CB046ED006EA008 /* userauth.c */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782780B4745DD008DBA01 /* NSArray+Connection.m */; };
@@ -223,9 +202,6 @@
 		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
 		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79E17A0C0A659C1E009CA013 /* Passphrase.nib */; };
-		79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E17A130A659CEC009CA013 /* SSHPassphrase.m */; };
-		79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E17A140A659CEC009CA013 /* SSHPassphrase.h */; };
 		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
 		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
@@ -247,6 +223,16 @@
 		CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */ = {isa = PBXBuildFile; fileRef = CE4F78E80B9C8F530083B946 /* Logs.icns */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
+		D3598B790CF3D40800C61A38 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
+		D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B720CF3D40800C61A38 /* fdwrite.c */; };
+		D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B730CF3D40800C61A38 /* fdwrite.h */; };
+		D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B740CF3D40800C61A38 /* sshversion.c */; };
+		D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B750CF3D40800C61A38 /* sshversion.h */; };
+		D3598B7E0CF3D40800C61A38 /* typeforchar.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B760CF3D40800C61A38 /* typeforchar.c */; };
+		D3598B7F0CF3D40800C61A38 /* typeforchar.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B770CF3D40800C61A38 /* typeforchar.h */; };
+		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
+		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
+		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -389,27 +375,6 @@
 		795FF5060B0C048700EA9292 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Droplet.nib; sourceTree = "<group>"; };
 		795FF50C0B0C05F400EA9292 /* DropletController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DropletController.m; sourceTree = "<group>"; };
 		795FF50D0B0C05F400EA9292 /* DropletController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DropletController.h; sourceTree = "<group>"; };
-		796CFE8C0CB046ED006EA008 /* channel.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = channel.c; path = libssh2/channel.c; sourceTree = "<group>"; };
-		796CFE8D0CB046ED006EA008 /* comp.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = comp.c; path = libssh2/comp.c; sourceTree = "<group>"; };
-		796CFE8E0CB046ED006EA008 /* crypt.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = crypt.c; path = libssh2/crypt.c; sourceTree = "<group>"; };
-		796CFE8F0CB046ED006EA008 /* hostkey.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = hostkey.c; path = libssh2/hostkey.c; sourceTree = "<group>"; };
-		796CFE900CB046ED006EA008 /* kex.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = kex.c; path = libssh2/kex.c; sourceTree = "<group>"; };
-		796CFE910CB046ED006EA008 /* libssh2_config.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libssh2_config.h; path = libssh2/libssh2_config.h; sourceTree = "<group>"; };
-		796CFE920CB046ED006EA008 /* libssh2_priv.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libssh2_priv.h; path = libssh2/libssh2_priv.h; sourceTree = "<group>"; };
-		796CFE930CB046ED006EA008 /* libssh2_publickey.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libssh2_publickey.h; path = libssh2/libssh2_publickey.h; sourceTree = "<group>"; };
-		796CFE940CB046ED006EA008 /* libssh2_sftp.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libssh2_sftp.h; path = libssh2/libssh2_sftp.h; sourceTree = "<group>"; };
-		796CFE950CB046ED006EA008 /* libssh2.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = libssh2.h; path = libssh2/libssh2.h; sourceTree = "<group>"; };
-		796CFE960CB046ED006EA008 /* mac.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = mac.c; path = libssh2/mac.c; sourceTree = "<group>"; };
-		796CFE970CB046ED006EA008 /* misc.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = misc.c; path = libssh2/misc.c; sourceTree = "<group>"; };
-		796CFE980CB046ED006EA008 /* openssl.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = openssl.c; path = libssh2/openssl.c; sourceTree = "<group>"; };
-		796CFE990CB046ED006EA008 /* openssl.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = openssl.h; path = libssh2/openssl.h; sourceTree = "<group>"; };
-		796CFE9A0CB046ED006EA008 /* packet.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = packet.c; path = libssh2/packet.c; sourceTree = "<group>"; };
-		796CFE9B0CB046ED006EA008 /* pem.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = pem.c; path = libssh2/pem.c; sourceTree = "<group>"; };
-		796CFE9C0CB046ED006EA008 /* publickey.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = publickey.c; path = libssh2/publickey.c; sourceTree = "<group>"; };
-		796CFE9D0CB046ED006EA008 /* scp.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = scp.c; path = libssh2/scp.c; sourceTree = "<group>"; };
-		796CFE9E0CB046ED006EA008 /* session.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = session.c; path = libssh2/session.c; sourceTree = "<group>"; };
-		796CFE9F0CB046ED006EA008 /* sftp.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = sftp.c; path = libssh2/sftp.c; sourceTree = "<group>"; };
-		796CFEA00CB046ED006EA008 /* userauth.c */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.c; name = userauth.c; path = libssh2/userauth.c; sourceTree = "<group>"; };
 		796DB21109F89DCB0065897B /* SSLStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSLStream.h; sourceTree = "<group>"; };
 		796DB21209F89DCB0065897B /* SSLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSLStream.m; sourceTree = "<group>"; };
 		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
@@ -513,8 +478,8 @@
 		79CFD83C09F7048400172CDD /* ONBSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ONBSocket.m; sourceTree = "<group>"; };
 		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
 		79CFD84209F7048400172CDD /* RunLoopForwarder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunLoopForwarder.m; sourceTree = "<group>"; };
-		79CFD84309F7048400172CDD /* SFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPConnection.h; sourceTree = SOURCE_ROOT; };
-		79CFD84409F7048400172CDD /* SFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnection.m; sourceTree = SOURCE_ROOT; };
+		79CFD84309F7048400172CDD /* SFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPConnection.h; sourceTree = "<group>"; };
+		79CFD84409F7048400172CDD /* SFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnection.m; sourceTree = "<group>"; };
 		79CFD84709F7048500172CDD /* StreamBasedConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamBasedConnection.h; sourceTree = SOURCE_ROOT; };
 		79CFD84809F7048500172CDD /* StreamBasedConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = StreamBasedConnection.m; sourceTree = SOURCE_ROOT; };
 		79CFD84909F7048500172CDD /* WebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebDAVConnection.h; sourceTree = SOURCE_ROOT; };
@@ -556,9 +521,6 @@
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
 		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
-		79E17A0D0A659C1E009CA013 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		79E17A130A659CEC009CA013 /* SSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSHPassphrase.m; sourceTree = "<group>"; };
-		79E17A140A659CEC009CA013 /* SSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSHPassphrase.h; sourceTree = "<group>"; };
 		79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Connection.h"; sourceTree = "<group>"; };
 		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
 		79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCategory.h; sourceTree = "<group>"; };
@@ -586,21 +548,14 @@
 		CE05A3680B6A94C000A25808 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE1AD3DE0A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CE1AD3E00A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		CE3032E50A6DF53200C31C75 /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		CE3032E60A6DF53700C31C75 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		CE3032E70A6DF53A00C31C75 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		CE3032E80A6DF53D00C31C75 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE4F78E80B9C8F530083B946 /* Logs.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Logs.icns; sourceTree = "<group>"; };
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CE55A6630AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CEB563860A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CED189610AC320E4002E8A4A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189620AC320E8002E8A4A /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189630AC320EA002E8A4A /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -618,6 +573,16 @@
 		CEF894F80BD72A6A002886AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CEF894FD0BD72A70002886AA /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CEF895020BD72A76002886AA /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		D3598B710CF3D40800C61A38 /* argcargv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = argcargv.c; sourceTree = "<group>"; };
+		D3598B720CF3D40800C61A38 /* fdwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fdwrite.c; sourceTree = "<group>"; };
+		D3598B730CF3D40800C61A38 /* fdwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdwrite.h; sourceTree = "<group>"; };
+		D3598B740CF3D40800C61A38 /* sshversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshversion.c; sourceTree = "<group>"; };
+		D3598B750CF3D40800C61A38 /* sshversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sshversion.h; sourceTree = "<group>"; };
+		D3598B760CF3D40800C61A38 /* typeforchar.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = typeforchar.c; sourceTree = "<group>"; };
+		D3598B770CF3D40800C61A38 /* typeforchar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = typeforchar.h; sourceTree = "<group>"; };
+		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
+		D3598B810CF3D41000C61A38 /* SFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPTServer.h; sourceTree = "<group>"; };
+		D3598B820CF3D41000C61A38 /* SFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPTServer.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -836,37 +801,6 @@
 			name = HTTP;
 			sourceTree = "<group>";
 		};
-		794DF0E40A5CD087007157BE /* SSH */ = {
-			isa = PBXGroup;
-			children = (
-				79E17A140A659CEC009CA013 /* SSHPassphrase.h */,
-				79E17A130A659CEC009CA013 /* SSHPassphrase.m */,
-				79E17A0C0A659C1E009CA013 /* Passphrase.nib */,
-				796CFE8C0CB046ED006EA008 /* channel.c */,
-				796CFE8D0CB046ED006EA008 /* comp.c */,
-				796CFE8E0CB046ED006EA008 /* crypt.c */,
-				796CFE8F0CB046ED006EA008 /* hostkey.c */,
-				796CFE900CB046ED006EA008 /* kex.c */,
-				796CFE910CB046ED006EA008 /* libssh2_config.h */,
-				796CFE920CB046ED006EA008 /* libssh2_priv.h */,
-				796CFE930CB046ED006EA008 /* libssh2_publickey.h */,
-				796CFE940CB046ED006EA008 /* libssh2_sftp.h */,
-				796CFE950CB046ED006EA008 /* libssh2.h */,
-				796CFE960CB046ED006EA008 /* mac.c */,
-				796CFE970CB046ED006EA008 /* misc.c */,
-				796CFE980CB046ED006EA008 /* openssl.c */,
-				796CFE990CB046ED006EA008 /* openssl.h */,
-				796CFE9A0CB046ED006EA008 /* packet.c */,
-				796CFE9B0CB046ED006EA008 /* pem.c */,
-				796CFE9C0CB046ED006EA008 /* publickey.c */,
-				796CFE9D0CB046ED006EA008 /* scp.c */,
-				796CFE9E0CB046ED006EA008 /* session.c */,
-				796CFE9F0CB046ED006EA008 /* sftp.c */,
-				796CFEA00CB046ED006EA008 /* userauth.c */,
-			);
-			name = SSH;
-			sourceTree = "<group>";
-		};
 		795AFEE50B1154E2006905FA /* UKKQueue */ = {
 			isa = PBXGroup;
 			children = (
@@ -941,6 +875,7 @@
 		79CFD11A09F7022900172CDD /* Connections */ = {
 			isa = PBXGroup;
 			children = (
+				D3598B580CF3D3DF00C61A38 /* SFTP */,
 				792CFCA70A806108001A00C6 /* HTTP */,
 				79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */,
 				79CFD80C09F7048400172CDD /* AbstractConnection.h */,
@@ -963,11 +898,8 @@
 				79CFD83209F7048400172CDD /* FTPOverSSLConnection.m */,
 				79CFD83909F7048400172CDD /* NNTPConnection.h */,
 				79CFD83A09F7048400172CDD /* NNTPConnection.m */,
-				79CFD84309F7048400172CDD /* SFTPConnection.h */,
-				79CFD84409F7048400172CDD /* SFTPConnection.m */,
 				7946B0FC0AC0F4A400CAE90F /* S3Connection.h */,
 				7946B0FD0AC0F4A400CAE90F /* S3Connection.m */,
-				794DF0E40A5CD087007157BE /* SSH */,
 				79CFD83709F7048400172CDD /* MultipleConnection.h */,
 				79CFD83809F7048400172CDD /* MultipleConnection.m */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
@@ -1128,6 +1060,33 @@
 			name = Interfaces;
 			sourceTree = "<group>";
 		};
+		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD84309F7048400172CDD /* SFTPConnection.h */,
+				79CFD84409F7048400172CDD /* SFTPConnection.m */,
+				D3598B590CF3D3E400C61A38 /* Other */,
+			);
+			name = SFTP;
+			sourceTree = "<group>";
+		};
+		D3598B590CF3D3E400C61A38 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				D3598B810CF3D41000C61A38 /* SFTPTServer.h */,
+				D3598B820CF3D41000C61A38 /* SFTPTServer.m */,
+				D3598B710CF3D40800C61A38 /* argcargv.c */,
+				D3598B720CF3D40800C61A38 /* fdwrite.c */,
+				D3598B730CF3D40800C61A38 /* fdwrite.h */,
+				D3598B740CF3D40800C61A38 /* sshversion.c */,
+				D3598B750CF3D40800C61A38 /* sshversion.h */,
+				D3598B760CF3D40800C61A38 /* typeforchar.c */,
+				D3598B770CF3D40800C61A38 /* typeforchar.h */,
+				D3598B780CF3D40800C61A38 /* argcargv.h */,
+			);
+			name = Other;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -1149,7 +1108,6 @@
 				79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */,
 				79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */,
 				794DC3270A5A0EDC007157BE /* ConnectionThreadManager.h in Headers */,
-				79E17A160A659CEC009CA013 /* SSHPassphrase.h in Headers */,
 				3C231A5A0A66ECB100951F9E /* WebDAVConnection.h in Headers */,
 				3C231A5B0A66ECB200951F9E /* DotMacConnection.h in Headers */,
 				3C231A5C0A66ECB400951F9E /* WebDAVSecureConnection.h in Headers */,
@@ -1189,12 +1147,11 @@
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */,
 				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
-				796CFEA60CB046ED006EA008 /* libssh2_config.h in Headers */,
-				796CFEA70CB046ED006EA008 /* libssh2_priv.h in Headers */,
-				796CFEA80CB046ED006EA008 /* libssh2_publickey.h in Headers */,
-				796CFEA90CB046ED006EA008 /* libssh2_sftp.h in Headers */,
-				796CFEAA0CB046ED006EA008 /* libssh2.h in Headers */,
-				796CFEAE0CB046ED006EA008 /* openssl.h in Headers */,
+				D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */,
+				D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */,
+				D3598B7F0CF3D40800C61A38 /* typeforchar.h in Headers */,
+				D3598B800CF3D40800C61A38 /* argcargv.h in Headers */,
+				D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1381,7 +1338,6 @@
 				79CFD8C809F7069100172CDD /* ConnectionOpenPanel.nib in Resources */,
 				79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */,
 				797CC8C709F861770063FF9B /* Localizable.strings in Resources */,
-				79E17A0E0A659C1E009CA013 /* Passphrase.nib in Resources */,
 				7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */,
 				798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */,
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
@@ -1578,7 +1534,6 @@
 				79CFD88D09F7048500172CDD /* WebDAVSecureConnection.m in Sources */,
 				79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */,
 				794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */,
-				79E17A150A659CEC009CA013 /* SSHPassphrase.m in Sources */,
 				792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */,
 				792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */,
 				792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */,
@@ -1614,21 +1569,11 @@
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
 				79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */,
 				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
-				796CFEA10CB046ED006EA008 /* channel.c in Sources */,
-				796CFEA20CB046ED006EA008 /* comp.c in Sources */,
-				796CFEA30CB046ED006EA008 /* crypt.c in Sources */,
-				796CFEA40CB046ED006EA008 /* hostkey.c in Sources */,
-				796CFEA50CB046ED006EA008 /* kex.c in Sources */,
-				796CFEAB0CB046ED006EA008 /* mac.c in Sources */,
-				796CFEAC0CB046ED006EA008 /* misc.c in Sources */,
-				796CFEAD0CB046ED006EA008 /* openssl.c in Sources */,
-				796CFEAF0CB046ED006EA008 /* packet.c in Sources */,
-				796CFEB00CB046ED006EA008 /* pem.c in Sources */,
-				796CFEB10CB046ED006EA008 /* publickey.c in Sources */,
-				796CFEB20CB046ED006EA008 /* scp.c in Sources */,
-				796CFEB30CB046ED006EA008 /* session.c in Sources */,
-				796CFEB40CB046ED006EA008 /* sftp.c in Sources */,
-				796CFEB50CB046ED006EA008 /* userauth.c in Sources */,
+				D3598B790CF3D40800C61A38 /* argcargv.c in Sources */,
+				D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */,
+				D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */,
+				D3598B7E0CF3D40800C61A38 /* typeforchar.c in Sources */,
+				D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1815,21 +1760,6 @@
 				79CFD8DF09F7071400172CDD /* en */,
 			);
 			name = Permissions.nib;
-			sourceTree = "<group>";
-		};
-		79E17A0C0A659C1E009CA013 /* Passphrase.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				79E17A0D0A659C1E009CA013 /* en */,
-				CE3032E50A6DF53200C31C75 /* fr */,
-				CE3032E60A6DF53700C31C75 /* zh_TW */,
-				CE3032E70A6DF53A00C31C75 /* ja */,
-				CE3032E80A6DF53D00C31C75 /* da */,
-				CEB563860A7AB7070081179A /* de */,
-				CE1AD3E00A7E845A0083C01E /* it */,
-				CE55A6630AD194740091C8AE /* zh_CN */,
-			);
-			name = Passphrase.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

@@ -1,66 +1,95 @@
-/*
- Copyright (c) 2005, Greg Hulands <ghulands@mac.com>
- All rights reserved.
- 
- 
- Redistribution and use in source and binary forms, with or without modification, 
- are permitted provided that the following conditions are met:
- 
- 
- Redistributions of source code must retain the above copyright notice, this list 
- of conditions and the following disclaimer.
- 
- Redistributions in binary form must reproduce the above copyright notice, this 
- list of conditions and the following disclaimer in the documentation and/or other 
- materials provided with the distribution.
- 
- Neither the name of Greg Hulands nor the names of its contributors may be used to 
- endorse or promote products derived from this software without specific prior 
- written permission.
- 
- 
- 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
- EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
- TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
- WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- 
- */
+//
+//  SFTPConnection.h
+//  CocoaSFTP
+//
+//  Created by Brian Amerige on 11/4/07.
+//  Copyright 2007 Extendmac, LLC.. All rights reserved.
+//
 
 #import <Cocoa/Cocoa.h>
 #import "StreamBasedConnection.h"
+#import "CKTransferRecord.h"
+#import "CKInternalTransferRecord.h"
 #import "FTPConnection.h"
-#import "libssh2.h"
-#import "libssh2_sftp.h"
-
-@class RunLoopForwarder, SFTPStream;
-
-enum { SFTPError = 25000, SFTPErrorBadPassword, SFTPErrorDirectoryContents, SFTPErrorPermissionDenied, SFTPErrorDirectoryDoesNotExist, SFTPErrorGeneric, SFTPErrorAuthentication, SFTPErrorWrite };
+#import "SFTPTServer.h"
 
 @interface SFTPConnection : StreamBasedConnection 
 {
-	LIBSSH2_SESSION *mySession;
-	LIBSSH2_SFTP *mySFTPChannel;
+	int master;
+	BOOL isConnected, isUploading, isDownloading;
+	NSMutableString *currentDirectory;
+	NSTextStorage *myTextStorage;
 	
-	LIBSSH2_SFTP_HANDLE *myTransferHandle;
-	unsigned long long myTransferSize;
-	unsigned long long myBytesTransferred;
+	NSMutableArray *uploadQueue, *downloadQueue, *deleteFileQueue, *deleteDirectoryQueue, *renameQueue, *permissionChangeQueue;
+	NSMutableArray *connectToQueue;
 	
-	struct __sftpflags {
-		unsigned authorized: 1;
-		unsigned unused: 31;
-	} mySFTPFlags;
+	NSMutableArray *commandQueue;
 	
-	NSString *_currentDir;
-	NSString *myKeychainFingerPrint;
+	SFTPTServer *theSFTPTServer;
 }
 
 @end
 
-extern NSString *SFTPException;
-extern NSString *SFTPErrorDomain;
+@interface SFTPConnection (Private)
+- (void)establishDistributedObjectsConnection;
+
+- (void)queueSFTPCommand:(void *)cmd;
+- (void)queueSFTPCommandWithString:(NSString *)cmdString;
+- (void)writeSFTPCommand:(void *)cmd;
+- (void)writeSFTPCommandWithString:(NSString *)commandString;
+
+- (void)logForCommandQueue:(NSString *)log;
+@end
+
+@interface SFTPConnection (WarningTidys)
+- (CKTransferRecord *)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(unsigned long long)offset remotePath:(NSString *)remotePath checkRemoteExistence:(BOOL)checkRemoteExistenceFlag delegate:(id)delegate;
+- (BOOL)isBusy;
+- (BOOL)isUploading;
+- (BOOL)isDownloading;
+- (int)numberOfTransfers;
+- (void)directoryContents;
+@end
+
+@interface SFTPConnection (BackendInterface)
+- (void)finishedCommand;
+- (void)checkFinishedCommandStringForNotifications:(NSString *)finishedCommand;
+- (void)setServerObject:(id)serverObject;
+- (void)setMasterProxy:(int)masterProxy;
+- (void)finishedCommand;
+
+- (void)didConnect;
+- (void)didDisconnect;
+- (void)failedToConnect;
+
+- (void)didReceiveDirectoryContents:(NSArray*)items;
+- (void)setCurrentRemotePath:(NSString *)remotePath;
+
+- (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
+- (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo;
+- (void)uploadDidFinish:(CKInternalTransferRecord *)uploadInfo;
+- (CKInternalTransferRecord *)currentUploadInfo;
+
+- (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
+- (CKInternalTransferRecord *)currentDownloadInfo;
+- (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo;
+- (void)downloadDidFinish:(CKInternalTransferRecord *)downloadInfo;
+
+- (NSString *)currentFileDeletionPath;
+- (NSString *)currentDirectoryDeletionPath;
+- (void)didDeleteFile:(NSString *)remotePath;
+- (void)didDeleteDirectory:(NSString *)remotePath;
+
+- (NSDictionary *)currentRenameInfo;
+- (void)didRename:(NSDictionary *)renameInfo;
+
+- (NSDictionary *)currentPermissionChangeInfo;
+- (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo;
+
+- (void)passwordErrorOccurred;
+- (void)requestPasswordWithPrompt:(char *)header;
+- (void)connectionError:(NSError *)error;
+- (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo;
+
+- (void)logServerResponseBuffer:(NSString *)serverBuffer;
+- (void)addStringToTranscript:(NSString *)stringToAdd;
+@end

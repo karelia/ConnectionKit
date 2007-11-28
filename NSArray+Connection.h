@@ -32,4 +32,5 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 
 @interface NSArray (Connection) 
 - (NSString *)shortDescription;
+- ( int )createArgv: ( char *** )argv;
 @end

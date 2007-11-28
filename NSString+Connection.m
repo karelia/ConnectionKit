@@ -25,7 +25,7 @@
  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+  */
 
 #import "NSString+Connection.h"
 #import <math.h>
@@ -120,6 +120,232 @@
 	return (NSString *)uuidStr;
 }
 
+/*The following are from Fugu (for SFTP usage)
+ * Copyright (c) 2003 Regents of The University of Michigan. 
+*/
++ ( NSString * )pathForExecutable: ( NSString * )executable
+{
+    NSString	*executablePath = nil;
+    NSString	*searchPath = [[ NSUserDefaults standardUserDefaults ]
+							   objectForKey: @"ExecutableSearchPath" ];
+	
+    if ( searchPath == nil ) {
+		searchPath = @"/usr/bin";
+    }
+	
+    executablePath = [ searchPath stringByAppendingPathComponent: executable ];
+	
+    if ( [[ NSFileManager defaultManager ]
+		  fileExistsAtPath: executablePath ] ) {
+		return( executablePath );
+    }
+	
+    /* try again with a default path */
+    executablePath = nil;
+    executablePath = [ NSString stringWithFormat: @"/usr/bin/%@", executable ];
+	
+    if ( ! [[ NSFileManager defaultManager ]
+			fileExistsAtPath: executablePath ] ) {
+        executablePath = nil;
+    }
+	
+    return( executablePath );
+}
+
+- ( char )objectTypeFromOctalRepresentation: ( NSString * )octalRep
+{
+    if ( [ octalRep isEqualToString: @"01" ] ) return( 'p' );
+    else if ( [ octalRep isEqualToString: @"02" ] ) return( 'c' );
+    else if ( [ octalRep isEqualToString: @"04" ] ) return( 'd' );
+    else if ( [ octalRep isEqualToString: @"06" ] ) return( 'b' );
+    else if ( [ octalRep isEqualToString: @"010" ] ) return( '-' );
+    else if ( [ octalRep isEqualToString: @"012" ] ) return( 'l' );
+    else if ( [ octalRep isEqualToString: @"014" ] ) return( 's' );
+    else if ( [ octalRep isEqualToString: @"016" ] ) return( 'D' );
+    else return( '-' );
+}
+
+- ( NSString * )stringRepresentationOfOctalMode
+{
+    NSString	*type = nil;
+    char	tmp[ 11 ] = "----------";
+    int		i = 1, j = 0, len = [ self length ];
+    
+    /*
+     * if we're dealing with a server that outputs modes and types
+     * as an octal string, start creating the mode string from
+     * the appropriate point
+     */
+    if ( len == 6 ) {
+        i = 3;
+    } else if ( len == 7 ) {
+        i = 4;
+    } else {
+        i = 1;
+    }
+	
+    for ( j = 1; i < len; i++, j += 3 ) {
+        switch( [ self characterAtIndex: i ] ) {
+			case '0':
+				break;
+			case '1':
+				tmp[ j + 2 ] = 'x';
+				break;
+			case '2':
+				tmp[ j + 1 ] = 'w';
+				break;
+			case '3':
+				tmp[ j + 1 ] = 'w';
+				tmp[ j + 2 ] = 'x';
+				break;
+			case '4':
+				tmp[ j ] = 'r';
+				break;
+			case '5':
+				tmp[ j ] = 'r';
+				tmp[ j + 2 ] = 'x';
+				break;
+			case '6':
+				tmp[ j ] = 'r';
+				tmp[ j + 1 ] = 'w';
+				break;
+			case '7':
+				tmp[ j ] = 'r';
+				tmp[ j + 1 ] = 'w';
+				tmp[ j + 2 ] = 'x';
+				break;
+        }
+    }
+    
+    if ( len == 6 ) {
+        i = 3;
+    } else if ( len == 7 ) {
+        i = 4;
+    } else {
+        i = 1;
+    }
+    
+    switch( [ self characterAtIndex: ( i - 1 ) ] ) {
+		case '0':
+			break;
+		case '1':
+			/* sticky bit */
+			tmp[ 9 ] = 't';
+			break;
+		case '2':
+			/* setgid */
+			if ( tmp[ 6 ] != 'x' ) {
+				tmp[ 6 ] = 'S';
+			} else {
+				tmp[ 6 ] = 's';
+			}
+			
+			break;
+			case '4':
+			/* setuid */
+			if ( tmp[ 3 ] != 'x' ) {
+				tmp[ 3 ] = 'S';
+			} else {
+				tmp[ 3 ] = 's';
+			}
+			
+			break;
+    }
+    
+    if ( len == 6 ) {
+        type = [ self substringToIndex: 2 ];
+        tmp[ 0 ] = [ self objectTypeFromOctalRepresentation: type ];
+    } else if ( len == 7 ) {
+        type = [ self substringToIndex: 3 ];
+        tmp[ 0 ] = [ self objectTypeFromOctalRepresentation: type ];
+    } else {
+        tmp[ 0 ] = ' ';
+    }
+	
+    return( [ NSString stringWithUTF8String: tmp ] );
+}
++ ( NSString * )stringWithBytesOfUnknownExternalEncoding: ( char * )bytes
+												  length: ( unsigned )len
+{
+    int                     i, enccount = 0;
+    CFStringRef             convertedString = NULL;
+    CFStringEncoding        encodings[] = { kCFStringEncodingISOLatin2,
+		kCFStringEncodingISOLatin3,
+		kCFStringEncodingISOLatin4,
+		kCFStringEncodingISOLatinCyrillic,
+		kCFStringEncodingISOLatinArabic,
+		kCFStringEncodingISOLatinGreek,
+		kCFStringEncodingISOLatinHebrew,
+		kCFStringEncodingISOLatin5,
+		kCFStringEncodingISOLatin6,
+		kCFStringEncodingISOLatinThai,
+		kCFStringEncodingISOLatin7,
+		kCFStringEncodingISOLatin8,
+		kCFStringEncodingISOLatin9,
+		kCFStringEncodingWindowsLatin2,
+		kCFStringEncodingWindowsCyrillic,
+		kCFStringEncodingWindowsGreek,
+		kCFStringEncodingWindowsLatin5,
+		kCFStringEncodingWindowsHebrew,
+		kCFStringEncodingWindowsArabic,
+		kCFStringEncodingKOI8_R,
+		kCFStringEncodingBig5,
+	kCFStringEncodingNextStepLatin };
+	
+    if ( bytes == NULL ) {
+        return( nil );
+    }
+    
+    enccount = ( sizeof( encodings ) / sizeof( CFStringEncoding ));
+    
+    for ( i = 0; i < enccount; i++) {
+        if ( ! CFStringIsEncodingAvailable( encodings[ i ] )) {
+            continue;
+        }
+        
+        if (( convertedString = CFStringCreateWithBytes( kCFAllocatorDefault,
+														( UInt8 * )bytes, len, encodings[ i ], true )) != NULL ) {
+            break;
+        }
+    }
+	
+    return(( NSString * )convertedString );
+}
+
++ ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes
+										  length: ( unsigned )len
+{
+    int                     i, enccount = 0;
+    CFStringRef             convertedString = NULL;
+    CFStringEncoding        encodings[] = { kCFStringEncodingUTF8,
+		kCFStringEncodingISOLatin1,
+		kCFStringEncodingWindowsLatin1,
+	kCFStringEncodingNextStepLatin };
+    
+    if ( bytes == NULL ) {
+        return( nil );
+    }
+    
+    enccount = ( sizeof( encodings ) / sizeof( CFStringEncoding ));
+    
+    for ( i = 0; i < enccount; i++) {
+        if (( convertedString = CFStringCreateWithBytes( kCFAllocatorDefault,
+														( UInt8 * )bytes, len, encodings[ i ], false )) != NULL ) {
+            break;
+        }
+    }
+	
+    if ( convertedString == NULL ) {
+        convertedString = ( CFStringRef )[ NSString stringWithBytesOfUnknownExternalEncoding: bytes
+																					  length: len ];
+    }
+    
+    if ( convertedString != NULL ) {
+        [ ( NSString * )convertedString autorelease ];
+    }
+	
+    return(( NSString * )convertedString );
+}
 @end
 
 @implementation NSAttributedString (Connection)
