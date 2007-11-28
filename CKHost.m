@@ -784,7 +784,8 @@ static NSImage *sHostIcon = nil;
 	{
 		[str appendString:[self host]];
 	}
-	if ([self port] && ![[self port] isEqualToString:@""])
+	//We check if port is a string because there have been cases where client apps have (improperly) stored port as an NSNumber. In this case, it would cause a crasher, and not allow the registry to fully launch (name is called when reading it, effectively). Once we get through this launch, the registry resets the corrupt entry.
+	if ([self port] && [[self port] isKindOfClass:[NSString class]] && ![[self port] isEqualToString:@""]) 
 	{
 		[str appendFormat:@":%@", [self port]];
 	}

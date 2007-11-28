@@ -462,6 +462,9 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 - (void)transferDidFinish:(CKTransferRecord *)transfer
 {
 	[self setProgress:100];
+	myIntermediateTransferred = (mySize - myTransferred);
+	myTransferred = mySize;
+	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 }
 
 #pragma mark -
