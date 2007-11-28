@@ -161,16 +161,6 @@ typedef enum {
 
 @end
 
-// these cells are passed an NSDictionary with keys name and icon to the objectValue of the cell
-@interface CKDirectoryBrowserCell : NSBrowserCell
-{
-	BOOL myMakingDragImage;
-}
-
-- (void)setMakeDragImage:(BOOL)flag;
-
-@end
-
 @interface CKDirectoryTableBrowserCell : NSBrowserCell
 {
 	NSString *myTitle;
