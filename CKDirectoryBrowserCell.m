@@ -8,6 +8,7 @@
 
 #import "CKDirectoryBrowserCell.h"
 #import "CKDirectoryNode.h"
+#import "NSMatrix+Connection.h"
 
 static NSMutableParagraphStyle *sStyle = nil;
 #define PADDING 5
