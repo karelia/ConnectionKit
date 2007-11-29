@@ -31,9 +31,9 @@ static NSMutableParagraphStyle *sStyle = nil;
 // If extensions are hidden it gets screwed up.
 - (NSString *)stringValue
 {
-	if ([self representedNode])
+	if ([self representedObject])
 	{
-		return [[self representedNode] name];
+		return [[self representedObject] name];
 	}
 	return @"";
 }
@@ -62,7 +62,8 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {	
-	NSImage *iconImage = [[self representedNode] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
+	NSLog(@"%s: %@", _cmd, [self representedObject]);
+	NSImage *iconImage = [[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
 	if (iconImage != nil) {
         NSSize imageSize = [iconImage size];
         NSRect imageFrame, highlightRect, textFrame;
@@ -100,18 +101,6 @@ static NSMutableParagraphStyle *sStyle = nil;
 		// At least draw something if we couldn't find an icon. You may want to do something more intelligent.
     	[super drawInteriorWithFrame:cellFrame inView:controlView];
     }
-}
-
-- (CKDirectoryNode *)representedNode
-{
-	return _representedNode;
-}
-
-- (void)setRepresentedNode:(CKDirectoryNode *)node
-{
-	[node retain];
-    [_representedNode release];
-    _representedNode = node;
 }
 
 @end

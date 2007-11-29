@@ -11,13 +11,9 @@
 
 // these cells are passed an NSDictionary with keys name and icon to the objectValue of the cell
 @interface CKDirectoryBrowserCell : NSBrowserCell {
-	CKDirectoryNode *_representedNode;
 	BOOL myMakingDragImage;
 }
 
 - (void)setMakeDragImage:(BOOL)flag;
-
-- (CKDirectoryNode *)representedNode;
-- (void)setRepresentedNode:(CKDirectoryNode *)node;
 
 @end
