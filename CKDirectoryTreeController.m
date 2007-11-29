@@ -1111,6 +1111,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	NSDictionary *rec = [myHistory objectAtIndex:myHistoryIndex];
 	NSString *relPath = [rec objectForKey:@"rp"];
 	NSString *fullPath = [rec objectForKey:@"fp"];
+	
+	// fake the selection
+	[mySelection removeAllObjects];
+	[mySelection addObject:[CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode]];
 
 	[self _changeRelativeRootToPath:relPath];
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
