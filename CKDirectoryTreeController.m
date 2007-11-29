@@ -541,7 +541,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)reloadViews
 {
-	NSLog(@"%s", _cmd);
 	// reload the data
 	myFlags.isReloading = YES;
 	
@@ -1335,7 +1334,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column 
 {
-	NSLog(@"%s %d", _cmd, column);
 	CKDirectoryNode *node = nil;
 	if (column == 0)
 	{
@@ -1363,7 +1361,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
-	NSLog(@"%s%@", _cmd, node);
 	[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
 	[cell setRepresentedObject:[node retain]];
 	[cell setTitle:[self _cellDisplayNameWithNode:node]];
@@ -1600,6 +1597,21 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)mouseDown:(NSEvent *)theEvent
 {
 	[super mouseDown:theEvent];
+}
+
+- (NSBrowser *)browser
+{
+	NSView *superView = [self superview];
+	
+	while (superView)
+	{
+		if ([superView isKindOfClass:[NSBrowser class]])
+		{
+			return superView;
+		}
+		superView = [superView superview];
+	}
+	return nil;
 }
 
 @end

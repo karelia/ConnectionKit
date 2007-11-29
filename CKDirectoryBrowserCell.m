@@ -62,7 +62,23 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {	
-	NSLog(@"%s: %@", _cmd, [self representedObject]);
+	if (![self isLoaded]) 
+	{
+		NSMatrix *matrix = (NSMatrix *)controlView;
+		NSBrowser *browser = [matrix browser];
+		int row = 0, col = [browser columnOfMatrix:matrix];
+		for (row = 0; row < [matrix numberOfRows]; row++)
+		{
+			NSCell *cell = [matrix cellAtRow:row column:0];
+			if (cell == self)
+			{
+				break;
+			}
+		}
+		[[browser delegate] browser:browser willDisplayCell:self atRow:row column:col];
+		[self setLoaded:YES];
+	}
+	
 	NSImage *iconImage = [[self representedObject] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
 	if (iconImage != nil) {
         NSSize imageSize = [iconImage size];
