@@ -70,9 +70,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node;
 @end
 
-@interface CKDirectoryBrowserMatrix : NSMatrix
-@end
-
 @interface CKTableBasedBrowser (Private)
 - (void)setDefaultColumnWidth:(float)width;
 - (void)refreshColumn:(unsigned)col;
@@ -453,7 +450,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #define MAX_VISIBLE_COLUMNS 3
 	// set up NSBrowser
 	[oStandardBrowser setCellClass:[CKDirectoryBrowserCell class]];
-	[oStandardBrowser setMatrixClass:[CKDirectoryBrowserMatrix class]];
 	[oStandardBrowser setDelegate:self];
     [oStandardBrowser setTarget:self];
     [oStandardBrowser setAction: @selector(standardBrowserSelectedWithDelay:)];
@@ -1586,36 +1582,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	return [menu autorelease];
-}
-
-@end
-
-
-@implementation CKDirectoryBrowserMatrix
-
-- (void)selectCellAtRow:(int)row column:(int)column
-{
-	[super selectCellAtRow:row column:column];
-}
-
-- (void)mouseDown:(NSEvent *)theEvent
-{
-	[super mouseDown:theEvent];
-}
-
-- (NSBrowser *)browser
-{
-	NSView *superView = [self superview];
-	
-	while (superView)
-	{
-		if ([superView isKindOfClass:[NSBrowser class]])
-		{
-			return superView;
-		}
-		superView = [superView superview];
-	}
-	return nil;
 }
 
 @end

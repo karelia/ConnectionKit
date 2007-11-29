@@ -206,6 +206,8 @@
 		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
 		79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */; };
 		79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */; };
+		79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
 		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -527,6 +529,8 @@
 		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
 		79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryBrowserCell.h; sourceTree = "<group>"; };
 		79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryBrowserCell.m; sourceTree = "<group>"; };
+		79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMatrix+Connection.h"; sourceTree = "<group>"; };
+		79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMatrix+Connection.m"; sourceTree = "<group>"; };
 		79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCategory.h; sourceTree = "<group>"; };
 		79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCategory.m; sourceTree = "<group>"; };
 		79F54D490AC8BDA1006AD3E2 /* CKHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHost.h; sourceTree = "<group>"; };
@@ -987,6 +991,8 @@
 				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
 				79CA054A0B852037005BED50 /* CKCacheableHost.h */,
 				79CA054B0B852037005BED50 /* CKCacheableHost.m */,
+				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
+				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -1100,6 +1106,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */,
 				792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */,
 				79CFD89509F704F400172CDD /* Connection.h in Headers */,
 				79CFD84D09F7048500172CDD /* AbstractConnection.h in Headers */,
@@ -1582,6 +1589,7 @@
 				D3598B7E0CF3D40800C61A38 /* typeforchar.c in Sources */,
 				D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */,
 				79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */,
+				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
