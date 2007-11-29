@@ -823,7 +823,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	else if ([[pboard types] indexOfObject:NSFilenamesPboardType] != NSNotFound)
 	{
 		NSString *itemPath = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
-		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [[item className] isEqualToString:@"CKBonjourCategory"] ||[[[item category] className] isEqualToString:@"CKBonjourCategory"])
+		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [item isKindOfClass:[CKBonjourCategory class]] || [[item category] isKindOfClass:[CKBonjourCategory class]])
 		{
 			return NSDragOperationNone;
 		}
@@ -907,7 +907,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		if (!item)
 		{
 			//Add new Host to the root.
-			if (index == -1)
+			if (index < 0)
 			{
 				[self addHost:currentItem];
 			}
