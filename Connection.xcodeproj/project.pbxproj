@@ -204,6 +204,8 @@
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
+		79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */; };
+		79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */; };
 		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -523,6 +525,8 @@
 		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
 		79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Connection.h"; sourceTree = "<group>"; };
 		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
+		79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryBrowserCell.h; sourceTree = "<group>"; };
+		79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryBrowserCell.m; sourceTree = "<group>"; };
 		79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCategory.h; sourceTree = "<group>"; };
 		79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCategory.m; sourceTree = "<group>"; };
 		79F54D490AC8BDA1006AD3E2 /* CKHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHost.h; sourceTree = "<group>"; };
@@ -990,6 +994,8 @@
 		79CFD8A509F705FF00172CDD /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */,
+				79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */,
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				79CFD81109F7048400172CDD /* ConnectionOpenPanel.h */,
 				79CFD81209F7048400172CDD /* ConnectionOpenPanel.m */,
@@ -1152,6 +1158,7 @@
 				D3598B7F0CF3D40800C61A38 /* typeforchar.h in Headers */,
 				D3598B800CF3D40800C61A38 /* argcargv.h in Headers */,
 				D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */,
+				79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1574,6 +1581,7 @@
 				D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */,
 				D3598B7E0CF3D40800C61A38 /* typeforchar.c in Sources */,
 				D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */,
+				79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
