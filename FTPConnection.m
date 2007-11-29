@@ -873,11 +873,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
 			{	
-				if (_flags.didAuthenticate)
-				{
-					[_forwarder connection:self didAuthenticateToHost:[self host]];
-				}
-				
+				_ftpFlags.sentAuthenticated = NO;
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
 				[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
 															awaitState:ConnectionIdleState
@@ -951,11 +947,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self setCurrentPath:path];
 				
 				if (_rootPath == nil) 
-					_rootPath = [[NSString stringWithString:path] retain];
+					_rootPath = [path copy];
+				
+				if (!_ftpFlags.sentAuthenticated && _flags.didAuthenticate)
+				{
+					[_forwarder connection:self didAuthenticateToHost:[self host]];
+					_ftpFlags.sentAuthenticated = YES;
+				}
 				
 				if (_flags.changeDirectory) {
 					[_forwarder connection:self didChangeToDirectory:_currentPath];
 				}
+				
+				
 			}
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{

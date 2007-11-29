@@ -104,7 +104,8 @@ typedef enum {
 		unsigned isMicrosoft: 1;
 		unsigned setTransferMode: 1;
 		unsigned received226: 1;
-		unsigned unused: 12;
+		unsigned sentAuthenticated: 1;
+		unsigned unused: 11;
 	} _ftpFlags;
 	
 	NSTimer *_noopTimer;
