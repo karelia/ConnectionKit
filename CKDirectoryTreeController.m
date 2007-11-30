@@ -45,8 +45,6 @@
 #define ICON_INSET_HORIZ	4.0	/* Distance to inset the icon from the left edge. */
 #define ICON_TEXT_SPACING	2.0	/* Distance between the end of the icon and the text part */
 
-#define USE_NSBROWSER 1
-
 #define FILE_NAVIGATION_DELAY 0.2
 
 enum {
@@ -68,6 +66,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSArray *)_selectedItems;
 - (void)_updateHistoryButtons;
 - (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node;
+- (void)reloadViews;
 @end
 
 @interface CKTableBasedBrowser (Private)
@@ -290,14 +289,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[self _updateHistoryButtons];
 	}
 	
-	// make sure the views are in sync
-	[oOutlineView scrollItemToTop:mySelectedNode];
-	
-	// we are assuming here that the path will never be less than myRelativeRootPath 
-	[oStandardBrowser setPath:[self _browserPathForPath:path]];
-	
-	[oBrowser setPath:[self _browserPathForPath:path]];
-	//[oBrowser scrollColumnToVisible:[[[[mySelectedNode path] substringFromIndex:[myRelativeRootPath length]] componentsSeparatedByString:@"/"] count]];
+	[self reloadViews];
 	
 	myFlags.isNavigatingToPath = NO;
 	
@@ -326,6 +318,79 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		name = [name stringByDeletingPathExtension];
 	}
 	return name;
+}
+
+- (void)reloadViews
+{
+	// reload the data
+	myFlags.isReloading = YES;
+	
+	if ([[self _selectedItems] count] == 0)
+	{
+		// we have nothing selected so make sure all views are unselected
+		[oOutlineView deselectAll:self];
+		[oStandardBrowser loadColumnZero];
+		[oBrowser setPath:nil];
+	}
+	
+	[oOutlineView reloadData];
+	
+	// loop over and select everything
+	NSEnumerator *e = [[self _selectedItems] objectEnumerator];
+	CKDirectoryNode *cur;
+	BOOL didScroll = NO, didSetBrowserPath = NO;
+	
+	while ((cur = [e nextObject]))
+	{
+		// do the outline view
+		NSMutableArray *nodesToExpand = [NSMutableArray array];
+		if ([self outlineView:oOutlineView isItemExpandable:cur])
+		{
+			[nodesToExpand addObject:cur];
+		}
+		CKDirectoryNode *parent = [cur parent];
+		
+		while ((parent))
+		{
+			[nodesToExpand addObject:parent];
+			parent = [parent parent];
+		}
+		
+		NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
+		
+		while ((parent = [g nextObject]))
+		{
+			[oOutlineView expandItem:parent];
+		}
+		
+		[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
+		if (!didScroll)
+		{
+			// only scroll if we aren't the active view
+			[oOutlineView scrollItemToTop:cur];
+			didScroll = YES;
+		}
+		
+		// do the NSBrowser
+		if (!didSetBrowserPath)
+		{
+			[oStandardBrowser setPath:[self _browserPathForPath:[cur path]]];
+			[oStandardBrowser reloadColumn:[oStandardBrowser lastColumn]];
+			
+			//make sure the last column is the first responder
+			[[oView window] makeFirstResponder:[oStandardBrowser matrixInColumn:[oStandardBrowser selectedColumn]]];
+			didSetBrowserPath = YES;
+		}
+		
+		// TODO: This does not work with multi selection
+		//int browserRow = [[[cur parent] contents] indexOfObject:cur];
+		//[oStandardBrowser selectRow:browserRow inColumn:[oStandardBrowser lastColumn]];
+	}
+	
+	// do the table browser
+	[oBrowser selectItems:[self _selectedItems]];
+	
+	myFlags.isReloading = NO;
 }
 
 @end
@@ -533,76 +598,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (SEL)action
 {
 	return myAction;
-}
-
-- (void)reloadViews
-{
-	// reload the data
-	myFlags.isReloading = YES;
-	
-	if ([[self _selectedItems] count] == 0)
-	{
-		// we have nothing selected so make sure all views are unselected
-		[oOutlineView deselectAll:self];
-		[oStandardBrowser loadColumnZero];
-		[oBrowser setPath:nil];
-	}
-	
-	[oOutlineView reloadData];
-
-	// loop over and select everything
-	NSEnumerator *e = [[self _selectedItems] objectEnumerator];
-	CKDirectoryNode *cur;
-	BOOL didScroll = NO, didSetBrowserPath = NO;
-	
-	while ((cur = [e nextObject]))
-	{
-		// do the outline view
-		NSMutableArray *nodesToExpand = [NSMutableArray array];
-		if ([self outlineView:oOutlineView isItemExpandable:cur])
-		{
-			[nodesToExpand addObject:cur];
-		}
-		CKDirectoryNode *parent = [cur parent];
-		
-		while ((parent))
-		{
-			[nodesToExpand addObject:parent];
-			parent = [parent parent];
-		}
-		
-		NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
-		
-		while ((parent = [g nextObject]))
-		{
-			[oOutlineView expandItem:parent];
-		}
-		
-		[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
-		if (!didScroll)
-		{
-			// only scroll if we aren't the active view
-			[oOutlineView scrollItemToTop:cur];
-			didScroll = YES;
-		}
-		
-		// do the NSBrowser
-		if (!didSetBrowserPath)
-		{
-			[oStandardBrowser setPath:[self _browserPathForPath:[cur path]]];
-			[oStandardBrowser reloadColumn:[oStandardBrowser lastColumn]];
-			didSetBrowserPath = YES;
-		}
-		
-		// TODO: This does not work with multi selection
-		//int browserRow = [[[cur parent] contents] indexOfObject:cur];
-		//[oStandardBrowser selectRow:browserRow inColumn:[oStandardBrowser lastColumn]];
-	}
-	
-	// do the table browser
-	[oBrowser selectItems:[self _selectedItems]];
-	
-	myFlags.isReloading = NO;
 }
 
 - (void)setContentIsRemote:(BOOL)flag
@@ -834,7 +829,29 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		[self _pruneHistoryWithPath:path];
     }
-    [self reloadViews];
+	
+	// if the contents for this path is not in the current selection then don't reload
+	BOOL shouldReloadViews = NO;
+	
+	if ([[self _selectedItems] count] == 0)
+	{
+		shouldReloadViews = YES;
+	}
+	else if ([[self _selectedItems] count] == 1)
+	{
+		CKDirectoryNode *cur = [[self _selectedItems] lastObject];
+		
+		if ([[cur path] isEqualToString:path])
+		{
+			shouldReloadViews = YES;
+		}
+	}
+	
+	if (shouldReloadViews)
+	{
+		[self reloadViews];
+	}
+	
 }
 
 - (void)nodesRemovedInMerge:(NSNotification *)n
@@ -847,7 +864,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	while ((cur = [e nextObject]))
 	{
 		// remove it from the selection
-		[mySelection removeObject:cur];
+		if ([mySelection containsObject:cur])
+		{
+			[mySelection removeObject:cur];
+		}
 		
 		// go through and see if we were visible
 		NSString *path = [cur path];
@@ -869,7 +889,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 							   withObject:[NSNumber numberWithUnsignedInt:col] 
 							   afterDelay:0 
 								  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
-					//[oStandardBrowser setPath:parentPath]; // This seems to have solved a crash when trying to get path from the NSBrowser, after deleting a folder high up in the selection and doing refresh
 					[self _updatePopUpToPath:parentPath];
 				}
 			}
@@ -1019,9 +1038,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	// this pushes a history object and fetches the contents
 	[self _navigateToPath:path pushToHistoryStack:YES];
-
-	// sync all the views
-	[self reloadViews];
 }
 
 - (IBAction)outlineViewSelected:(id)sender
@@ -1048,12 +1064,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)standardBrowserSelectedWithDelay:(id)sender
 {
-	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(_standardBrowserSelected:) object:nil];
-	[self performSelector:@selector(standardBrowserSelected:) withObject:nil afterDelay:FILE_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
-}
-
-- (IBAction)standardBrowserSelected:(id)sender
-{
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(standardBrowserSelected:) object:nil];
+	
 	// update our internal selection tracking
 	[mySelection removeAllObjects];
 	NSEnumerator *e = [[oStandardBrowser selectedCells] objectEnumerator];
@@ -1064,6 +1076,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[mySelection addObject:[cur representedObject]];
 	}
 	
+	[self performSelector:@selector(standardBrowserSelected:) withObject:nil afterDelay:FILE_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+}
+
+- (IBAction)standardBrowserSelected:(id)sender
+{	
 	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
 	[self _navigateToPath:fullPath pushToHistoryStack:YES];
 	[self _updatePopUpToPath:fullPath];
@@ -1116,8 +1133,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
 	[self _updatePopUpToPath:fullPath];
 	[self _updateHistoryButtons];
-	
-	[self reloadViews];
 }
 
 - (IBAction)outlineDoubleClicked:(id)sender
