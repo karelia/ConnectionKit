@@ -249,7 +249,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	}
 	[self willChangeValueForKey:@"childCategories"];
     [item setCategory:nil];
-	[myChildCategories removeObject:item];
+	[myChildCategories removeObjectIdenticalTo:item];
 	[self didChangeValueForKey:@"childCategories"];
 	[self didChange];
 }

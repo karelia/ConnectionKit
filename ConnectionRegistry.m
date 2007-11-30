@@ -378,7 +378,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
 	}
 	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObject:item];
+	[myConnections removeObjectIdenticalTo:item];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
