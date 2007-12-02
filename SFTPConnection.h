@@ -59,7 +59,6 @@
 
 - (void)didConnect;
 - (void)didDisconnect;
-- (void)failedToConnect;
 
 - (void)didReceiveDirectoryContents:(NSArray*)items;
 - (void)setCurrentRemotePath:(NSString *)remotePath;

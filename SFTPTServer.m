@@ -251,18 +251,38 @@ static int      fncolumn = -1;
 	
 	NSString *formattedAmountString = [NSString stringWithUTF8String:t_amount];
 	char *amountCharacter;
+	unsigned int baseMultiplier = 1.0;
 	if ([formattedAmountString hasSuffix:@"KB"])
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfKBString UTF8String];
+		baseMultiplier = pow(1024, 1);
 	}
+	else if ([formattedAmountString hasSuffix:@"MB"])
+	{
+		NSString *numberOfMBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
+		amountCharacter = (char *)[numberOfMBString UTF8String];
+		baseMultiplier = pow(1024, 2);
+	}
+	else if ([formattedAmountString hasSuffix:@"GB"])
+	{
+		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
+		amountCharacter = (char *)[numberOfKBString UTF8String];
+		baseMultiplier = pow(1024, 3);
+	}	
+	else if ([formattedAmountString hasSuffix:@"TB"])
+	{
+		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
+		amountCharacter = (char *)[numberOfKBString UTF8String];
+		baseMultiplier = pow(1024, 3);
+	}	
 	else
 	{
 		amountCharacter = t_amount;
 	}
 	
 	unsigned long long amountTransferred = strtoull(amountCharacter, NULL, 0);
-	amountTransferred *= 1024;
+	amountTransferred *= baseMultiplier;
     if ( uploading ) 
 	{
 		[wrapperConnection upload:[wrapperConnection currentUploadInfo] didProgressTo:progressPercentage withEstimatedCompletionIn:eta givenTransferRateOf:transferRate amountTransferred:amountTransferred];
@@ -578,7 +598,6 @@ DOT_OR_DOTDOT:
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
 	BOOL hasValidPassword = NO, passwordWasSent = NO, homeDirectoryWasSet = NO, wasChanging = NO, wasListing = NO, atSFTPPrompt = NO;
-	unsigned int numberOfPasswordStrikes = 0;
 	while (1)
 	{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -615,16 +634,9 @@ DOT_OR_DOTDOT:
 			[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
 		}
 		
-		if ([self hasPasswordPromptInBuffer:serverResponseBuffer] && !hasValidPassword)
+		if ([self hasPasswordPromptInBuffer:serverResponseBuffer] && !hasValidPassword && connecting)
 		{
-			if (numberOfPasswordStrikes > 0)
-			{
-				[sftpWrapperConnection passwordErrorOccurred];
-			}
-			if (connecting)
-			{
-				[sftpWrapperConnection requestPasswordWithPrompt:(char *)serverResponseBuffer];
-			}
+			[sftpWrapperConnection requestPasswordWithPrompt:(char *)serverResponseBuffer];
 			passwordWasSent = YES;
 		}
 		else if (strstr(serverResponseBuffer, "sftp> ") != nil)
@@ -663,8 +675,8 @@ DOT_OR_DOTDOT:
 			
 			if (strncmp((char *)serverResponseBuffer, "Permission denied, ", strlen("Permission denied, ")) == 0)
 			{
-				passwordWasSent = NO;
-				numberOfPasswordStrikes++;
+				[sftpWrapperConnection passwordErrorOccurred];
+				[self forceDisconnect];
 			}
 			else if ([self bufferContainsError:serverResponseBuffer])
 			{
@@ -706,7 +718,6 @@ DOT_OR_DOTDOT:
 			else if ([self buffer:serverResponseBuffer containsString:"passphrase for key"])
  			{
 				passwordWasSent = NO;
-				numberOfPasswordStrikes = 0;
 				[sftpWrapperConnection requestPasswordWithPrompt:(char *)serverResponseBuffer];
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"Changing owner on"] || [self buffer:serverResponseBuffer containsString:"Changing group on"] || [self buffer:serverResponseBuffer containsString:"Changing mode on"])
@@ -753,11 +764,6 @@ DOT_OR_DOTDOT:
 			[self collectListingFromMaster:master fileStream:masterFileStream forWrapperConnection:sftpWrapperConnection];
 			memset(serverResponseBuffer, '\0', strlen(serverResponseBuffer));
 			[sftpWrapperConnection didReceiveDirectoryContents:[self remoteObjectList]];
-		}
-		
-		if (numberOfPasswordStrikes >= 3)
-		{
-			[sftpWrapperConnection failedToConnect];
 		}
 		
 		if (serverResponseBuffer[0] != '\0')
