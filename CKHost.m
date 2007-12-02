@@ -358,15 +358,15 @@ static NSImage *sHostIcon = nil;
 													  NULL,
 													  strlen([myUsername UTF8String]),
 													  [myUsername UTF8String],
-													  strlen([myInitialPath UTF8String]),
-													  [myInitialPath UTF8String],
+													  myInitialPath ? strlen([myInitialPath UTF8String]) : 0,
+													  myInitialPath ? [myInitialPath UTF8String] : NULL,
 													  [myPort intValue],
 													  kSecProtocolTypeFTP,
 													  kSecAuthenticationTypeDefault,
 													  NULL,
 													  NULL,
 													  &item);
-			
+			NSLog(@"status = %s", GetMacOSStatusErrorString(status));
 			if (status == noErr)
 			{
 				status = SecKeychainItemDelete(item);

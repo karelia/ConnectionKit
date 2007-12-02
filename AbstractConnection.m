@@ -1700,7 +1700,13 @@ if ([fn isEqualToString:@"."] || \
 						[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
 						[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:6] day:[words objectAtIndex:7] yearOrTime:[words objectAtIndex:8]] forKey:NSFileModificationDate];
 					else
-						[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
+					{
+						NSCalendarDate *date = [NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]];
+						if (date)
+						{
+							[d setObject:date forKey:NSFileModificationDate];
+						}
+					}
 					
 					int filenameStartIndex = 8;
 					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||

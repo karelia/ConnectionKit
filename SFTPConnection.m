@@ -114,10 +114,14 @@ static char *lsform;
 #pragma mark SFTP Actions
 - (void)connect
 {
-	if (![self username] || ![self password])
+	if (![self username])
 	{
 		//Can't do anything here, throw an error.
 		return;
+	}
+	if (![self password])
+	{
+		[self setPassword:@""];
 	}
 	NSMutableArray *parameters = [NSMutableArray array];
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
@@ -665,17 +669,22 @@ WRITE_ERROR:
 		}
 		NSString *sizeString = [currentItem objectForKey:@"size"];
 		NSNumber *size = [NSNumber numberWithUnsignedLongLong:strtoull([sizeString UTF8String], NULL, 0)];
-		NSDate *date;
-		if ([dateString rangeOfString:@":"].location != NSNotFound)
-		{
-			//This date happened in the past 6 months, so its format is 'Dec 25 22:10'
-			date = [NSCalendarDate dateWithString:dateString calendarFormat:@"%b %d %H:%M"];
-		}
-		else
-		{
-			//This date happened more than 6 months ago, so its format is 'Dec 25 2007'
-			date = [NSCalendarDate  dateWithString:dateString calendarFormat:@"%b %d %Y"];
-		}
+	
+		NSArray *dateComponents = [dateString componentsSeparatedByString:@" "];
+		NSString *month = [dateComponents objectAtIndex:0];
+		NSString *dayNumber = [dateComponents objectAtIndex:1];
+		NSString *yearOrTime = [dateComponents objectAtIndex:2];
+		NSCalendarDate *date = [NSCalendarDate getDateFromMonth:month day:dayNumber yearOrTime:yearOrTime];
+//		if ([dateString rangeOfString:@":"].location != NSNotFound)
+//		{
+//			//This date happened in the past 6 months, so its format is 'Dec 25 22:10'
+//			date = [NSCalendarDate dateWithString:dateString calendarFormat:@"%b %d %H:%M"];
+//		}
+//		else
+//		{
+//			//This date happened more than 6 months ago, so its format is 'Dec 25 2007'
+//			date = [NSCalendarDate  dateWithString:dateString calendarFormat:@"%b %d %Y"];
+//		}
 		NSMutableDictionary *ckFormattedItem = [NSMutableDictionary dictionaryWithObjectsAndKeys:
 												name, cxFilenameKey, 
 												date, NSFileModificationDate, 
@@ -881,14 +890,12 @@ WRITE_ERROR:
 	}
 }
 
-- (void)failedToConnect
-{
-	isConnected = NO;
-}
-
 - (void)passwordErrorOccurred
 {
-	NSLog(@"Encountered Password Error");
+	if (_flags.badPassword)
+	{
+		[_forwarder connectionDidSendBadPassword:self];
+	}
 }
 
 - (void)connectionError:(NSError *)theError
