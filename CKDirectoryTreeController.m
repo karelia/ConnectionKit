@@ -257,16 +257,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		myDirectoriesLoading++;
 		[myDelegate directoryTreeStartedLoadingContents:self];
 		[myDelegate directoryTree:self needsContentsForPath:path];
-		
-		// expand the folder in the outline view
-		if (myFlags.outlineViewIsCollapsing)
-		{
-			myFlags.outlineViewIsCollapsing = NO;
-		}
-		else
-		{
-			[oOutlineView expandItem:mySelectedNode];
-		}
 	}
 	
 	if (flag)
@@ -1166,15 +1156,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		item = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 	}
 
-// TODO: Check why this is here... the logic in the isExpandable should be enough
-//    if (![self treatsFilePackagesAsDirectories] && [item isFilePackage])
-//    {
-//        result = 0;
-//    }
-//	else
-    {
-        result = [item countIncludingHiddenFiles:myFlags.showsHiddenFiles];
-    }
+	result = [item countIncludingHiddenFiles:myFlags.showsHiddenFiles];
 	
 	return result;
 }
