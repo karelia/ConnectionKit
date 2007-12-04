@@ -325,7 +325,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oBrowser setPath:nil];
 	}
 	
+	myFlags.outlineViewFullReload = YES;
 	[oOutlineView reloadData];
+	myFlags.outlineViewFullReload = NO;
 	
 	// loop over and select everything
 	NSEnumerator *e = [[self _selectedItems] objectEnumerator];
@@ -424,7 +426,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myHistory = [[NSMutableArray alloc] initWithCapacity:32];
 	myHistoryIndex = -1;
 	mySelection = [[NSMutableSet alloc] initWithCapacity:8];
-	myOutlineTriangleTriggeredFetches = [[NSMutableArray alloc] init];
+	myExpandedOutlineItems = [[NSMutableSet alloc] init];
 	
 	myFlags.allowsDrags = YES;
 	myFlags.allowsDrops = NO;
@@ -453,7 +455,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[mySelectedDirectory release];
 	[myHistory release];
 	[mySelection release];
-	[myOutlineTriangleTriggeredFetches release];
+	[myExpandedOutlineItems release];
 	[mySearchString release];
 	
 	[super dealloc];
@@ -807,7 +809,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)setContents:(NSArray *)contents forPath:(NSString *)path
 {
-	TRACE;
     if (myDirectoriesLoading > 0)
     {
         myDirectoriesLoading--;
@@ -1037,6 +1038,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)popupChanged:(id)sender
 {
+	if ([self _isFiltering])
+	{
+		[self _resetSearch];
+	}
+	
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
 	
@@ -1074,22 +1080,34 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		fullPath = [node path];
 	}
 	
-	// if we are searching, we only want to load the folder contents and not push anything on the history stack
-	if ([self _isFiltering])
+	if ([selection count] > 0)
 	{
-		if ([[oOutlineView itemAtRow:[oOutlineView selectedRow]] isDirectory])
+		// if we are searching, we only want to load the folder contents and not push anything on the history stack
+		if ([self _isFiltering])
 		{
-			myDirectoriesLoading++;
-			[myDelegate directoryTreeStartedLoadingContents:self];
-			[myDelegate directoryTree:self needsContentsForPath:fullPath];
+			if ([[oOutlineView itemAtRow:[oOutlineView selectedRow]] isDirectory])
+			{
+				myDirectoriesLoading++;
+				[myDelegate directoryTreeStartedLoadingContents:self];
+				[myDelegate directoryTree:self needsContentsForPath:fullPath];
+			}
+		}
+		else
+		{
+			[mySelection removeAllObjects];
+			[mySelection addObjectsFromArray:selection];
+			[self _navigateToPath:fullPath pushToHistoryStack:YES];
+			[self _updatePopUpToPath:fullPath];
 		}
 	}
 	else
 	{
+		// we deselected so push the parent path on the history stack
+		CKDirectoryNode *parent = [(CKDirectoryNode *)[[self _selectedItems] lastObject] parent];
 		[mySelection removeAllObjects];
-		[mySelection addObjectsFromArray:selection];
-		[self _navigateToPath:fullPath pushToHistoryStack:YES];
-		[self _updatePopUpToPath:fullPath];
+		[mySelection addObject:parent];
+		[self _navigateToPath:[parent path] pushToHistoryStack:YES];
+		[self _updatePopUpToPath:[parent path]];
 	}
 }
 
@@ -1374,31 +1392,33 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldExpandItem:(id)item
 {
-	TRACE;
 	if (myFlags.outlineViewDoubleCallback) 
 	{
 		myFlags.outlineViewDoubleCallback = NO;
 		return YES;
 	}
 	
+	if (myFlags.outlineViewFullReload)
+	{
+		return [myExpandedOutlineItems containsObject:[item path]];
+	}
+	
 	if ([item isDirectory])
 	{
 		myFlags.outlineViewDoubleCallback = YES;
 		
+		if (![myExpandedOutlineItems containsObject:[item path]])
+		{
+			[myExpandedOutlineItems addObject:[item path]];
+			
+			// need to fetch from the delegate
+			myDirectoriesLoading++;
+			[myDelegate directoryTreeStartedLoadingContents:self];
+			[myDelegate directoryTree:self needsContentsForPath:[item path]];
+		}
+		
 		// allow cache to display immediately if available
-//		[oOutlineView reloadData];
-//		
-//		// need to fetch from the delegate
-//		if ([myOutlineTriangleTriggeredFetches containsObject:[item path]])
-//		{
-//			[myOutlineTriangleTriggeredFetches removeObjectAtIndex:[myOutlineTriangleTriggeredFetches indexOfObject:[item path]]];
-//		}
-//		else
-//		{
-//			myDirectoriesLoading++;
-//			[myDelegate directoryTreeStartedLoadingContents:self];
-//			[myDelegate directoryTree:self needsContentsForPath:[item path]];
-//		}
+		[oOutlineView reloadData];
 	}
 	
 	return YES;
@@ -1411,6 +1431,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[mySelection addObject:[item parent]];
 	}
 	[mySelection removeObject:item];
+	
+	[myExpandedOutlineItems removeObject:[item path]];
 	
 	// collapsing doesn't trigger the target/action
 	[self performSelector:@selector(outlineViewSelected:)

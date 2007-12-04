@@ -76,7 +76,7 @@ typedef enum {
 	unsigned myDirectoriesLoading;
 	unsigned long long myCachedContentsThresholdSize;
 	NSString *mySearchString;
-	NSMutableArray *myOutlineTriangleTriggeredFetches;
+	NSMutableSet *myExpandedOutlineItems;
 	
 	id myDelegate;
 	id myTarget;
@@ -95,7 +95,8 @@ typedef enum {
 		unsigned canCreateFolders: 1;
 		unsigned isReloading: 1;
 		unsigned firstTimeWithOutlineView: 1;
-		unsigned unused: 20;
+		unsigned outlineViewFullReload: 1;
+		unsigned unused: 19;
 	} myFlags;
 }
 
