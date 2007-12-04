@@ -348,6 +348,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			while ((parent))
 			{
 				[nodesToExpand addObject:parent];
+				[myExpandedOutlineItems addObject:[parent path]];
 				parent = [parent parent];
 			}
 			
@@ -1070,6 +1071,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)outlineViewSelected:(id)sender
 {
+	// this seems to be a known issue with table/outline views http://www.cocoabuilder.com/archive/message/cocoa/2004/5/11/106845
+	// stop a double click of the outline view doing anything
+	NSTableHeaderView *header = [oOutlineView headerView];
+	NSEvent *event = [NSApp currentEvent];
+	NSPoint location = [event locationInWindow];
+	location = [[header superview] convertPoint:location fromView:nil];
+	
+	if ([header hitTest:location]) return;
+	
 	NSString *fullPath = nil;
 	// update our internal selection tracking
 	/* TODO: we may need to limit multi selection to just the one directory as they 
@@ -1202,6 +1212,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 	[self _changeRelativeRootToPath:relPath];
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
+	if ([oStyles indexOfSelectedTabViewItem] == CKOutlineViewStyle)
+	{
+		[self _reloadViewsAutoExpandingNodes:YES];
+	}
 	[self _updatePopUpToPath:fullPath];
 	[self _updateHistoryButtons];
 }
@@ -1219,26 +1233,30 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	// a double click will change the relative root path of where we are browsing
 	CKDirectoryNode *node = [oOutlineView itemAtRow:[oOutlineView selectedRow]];
-	NSString *path = [node path];
 	
-	if ([node isFilePackage] && ![self treatsFilePackagesAsDirectories]) return;
-	
-	// clear any search string
-	if ([self _isFiltering])
+	if (node)
 	{
-		[self _resetSearch];
-		[mySelection removeAllObjects];
-		[mySelection addObject:node];
-		[self _navigateToPath:path pushToHistoryStack:YES];
-		// change back to the browser from the "search results"
-		[oStyle selectSegmentWithTag:CKBrowserStyle];
-		[self viewStyleChanged:oStyle];
-	}
-	else
-	{
-		[mySelection removeAllObjects];
-		[self _changeRelativeRootToPath:path];
-		[self _navigateToPath:path pushToHistoryStack:YES];
+		NSString *path = [node path];
+		
+		if ([node isFilePackage] && ![self treatsFilePackagesAsDirectories]) return;
+		
+		// clear any search string
+		if ([self _isFiltering])
+		{
+			[self _resetSearch];
+			[mySelection removeAllObjects];
+			[mySelection addObject:node];
+			[self _navigateToPath:path pushToHistoryStack:YES];
+			// change back to the browser from the "search results"
+			[oStyle selectSegmentWithTag:CKBrowserStyle];
+			[self viewStyleChanged:oStyle];
+		}
+		else
+		{
+			[mySelection removeAllObjects];
+			[self _changeRelativeRootToPath:path];
+			[self _navigateToPath:path pushToHistoryStack:YES];
+		}
 	}
 }
 
