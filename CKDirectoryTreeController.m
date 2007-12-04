@@ -241,7 +241,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)_navigateToPath:(NSString *)path pushToHistoryStack:(BOOL)flag
 {
-	NSLog(@"%s%@", _cmd, path);
 	// stop being re-entrant from the outlineview's shouldExpandItem: delegate method
 	if(myFlags.isNavigatingToPath) return;
 	if (myFlags.isReloading) return;
@@ -478,10 +477,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myOutlineViewColumns = [[NSMutableDictionary alloc] initWithCapacity:8];
 	NSTableColumn *col;
 	
+	[oOutlineView setAllowsColumnReordering:NO];
+	[oOutlineView setAllowsColumnSelection:NO];
+	
 	col = [[NSTableColumn alloc] initWithIdentifier:@"name"];
 	[col setEditable:NO];
 	[[col headerCell] setTitle:LocalizedStringInConnectionKitBundle(@"Name", @"outline view column header name")];
 	[col setDataCell:[[[CKDirectoryCell alloc] initTextCell:@""] autorelease]];
+	[col setSortDescriptorPrototype:nil];
 	[myOutlineViewColumns setObject:col forKey:@"name"];
 	[col release];
 	
@@ -492,6 +495,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     [modifiedCell setFont:[NSFont systemFontOfSize:11]];
 	[col setDataCell:modifiedCell];
 	[col setMinWidth:150];
+	[col setSortDescriptorPrototype:nil];
 	[myOutlineViewColumns setObject:col forKey:@"modified"];
 	[col release];
 	
@@ -504,6 +508,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[sizeCell setFormatter:[[[CKFileSizeFormatter alloc] init] autorelease]];
 	[col setDataCell:sizeCell];
 	[col setMinWidth:80];
+	[col setSortDescriptorPrototype:nil];
 	[myOutlineViewColumns setObject:col forKey:@"size"];
 	[col release];
 	
@@ -514,6 +519,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     [kindCell setFont:[NSFont systemFontOfSize:11]];
 	[col setDataCell:kindCell];
 	[col setMinWidth:150];
+	[col setSortDescriptorPrototype:nil];
 	[myOutlineViewColumns setObject:col forKey:@"kind"];
 	[col release];
 	
@@ -537,6 +543,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[oStandardBrowser setDelegate:self];
     [oStandardBrowser setTarget:self];
     [oStandardBrowser setAction: @selector(standardBrowserSelectedWithDelay:)];
+	[oStandardBrowser setAllowsEmptySelection:YES];
 
 	// set up the browser
 	CKDirectoryTableBrowserCell *tableCell = [[CKDirectoryTableBrowserCell alloc] initTextCell:@""];
@@ -1062,7 +1069,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 }
 
 - (IBAction)outlineViewSelected:(id)sender
-{	
+{
 	NSString *fullPath = nil;
 	// update our internal selection tracking
 	/* TODO: we may need to limit multi selection to just the one directory as they 
@@ -1102,12 +1109,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	else
 	{
-		// we deselected so push the parent path on the history stack
-		CKDirectoryNode *parent = [(CKDirectoryNode *)[[self _selectedItems] lastObject] parent];
-		[mySelection removeAllObjects];
-		[mySelection addObject:parent];
-		[self _navigateToPath:[parent path] pushToHistoryStack:YES];
-		[self _updatePopUpToPath:[parent path]];
+		if ([oOutlineView selectedRow] >= 0 && [oOutlineView selectedRow] < [oOutlineView numberOfRows])
+		{
+			// we deselected so push the relative root path on the history stack
+			CKDirectoryNode *node = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
+			[mySelection removeAllObjects];
+			[mySelection addObject:node];
+			[self _navigateToPath:[node path] pushToHistoryStack:YES];
+			[self _updatePopUpToPath:[node path]];
+		}
 	}
 }
 
@@ -1198,6 +1208,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)outlineDoubleClicked:(id)sender
 {
+	// this seems to be a known issue with table/outline views http://www.cocoabuilder.com/archive/message/cocoa/2004/5/11/106845
+	// stop a double click of the outline view doing anything
+	NSTableHeaderView *header = [oOutlineView headerView];
+	NSEvent *event = [NSApp currentEvent];
+	NSPoint location = [event locationInWindow];
+	location = [[header superview] convertPoint:location fromView:nil];
+	
+	if ([header hitTest:location]) return;
+	
 	// a double click will change the relative root path of where we are browsing
 	CKDirectoryNode *node = [oOutlineView itemAtRow:[oOutlineView selectedRow]];
 	NSString *path = [node path];
@@ -1322,7 +1341,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	else if ([ident isEqualToString:@"size"])
 	{
-		return [NSNumber numberWithUnsignedLongLong:[(CKDirectoryNode *)item size]];
+		if ([item isDirectory])
+		{
+			return @"--";
+		}
+		else
+		{
+			return [NSNumber numberWithUnsignedLongLong:[(CKDirectoryNode *)item size]];
+		}
 	}
 	else if ([ident isEqualToString:@"kind"])
 	{
@@ -1392,20 +1418,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldExpandItem:(id)item
 {
-	if (myFlags.outlineViewDoubleCallback) 
+	if (myFlags.outlineViewDoubleCallback || myFlags.outlineViewFullReload) 
 	{
 		myFlags.outlineViewDoubleCallback = NO;
-		return YES;
-	}
-	
-	if (myFlags.outlineViewFullReload)
-	{
 		return [myExpandedOutlineItems containsObject:[item path]];
 	}
 	
 	if ([item isDirectory])
 	{
-		myFlags.outlineViewDoubleCallback = YES;
+		//myFlags.outlineViewDoubleCallback = YES;
 		
 		if (![myExpandedOutlineItems containsObject:[item path]])
 		{
@@ -1418,7 +1439,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		}
 		
 		// allow cache to display immediately if available
-		[oOutlineView reloadData];
+		[self _reloadViewsAutoExpandingNodes:YES];
 	}
 	
 	return YES;
@@ -1441,6 +1462,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 				  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
 	
 	return YES;
+}
+
+- (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectTableColumn:(NSTableColumn *)tableColumn
+{
+	return NO;
 }
 
 #pragma mark -
@@ -2044,6 +2070,8 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)keyDown:(NSEvent *)theEvent
 {
+	[self interpretKeyEvents:[NSArray arrayWithObject:theEvent]];
+/*
 	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(searchConcatenationEnded) object:nil];
 	
 	if ([[theEvent characters] characterAtIndex:0] == NSDeleteFunctionKey ||
@@ -2106,6 +2134,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 		
 		[self performSelector:@selector(searchConcatenationEnded) withObject:nil afterDelay:KEYPRESS_DELAY];
 	}
+ */
 }
 
 - (void)deleteBackward:(id)sender
@@ -2121,6 +2150,102 @@ static NSMutableParagraphStyle *sStyle = nil;
 	if ([[self delegate] respondsToSelector:@selector(tableView:deleteRows:)])
 	{
 		[[self delegate] tableView:self deleteRows:[[self selectedRowEnumerator] allObjects]];
+	}
+}
+
+// these are from http://www.cocoabuilder.com/archive/message/cocoa/2002/7/28/72439
+- (void)moveDown:(id)sender 
+{
+	[self scrollLineDown:sender];
+	if ([self target] && [self action])
+	{
+		[[self target] performSelector:[self action] withObject:self];
+	}
+}
+
+- (void)moveUp:(id)sender 
+{
+	[self scrollLineUp:sender];
+	if ([self target] && [self action])
+	{
+		[[self target] performSelector:[self action] withObject:self];
+	}
+}
+
+- (void)scrollToRow:(int)row selectRow:(BOOL)select 
+{
+	if (select) 
+	{
+		[self selectRow:row byExtendingSelection:NO];
+	}
+	[self scrollRowToVisible:row];
+}
+
+- (void)scrollLineUp:(id)sender 
+{
+	int row = [self selectedRow];
+	if (row < 0) 
+	{
+		row = [self numberOfRows];
+	}
+	if (--row >= 0) 
+	{
+		[self scrollToRow:row selectRow:YES];
+	}
+}
+
+- (void)scrollLineDown:(id)sender 
+{
+	int row = [self selectedRow];
+	if (++row < [self numberOfRows]) 
+	{
+		[self scrollToRow:row selectRow:YES];
+	}
+}
+
+- (void)scrollToBeginningOfDocument:(id)sender 
+{
+	int rows = [self numberOfRows];
+	if (rows) 
+	{
+		[self scrollToRow:rows selectRow:NO];
+	}
+}
+
+- (void)scrollToEndOfDocument:(id)sender 
+{
+	int rows = [self numberOfRows];
+	if (rows) 
+	{
+		[self scrollToRow:rows-1 selectRow:NO];
+	}
+}
+
+- (void)cancel:(id)sender 
+{
+	[self abortEditing];
+	[[self window] makeFirstResponder:self];
+}
+
+- (void)moveRight:(id)sender 
+{
+	id row;
+	NSEnumerator *enumerator = [self selectedRowEnumerator];
+	
+	while (row = [enumerator nextObject]) 
+	{
+		[self expandItem:[self itemAtRow:[row intValue]]];
+	}
+}
+
+- (void)moveLeft:(id)sender 
+{
+	id row;
+	NSEnumerator *enumerator = [self selectedRowEnumerator];
+	
+	while (row = [enumerator nextObject]) 
+	{
+		[self collapseItem:[self itemAtRow:[row intValue]]];
 	}
 }
 
