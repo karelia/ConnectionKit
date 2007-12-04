@@ -348,7 +348,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			while ((parent))
 			{
 				[nodesToExpand addObject:parent];
-				[myExpandedOutlineItems addObject:[parent path]];
 				parent = [parent parent];
 			}
 			
@@ -1051,6 +1050,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[self _resetSearch];
 	}
 	
+	// outline view needs a forced deselection
+	[oOutlineView deselectAll:self];
+	
 	CKDirectoryNode *node = [sender representedObjectOfSelectedItem];
 	NSString *path = [node path];
 	
@@ -1209,13 +1211,20 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	// fake the selection
 	[mySelection removeAllObjects];
 	[mySelection addObject:[CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode]];
-
+	
+	// outline view needs a forced deselection
+	[oOutlineView deselectAll:self];
+	
+	// we need to make sure the path we are going to is fully expandable for the outline view, just incase they closed the node
+	CKDirectoryNode *parent = [[CKDirectoryNode nodeForPath:fullPath withRoot:myRootNode] parent];
+	while (parent)
+	{
+		[myExpandedOutlineItems addObject:[parent path]];
+		parent = [parent parent];
+	}
+	
 	[self _changeRelativeRootToPath:relPath];
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
-	if ([oStyles indexOfSelectedTabViewItem] == CKOutlineViewStyle)
-	{
-		[self _reloadViewsAutoExpandingNodes:YES];
-	}
 	[self _updatePopUpToPath:fullPath];
 	[self _updateHistoryButtons];
 }
@@ -1957,7 +1966,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 {
     if (![anObject isKindOfClass:[NSNumber class]]) 
 	{
-        return nil;
+        return [anObject description];
     }
 	
     return [NSString formattedFileSize:[anObject doubleValue]];
