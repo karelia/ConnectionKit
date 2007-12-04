@@ -601,6 +601,12 @@ DOT_OR_DOTDOT:
 	while (1)
 	{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+		if (cancelflag)
+		{
+			[pool release];
+			pool = nil;
+			break;
+		}		
 		
 		FD_ZERO(&readMask);
 		FD_SET(master, &readMask);
@@ -744,20 +750,6 @@ DOT_OR_DOTDOT:
 				//[sftpWrapperConnection setBusyWithMessage:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
 		}
-		
-		if ([self buffer:serverResponseBuffer containsString:"Remote working"])
-		{
-			char *bufferDump = strdup((char *)serverResponseBuffer);
-			char *newline = strrchr(bufferDump, '\r');
-			if (newline)
-			{
-				*newline = '\0';
-			}
-			char *path = strchr(bufferDump, '/');
-			NSString *remotePath = [NSString stringWithBytesOfUnknownEncoding:path length:strlen(path)];
-			[sftpWrapperConnection setCurrentRemotePath:remotePath];
-			free(bufferDump);
-		}
 		if ([self hasDirectoryListingFormInBuffer:serverResponseBuffer])
 		{
 			wasListing = YES;
@@ -773,10 +765,6 @@ DOT_OR_DOTDOT:
 		
 		[pool release];
 		pool = nil;
-		if (cancelflag)
-		{
-			break;
-		}
 	}
 	
 	int status;
