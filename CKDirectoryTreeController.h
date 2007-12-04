@@ -76,6 +76,7 @@ typedef enum {
 	unsigned myDirectoriesLoading;
 	unsigned long long myCachedContentsThresholdSize;
 	NSString *mySearchString;
+	NSMutableArray *myOutlineTriangleTriggeredFetches;
 	
 	id myDelegate;
 	id myTarget;

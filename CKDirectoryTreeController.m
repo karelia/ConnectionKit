@@ -424,6 +424,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myHistory = [[NSMutableArray alloc] initWithCapacity:32];
 	myHistoryIndex = -1;
 	mySelection = [[NSMutableSet alloc] initWithCapacity:8];
+	myOutlineTriangleTriggeredFetches = [[NSMutableArray alloc] init];
 	
 	myFlags.allowsDrags = YES;
 	myFlags.allowsDrops = NO;
@@ -452,6 +453,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[mySelectedDirectory release];
 	[myHistory release];
 	[mySelection release];
+	[myOutlineTriangleTriggeredFetches release];
+	[mySearchString release];
 	
 	[super dealloc];
 }
@@ -1144,7 +1147,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (IBAction)historyChanged:(id)sender
 {
 	// clear any search string
-	if (![mySearchString isEqualToString:@""])
+	if ([self _isFiltering])
 	{
 		[self _resetSearch];
 		[oStyle selectSegmentWithTag:CKBrowserStyle];
@@ -1386,9 +1389,16 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 //		[oOutlineView reloadData];
 //		
 //		// need to fetch from the delegate
-//		myDirectoriesLoading++;
-//		[myDelegate directoryTreeStartedLoadingContents:self];
-//		[myDelegate directoryTree:self needsContentsForPath:[item path]];
+//		if ([myOutlineTriangleTriggeredFetches containsObject:[item path]])
+//		{
+//			[myOutlineTriangleTriggeredFetches removeObjectAtIndex:[myOutlineTriangleTriggeredFetches indexOfObject:[item path]]];
+//		}
+//		else
+//		{
+//			myDirectoriesLoading++;
+//			[myDelegate directoryTreeStartedLoadingContents:self];
+//			[myDelegate directoryTree:self needsContentsForPath:[item path]];
+//		}
 	}
 	
 	return YES;
