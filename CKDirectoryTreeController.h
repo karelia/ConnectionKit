@@ -75,6 +75,7 @@ typedef enum {
 	NSString *myFilter;
 	unsigned myDirectoriesLoading;
 	unsigned long long myCachedContentsThresholdSize;
+	NSString *mySearchString;
 	
 	id myDelegate;
 	id myTarget;
@@ -92,9 +93,8 @@ typedef enum {
 		unsigned showsFilePackageExtensions: 1;
 		unsigned canCreateFolders: 1;
 		unsigned isReloading: 1;
-		unsigned outlineViewIsCollapsing: 1;
 		unsigned firstTimeWithOutlineView: 1;
-		unsigned unused: 19;
+		unsigned unused: 20;
 	} myFlags;
 }
 
