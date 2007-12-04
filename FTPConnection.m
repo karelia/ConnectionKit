@@ -1358,7 +1358,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
 				[self dequeueDeletion];
 			}
-			else if (GET_STATE == FTPChangeDirectoryListingStyle || ConnectionSettingPermissionsState)
+			else if (GET_STATE == FTPChangeDirectoryListingStyle || GET_STATE == ConnectionSettingPermissionsState)			
 			{
 				[self setState:ConnectionIdleState];
 				break;
