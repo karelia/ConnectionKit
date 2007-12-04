@@ -553,6 +553,11 @@ WRITE_ERROR:
 	{
 		[self didSetPermissionsForFile:[self currentPermissionChangeInfo]];
 	}
+	else if ([finishedCommand hasPrefix:@"cd"])
+	{
+		NSString *directory = [finishedCommand substringWithRange:NSMakeRange(4, [finishedCommand length] - 5)]; // from cd "httpdocs" to httpdocs
+		[self didChangeToDirectory:directory];
+	}
 }
 
 #pragma mark -
@@ -699,7 +704,14 @@ WRITE_ERROR:
 		[_forwarder connection:self didReceiveContents:connectionKitFormattedContents ofDirectory:currentDirectory];
 	}
 }
-
+- (void)didChangeToDirectory:(NSString *)path
+{
+	[currentDirectory setString:path];
+	if (_flags.changeDirectory)
+	{
+		[_forwarder connection:self didChangeToDirectory:path];
+	}
+}
 #pragma mark -
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
 {
@@ -875,12 +887,6 @@ WRITE_ERROR:
 		[_forwarder connection:self didAuthenticateToHost:[self host]];
 	}		
 }
-
-- (void)setCurrentRemotePath:(NSString *)remotePath
-{
-	[currentDirectory setString:remotePath];
-}
-
 - (void)didDisconnect
 {
 	isConnected = NO;

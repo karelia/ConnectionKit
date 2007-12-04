@@ -1541,7 +1541,6 @@ if ([fn isEqualToString:@"."] || \
 	}
 	else
 		lines = [line componentsSeparatedByString:@"\r\n"];
-	
 	NSEnumerator *e = [lines objectEnumerator];
 	NSString *cur;
 	
@@ -1571,77 +1570,149 @@ if ([fn isEqualToString:@"."] || \
 		// 9 - link arrow / link target
 		// 10 - link target
 		
-		if ([words count] >= 7)
+		if ([words count] < 7)
 		{
-			if ([[words objectAtIndex:1] isEqualToString:@"folder"]) //This is for netprezense folders 
+			continue;
+		}
+		
+		if ([[words objectAtIndex:1] isEqualToString:@"folder"]) //This is for netprezense folders 
+		{
+			NSMutableDictionary *d = [NSMutableDictionary dictionary];
+			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] forKey:NSFileReferenceCount];
+			[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:3] day:[words objectAtIndex:4] yearOrTime:[words objectAtIndex:5]] forKey:NSFileModificationDate];
+			
+			int i;
+			NSMutableString *filenameStr = [NSMutableString string];
+			for (i = 6; i < [words count]; i++)
+				[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
+			
+			[d setObject:[self fixFilename:filenameStr withAttributes:d]
+				  forKey:cxFilenameKey];
+			CHECK_NAME
+			[attributedLines addObject:d];
+		}
+		else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] &&
+				 [[words objectAtIndex:4] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:4] intValue]] stringValue]] &&
+				 [[words objectAtIndex:5] intValue] >= 0 && [[words objectAtIndex:6] intValue] <= 31 && [[words objectAtIndex:6] intValue] > 0)
+		{
+			/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */
+			NSMutableDictionary *d = [NSMutableDictionary dictionary];
+			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
+			[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
+			
+			[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:4] doubleValue]] forKey:NSFileSize];
+			
+			int i;
+			NSMutableString *filenameStr = [NSMutableString string];
+			for (i = 8; i < [words count]; i++)
+				[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
+			
+			[d setObject:[self fixFilename:filenameStr withAttributes:d]
+				  forKey:cxFilenameKey];
+			CHECK_NAME
+			[attributedLines addObject:d];
+		}
+		else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] && 	 
+				 [[words objectAtIndex:5] intValue] <= 31 && [[words objectAtIndex:5] intValue] > 0) //This is for netprezense files
+		{
+			/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */
+			NSMutableDictionary *d = [NSMutableDictionary dictionary];
+			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
+			[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
+			
+			[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
+			
+			int i;
+			NSMutableString *filenameStr = [NSMutableString string];
+			for (i = 7; i < [words count]; i++)
+				[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
+			
+			[d setObject:[self fixFilename:filenameStr withAttributes:d]
+				  forKey:cxFilenameKey];
+			CHECK_NAME
+			[attributedLines addObject:d];
+		}
+		else if ([[words objectAtIndex:1] isEqualToString:@"FTP"] && [[words objectAtIndex:2] isEqualToString:@"User"]) // Trellix FTP Server
+		{
+			NSMutableDictionary *d = [NSMutableDictionary dictionary];
+			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+			[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
+			[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
+			
+			//if it is a sym link we want to break up the name and target
+			int filenameStartIndex = 7;
+			if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 			{
-				NSMutableDictionary *d = [NSMutableDictionary dictionary];
-				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
-				[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] forKey:NSFileReferenceCount];
-				[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:3] day:[words objectAtIndex:4] yearOrTime:[words objectAtIndex:5]] forKey:NSFileModificationDate];
-				
+				NSMutableArray *filenameBits = [NSMutableArray array];
 				int i;
-				NSMutableString *filenameStr = [NSMutableString string];
-				for (i = 6; i < [words count]; i++)
-					[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
 				
-				[d setObject:[self fixFilename:filenameStr withAttributes:d]
+				for ( i = filenameStartIndex; i < [words count]; i++) {
+					NSString *bit = [words objectAtIndex:i];
+					NSRange r = [bit rangeOfString:@"->"];
+					if (r.location != NSNotFound) {
+						//bit = [bit substringToIndex:r.location];
+						//[filenameBits addObject:bit];
+						break;
+					}
+					[filenameBits addObject:bit];
+				}
+				
+				NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
+				NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+				filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				NSString *symTarget = [symBits componentsJoinedByString:@" "];
+				symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+				
+				[d setObject:[self fixFilename:filenameStr withAttributes:d] 
 					  forKey:cxFilenameKey];
-				CHECK_NAME
-				[attributedLines addObject:d];
+				[d setObject:[self fixFilename:symTarget withAttributes:d]
+					  forKey:cxSymbolicLinkTargetKey];
 			}
-			else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] &&
-					 [[words objectAtIndex:4] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:4] intValue]] stringValue]] &&
-					 [[words objectAtIndex:5] intValue] >= 0 && [[words objectAtIndex:6] intValue] <= 31 && [[words objectAtIndex:6] intValue] > 0)
+			else
 			{
-				/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */
-				NSMutableDictionary *d = [NSMutableDictionary dictionary];
-				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
-				[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
-				[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
+				NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
+				NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
 				
+				[d setObject:[self fixFilename:filenameStr withAttributes:d] 
+					  forKey:cxFilenameKey];
+			}
+			CHECK_NAME
+			[attributedLines addObject:d];
+		}
+		else
+		{
+			NSString *groupSize = [words objectAtIndex:3];
+			int s = [groupSize intValue];
+			BOOL hasGroup = s >= 0;
+			
+			NSMutableDictionary *d = [NSMutableDictionary dictionary];
+			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
+			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
+			[d setObject:[words objectAtIndex:2] forKey:NSFileOwnerAccountID];
+			
+			if (hasGroup)
+			{
+				[d setObject:[words objectAtIndex:3] forKey:NSFileGroupOwnerAccountID];
 				[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:4] doubleValue]] forKey:NSFileSize];
+				//workout date
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
+					[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
+					[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:6] day:[words objectAtIndex:7] yearOrTime:[words objectAtIndex:8]] forKey:NSFileModificationDate];
+				else
+				{
+					NSCalendarDate *date = [NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]];
+					[d setObject:date forKey:NSFileModificationDate];
+				}
 				
-				int i;
-				NSMutableString *filenameStr = [NSMutableString string];
-				for (i = 8; i < [words count]; i++)
-					[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
-				
-				[d setObject:[self fixFilename:filenameStr withAttributes:d]
-					  forKey:cxFilenameKey];
-				CHECK_NAME
-				[attributedLines addObject:d];
-			}
-			else if ([[words objectAtIndex:2] isEqualToString:[[NSNumber numberWithInt:[[words objectAtIndex:2] intValue]] stringValue]] && 	 
-					 [[words objectAtIndex:5] intValue] <= 31 && [[words objectAtIndex:5] intValue] > 0) //This is for netprezense files
-			{
-				/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */
-				NSMutableDictionary *d = [NSMutableDictionary dictionary];
-				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
-				[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
-				[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
-				
-				[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
-				
-				int i;
-				NSMutableString *filenameStr = [NSMutableString string];
-				for (i = 7; i < [words count]; i++)
-					[filenameStr appendFormat:@"%@ ", [words objectAtIndex:i]];
-				
-				[d setObject:[self fixFilename:filenameStr withAttributes:d]
-					  forKey:cxFilenameKey];
-				CHECK_NAME
-				[attributedLines addObject:d];
-			}
-			else if ([[words objectAtIndex:1] isEqualToString:@"FTP"] && [[words objectAtIndex:2] isEqualToString:@"User"]) // Trellix FTP Server
-			{
-				NSMutableDictionary *d = [NSMutableDictionary dictionary];
-				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
-				[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
-				[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
+				int filenameStartIndex = 8;
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
+					[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
+					filenameStartIndex = 9;
 				
 				//if it is a sym link we want to break up the name and target
-				int filenameStartIndex = 7;
 				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 				{
 					NSMutableArray *filenameBits = [NSMutableArray array];
@@ -1673,138 +1744,65 @@ if ([fn isEqualToString:@"."] || \
 				{
 					NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
 					NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
-					
+											
 					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
 						  forKey:cxFilenameKey];
 				}
-				CHECK_NAME
-				[attributedLines addObject:d];
 			}
-			else
+			else // no group
 			{
-				NSString *groupSize = [words objectAtIndex:3];
-				int s = [groupSize intValue];
-				BOOL hasGroup = s >= 0;
+				[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
 				
-				NSMutableDictionary *d = [NSMutableDictionary dictionary];
-				[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
-				[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
-				[d setObject:[words objectAtIndex:2] forKey:NSFileOwnerAccountID];
+				// workout date
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
+					[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
+					[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
+				else
+					[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
 				
-				if (hasGroup)
+				int filenameStartIndex = 7;
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
+					[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
+					filenameStartIndex = 8;
+				
+				if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
 				{
-					[d setObject:[words objectAtIndex:3] forKey:NSFileGroupOwnerAccountID];
-					[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:4] doubleValue]] forKey:NSFileSize];
-					//workout date
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
-						[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
-						[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:6] day:[words objectAtIndex:7] yearOrTime:[words objectAtIndex:8]] forKey:NSFileModificationDate];
-					else
-					{
-						NSCalendarDate *date = [NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]];
-						if (date)
-						{
-							[d setObject:date forKey:NSFileModificationDate];
-						}
-					}
+					NSMutableArray *filenameBits = [NSMutableArray array];
+					int i;
 					
-					int filenameStartIndex = 8;
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
-						[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
-						filenameStartIndex = 9;
-					
-					//if it is a sym link we want to break up the name and target
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-					{
-						NSMutableArray *filenameBits = [NSMutableArray array];
-						int i;
-						
-						for ( i = filenameStartIndex; i < [words count]; i++) {
-							NSString *bit = [words objectAtIndex:i];
-							NSRange r = [bit rangeOfString:@"->"];
-							if (r.location != NSNotFound) {
-								//bit = [bit substringToIndex:r.location];
-								//[filenameBits addObject:bit];
-								break;
-							}
+					for (i = filenameStartIndex; i < [words count]; i++) {
+						NSString *bit = [words objectAtIndex:i];
+						NSRange r = [bit rangeOfString:@"->"];
+						if (r.location != NSNotFound) {
+							bit = [bit substringToIndex:r.location];
 							[filenameBits addObject:bit];
+							break;
 						}
-						
-						NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
-						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
-						filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-						NSString *symTarget = [symBits componentsJoinedByString:@" "];
-						symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-						
-						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
-							  forKey:cxFilenameKey];
-						[d setObject:[self fixFilename:symTarget withAttributes:d]
-							  forKey:cxSymbolicLinkTargetKey];
+						[filenameBits addObject:bit];
 					}
-					else
-					{
-						NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
-						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
-												
-						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
-							  forKey:cxFilenameKey];
-					}
+					
+					NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
+					NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
+					filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+					NSString *symTarget = [symBits componentsJoinedByString:@" "];
+					symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+					
+					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
+						  forKey:cxFilenameKey];
+					[d setObject:[self fixFilename:symTarget withAttributes:d]  
+						  forKey:cxSymbolicLinkTargetKey];
 				}
-				else // no group
+				else
 				{
-					[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:3] doubleValue]] forKey:NSFileSize];
+					NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
+					NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
 					
-					// workout date
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
-						[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
-						[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
-					else
-						[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:4] day:[words objectAtIndex:5] yearOrTime:[words objectAtIndex:6]] forKey:NSFileModificationDate];
-					
-					int filenameStartIndex = 7;
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] ||
-						[[d objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial])
-						filenameStartIndex = 8;
-					
-					if ([[d objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-					{
-						NSMutableArray *filenameBits = [NSMutableArray array];
-						int i;
-						
-						for (i = filenameStartIndex; i < [words count]; i++) {
-							NSString *bit = [words objectAtIndex:i];
-							NSRange r = [bit rangeOfString:@"->"];
-							if (r.location != NSNotFound) {
-								bit = [bit substringToIndex:r.location];
-								[filenameBits addObject:bit];
-								break;
-							}
-							[filenameBits addObject:bit];
-						}
-						
-						NSArray *symBits = [words subarrayWithRange:NSMakeRange(i, [words count] - i)];
-						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
-						filenameStr = [filenameStr stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-						NSString *symTarget = [symBits componentsJoinedByString:@" "];
-						symTarget = [symTarget stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-						
-						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
-							  forKey:cxFilenameKey];
-						[d setObject:[self fixFilename:symTarget withAttributes:d]  
-							  forKey:cxSymbolicLinkTargetKey];
-					}
-					else
-					{
-						NSArray *filenameBits = [words subarrayWithRange:NSMakeRange(filenameStartIndex, [words count] - filenameStartIndex)];
-						NSString *filenameStr = [filenameBits componentsJoinedByString:@" "];
-						
-						[d setObject:[self fixFilename:filenameStr withAttributes:d] 
-							  forKey:cxFilenameKey];
-					}			
-				}
-				CHECK_NAME
-				[attributedLines addObject:d];
+					[d setObject:[self fixFilename:filenameStr withAttributes:d] 
+						  forKey:cxFilenameKey];
+				}			
 			}
+			CHECK_NAME
+			[attributedLines addObject:d];
 		}
 	}
 	return [attributedLines sortedArrayUsingFunction:filenameSort context:NULL];

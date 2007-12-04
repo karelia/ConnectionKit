@@ -61,7 +61,7 @@
 - (void)didDisconnect;
 
 - (void)didReceiveDirectoryContents:(NSArray*)items;
-- (void)setCurrentRemotePath:(NSString *)remotePath;
+- (void)didChangeToDirectory:(NSString *)path;
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
 - (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo;
