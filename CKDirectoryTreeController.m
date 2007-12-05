@@ -66,6 +66,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSArray *)_selectedItems;
 - (void)_updateHistoryButtons;
 - (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node;
+- (void)_reloadViewsAutoExpandingNodes:(BOOL)flag;
 - (void)_reloadViews;
 - (void)_resetSearch;
 @end
