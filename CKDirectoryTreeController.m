@@ -1177,8 +1177,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (IBAction)standardBrowserSelected:(id)sender
 {	
 	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
-	[self _navigateToPath:fullPath pushToHistoryStack:YES];
-	[self _updatePopUpToPath:fullPath];
+	if (fullPath)
+	{
+		[self _navigateToPath:fullPath pushToHistoryStack:YES];
+		[self _updatePopUpToPath:fullPath];
+	}
 }
 
 - (IBAction)browserSelected:(id)sender
