@@ -372,11 +372,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		// do the NSBrowser
 		if (!didSetBrowserPath)
 		{
-			//NSLog(@"before setPath: path=%@ lastColumn=%d lastVisibleColumn=%d", [oStandardBrowser path], [oStandardBrowser lastColumn], [oStandardBrowser lastVisibleColumn]);
 			NSString *browserPath = [self _browserPathForPath:[cur path]];
 			[oStandardBrowser setPath:browserPath];
 			[oStandardBrowser reloadColumn:[oStandardBrowser lastVisibleColumn]];
-			//NSLog(@"after setPath: path=%@ lastColumn=%d lastVisibleColumn=%d", [oStandardBrowser path], [oStandardBrowser lastColumn], [oStandardBrowser lastVisibleColumn]);
 			
 			// make sure the last column is the first responder so that it is blue
 			if ([oStyles indexOfSelectedTabViewItem] == CKBrowserStyle)
@@ -1248,6 +1246,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)outlineDoubleClicked:(id)sender
 {
+	// we have to cancel this as the single click action is called before the double click
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(outlineViewSelectedRunloopDelay:) object:nil];
+	
 	// this seems to be a known issue with table/outline views http://www.cocoabuilder.com/archive/message/cocoa/2004/5/11/106845
 	// stop a double click of the outline view doing anything
 	NSTableHeaderView *header = [oOutlineView headerView];
@@ -1538,7 +1539,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		parent = [[oStandardBrowser selectedCellInColumn:column - 1] representedObject];
 	}
-	
 	CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
 	[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
 	[cell setRepresentedObject:[node retain]];
