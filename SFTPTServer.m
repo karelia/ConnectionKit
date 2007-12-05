@@ -745,10 +745,19 @@ DOT_OR_DOTDOT:
 				NSMutableDictionary *hostInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSString stringWithUTF8String:serverResponseBuffer], @"msg", [self retrieveUnknownHostKeyFromStream:masterFileStream], @"key", nil];
 				[sftpWrapperConnection getContinueQueryForUnknownHost:hostInfo];
 			}
-			else if ([self buffer:serverResponseBuffer containsString:"Removing "])
+		}
+		if ([self buffer:serverResponseBuffer containsString:"Remote working"])
+		{
+			char *bufferDump = strdup((char *)serverResponseBuffer);
+			char *newline = strrchr(bufferDump, '\r');
+			if (newline)
 			{
-				//[sftpWrapperConnection setBusyWithMessage:[NSString stringWithUTF8String:serverResponseBuffer]];
+				*newline = '\0';
 			}
+			char *path = strchr(bufferDump, '/');
+			NSString *remotePath = [NSString stringWithBytesOfUnknownEncoding:path length:strlen(path)];
+			[sftpWrapperConnection setCurrentRemotePath:remotePath];
+			free(bufferDump);
 		}
 		if ([self hasDirectoryListingFormInBuffer:serverResponseBuffer])
 		{
