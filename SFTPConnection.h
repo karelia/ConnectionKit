@@ -88,7 +88,7 @@
 - (void)requestPasswordWithPrompt:(char *)header;
 - (void)connectionError:(NSError *)error;
 - (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo;
-
+- (void)setCurrentRemotePath:(NSString *)remotePath;
 - (void)logServerResponseBuffer:(NSString *)serverBuffer;
 - (void)addStringToTranscript:(NSString *)stringToAdd;
 @end

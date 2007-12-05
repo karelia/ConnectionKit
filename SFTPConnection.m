@@ -706,7 +706,6 @@ WRITE_ERROR:
 }
 - (void)didChangeToDirectory:(NSString *)path
 {
-	[currentDirectory setString:path];
 	if (_flags.changeDirectory)
 	{
 		[_forwarder connection:self didChangeToDirectory:path];
@@ -895,7 +894,10 @@ WRITE_ERROR:
 		[_forwarder connection:self didDisconnectFromHost:[self host]];
 	}
 }
-
+- (void)setCurrentRemotePath:(NSString *)remotePath
+{
+	[currentDirectory setString:remotePath];
+}
 - (void)passwordErrorOccurred
 {
 	if (_flags.badPassword)
