@@ -104,10 +104,12 @@ static NSMutableParagraphStyle *sStyle = nil;
             if ([self isHighlighted] || [self state] != 0) {
                 // The return value from highlightColorInView will return the appropriate one for you. 
                 [[self highlightColorInView:controlView] set];
-                // Draw the highlight, but only the portion that won't be caught by the call to [super drawInteriorWithFrame:...] below.  
-                highlightRect = NSMakeRect(NSMinX(cellFrame), NSMinY(cellFrame), NSWidth(cellFrame) - NSWidth(textFrame), NSHeight(cellFrame));
-                NSRectFill(highlightRect);
-            }
+			} else {
+				[[NSColor controlBackgroundColor] set];
+			}
+			// Draw the highlight, but only the portion that won't be caught by the call to [super drawInteriorWithFrame:...] below.  
+			highlightRect = NSMakeRect(NSMinX(cellFrame), NSMinY(cellFrame), NSWidth(cellFrame) - NSWidth(textFrame), NSHeight(cellFrame));
+			NSRectFill(highlightRect);
         }
 		
         [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0];
