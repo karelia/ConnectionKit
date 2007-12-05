@@ -1075,6 +1075,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (IBAction)outlineViewSelected:(id)sender
 {
+	[NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(outlineViewSelectedRunloopDelay:) object:nil];
+	
 	// this seems to be a known issue with table/outline views http://www.cocoabuilder.com/archive/message/cocoa/2004/5/11/106845
 	// stop a double click of the outline view doing anything
 	NSTableHeaderView *header = [oOutlineView headerView];
@@ -1101,6 +1103,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		fullPath = [node path];
 	}
 	
+	BOOL needsDelayedReload = YES;
+	
 	if ([selection count] > 0)
 	{
 		// if we are searching, we only want to load the folder contents and not push anything on the history stack
@@ -1111,28 +1115,39 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 				myDirectoriesLoading++;
 				[myDelegate directoryTreeStartedLoadingContents:self];
 				[myDelegate directoryTree:self needsContentsForPath:fullPath];
+				needsDelayedReload = NO;
 			}
 		}
 		else
 		{
 			[mySelection removeAllObjects];
 			[mySelection addObjectsFromArray:selection];
-			[self _navigateToPath:fullPath pushToHistoryStack:YES];
-			[self _updatePopUpToPath:fullPath];
 		}
 	}
 	else
 	{
-		if ([oOutlineView selectedRow] >= 0 && [oOutlineView selectedRow] < [oOutlineView numberOfRows])
+		BOOL wasDeselection = [oOutlineView rowAtPoint:[[oOutlineView superview] convertPoint:[event locationInWindow] fromView:nil]] != NSNotFound;
+		
+		if (wasDeselection)
 		{
 			// we deselected so push the relative root path on the history stack
 			CKDirectoryNode *node = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 			[mySelection removeAllObjects];
 			[mySelection addObject:node];
-			[self _navigateToPath:[node path] pushToHistoryStack:YES];
-			[self _updatePopUpToPath:[node path]];
 		}
 	}
+	
+	if (needsDelayedReload)
+	{
+		[self performSelector:@selector(outlineViewSelectedRunloopDelay:) withObject:nil afterDelay:FILE_NAVIGATION_DELAY inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
+	}
+}
+
+- (IBAction)outlineViewSelectedRunloopDelay:(id)sender
+{	
+	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
+	[self _navigateToPath:fullPath pushToHistoryStack:YES];
+	[self _updatePopUpToPath:fullPath];
 }
 
 - (IBAction)standardBrowserSelectedWithDelay:(id)sender
