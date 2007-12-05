@@ -281,7 +281,15 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[self _updateHistoryButtons];
 	}
 	
-	[self _reloadViews];
+	if (myFlags.wasHistoryOperation)
+	{
+		myFlags.wasHistoryOperation = NO;
+		[self _reloadViewsAutoExpandingNodes:YES];
+	}
+	else
+	{
+		[self _reloadViewsAutoExpandingNodes:NO];
+	}
 	
 	myFlags.isNavigatingToPath = NO;
 	
@@ -1239,6 +1247,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	[self _changeRelativeRootToPath:relPath];
+	myFlags.wasHistoryOperation = YES;
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
 	[self _updatePopUpToPath:fullPath];
 	[self _updateHistoryButtons];

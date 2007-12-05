@@ -96,7 +96,8 @@ typedef enum {
 		unsigned isReloading: 1;
 		unsigned firstTimeWithOutlineView: 1;
 		unsigned outlineViewFullReload: 1;
-		unsigned unused: 19;
+		unsigned wasHistoryOperation: 1;
+		unsigned unused: 18;
 	} myFlags;
 }
 
