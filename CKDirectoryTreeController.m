@@ -271,7 +271,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		}
 		
 		// push the new navigation item on the stack if the last item is not the same as this one
-		if (![[[myHistory lastObject] objectForKey:@"fp"] isEqualToString:path])
+		if (![[[myHistory lastObject] objectForKey:@"fp"] isEqualToString:path] || 
+			![[[myHistory lastObject] objectForKey:@"rp"] isEqualToString:myRelativeRootPath])
 		{
 			[myHistory addObject:[NSDictionary dictionaryWithObjectsAndKeys:path, @"fp", myRelativeRootPath, @"rp", nil]];
 			myHistoryIndex++;
@@ -753,6 +754,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oBrowser setPath:nil];
 		[oOutlineView reloadData];
 		[mySelection removeAllObjects];
+		[myExpandedOutlineItems removeAllObjects];
 		
 		[self _reloadViews];
 	}
@@ -1445,31 +1447,26 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldExpandItem:(id)item
 {
+	BOOL result = NO;
+	
 	if (myFlags.outlineViewDoubleCallback || myFlags.outlineViewFullReload) 
 	{
 		myFlags.outlineViewDoubleCallback = NO;
-		return [myExpandedOutlineItems containsObject:[item path]];
+		result = [myExpandedOutlineItems containsObject:[item path]];
 	}
-	
-	if ([item isDirectory])
-	{
-		//myFlags.outlineViewDoubleCallback = YES;
-		
+	else if ([item isDirectory])
+	{		
 		if (![myExpandedOutlineItems containsObject:[item path]])
 		{
 			[myExpandedOutlineItems addObject:[item path]];
-			
 			// need to fetch from the delegate
 			myDirectoriesLoading++;
 			[myDelegate directoryTreeStartedLoadingContents:self];
 			[myDelegate directoryTree:self needsContentsForPath:[item path]];
 		}
-		
-		// allow cache to display immediately if available
-		[self _reloadViewsAutoExpandingNodes:YES];
+		result = YES;
 	}
-	
-	return YES;
+	return result;
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldCollapseItem:(id)item
@@ -1481,7 +1478,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[mySelection removeObject:item];
 	
 	[myExpandedOutlineItems removeObject:[item path]];
-	
+
 	// collapsing doesn't trigger the target/action
 	[self performSelector:@selector(outlineViewSelected:)
 			   withObject:oOutlineView
@@ -2086,6 +2083,14 @@ static NSMutableParagraphStyle *sStyle = nil;
 {
 	[myQuickSearchString release];
 	[super dealloc];
+}
+
+- (void)reloadData
+{
+	if (myIsReloading) return;
+	myIsReloading = YES;
+	[super reloadData];
+	myIsReloading = NO;
 }
 
 - (void)searchConcatenationEnded

@@ -217,6 +217,7 @@ typedef enum {
 @interface CKDirectoryOutlineView : NSOutlineView
 {
 	NSMutableString *myQuickSearchString;
+	BOOL myIsReloading;
 }
 
 @end
