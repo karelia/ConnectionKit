@@ -93,6 +93,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myRelativeRootPath = [path copy];
 	
 	[self _updatePopUpToPath:myRelativeRootPath];
+	
+	// reset the outline view scroller to the top
+	[oOutlineView scrollRectToVisible:NSMakeRect(0, 0, 1, 1)];
 }
 
 // this method is expected to be called only on paths that exist for the current browser, otherwise it will return nil
@@ -373,7 +376,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			}
 		}
 		[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
-		[oOutlineView scrollRectToVisible:outlineViewVisibleRect];
 		
 		if (!didScroll)
 		{
@@ -401,6 +403,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		//int browserRow = [[[cur parent] contents] indexOfObject:cur];
 		//[oStandardBrowser selectRow:browserRow inColumn:[oStandardBrowser lastColumn]];
 	}
+	
+	// restore outline view position
+	[oOutlineView scrollRectToVisible:outlineViewVisibleRect];
 	
 	// do the table browser
 	[oBrowser selectItems:[self _selectedItems]];
@@ -1144,7 +1149,6 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			// we deselected so push the relative root path on the history stack
 			CKDirectoryNode *node = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
 			[mySelection removeAllObjects];
-			[mySelection addObject:node];
 		}
 	}
 	
@@ -1157,6 +1161,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (IBAction)outlineViewSelectedRunloopDelay:(id)sender
 {	
 	NSString *fullPath  = [[[mySelection allObjects] lastObject] path];
+	
+	if (!fullPath)
+	{
+		fullPath = [[myRelativeRootPath copy] autorelease];
+	}
 	[self _navigateToPath:fullPath pushToHistoryStack:YES];
 	[self _updatePopUpToPath:fullPath];
 }
@@ -1259,6 +1268,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	[self _navigateToPath:fullPath pushToHistoryStack:NO];
 	[self _updatePopUpToPath:fullPath];
 	[self _updateHistoryButtons];
+	
+	// scroll the selected item into view for the outline view
+	if ([oOutlineView selectedRow] != NSNotFound)
+	{
+		[oOutlineView scrollRowToVisible:[oOutlineView selectedRow]];
+	}
 }
 
 - (IBAction)outlineDoubleClicked:(id)sender
