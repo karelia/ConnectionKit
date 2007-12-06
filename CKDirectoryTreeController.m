@@ -334,6 +334,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		[oBrowser setPath:nil];
 	}
 	
+	// tiger will scroll us back to the top in the outline view so we need to save the current rect
+	NSRect outlineViewVisibleRect = [[oOutlineView enclosingScrollView] documentVisibleRect];
+	
 	myFlags.outlineViewFullReload = YES;
 	[oOutlineView reloadData];
 	myFlags.outlineViewFullReload = NO;
@@ -370,6 +373,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			}
 		}
 		[oOutlineView selectRow:[oOutlineView rowForItem:cur] byExtendingSelection:NO]; //TODO: need to change for multi selection support
+		[oOutlineView scrollRectToVisible:outlineViewVisibleRect];
 		
 		if (!didScroll)
 		{
