@@ -216,9 +216,6 @@ static char *lsform;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-//	NSDictionary *uploadDictionary = [NSDictionary dictionaryWithObjectsAndKeys:localPath, @"localPath", remotePath, @"remotePath", [NSNumber numberWithBool:NO], @"isDirectory", nil];
-//	[uploadQueue addObject:uploadDictionary];	
-//	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"put \"%@\" \"%@\"", localPath, remotePath]];
 }
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
