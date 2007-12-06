@@ -147,6 +147,7 @@ typedef enum {
 - (IBAction)browserSelected:(id)sender;
 - (IBAction)filterChanged:(id)sender;
 - (IBAction)historyChanged:(id)sender;
+- (IBAction)newFolder:(id)sender;
 
 - (void)setCachedContentsThresholdSize:(unsigned long long)bytes;
 - (unsigned long long)cachedContentsThresholdSize;

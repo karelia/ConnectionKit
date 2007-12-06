@@ -1146,8 +1146,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		if (wasDeselection)
 		{
-			// we deselected so push the relative root path on the history stack
-			CKDirectoryNode *node = [CKDirectoryNode nodeForPath:myRelativeRootPath withRoot:myRootNode];
+			// we deselected so push the relative root path on the history stack via the nil path check in outlineViewSelectedRunloopDelay:
 			[mySelection removeAllObjects];
 		}
 	}
@@ -1705,6 +1704,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)newFolder:(id)sender
 {
+	// deselect if we currently have a file selected
+	CKDirectoryNode *selection = [[self _selectedItems] lastObject];
+	if (![selection isDirectory])
+	{
+		[mySelection removeAllObjects];
+		[mySelection addObject:[selection parent]];
+		[self _reloadViews];
+	}
 	[myDelegate performSelector:@selector(directoryTreeWantsNewFolderCreated:)
 					 withObject:self
 					 afterDelay:0.0
