@@ -748,9 +748,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					_ftpFlags.isMicrosoft = NO;
 				}
 				
-				// For some bizarre reason the Serv-U FTP Server doesn't accept the FEAT command here.
-				// It just hangs instead. So this is a special case to jump straight to login.
-				if ([command rangeOfString:@"Serv-U FTP Server"].location != NSNotFound)
+				// Some servers do not accept the FEAT command before logging in. They either ignore it or close the connection
+				// after. The user default CKDisableFEATCommandBeforeFTPLogin enables applications to disable sending of the
+				// command until after login.
+				if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
 				{
 					[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
 					[self setState:ConnectionSentUsernameState];
