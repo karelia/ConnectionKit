@@ -67,15 +67,8 @@ static NSMutableParagraphStyle *sStyle = nil;
 	{
 		NSMatrix *matrix = (NSMatrix *)controlView;
 		NSBrowser *browser = [matrix browser];
-		int row = 0, col = [browser columnOfMatrix:matrix];
-		for (row = 0; row < [matrix numberOfRows]; row++)
-		{
-			NSCell *cell = [matrix cellAtRow:row column:0];
-			if (cell == self)
-			{
-				break;
-			}
-		}
+		int row = [[matrix cells] indexOfObject:self];
+		int col = [browser columnOfMatrix:matrix]; 
 		[[browser delegate] browser:browser willDisplayCell:self atRow:row column:col];
 		[self setLoaded:YES];
 	}
