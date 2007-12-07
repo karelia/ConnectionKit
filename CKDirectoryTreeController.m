@@ -1087,6 +1087,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	// this pushes a history object and fetches the contents
 	[self _navigateToPath:path pushToHistoryStack:YES];
+	
+	// scroll the selected item into view for the outline view
+	if ([oOutlineView selectedRow] != NSNotFound)
+	{
+		[oOutlineView scrollRowToVisible:[oOutlineView selectedRow]];
+	}
 }
 
 - (IBAction)outlineViewSelected:(id)sender
@@ -1312,7 +1318,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		else
 		{
 			[mySelection removeAllObjects];
-			[self _changeRelativeRootToPath:path];
+			if ([node isDirectory])
+			{
+				[self _changeRelativeRootToPath:path];
+			}
 			[self _navigateToPath:path pushToHistoryStack:YES];
 		}
 	}
@@ -1570,10 +1579,17 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	{
 		parent = [[oStandardBrowser selectedCellInColumn:column - 1] representedObject];
 	}
-	CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
-	[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
-	[cell setRepresentedObject:[node retain]];
-	[cell setTitle:[self _cellDisplayNameWithNode:node]];
+	
+	// TODO: this is a HACK to get around a bug when you are in outline view and select a folder, then double click it to change the relative root
+	// repeating this a few folders deep then use the history buttons to go back. The setPath: on the NSBrowser will cause the cells to redraw, but 
+	// the rows are out of bounds and we haven't had time to track down why. NSBrowser is a PoS.
+	if ([[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] count] > row)
+	{
+		CKDirectoryNode *node = [[parent contentsIncludingHiddenFiles:myFlags.showsHiddenFiles] objectAtIndex:row];
+		[cell setLeaf:![self outlineView:nil isItemExpandable:node]];
+		[cell setRepresentedObject:[node retain]];
+		[cell setTitle:[self _cellDisplayNameWithNode:node]];
+	}
 }
 
 #pragma mark -
