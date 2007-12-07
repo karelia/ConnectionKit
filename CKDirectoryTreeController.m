@@ -1722,7 +1722,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 {
 	// deselect if we currently have a file selected
 	CKDirectoryNode *selection = [[self _selectedItems] lastObject];
-	if (![selection isDirectory])
+	if (selection && ![selection isDirectory])
 	{
 		[mySelection removeAllObjects];
 		[mySelection addObject:[selection parent]];
