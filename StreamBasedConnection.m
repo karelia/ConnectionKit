@@ -941,9 +941,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 															   error:nil];
 		[_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
-	}
-	if (![_fileCheckingConnection isConnected])
-	{
 		[_fileCheckingConnection connect];
 	}
 	[_fileCheckLock lock];
@@ -1166,27 +1163,24 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (con == _fileCheckingConnection)
 	{
-		if (_flags.fileCheck) {
-			NSString *name = [_fileCheckInFlight lastPathComponent];
-			NSEnumerator *e = [contents objectEnumerator];
-			NSDictionary *cur;
-			BOOL foundFile = NO;
-			
-			while (cur = [e nextObject]) 
+		if (_flags.fileCheck) 
+		{
+			NSArray *currentDirectoryContentsFilenames = [contents valueForKey:cxFilenameKey];
+			NSMutableArray *fileChecksToRemoveFromQueue = [NSMutableArray array];
+			NSEnumerator *pathsToCheckForEnumerator = [_fileCheckQueue objectEnumerator];
+			NSString *currentPathToCheck;
+			while ((currentPathToCheck = [pathsToCheckForEnumerator nextObject]))
 			{
-				if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+				if (![[currentPathToCheck stringByDeletingLastPathComponent] isEqualToString:dirPath])
 				{
-					[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
-					foundFile = YES;
-					break;
+					continue;
 				}
+				[fileChecksToRemoveFromQueue addObject:currentPathToCheck];
+				BOOL currentDirectoryContainsFile = [currentDirectoryContentsFilenames containsObject:[currentPathToCheck lastPathComponent]];
+				[_forwarder connection:self checkedExistenceOfPath:currentPathToCheck pathExists:currentDirectoryContainsFile];
 			}
-			if (!foundFile)
-			{
-				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
-			}
+			[_fileCheckQueue removeObjectsInArray:fileChecksToRemoveFromQueue];
 		}
-		[self dequeueFileCheck];
 		[_fileCheckInFlight autorelease];
 		_fileCheckInFlight = nil;
 		[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
