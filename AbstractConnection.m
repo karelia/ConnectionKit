@@ -1602,9 +1602,7 @@ if ([fn isEqualToString:@"."] || \
 			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
 			
 			NSCalendarDate *date = [NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]];
-			NSLog(@"%@", date);
-			[d setObject:date forKey:NSFileModificationDate];
-			
+			[d setObject:date forKey:NSFileModificationDate];			
 			[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:4] doubleValue]] forKey:NSFileSize];
 			
 			int i;
