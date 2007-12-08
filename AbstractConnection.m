@@ -1600,7 +1600,10 @@ if ([fn isEqualToString:@"."] || \
 			NSMutableDictionary *d = [NSMutableDictionary dictionary];
 			[self parsePermissions:[words objectAtIndex:0] withAttributes:d];
 			[d setObject:[NSNumber numberWithInt:[[words objectAtIndex:1] intValue]] forKey:NSFileReferenceCount];
-			[d setObject:[NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]] forKey:NSFileModificationDate];
+			
+			NSCalendarDate *date = [NSCalendarDate getDateFromMonth:[words objectAtIndex:5] day:[words objectAtIndex:6] yearOrTime:[words objectAtIndex:7]];
+			NSLog(@"%@", date);
+			[d setObject:date forKey:NSFileModificationDate];
 			
 			[d setObject:[NSNumber numberWithDouble:[[words objectAtIndex:4] doubleValue]] forKey:NSFileSize];
 			
@@ -1874,7 +1877,8 @@ if ([fn isEqualToString:@"."] || \
 		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %d %@", month, day, [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
 		
 		// If date is in the future, then roll back the year by one
-		if ([date compare:now] == NSOrderedDescending) {
+		if ([date yearOfCommonEra] > [now yearOfCommonEra])
+		{
 			date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1
 										  month:[date monthOfYear]
 											day:[date dayOfMonth]
