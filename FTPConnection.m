@@ -781,14 +781,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
 			{
-				BOOL isUpload = [self currentUpload] != nil;
-				NSString *remotePath;
-				if (isUpload)
+				NSString *remotePath = [NSString string];
+				if ([self currentUpload] != nil)
 				{
 					remotePath = [NSString stringWithString:[[self currentUpload] remotePath]];
 					[self dequeueUpload];
 				}
-				else
+				else if ([self currentDownload] != nil)
 				{
 					remotePath = [NSString stringWithString:[[self currentDownload] remotePath]];
 					[self dequeueDownload];
