@@ -224,6 +224,7 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 
 - (void)setContents:(NSArray *)contents
 {
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKDirectoryNodeDidRemoveNodesNotification object:myContents];
 	[myContents removeAllObjects];
 	[myContents addObjectsFromArray:contents];
 	[contents makeObjectsPerformSelector:@selector(setParent:) withObject:self];
