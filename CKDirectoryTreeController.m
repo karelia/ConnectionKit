@@ -455,7 +455,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	myFlags.firstTimeWithOutlineView = YES;
 	
 	[[NSNotificationCenter defaultCenter] addObserver:self
-											 selector:@selector(nodesRemovedInMerge:)
+											 selector:@selector(nodesRemovedInModel:)
 												 name:CKDirectoryNodeDidRemoveNodesNotification
 											   object:nil];
 	
@@ -883,8 +883,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 }
 
-- (void)nodesRemovedInMerge:(NSNotification *)n
+- (void)nodesRemovedInModel:(NSNotification *)n
 {
+	// grab the current full path BEFORE we remove any selections!
+	NSString *selectedPathBeforeRemoval = [self selectedPath];
+		
 	NSArray *nodes = [n object];
 	
 	NSEnumerator *e = [nodes objectEnumerator];
@@ -904,22 +907,20 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		[self _pruneHistoryWithPath:path];
 		
-		if ([parentPath hasPrefix:myRelativeRootPath])
+		if ([selectedPathBeforeRemoval hasPrefix:parentPath])
 		{
-			NSString *fullPath = [myRelativeRootPath stringByAppendingPathComponent:[self selectedPath]];
+			unsigned col = [[[self _browserPathForPath:parentPath] pathComponents] count] - 1;
 			
-			if ([fullPath hasPrefix:parentPath])
+			if (col >= 0 && col <= [oStandardBrowser lastColumn])
 			{
-				unsigned col = [[[self _browserPathForPath:parentPath] pathComponents] count] - 1;
+				[self performSelector:@selector(delayedColumnRefresh:) 
+						   withObject:[NSNumber numberWithUnsignedInt:col] 
+						   afterDelay:0 
+							  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		  
 				
-				if (col >= 0 && col <= [oStandardBrowser lastColumn])
-				{
-					[self performSelector:@selector(delayedColumnRefresh:) 
-							   withObject:[NSNumber numberWithUnsignedInt:col] 
-							   afterDelay:0 
-								  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];
-					[self _updatePopUpToPath:parentPath];
-				}
+				// make the parent the current selection
+				[mySelection addObject:[CKDirectoryNode nodeForPath:parentPath withRoot:myRootNode]];
+				[self _updatePopUpToPath:parentPath];
 			}
 		}
 	}
