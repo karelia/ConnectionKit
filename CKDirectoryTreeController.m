@@ -369,9 +369,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			
 			NSEnumerator *g = [nodesToExpand reverseObjectEnumerator];
 			
+			[myExpandedOutlineItems removeAllObjects];
+			
 			while ((parent = [g nextObject]))
 			{
 				myFlags.outlineViewDoubleCallback = YES;
+				[myExpandedOutlineItems addObject:[parent path]];
 				[oOutlineView expandItem:parent];
 			}
 		}
@@ -1048,6 +1051,10 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 				[[cols objectAtIndex:1] setWidth:width * 0.124610591900312];
 				[[cols objectAtIndex:2] setWidth:width * 0.233644859813084];
 				[[cols objectAtIndex:3] setWidth:width * 0.228317757009346];
+			}
+			if ([oOutlineView selectedRow] != NSNotFound)
+			{
+				[oOutlineView scrollItemToTop:[oOutlineView itemAtRow:[oOutlineView selectedRow]]];
 			}
 		}
 		[oStyles selectTabViewItemAtIndex:[oStyle selectedSegment]];
