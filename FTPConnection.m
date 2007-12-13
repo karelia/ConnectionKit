@@ -776,7 +776,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 226:
 		{
 			_ftpFlags.received226 = YES;
-			if (_ftpFlags.isActiveDataConn == YES) {
+			if (_ftpFlags.isActiveDataConn == YES) 
+			{
 				[self closeDataConnection];
 			}
 			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
@@ -785,12 +786,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if ([self currentUpload] != nil)
 				{
 					remotePath = [NSString stringWithString:[[self currentUpload] remotePath]];
+					//Dequeue and close any handles just as if we finished the upload
 					[self dequeueUpload];
+					[self setReadData:nil];
+					[self setReadHandle:nil];
+					_transferSize = 0;
 				}
 				else if ([self currentDownload] != nil)
 				{
 					remotePath = [NSString stringWithString:[[self currentDownload] remotePath]];
+					//Dequeue and close any handles just as if we finished the download
 					[self dequeueDownload];
+					[_writeHandle closeFile];
+					[self setWriteHandle:nil];
 				}
 				if (_flags.cancel)
 				{
@@ -1095,15 +1103,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			//We don handle this here because we handle the data port connection closure in the
 			// NSStream event management.
 			// However, send our abort callback.
-			if (_flags.cancel)
-			{
-				[_forwarder connectionDidCancelTransfer:self];
-			}
-			if (_flags.didCancel)
-			{
-				NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
-				[_forwarder connection:self didCancelTransfer:remotePath];
-			}
+			
+			/*
+			 I am fairly sure we don't need these calls here. When we ABOR a transfer, (either upload or download), we get caught by 226 anyway, so we 
+			 end up sending two delegate calls for the one transfer cancellation. - bamerige (12/12/07)
+			 */
+			
+//			if (_flags.cancel)
+//			{
+//				[_forwarder connectionDidCancelTransfer:self];
+//			}
+//			if (_flags.didCancel)
+//			{
+//				NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
+//				[_forwarder connection:self didCancelTransfer:remotePath];
+//			}
 			
 			break;
 		}
