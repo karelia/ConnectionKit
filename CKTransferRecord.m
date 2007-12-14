@@ -163,9 +163,18 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		{
 			myLastDirectorySpeedUpdate = now;
 			NSTimeInterval elapsedTime = now - myTransferStartTime;
-			unsigned long long transferred = [self transferred];
+
 			[self willChangeValueForKey:@"speed"];
-			mySpeed = transferred / elapsedTime;
+			if (elapsedTime == 0.0)
+			{
+				//If we don't catch this, we are effectively dividing by zero below. This would leave mySpeed as NaN.
+				mySpeed = 0.0;
+			}
+			else
+			{
+				unsigned long long transferred = [self transferred];
+				mySpeed = transferred / elapsedTime;
+			}
 			[self didChangeValueForKey:@"speed"];
 		}
 	}
