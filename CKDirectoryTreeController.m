@@ -408,6 +408,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 	
 	// restore outline view position
+	// TODO: BH this might be ruining scrolling to selection when selecting outline view because we negate [oOutlineView scrollItemToTop:cur];
 	[oOutlineView scrollRectToVisible:outlineViewVisibleRect];
 	
 	// do the table browser
