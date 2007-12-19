@@ -28,9 +28,8 @@
  */
 
 #import <Connection/CKHost.h>
-#import <Carbon/Carbon.h>
-#import <Security/Security.h>
 #import <Connection/Connection.h>
+#import "EMKeychainProxy.h"
 
 NSString *CKHostChanged = @"CKHostChanged";
 static NSImage *sHostIcon = nil;
@@ -64,7 +63,7 @@ static NSImage *sHostIcon = nil;
 		myUUID = [[NSString uuid] retain];
 		myConnectionType = @"FTP";
 		myHost = @"";
-		myUsername = [NSUserName() copy];
+		myUsername = @"";
 		myInitialPath = @"";
 		myPort = @"";
 		myIcon = [sHostIcon retain];
@@ -264,6 +263,13 @@ static NSImage *sHostIcon = nil;
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
+	
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	if (!keychainItem && myPassword && [myPassword length] > 0 && myUsername && [myUsername length] > 0)
+	{
+		//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
+		[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	}	
 }
 
 - (NSString *)uuid
@@ -273,139 +279,103 @@ static NSImage *sHostIcon = nil;
 
 - (void)setHost:(NSString *)host
 {
-	if (host != myHost)
+	if (host == myHost)
 	{
-		[self willChangeValueForKey:@"host"];
-		[myHost autorelease];
-		myHost = [host copy];
-		[self didChangeValueForKey:@"host"];
-		[self didChange];
+		return;
 	}
+	
+	NSString *oldServerString = [NSString stringWithString:myHost];
+
+	[self willChangeValueForKey:@"host"];
+	[myHost autorelease];
+	myHost = [host copy];
+	[self didChangeValueForKey:@"host"];
+	[self didChange];
+	
+	if (!oldServerString || [oldServerString length] == 0)
+	{
+		return;
+	}
+	
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	[keychainItem setServer:host];		
 }
 
 - (void)setPort:(NSString *)port
 {
-	if (port != myPort)
+	if (port == myPort)
 	{
-		[self willChangeValueForKey:@"port"];
-		[myPort autorelease];
-		myPort = [port copy];
-		[self didChangeValueForKey:@"port"];
-		[self didChange];
+		return;
 	}
+	
+	NSString *oldPortString = (myPort) ? [NSString stringWithString:myPort] : nil;
+	
+	[self willChangeValueForKey:@"port"];
+	[myPort autorelease];
+	myPort = [port copy];
+	[self didChangeValueForKey:@"port"];
+	[self didChange];
+	
+	if (!oldPortString || [oldPortString length] == 0)
+	{
+		return;
+	}
+	
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
+	[keychainItem setPort:[port intValue]];
 }
 
 - (void)setUsername:(NSString *)username
 {
-	if (username != myUsername)
+	if (username == myUsername)
 	{
-		[self willChangeValueForKey:@"username"];
-		[myUsername autorelease];
-		myUsername = [username copy];
-		[self didChangeValueForKey:@"username"];
-		[self didChange];
+		return;
 	}
+	
+	NSString *oldUsernameString = [NSString stringWithString:myUsername];
+	
+	[self willChangeValueForKey:@"username"];
+	[myUsername autorelease];
+	myUsername = [username copy];
+	[self didChangeValueForKey:@"username"];
+	[self didChange];
+	
+	if (!oldUsernameString || [oldUsernameString length] == 0)
+	{
+		return;
+	}
+	
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:oldUsernameString path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	[keychainItem setUsername:username];
 }
 
 - (void)setPassword:(NSString *)password
 {
-	if (password != myPassword)
+	if (myPassword == password)
 	{
-		[self willChangeValueForKey:@"password"];
-		[myPassword autorelease];
-		myPassword = [password copy];
-		[self didChangeValueForKey:@"password"];
-		
-		//save to keychain
-		@try {
-			if ([myHost isEqualToString:@""] ||
-				[myUsername isEqualToString:@""])
-			{
-				return;
-			}
-			
-			SecKeychainAttribute attributes[4];
-			SecKeychainAttributeList list;
-			SecKeychainItemRef item = nil;
-			OSStatus status;
-			char *desc = "ConnectionKit Password";
-			NSString *label = [self name];
-			
-			attributes[0].tag = kSecAccountItemAttr;
-			attributes[0].data = (void *)[myUsername UTF8String];
-			attributes[0].length = strlen(attributes[0].data);
-			
-			attributes[1].tag = kSecCommentItemAttr;
-			attributes[1].data = (void *)[label UTF8String];
-			attributes[1].length = strlen(attributes[1].data);
-			
-			attributes[2].tag = kSecDescriptionItemAttr;
-			attributes[2].data = (void *)desc;
-			attributes[2].length = strlen(desc);
-			
-			attributes[3].tag = kSecLabelItemAttr;
-			attributes[3].data = (void *)[label UTF8String];
-			attributes[3].length = strlen(attributes[3].data);
-			
-			list.count = 4;
-			list.attr = attributes;
-						
-			// see if it already exists
-			status = SecKeychainFindInternetPassword (NULL,
-													  strlen([myHost UTF8String]),
-													  [myHost UTF8String],
-													  0,
-													  NULL,
-													  strlen([myUsername UTF8String]),
-													  [myUsername UTF8String],
-													  myInitialPath ? strlen([myInitialPath UTF8String]) : 0,
-													  myInitialPath ? [myInitialPath UTF8String] : NULL,
-													  [myPort intValue],
-													  kSecProtocolTypeFTP,
-													  kSecAuthenticationTypeDefault,
-													  NULL,
-													  NULL,
-													  &item);
-			NSLog(@"status = %s", GetMacOSStatusErrorString(status));
-			if (status == noErr)
-			{
-				status = SecKeychainItemDelete(item);
-				CFRelease(item); item = NULL;
-			}
-			else
-			{
-				SecKeychainSearchRef search = nil;
-				status = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
-				
-				if (status == noErr)
-				{
-					if ((status = SecKeychainSearchCopyNext (search, &item)) != errSecItemNotFound) 
-					{
-						status = SecKeychainItemDelete(item);
-						if (status != noErr)
-						{
-							NSLog(@"Error deleting keychain item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
-						}
-					}
-					if (item) CFRelease(item); item = NULL;
-				}
-				if (search) CFRelease(search);
-			}
-			char *passphraseUTF8 = (char *)[myPassword UTF8String];
-			status = SecKeychainItemCreateFromContent(kSecInternetPasswordItemClass, &list, strlen(passphraseUTF8), passphraseUTF8, NULL,NULL,&item);
-			if (status != 0) 
-			{
-				NSLog(@"Error creating new item: %s (%s)\n", (int)status, GetMacOSStatusErrorString(status), GetMacOSStatusCommentString(status));
-			}
-			if (item) CFRelease(item);
-			
-		}
-		@catch (id error) {
-			
-		}
-		@finally {
-			[self didChange];
-		}
+		return;
+	}
+
+	[self willChangeValueForKey:@"password"];
+	[myPassword autorelease];
+	myPassword = [password copy];
+	[self didChangeValueForKey:@"password"];
+	[self didChange];
+	
+	//Save to keychain
+	if (!myUsername || [myUsername length] == 0 || !myHost || [myHost length] == 0)
+	{
+		return;
+	}
+	
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	if (keychainItem)
+	{
+		[keychainItem setPassword:password];
+	}
+	else
+	{
+		[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
 	}
 }
 
@@ -423,14 +393,16 @@ static NSImage *sHostIcon = nil;
 
 - (void)setInitialPath:(NSString *)path
 {
-	if (path != myInitialPath)
+	if (path == myInitialPath)
 	{
-		[self willChangeValueForKey:@"initialPath"];
-		[myInitialPath autorelease];
-		myInitialPath = [path copy];
-		[self didChangeValueForKey:@"initialPath"];
-		[self didChange];
+		return;
 	}
+	
+	[self willChangeValueForKey:@"initialPath"];
+	[myInitialPath autorelease];
+	myInitialPath = [path copy];
+	[self didChangeValueForKey:@"initialPath"];
+	[self didChange];
 }
 
 - (void)setURL:(NSURL *)url
@@ -479,130 +451,29 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)username
 {
+	if (!myUsername || [myUsername length] == 0)
+	{
+		return [NSString stringWithString:NSUserName()];
+	}
 	return myUsername;
 }
+
 - (NSString *)password
 {
 	if (myPassword)
 	{
 		return myPassword;
 	}
-	//Need to get the password from keychain
+	
 	if (!myHost || !myUsername || [myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
 	{
-		//We don't have anything to base our keychain search from, we have no chance.
+		//We don't have anything to go on, so let's die here.
+		NSLog(@"No User or Server to look for password with.");
 		return nil;
 	}
-	OSStatus status;
-	UInt32 length = 0;
-	char *pass = NULL;
 	
-	// Try searching for an internet password first
-	status = SecKeychainFindInternetPassword (NULL, strlen([myHost UTF8String]), [myHost UTF8String], 0, NULL, strlen([myUsername UTF8String]), [myUsername UTF8String], strlen([myInitialPath UTF8String]), [myInitialPath UTF8String], [myPort intValue], kSecProtocolTypeFTP, kSecAuthenticationTypeDefault, &length, (void **)&pass, NULL);	
-	if (status != errSecItemNotFound)
-	{
-		//Found an internet password
-		myPassword = [[NSString stringWithCString:pass length:length] retain];
-		if (length)
-		{
-			SecKeychainItemFreeContent(NULL, pass);
-		}
-		if (myPassword && ![myPassword isEqualToString:@""])
-		{
-			return myPassword;
-		}
-	}
-	
-	//Didn't find an internet password, let's look elsewhere
-	SecKeychainSearchRef search = nil;
-	SecKeychainItemRef item = nil;
-	SecKeychainAttributeList list;
-	SecKeychainAttribute attributes[4];
-	OSErr result;
-	
-	char *description = "ConnectionKit Password";
-	NSString *label = [self name];
-	
-	attributes[0].tag = kSecAccountItemAttr;
-	attributes[0].data = (void *)[myUsername UTF8String];
-	attributes[0].length = strlen(attributes[0].data);
-	
-	attributes[1].tag = kSecCommentItemAttr;
-	attributes[1].data = (void *)[label UTF8String];
-	attributes[1].length = strlen(attributes[1].data);
-	
-	attributes[2].tag = kSecLabelItemAttr;
-	attributes[2].data = (void *)[label UTF8String];
-	attributes[2].length = strlen(attributes[2].data);
-
-	attributes[3].tag = kSecDescriptionItemAttr;
-	attributes[3].data = (void *)description;
-	attributes[3].length = strlen(description);	
-	
-	//We start out with very stringent attribute specifications. 
-	//As we continue to not find a password, we scale back the requirements from the attributes.
-	unsigned int attributeCountRequirement = 4;
-	while (attributeCountRequirement > 0 && myPassword == nil)
-	{
-		list.count = attributeCountRequirement;
-		list.attr = &attributes[0];
-		
-		result = SecKeychainSearchCreateFromAttributes(NULL, kSecInternetPasswordItemClass, &list, &search);
-		if (result != noErr)
-		{
-			//Ran into some error, log it
-			NSLog(@"Status %d from SecKeychainSearchCreateFromAttributes", result);
-		}
-        
-		while ((result = SecKeychainSearchCopyNext(search, &item)) == noErr && 
-               item != NULL && 
-               myPassword == nil)
-		{
-			//We found something, but is it anything for this server
-			SecKeychainAttributeInfo info;
-            UInt32 infoFormats[3] = { 0, 0, 0 };
-            UInt32 infoTags[3] = { kSecCommentItemAttr, kSecDescriptionItemAttr, kSecLabelItemAttr };
-            
-            SecItemClass itemClass;
-            SecKeychainAttributeList *attributesList = NULL;
-    
-            info.count = 1;
-            info.tag = &infoTags[0];
-            info.format = &infoFormats[0];
-            
-            // don't get the password otherwise keychain will put up a dialog for each item we enumerate over
-            status = SecKeychainItemCopyAttributesAndData(item, &info, &itemClass, &attributesList, NULL, NULL);
-            
-            if (status == noErr)
-            {
-                unsigned i;
-                for (i = 0; i < attributesList->count; i++)
-                {
-                    SecKeychainAttribute attrib = attributesList->attr[i];
-                    
-                    NSString *str = [[[NSString alloc] initWithCString:attrib.data length:attrib.length] autorelease];
-                    
-                    if ([str rangeOfString:myHost].location != NSNotFound)
-                    {
-                        status = SecKeychainItemCopyContent(item, NULL, &list, &length, (void **)&pass);
-                        if (status != userCanceledErr)
-                        {
-                            myPassword = [[NSString stringWithCString:pass length:length] retain];
-                            SecKeychainItemFreeContent(&list, pass);
-                        }
-                        break;
-                    }
-                }
-            }
-            status = SecKeychainItemFreeAttributesAndData(attributesList, NULL);
-            CFRelease(item); item = NULL;
-		}
-		attributeCountRequirement--;
-	}
-	//Clean up
-	if (item) CFRelease(item);
-	if (search) CFRelease(search);
-	return myPassword;
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	return [keychainItem password];
 }
 
 - (NSString *)connectionType
