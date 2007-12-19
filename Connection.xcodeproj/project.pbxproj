@@ -237,6 +237,10 @@
 		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
+		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; };
+		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
+		D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */; };
+		D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -591,6 +595,10 @@
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* SFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* SFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPTServer.m; sourceTree = "<group>"; };
+		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
+		D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainProxy.m; sourceTree = "<group>"; };
+		D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainItem.h; sourceTree = "<group>"; };
+		D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainItem.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -847,6 +855,10 @@
 		7983E2120B0C22D600F5078E /* Bookmark Registry */ = {
 			isa = PBXGroup;
 			children = (
+				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
+				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
+				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
+				D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */,
 				795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */,
 				795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */,
 				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
@@ -1166,6 +1178,8 @@
 				D3598B800CF3D40800C61A38 /* argcargv.h in Headers */,
 				D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */,
 				79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */,
+				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
+				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1590,6 +1604,8 @@
 				D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */,
 				79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
+				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
+				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
