@@ -53,6 +53,11 @@ static EMKeychainProxy* sharedProxy;
 #pragma mark Getting Keychain Items
 - (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString
 {
+	if (!usernameString || [usernameString length] == 0)
+	{
+		return nil;
+	}
+	
 	const char *serviceName = [serviceNameString UTF8String];
 	const char *username = [usernameString UTF8String];
 	
@@ -75,6 +80,10 @@ static EMKeychainProxy* sharedProxy;
 }
 - (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol
 {
+	if (!usernameString || [usernameString length] == 0)
+	{
+		return nil;
+	}
 	const char *server = [serverString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *path = [pathString UTF8String];

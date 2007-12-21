@@ -55,10 +55,10 @@
 	{
 		return NO;
 	}
-	[self willChangeValueForKey:@"myPassword"];
+	[self willChangeValueForKey:@"password"];
 	[myPassword autorelease];
 	myPassword = [newPasswordString copy];
-	[self didChangeValueForKey:@"myPassword"];
+	[self didChangeValueForKey:@"password"];
 	
 	const char *newPassword = [newPasswordString UTF8String];
 	OSStatus returnStatus = SecKeychainItemModifyAttributesAndData(coreKeychainItem, NULL, strlen(newPassword), (void *)newPassword);
@@ -66,19 +66,19 @@
 }
 - (BOOL)setUsername:(NSString *)newUsername
 {
-	[self willChangeValueForKey:@"myUsername"];
+	[self willChangeValueForKey:@"username"];
 	[myUsername autorelease];
 	myUsername = [newUsername copy];
-	[self didChangeValueForKey:@"myUsername"];	
+	[self didChangeValueForKey:@"username"];	
 	
 	return [self modifyAttributeWithTag:kSecAccountItemAttr toBeString:newUsername];
 }
 - (BOOL)setLabel:(NSString *)newLabel
 {
-	[self willChangeValueForKey:@"myLabel"];
+	[self willChangeValueForKey:@"label"];
 	[myLabel autorelease];
 	myLabel = [newLabel copy];
-	[self didChangeValueForKey:@"myLabel"];
+	[self didChangeValueForKey:@"label"];
 	
 	return [self modifyAttributeWithTag:kSecLabelItemAttr toBeString:newLabel];
 }
@@ -123,10 +123,10 @@
 
 - (BOOL)setServiceName:(NSString *)newServiceName
 {
-	[self willChangeValueForKey:@"myServiceName"];
+	[self willChangeValueForKey:@"serviceName"];
 	[myServiceName autorelease];
 	myServiceName = [newServiceName copy];
-	[self didChangeValueForKey:@"myServiceName"];	
+	[self didChangeValueForKey:@"serviceName"];	
 	
 	return [self modifyAttributeWithTag:kSecServiceItemAttr toBeString:newServiceName];
 }
@@ -168,35 +168,35 @@
 
 - (BOOL)setServer:(NSString *)newServer
 {
-	[self willChangeValueForKey:@"myServer"];
+	[self willChangeValueForKey:@"server"];
 	[myServer autorelease];
 	myServer = [newServer copy];	
-	[self didChangeValueForKey:@"myServer"];
+	[self didChangeValueForKey:@"server"];
 	
 	return [self modifyAttributeWithTag:kSecServerItemAttr toBeString:newServer];
 }
 - (BOOL)setPath:(NSString *)newPath
 {
-	[self willChangeValueForKey:@"myPath"];
+	[self willChangeValueForKey:@"path"];
 	[myPath autorelease];
 	myPath = [newPath copy];
-	[self didChangeValueForKey:@"myPath"];
+	[self didChangeValueForKey:@"path"];
 	
 	return [self modifyAttributeWithTag:kSecPathItemAttr toBeString:newPath];
 }
 - (BOOL)setPort:(int)newPort
 {
-	[self willChangeValueForKey:@"myPort"];
+	[self willChangeValueForKey:@"port"];
 	myPort = newPort;
-	[self didChangeValueForKey:@"myPort"];
+	[self didChangeValueForKey:@"port"];
 	
 	return [self modifyAttributeWithTag:kSecPortItemAttr toBeString:[NSString stringWithFormat:@"%i", newPort]];
 }
 - (BOOL)setProtocol:(SecProtocolType)newProtocol
 {
-	[self willChangeValueForKey:@"myProtocol"];
+	[self willChangeValueForKey:@"protocol"];
 	myProtocol = newProtocol;
-	[self didChangeValueForKey:@"myProtocol"];
+	[self didChangeValueForKey:@"protocol"];
 	
 	SecKeychainAttribute attributes[1];
 	attributes[0].tag = kSecProtocolItemAttr;
