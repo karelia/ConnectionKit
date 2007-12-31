@@ -29,6 +29,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "AbstractConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
 
 /*!	AbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
 Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
@@ -128,7 +129,6 @@ typedef struct __flags {
 } connectionFlags;
 
 @class UKKQueue, RunLoopForwarder;
-@protocol AbstractConnectionProtocol;
 
 @interface AbstractConnection : NSObject <AbstractConnectionProtocol> 
 {

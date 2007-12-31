@@ -30,7 +30,6 @@
 
 #import "DotMacConnection.h"
 #import "AbstractConnection.h"
-#import "AbstractConnectionProtocol.h"
 #import "DAVDirectoryContentsRequest.h"
 #import "DAVCreateDirectoryRequest.h"
 #import "DAVUploadFileRequest.h"

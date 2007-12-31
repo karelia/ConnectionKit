@@ -30,7 +30,6 @@
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
 #import "AbstractConnection.h"
-#import "AbstractConnectionProtocol.h"
 
 @interface CKBonjourHost : CKHost
 {
