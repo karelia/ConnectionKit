@@ -28,7 +28,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/AbstractConnectionProtocol.h>
+#import "AbstractConnectionProtocol.h"
 
 extern NSString *ControllerDomain; // used for logging
 extern NSString *CKTransferControllerDomain; // used for errors

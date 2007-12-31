@@ -31,7 +31,6 @@
 #import "CKHostCategory.h"
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
-#import "AbstractConnectionProtocol.h"
 #import "AbstractConnection.h"
 #import "CKHostCell.h"
 
