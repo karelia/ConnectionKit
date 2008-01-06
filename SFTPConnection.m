@@ -198,6 +198,10 @@ static char *lsform;
 
 - (void)directoryContents
 {
+	if ([currentDirectory length] == 0)
+	{
+		[self changeToDirectory:@"./"];
+	}
 	[self queueSFTPCommand:lsform];
 }
 
