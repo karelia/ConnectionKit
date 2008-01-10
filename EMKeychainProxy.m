@@ -80,7 +80,7 @@ static EMKeychainProxy* sharedProxy;
 }
 - (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol
 {
-	if (!usernameString || [usernameString length] == 0)
+	if (!usernameString || [usernameString length] == 0 || !serverString || [serverString length] == 0)
 	{
 		return nil;
 	}
@@ -116,6 +116,10 @@ static EMKeychainProxy* sharedProxy;
 #pragma mark Saving Passwords
 - (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString password:(NSString *)passwordString
 {
+	if (!usernameString || [usernameString length] == 0 || !serviceNameString || [serviceNameString length] == 0)
+	{
+		return nil;
+	}	
 	const char *serviceName = [serviceNameString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *password = [passwordString UTF8String];
@@ -132,6 +136,10 @@ static EMKeychainProxy* sharedProxy;
 }
 - (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString password:(NSString *)passwordString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol
 {
+	if (!usernameString || [usernameString length] == 0 || !serverString || [serverString length] == 0 || !passwordString || [passwordString length] == 0)
+	{
+		return nil;
+	}	
 	const char *server = [serverString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *password = [passwordString UTF8String];
