@@ -93,7 +93,6 @@
 		795FF5020B0C018100EA9292 /* DropletMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF5010B0C018100EA9292 /* DropletMain.m */; };
 		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
 		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
-		796291410B93909100C10BC6 /* folder.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EC09F7076200172CDD /* folder.png */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782780B4745DD008DBA01 /* NSArray+Connection.m */; };
@@ -185,7 +184,6 @@
 		79CFD8F509F7076200172CDD /* console.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8E909F7076200172CDD /* console.tiff */; };
 		79CFD8F609F7076200172CDD /* delete.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EA09F7076200172CDD /* delete.tiff */; };
 		79CFD8F709F7076200172CDD /* download.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EB09F7076200172CDD /* download.tif */; };
-		79CFD8F809F7076200172CDD /* folder.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EC09F7076200172CDD /* folder.png */; };
 		79CFD8F909F7076200172CDD /* home.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8ED09F7076200172CDD /* home.tiff */; };
 		79CFD8FA09F7076200172CDD /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EE09F7076200172CDD /* icon.icns */; };
 		79CFD8FB09F7076200172CDD /* lock.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EF09F7076200172CDD /* lock.tiff */; };
@@ -514,7 +512,6 @@
 		79CFD8E909F7076200172CDD /* console.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = console.tiff; sourceTree = SOURCE_ROOT; };
 		79CFD8EA09F7076200172CDD /* delete.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = delete.tiff; sourceTree = SOURCE_ROOT; };
 		79CFD8EB09F7076200172CDD /* download.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = download.tif; sourceTree = SOURCE_ROOT; };
-		79CFD8EC09F7076200172CDD /* folder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = folder.png; sourceTree = SOURCE_ROOT; };
 		79CFD8ED09F7076200172CDD /* home.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = home.tiff; sourceTree = SOURCE_ROOT; };
 		79CFD8EE09F7076200172CDD /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = SOURCE_ROOT; };
 		79CFD8EF09F7076200172CDD /* lock.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = lock.tiff; sourceTree = SOURCE_ROOT; };
@@ -1062,7 +1059,6 @@
 				79CFD8E909F7076200172CDD /* console.tiff */,
 				79CFD8EA09F7076200172CDD /* delete.tiff */,
 				79CFD8EB09F7076200172CDD /* download.tif */,
-				79CFD8EC09F7076200172CDD /* folder.png */,
 				79CFD8ED09F7076200172CDD /* home.tiff */,
 				79CFD8EE09F7076200172CDD /* icon.icns */,
 				79CFD8EF09F7076200172CDD /* lock.tiff */,
@@ -1375,7 +1371,6 @@
 				79906BB00B1175A800FE9681 /* bonjour.png in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */,
-				796291410B93909100C10BC6 /* folder.png in Resources */,
 				799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */,
 				79B09AA60C85CDFD00E7F1CC /* history_forward.tiff in Resources */,
 				79B09AA70C85CDFD00E7F1CC /* history_back.tiff in Resources */,
@@ -1406,7 +1401,6 @@
 				79CFD8F509F7076200172CDD /* console.tiff in Resources */,
 				79CFD8F609F7076200172CDD /* delete.tiff in Resources */,
 				79CFD8F709F7076200172CDD /* download.tif in Resources */,
-				79CFD8F809F7076200172CDD /* folder.png in Resources */,
 				79CFD8F909F7076200172CDD /* home.tiff in Resources */,
 				79CFD8FA09F7076200172CDD /* icon.icns in Resources */,
 				79CFD8FB09F7076200172CDD /* lock.tiff in Resources */,
