@@ -979,6 +979,10 @@ NSDictionary *sDataAttributes = nil;
 	while ((path = [e nextObject]))
 	{
 		path = [localPath stringByAppendingPathComponent:path];
+		if (ignoreHiddenFilesFlag && [[localPath lastPathComponent] hasPrefix:@"."])
+		{
+			continue;
+		}
 		if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
 		{
 			[self recursivelyUpload:path 
@@ -990,24 +994,21 @@ NSDictionary *sDataAttributes = nil;
 		else
 		{
 			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
-			if (!ignoreHiddenFilesFlag || ![[remote lastPathComponent] hasPrefix:@"."])
+			record = [self uploadFile:path
+							   toFile:remote
+				 checkRemoteExistence:NO
+							 delegate:nil];
+			if (![[root path] isEqualToString:@"/"])
 			{
-				record = [self uploadFile:path
-								   toFile:remote
-					 checkRemoteExistence:NO
-								 delegate:nil];
-				if (![[root path] isEqualToString:@"/"])
-				{
-					[self _mergeRecord:record into:root];
-				}
-				else
-				{
-					CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
-					root = parent;
-					[root setName:[[root name] lastPathComponent]];		
-					[record setName:[[record name] lastPathComponent]];		
-					[root addContent:record];
-				}
+				[self _mergeRecord:record into:root];
+			}
+			else
+			{
+				CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
+				root = parent;
+				[root setName:[[root name] lastPathComponent]];		
+				[record setName:[[record name] lastPathComponent]];		
+				[root addContent:record];
 			}
 		}
 	}
