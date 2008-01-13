@@ -979,7 +979,7 @@ NSDictionary *sDataAttributes = nil;
 	while ((path = [e nextObject]))
 	{
 		path = [localPath stringByAppendingPathComponent:path];
-		if (ignoreHiddenFilesFlag && [[localPath lastPathComponent] hasPrefix:@"."])
+		if (ignoreHiddenFilesFlag && [[path lastPathComponent] hasPrefix:@"."])
 		{
 			continue;
 		}
