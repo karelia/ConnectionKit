@@ -1863,7 +1863,6 @@ if ([fn isEqualToString:@"."] || \
 @implementation NSCalendarDate (AbstractConnectionExtras)
 + (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime
 {
-	NSLog(@"%@ %@ %@", month, day, yearOrTime);
 	NSCalendarDate * date;
 	// Has a Year
 	if ([yearOrTime rangeOfString:@":"].location == NSNotFound) 
