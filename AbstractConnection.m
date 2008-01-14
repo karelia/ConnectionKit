@@ -1863,19 +1863,21 @@ if ([fn isEqualToString:@"."] || \
 @implementation NSCalendarDate (AbstractConnectionExtras)
 + (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime
 {
+	NSLog(@"%@ %@ %@", month, day, yearOrTime);
 	NSCalendarDate * date;
 	// Has a Year
-	if ([yearOrTime rangeOfString:@":"].location == NSNotFound) {
+	if ([yearOrTime rangeOfString:@":"].location == NSNotFound) 
+	{
 		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %@", month, day, yearOrTime] calendarFormat:@"%b %d %Y"];
 	}
-	
 	// Has A Time
-	else {
+	else 
+	{
 		NSCalendarDate *now = [NSCalendarDate date];
 		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %d %@", month, day, [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
 		
 		// If date is in the future, then roll back the year by one
-		if ([date yearOfCommonEra] > [now yearOfCommonEra])
+		if ([date compare:now] == NSOrderedDescending)
 		{
 			date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1
 										  month:[date monthOfYear]
