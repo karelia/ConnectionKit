@@ -235,6 +235,8 @@
 		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
+		D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
+		D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; };
 		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
 		D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */; };
@@ -592,6 +594,8 @@
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* SFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* SFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPTServer.m; sourceTree = "<group>"; };
+		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
+		D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
 		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
 		D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainProxy.m; sourceTree = "<group>"; };
 		D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainItem.h; sourceTree = "<group>"; };
@@ -1037,6 +1041,8 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */,
+				D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */,
 				79318F2E0CA9F3A1005C4AB6 /* gear.tiff */,
 				790999680CA8376B00A22156 /* gear_disabled.tiff */,
 				790999690CA8376B00A22156 /* gear_normal.tiff */,
@@ -1411,6 +1417,8 @@
 				79CFD97C09F70AA700172CDD /* network_icon.png in Resources */,
 				79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */,
 				795A010A0B116832006905FA /* edit.png in Resources */,
+				D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */,
+				D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
