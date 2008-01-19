@@ -235,6 +235,8 @@
 		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
+		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
+		D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
 		D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
 		D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; };
@@ -1392,6 +1394,8 @@
 				7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */,
 				7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */,
 				79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */,
+				D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */,
+				D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
