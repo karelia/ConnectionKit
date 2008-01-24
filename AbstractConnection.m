@@ -1875,16 +1875,21 @@ if ([fn isEqualToString:@"."] || \
 		NSCalendarDate *now = [NSCalendarDate date];
 		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %d %@", month, day, [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
 		
-		// If date is in the future, then roll back the year by one
+		//Is the date in the future?
 		if ([date compare:now] == NSOrderedDescending)
 		{
-			date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1
-										  month:[date monthOfYear]
-											day:[date dayOfMonth]
-										   hour:[date hourOfDay]
-										 minute:[date minuteOfHour]
-										 second:[date secondOfMinute]
-									   timeZone:[date timeZone]];
+			NSTimeInterval timeDifference = [date timeIntervalSinceDate:now];
+			float sixMonthsInSeconds = (3600*24*30.5*6);
+			if (timeDifference > sixMonthsInSeconds) //If it's beyond 6 months in the future, it would not have been without a year. Roll it back.
+			{
+				date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1
+											  month:[date monthOfYear]
+												day:[date dayOfMonth]
+											   hour:[date hourOfDay]
+											 minute:[date minuteOfHour]
+											 second:[date secondOfMinute]
+										   timeZone:[date timeZone]];
+			}			
 		}
 	}
 	
