@@ -1596,6 +1596,29 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			KTLog(ProtocolDomain, KTLogDebug, @"error state received = %@", [self stateName:GET_STATE]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
 			/* Some servers when trying to test PASV can crap out and throw an error */
+			if (GET_STATE == FTPAwaitingDataConnectionToOpen)
+			{
+				ConnectionCommand *lastCommand = [[self commandHistory] objectAtIndex:0];
+				ConnectionState lastState = [lastCommand sentState];
+				switch (lastState)
+				{
+					case FTPSettingEPSVState:
+						_ftpFlags.canUseEPSV = NO;
+						break;
+					case FTPSettingEPRTState:
+						_ftpFlags.canUseEPRT = NO;
+						break;
+					case FTPSettingActiveState:
+						_ftpFlags.canUseActive = NO;
+						break;
+					case FTPSettingPassiveState:
+						_ftpFlags.canUsePASV = NO;
+						break;
+				}
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				break;
+			}
 			if (GET_STATE == FTPSettingEPSVState) 
 			{
 				_ftpFlags.canUseEPSV = NO;
