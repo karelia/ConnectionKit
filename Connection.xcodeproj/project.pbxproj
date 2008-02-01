@@ -235,6 +235,8 @@
 		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
+		D3C04AE40D4C1BA900C83775 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D3C04AE50D4C1BA900C83775 /* LeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */; };
 		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
 		D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
@@ -596,6 +598,8 @@
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* SFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* SFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPTServer.m; sourceTree = "<group>"; };
+		D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeopardSourceListTableColumn.h; sourceTree = "<group>"; };
+		D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeopardSourceListTableColumn.m; sourceTree = "<group>"; };
 		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
 		D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
 		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
@@ -858,6 +862,8 @@
 		7983E2120B0C22D600F5078E /* Bookmark Registry */ = {
 			isa = PBXGroup;
 			children = (
+				D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */,
+				D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */,
 				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
 				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
 				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
@@ -1184,6 +1190,7 @@
 				79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */,
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
+				D3C04AE40D4C1BA900C83775 /* LeopardSourceListTableColumn.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1612,6 +1619,7 @@
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
 				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
+				D3C04AE50D4C1BA900C83775 /* LeopardSourceListTableColumn.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2220,6 +2228,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -2254,6 +2263,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = NO;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
