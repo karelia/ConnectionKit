@@ -44,6 +44,7 @@
 
 @interface ConnectionRegistry : NSObject 
 {
+	NSMutableArray *myLeopardSourceListGroups;
 	NSMutableArray *myConnections;
 	NSMutableArray *myDraggedItems;
 	NSString *myDatabaseFile;
@@ -56,6 +57,7 @@
 	NSArray *myFilteredHosts;
 	
 	BOOL myIsGroupEditing;
+	BOOL myUsesLeopardStyleSourceList;
 }
 
 // you can set a custom database if you don't want to use the default shared registry.
@@ -88,6 +90,10 @@
 
 - (void)setFilterString:(NSString *)filter;
 - (void)handleFilterableOutlineView:(NSOutlineView *)view;
+
+- (void)setUsesLeopardStyleSourceList:(BOOL)flag;
+- (BOOL)itemIsLeopardSourceGroupHeader:(id)item;
+- (NSOutlineView *)outlineView;
 
 @end
 

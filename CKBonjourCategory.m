@@ -30,6 +30,7 @@
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
 #import "AbstractConnection.h"
+#import "ConnectionRegistry.h"
 
 @interface CKBonjourHost : CKHost
 {
@@ -145,34 +146,26 @@ static NSImage *sBonjourIcon = nil;
 
 - (void)netServiceBrowser:(NSNetServiceBrowser *)netServiceBrowser didRemoveService:(NSNetService *)netService moreComing:(BOOL)moreServicesComing
 {
-	NSEnumerator *e = [[myFTPCategory hosts] objectEnumerator];
+	NSMutableArray *allBonjourHosts = [NSMutableArray array];
+	[allBonjourHosts addObjectsFromArray:[myFTPCategory hosts]];
+	[allBonjourHosts addObjectsFromArray:[mySFTPCategory hosts]];
+	[allBonjourHosts addObjectsFromArray:[myHTTPCategory hosts]];
+	
+	NSEnumerator *e = [allBonjourHosts objectEnumerator];
 	CKHost *cur;
 	
 	while ((cur = [e nextObject]))
 	{
-		if ([cur userInfo] == netService)
+		if ([[cur userInfo] isEqualTo:netService])
 		{
-			[myFTPCategory removeHost:cur];
-			return;
+			[[cur category] removeHost:cur];
+			break;
 		}
 	}
-	e = [[mySFTPCategory hosts] objectEnumerator];
-	while ((cur = [e nextObject]))
+	
+	if (!moreServicesComing)
 	{
-		if ([cur userInfo] == netService)
-		{
-			[mySFTPCategory removeHost:cur];
-			return;
-		}
-	}
-	e = [[myHTTPCategory hosts] objectEnumerator];
-	while ((cur = [e nextObject]))
-	{
-		if ([cur userInfo] == netService)
-		{
-			[myHTTPCategory removeHost:cur];
-			return;
-		}
+		[[[ConnectionRegistry sharedRegistry] outlineView] reloadData];
 	}
 }
 
@@ -205,6 +198,7 @@ static NSImage *sBonjourIcon = nil;
 	}
 	[h setPort:[AbstractConnection registeredPortForConnectionType:[h connectionType]]];
 	[h release];
+	[[[ConnectionRegistry sharedRegistry] outlineView] reloadData];
 }
 
 - (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict

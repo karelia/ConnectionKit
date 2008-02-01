@@ -49,6 +49,8 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 - (void)changed:(NSNotification *)notification;
 - (NSArray *)hostsFromDatabaseFile;
 
+- (BOOL)itemIsLeopardSourceGroupHeader:(id)item;
+
 @end
 
 @implementation ConnectionRegistry
@@ -97,6 +99,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	{
 		myLock = [[NSLock alloc] init];
 		myCenter = [NSDistributedNotificationCenter defaultCenter];
+		myLeopardSourceListGroups = [[NSMutableArray alloc] init];
 		myConnections = [[NSMutableArray alloc] init];
 		myDraggedItems = [[NSMutableArray alloc] init];
 		myDatabaseFile = [[ConnectionRegistry registryDatabase] copy];
@@ -150,6 +153,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 - (void)dealloc
 {
+	[myLeopardSourceListGroups release];
 	[myDraggedItems release];
 	[myBonjour release];
 	[myLock release];
@@ -269,7 +273,14 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 														   object:cur];
 			}
 		}
-		[myConnections insertObject:myBonjour atIndex:idx];
+		if (myUsesLeopardStyleSourceList)
+		{
+			[self setUsesLeopardStyleSourceList:YES]; //Redoes all the jazz
+		}
+		else
+		{
+			[myConnections insertObject:myBonjour atIndex:idx];
+		}
 		[self didChangeValueForKey:@"connections"];
 	}
 }
@@ -288,8 +299,12 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	}
 	
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
-	unsigned idx = [myConnections indexOfObject:myBonjour];
-	[myConnections removeObject:myBonjour];
+	unsigned idx;
+	if (!myUsesLeopardStyleSourceList)
+	{
+		idx = [myConnections indexOfObject:myBonjour];
+		[myConnections removeObject:myBonjour];
+	}
 	// write to the database
 	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
 	{
@@ -312,7 +327,14 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	{
 		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
 	}
-	[myConnections insertObject:myBonjour atIndex:idx];
+	if (myUsesLeopardStyleSourceList)
+	{
+		[self setUsesLeopardStyleSourceList:YES];
+	}
+	else
+	{
+		[myConnections insertObject:myBonjour atIndex:idx];
+	}
 	[fm removeFileAtPath:lockPath handler:nil];
 	
 	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
@@ -571,9 +593,40 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	return [self allCategoriesWithinItems:myConnections];
 }
 
+#pragma mark Leopard Style Source List
+- (void)setUsesLeopardStyleSourceList:(BOOL)flag
+{
+	/*
+		See http://brianamerige.com/blog/2008/01/31/connectionkit-leopard-styled-source-list-notes/ for more information on how to fully implement the Leopard Style source list.
+	*/
+	myUsesLeopardStyleSourceList = flag;
+	if (!flag)
+	{
+		return;
+	}
+	[myConnections removeObject:myBonjour];
+	[myLeopardSourceListGroups removeAllObjects];
+	
+	NSDictionary *bonjourGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:[myBonjour childCategories], @"Children", 
+									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
+									  @"BONJOUR", @"Name", nil];
+	[myLeopardSourceListGroups insertObject:bonjourGroupItem atIndex:0];
+	
+	NSDictionary *bookmarksGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:myConnections, @"Children", 
+									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
+									  @"BOOKMARKS", @"Name", nil];
+	[myLeopardSourceListGroups addObject:bookmarksGroupItem];
+}
+- (BOOL)itemIsLeopardSourceGroupHeader:(id)item
+{
+	return (item && [item isKindOfClass:[NSDictionary class]] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
+}
+- (NSOutlineView *)outlineView
+{
+	return myOutlineView;
+}
 #pragma mark -
 #pragma mark Outline View Data Source
-
 - (void)setFilterString:(NSString *)filter
 {
 	if (filter != myFilter)
@@ -608,13 +661,31 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	{
 		return [myFilteredHosts count];
 	}
-	if (item == nil)
+	if (myUsesLeopardStyleSourceList)
 	{
-		return [[self connections] count];
+		if (!item)
+		{
+			return [myLeopardSourceListGroups count];
+		}
+		else if ([self itemIsLeopardSourceGroupHeader:item])
+		{
+			return [[item objectForKey:@"Children"] count];
+		}
+		else if ([item isKindOfClass:[CKHostCategory class]])
+		{
+			return [[item childCategories] count];
+		}
 	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
+	else
 	{
-		return [[item childCategories] count];
+		if (item == nil)
+		{
+			return [[self connections] count];
+		}
+		else if ([item isKindOfClass:[CKHostCategory class]])
+		{
+			return [[item childCategories] count];
+		}
 	}
 	return 0;
 }
@@ -625,21 +696,47 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	{
 		return [myFilteredHosts objectAtIndex:index];
 	}
-	if (item == nil)
+	if (myUsesLeopardStyleSourceList)
 	{
-		return [[self connections] objectAtIndex:index];
+		if (!item)
+		{
+			return [myLeopardSourceListGroups objectAtIndex:index];
+		}
+		else if ([self itemIsLeopardSourceGroupHeader:item])
+		{
+			return [[item objectForKey:@"Children"] objectAtIndex:index];
+		}
+		return [[item childCategories] objectAtIndex:index];
 	}
-	return [[item childCategories] objectAtIndex:index];
+	else
+	{
+		if (item == nil)
+		{
+			return [[self connections] objectAtIndex:index];
+		}
+		return [[item childCategories] objectAtIndex:index];
+	}
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
 	if (myFilter) return NO;
+	if (myUsesLeopardStyleSourceList)
+	{
+		if ([self itemIsLeopardSourceGroupHeader:item])
+		{
+			return YES;
+		}
+	}
 	return [item isKindOfClass:[CKHostCategory class]] && [[item childCategories] count] > 0 ;
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
+	if ([self itemIsLeopardSourceGroupHeader:item])
+	{
+		return [item objectForKey:@"Name"];
+	}
     NSString *ident = [tableColumn identifier];
     
     if ([ident isEqualToString:@"connType"])
@@ -750,9 +847,9 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	[pboard declareTypes:types owner:nil];
 	
+	NSMutableArray *files = [NSMutableArray array];
 	if (!skipDroplets)
 	{
-		NSMutableArray *files = [NSMutableArray array];
 		NSEnumerator *e = [items objectEnumerator];
 		id cur;
 		
@@ -767,7 +864,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 					
 				}
 			}
-			else
+			else if (![cur isKindOfClass:[NSDictionary class]])
 			{
 				NSString *catDir = [wd stringByAppendingPathComponent:[cur name]];
 				[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
@@ -781,8 +878,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[pboard setPropertyList:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:@"InitiatedByDrag"] forType:CKDraggedBookmarksPboardType];
 	[myDraggedItems removeAllObjects];
 	[myDraggedItems addObjectsFromArray:items];
-	
-	return YES;
+	return [files count] > 0; //Only allow the drag if we are actually dragging something we can drag (i.e., not a BONJOUR/BOOKMARK header)
 }
 
 - (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
@@ -793,7 +889,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	{
 		//Check if dragged item is part of an uneditable category
 		id draggedItem = [myDraggedItems objectAtIndex:0];
-		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]) || ([item isKindOfClass:[CKHostCategory class]] && ![item isEditable]);
+		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]) || ([item isKindOfClass:[CKHostCategory class]] && ![item isEditable]);		
 		if (isNotEditable)
 		{
 			return NSDragOperationNone;
@@ -806,11 +902,15 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 				return NSDragOperationNone;
 			}
 		}
-		// don't allow items to be dragged above bonjour
-		if ([[myConnections objectAtIndex:0] isKindOfClass:[CKBonjourCategory class]] && item == nil && proposedChildIndex == 0)
+		if (myUsesLeopardStyleSourceList && [item isKindOfClass:[NSDictionary class]] && [[item objectForKey:@"Name"] isEqualToString:@"BONJOUR"])
 		{
 			return NSDragOperationNone;
 		}
+//		// don't allow items to be dragged above bonjour
+//		if (([[myConnections objectAtIndex:0] isKindOfClass:[CKBonjourCategory class]] || myUsesLeopardStyleSourceList) && item == nil && proposedChildIndex == 0)
+//		{
+//			return NSDragOperationNone;
+//		}
 		// don't allow a host to get dropped on another host
 		if ([item isKindOfClass:[CKHost class]])
 		{
@@ -903,7 +1003,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		}
 		
 		//Add it in its new location
-		if (!item)
+		if (!item || [item isKindOfClass:[NSDictionary class]]) 
 		{
 			//Add new Host to the root.
 			if (index < 0)
