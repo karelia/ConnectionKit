@@ -58,6 +58,7 @@
 #import <Connection/CKHTTPResponse.h>
 #import <Connection/CKHTTPFileDownloadResponse.h>
 
+#import <Connection/LeopardSourceListTableColumn.h>
 #import <Connection/ConnectionRegistry.h>
 #import <Connection/CKHostCategory.h>
 #import <Connection/CKBonjourCategory.h>
