@@ -629,23 +629,24 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 #pragma mark Outline View Data Source
 - (void)setFilterString:(NSString *)filter
 {
-	if (filter != myFilter)
+	if (filter == myFilter)
 	{
-		[myFilter autorelease];
-		[myFilteredHosts autorelease];
-		
-		if ([filter isEqualToString:@""])
-		{
-			myFilter = nil;
-			myFilteredHosts = nil;
-		}
-		else
-		{
-			myFilter = [filter copy];
-			myFilteredHosts = [[self hostsMatching:filter] retain];
-		}
-		[myOutlineView reloadData];
+		return;
 	}
+	[myFilter autorelease];
+	[myFilteredHosts autorelease];
+	
+	if ([filter isEqualToString:@""])
+	{
+		myFilter = nil;
+		myFilteredHosts = nil;
+	}
+	else
+	{
+		myFilter = [filter copy];
+		myFilteredHosts = [[self hostsMatching:filter] retain];
+	}
+	[myOutlineView reloadData];
 }
 
 - (void)handleFilterableOutlineView:(NSOutlineView *)view
