@@ -119,10 +119,6 @@ static char *lsform;
 		//Can't do anything here, throw an error.
 		return;
 	}
-	if (![self password])
-	{
-		[self setPassword:@""];
-	}
 	NSMutableArray *parameters = [NSMutableArray array];
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
@@ -134,7 +130,10 @@ static char *lsform;
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [[self port] intValue]]];
 	}
 	//We're given a password, so we don't want to use any known hosts/pubkeys, etc.
-	[parameters addObject:@"-o PubkeyAuthentication=no"];
+	if ([self password])
+	{
+		[parameters addObject:@"-o PubkeyAuthentication=no"];
+	}
 	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
 	
 	switch (sshversion())
@@ -421,6 +420,10 @@ WRITE_ERROR:
 
 - (void)writeSFTPCommandWithString:(NSString *)commandString
 {
+	if (!commandString)
+	{
+		return;
+	}
 	[self logForCommandQueue:[NSString stringWithFormat:@"Dispatching \"%@\"", commandString]];
 	if ([commandString isEqualToString:@"CONNECT"])
 	{
@@ -866,6 +869,11 @@ WRITE_ERROR:
 #pragma mark -
 - (void)requestPasswordWithPrompt:(char *)header
 {
+	if (![self password])
+	{
+		[self passwordErrorOccurred];
+		return;
+	}
 	[self writeSFTPCommandWithString:[self password]];
 }
 
@@ -873,6 +881,19 @@ WRITE_ERROR:
 {
 	//Authenticity of the host couldn't be established. yes/no scenario
 	[self writeSFTPCommandWithString:@"yes"];
+}
+- (void)passphraseRequested:(NSString *)buffer
+{
+	if (_flags.passphrase)
+	{
+		NSString *passphrase = [_forwarder connection:self passphraseForHost:[self host]];
+		if (passphrase)
+		{
+			[self writeSFTPCommandWithString:passphrase];
+			return;
+		}
+	}
+	[self passwordErrorOccurred];
 }
 
 - (void)didConnect

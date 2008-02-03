@@ -84,6 +84,7 @@
 - (NSDictionary *)currentPermissionChangeInfo;
 - (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo;
 
+- (void)passphraseRequested:(NSString *)buffer;
 - (void)passwordErrorOccurred;
 - (void)requestPasswordWithPrompt:(char *)header;
 - (void)connectionError:(NSError *)error;
