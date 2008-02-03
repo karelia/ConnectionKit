@@ -222,6 +222,9 @@ enum {
 - (void)connection:(id <AbstractConnectionProtocol>)con didAuthenticateToHost:(NSString *)host; // this is a successful login
 - (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con;
 
+//SFTP Passphrase Support
+- (NSString *)connection:(id <AbstractConnectionProtocol>)con passphraseForHost:(NSString *)host;
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didCreateDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path;

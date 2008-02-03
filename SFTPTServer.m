@@ -115,10 +115,7 @@ static int      fncolumn = -1;
 #endif /* notdef */
     BOOL                hasPrompt = NO;
     int                 i, pnum = 0;
-    char                *prompts[] = { "password", "passphrase",
-                                    "Password:", "PASSCODE:",
-                                    "Password for ", "Passcode for ",
-				    "CryptoCard Challenge" };
+    char                *prompts[] = { "password", "Password:", "PASSCODE:", "Password for ", "Passcode for ", "CryptoCard Challenge" };
                                     
     if ( buf == NULL ) {
         return( NO );
@@ -723,8 +720,8 @@ DOT_OR_DOTDOT:
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"passphrase for key"])
  			{
-				passwordWasSent = NO;
-				[sftpWrapperConnection requestPasswordWithPrompt:(char *)serverResponseBuffer];
+				[sftpWrapperConnection passphraseRequested:[NSString stringWithUTF8String:(void *)serverResponseBuffer]];
+				passwordWasSent = YES;
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"Changing owner on"] || [self buffer:serverResponseBuffer containsString:"Changing group on"] || [self buffer:serverResponseBuffer containsString:"Changing mode on"])
 			{

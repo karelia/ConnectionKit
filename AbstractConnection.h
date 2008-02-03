@@ -124,6 +124,7 @@ typedef struct __flags {
 	unsigned isRecursiveUploading:1;
 	unsigned isRecursiveDeleting:1;
 	unsigned didAuthenticate:1;
+	unsigned passphrase:1;
 	
 	unsigned padding:2;
 } connectionFlags;
