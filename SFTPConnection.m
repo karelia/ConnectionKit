@@ -130,7 +130,7 @@ static char *lsform;
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [[self port] intValue]]];
 	}
 	//We're given a password, so we don't want to use any known hosts/pubkeys, etc.
-	if ([self password])
+	if ([self password] && [[self password] length] > 0)
 	{
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
 	}
