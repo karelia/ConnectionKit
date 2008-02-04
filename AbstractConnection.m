@@ -751,7 +751,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.fileCheck				= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:)];
 	_flags.authorizeConnection		= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
 	_flags.didAuthenticate			= [del respondsToSelector:@selector(connection:didAuthenticateToHost:)];
-	_flags.passphrase				= [del respondsToSelector:@selector(connection:passphraseForHost:)];
+	_flags.passphrase				= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
 }
 
 - (id)delegate
