@@ -11,6 +11,7 @@
 #import "NSFileManager+Connection.h"
 #import "AbstractConnectionProtocol.h"
 #import "NSString+Connection.h"
+#import "EMKeychainProxy.h"
 
 #include "sshversion.h"
 #include "fdwrite.h"
@@ -884,9 +885,20 @@ WRITE_ERROR:
 }
 - (void)passphraseRequested:(NSString *)buffer
 {
+	//Typical Buffer: Enter passphrase for key '/Users/brian/.ssh/id_rsa': 
+	
+	//Try to get it ourselves via keychain before asking client app for it
+	NSString *pubKeyPath = [buffer substringWithRange:NSMakeRange(26, [buffer length]-29)]; //26th index is the start of the path
+	EMGenericKeychainItem *item = [[EMKeychainProxy sharedProxy] genericKeychainItemForService:@"SSH" withUsername:pubKeyPath];
+	if (item && [item password])
+	{
+		[self writeSFTPCommandWithString:[item password]];
+		return;
+	}
+	
 	if (_flags.passphrase)
 	{
-		NSString *passphrase = [_forwarder connection:self passphraseForHost:[self host]];
+		NSString *passphrase = [_forwarder connection:self passphraseForHost:[self host] username:[self username] publicKeyPath:pubKeyPath];
 		if (passphrase)
 		{
 			[self writeSFTPCommandWithString:passphrase];
