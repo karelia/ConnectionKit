@@ -90,7 +90,7 @@ static EMKeychainProxy* sharedProxy;
 	
 	if (!pathString || [pathString length] == 0)
 	{
-		path = "/";
+		path = "";
 	}
 	
 	UInt32 passwordLength = 0;
@@ -147,7 +147,7 @@ static EMKeychainProxy* sharedProxy;
 	
 	if (!pathString || [pathString length] == 0)
 	{
-		path = "/";
+		path = "";
 	}
 
 	SecKeychainItemRef item = nil;

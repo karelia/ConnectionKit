@@ -22,7 +22,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//Last Changed on 12/20/07. Version 0.13
+//Last Changed on 2/07/08. Version 0.14
 
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
