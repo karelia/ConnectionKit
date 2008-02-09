@@ -294,8 +294,19 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	
 	if ([fm fileExistsAtPath:lockPath])
 	{
-		[self performSelector:_cmd withObject:nil afterDelay:0.0];
-		return;
+		databaseWriteFailCount++;
+		if (databaseWriteFailCount > 4)
+		{
+			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
+			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
+			[fm removeFileAtPath:lockPath handler:nil];
+			databaseWriteFailCount = 0;
+		}
+		else
+		{
+			[self performSelector:_cmd withObject:nil afterDelay:0.5];
+			return;
+		}
 	}
 	
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
@@ -619,7 +630,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 }
 - (BOOL)itemIsLeopardSourceGroupHeader:(id)item
 {
-	return (item && [item isKindOfClass:[NSDictionary class]] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
+	return (item && [item isKindOfClass:[NSDictionary class]] && [item objectForKey:@"IsSourceGroup"] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
 }
 - (NSOutlineView *)outlineView
 {
@@ -923,7 +934,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	else if ([[pboard types] indexOfObject:NSFilenamesPboardType] != NSNotFound)
 	{
 		NSString *itemPath = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
-		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [item isKindOfClass:[CKBonjourCategory class]] || [[item category] isKindOfClass:[CKBonjourCategory class]])
+		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [item isKindOfClass:[NSDictionary class]] || [item isKindOfClass:[CKBonjourCategory class]] || [[item category] isKindOfClass:[CKBonjourCategory class]])
 		{
 			return NSDragOperationNone;
 		}
@@ -978,10 +989,9 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		itemEnumerator = [myDraggedItems objectEnumerator];
 	}
 	
-	NSEnumerator *itemsToMoveEnumerator = [myDraggedItems objectEnumerator];
 	id currentItem = nil;
 	[self beginGroupEditing];
-	while ((currentItem = [itemsToMoveEnumerator nextObject]))
+	while ((currentItem = [itemEnumerator nextObject]))
 	{
 		CKHostCategory *currentCategory = [currentItem category];
 		unsigned currentIndex = NSNotFound;
