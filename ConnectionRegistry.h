@@ -58,6 +58,8 @@
 	
 	BOOL myIsGroupEditing;
 	BOOL myUsesLeopardStyleSourceList;
+	
+	int databaseWriteFailCount;
 }
 
 // you can set a custom database if you don't want to use the default shared registry.
