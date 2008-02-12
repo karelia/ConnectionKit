@@ -134,92 +134,95 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[super threadedConnect];
 	[self setState:ConnectionIdleState];
 }
-
 - (void)processReceivedData:(NSData *)data
-{	
+{
 	[myResponseBuffer appendData:data];
-	if ([self processBufferWithNewData:data])
+	
+	if (![self processBufferWithNewData:data])
 	{
-		NSRange responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
-		if (responseRange.location != NSNotFound)
+		return;
+	}
+	NSRange responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
+	if (responseRange.location == NSNotFound)
+	{
+		return;
+	}
+
+	NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
+	CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
+	[myResponseBuffer setLength:0];
+	[self closeStreams];
+	
+	[myCurrentRequest release];
+	myCurrentRequest = nil;
+	
+	KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
+	
+	if ([self transcript])
+	{
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
+																  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
+																  attributes:[AbstractConnection dataAttributes]] autorelease]];
+	}
+	
+	if ([response code] == 401)
+	{
+		if (myAuthorization != nil)
 		{
-			NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
-			CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
-			[myResponseBuffer setLength:0];
-			[self closeStreams];
-			
-			[myCurrentRequest release];
-			myCurrentRequest = nil;
-			
-			KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
-			
+			// the user or password supplied is bad
+			if (_flags.badPassword)
+			{
+				[_forwarder connectionDidSendBadPassword:self];
+				[self setState:ConnectionNotConnectedState];
+				if (_flags.didDisconnect)
+				{
+					[_forwarder connection:self didDisconnectFromHost:[self host]];
+				}
+			}
+		}
+		else
+		{
 			if ([self transcript])
 			{
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
-																		  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
-																		  attributes:[AbstractConnection dataAttributes]] autorelease]];
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
+																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
 			}
+			// need to append authorization
+			NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+			NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
+			NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+			NSScanner *scanner = [NSScanner scannerWithString:auth];
+			NSString *authMethod = nil;
+			NSString *realm = nil;
+			[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
+			[scanner scanUpToString:@"Realm\"" intoString:nil];
+			[scanner scanUpToCharactersFromSet:quote intoString:&realm];
 			
-			if ([response code] == 401)
+			if ([authMethod isEqualToString:@"Basic"])
 			{
-				if (myAuthorization != nil)
-				{
-					// the user or password supplied is bad
-					if (_flags.badPassword)
-					{
-						[_forwarder connectionDidSendBadPassword:self];
-						[self setState:ConnectionNotConnectedState];
-						if (_flags.didDisconnect)
-						{
-							[_forwarder connection:self didDisconnectFromHost:[self host]];
-						}
-					}
-				}
-				else
-				{
-					if ([self transcript])
-					{
-						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
-																				  attributes:[AbstractConnection sentAttributes]] autorelease]];
-					}
-					// need to append authorization
-					NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-					NSCharacterSet *quote = [NSCharacterSet characterSetWithCharactersInString:@"\""];
-					NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
-					NSScanner *scanner = [NSScanner scannerWithString:auth];
-					NSString *authMethod = nil;
-					NSString *realm = nil;
-					[scanner scanUpToCharactersFromSet:[NSCharacterSet whitespaceCharacterSet] intoString:&authMethod];
-					[scanner scanUpToString:@"Realm\"" intoString:nil];
-					[scanner scanUpToCharactersFromSet:quote intoString:&realm];
-					
-					if ([authMethod isEqualToString:@"Basic"])
-					{
-						NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
-						NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
-						[myAuthorization autorelease];
-						myAuthorization = [[authData base64Encoding] retain];
-						//resend the request with auth
-						[self sendCommand:myCurrentRequest];
-						return;
-					}
-					else
-					{
-						if ([self transcript])
-						{
-							[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection only supports Basic Authentication!\n"] 
-																					  attributes:[AbstractConnection sentAttributes]] autorelease]];
-						}
-						@throw [NSException exceptionWithName:NSInternalInconsistencyException
-													   reason:@"Only Basic Authentication is supported at the moment"
-													 userInfo:nil];
-					}
-				}
+				NSString *authString = [NSString stringWithFormat:@"%@:%@", [self username], [self password]];
+				NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+				[myAuthorization autorelease];
+				myAuthorization = [[authData base64Encoding] retain];
+				//resend the request with auth
+				[self sendCommand:myCurrentRequest];
+				return;
 			}
-			[self processResponse:response];
+			else
+			{
+				if ([self transcript])
+				{
+					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection only supports Basic Authentication!\n"] 
+																			  attributes:[AbstractConnection sentAttributes]] autorelease]];
+				}
+				@throw [NSException exceptionWithName:NSInternalInconsistencyException
+											   reason:@"Only Basic Authentication is supported at the moment"
+											 userInfo:nil];
+			}
 		}
 	}
+	[self processResponse:response];
 }
 
 - (BOOL)processBufferWithNewData:(NSData *)data
@@ -265,8 +268,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
-		
+		[req setHeader:@"keep-alive" forKey:@"Connection"];
 		[self setAuthenticationWithRequest:req];
 		
 		NSData *packet = [req serialized];
@@ -280,7 +282,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[self initiatingNewRequest:req withPacket:packet];
 		
 		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsUTF8String]);
-		
 		[self sendData:packet];
 	}
 	else 

@@ -132,7 +132,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark Stream Overrides
 
 - (void)processResponse:(CKHTTPResponse *)response
-{	
+{
 	KTLog(ProtocolDomain, KTLogDebug, @"%@", response);
 	switch (GET_STATE)
 	{
@@ -156,6 +156,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				case 404:
 				{		
 					err = [NSString stringWithFormat: @"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
+					break;
 				}
 				default: 
 				{
