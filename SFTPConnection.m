@@ -33,7 +33,10 @@ static char *lsform;
 {
 	return @"SFTP";
 }
-
++ (NSString *)urlScheme
+{
+	return @"sftp";
+}
 + (id)connectionToHost:(NSString *)host port:(NSString *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
 {
 	return [[[SFTPConnection alloc] initWithHost:host
