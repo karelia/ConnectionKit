@@ -202,6 +202,7 @@
 				case 404:
 				{		
 					err = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no .Mac access to the directory", @".Mac Directory Contents Error"), [dav path]];
+					break;
 				}
 				default: 
 				{
