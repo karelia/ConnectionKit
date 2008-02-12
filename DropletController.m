@@ -21,7 +21,6 @@ static NSSize sFilesCollapsedSize = {375, 105};
 
 - (void)awakeFromNib
 {
-	NSLog(@"awakeFromNib");
 	NSString *str = [[NSUserDefaults standardUserDefaults] objectForKey:[oWindow frameAutosaveName]];
 	if (str)
 	{
