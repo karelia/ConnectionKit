@@ -309,7 +309,7 @@
 	
 	[self serializeContentWithPacket:packet];
 	
-	// add an md5 hash header
+//	// add an md5 hash header
 //	if ([myContent length] > 0)
 //	{
 //		NSString *md5 = [NSString stringWithFormat:@"Content-MD5: %%@\r\n", [[myContent md5Digest] base64Encoding]];
