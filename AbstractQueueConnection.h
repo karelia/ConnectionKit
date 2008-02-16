@@ -97,7 +97,7 @@ extern NSString *QueueDomain;
 {
 	NSRecursiveLock		*_queueLock;
 	int					_checkQueueCount;
-	
+	int					_openBulkCommands;
 	// Queue Support
 	NSMutableArray		*_commandHistory;
 	NSMutableArray		*_commandQueue;
@@ -117,6 +117,11 @@ extern NSString *QueueDomain;
 
 - (void)checkQueue;
 - (BOOL)isCheckingQueue;
+
+//Queue Accessors
+- (NSMutableArray *)uploadQueue;
+- (NSMutableArray *)downloadQueue;
+- (NSMutableArray *)commandQueue;	
 
 //Command History
 - (id)lastCommand;

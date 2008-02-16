@@ -50,7 +50,7 @@
 	
 	if (self = [super initWithMethod:@"PROPFIND" uri:uri])
 	{
-		[self setHeader:@"1" forKey:@"Depth"];
+		[self setHeader:@"0" forKey:@"Depth"];
 		
 		myPath = [uri copy];
 		

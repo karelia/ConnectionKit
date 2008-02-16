@@ -311,6 +311,34 @@ NSString *QueueDomain = @"Queuing";
 	[string appendString:@"\n)"];
 	return string;
 }
+- (NSMutableArray *)uploadQueue
+{
+	return _uploadQueue;
+}
+- (NSMutableArray *)downloadQueue
+{
+	return _downloadQueue;
+}
+- (NSMutableArray *)commandQueue
+{
+	return _downloadQueue;
+}
+
+- (void)startBulkCommands
+{
+	[super startBulkCommands];
+	_openBulkCommands++;
+}
+- (void)endBulkCommands
+{
+	[super endBulkCommands];
+	_openBulkCommands--;
+	
+	if (_openBulkCommands == 0)
+	{
+		[self checkQueue];
+	}
+}
 
 #define ADD_TO_QUEUE(queue, object) [_queueLock lock]; [queue addObject:object]; [_queueLock unlock];
 
