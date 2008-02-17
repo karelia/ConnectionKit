@@ -323,7 +323,7 @@ NSString *QueueDomain = @"Queuing";
 {
 	return _downloadQueue;
 }
-
+/* NOTE:  Not sure if we necessarily need this subclass override here. This does seem to fix an issue with file based connections, but until I have a chance to test it further, we'll leave it commented out.  -Brian Amerige 
 - (void)startBulkCommands
 {
 	[super startBulkCommands];
@@ -334,11 +334,11 @@ NSString *QueueDomain = @"Queuing";
 	[super endBulkCommands];
 	_openBulkCommands--;
 	
-	if (_openBulkCommands == 0)
+	if (_openBulkCommands == 0 && ![self isCheckingQueue])
 	{
 		[self checkQueue];
 	}
-}
+}*/
 
 #define ADD_TO_QUEUE(queue, object) [_queueLock lock]; [queue addObject:object]; [_queueLock unlock];
 
