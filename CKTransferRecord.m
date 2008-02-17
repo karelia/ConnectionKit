@@ -206,7 +206,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)setProgress:(int)progress
 {
-	if (myProgress != progress)
+	if (myProgress != progress || progress == 100)
 	{
 		if (progress == 100 && myProgress == 1)
 		{
@@ -302,8 +302,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 		[myError autorelease];
 		myError = [error retain];
 		[self didChangeValueForKey:@"progress"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
-															object:self];
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
 }
 
@@ -427,10 +426,10 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	[self setProgress:0];
 	myTransferred = 0;
 	myIntermediateTransferred = 0;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
+	[self setProgress:0];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
@@ -470,10 +469,10 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 
 - (void)transferDidFinish:(CKTransferRecord *)transfer
 {
-	[self setProgress:100];
 	myIntermediateTransferred = (mySize - myTransferred);
 	myTransferred = mySize;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
+	[self setProgress:100];
 }
 
 #pragma mark -
