@@ -11,6 +11,7 @@
 #import "CKTransferRecord.h"
 #import "CKInternalTransferRecord.h"
 #import "FTPConnection.h"
+#import "EMKeychainProxy.h"
 #import "SFTPTServer.h"
 
 @interface SFTPConnection : StreamBasedConnection 
