@@ -149,7 +149,7 @@ static int      fncolumn = -1;
                                     "ssh_exchange_identification",
                                     "Operation timed out"
                                     "no address associated with",
-									"Error",
+									"Error: ",
                                     "REMOTE HOST IDENTIFICATION HAS CHANGED" };
                                     
     if ( buf == NULL ) {
