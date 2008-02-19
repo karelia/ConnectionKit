@@ -183,7 +183,7 @@ static char *lsform;
 #pragma mark -
 - (NSString *)currentDirectory
 {
-	return currentDirectory;
+	return [NSString stringWithString:currentDirectory];
 }
 
 - (void)changeToDirectory:(NSString *)newDir
@@ -709,7 +709,7 @@ WRITE_ERROR:
 	}
 	if (_flags.directoryContents)
 	{
-		[_forwarder connection:self didReceiveContents:connectionKitFormattedContents ofDirectory:currentDirectory];
+		[_forwarder connection:self didReceiveContents:connectionKitFormattedContents ofDirectory:[NSString stringWithString:currentDirectory]];
 	}
 }
 - (void)didChangeToDirectory:(NSString *)path
