@@ -58,6 +58,8 @@
 #import <Connection/CKHTTPResponse.h>
 #import <Connection/CKHTTPFileDownloadResponse.h>
 
+#import <Connection/EMKeychainProxy.h>
+#import <Connection/EMKeychainItem.h>
 #import <Connection/LeopardSourceListTableColumn.h>
 #import <Connection/ConnectionRegistry.h>
 #import <Connection/CKHostCategory.h>

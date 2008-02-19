@@ -11,7 +11,6 @@
 #import "NSFileManager+Connection.h"
 #import "AbstractConnectionProtocol.h"
 #import "NSString+Connection.h"
-#import "EMKeychainProxy.h"
 
 #include "sshversion.h"
 #include "fdwrite.h"
