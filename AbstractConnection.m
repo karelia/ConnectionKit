@@ -1024,6 +1024,7 @@ NSDictionary *sDataAttributes = nil;
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
 	CKTransferRecord *root = [CKTransferRecord rootRecordWithPath:remotePath];
+	[root setUpload:YES];
 	NSFileManager *fm = [NSFileManager defaultManager];
 	
 	CKTransferRecord *record;
@@ -1045,6 +1046,7 @@ NSDictionary *sDataAttributes = nil;
 		else
 		{
 			root = record;
+			[root setUpload:YES];
 			[root setName:[[root name] lastPathComponent]];		
 		}
 	}
@@ -1058,7 +1060,6 @@ NSDictionary *sDataAttributes = nil;
 			  ignoreHiddenFiles:ignoreHiddenFilesFlag];
 	}
 	[self endBulkCommands];
-	
 	return root;
 }
 
