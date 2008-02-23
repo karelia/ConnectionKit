@@ -218,8 +218,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		[self willChangeValueForKey:@"progress"];
 		myProgress = progress;
 		[self didChangeValueForKey:@"progress"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification
-															object:self];
+		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
 }
 
