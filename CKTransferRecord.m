@@ -31,6 +31,8 @@
 #import "NSString+Connection.h"
 
 NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";
+NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTransferDidBeginNotification";
+NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
 
 @implementation CKTransferRecord
 
@@ -430,6 +432,7 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	myIntermediateTransferred = 0;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:0];
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification object:self];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
@@ -473,6 +476,8 @@ NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgre
 	myTransferred = mySize;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
+	
 }
 
 #pragma mark -
