@@ -994,14 +994,19 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection connect];
 	}
 	[_deletionLock lock];
-	if (!myStreamFlags.isDeleting && [_recursiveDeletionsQueue count] > 0)
+	unsigned int deletionsCount = [_recursiveDeletionsQueue count];
+	[_deletionLock unlock];
+	if (!myStreamFlags.isDeleting && deletionsCount > 0)
 	{
 		_numberOfListingsRemaining++;
 		myStreamFlags.isDeleting = YES;
-		[_emptyDirectoriesToDelete addObject:[_recursiveDeletionsQueue objectAtIndex:0]];
-		[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		[_deletionLock lock];
+		NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
+		[_emptyDirectoriesToDelete addObject:directoryPath];
+		[_deletionLock unlock];
+		[_recursiveListingConnection changeToDirectory:directoryPath];
+		[_recursiveListingConnection directoryContents];
 	}
-	[_deletionLock unlock];
 }
 
 - (void)recursivelyDeleteDirectory:(NSString *)path
@@ -1085,7 +1090,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			else
 			{
 				_recursiveListingConnection = [_recursiveDeletionConnection retain];
-				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+				[_deletionLock lock];
+				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
+				[_deletionLock unlock];
+				[_recursiveListingConnection changeToDirectory:directoryPath];
+				[_recursiveListingConnection directoryContents];
 			}
 		}
 		else if (_recursiveDeletionConnection == nil)
@@ -1112,7 +1121,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			else
 			{
 				_recursiveListingConnection - [_recursiveDownloadConnection retain];
-				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+				[_recursiveDownloadLock lock];
+				NSString *directoryPath = [_recursiveDownloadQueue objectAtIndex:0];
+				[_recursiveDownloadLock unlock];
+				[_recursiveListingConnection changeToDirectory:directoryPath];
+				[_recursiveListingConnection directoryContents];
 			}
 		}
 		else if (_recursiveDownloadConnection == nil)
@@ -1206,7 +1219,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
 				_numberOfListingsRemaining++;
-				[_recursiveListingConnection contentsOfDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveListingConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveListingConnection directoryContents];
 			}
 			else
 			{
@@ -1327,7 +1341,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_deletionLock unlock];
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
 		{
+			[_deletionLock lock];
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
+			[_deletionLock unlock];
 			if (_flags.deleteDirectory) 
 			{
 				[_forwarder connection:self didDeleteDirectory:dirPath];
@@ -1340,17 +1356,22 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			else
 			{
 				[_deletionLock lock];
-				[_emptyDirectoriesToDelete addObject:[_recursiveDeletionsQueue objectAtIndex:0]];
-				_numberOfListingsRemaining++;
-				[_recursiveListingConnection contentsOfDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
+				[_emptyDirectoriesToDelete addObject:directoryPath];
 				[_deletionLock unlock];
+				_numberOfListingsRemaining++;
+				[_recursiveListingConnection changeToDirectory:directoryPath];
+				[_recursiveListingConnection directoryContents];
 			}
 		}
 		else
 		{
 			if (_flags.deleteDirectoryInAncestor)
 			{
-				[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+				[_deletionLock lock];
+				NSString *ancestorDirectory = [_recursiveDeletionsQueue objectAtIndex:0];
+				[_deletionLock unlock];
+				[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory];
 			}
 		}
 	}
