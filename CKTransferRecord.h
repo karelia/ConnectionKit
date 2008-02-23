@@ -104,6 +104,8 @@
 @end
 
 extern NSString *CKTransferRecordProgressChangedNotification;
+extern NSString *CKTransferRecordTransferDidBeginNotification;
+extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 @interface CKTransferRecord (Private)
 - (void)setConnection:(id <AbstractConnectionProtocol>)connection; 
