@@ -758,7 +758,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
             return [item connectionType];
         }
     }
-    else
+    else if ([item isKindOfClass:[CKHost class]] || [item isKindOfClass:[CKHostCategory class]])
     {
         //We have a large icon here, we need to scale it to the nearest base 2 size, based on the rowheight of the outlineview.
         float widthAndHeightDimension = pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
