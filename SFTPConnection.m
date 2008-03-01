@@ -132,10 +132,13 @@ static char *lsform;
 	{
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [[self port] intValue]]];
 	}
-	//We're given a password, so we don't want to use any known hosts/pubkeys, etc.
 	if ([self password] && [[self password] length] > 0)
 	{
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
+	}
+	else
+	{
+		[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
 	}
 	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
 	
@@ -353,7 +356,9 @@ static char *lsform;
 #pragma mark -
 - (void)threadedCancelTransfer
 {
-	[self writeSFTPCommandWithString:@"Interrupt"];
+	[self forceDisconnect];
+	[self connect];
+//	[self writeSFTPCommandWithString:@"Interrupt"];
 }
 
 #pragma mark -
