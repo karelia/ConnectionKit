@@ -587,7 +587,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				
 				free(buf);
 			}
-			else
+			else if ([command rangeOfString:@"directory listing"].location != NSNotFound) //Sometimes we get "150 Here comes the directory listing"
 			{
 				//we'll clean the buffer
 				[_buffer setLength:0];
