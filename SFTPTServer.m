@@ -541,6 +541,7 @@ DOT_OR_DOTDOT:
 	}
 	
 	//Construct the initial argument
+	[sftpWrapperConnection logForCommandQueue:[NSString stringWithFormat:@"Dispatching \"sftp %@\"", [params componentsJoinedByString:@" "]]];
 	NSArray *passedInArguments = [params copy];
 	NSArray *commandArguments = [NSArray arrayWithObject:sftpBinaryPath];
 	commandArguments = [commandArguments arrayByAddingObjectsFromArray:passedInArguments];
