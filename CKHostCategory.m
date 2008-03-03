@@ -333,17 +333,7 @@ static NSImage *sFolderImage = nil;
 {
 	if (!sFolderImage)
 	{
-		NSBundle *bundle = [NSBundle bundleForClass:[self class]];
-		
-		//If we're on Leopard, use the Leopard icon. Otherwise we use the Aqua icon.
-		BOOL isLeopard = NO;
-		SInt32 OSVersion;		
-		if (Gestalt(gestaltSystemVersionMinor, &OSVersion) == noErr)
-		{
-			isLeopard = (OSVersion == 5);
-		}
-		NSString *folderIconPath = (isLeopard) ? ([bundle pathForResource:@"LeopardFolder" ofType:@"tiff"]) : ([bundle pathForResource:@"AquaFolder" ofType:@"png"]);
-		sFolderImage = [[NSImage alloc] initWithContentsOfFile:folderIconPath];
+		sFolderImage = [(NSImage*)[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
 	}
 	return sFolderImage;
 }
