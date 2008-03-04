@@ -329,7 +329,8 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 }
 
 static NSImage *sFolderImage = nil;
-- (NSImage *)icon
+
++ (NSImage *)icon
 {
 	if (!sFolderImage)
 	{
@@ -347,6 +348,11 @@ static NSImage *sFolderImage = nil;
 		[sFolderImage setSize:NSMakeSize(16.0, 16.0)];
 	}
 	return sFolderImage;
+}
+
+- (NSImage *)icon
+{
+	return [CKHostCategory icon];
 }
 
 - (NSImage *)iconWithSize:(NSSize)size
