@@ -62,6 +62,7 @@
 - (CKHostCategory *)category;
 - (BOOL)isChildOf:(CKHostCategory *)cat;
 
++ (NSImage *)icon;
 - (NSImage *)icon;
 
 - (BOOL)isEditable;
