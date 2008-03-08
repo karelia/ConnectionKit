@@ -270,6 +270,10 @@ static NSMutableDictionary *responseMap = nil;
 	if (self = [super init])
 	{
 		myRequest = [request retain];
+		if (!data || [data length] == 0)
+		{
+			return self;
+		}
 		NSRange headerRange = [data rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 		NSString *headerString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
 		NSArray *headerLines = [headerString componentsSeparatedByString:@"\r\n"];
