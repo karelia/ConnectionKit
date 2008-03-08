@@ -142,12 +142,19 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	{
 		return;
 	}
-	NSRange responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
-	if (responseRange.location == NSNotFound)
+	NSRange responseRange;
+	if ([data length] > 0)
 	{
-		return;
+		responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
+		if (responseRange.location == NSNotFound)
+		{
+			return;
+		}
 	}
-
+	else
+	{
+		responseRange = NSMakeRange(0, [myResponseBuffer length]);
+	}
 	NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
 	CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
 	[myResponseBuffer setLength:0];
@@ -268,7 +275,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"TE, Keep-Alive" forKey:@"Connection"];
+		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
 		[req setHeader:@"trailers" forKey:@"TE"];
 		[self setAuthenticationWithRequest:req];
 		

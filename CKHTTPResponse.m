@@ -205,16 +205,17 @@ static NSMutableDictionary *responseMap = nil;
 			}
 			else
 			{
-				// it must be just a response with just headers
-				packetRange.location = 0;
-				packetRange.length = start;
+				return packetRange;
+//				// it must be just a response with just headers
+//				packetRange.location = 0;
+//				packetRange.length = start;
 			}
 		}
 		else
 		{
 			NSCharacterSet *hexSet = [NSCharacterSet characterSetWithCharactersInString:@"0123456789abcdefABCDEF"];
-			NSRange lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
-											  range:NSMakeRange(start, [data length] - start)];
+			NSData *newLineData = [[NSString stringWithFormat:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding];
+			NSRange lengthRange = [data rangeOfData:newLineData range:NSMakeRange(start, [data length] - start)];
 			NSString *lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
 			NSScanner *scanner = [NSScanner scannerWithString:lengthString];
 			unsigned chunkLength = 0;
@@ -225,8 +226,7 @@ static NSMutableDictionary *responseMap = nil;
 			{
 				//[self appendContent:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
 				
-				lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
-										  range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
+				lengthRange = [data rangeOfData:newLineData range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
 				if (lengthRange.location == NSNotFound)
 				{
 					return packetRange;
@@ -336,6 +336,10 @@ static NSMutableDictionary *responseMap = nil;
 			if (contentLength > 0)
 			{
 				[self setContent:[data subdataWithRange:NSMakeRange(start, contentLength)]];
+			}
+			else
+			{
+				[self setContent:[data subdataWithRange:NSMakeRange(start, [data length] - start)]];
 			}
 		}
 		else
