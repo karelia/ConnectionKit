@@ -139,6 +139,8 @@ static char *lsform;
 	else
 	{
 		[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
+		[parameters addObject:@"-o IdentityFile=~/.ssh/id_rsa"];
+		[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
 	}
 	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
 	
