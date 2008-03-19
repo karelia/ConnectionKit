@@ -235,6 +235,9 @@
 		D3598B800CF3D40800C61A38 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		D3598B830CF3D41000C61A38 /* SFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* SFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* SFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* SFTPTServer.m */; };
+		D3A2B7680D909F40002F02EF /* SSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = D3A2B7660D909F40002F02EF /* SSHPassphrase.m */; };
+		D3A2B7690D909F40002F02EF /* SSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A2B7670D909F40002F02EF /* SSHPassphrase.h */; };
+		D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */; };
 		D3C04AE40D4C1BA900C83775 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3C04AE50D4C1BA900C83775 /* LeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */; };
 		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
@@ -598,6 +601,9 @@
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* SFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* SFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPTServer.m; sourceTree = "<group>"; };
+		D3A2B7660D909F40002F02EF /* SSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSHPassphrase.m; sourceTree = "<group>"; };
+		D3A2B7670D909F40002F02EF /* SSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSHPassphrase.h; sourceTree = "<group>"; };
+		D3A2B7A20D90A2E2002F02EF /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeopardSourceListTableColumn.h; sourceTree = "<group>"; };
 		D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeopardSourceListTableColumn.m; sourceTree = "<group>"; };
 		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
@@ -1087,6 +1093,7 @@
 		79CFD8E709F7072100172CDD /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
+				D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				79CFD8DC09F7071400172CDD /* InputDialog.nib */,
 				79CFD8DE09F7071400172CDD /* Permissions.nib */,
@@ -1097,6 +1104,8 @@
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
 			isa = PBXGroup;
 			children = (
+				D3A2B7660D909F40002F02EF /* SSHPassphrase.m */,
+				D3A2B7670D909F40002F02EF /* SSHPassphrase.h */,
 				79CFD84309F7048400172CDD /* SFTPConnection.h */,
 				79CFD84409F7048400172CDD /* SFTPConnection.m */,
 				D3598B590CF3D3E400C61A38 /* Other */,
@@ -1191,6 +1200,7 @@
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
 				D3C04AE40D4C1BA900C83775 /* LeopardSourceListTableColumn.h in Headers */,
+				D3A2B7690D909F40002F02EF /* SSHPassphrase.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1403,6 +1413,7 @@
 				79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */,
 				D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */,
 				D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */,
+				D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1620,6 +1631,7 @@
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
 				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
 				D3C04AE50D4C1BA900C83775 /* LeopardSourceListTableColumn.m in Sources */,
+				D3A2B7680D909F40002F02EF /* SSHPassphrase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1806,6 +1818,14 @@
 				79CFD8DF09F7071400172CDD /* en */,
 			);
 			name = Permissions.nib;
+			sourceTree = "<group>";
+		};
+		D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D3A2B7A20D90A2E2002F02EF /* en */,
+			);
+			name = Passphrase.nib;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -2338,10 +2358,8 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;

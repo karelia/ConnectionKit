@@ -21,7 +21,7 @@
 	NSMutableString *currentDirectory;
 	NSTextStorage *myTextStorage;
 	
-	NSMutableArray *uploadQueue, *downloadQueue, *deleteFileQueue, *deleteDirectoryQueue, *renameQueue, *permissionChangeQueue;
+	NSMutableArray *uploadQueue, *downloadQueue, *deleteFileQueue, *deleteDirectoryQueue, *renameQueue, *permissionChangeQueue, *attemptedKeychainPublicKeyAuthentications;
 	NSMutableArray *connectToQueue;
 	
 	NSMutableArray *commandQueue;
