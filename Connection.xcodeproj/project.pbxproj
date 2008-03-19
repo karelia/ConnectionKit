@@ -330,6 +330,13 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
+		3C2A09C30D91B478002B8174 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09C60D91B485002B8174 /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09C90D91B496002B8174 /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09CC0D91B4AD002B8174 /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09CF0D91B4BE002B8174 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09D20D91B4D7002B8174 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		3C2A09D50D91B4E3002B8174 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1824,6 +1831,13 @@
 			isa = PBXVariantGroup;
 			children = (
 				D3A2B7A20D90A2E2002F02EF /* en */,
+				3C2A09C30D91B478002B8174 /* da */,
+				3C2A09C60D91B485002B8174 /* de */,
+				3C2A09C90D91B496002B8174 /* fr */,
+				3C2A09CC0D91B4AD002B8174 /* it */,
+				3C2A09CF0D91B4BE002B8174 /* ja */,
+				3C2A09D20D91B4D7002B8174 /* zh_CN */,
+				3C2A09D50D91B4E3002B8174 /* zh_TW */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
