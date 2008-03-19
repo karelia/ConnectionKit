@@ -11,6 +11,7 @@
 #import "NSFileManager+Connection.h"
 #import "AbstractConnectionProtocol.h"
 #import "NSString+Connection.h"
+#import "SSHPassphrase.h"
 
 #include "sshversion.h"
 #include "fdwrite.h"
@@ -57,6 +58,7 @@ static char *lsform;
 		renameQueue = [[NSMutableArray array] retain];
 		permissionChangeQueue = [[NSMutableArray array] retain];
 		commandQueue = [[NSMutableArray arrayWithObject:@"CONNECT"] retain];
+		attemptedKeychainPublicKeyAuthentications = [[NSMutableArray array] retain];
 		
 		[self establishDistributedObjectsConnection];
 	}
@@ -74,6 +76,7 @@ static char *lsform;
 	[permissionChangeQueue release];
 	[currentDirectory release];
 	[commandQueue release];
+	[attemptedKeychainPublicKeyAuthentications release];
 	
 	[super dealloc];
 }
@@ -896,29 +899,44 @@ WRITE_ERROR:
 {
 	//Typical Buffer: Enter passphrase for key '/Users/brian/.ssh/id_rsa': 
 	
+	NSString *pubKeyPath = [buffer substringWithRange:NSMakeRange(26, [buffer length]-29)];
+	
 	//Try to get it ourselves via keychain before asking client app for it
-	NSString *pubKeyPath = [buffer substringWithRange:NSMakeRange(26, [buffer length]-29)]; //26th index is the start of the path
 	EMGenericKeychainItem *item = [[EMKeychainProxy sharedProxy] genericKeychainItemForService:@"SSH" withUsername:pubKeyPath];
-	if (item && [item password])
+	if (item && [item password] && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
 	{
+		[attemptedKeychainPublicKeyAuthentications addObject:pubKeyPath];
 		[self writeSFTPCommandWithString:[item password]];
 		return;
 	}
 	
+	//We don't have it on keychain, so ask the delegate for it if we can, or ask ourselves if not.	
+	NSString *passphrase = nil;
 	if (_flags.passphrase)
 	{
-		NSString *passphrase = [_forwarder connection:self passphraseForHost:[self host] username:[self username] publicKeyPath:pubKeyPath];
-		if (passphrase)
-		{
-			[self writeSFTPCommandWithString:passphrase];
-			return;
-		}
+		passphrase = [_forwarder connection:self passphraseForHost:[self host] username:[self username] publicKeyPath:pubKeyPath];
 	}
+	else
+	{
+		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
+		SSHPassphrase *passphraseFetcher = [[SSHPassphrase alloc] init];
+		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[self username]];
+	}
+	
+	if (passphrase)
+	{
+		[self writeSFTPCommandWithString:passphrase];
+		return;
+	}	
+	
 	[self passwordErrorOccurred];
 }
 
 - (void)didConnect
 {
+	//Clear any failed pubkey authentications as we're now connected
+	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
+	
 	isConnected = YES;
 	if (_flags.didConnect)
 	{
