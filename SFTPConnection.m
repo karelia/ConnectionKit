@@ -921,6 +921,7 @@ WRITE_ERROR:
 		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
 		SSHPassphrase *passphraseFetcher = [[SSHPassphrase alloc] init];
 		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[self username]];
+		[passphraseFetcher release];
 	}
 	
 	if (passphrase)
