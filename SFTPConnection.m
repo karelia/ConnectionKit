@@ -221,6 +221,12 @@ static char *lsform;
 	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"mkdir \"%@\"", newDirectoryPath]];
 }
 
+- (void)createDirectory:(NSString *)newDirectoryPath permissions:(unsigned long)permissions
+{
+	[self createDirectory:newDirectoryPath];
+	[self setPermissions:permissions forFile:newDirectoryPath];
+}
+
 #pragma mark -
 - (void)uploadFile:(NSString *)localPath
 {
