@@ -696,7 +696,7 @@ DOT_OR_DOTDOT:
 				{
 					localizedErrorString = @"Create directory operation failed";
 				}
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, nil];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:YES], ConnectionDirectoryExistsKey, nil];
 				NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
 				[sftpWrapperConnection connectionError:error];
 			}
