@@ -686,6 +686,7 @@ DOT_OR_DOTDOT:
 			{
 				NSString *failureReasonTitle = @"Error!";
 				int code = 0;
+				BOOL createDirectoryError = NO;
 				NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
 				if ([self buffer:serverResponseBuffer containsString:"Error resolving"])
 				{
@@ -695,8 +696,9 @@ DOT_OR_DOTDOT:
 				else if ([self buffer:serverResponseBuffer containsString:"Couldn't create directory"])
 				{
 					localizedErrorString = @"Create directory operation failed";
+					createDirectoryError = YES;
 				}
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:YES], ConnectionDirectoryExistsKey, nil];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
 				NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
 				[sftpWrapperConnection connectionError:error];
 			}
