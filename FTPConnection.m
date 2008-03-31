@@ -1435,15 +1435,36 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 553:
 		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Filename not Allowed", @"FTP Upload error"),
-																					  NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey,
-													 nil]];
-				[_forwarder connection:self didReceiveError:error];
+			if (GET_STATE == ConnectionSettingPermissionsState)
+			{
+				if (_flags.error) 
+				{
+					NSError *error = [NSError errorWithDomain:FTPErrorDomain
+														 code:code
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]],
+															   NSLocalizedDescriptionKey,
+															   command, NSLocalizedFailureReasonErrorKey,
+															   nil]];
+					[_forwarder connection:self didReceiveError:error];
+				}
+				[self dequeuePermissionChange];
+				[self setState:ConnectionIdleState];
 			}
+			else
+			{
+				if (_flags.error) 
+				{
+					NSError *error = [NSError errorWithDomain:FTPErrorDomain
+														 code:code
+													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Filename not Allowed", @"FTP Upload error"),
+															   NSLocalizedDescriptionKey,
+															   command, NSLocalizedFailureReasonErrorKey,
+															   nil]];
+					[_forwarder connection:self didReceiveError:error];
+				}
+				// Should we set the state to idle or just sit here?
+			}
+			
 			break;
 		}
 	}

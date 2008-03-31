@@ -285,7 +285,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_forwarder setDelegate:delegate];	// note that its delegate it not retained.
 }
 
-- (void)openStreamsToPort:(unsigned)port
+- (BOOL)openStreamsToPort:(unsigned)port
 {
 	NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
 	if(!host){
@@ -299,7 +299,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					_connectionHost, @"host", nil]];
             [_forwarder connection:self didReceiveError:error];
 		}
-		return;
+		return NO;
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
@@ -371,8 +371,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 																				  forKey:NSLocalizedDescriptionKey]];
 			[_forwarder connection:self didReceiveError:error];
 		}
-		return;
+		return NO;
 	}
+	return YES;
 }
 
 - (void)threadedConnect
@@ -393,9 +394,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		connectionPort = 21;	// standard FTP control port
 	}
 	
-	[self openStreamsToPort:connectionPort];
-	
-	[super connect];
+	if ([self openStreamsToPort:connectionPort])
+	{
+		// only call super if we have successfully opened the ports and put them on the runloop
+		[super connect];
+	}
 }
 
 /*!	Disconnect from host.  Called by foreground thread.
