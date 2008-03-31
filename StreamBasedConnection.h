@@ -110,7 +110,7 @@
 	NSMutableData		*mySSLEncryptedSendBuffer;
 }
 
-- (void)openStreamsToPort:(unsigned)port;
+- (BOOL)openStreamsToPort:(unsigned)port;
 - (void)scheduleStreamsOnRunLoop;
 
 - (void)setSendStream:(NSStream *)stream;
