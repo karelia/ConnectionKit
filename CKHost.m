@@ -327,12 +327,17 @@ static NSImage *sHostIcon = nil;
 
 - (void)setUsername:(NSString *)username
 {
+	if (!username)
+	{
+		username = @"";
+	}
+	
 	if (username == myUsername)
 	{
 		return;
 	}
 	
-	NSString *oldUsernameString = [NSString stringWithString:myUsername];
+	NSString *oldUsernameString = (myUsername) ? [NSString stringWithString:myUsername] : nil;
 	
 	[self willChangeValueForKey:@"username"];
 	[myUsername autorelease];
@@ -351,6 +356,11 @@ static NSImage *sHostIcon = nil;
 
 - (void)setPassword:(NSString *)password
 {
+	if (!password)
+	{
+		password = @"";
+	}
+	
 	if (myPassword == password)
 	{
 		return;
@@ -393,6 +403,11 @@ static NSImage *sHostIcon = nil;
 
 - (void)setInitialPath:(NSString *)path
 {
+	if (!path)
+	{
+		path = @"";
+	}
+	
 	if (path == myInitialPath)
 	{
 		return;
