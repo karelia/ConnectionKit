@@ -156,7 +156,7 @@ static NSImage *sBonjourIcon = nil;
 	
 	while ((cur = [e nextObject]))
 	{
-		if ([[cur userInfo] isEqualTo:netService])
+		if ([cur userInfo] == netService)
 		{
 			[[cur category] removeHost:cur];
 			break;
