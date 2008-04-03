@@ -1262,7 +1262,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		// setup the local relative directory
 		NSString *relativePath = [dirPath substringFromIndex:[remote length]];
 		NSString *localDir = [local stringByAppendingPathComponent:relativePath];
-//		NSLog(@"recursivelyCreateDirectory: %@", localDir);
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:localDir attributes:nil];
 		
 		NSEnumerator *e = [contents objectEnumerator];

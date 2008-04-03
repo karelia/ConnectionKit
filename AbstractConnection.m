@@ -1728,6 +1728,7 @@ if (![fn isEqualToString:@"."] && \
 			NSString *bit = [words objectAtIndex:index];
 			if ([bit rangeOfString:@"->"].location != NSNotFound)
 			{
+				index++;
 				break;
 			}
 			[filenameBits addObject:bit];
