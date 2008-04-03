@@ -1059,6 +1059,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[d setObject:rec forKey:@"record"];
 	[d setObject:remotePath forKey:@"remote"];
 	[d setObject:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:@"local"];
+	[d setObject:[NSNumber numberWithBool:NO] forKey:@"HasListedFirstDirectory"];
 	[d setObject:[NSNumber numberWithBool:flag] forKey:@"overwrite"];
 	
 	[_recursiveDownloadLock lock];
@@ -1251,16 +1252,24 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	else if (con == _recursiveDownloadConnection) 
 	{
 		[_recursiveDownloadLock lock];
-		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
+		NSMutableDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
 		CKTransferRecord *root = [rec objectForKey:@"record"];
-		NSString *remote = [rec objectForKey:@"remote"];
-		NSString *local = [rec objectForKey:@"local"];
+		NSString *remote = [rec objectForKey:@"remote"]; 
+//		if (![[rec objectForKey:@"HasListedFirstDirectory"] boolValue] && ![dirPath isEqualToString:remote])
+//		{
+//			//We received a listing for a directory OTHER than what we initially requested. We must be downloading a symbolic link.
+//			//To preseve the initial request, modify our rec so we can determine the relative paths properly
+//			[rec setObject:dirPath forKey:@"remote"];
+//			[root setName:dirPath];
+//			remote = dirPath;
+//		}
+		NSString *local = [rec objectForKey:@"local"]; 
 		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
 		_downloadListingsRemaining--;
 		[_recursiveDownloadLock unlock];
 		
 		// setup the local relative directory
-		NSString *relativePath = [dirPath substringFromIndex:[remote length]];
+		NSString *relativePath = [dirPath substringFromIndex:[remote length]]; 
 		NSString *localDir = [local stringByAppendingPathComponent:relativePath];
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:localDir attributes:nil];
 		
@@ -1277,7 +1286,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[_recursiveDownloadConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 				[_recursiveDownloadConnection directoryContents];
 			}
-			else
+			else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeRegular])
 			{
 				CKTransferRecord *down = [self downloadFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]] 
 												toDirectory:localDir
@@ -1292,7 +1301,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
 			{
 				//We tried to download an entirely empty folder. We're finished.
-//				NSLog(@"Empty folder");
 				[_forwarder connection:self downloadDidFinish:dirPath];
 			}
 			[_recursiveDownloadLock lock];
