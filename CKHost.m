@@ -523,7 +523,8 @@ static NSImage *sHostIcon = nil;
 		
 		[url appendString:@"@"];
 	}
-	[url appendString:[self host]];
+	if ([self host])
+		[url appendString:[self host]];
 	
 	NSString *port = myPort;
 	if (!port || [port isEqualToString:@""])
