@@ -427,7 +427,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)directoryContents
 {
-	[self queueCommand:[ConnectionCommand command:@"LIST"
+	[self queueCommand:[ConnectionCommand command:@"LIST -a"
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
@@ -438,7 +438,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
-	[self queueCommand:[ConnectionCommand command:@"LIST"
+	[self queueCommand:[ConnectionCommand command:@"LIST -a"
 									   awaitState:ConnectionIdleState
 										sentState:ConnectionAwaitingDirectoryContentsState
 										dependant:nil
