@@ -140,17 +140,7 @@ static int      fncolumn = -1;
 {
     BOOL                hasError = NO;
     int                 i, numerrs = 0;
-    char                *errors[] = { "Permission denied",
-                                    "Couldn't ", "Secure connection ",
-                                    "No address associated with",
-                                    "Connection refused",
-                                    "Request for subsystem",
-                                    "Cannot download",
-                                    "ssh_exchange_identification",
-                                    "Operation timed out"
-                                    "no address associated with",
-									"Error: ",
-                                    "REMOTE HOST IDENTIFICATION HAS CHANGED" };
+    char                *errors[] = {"Permission denied", "Couldn't ", "Secure connection ", "No address associated with", "Connection refused", "Request for subsystem", "Cannot download", "ssh_exchange_identification", "Operation timed out", "no address associated with", "Error: "};
                                     
     if ( buf == NULL ) {
         return( NO );
