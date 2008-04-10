@@ -240,7 +240,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([command isEqualToString:@"LIST -FA"] && _ftpFlags.isMicrosoft)
+	else if ([command isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
 	{
 		command = @"LIST";
 	}
@@ -778,7 +778,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			_ftpFlags.received226 = YES;
 			if (_ftpFlags.isActiveDataConn == YES) 
 			{
-				[self closeDataConnection];
+			//	[self closeDataConnection];
 			}
 			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
 			{
@@ -851,6 +851,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				int port = i[4] << 8 | i[5];
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
+
+				//Make sure PASV didn't just return us our own address. If it did, it's bogus.
+				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
+				{
+					//Ah! We were given a bogus PASV connection.
+					_ftpFlags.canUsePASV = NO;
+					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+					_state = [cmd sentState];
+					[self sendCommand:[cmd command]];						
+					break;
+				}
+				
 				NSHost *host = [CKCacheableHost hostWithAddress:hostString];
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 				
@@ -871,13 +883,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if ( !start || sscanf(start, "|||%d|", &port) != 1)
 				{
 					_ftpFlags.canUseEPSV = NO;
-					[self pushCommandOnHistoryQueue:[ConnectionCommand command:@"EPRT"
-																	awaitState:ConnectionIdleState
-																	 sentState:FTPSettingEPRTState
-																	 dependant:nil
-																	  userInfo:nil]];
-					_state = FTPSettingEPRTState;
-					[self sendCommand:@"EPRT"];
+					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+					_state = [cmd sentState];
+					[self sendCommand:[cmd command]];
 				}
 				NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
@@ -1491,7 +1499,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 /*!	Stream delegate method.  "The delegate receives this message only if the stream object is scheduled on a runloop. The message is sent on the stream object’s thread."
 */
 - (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
-{	
+{
 	if (aStream == _dataReceiveStream)
 	{
 		[self handleDataReceivedEvent:eventCode];
@@ -1538,7 +1546,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			uint8_t *buf = (uint8_t *)malloc(sizeof (uint8_t) * kStreamChunkSize);
 			int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
-			
 			if (len >= 0)
 			{	
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
@@ -1998,23 +2005,25 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
 	{
-		NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
-		
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
-																  attributes:[AbstractConnection dataAttributes]] autorelease]];
-
-		NSArray *contents = [self parseLines:results];
-		
-		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
-		
-		[self cacheDirectory:_currentPath withContents:contents];
-		
-		if (_flags.directoryContents)
+		if ([_dataBuffer length] != 0)
 		{
-			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
+			NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
+																	  attributes:[AbstractConnection dataAttributes]] autorelease]];
+
+			NSArray *contents = [self parseLines:results];
+			
+			KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
+			
+			[self cacheDirectory:_currentPath withContents:contents];
+			
+			if (_flags.directoryContents)
+			{
+				[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
+			}
+			[results release];
+			[_dataBuffer setLength:0];
 		}
-		[results release];
-		[_dataBuffer setLength:0];
 		if (_ftpFlags.received226)
 		{
 			[self setState:ConnectionIdleState];
@@ -2543,7 +2552,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)directoryContents
 {
-	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -fa" 
+	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -a" 
 											awaitState:ConnectionIdleState 
 											 sentState:ConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
@@ -2571,7 +2580,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												userInfo:nil];
 	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -fa" 
+	ConnectionCommand *ls = [ConnectionCommand command:@"LIST -a" 
 											awaitState:ConnectionIdleState 
 											 sentState:ConnectionAwaitingDirectoryContentsState 
 											 dependant:dataCmd 
@@ -2785,7 +2794,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		
 		if (_flags.error) {
-			
 			/*NSError *err = [NSError errorWithDomain:FTPErrorDomain
 											   code:FTPErrorNoDataModes
 										   userInfo:[NSDictionary dictionaryWithObject:@"Failed to create active connection to server" forKey:NSLocalizedDescriptionKey]];
