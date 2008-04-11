@@ -852,10 +852,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 
-				//Make sure PASV didn't just return us our own address. If it did, it's bogus.
+				//Connecting to the same machine causes PASV to sit idle.
 				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
 				{
-					//Ah! We were given a bogus PASV connection.
 					_ftpFlags.canUsePASV = NO;
 					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
 					_state = [cmd sentState];
@@ -2023,6 +2022,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			[results release];
 			[_dataBuffer setLength:0];
+		}
+		else
+		{
+			NSLog(@"Received nothing for dir contents");
 		}
 		if (_ftpFlags.received226)
 		{
