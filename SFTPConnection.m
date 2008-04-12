@@ -287,15 +287,7 @@ static char *lsform;
 	[record setObject:localPath forKey:QueueUploadLocalFileKey];
 	[record setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
-	id internalTransferRecordDelegate = nil;
-	if (delegate)
-	{
-		internalTransferRecordDelegate = delegate;
-	}
-	else
-	{
-		internalTransferRecordDelegate = record;
-	}
+	id internalTransferRecordDelegate = (delegate) ? delegate : record;
 		
 	CKInternalTransferRecord *internalRecord = [CKInternalTransferRecord recordWithLocal:localPath data:data offset:offset remote:remotePath delegate:internalTransferRecordDelegate userInfo:record];
 	
