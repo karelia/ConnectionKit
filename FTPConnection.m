@@ -852,7 +852,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				//port = ntohs(i[5] << 8 | i[4]);
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 
-				//Connecting to the same machine causes PASV to sit idle.
+				//Connecting to local machine causes PASV to sit idle.
 				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
 				{
 					_ftpFlags.canUsePASV = NO;
@@ -1527,7 +1527,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[_commandBuffer appendString:str];
 	}
 	[str release];
-				
 	while ((newLinePosition=[_commandBuffer rangeOfString:@"\r\n"]).location != NSNotFound ||
 		   (newLinePosition=[_commandBuffer rangeOfString:@"\n"]).location != NSNotFound)
 	{
@@ -2007,6 +2006,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		if ([_dataBuffer length] != 0)
 		{
 			NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
+			if (!results)
+			{
+				//Try ASCII
+				results = [[NSString alloc] initWithData:_dataBuffer encoding:NSASCIIStringEncoding];
+				if (!results)
+				{
+					//We failed!
+					return;
+				}
+			}
 			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
 																	  attributes:[AbstractConnection dataAttributes]] autorelease]];
 
