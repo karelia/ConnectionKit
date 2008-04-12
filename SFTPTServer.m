@@ -27,7 +27,7 @@ extern int	errno;
 char	**environ;
 
 /* used to set which field contains the filename */
-static int      fncolumn = -1;
+static int      filenameIndexDistanceFromEnd = -1;
 
 @implementation SFTPTServer
 
@@ -309,6 +309,7 @@ static int      fncolumn = -1;
 
 - ( NSMutableDictionary * )remoteObjectFromSFTPLine: ( char * )object
 {
+	int fncolumn = -1;
     int			j, tac, len;
     int			datecolumn = -1, ownercolumn = 2;
     char                line[ MAXPATHLEN * 2 ] = { 0 };
@@ -353,7 +354,7 @@ static int      fncolumn = -1;
     
     /* SSH.com's sftp client writes dir name + : before listing */
     if ( tac == 1 && strcmp( targv[ 0 ], ".:" ) == 0 ) {
-        fncolumn = 8;
+		filenameIndexDistanceFromEnd = tac - 8;
         goto DOT_OR_DOTDOT;
     } else if ( tac == 1 ) {
 	/* prevent crashes */
@@ -366,10 +367,12 @@ static int      fncolumn = -1;
      */
     for ( j = 0; j < tac; j++ ) {
         if ( strcmp( targv[ j ], "." ) == 0 || strcmp( targv[ j ], "./" ) == 0 ) {
+			filenameIndexDistanceFromEnd = tac - j;
             fncolumn = j;
             break;
         }
     }
+	fncolumn = tac - filenameIndexDistanceFromEnd;
     /* likewise, determine how many fields are used for the date.	*/
     /* based on code submitted by Hugues Martel.			*/
     if ( fncolumn == -1 ) {
@@ -388,17 +391,21 @@ static int      fncolumn = -1;
         return( nil );			/* invalid output */
     }
 
-    for ( j = ( fncolumn - 1 ); j >= 0; j-- ) {
-        if ( isalpha( *targv[ j ] )) { 	/* we've found the column containing the month */
+    for ( j = ( fncolumn - 1 ); j >= 0; j-- )
+	{
+        if ( isalpha( *targv[ j ] ))
+		{ 	/* we've found the column containing the month */
             datecolumn = j;
-            if ( datecolumn != 5 ) {
+            if ( datecolumn != 5 )
+			{
                 int             ind = 0;
                 
-                NSLog( @"datecolumn: %d\tdate: %s", datecolumn, targv[ j ] );
-                for ( ind = 0; ind < tac; ind++ ) {
-                    NSLog( @"targv[ %d ]: %s", ind, targv[ ind ] );
-                }
-                NSLog( @"line: %s", object );
+//                NSLog( @"datecolumn: %d\tdate: %s", datecolumn, targv[ j ] );
+//                for ( ind = 0; ind < tac; ind++ )
+//				{
+//                    NSLog( @"targv[ %d ]: %s", ind, targv[ ind ] );
+//                }
+//                NSLog( @"line: %s", object );
             }
             break;
         }
