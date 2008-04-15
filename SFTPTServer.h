@@ -20,6 +20,7 @@
     NSString		*remoteDirBuf;
     NSString		*_currentTransferPath;
     NSString            *_sftpRemoteObjectList;
+	NSMutableString *directoryListingBufferString;
 	
 	int		cancelflag;
 	pid_t		sftppid;
