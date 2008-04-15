@@ -81,7 +81,23 @@
 	}
 	return [comps componentsJoinedByString:@"/"];
 }
-
+- (NSString *)stringByStandardizingURLComponents
+{
+	NSString *returnString = [NSString stringWithString:self];
+	
+	//Make sure we've got one (and only one) leading slash
+	while ([returnString hasPrefix:@"//"])
+	{
+		returnString = [returnString substringFromIndex:1];
+	}
+	
+	//Make sure we've got no tailing slashes
+	while ([returnString hasSuffix:@"/"] && ![returnString isEqualToString:@"/"])
+	{
+		returnString = [returnString substringToIndex:[returnString length] - 1];
+	}
+	return returnString;
+}
 + (NSString *)formattedFileSize:(double)size
 {
 	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];

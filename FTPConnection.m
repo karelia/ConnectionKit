@@ -2622,6 +2622,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
+		{
+			return;
+		}		
+	}	
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:)
 													  target:self
@@ -2632,11 +2642,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											 dependant:nil 
 											  userInfo:nil];
 	[self queueCommand:ls];
-	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	if (cachedContents)
-	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
-	}
 }
 
 #pragma mark -

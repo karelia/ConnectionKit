@@ -840,6 +840,16 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
+		{
+			return;
+		}		
+	}		
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:dirPath]];
@@ -849,11 +859,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
-	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	if (cachedContents)
-	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
-	}
 }
 
 #pragma mark -
