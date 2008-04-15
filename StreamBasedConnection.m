@@ -1042,6 +1042,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.isDownloading = YES;
 		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
 		_downloadListingsRemaining++;
+		[self setProperty:[NSNumber numberWithBool:YES] forKey:@"IsDiscoveringFilesToDownload"];
 		[_recursiveDownloadConnection changeToDirectory:[rec objectForKey:@"remote"]];
 		[_recursiveDownloadConnection directoryContents];
 	}
@@ -1298,6 +1299,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		if (_downloadListingsRemaining == 0)
 		{
+			[self setProperty:[NSNumber numberWithBool:NO] forKey:@"IsDiscoveringFilesToDownload"];
 			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
 			{
 				//We tried to download an entirely empty folder. We're finished.
