@@ -53,6 +53,7 @@ static int      filenameIndexDistanceFromEnd = -1;
 {
     _currentTransferPath = nil;
     _sftpRemoteObjectList = nil;
+	directoryListingBufferString = [[NSMutableString alloc] init];
 	
 	cancelflag = 0;
 	sftppid = 0;
@@ -62,6 +63,11 @@ static int      filenameIndexDistanceFromEnd = -1;
 	
     
     return(( self = [ super init ] ) ? self : nil );
+}
+- (void)dealloc
+{
+	[directoryListingBufferString release];
+	[super dealloc];
 }
 
 /* accessor methods */
@@ -307,223 +313,6 @@ static int      filenameIndexDistanceFromEnd = -1;
     return( key );
 }
 
-- ( NSMutableDictionary * )remoteObjectFromSFTPLine: ( char * )object
-{
-	int fncolumn = -1;
-    int			j, tac, len;
-    int			datecolumn = -1, ownercolumn = 2;
-    char                line[ MAXPATHLEN * 2 ] = { 0 };
-    char                *filename = NULL;
-    char		**targv;
-    char                *p;
-    NSMutableDictionary	*infoDictionary = nil;
-    NSString		*dateString = nil, *groupName = nil, *name = nil;
-    NSData              *nameAsRawBytes = nil;
-
-    if ( strncmp( object, "sftp> ", strlen( "sftp> " )) == 0 ) {
-        return( nil );
-    }
-    
-    if ( strlen( object ) >= sizeof( line )) {
-        NSLog( @"%s: too long\n", object );
-        return( nil );
-    }
-    strcpy( line, object );
-    
-    /* break up the string into components */
-    if (( tac = argcargv( line, &targv )) <= 0 ) {
-        return( nil );
-    }
-    
-    /* 
-     * much of the abstraction in here to handle an arbitrary number of fields
-     * was suggested by Hugues Martel. He used Obj-C calls. C calls are used here,
-     * since otherwise there's a lot of unnecessary conversion.
-     * Many thanks to Hugues for this contribution.
-     */
-        
-    /* SSH.com's sftp gives true ls -lF output. 		*/
-    /* Do we need to add other chars here (>, /, @, =)? 	*/
-    if ( tac > 0 ) {
-	p = targv[ ( tac - 1 ) ];
-	len = strlen( p );
-	if ( len > 1 && *targv[ 0 ] == '-' && p[ len - 1 ] == '*' ) {
-            p[ len - 1 ] = '\0';
-        }
-    }
-    
-    /* SSH.com's sftp client writes dir name + : before listing */
-    if ( tac == 1 && strcmp( targv[ 0 ], ".:" ) == 0 ) {
-		filenameIndexDistanceFromEnd = tac - 8;
-        goto DOT_OR_DOTDOT;
-    } else if ( tac == 1 ) {
-	/* prevent crashes */
-	goto DOT_OR_DOTDOT;
-    }
-    
-    /*
-     * find the filename column. The first line should contain
-     * a filename '.' or './'.
-     */
-    for ( j = 0; j < tac; j++ ) {
-        if ( strcmp( targv[ j ], "." ) == 0 || strcmp( targv[ j ], "./" ) == 0 ) {
-			filenameIndexDistanceFromEnd = tac - j;
-            fncolumn = j;
-            break;
-        }
-    }
-	fncolumn = tac - filenameIndexDistanceFromEnd;
-    /* likewise, determine how many fields are used for the date.	*/
-    /* based on code submitted by Hugues Martel.			*/
-    if ( fncolumn == -1 ) {
-        /* probably an invalid line, but might also be a VShell-like    */
-        /* server at the root directory.				*/
-        if ( isdigit( *targv[ 0 ] ) && strchr( targv[ 4 ], ':' ) != NULL ) {
-            fncolumn = 5;
-        } else if ( *targv[ 0 ] == 'd' || *targv[ 0 ] == '-'
-                    && tac >= 9 ) {
-            /* might also be OpenSSH on Cygwin, which doesn't display	*/
-            /* a '.' or './' at the root directory. if so, handle it.	*/
-            fncolumn = 8;
-        }
-    }
-    if ( fncolumn == -1 || fncolumn > tac ) {
-        return( nil );			/* invalid output */
-    }
-
-    for ( j = ( fncolumn - 1 ); j >= 0; j-- )
-	{
-        if ( isalpha( *targv[ j ] ))
-		{ 	/* we've found the column containing the month */
-            datecolumn = j;
-            if ( datecolumn != 5 )
-			{
-                int             ind = 0;
-                
-//                NSLog( @"datecolumn: %d\tdate: %s", datecolumn, targv[ j ] );
-//                for ( ind = 0; ind < tac; ind++ )
-//				{
-//                    NSLog( @"targv[ %d ]: %s", ind, targv[ ind ] );
-//                }
-//                NSLog( @"line: %s", object );
-            }
-            break;
-        }
-    }
-    if ( datecolumn < 0 ) {	/* potentially dealing with old OpenSSH version */
-        if ( *targv[ 0 ] == '0' && strlen( targv[ 0 ] ) > 1
-                                && strchr( targv[ 4 ], ':' ) == NULL
-                                && fncolumn == 5 ) {
-            datecolumn = ( fncolumn - 1 );
-            ownercolumn = 1;
-        }
-    }
-    if ( datecolumn >= tac || datecolumn < 0 ) {
-        return( nil );
-    }
-            
-    dateString = [ NSString stringWithUTF8String: targv[ datecolumn ]];
-    for ( j = ( datecolumn + 1 ); j < fncolumn; j++ ) {
-        dateString = [ NSString stringWithFormat: @"%@ %s", dateString, targv[ j ]];
-    }
-    infoDictionary = [[ NSMutableDictionary alloc ] init ];
-    [ infoDictionary setObject: dateString forKey: @"date" ];
-    
-    if ( datecolumn >= 1 ) {    /* size always comes before date */
-        [ infoDictionary setObject: [ NSString stringWithUTF8String:
-                                        targv[ ( datecolumn - 1 ) ]]
-                            forKey: @"size" ];
-    }
-        
-    if ( fncolumn > 0 && tac >= ( fncolumn + 1 )) {
-        if ( tac > ( fncolumn + 1 )) {
-            if ( strstr( targv[ 0 ], "sftp>" ) != NULL ) {
-                goto DOT_OR_DOTDOT;
-            }
-            
-            for ( j = fncolumn; j < tac; j++ ) {
-                len += ( strlen( targv[ j ] ) + 1 );    /* +1 for spaces */
-            }
-
-            if (( filename = ( char * )malloc( len )) == NULL ) {
-                NSLog( @"malloc: %s", strerror( errno ));
-                exit( 2 );
-            }
-            strlcpy( filename, targv[ fncolumn ], len );
-            
-            for ( j = fncolumn + 1; j < tac; j++ ) {
-                if ( strcmp( targv[ j ], "->" ) == 0 ) {
-                    break;
-                }
-                strlcat( filename, " ", len );
-                strlcat( filename, targv[ j ], len );
-            }
-            
-            nameAsRawBytes = [ NSData dataWithBytes: filename length: strlen( filename ) ];
-            name = [ NSString stringWithBytesOfUnknownEncoding: filename
-                                                    length: strlen( filename ) ];
-            free( filename );
-        } else {
-            if ( strcmp( ".", targv[ fncolumn ] ) == 0
-                    || strcmp( "./", targv[ fncolumn ] ) == 0 /* VShell output */
-                    || strcmp( "../", targv[ fncolumn ] ) == 0
-                    || strcmp( "..", targv[ fncolumn ] ) == 0 ) goto DOT_OR_DOTDOT;
-            
-            nameAsRawBytes = [ NSData dataWithBytes: targv[ fncolumn ]
-                                length: strlen( targv[ fncolumn ] ) ];
-            name = [ NSString stringWithBytesOfUnknownEncoding: targv[ fncolumn ]
-                                            length: strlen( targv[ fncolumn ] ) ];
-        }
-
-        if (( datecolumn - 1 ) == 0 ) {		/* dealing with a VShell server, probably. */
-            [ infoDictionary setObject: @"N/A" forKey: @"owner" ];
-            [ infoDictionary setObject: @"N/A" forKey: @"group" ];
-            /* since VShell doesn't include a mode, we have to invent one */
-            /* based on code submitted by Hugues Martel. */
-            if ( [ name characterAtIndex: ( [ name length ] - 1 ) ] == '/' ) { /* directory */
-                [ infoDictionary setObject: @"d---------" forKey: @"perm" ];
-                [ infoDictionary setObject: @"directory" forKey: @"type" ];
-            } else {
-                [ infoDictionary setObject: @"----------" forKey: @"perm" ];
-                [ infoDictionary setObject: @"file" forKey: @"type" ];
-            }
-        } else if (( datecolumn - 1 ) > 1 ) {	/* probably some unix variant */
-            [ infoDictionary setObject: [ NSString stringWithUTF8String: targv[ ownercolumn ]]
-                                    forKey: @"owner" ];
-            groupName = [ NSString stringWithUTF8String: targv[ ( ownercolumn + 1 ) ]];
-            /* possible to have group names containing spaces */
-            for ( j = ( ownercolumn + 2 ); j < ( datecolumn - 1 ); j++ ) {
-                groupName = [ NSString stringWithFormat: @"%@ %s", groupName, targv[ j ]];
-            }
-            [ infoDictionary setObject: groupName forKey: @"group" ];
-
-            /* handle old OpenSSH server by translating output */
-            if (( datecolumn + 1 ) == fncolumn && *targv[ 0 ] == '0' ) {
-                [ infoDictionary setObject:
-                                    [[ NSString stringWithUTF8String: targv[ 0 ]]
-                                        stringRepresentationOfOctalMode ]
-                                    forKey: @"perm" ];
-            } else {
-                [ infoDictionary setObject: [ NSString stringWithUTF8String: targv[ 0 ]]
-                                    forKey: @"perm" ];
-            }
-            [ infoDictionary setObject:
-                [ NSString stringWithUTF8String:
-                typeforchar( [[ infoDictionary objectForKey: @"perm" ] characterAtIndex: 0 ] ) ]
-                            forKey: @"type" ];
-        }
-        [ infoDictionary setObject: name forKey: @"name" ];
-        [ infoDictionary setObject: nameAsRawBytes forKey: @"NameAsRawBytes" ];
-    }
-    
-    return( [ infoDictionary autorelease ] );
-    
-DOT_OR_DOTDOT:
-    if ( infoDictionary ) {
-        [ infoDictionary release ];
-    }
-    return( nil );
-}
 - (BOOL)buffer:(char *)buffer containsString:(char *)stringCheck
 {
 	return strstr(buffer, stringCheck) != NULL;
@@ -871,22 +660,22 @@ DOT_OR_DOTDOT:
                 }
                 incomplete_line = 0;
             }
-            
-            if (( object = [ self remoteObjectFromSFTPLine: buf ] ) != nil ) {
-                if ( items == nil ) {
-                    items = [[[ NSMutableArray alloc ] init ] autorelease ];
-                }
-                [ items addObject: object ];
-            }
-            
+                        
             [ wrapperConnection addStringToTranscript: [ NSString stringWithBytesOfUnknownEncoding: buf
                                                 length: strlen( buf ) ]];
-            if ( strstr( buf, "sftp>" ) != NULL ) {
+            if ( strstr( buf, "sftp>" ) != NULL )
+			{
                 memset( buf, '\0', strlen( buf ));
                 [ wrapperConnection finishedCommand ];
-                [ self setRemoteObjectList: items ];
+				[self setRemoteObjectList:[NSFileManager attributedFilesFromListing:directoryListingBufferString]];
+				[directoryListingBufferString release];
+				directoryListingBufferString = [[NSMutableString alloc] init];
                 return;
             }
+			else
+			{
+				[directoryListingBufferString appendString:[NSString stringWithUTF8String:buf]];
+			}
         
             memset( buf, '\0', strlen(( char * )buf ));
         }

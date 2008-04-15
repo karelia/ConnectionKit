@@ -646,77 +646,9 @@ WRITE_ERROR:
 #pragma mark -
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
-	/*
-	 A CK Listing: 
-	 
-	 NSFileModificationDate = Oct 29 2007 02:43;
-	 NSFilePosixPermissions = 493;
-	 NSFileReferenceCount = 1;
-	 NSFileSize = 1531728;
-	 NSFileType = NSFileTypeRegular;
-	 cxFilenameKey = "Picture 1.png";
-	 
-	 A Fugu SFTP Listing:
-	 NameAsRawBytes = <64617461>;
-	 date = "Dec 21 2006";
-	 group = "extendmac.com";
-	 name = data;
-	 owner = "extendmac.com";
-	 perm = lrwxrwxrwx;
-	 size = 10;
-	 type = "symbolic link";	 
-	 */
-	NSMutableArray *connectionKitFormattedContents = [NSMutableArray array];
-	NSEnumerator *itemsEnum = [items objectEnumerator];
-	NSDictionary *currentItem;
-	while ((currentItem = [itemsEnum nextObject]))
-	{
-		NSString *dateString = [currentItem objectForKey:@"date"];
-		NSString *name = [currentItem objectForKey:@"name"];
-		NSString *permissions = [currentItem objectForKey:@"perm"]; // must be converted to hex
-		NSString *type = [currentItem objectForKey:@"type"];
-		if ([type isEqualToString:@"symbolic"])
-		{
-			type = NSFileTypeSymbolicLink;
-		}
-		else if ([type isEqualToString:@"file"])
-		{
-			type = NSFileTypeRegular;
-		}
-		else
-		{
-			type = NSFileTypeDirectory;
-		}
-		NSString *sizeString = [currentItem objectForKey:@"size"];
-		NSNumber *size = [NSNumber numberWithUnsignedLongLong:strtoull([sizeString UTF8String], NULL, 0)];
-	
-		NSArray *dateComponents = [dateString componentsSeparatedByString:@" "];
-		NSString *month = [dateComponents objectAtIndex:0];
-		NSString *dayNumber = [dateComponents objectAtIndex:1];
-		NSString *yearOrTime = [dateComponents objectAtIndex:2];
-		NSCalendarDate *date = [NSCalendarDate getDateFromMonth:month day:dayNumber yearOrTime:yearOrTime];
-//		if ([dateString rangeOfString:@":"].location != NSNotFound)
-//		{
-//			//This date happened in the past 6 months, so its format is 'Dec 25 22:10'
-//			date = [NSCalendarDate dateWithString:dateString calendarFormat:@"%b %d %H:%M"];
-//		}
-//		else
-//		{
-//			//This date happened more than 6 months ago, so its format is 'Dec 25 2007'
-//			date = [NSCalendarDate  dateWithString:dateString calendarFormat:@"%b %d %Y"];
-//		}
-		NSMutableDictionary *ckFormattedItem = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-												name, cxFilenameKey, 
-												date, NSFileModificationDate, 
-												type, NSFileType, 
-												size, NSFileSize, 
-												nil];
-		[NSFileManager parsePermissions:permissions withAttributes:ckFormattedItem];
-		[connectionKitFormattedContents addObject:ckFormattedItem];
-	}
 	if (_flags.directoryContents)
 	{
-		[_forwarder connection:self didReceiveContents:connectionKitFormattedContents ofDirectory:[NSString stringWithString:currentDirectory]];
+		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory]];
 	}
 }
 - (void)didChangeToDirectory:(NSString *)path
