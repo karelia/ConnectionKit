@@ -1633,7 +1633,7 @@ if (![fn isEqualToString:@"."] && \
 				size = [NSNumber numberWithInt:[wordTwo intValue]];
 				[attributes setObject:NSFileTypeRegular forKey:NSFileType];
 			}
-			filename = [self fixFilename:wordThree withAttributes:attributes];
+			filename = [self filenameFromIndex:3 inWords:words attributes:attributes];
 		}		
 		else if ([wordOne isEqualToString:@"folder"]) //netprez folder
 		{
