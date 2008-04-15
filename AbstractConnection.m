@@ -777,11 +777,13 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents
 {
+	path = [path stringByStandardizingURLComponents];
 	[_cachedDirectoryContents setObject:contents forKey:path];
 }
 
 - (NSArray *)cachedContentsWithDirectory:(NSString *)path
 {
+	path = [path stringByStandardizingURLComponents];
 	return [_cachedDirectoryContents objectForKey:path];
 }
 
@@ -1606,6 +1608,7 @@ if (![fn isEqualToString:@"."] && \
 		NSString *wordSix = ([words count] >= 7) ? [words objectAtIndex:6] : nil;
 		NSString *wordSeven = ([words count] >= 8) ? [words objectAtIndex:7] : nil;
 		NSString *wordEight = ([words count] >= 9) ? [words objectAtIndex:8] : nil;
+		NSString *wordNine = ([words count] >= 10) ? [words objectAtIndex:9] : nil;
 		
 		NSString *filename = nil;
 		NSCalendarDate *date = nil;
@@ -1668,23 +1671,37 @@ if (![fn isEqualToString:@"."] && \
 		{
 			[self parsePermissions:wordZero withAttributes:attributes];
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
-			[attributes setObject:wordTwo forKey:NSFileOwnerAccountID];
+			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName];
 			
-			NSString *groupSize = wordThree;
-			BOOL hasGroup = ([groupSize intValue] >= 0);
+			NSString *group = wordThree;
+			BOOL hasGroup = (![NSFileManager wordIsInteger:group]);
 			
 			NSString *month, *day, *yearOrTime;
 			BOOL isSpecial = [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] || [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial];
 			if (hasGroup)
 			{
-				[attributes setObject:wordThree forKey:NSFileGroupOwnerAccountID];
-				size = [NSNumber numberWithDouble:[wordFour doubleValue]];
-				
-				month = (isSpecial) ? wordSix : wordFive;
-				day = (isSpecial) ? wordSeven : wordSix;
-				yearOrTime = (isSpecial) ? wordEight : wordSeven;
-				
-				[self parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
+				if (![NSFileManager wordIsInteger:wordFour])
+				{
+					//	drwx------  10 Administrators Domain Admin        0 Apr 23  2007 etc
+					//Group has two words. This is kind of a hacky fix, as we only cover it if it's two words, but if the system is going as far as having a group name with spaces, it could also have an account name with spaces, etc etc.
+					[attributes setObject:[wordThree stringByAppendingFormat:@" %@", wordFour] forKey:NSFileGroupOwnerAccountName];
+					size = [NSNumber numberWithDouble:[wordFive doubleValue]];
+					
+					month = (isSpecial) ? wordSeven : wordSix;
+					day = (isSpecial) ? wordEight : wordSeven;
+					yearOrTime = (isSpecial) ? wordNine : wordEight;	
+					[self parseFilenameAndSymbolicLinksFromIndex:9 ofWords:words withAttributes:attributes];
+				}
+				else
+				{
+					[attributes setObject:wordThree forKey:NSFileGroupOwnerAccountName];
+					size = [NSNumber numberWithDouble:[wordFour doubleValue]];
+					
+					month = (isSpecial) ? wordSix : wordFive;
+					day = (isSpecial) ? wordSeven : wordSix;
+					yearOrTime = (isSpecial) ? wordEight : wordSeven;
+					[self parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
+				}				
 			}
 			else //no group
 			{
