@@ -821,6 +821,16 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
+	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+	if (cachedContents)
+	{
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
+		{
+			return;
+		}		
+	}		
+	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
 													  target:self
 												   arguments:[NSArray arrayWithObject:[self internalRepresentationWithPath:dirPath]]];
@@ -830,11 +840,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
-	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	if (cachedContents)
-	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
-	}
 }
 
 @end
