@@ -1,21 +1,55 @@
-{
-    IBClasses = (
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            ACTIONS = {closePanel = id; createNewFolder = id; goToFolder = id; newFolder = id; }; 
-            CLASS = connectionOpenPanelController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                createFolder = NSWindow; 
-                delegate = id; 
-                directoryContents = NSArrayController; 
-                openButton = NSButton; 
-                openCancelButton = NSButton; 
-                parentDirectories = NSArrayController; 
-                tableView = NSTableView; 
-            }; 
-            SUPERCLASS = NSWindowController; 
-        }
-    ); 
-    IBVersion = 1; 
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>closePanel</key>
+				<string>id</string>
+				<key>createNewFolder</key>
+				<string>id</string>
+				<key>goToFolder</key>
+				<string>id</string>
+				<key>newFolder</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>connectionOpenPanelController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>createFolder</key>
+				<string>NSWindow</string>
+				<key>delegate</key>
+				<string>id</string>
+				<key>directoryContents</key>
+				<string>NSArrayController</string>
+				<key>openButton</key>
+				<string>NSButton</string>
+				<key>openCancelButton</key>
+				<string>NSButton</string>
+				<key>parentDirectories</key>
+				<string>NSArrayController</string>
+				<key>tableView</key>
+				<string>NSTableView</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSWindowController</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>
