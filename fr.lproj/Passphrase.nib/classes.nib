@@ -6,6 +6,7 @@
             LANGUAGE = ObjC; 
             SUPERCLASS = NSObject; 
         }, 
+        {CLASS = NSObject; LANGUAGE = ObjC; }, 
         {
             ACTIONS = {cancel = id; unlock = id; }; 
             CLASS = SSHPassphrase; 
