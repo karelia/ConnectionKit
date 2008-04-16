@@ -569,6 +569,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
+	dirPath = [dirPath encodeLegally];
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDidChangeToDirectory:)
 													  target:self
 												   arguments:[NSArray arrayWithObjects: dirPath, nil]];
@@ -839,6 +840,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
+	dirPath = [dirPath encodeLegally];
 	
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
