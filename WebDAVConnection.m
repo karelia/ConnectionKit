@@ -43,6 +43,7 @@
 #import "CKHTTPFileDownloadResponse.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
+#import "NSString+Connection.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
