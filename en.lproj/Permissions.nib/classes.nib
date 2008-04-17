@@ -1,24 +1,32 @@
 {
-    IBClasses = (
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {
-            ACTIONS = {attribsChanged = id; cancel = id; save = id; }; 
-            CLASS = PermissionsController; 
-            LANGUAGE = ObjC; 
-            OUTLETS = {
-                ge = id; 
-                gr = id; 
-                gw = id; 
-                ue = id; 
-                ur = id; 
-                uw = id; 
-                we = id; 
-                window = id; 
-                wr = id; 
-                ww = id; 
-            }; 
-            SUPERCLASS = NSObject; 
+    IBClasses =     (
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            ACTIONS =             {
+                attribsChanged = id;
+                cancel = id;
+                save = id;
+            };
+            CLASS = PermissionsController;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                ge = id;
+                gr = id;
+                gw = id;
+                ue = id;
+                ur = id;
+                uw = id;
+                we = id;
+                window = id;
+                wr = id;
+                ww = id;
+            };
+            SUPERCLASS = NSObject;
         }
-    ); 
-    IBVersion = 1; 
+    );
+    IBVersion = 1;
 }
