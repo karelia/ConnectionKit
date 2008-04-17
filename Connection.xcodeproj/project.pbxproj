@@ -1291,11 +1291,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
 			buildPhases = (
-				79CFD12109F702BE00172CDD /* Headers */,
 				797CBBEB09F854B60063FF9B /* Generate Localizable.strings */,
-				79CFD12209F702BE00172CDD /* Resources */,
 				79CFD12309F702BE00172CDD /* Sources */,
 				79CFD12409F702BE00172CDD /* Frameworks */,
+				79CFD12109F702BE00172CDD /* Headers */,
+				79CFD12209F702BE00172CDD /* Resources */,
 				7931260F0B3684B2002FF80D /* Strip UKKQueue */,
 			);
 			buildRules = (
@@ -1481,6 +1481,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "HAS_SYMBOLS=`nm ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH} |grep .objc_class_name_UKKQueue |grep -w A`\necho $HAS_SYMBOLS\nif [ \"$HAS_SYMBOLS\" == \"\" ]\nthen\n\techo \"No need to strip symbols\"\nelse\n\tnmedit -R \"${SOURCE_ROOT}/UKKQueue_Symbols\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		797CBBEB09F854B60063FF9B /* Generate Localizable.strings */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1494,7 +1495,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd ${SRCROOT}\ngenstrings -q -u -s LocalizedStringInThisBundle -o en.lproj *.m\n";
+			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd ${SRCROOT}\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n";
+			showEnvVarsInLog = 0;
 		};
 		7983E7EE0B0C4F5100F5078E /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
