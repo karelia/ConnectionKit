@@ -582,6 +582,12 @@
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEBC056A0DB94446001BF0DF /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CEBC056E0DB94548001BF0DF /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CEBC056F0DB94553001BF0DF /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CEBC05700DB9455A001BF0DF /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CEBC05710DB9455F001BF0DF /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CEBC05720DB94567001BF0DF /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CED189610AC320E4002E8A4A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189620AC320E8002E8A4A /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189630AC320EA002E8A4A /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -1766,6 +1772,12 @@
 			children = (
 				799174960C83962D00EFFC79 /* en */,
 				CE0180830DB6C72E003E008B /* fr */,
+				CEBC056A0DB94446001BF0DF /* da */,
+				CEBC056E0DB94548001BF0DF /* de */,
+				CEBC056F0DB94553001BF0DF /* it */,
+				CEBC05700DB9455A001BF0DF /* ja */,
+				CEBC05710DB9455F001BF0DF /* zh_CN */,
+				CEBC05720DB94567001BF0DF /* zh_TW */,
 			);
 			name = CKDirectoryTree.nib;
 			sourceTree = "<group>";
