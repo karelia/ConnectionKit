@@ -1,7 +1,15 @@
 {
-    IBClasses = (
-        {CLASS = DropletLauncherDelegate; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }
-    ); 
-    IBVersion = 1; 
+    IBClasses =     (
+                {
+            CLASS = DropletLauncherDelegate;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        }
+    );
+    IBVersion = 1;
 }
