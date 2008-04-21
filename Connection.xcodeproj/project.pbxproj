@@ -1501,7 +1501,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd ${SRCROOT}\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n";
+			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n";
 			showEnvVarsInLog = 0;
 		};
 		7983E7EE0B0C4F5100F5078E /* ShellScript */ = {
