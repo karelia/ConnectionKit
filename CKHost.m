@@ -466,10 +466,6 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)username
 {
-	if (!myUsername || [myUsername length] == 0)
-	{
-		return [NSString stringWithString:NSUserName()];
-	}
 	return myUsername;
 }
 
