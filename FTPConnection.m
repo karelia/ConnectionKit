@@ -897,7 +897,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 230:
 		{
-			if (GET_STATE == ConnectionSentPasswordState) //Login successful set up session
+			if (GET_STATE == ConnectionSentPasswordState || ([[self username] isEqualToString:@"anonymous"] && GET_STATE == ConnectionSentUsernameState)) //Login successful, set up session
 			{	
 				_ftpFlags.sentAuthenticated = NO;
 				// Queue up the commands we want to insert in the queue before notifying client we're connected
