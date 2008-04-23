@@ -1637,7 +1637,7 @@ if (![fn isEqualToString:@"."] && \
 		}		
 		else if ([wordOne isEqualToString:@"folder"]) //netprez folder
 		{
-			[self parsePermissions:wordOne withAttributes:attributes];
+			[self parsePermissions:wordZero withAttributes:attributes];
 			referenceCount = [NSNumber numberWithInt:[wordTwo intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordThree day:wordFour yearOrTime:wordFive];
 			filename = [self filenameFromIndex:6 inWords:words attributes:attributes];
