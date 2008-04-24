@@ -969,6 +969,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	NSEnumerator *itemEnumerator = nil;
+	id selectedItem = [outlineView itemAtRow:[outlineView selectedRow]];
 	
 	if ([[pboard types] indexOfObject:CKDraggedBookmarksPboardType] == NSNotFound)
 	{
@@ -1046,7 +1047,9 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[myDraggedItems removeAllObjects];
 	[self endGroupEditing];
 	
+	//Maintain the selected item. We need to reloadData on the outlineView so the changes in data we just made are are seen by the rowForItem: call.
+	[outlineView reloadData];
+	[outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:[outlineView rowForItem:selectedItem]] byExtendingSelection:NO];	
 	return YES;
 }
-
 @end
