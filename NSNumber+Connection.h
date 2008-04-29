@@ -29,7 +29,7 @@
  Authored by Greg Hulands <ghulands@mac.com>
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 
 @interface NSNumber (Connection)
