@@ -552,18 +552,31 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				if (_writeHandle == nil) // we can get setup in the handleDataReceievedEvent: method
 				{
 					NSFileManager *fm = [NSFileManager defaultManager];
-					[fm removeFileAtPath:[download localPath] handler:nil];
-					[fm createFileAtPath:[download localPath]
-								contents:nil
-							  attributes:nil];
+					
+					// check the file offset of the current download to see if we resume the transfer
+					unsigned long long fileOffset = [download offset];
+					bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
+					
+					if ( !isResume ) {
+						[fm removeFileAtPath:[download localPath] handler:nil];
+						[fm createFileAtPath:[download localPath]
+									contents:nil
+								  attributes:nil];
+						_transferSent = 0;
+					}
+					
 					[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+					if ( isResume ) {
+						[_writeHandle seekToEndOfFile];
+						_transferSent = fileOffset;
+					}
 				}
 				//start to read in the data to kick start it
 				uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
 				int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
 				if (len >= 0) {
 					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
-					_transferSent = len;
+					_transferSent += len;
 					
 					if (_flags.downloadProgressed)
 					{
@@ -573,7 +586,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					{
 						[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
 					}
-					int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
 					if (_flags.downloadPercent)
 					{
 						[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
@@ -1556,11 +1569,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					if (_writeHandle == nil) // data receieved before receiving a 150
 					{
 						NSFileManager *fm = [NSFileManager defaultManager];
-						[fm removeFileAtPath:[download localPath] handler:nil];
-						[fm createFileAtPath:[download localPath]
-									contents:nil
-								  attributes:nil];
+						
+						// check the file offset of the current download to see if we resume the transfer
+						unsigned long long fileOffset = [download offset];
+						bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
+						
+						if ( !isResume ) {
+							[fm removeFileAtPath:[download localPath] handler:nil];
+							[fm createFileAtPath:[download localPath]
+										contents:nil
+									  attributes:nil];
+							_transferSent = 0;
+						}
+						
 						[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+						if ( isResume ) {
+							[_writeHandle seekToEndOfFile];
+							_transferSent = fileOffset;
+						}
 					}
 					[_writeHandle writeData:data];
 					_transferSent += len;
@@ -2507,54 +2533,62 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath
-														   size:0];
-	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
-	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
+	/*
+	 TYPE I
+	 SIZE file
+	 PASV/EPSV/ERPT/PORT
+	 RETR file
+	 TYPE A
+	 */
+
+	[self startBulkCommands];
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:offset
 																			remote:remotePath
 																		  delegate:delegate ? delegate : record
 																		  userInfo:record];
-	[_downloadQueue addObject:download];
+	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
+	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
+	[record setProperty:[NSNumber numberWithInt:0] forKey:QueueDownloadTransferPercentReceived];
+
+	[self queueDownload:download];
+	
 	ConnectionCommand *retr = [ConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
 											  awaitState:ConnectionIdleState 
 											   sentState:ConnectionDownloadingFileState
 											   dependant:nil
 												userInfo:download];
+	
 	ConnectionCommand *rest = [ConnectionCommand command:[NSString stringWithFormat:@"REST %@", off]
 											  awaitState:ConnectionIdleState 
 											   sentState:ConnectionSentOffsetState
 											   dependant:retr
 												userInfo:nil];
-	ConnectionCommand *size = nil;
-	if (_ftpFlags.hasSize) {
-		size = [ConnectionCommand command:[NSString stringWithFormat:@"SIZE %@", remotePath]
-							   awaitState:ConnectionIdleState 
-								sentState:ConnectionSentSizeState
-								dependant:rest
-								 userInfo:nil];
-	}
-	
-	
-	ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
-												 awaitState:ConnectionIdleState 
-												  sentState:ConnectionIdleState
-												  dependant:_ftpFlags.hasSize ? size : rest
-												   userInfo:nil];
 	
 	ConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
+	[dataCmd addDependantCommand:rest];
+	
+	ConnectionCommand *size = [ConnectionCommand command:[NSString stringWithFormat:@"SIZE %@", remotePath]
+											  awaitState:ConnectionIdleState 
+											   sentState:ConnectionSentSizeState
+											   dependant:dataCmd
+												userInfo:nil];
+	
 	if (!_ftpFlags.setTransferMode) {
-		[dataCmd addDependantCommand:bin];
+		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
+												 awaitState:ConnectionIdleState
+												  sentState:FTPModeChangeState
+												  dependant:nil
+												   userInfo:nil];
+		[self queueCommand:bin];
+		_ftpFlags.setTransferMode = YES;
 	}
 	
-	[self startBulkCommands];
-	[self queueCommand:dataCmd];
-	if (!_ftpFlags.setTransferMode)
-		[self queueCommand:bin];
 	if (_ftpFlags.hasSize)
 		[self queueCommand:size];
+	[self queueCommand:dataCmd];
 	[self queueCommand:rest];
 	[self queueCommand:retr];
 	[self endBulkCommands];
@@ -2913,7 +2947,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												 userInfo:nil];
 	ConnectionCommand *rest = nil;
 	if (offset != 0) {
-		rest = [ConnectionCommand command:[NSString stringWithFormat:@"REST %@", offset]
+		rest = [ConnectionCommand command:[NSString stringWithFormat:@"REST %qu", offset]
 							   awaitState:ConnectionIdleState
 								sentState:ConnectionSentOffsetState
 								dependant:store
