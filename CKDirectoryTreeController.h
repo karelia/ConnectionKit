@@ -151,6 +151,7 @@ typedef enum {
 
 - (void)setCachedContentsThresholdSize:(unsigned long long)bytes;
 - (unsigned long long)cachedContentsThresholdSize;
+- (void)refresh:(id)sender;
 
 @end
 
