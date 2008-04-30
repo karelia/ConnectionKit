@@ -279,12 +279,11 @@ static NSImage *sHostIcon = nil;
 
 - (void)setHost:(NSString *)host
 {
-	if (host == myHost)
+	if ([host isEqualToString:myHost])
 	{
 		return;
 	}
-	
-	NSString *oldServerString = [NSString stringWithString:myHost];
+	NSString *oldServerString = (myHost != nil) ? [NSString stringWithString:myHost] : nil;
 
 	[self willChangeValueForKey:@"host"];
 	[myHost autorelease];
@@ -361,7 +360,7 @@ static NSImage *sHostIcon = nil;
 		password = @"";
 	}
 	
-	if (myPassword == password)
+	if ([myPassword isEqualToString:password])
 	{
 		return;
 	}
@@ -479,7 +478,6 @@ static NSImage *sHostIcon = nil;
 	if (!myHost || !myUsername || [myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
 	{
 		//We don't have anything to go on, so let's die here.
-		NSLog(@"No User or Server to look for password with.");
 		return nil;
 	}
 	
