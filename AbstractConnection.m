@@ -1674,13 +1674,31 @@ if (![fn isEqualToString:@"."] && \
 			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName];
 			
 			NSString *group = wordThree;
-			BOOL hasGroup = (![NSFileManager wordIsInteger:group]);
 			
 			NSString *month, *day, *yearOrTime;
 			BOOL isSpecial = [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] || [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial];
-			if (hasGroup)
+			
+			
+			//Find the last word to be an integer
+			//The column index AFTER the last integer is where filename begins.
+			//We do this so we can count filename as one column to determine whether the group has two words.
+			
+			int indexOfLastInteger = -1;
+			NSEnumerator *wordsEnum = [words reverseObjectEnumerator];
+			NSString *theWord;
+			while ((theWord = [wordsEnum nextObject]))
 			{
-				if (![NSFileManager wordIsInteger:wordFour])
+				if ([NSFileManager wordIsInteger:theWord] || ([theWord length] == 5 && [theWord characterAtIndex:2] == ':'))
+				{
+					indexOfLastInteger = [words indexOfObject:theWord];
+					break;
+				}
+			}
+			int numberOfColumnsWhenCountingFilenameAsOne = indexOfLastInteger + 2; //+1 for filename, +1 for first index
+			
+			if (numberOfColumnsWhenCountingFilenameAsOne > 7) //If there are more than 7 columns, there is a group
+			{ 
+				if (numberOfColumnsWhenCountingFilenameAsOne > 9) //If there are more than 9 columns, we consider the group to be two words
 				{
 					//	drwx------  10 Administrators Domain Admin        0 Apr 23  2007 etc
 					//Group has two words. This is kind of a hacky fix, as we only cover it if it's two words, but if the system is going as far as having a group name with spaces, it could also have an account name with spaces, etc etc.
@@ -1692,7 +1710,7 @@ if (![fn isEqualToString:@"."] && \
 					yearOrTime = (isSpecial) ? wordNine : wordEight;	
 					[self parseFilenameAndSymbolicLinksFromIndex:9 ofWords:words withAttributes:attributes];
 				}
-				else
+				else //Looks like a standard listing.
 				{
 					[attributes setObject:wordThree forKey:NSFileGroupOwnerAccountName];
 					size = [NSNumber numberWithDouble:[wordFour doubleValue]];
