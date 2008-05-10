@@ -1673,8 +1673,6 @@ if (![fn isEqualToString:@"."] && \
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
 			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName];
 			
-			NSString *group = wordThree;
-			
 			NSString *month, *day, *yearOrTime;
 			BOOL isSpecial = [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] || [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial];
 			
@@ -1688,7 +1686,8 @@ if (![fn isEqualToString:@"."] && \
 			NSString *theWord;
 			while ((theWord = [wordsEnum nextObject]))
 			{
-				if ([NSFileManager wordIsInteger:theWord] || ([theWord length] == 5 && [theWord characterAtIndex:2] == ':'))
+				//It's either a time or a year
+				if (([NSFileManager wordIsInteger:theWord] && [theWord length] == 4)  || ([theWord length] == 5 && [theWord characterAtIndex:2] == ':'))
 				{
 					indexOfLastInteger = [words indexOfObject:theWord];
 					break;
