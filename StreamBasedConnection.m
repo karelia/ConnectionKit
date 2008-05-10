@@ -142,9 +142,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckInFlight release];
 	
 	[_recursiveDeletionsQueue release];
-	[_recursiveListingConnection setDelegate:nil];
-	[_recursiveListingConnection forceDisconnect];
-	[_recursiveListingConnection release];
 	[_recursiveDeletionConnection setDelegate:nil];
 	[_recursiveDeletionConnection forceDisconnect];
 	[_recursiveDeletionConnection release];
@@ -386,7 +383,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)connect
 {
 	_isForceDisconnecting = NO;
-	[self emptyCommandQueue];
 	
 	int connectionPort = [_connectionPort intValue];
 	if (0 == connectionPort)
@@ -419,7 +415,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[self setState:ConnectionNotConnectedState];
 	[self closeStreams];
 	[_fileCheckingConnection disconnect];
-	[_recursiveListingConnection disconnect];
 	[_recursiveDeletionConnection disconnect];
 	[_recursiveDownloadConnection disconnect];
 	
@@ -440,7 +435,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[self setState:ConnectionNotConnectedState];
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 	[_fileCheckingConnection forceDisconnect];
-	[_recursiveListingConnection forceDisconnect];
 	[_recursiveDeletionConnection forceDisconnect];
 	[_recursiveDownloadConnection forceDisconnect];
 }
@@ -448,14 +442,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void) cleanupConnection
 {
 	[_fileCheckingConnection cleanupConnection];
-	[_recursiveListingConnection cleanupConnection];
 	[_recursiveDeletionConnection cleanupConnection];
 	[_recursiveDownloadConnection cleanupConnection];
 }
 
 - (BOOL)isBusy
 {
-	return ([super isBusy] || [_recursiveListingConnection isBusy] || [_recursiveDownloadConnection isBusy] || [_recursiveDeletionConnection isBusy] || [_fileCheckingConnection isBusy]); 
+	return ([super isBusy] || [_recursiveDownloadConnection isBusy] || [_recursiveDeletionConnection isBusy] || [_fileCheckingConnection isBusy]); 
 }
 
 #pragma mark -
@@ -1070,77 +1063,25 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	//If any of these connections are nil, they were released by the didDisconnect method. We need them, however.
 	//In testing, this is because the host didn't support the number of additional concurrent connections we requested to open.
-	//To remedy this, we point the nil connection to its peer connection, who will perform that work as well.
-	
-	BOOL noConnectionsToContinue = NO;
-	
-	if ([_recursiveDeletionsQueue count] > 0)
+	//To remedy this, we point the nil connection to ourself connection, who will perform that work as well.
+		
+	if ([_recursiveDeletionsQueue count] > 0 && _recursiveDeletionConnection == nil)
 	{
-		//We are recursively deleting
-		if (_recursiveListingConnection == nil)
-		{
-			if (_recursiveDeletionConnection == nil)
-			{
-				noConnectionsToContinue = YES;
-			}
-			else
-			{
-				_recursiveListingConnection = [_recursiveDeletionConnection retain];
-				[_deletionLock lock];
-				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
-				[_deletionLock unlock];
-				[_recursiveListingConnection changeToDirectory:directoryPath];
-				[_recursiveListingConnection directoryContents];
-			}
-		}
-		else if (_recursiveDeletionConnection == nil)
-		{
-			if (_recursiveListingConnection == nil)
-			{
-				noConnectionsToContinue = YES;
-			}
-			else
-			{
-				_recursiveDeletionConnection =  [_recursiveListingConnection retain];
-			}
-		}		
+		//_recursiveDeletionConnection, a support connection we opened, failed. Let's disconnect and abandon it, and use ourself for the task.
+		_recursiveDeletionConnection = self;
+		[_deletionLock lock];
+		[_recursiveDeletionConnection changeToDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		[_recursiveDeletionConnection directoryContents];
+		[_deletionLock unlock];
 	}
-	else if ([_recursiveDownloadQueue count] > 0)
+	else if ([_recursiveDownloadQueue count] > 0 && _recursiveDownloadConnection == nil)
 	{
-		//We are recursively downloading
-		if (_recursiveListingConnection == nil)
-		{
-			if (_recursiveDownloadConnection == nil)
-			{
-				noConnectionsToContinue = YES;
-			}
-			else
-			{
-				_recursiveListingConnection - [_recursiveDownloadConnection retain];
-				[_recursiveDownloadLock lock];
-				NSString *directoryPath = [_recursiveDownloadQueue objectAtIndex:0];
-				[_recursiveDownloadLock unlock];
-				[_recursiveListingConnection changeToDirectory:directoryPath];
-				[_recursiveListingConnection directoryContents];
-			}
-		}
-		else if (_recursiveDownloadConnection == nil)
-		{
-			if (_recursiveListingConnection == nil)
-			{
-				noConnectionsToContinue = YES;
-			}
-			else
-			{
-				_recursiveDownloadConnection = [_recursiveListingConnection retain];
-			}
-		}
-	}
-	
-	if (noConnectionsToContinue)
-	{
-		//It seems we've got no connections we can use to do this operation. Error here, because we will fail the operation.
-		NSLog(@"Connections for operation were denied connectivity.");
+		//_recursiveDownloadConnection, a support connection we opened, failed. Let's disconnect and abandon it, and use ourself for the task.
+		_recursiveDownloadConnection = self;
+		[_recursiveDownloadLock lock];
+		[_recursiveDownloadConnection changeToDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+		[_recursiveDownloadConnection directoryContents];
+		[_recursiveDownloadLock unlock];
 	}
 }
 
@@ -1150,11 +1091,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_fileCheckingConnection release];
 		_fileCheckingConnection = nil;
-	}
-	else if (con == _recursiveListingConnection)
-	{
-		[_recursiveListingConnection release];
-		_recursiveListingConnection = nil;
 	}
 	else if (con == _recursiveDeletionConnection)
 	{
@@ -1369,6 +1305,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				_numberOfDeletionsRemaining = 0;
 				myStreamFlags.isDeleting = NO;
+
+				[_recursiveDeletionConnection disconnect]; //in didDisconnect, we release and set the pointer to nil.
 			}
 			else
 			{
