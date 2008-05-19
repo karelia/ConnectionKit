@@ -410,7 +410,10 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
 	}
 	[self willChangeValueForKey:@"connections"];
-	[myConnections removeObjectIdenticalTo:item];
+	int index = [myConnections indexOfObjectIdenticalTo:item];
+	id obj = [myConnections objectAtIndex:index];
+	[myConnections removeObjectAtIndex:index];
+	obj = nil;
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }
@@ -630,7 +633,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 }
 - (BOOL)itemIsLeopardSourceGroupHeader:(id)item
 {
-	return (item && [item isKindOfClass:[NSDictionary class]] && [item objectForKey:@"IsSourceGroup"] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
+	return (item != nil && [item isKindOfClass:[NSDictionary class]] && [item objectForKey:@"IsSourceGroup"] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
 }
 - (NSOutlineView *)outlineView
 {
@@ -746,9 +749,8 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
 	if ([self itemIsLeopardSourceGroupHeader:item])
-	{
 		return [item objectForKey:@"Name"];
-	}
+	
     NSString *ident = [tableColumn identifier];
     
     if ([ident isEqualToString:@"connType"])
@@ -766,41 +768,19 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
         NSImage *icon = [item iconWithSize:nearestSize];
         
         if ([item isKindOfClass:[CKHostCategory class]])
-        {		
             return [NSDictionary dictionaryWithObjectsAndKeys:[item name], CKHostCellStringValueKey, icon, CKHostCellImageValueKey, nil];
-        }
         else
         {
             NSString *primary = [item annotation];
             NSString *secondary = nil;
             BOOL useHostName = [[[NSUserDefaults standardUserDefaults] objectForKey:@"CKHostCellUsesHostName"] boolValue];
             if (!primary || [primary isEqualToString:@""])
-            {
-                if (useHostName)
-                {
-                    primary = [item host];
-                }
-                else
-                {
-                    primary = [item name];
-                }
-            }
+				primary = (useHostName) ? [item host] : [item name];
             else
-            {
-                if (useHostName)
-                {
-                    secondary = [item host];
-                }
-                else
-                {
-                    secondary = [item name];
-                }
-            }
+				secondary = (useHostName) ? [item host] : [item name];
             
             if ([primary isEqualToString:secondary])
-            {
                 secondary = nil;
-            }
             
             // annotation is last incase it is nil and finishes the dictionary there.
             return [NSDictionary dictionaryWithObjectsAndKeys:primary, CKHostCellStringValueKey, icon, CKHostCellImageValueKey, secondary, CKHostCellSecondaryStringValueKey, nil];
