@@ -1346,8 +1346,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
-			[self sendCommand:@"QUIT"];
-			[self setState:ConnectionSentQuitState];
+			if (GET_STATE != ConnectionSentQuitState)
+			{
+				[self sendCommand:@"QUIT"];
+				[self setState:ConnectionSentQuitState];
+			}
 			break;
 		}
 		case 532:
