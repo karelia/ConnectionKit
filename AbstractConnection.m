@@ -1633,14 +1633,16 @@ if (![fn isEqualToString:@"."] && \
 				size = [NSNumber numberWithInt:[wordTwo intValue]];
 				[attributes setObject:NSFileTypeRegular forKey:NSFileType];
 			}
-			filename = [self filenameFromIndex:3 inWords:words attributes:attributes];
+			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:3 ofWords:words withAttributes:attributes];
+//			filename = [self filenameFromIndex:3 inWords:words attributes:attributes];
 		}		
 		else if ([wordOne isEqualToString:@"folder"]) //netprez folder
 		{
 			[self parsePermissions:wordZero withAttributes:attributes];
 			referenceCount = [NSNumber numberWithInt:[wordTwo intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordThree day:wordFour yearOrTime:wordFive];
-			filename = [self filenameFromIndex:6 inWords:words attributes:attributes];
+			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:6 ofWords:words withAttributes:attributes];
+//			filename = [self filenameFromIndex:6 inWords:words attributes:attributes];
 		}
 		else if ([NSFileManager wordIsInteger:wordTwo] && [NSFileManager wordIsInteger:wordFour] && [wordFive intValue] >= 0 && [wordSix intValue] <= 31 && [wordSix intValue] > 0)
 		{
@@ -1649,7 +1651,8 @@ if (![fn isEqualToString:@"."] && \
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFive day:wordSix yearOrTime:wordSeven];
 			size = [NSNumber numberWithDouble:[wordFour doubleValue]];
-			filename = [self filenameFromIndex:8 inWords:words attributes:attributes];
+			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
+//			filename = [self filenameFromIndex:8 inWords:words attributes:attributes];
 		}
 		else if ([NSFileManager wordIsInteger:wordTwo] && [wordFive intValue] <= 31 && [wordFive intValue] > 0) // netprez file
 		{
@@ -1658,7 +1661,8 @@ if (![fn isEqualToString:@"."] && \
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFour day:wordFive yearOrTime:wordSix];
 			size = [NSNumber numberWithDouble:[wordThree doubleValue]];
-			filename = [self filenameFromIndex:7 inWords:words attributes:attributes];
+			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:7 ofWords:words withAttributes:attributes];
+//			filename = [self filenameFromIndex:7 inWords:words attributes:attributes];
 		}
 		else if ([wordOne isEqualToString:@"FTP"] && [wordTwo isEqualToString:@"User"]) //Trellix FTP Server
 		{
