@@ -2032,39 +2032,33 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else if (GET_STATE == ConnectionAwaitingDirectoryContentsState)
 	{
-		if ([_dataBuffer length] != 0)
+		NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
+		if (!results)
 		{
-			NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
+			//Try ASCII
+			results = [[NSString alloc] initWithData:_dataBuffer encoding:NSASCIIStringEncoding];
 			if (!results)
 			{
-				//Try ASCII
-				results = [[NSString alloc] initWithData:_dataBuffer encoding:NSASCIIStringEncoding];
-				if (!results)
-				{
-					//We failed!
-					return;
-				}
+				//We failed!
+				return;
 			}
-			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
-																	  attributes:[AbstractConnection dataAttributes]] autorelease]];
+		}
+		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:results 
+																  attributes:[AbstractConnection dataAttributes]] autorelease]];
 
-			NSArray *contents = [self parseLines:results];
-			
-			KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
-			
-			[self cacheDirectory:_currentPath withContents:contents];
-			
-			if (_flags.directoryContents)
-			{
-				[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
-			}
-			[results release];
-			[_dataBuffer setLength:0];
-		}
-		else
+		NSArray *contents = [self parseLines:results];
+		
+		KTLog(ParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
+		
+		[self cacheDirectory:_currentPath withContents:contents];
+		
+		if (_flags.directoryContents)
 		{
-			NSLog(@"Received nothing for dir contents");
+			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
 		}
+		[results release];
+		[_dataBuffer setLength:0];
+
 		if (_ftpFlags.received226)
 		{
 			[self setState:ConnectionIdleState];
