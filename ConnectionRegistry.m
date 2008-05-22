@@ -708,27 +708,19 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
 {
 	if (myFilter)
-	{
 		return [myFilteredHosts objectAtIndex:index];
-	}
 	if (myUsesLeopardStyleSourceList)
 	{
 		if (!item)
-		{
 			return [myLeopardSourceListGroups objectAtIndex:index];
-		}
 		else if ([self itemIsLeopardSourceGroupHeader:item])
-		{
 			return [[item objectForKey:@"Children"] objectAtIndex:index];
-		}
 		return [[item childCategories] objectAtIndex:index];
 	}
 	else
 	{
 		if (item == nil)
-		{
 			return [[self connections] objectAtIndex:index];
-		}
 		return [[item childCategories] objectAtIndex:index];
 	}
 }
