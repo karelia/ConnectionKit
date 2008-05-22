@@ -71,6 +71,8 @@
 	
 	// These peer connections are used to speed up recursive directory deletion
 	NSMutableArray					*_recursiveDeletionsQueue;
+	id								 previousDelegate;
+	NSString						*previousWorkingDirectory;
 	id <AbstractConnectionProtocol> _recursiveDeletionConnection;
 	unsigned						_numberOfListingsRemaining;
 	unsigned						_numberOfDeletionsRemaining;

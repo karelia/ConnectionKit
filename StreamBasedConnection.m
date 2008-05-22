@@ -971,6 +971,24 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Recursive Deletion Support Methods
+- (void)temporarilyTakeOverRecursiveDeletionDelegate
+{
+	previousWorkingDirectory = [[NSString stringWithString:[self currentDirectory]] retain];
+	previousDelegate = [self delegate];
+	_recursiveDeletionConnection = self;
+	[_recursiveDeletionConnection setDelegate:self];
+}
+- (void)restoreRecursiveDeletionDelegate
+{
+	if (!previousDelegate)
+		return;
+	[self changeToDirectory:previousWorkingDirectory];
+	[_recursiveDeletionConnection setDelegate:previousDelegate];
+	previousDelegate = nil;
+	[previousWorkingDirectory release];
+	previousWorkingDirectory = nil;
+	_recursiveDeletionConnection = nil;
+}
 - (void)processRecursiveDeletionQueue
 {
 	if (!_recursiveDeletionConnection)
@@ -1006,7 +1024,24 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Recursive Downloading Support
-
+- (void)temporarilyTakeOverRecursiveDownloadingDelegate
+{
+	previousWorkingDirectory = [[NSString stringWithString:[self currentDirectory]] retain];
+	previousDelegate = [self delegate];
+	_recursiveDownloadConnection = self;
+	[_recursiveDownloadConnection setDelegate:self];
+}
+- (void)restoreRecursiveDownloadingDelegate
+{
+	if (!previousDelegate)
+		return;
+	[self changeToDirectory:previousWorkingDirectory];
+	[_recursiveDownloadConnection setDelegate:previousDelegate];
+	previousDelegate = nil;
+	[previousWorkingDirectory release];
+	previousWorkingDirectory = nil;
+	_recursiveDownloadConnection = nil;
+}
 - (void)processRecursiveDownloadingQueue
 {
 	if (!_recursiveDownloadConnection)
@@ -1065,23 +1100,34 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	//In testing, this is because the host didn't support the number of additional concurrent connections we requested to open.
 	//To remedy this, we point the nil connection to ourself connection, who will perform that work as well.
 		
-	if ([_recursiveDeletionsQueue count] > 0 && _recursiveDeletionConnection == nil)
+	NSLog(@"%@", [error description]);
+	if ([_recursiveDeletionsQueue count] > 0 && con == _recursiveDeletionConnection)
 	{
-		//_recursiveDeletionConnection, a support connection we opened, failed. Let's disconnect and abandon it, and use ourself for the task.
-		_recursiveDeletionConnection = self;
+		if (previousDelegate)
+			return;
+
+		[self temporarilyTakeOverRecursiveDeletionDelegate];
+		
 		[_deletionLock lock];
-		[_recursiveDeletionConnection changeToDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
-		[_recursiveDeletionConnection directoryContents];
+		NSString *pathToDelete = [_recursiveDeletionsQueue objectAtIndex:0];
 		[_deletionLock unlock];
+		
+		[_recursiveDeletionConnection changeToDirectory:pathToDelete];
+		[_recursiveDeletionConnection directoryContents];
 	}
-	else if ([_recursiveDownloadQueue count] > 0 && _recursiveDownloadConnection == nil)
+	else if ([_recursiveDownloadQueue count] > 0 && con == _recursiveDownloadConnection)
 	{
-		//_recursiveDownloadConnection, a support connection we opened, failed. Let's disconnect and abandon it, and use ourself for the task.
-		_recursiveDownloadConnection = self;
+		if (previousDelegate)
+			return;
+		
+		[self temporarilyTakeOverRecursiveDownloadingDelegate];
+		
 		[_recursiveDownloadLock lock];
-		[_recursiveDownloadConnection changeToDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
-		[_recursiveDownloadConnection directoryContents];
+		NSString *pathToDownload = [[_recursiveDownloadQueue objectAtIndex:0] objectForKey:@"remote"];
 		[_recursiveDownloadLock unlock];
+		
+		[_recursiveDownloadConnection changeToDirectory:pathToDownload];
+		[_recursiveDownloadConnection directoryContents];
 	}
 }
 
@@ -1257,6 +1303,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				[self performSelector:@selector(processRecursiveDownloadingQueue) withObject:nil afterDelay:0.0];
 			}
+			else
+			{
+				[self restoreRecursiveDownloadingDelegate];
+			}
 			
 			[_recursiveDownloadLock unlock];
 		}
@@ -1299,14 +1349,25 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[_recursiveDeletionsQueue removeObjectAtIndex:0];
 			if (_flags.deleteDirectory) 
 			{
-				[_forwarder connection:self didDeleteDirectory:dirPath];
+				if (previousDelegate && _recursiveDeletionConnection == self && [_recursiveDeletionConnection delegate] == self)
+				{
+					//In connection:didReceiveError, we were notified that the deletion connection we attempted to open up failed to open. To remedy this, we used OURSELF as the deletion connection, temporarily setting our delegate to OURSELF so we'd receive the calls we needed to perform the deletion. 
+					//Now that we're done, let's restore our delegate.
+					[self restoreRecursiveDeletionDelegate];
+					[_forwarder connection:self didDeleteDirectory:dirPath];
+					if ([_recursiveDeletionsQueue count] > 0)
+						[self temporarilyTakeOverRecursiveDeletionDelegate];
+				}
+				else
+				{
+					[_forwarder connection:self didDeleteDirectory:dirPath];
+				}
 			}			
 			if ([_recursiveDeletionsQueue count] == 0)
 			{
 				_numberOfDeletionsRemaining = 0;
-				myStreamFlags.isDeleting = NO;
-
-				[_recursiveDeletionConnection disconnect]; //in didDisconnect, we release and set the pointer to nil.
+				myStreamFlags.isDeleting = NO;				
+				[_recursiveDeletionConnection disconnect];
 			}
 			else
 			{
@@ -1322,7 +1383,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if (_flags.deleteDirectoryInAncestor)
 			{
 				NSString *ancestorDirectory = [_recursiveDeletionsQueue objectAtIndex:0];
-				[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory];
+				if (previousDelegate && _recursiveDeletionConnection == self && [_recursiveDeletionConnection delegate] == self)
+				{
+					[self restoreRecursiveDeletionDelegate];
+					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory];
+					[self temporarilyTakeOverRecursiveDeletionDelegate];
+				}
 			}
 		}
 		[_deletionLock unlock];
