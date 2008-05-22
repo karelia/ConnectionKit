@@ -35,6 +35,7 @@
 #import "ConnectionThreadManager.h"
 #import "NSString+Connection.h"
 #import "KTLog.h"
+#import "RegexKitLite.h"
 
 @interface AbstractConnection (Deprecated)
 + (id <AbstractConnectionProtocol>)connectionWithName:(NSString *)name
@@ -1540,14 +1541,8 @@ if (![fn isEqualToString:@"."] && \
 	}
 	return [self fixFilename:tempStr withAttributes:attributes];
 }
-
-+ (NSArray *)attributedFilesFromListing:(NSString *)listing
++ (NSArray *)_linesFromListing:(NSString *)listing
 {
-	if ([listing length] == 0)
-	{
-		return [NSArray array];
-	}
-	
 	NSString *lineEnding = @"\r\n";
 	//Determine how we break lines
 	if ([listing rangeOfString:@"\r\n"].location == NSNotFound)
@@ -1563,23 +1558,87 @@ if (![fn isEqualToString:@"."] && \
 		}
 		lineEnding = @"\n";
 	}
+	return [listing componentsSeparatedByString:lineEnding];
+}
++ (NSArray *)_wordsFromLine:(NSString *)line
+{
+	NSArray *words = [line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	NSMutableArray *finalWords = [NSMutableArray arrayWithArray:words];
+	NSEnumerator *wordEnumerator = [words objectEnumerator];
+	NSString *word;
+	while ((word = [wordEnumerator nextObject]))
+	{
+		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
+			[finalWords removeObject:word];
+	}
+	return finalWords;
+}
++ (NSString *)_dateStringFromListing:(NSString *)listing
+{
+	//This regex finds the entire date. "May 12 2006" or "May 12 12:15"
+	NSRange dateRange = [listing rangeOfRegex:@"((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))( )+((0*[1-9])|([12][0-9])|(3[01]))( )+((([012][0-9])|(3[01])):([0-5][0-9])|[0-9]{4})"];
+	if (dateRange.location == NSNotFound)
+		return nil;
+
+	return [listing substringWithRange:dateRange];
+}
++ (int)_filenameColumnIndexFromLine:(NSString *)line
+{
+	/*
+		* Look for the date, and base the filename column index as the column after that.
+		* If we can't find the date or "." or "..", use popular-assumptions about the filename column index based on the number of columns we have.
+	*/
+	int filenameColumnIndex = -1;
+	NSString *date = [self _dateStringFromListing:line];
+	NSArray *words = [self _wordsFromLine:line];
+	
+	if (date)
+	{
+		//Filename is after the date column.
+		NSString *lastColumnStringOfDate = [[date componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lastObject];
+		int lastDateColumnIndex = [words indexOfObject:lastColumnStringOfDate];
+		if (lastDateColumnIndex != NSNotFound)
+			filenameColumnIndex = lastDateColumnIndex + 1;
+	}
+
+	if (filenameColumnIndex == -1)
+	{
+		//If we can't find the date or "." or "..", use popular-assumptions about the filename column index based on the number of columns we have.
+		switch ([words count])
+		{
+			case 10:
+				//-rwx------ 1 user group           2252 May 22 04:20 Project-Video Planning.rtf
+				filenameColumnIndex = 8;
+				break;
+			case 9:
+				//-rwx------ 1 user group           2252 May 22 04:20 myFile.tiff
+				filenameColumnIndex = 7;
+				break;
+			case 8: //No Group
+				//-rwx------ 1 user            2252 May 22 04:20 myFile.tiff
+				filenameColumnIndex = 6;
+			default:
+				filenameColumnIndex = [words count] - 1;
+				break;
+		}			
+	}
+
+	return filenameColumnIndex;
+}
++ (NSArray *)attributedFilesFromListing:(NSString *)listing
+{
+	if ([listing length] == 0)
+		return [NSArray array];
+	
 	NSMutableArray *attributedLines = [NSMutableArray array];
-	NSArray *lines = [listing componentsSeparatedByString:lineEnding];
+
+	NSArray *lines = [NSFileManager _linesFromListing:listing];
 	
 	NSEnumerator *lineEnumerator = [lines objectEnumerator];
 	NSString *line;
 	while ((line = [lineEnumerator nextObject]))
 	{
-		NSMutableArray *words = [NSMutableArray arrayWithArray:[line componentsSeparatedByString:@" "]];
-		NSEnumerator *wordsEnumerator = [[NSArray arrayWithArray:words] objectEnumerator];
-		NSString *word;
-		while ((word = [wordsEnumerator nextObject]))
-		{
-			if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
-			{
-				[words removeObject:word];
-			}
-		}
+		NSArray *words = [NSFileManager _wordsFromLine:line];
 		
 		//index should be 
 		// 0 - type and permissions
@@ -1587,7 +1646,7 @@ if (![fn isEqualToString:@"."] && \
 		// 2 - owner
 		// 3 - group / size
 		// 4 - size / date - month
-		// 5 - date - month / date - day
+		// 5 - date - month / date - day 
 		// 6 - date - day / date - year or time
 		// 7 - date - year or time / filename
 		// 8 - filename / -> link arrow
@@ -1607,10 +1666,7 @@ if (![fn isEqualToString:@"."] && \
 		NSString *wordFive = ([words count] >= 6) ? [words objectAtIndex:5] : nil;
 		NSString *wordSix = ([words count] >= 7) ? [words objectAtIndex:6] : nil;
 		NSString *wordSeven = ([words count] >= 8) ? [words objectAtIndex:7] : nil;
-		NSString *wordEight = ([words count] >= 9) ? [words objectAtIndex:8] : nil;
-		NSString *wordNine = ([words count] >= 10) ? [words objectAtIndex:9] : nil;
 		
-		NSString *filename = nil;
 		NSCalendarDate *date = nil;
 		NSNumber *referenceCount = nil;
 		NSNumber *size = nil;
@@ -1634,7 +1690,6 @@ if (![fn isEqualToString:@"."] && \
 				[attributes setObject:NSFileTypeRegular forKey:NSFileType];
 			}
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:3 ofWords:words withAttributes:attributes];
-//			filename = [self filenameFromIndex:3 inWords:words attributes:attributes];
 		}		
 		else if ([wordOne isEqualToString:@"folder"]) //netprez folder
 		{
@@ -1642,27 +1697,24 @@ if (![fn isEqualToString:@"."] && \
 			referenceCount = [NSNumber numberWithInt:[wordTwo intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordThree day:wordFour yearOrTime:wordFive];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:6 ofWords:words withAttributes:attributes];
-//			filename = [self filenameFromIndex:6 inWords:words attributes:attributes];
 		}
 		else if ([NSFileManager wordIsInteger:wordTwo] && [NSFileManager wordIsInteger:wordFour] && [wordFive intValue] >= 0 && [wordSix intValue] <= 31 && [wordSix intValue] > 0)
 		{
-			/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */
+			/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */ 
 			[self parsePermissions:wordZero withAttributes:attributes];
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFive day:wordSix yearOrTime:wordSeven];
 			size = [NSNumber numberWithDouble:[wordFour doubleValue]];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
-//			filename = [self filenameFromIndex:8 inWords:words attributes:attributes];
 		}
 		else if ([NSFileManager wordIsInteger:wordTwo] && [wordFive intValue] <= 31 && [wordFive intValue] > 0) // netprez file
 		{
-			/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */
+			/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */ 
 			[self parsePermissions:wordZero withAttributes:attributes];
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFour day:wordFive yearOrTime:wordSix];
 			size = [NSNumber numberWithDouble:[wordThree doubleValue]];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:7 ofWords:words withAttributes:attributes];
-//			filename = [self filenameFromIndex:7 inWords:words attributes:attributes];
 		}
 		else if ([wordOne isEqualToString:@"FTP"] && [wordTwo isEqualToString:@"User"]) //Trellix FTP Server
 		{
@@ -1673,72 +1725,51 @@ if (![fn isEqualToString:@"."] && \
 		}
 		else //Everything else
 		{
+			//Permissions
 			[self parsePermissions:wordZero withAttributes:attributes];
+			
+			//Reference Count
 			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
-			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName];
 			
-			NSString *month, *day, *yearOrTime;
-			BOOL isSpecial = [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeCharacterSpecial] || [[attributes objectForKey:NSFileType] isEqualToString:NSFileTypeBlockSpecial];
+			//Account
+			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName]; //Account
 			
-			
-			//Find the last word to be an integer
-			//The column index AFTER the last integer is where filename begins.
-			//We do this so we can count filename as one column to determine whether the group has two words.
-			
-			int indexOfLastInteger = -1;
-			NSEnumerator *wordsEnum = [words reverseObjectEnumerator];
-			NSString *theWord;
-			while ((theWord = [wordsEnum nextObject]))
+			//Date
+			NSString *dateString = [NSFileManager _dateStringFromListing:line]; //Date
+			if (!dateString)
 			{
-				//It's either a time or a year
-				if (([NSFileManager wordIsInteger:theWord] && [theWord length] == 4)  || ([theWord length] == 5 && [theWord characterAtIndex:2] == ':'))
-				{
-					indexOfLastInteger = [words indexOfObject:theWord];
-					break;
-				}
+				//Much of what we do from this point is based on finding the date. This is a serious bug, and should be addressed. Log it out, report an error.
+				NSLog(@"Could not parse date from line %@ of listing %@", line, listing);
+				NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:ConnectionErrorParsingDirectoryListing userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error") forKey:NSLocalizedDescriptionKey]];
+				@throw error;
 			}
-			int numberOfColumnsWhenCountingFilenameAsOne = indexOfLastInteger + 2; //+1 for filename, +1 for first index
-			
-			if (numberOfColumnsWhenCountingFilenameAsOne > 7) //If there are more than 7 columns, there is a group
-			{ 
-				if (numberOfColumnsWhenCountingFilenameAsOne > 9) //If there are more than 9 columns, we consider the group to be two words
-				{
-					//	drwx------  10 Administrators Domain Admin        0 Apr 23  2007 etc
-					//Group has two words. This is kind of a hacky fix, as we only cover it if it's two words, but if the system is going as far as having a group name with spaces, it could also have an account name with spaces, etc etc.
-					[attributes setObject:[wordThree stringByAppendingFormat:@" %@", wordFour] forKey:NSFileGroupOwnerAccountName];
-					size = [NSNumber numberWithDouble:[wordFive doubleValue]];
-					
-					month = (isSpecial) ? wordSeven : wordSix;
-					day = (isSpecial) ? wordEight : wordSeven;
-					yearOrTime = (isSpecial) ? wordNine : wordEight;	
-					[self parseFilenameAndSymbolicLinksFromIndex:9 ofWords:words withAttributes:attributes];
-				}
-				else //Looks like a standard listing.
-				{
-					[attributes setObject:wordThree forKey:NSFileGroupOwnerAccountName];
-					size = [NSNumber numberWithDouble:[wordFour doubleValue]];
-					
-					month = (isSpecial) ? wordSix : wordFive;
-					day = (isSpecial) ? wordSeven : wordSix;
-					yearOrTime = (isSpecial) ? wordEight : wordSeven;
-					[self parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
-				}				
-			}
-			else //no group
-			{
-				size = [NSNumber numberWithDouble:[wordThree doubleValue]];
-				
-				month = (isSpecial) ? wordFive : wordFour;
-				day = (isSpecial) ? wordSix : wordFive;
-				yearOrTime = (isSpecial) ? wordSeven : wordSix;
-				
-				[self parseFilenameAndSymbolicLinksFromIndex:7 ofWords:words withAttributes:attributes];
-			}
+
+			NSArray *dateComponents = [dateString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+			NSString *month = [dateComponents objectAtIndex:0];
+			NSString *day = [dateComponents objectAtIndex:1];
+			NSString *yearOrTime = [dateComponents objectAtIndex:2];			
 			date = [NSCalendarDate getDateFromMonth:month day:day yearOrTime:yearOrTime];
+			
+			//Size
+			int monthColumnIndex = [words indexOfObject:month];
+			int sizeColumnIndex = monthColumnIndex - 1;
+			size = [NSNumber numberWithDouble:[[words objectAtIndex:sizeColumnIndex] doubleValue]];
+			
+			//Group
+			NSString *group = [NSString string];
+			int currentIndex = 3; //Account's columnIndex is 2. Everything in between account and size is group.
+			while (currentIndex < sizeColumnIndex)
+			{
+				group = [group stringByAppendingString:[words objectAtIndex:currentIndex]];
+				currentIndex++;
+			}
+			[attributes setObject:group forKey:NSFileGroupOwnerAccountName];
+			
+			//Filename
+			int filenameColumnIndex = [NSFileManager _filenameColumnIndexFromLine:line];
+			[self parseFilenameAndSymbolicLinksFromIndex:filenameColumnIndex ofWords:words withAttributes:attributes];
 		}
 		
-		if (filename)
-			[attributes setObject:filename forKey:cxFilenameKey];
 		if (date)
 			[attributes setObject:date forKey:NSFileModificationDate];
 		if (referenceCount)

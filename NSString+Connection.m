@@ -98,6 +98,30 @@
 	}
 	return returnString;
 }
+- (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set  //10.5 adds this to NSString, but we are 10.4+
+{ 
+	NSMutableArray *result = [NSMutableArray array]; 
+	NSScanner *scanner = [NSScanner scannerWithString:self]; 
+	NSString *chunk = nil; 
+	BOOL found, sepFound; 
+	[scanner setCharactersToBeSkipped:nil]; 
+	sepFound = [scanner scanCharactersFromSet:set intoString:(NSString **)nil]; // skip any preceding separators 
+	if(sepFound) 
+	{ // if initial separator, start with empty component 
+		[result addObject:@""]; 
+	} 
+	while ((found = [scanner scanUpToCharactersFromSet:set intoString:&chunk])) 
+	{ 
+		[result addObject:chunk]; 
+		sepFound = [scanner scanCharactersFromSet: set intoString: (NSString **) nil]; 
+	} 
+	if(sepFound) 
+	{ // if final separator, end with empty component 
+		[result addObject: @""]; 
+	} 
+	result = [result copy]; 
+	return [result autorelease]; 
+}
 + (NSString *)formattedFileSize:(double)size
 {
 	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];

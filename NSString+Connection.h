@@ -41,6 +41,7 @@
 + (NSString *)formattedFileSize:(double)size;
 + (NSString *)formattedSpeed:(double)speed;
 + (id)uuid;
+- (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;
 
 //SFTP
 + ( NSString * )pathForExecutable: ( NSString * )executable;
