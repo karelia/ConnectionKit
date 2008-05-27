@@ -1601,6 +1601,11 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 }
 
+- (BOOL)browser:(NSBrowser *)sender shouldShowCellExpansionForRow:(int)rowIndex column:(int)columnIndex
+{
+	return NO;
+}
+
 #pragma mark -
 #pragma mark CKTableBasedBrowser DataSource Methods
 
