@@ -321,7 +321,7 @@
 /* Begin PBXFileReference section */
 		089C165DFE840E0CC02AAC07 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
-		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
+		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
 		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
 		09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractConnectionTest.m; sourceTree = "<group>"; };
 		09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPConnectionTest.h; sourceTree = "<group>"; };
@@ -347,7 +347,7 @@
 		790999690CA8376B00A22156 /* gear_normal.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_normal.tiff; sourceTree = "<group>"; };
 		7909996A0CA8376B00A22156 /* gear_pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_pressed.tiff; sourceTree = "<group>"; };
 		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
+		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
 		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
 		790FF0DC0ACCE8EA004B4021 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLogViewer.nib; sourceTree = "<group>"; };
 		790FF0E20ACCE966004B4021 /* KTLogController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = KTLogController.h; sourceTree = "<group>"; };
@@ -395,7 +395,7 @@
 		795FF1B40B0A821600EA9292 /* ConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionRegistry.h; sourceTree = "<group>"; };
 		795FF1B50B0A821600EA9292 /* ConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionRegistry.m; sourceTree = "<group>"; };
 		795FF4F10B0C013200EA9292 /* DropletHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DropletHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "DropletHelper-Info.plist"; sourceTree = "<group>"; };
+		795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DropletHelper-Info.plist"; sourceTree = "<group>"; };
 		795FF5010B0C018100EA9292 /* DropletMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletMain.m; sourceTree = "<group>"; };
 		795FF5060B0C048700EA9292 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Droplet.nib; sourceTree = "<group>"; };
 		795FF50C0B0C05F400EA9292 /* DropletController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DropletController.m; sourceTree = "<group>"; };
@@ -457,7 +457,7 @@
 		79CA054A0B852037005BED50 /* CKCacheableHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCacheableHost.h; sourceTree = "<group>"; };
 		79CA054B0B852037005BED50 /* CKCacheableHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCacheableHost.m; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		79CFD12709F702BE00172CDD /* Framework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
+		79CFD12709F702BE00172CDD /* Framework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		79CFD80C09F7048400172CDD /* AbstractConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnection.h; sourceTree = SOURCE_ROOT; };
 		79CFD80D09F7048400172CDD /* AbstractConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractConnection.m; sourceTree = SOURCE_ROOT; };
 		79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionProtocol.h; sourceTree = SOURCE_ROOT; };
@@ -581,6 +581,13 @@
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE9FC9550DF70F32002330B2 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95B0DF70F3D002330B2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95C0DF70F44002330B2 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95D0DF70F49002330B2 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95E0DF70F50002330B2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC9610DF70F56002330B2 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC9620DF70F5C002330B2 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -1053,7 +1060,6 @@
 			children = (
 				79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */,
 				79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */,
-				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				79CFD81109F7048400172CDD /* ConnectionOpenPanel.h */,
 				79CFD81209F7048400172CDD /* ConnectionOpenPanel.m */,
 				798313C70B0D67E000F5078E /* CKTransferProgressCell.h */,
@@ -1064,14 +1070,12 @@
 				7978FC250B1183DE0048168B /* CKController.m */,
 				79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */,
 				79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */,
-				799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */,
 				79B09C6A0C85E35100E7F1CC /* CKDirectoryNode.h */,
 				79B09C6B0C85E35100E7F1CC /* CKDirectoryNode.m */,
 				799173B70C83428100EFFC79 /* CKDirectoryTreeController.h */,
 				799173B80C83428100EFFC79 /* CKDirectoryTreeController.m */,
 				79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */,
 				79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */,
-				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -1117,6 +1121,9 @@
 		79CFD8E709F7072100172CDD /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
+				799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */,
+				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
+				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
 				D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */,
 				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
 				79CFD8DC09F7071400172CDD /* InputDialog.nib */,
@@ -1721,6 +1728,13 @@
 			isa = PBXVariantGroup;
 			children = (
 				089C165DFE840E0CC02AAC07 /* en */,
+				CE9FC9550DF70F32002330B2 /* da */,
+				CE9FC95B0DF70F3D002330B2 /* de */,
+				CE9FC95C0DF70F44002330B2 /* fr */,
+				CE9FC95D0DF70F49002330B2 /* it */,
+				CE9FC95E0DF70F50002330B2 /* ja */,
+				CE9FC9610DF70F56002330B2 /* zh_CN */,
+				CE9FC9620DF70F5C002330B2 /* zh_TW */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -1822,7 +1836,7 @@
 				CE55A6600AD194740091C8AE /* zh_CN */,
 			);
 			name = ConnectionOpenPanel.nib;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		79CFD8CA09F706C700172CDD /* KTLog.nib */ = {
 			isa = PBXVariantGroup;
