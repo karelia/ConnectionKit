@@ -86,7 +86,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (id)init
 {
-	[self initWithHost:@"the File System" port:@"ignored" username:@"ignored" password:@"ignored" error:nil];
+	[self initWithHost:LocalizedStringInConnectionKitBundle(@"the File System", @"name of a host to connect to; in this case, the local file system rather than a remote server") port:@"ignored" username:@"ignored" password:@"ignored" error:nil];
 	return self;
 }
 
