@@ -425,7 +425,7 @@ static char *lsform;
 	}
 	return;
 WRITE_ERROR:
-	NSLog(@"Write Failed, wrong number of byes");
+	NSLog(@"Write Failed, wrong number of bytes");
 	exit(2);
 }
 
