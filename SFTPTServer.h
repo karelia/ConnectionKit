@@ -33,7 +33,6 @@
 - ( id )init;
 - (void)forceDisconnect;
 - ( NSString * )retrieveUnknownHostKeyFromStream: ( FILE * )stream;
-- ( NSMutableDictionary * )remoteObjectFromSFTPLine: ( char * )line;
 - ( BOOL )hasDirectoryListingFormInBuffer: ( char * )buf;
 - ( void )collectListingFromMaster: ( int )master fileStream: ( FILE * )mf forWrapperConnection: ( SFTPConnection * )wrapperConn;
 - (NSString *)currentTransferPath;
