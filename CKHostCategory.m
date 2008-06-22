@@ -341,10 +341,11 @@ static NSImage *sFolderImage = nil;
 		SInt32 OSVersion;		
 		if (Gestalt(gestaltSystemVersionMinor, &OSVersion) == noErr)
 		{
-			isLeopard = (OSVersion == 5);
+			isLeopard = (OSVersion >= 5);
 		}
 		NSString *folderIconPath = (isLeopard) ? ([bundle pathForResource:@"LeopardFolder" ofType:@"tiff"]) : ([bundle pathForResource:@"AquaFolder" ofType:@"png"]);
 		sFolderImage = [[NSImage alloc] initWithContentsOfFile:folderIconPath];
+		[sFolderImage setScalesWhenResized:YES];
 		[sFolderImage setSize:NSMakeSize(16.0, 16.0)];
 	}
 	return sFolderImage;
