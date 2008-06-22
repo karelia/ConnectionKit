@@ -740,6 +740,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				794EFDD40A5CD6F900913151 /* libssl.dylib */,
 				794EFDD10A5CD6CA00913151 /* libcrypto.dylib */,
 				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
@@ -779,7 +780,6 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				790FF0C30ACCE483004B4021 /* KTLog Viewer */,
 				080E96DDFE201D6D7F000001 /* Framework */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
