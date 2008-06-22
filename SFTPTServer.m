@@ -26,9 +26,6 @@
 extern int	errno;
 char	**environ;
 
-/* used to set which field contains the filename */
-static int      filenameIndexDistanceFromEnd = -1;
-
 @implementation SFTPTServer
 
 + ( void )connectWithPorts: ( NSArray * )ports
@@ -594,8 +591,6 @@ static int      filenameIndexDistanceFromEnd = -1;
     char                tmp1[ MAXPATHLEN * 2 ], tmp2[ MAXPATHLEN * 2 ];
     int                 len, incomplete_line = 0;
     fd_set              readmask;
-    NSMutableDictionary *object = nil;
-    NSMutableArray      *items = nil;
     
     /* make sure we're not buffering */
     setvbuf( stream, NULL, _IONBF, 0 );
