@@ -473,6 +473,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
 											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
+			[item setTarget:[myOutlineView delegate]];
 			[item setRepresentedObject:cur];
 			NSImage *icon = [[cur icon] copy];
 			[icon setScalesWhenResized:YES];
@@ -522,6 +523,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
 											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
+			[item setTarget:[myOutlineView delegate]];
 			[item setRepresentedObject:cur];
 			[item setImage:icon];
 			[menu addItem:item];
