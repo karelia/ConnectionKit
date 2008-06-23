@@ -1,5 +1,9 @@
 {
     IBClasses = (
+        {CLASS = CKDirectoryBrowserCell; LANGUAGE = ObjC; SUPERCLASS = NSBrowserCell; }, 
+        {CLASS = CKDirectoryBrowserMatrix; LANGUAGE = ObjC; SUPERCLASS = NSMatrix; }, 
+        {CLASS = CKDirectoryCell; LANGUAGE = ObjC; SUPERCLASS = NSCell; }, 
+        {CLASS = CKDirectoryOutlineView; LANGUAGE = ObjC; SUPERCLASS = NSOutlineView; }, 
         {
             ACTIONS = {
                 browserSelected = id; 
@@ -12,8 +16,6 @@
             CLASS = CKDirectoryTreeController; 
             LANGUAGE = ObjC; 
             OUTLETS = {
-                myDelegate = id; 
-                myTarget = id; 
                 oActionGear = NSPopUpButton; 
                 oBrowser = CKTableBasedBrowser; 
                 oHistory = NSSegmentedControl; 
@@ -27,13 +29,18 @@
                 oPopup = NSPopUpButton; 
                 oSearch = NSSearchField; 
                 oSize = NSTextField; 
-                oStandardBrowser = NSBrowser; 
                 oStyle = NSSegmentedControl; 
                 oStyles = NSTabView; 
                 oView = NSView; 
             }; 
             SUPERCLASS = NSObject; 
         }, 
+        {
+            CLASS = CKDynamicDateFormattingCell; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = NSTextFieldCell; 
+        }, 
+        {CLASS = CKFileSizeFormatter; LANGUAGE = ObjC; SUPERCLASS = NSFormatter; }, 
         {
             ACTIONS = {selectAll = id; }; 
             CLASS = CKTableBasedBrowser; 
@@ -47,12 +54,16 @@
             }; 
             SUPERCLASS = NSView; 
         }, 
+        {CLASS = CKTableHeaderView; LANGUAGE = ObjC; SUPERCLASS = NSTableHeaderView; }, 
+        {CLASS = CKTriStateButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
+        {
+            CLASS = CKTriStateMenuButton; 
+            LANGUAGE = ObjC; 
+            SUPERCLASS = CKTriStateButton; 
+        }, 
         {CLASS = FirstResponder; LANGUAGE = ObjC; SUPERCLASS = NSObject; }, 
-        {CLASS = NSButton; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
         {CLASS = NSObject; LANGUAGE = ObjC; }, 
-        {CLASS = NSPopUpButton; LANGUAGE = ObjC; SUPERCLASS = NSButton; }, 
-        {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }, 
-        {CLASS = NSTabView; LANGUAGE = ObjC; SUPERCLASS = NSView; }
+        {CLASS = NSSegmentedControl; LANGUAGE = ObjC; SUPERCLASS = NSControl; }
     ); 
     IBVersion = 1; 
 }
