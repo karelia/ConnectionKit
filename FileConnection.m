@@ -539,8 +539,10 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	FILE *from = fopen([[upload localPath] cString], "r");
 	FILE *to = fopen([[upload remotePath] cString], "a");
-	//NSAssert(from != NULL, [NSString stringWithFormat:@"path from cannot be found: %@", [upload localPath]]);
-	//NSAssert(to != NULL, [NSString stringWithFormat:@"path to cannot be found: %@", [upload remotePath]]);
+	
+		// I put these assertions back in; it's better to get an assertion failure than a crash!
+	NSAssert(from, @"path from cannot be found");
+	NSAssert(to, @"path to cannot be found");
 	int fno = fileno(from), tno = fileno(to);
 	char bytes[8096];
 	int len;
