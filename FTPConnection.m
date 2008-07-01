@@ -866,14 +866,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 
 				//Connecting to local machine causes PASV to sit idle.
-				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
-				{
-					_ftpFlags.canUsePASV = NO;
-					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
-					_state = [cmd sentState];
-					[self sendCommand:[cmd command]];						
-					break;
-				}
+//				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
+//				{
+//					_ftpFlags.canUsePASV = NO;
+//					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+//					_state = [cmd sentState];
+//					[self sendCommand:[cmd command]];						
+//					break;
+//				}
 				
 				NSHost *host = [CKCacheableHost hostWithAddress:hostString];
 				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
