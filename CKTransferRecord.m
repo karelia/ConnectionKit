@@ -215,9 +215,12 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 			[self forceAnimationUpdate];
 			return;
 		}
+		
 		[self willChangeValueForKey:@"progress"];
 		myProgress = progress;
 		[self didChangeValueForKey:@"progress"];
+		
+		
 		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
 }
@@ -333,6 +336,32 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (CKTransferRecord *)parent
 {
 	return myParent;
+}
+
+- (void)willChangeValueForKey:(NSString *)key
+{
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well.
+	[super willChangeValueForKey:key];
+	
+	CKTransferRecord *parent = [self parent];
+	while (parent)
+	{
+		[parent willChangeValueForKey:key];
+		parent = [parent parent];
+	}
+}
+
+- (void)didChangeValueForKey:(NSString *)key
+{
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well.
+	[super didChangeValueForKey:key];
+	
+	CKTransferRecord *parent = [self parent];
+	while (parent)
+	{
+		[parent didChangeValueForKey:key];
+		parent = [parent parent];
+	}
 }
 
 - (CKTransferRecord *)root
