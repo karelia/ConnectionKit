@@ -504,15 +504,13 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	myTransferred = mySize;
 	myLastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
+
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
-	//If parent's finished, they need notifications too.
+	
+	//If parent is finished, they need notifications too.
 	CKTransferRecord *parent = [self parent];
-	while (parent)
-	{
-		if ([parent transferred] == [parent size])
-			[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:parent];
-		parent = [parent parent];
-	}
+	if (parent && [parent transferred] == [parent size])
+		[parent transferDidFinish:parent];
 }
 
 #pragma mark -
