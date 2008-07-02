@@ -43,6 +43,7 @@
 #import "CKCacheableHost.h"
 #import "CKTransferRecord.h"
 #import "AbstractConnectionProtocol.h"
+#import "NSString+Connection.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -1096,6 +1097,59 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
 {
+	if (con == _recursiveDeletionConnection &&
+		[[error localizedDescription] containsSubstring:@"failed to delete file"] &&
+		[[error localizedFailureReason] containsSubstring:@"permission denied"])
+	{
+		//Permission Error while deleting a file in recursive deletion. We handle it as if it successfully deleted the file, but don't give any delegate notifications about this specific file.
+		[_deletionLock lock];
+		_numberOfDeletionsRemaining--;
+		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
+		{
+			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
+			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
+			NSString *cur;
+			while (cur = [e nextObject])
+			{
+				[_recursiveDeletionConnection deleteDirectory:cur];
+			}
+			[_emptyDirectoriesToDelete removeAllObjects];
+		}
+		[_deletionLock unlock];		
+		return;
+	}
+	else if (con == _recursiveDeletionConnection &&
+			 [[error localizedDescription] containsSubstring:@"failed to delete directory"] &&
+			 [[error localizedFailureReason] containsSubstring:@"permission denied"])
+	{
+		//Permission Error while deleting a directory in recursive deletion. We handle it as if it successfully deleted the directory. If the error is for the actual ancestor directory, we send out an error.
+		[_deletionLock lock];
+		_numberOfDirDeletionsRemaining--;
+		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
+		{
+			[_recursiveDeletionsQueue removeObjectAtIndex:0];
+			if (_flags.error)
+			{
+				[_forwarder connection:self didReceiveError:error];
+			}
+			if ([_recursiveDeletionsQueue count] == 0)
+			{
+				_numberOfDeletionsRemaining = 0;
+				myStreamFlags.isDeleting = NO;				
+				[_recursiveDeletionConnection disconnect];
+			}
+			else
+			{
+				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
+				[_emptyDirectoriesToDelete addObject:directoryPath];
+				_numberOfListingsRemaining++;
+				[_recursiveDeletionConnection changeToDirectory:directoryPath];
+				[_recursiveDeletionConnection directoryContents];
+			}
+		}
+		[_deletionLock unlock];	
+		return;
+	}
 	//If any of these connections are nil, they were released by the didDisconnect method. We need them, however.
 	//In testing, this is because the host didn't support the number of additional concurrent connections we requested to open.
 	//To remedy this, we point the nil connection to ourself connection, who will perform that work as well.
