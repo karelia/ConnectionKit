@@ -42,6 +42,7 @@
 + (NSString *)formattedSpeed:(double)speed;
 + (id)uuid;
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;
+- (BOOL)containsSubstring:(NSString *)substring;
 
 //SFTP
 + ( NSString * )pathForExecutable: ( NSString * )executable;
