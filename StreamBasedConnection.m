@@ -104,9 +104,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.initializedSSL = NO;
 		myStreamFlags.isDeleting = NO;
 		
+		_recursiveS3RenamesQueue = [[NSMutableArray alloc] init];
+		_recursivelyRenamedDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_recursiveS3RenameLock = [[NSLock alloc] init];
+		
 		_recursiveDeletionsQueue = [[NSMutableArray alloc] init];
 		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
-		_deletionLock = [[NSLock alloc] init];
+		_recursiveDeletionLock = [[NSLock alloc] init];
 		
 		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
 		_recursiveDownloadLock = [[NSLock alloc] init];
@@ -142,12 +146,16 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection release];
 	[_fileCheckInFlight release];
 	
+	[_recursiveS3RenameLock release];
+	[_recursiveS3RenamesQueue release];
+	[_recursivelyRenamedDirectoriesToDelete release];
+	
 	[_recursiveDeletionsQueue release];
 	[_recursiveDeletionConnection setDelegate:nil];
 	[_recursiveDeletionConnection forceDisconnect];
 	[_recursiveDeletionConnection release];
 	[_emptyDirectoriesToDelete release];
-	[_deletionLock release];
+	[_recursiveDeletionLock release];
 	
 	[_recursiveDownloadConnection setDelegate:nil];
 	[_recursiveDownloadConnection forceDisconnect];
@@ -971,6 +979,49 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 }
 
 #pragma mark -
+#pragma mark Recursive S3 Directory Rename Support Methods
+- (void)processRecursiveS3RenamingQueue
+{
+	if (!_recursiveS3RenameConnection)
+	{
+		_recursiveS3RenameConnection = [self copy];
+		[_recursiveS3RenameConnection setName:@"Recursive S3 Renaming"];
+		[_recursiveS3RenameConnection setDelegate:self];
+		[_recursiveS3RenameConnection setTranscript:[self propertyForKey:@"RecursiveS3RenamingTranscript"]];
+		[_recursiveS3RenameConnection connect];
+	}
+	[_recursiveS3RenameLock lock];
+	if (!myStreamFlags.isRecursivelyRenamingForS3 && [_recursiveS3RenamesQueue count] > 0)
+	{
+		myStreamFlags.isRecursivelyRenamingForS3 = YES;
+		NSDictionary *renameDictionary = [_recursiveS3RenamesQueue objectAtIndex:0];
+		NSString *fromDirectoryPath = [renameDictionary objectForKey:@"FromDirectoryPath"];
+		
+		/*
+		 Here's the plan:
+		 (a) Create a new directory at the toDirectoryPath. Cache the old path for deletion later.
+		 (b) Recursively list the contents of fromDirectoryPath.
+		 (c) Create new directories at the appropriate paths for directories. Cache the old directory paths for deletion later.
+		 (d) Rename the files.
+		 (e) When we're done listing and done renaming, delete the old directory paths.
+		 */
+		
+		_numberOfS3RenameListingsRemaining++;
+		[_recursiveS3RenameConnection changeToDirectory:fromDirectoryPath];
+		[_recursiveS3RenameConnection directoryContents];
+	}
+	[_recursiveS3RenameLock unlock];
+}
+- (void)recursivelyRenameS3Directory:(NSString *)fromDirectoryPath to:(NSString *)toDirectoryPath
+{
+	[_recursiveS3RenameLock lock];
+	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromDirectoryPath, @"FromDirectoryPath", toDirectoryPath, @"ToDirectoryPath", nil];
+	[_recursiveS3RenamesQueue addObject:renameDictionary];
+	[_recursiveS3RenameLock unlock];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveS3RenamingQueue];
+}
+
+#pragma mark -
 #pragma mark Recursive Deletion Support Methods
 - (void)temporarilyTakeOverRecursiveDeletionDelegate
 {
@@ -1001,10 +1052,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection connect];
 	}
 	
-	[_deletionLock lock];
+	[_recursiveDeletionLock lock];
 	if (!myStreamFlags.isDeleting && [_recursiveDeletionsQueue count] > 0)
 	{
-		_numberOfListingsRemaining++;
+		_numberOfDeletionListingsRemaining++;
 		myStreamFlags.isDeleting = YES;
 		NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
 		[_emptyDirectoriesToDelete addObject:directoryPath];
@@ -1012,14 +1063,14 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDeletionConnection changeToDirectory:directoryPath];
 		[_recursiveDeletionConnection directoryContents];
 	}
-	[_deletionLock unlock];
+	[_recursiveDeletionLock unlock];
 }
 
 - (void)recursivelyDeleteDirectory:(NSString *)path
 {
-	[_deletionLock lock];
+	[_recursiveDeletionLock lock];
 	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
-	[_deletionLock unlock];	
+	[_recursiveDeletionLock unlock];	
 	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveDeletionQueue];
 }
 
@@ -1061,7 +1112,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		myStreamFlags.isDownloading = YES;
 		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
-		_downloadListingsRemaining++;
+		_numberOfDownloadListingsRemaining++;
 		[self setProperty:[NSNumber numberWithBool:YES] forKey:@"IsDiscoveringFilesToDownload"];
 		[_recursiveDownloadConnection changeToDirectory:[rec objectForKey:@"remote"]];
 		[_recursiveDownloadConnection directoryContents];
@@ -1102,9 +1153,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[[error localizedFailureReason] containsSubstring:@"permission denied"])
 	{
 		//Permission Error while deleting a file in recursive deletion. We handle it as if it successfully deleted the file, but don't give any delegate notifications about this specific file.
-		[_deletionLock lock];
+		[_recursiveDeletionLock lock];
 		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
+		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1115,7 +1166,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}
 			[_emptyDirectoriesToDelete removeAllObjects];
 		}
-		[_deletionLock unlock];		
+		[_recursiveDeletionLock unlock];		
 		return;
 	}
 	else if (con == _recursiveDeletionConnection &&
@@ -1123,7 +1174,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			 [[error localizedFailureReason] containsSubstring:@"permission denied"])
 	{
 		//Permission Error while deleting a directory in recursive deletion. We handle it as if it successfully deleted the directory. If the error is for the actual ancestor directory, we send out an error.
-		[_deletionLock lock];
+		[_recursiveDeletionLock lock];
 		_numberOfDirDeletionsRemaining--;
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
 		{
@@ -1142,12 +1193,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
 				[_emptyDirectoriesToDelete addObject:directoryPath];
-				_numberOfListingsRemaining++;
+				_numberOfDeletionListingsRemaining++;
 				[_recursiveDeletionConnection changeToDirectory:directoryPath];
 				[_recursiveDeletionConnection directoryContents];
 			}
 		}
-		[_deletionLock unlock];	
+		[_recursiveDeletionLock unlock];	
 		return;
 	}
 	//If any of these connections are nil, they were released by the didDisconnect method. We need them, however.
@@ -1162,9 +1213,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 		[self temporarilyTakeOverRecursiveDeletionDelegate];
 		
-		[_deletionLock lock];
+		[_recursiveDeletionLock lock];
 		NSString *pathToDelete = [_recursiveDeletionsQueue objectAtIndex:0];
-		[_deletionLock unlock];
+		[_recursiveDeletionLock unlock];
 		
 		[_recursiveDeletionConnection changeToDirectory:pathToDelete];
 		[_recursiveDeletionConnection directoryContents];
@@ -1202,6 +1253,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDownloadConnection release];
 		_recursiveDownloadConnection = nil;
 	}
+	else if (con = _recursiveS3RenameConnection)
+	{
+		[_recursiveS3RenameConnection release];
+		_recursiveS3RenameConnection = nil;
+	}
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
@@ -1232,8 +1288,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	else if (con == _recursiveDeletionConnection)
 	{
-		[_deletionLock lock];
-		_numberOfListingsRemaining--;
+		[_recursiveDeletionLock lock];
+		_numberOfDeletionListingsRemaining--;
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
@@ -1253,7 +1309,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
-				_numberOfListingsRemaining++;
+				_numberOfDeletionListingsRemaining++;
 				[pathsToList addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 			else
@@ -1281,7 +1337,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			[_emptyDirectoriesToDelete addObject:[dirPath stringByStandardizingPath]];
 		}
-		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
+		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1292,7 +1348,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}
 			[_emptyDirectoriesToDelete removeAllObjects];
 		}
-		[_deletionLock unlock];
+		[_recursiveDeletionLock unlock];
 	}
 	else if (con == _recursiveDownloadConnection) 
 	{
@@ -1310,7 +1366,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 //		}
 		NSString *local = [rec objectForKey:@"local"]; 
 		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
-		_downloadListingsRemaining--;
+		_numberOfDownloadListingsRemaining--;
 		[_recursiveDownloadLock unlock];
 		
 		// setup the local relative directory
@@ -1326,7 +1382,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
 				[_recursiveDownloadLock lock];
-				_downloadListingsRemaining++;
+				_numberOfDownloadListingsRemaining++;
 				[_recursiveDownloadLock unlock];
 				[_recursiveDownloadConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 				[_recursiveDownloadConnection directoryContents];
@@ -1341,7 +1397,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				[CKTransferRecord mergeTextPathRecord:down withRoot:root];
 			}
 		}
-		if (_downloadListingsRemaining == 0)
+		if (_numberOfDownloadListingsRemaining == 0)
 		{
 			[self setProperty:[NSNumber numberWithBool:NO] forKey:@"IsDiscoveringFilesToDownload"];
 			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
@@ -1365,6 +1421,58 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[_recursiveDownloadLock unlock];
 		}
 	}
+	else if (con == _recursiveS3RenameConnection)
+	{
+		[_recursiveS3RenameLock lock];
+		NSString *fromRootPath = [[_recursiveS3RenamesQueue objectAtIndex:0] objectForKey:@"FromDirectoryPath"];
+		NSString *toRootPath = [[_recursiveS3RenamesQueue objectAtIndex:0] objectForKey:@"ToDirectoryPath"];
+		NSString *toDirPath = [toRootPath stringByAppendingPathComponent:[dirPath substringFromIndex:[fromRootPath length]]];
+		[con createDirectory:toDirPath];
+		
+		NSEnumerator *contentsEnumerator = [contents objectEnumerator];
+		NSDictionary *itemDict;
+		while ((itemDict = [contentsEnumerator nextObject]))
+		{
+			NSString *itemRemotePath = [dirPath stringByAppendingPathComponent:[itemDict objectForKey:cxFilenameKey]];
+			if ([[itemDict objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			{
+				_numberOfS3RenameListingsRemaining++;
+				[con changeToDirectory:itemRemotePath];
+				[con directoryContents];
+			}
+			else
+			{
+				_numberOfS3RenamesRemaining++;
+				NSString *newItemRemotePath = [toDirPath stringByAppendingPathComponent:[itemRemotePath lastPathComponent]];
+				[con rename:itemRemotePath to:newItemRemotePath];
+			}
+		}
+		
+		_numberOfS3RenameListingsRemaining--;
+		[_recursivelyRenamedDirectoriesToDelete addObject:dirPath];
+		[_recursiveS3RenameLock unlock];
+	}
+}
+
+- (void)connection:(AbstractConnection *)conn didRename:(NSString *)fromPath to:(NSString *)toPath
+{
+	if (conn == _recursiveS3RenameConnection)
+	{
+		[_recursiveS3RenameLock lock];
+		_numberOfS3RenamesRemaining--;
+		if (_numberOfS3RenamesRemaining == 0 && _numberOfS3RenameListingsRemaining == 0)
+		{
+			NSEnumerator *renamedDirectoriesToDelete = [_recursivelyRenamedDirectoriesToDelete reverseObjectEnumerator];
+			NSString *path;
+			while ((path = [renamedDirectoriesToDelete nextObject]))
+			{
+				_numberOfS3RenameDirectoryDeletionsRemaining++;
+				[conn deleteDirectory:path];
+			}
+			[_recursivelyRenamedDirectoriesToDelete removeAllObjects];
+		}
+		[_recursiveS3RenameLock unlock];
+	}
 }
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
@@ -1375,9 +1483,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 		}
 		
-		[_deletionLock lock];
+		[_recursiveDeletionLock lock];
 		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfListingsRemaining == 0)
+		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1388,7 +1496,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}
 			[_emptyDirectoriesToDelete removeAllObjects];
 		}
-		[_deletionLock unlock];
+		[_recursiveDeletionLock unlock];
 	}
 }
 
@@ -1396,7 +1504,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (con == _recursiveDeletionConnection)
 	{
-		[_deletionLock lock];
+		[_recursiveDeletionLock lock];
 		_numberOfDirDeletionsRemaining--;
 		if (_numberOfDirDeletionsRemaining == 0 && [_recursiveDeletionsQueue count] > 0)
 		{
@@ -1427,7 +1535,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
 				[_emptyDirectoriesToDelete addObject:directoryPath];
-				_numberOfListingsRemaining++;
+				_numberOfDeletionListingsRemaining++;
 				[_recursiveDeletionConnection changeToDirectory:directoryPath];
 				[_recursiveDeletionConnection directoryContents];
 			}
@@ -1445,7 +1553,37 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				}
 			}
 		}
-		[_deletionLock unlock];
+		[_recursiveDeletionLock unlock];
+	}
+	else if (con == _recursiveS3RenameConnection)
+	{
+		[_recursiveS3RenameLock lock];
+		
+		_numberOfS3RenameDirectoryDeletionsRemaining--;
+		if (_numberOfS3RenameDirectoryDeletionsRemaining == 0)
+		{
+			_numberOfS3RenameListingsRemaining = 0;
+			_numberOfS3RenamesRemaining = 0;
+			_numberOfS3RenameDirectoryDeletionsRemaining = 0;
+			myStreamFlags.isRecursivelyRenamingForS3 = NO;
+			NSDictionary *renameDictionary = [_recursiveS3RenamesQueue objectAtIndex:0];
+			NSString *fromDirectoryPath = [NSString stringWithString:[renameDictionary objectForKey:@"FromDirectoryPath"]];
+			NSString *toDirectoryPath = [NSString stringWithString:[renameDictionary objectForKey:@"ToDirectoryPath"]];
+			[_recursiveS3RenamesQueue removeObjectAtIndex:0];
+			
+			if ([_recursiveS3RenamesQueue count] > 0)
+			{
+				[self processRecursiveS3RenamingQueue];
+			}
+			else
+			{
+				[con disconnect];
+				if (_flags.rename)
+					[_forwarder connection:self didRename:fromDirectoryPath to:toDirectoryPath];
+			}
+		}
+		
+		[_recursiveS3RenameLock unlock];
 	}
 }
 

@@ -105,6 +105,8 @@ enum {
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
+- (void)recursivelyRenameS3Directory:(NSString *)fromDirectoryPath to:(NSString *)toDirectoryPath;
+
 - (void)deleteFile:(NSString *)path;
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;

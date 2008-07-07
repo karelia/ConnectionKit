@@ -69,20 +69,29 @@
 	NSLock							*_fileCheckLock;
 	NSString						*_fileCheckInFlight;
 	
+	//Peer connection support for recursive S3 renaming
+	NSMutableArray					*_recursiveS3RenamesQueue;
+	NSMutableArray					*_recursivelyRenamedDirectoriesToDelete;
+	id <AbstractConnectionProtocol>	_recursiveS3RenameConnection;
+	unsigned						_numberOfS3RenameListingsRemaining;
+	unsigned						_numberOfS3RenamesRemaining;
+	unsigned						_numberOfS3RenameDirectoryDeletionsRemaining;
+	NSLock							*_recursiveS3RenameLock;
+	
 	// These peer connections are used to speed up recursive directory deletion
 	NSMutableArray					*_recursiveDeletionsQueue;
 	id								 previousDelegate;
 	NSString						*previousWorkingDirectory;
 	id <AbstractConnectionProtocol> _recursiveDeletionConnection;
-	unsigned						_numberOfListingsRemaining;
+	unsigned						_numberOfDeletionListingsRemaining;
 	unsigned						_numberOfDeletionsRemaining;
 	unsigned						_numberOfDirDeletionsRemaining;
 	NSMutableArray					*_emptyDirectoriesToDelete;
-	NSLock							*_deletionLock;
+	NSLock							*_recursiveDeletionLock;
 	
 	// Peer connection support for recursive download
 	id <AbstractConnectionProtocol> _recursiveDownloadConnection;
-	unsigned						_downloadListingsRemaining;
+	unsigned						_numberOfDownloadListingsRemaining;
 	NSMutableArray					*_recursiveDownloadQueue;
 	NSLock							*_recursiveDownloadLock;
 	
@@ -99,6 +108,7 @@
 		unsigned reportedError : 1;
 		unsigned isDeleting: 1;
 		unsigned isDownloading: 1;
+		unsigned isRecursivelyRenamingForS3: 1;
 		unsigned unused: 22;
 	} myStreamFlags;
 	
