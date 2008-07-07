@@ -33,8 +33,8 @@
 
 + (NSCalendarDate *)calendarDateWithZuluFormat:(NSString *)zulu
 {
-	// 2005-12-15T19:52:13Z
-	NSCalendarDate *d = [NSCalendarDate dateWithString:zulu calendarFormat:@"%Y-%m-%dT%H:%M:%SZ"];
+	// 2005-12-15T19:52:13.000Z
+	NSCalendarDate *d = [NSCalendarDate dateWithString:zulu calendarFormat:@"%Y-%m-%dT%H:%M:%S.000Z"];
 	NSTimeZone *zone = [NSTimeZone defaultTimeZone];
 	int offset = [zone secondsFromGMT];
 	NSCalendarDate *newDate = [NSCalendarDate dateWithTimeIntervalSinceReferenceDate:[d timeIntervalSinceReferenceDate] + offset];
