@@ -970,7 +970,6 @@ NSDictionary *sDataAttributes = nil;
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
-	
 	NSFileManager *fm = [NSFileManager defaultManager];
 	CKTransferRecord *record;
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
