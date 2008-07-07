@@ -233,8 +233,6 @@ NSString *QueueDomain = @"Queuing";
 	
 	BOOL checkAgain = NO;
 	do {
-		
-		
 		BOOL nextTry = 0 != [self numberOfCommands];
 		if (!nextTry)
 		{
