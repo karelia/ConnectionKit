@@ -149,7 +149,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		if (responseRange.location == NSNotFound)
 		{
 			return;
-		}
+		}\
 	}
 	else
 	{

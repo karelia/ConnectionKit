@@ -267,6 +267,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 						[_forwarder connection:self
 							   uploadDidFinish:[[self currentUpload] remotePath]];
 					}
+					if ([[self currentUpload] delegateRespondsToTransferDidFinish])
+					{
+						[[[self currentUpload] delegate] transferDidFinish:[[self currentUpload] delegate]];
+					}
 					break;
 				}
 				case 409:
@@ -356,6 +360,15 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 			}
 			[self dequeueDeletion];
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case ConnectionAwaitingRenameState:
+		{
+			if (_flags.rename)
+				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1]];
+			[_fileRenames removeObjectAtIndex:0];
+			[_fileRenames removeObjectAtIndex:0];
 			[self setState:ConnectionIdleState];
 			break;
 		}
@@ -621,6 +634,16 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
     NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	CKHTTPRequest *req = [CKHTTPRequest requestWithMethod:@"MOVE" uri:fromPath];
+	[req setHeader:toPath  forKey:@"Destination"];
+	ConnectionCommand *cmd = [ConnectionCommand command:req
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingRenameState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueRename:fromPath];
+	[self queueRename:toPath];
+	[self queueCommand:cmd];
 }
 
 - (void)deleteFile:(NSString *)path

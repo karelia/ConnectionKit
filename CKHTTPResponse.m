@@ -193,7 +193,9 @@ static NSMutableDictionary *responseMap = nil;
 		if (!isChunkedTransfer)
 		{
 			unsigned contentLength = [[headers objectForKey:@"Content-Length"] intValue];
-			if (contentLength > 0)
+			//S3 sends responses which are valid and complete but have Content-Length = 0. Confirmations of upload, delete, etc.
+			BOOL isAmazonS3 = ([headers objectForKey:@"Server"] && [[headers objectForKey:@"Server"] isEqualToString:@"AmazonS3"]);
+			if (contentLength > 0 || isAmazonS3) 
 			{
 				unsigned end = start + contentLength;
 				
@@ -206,9 +208,6 @@ static NSMutableDictionary *responseMap = nil;
 			else
 			{
 				return packetRange;
-//				// it must be just a response with just headers
-//				packetRange.location = 0;
-//				packetRange.length = start;
 			}
 		}
 		else

@@ -130,40 +130,23 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 {
 	return @"s3";
 }
-
-- (NSString *)internalRepresentationWithPath:(NSString *)path
+- (NSString *)standardizePath:(NSString *)unstandardPath
 {
-	NSString *separator = [self propertyForKey:@"S3PathSeparator"];
-	if (!separator)
-	{
-		separator = S3PathSeparator;
-	}
-	NSString *bucket = [path firstPathComponent];
-	NSString *p = [[[path stringByDeletingFirstPathComponent] componentsSeparatedByString:@"/"] componentsJoinedByString:separator];
-	return [[@"/" stringByAppendingString:bucket] stringByAppendingPathComponent:p];
+	if (![unstandardPath hasPrefix:@"/"])
+		unstandardPath = [@"/" stringByAppendingString:unstandardPath];
+	return unstandardPath;
 }
-
-- (NSString *)externalRepresentationWithPath:(NSString *)internalPath
+- (NSString *)fixPathToBeDirectoryPath:(NSString *)dirPath
 {
-	NSString *separator = [self propertyForKey:@"S3PathSeparator"];
-	if (!separator)
-	{
-		separator = S3PathSeparator;
-	}
-	NSMutableArray *comps = [[[internalPath componentsSeparatedByString:separator] mutableCopy] autorelease];
-	NSString *bucket = [[[comps objectAtIndex:0] retain] autorelease];
-	if ([bucket isEqualToString:@""])
-	{
-		bucket = @"/";
-	}
-	[comps removeObjectAtIndex:0];
-	NSString *p = [comps componentsJoinedByString:@"/"];
-	p = [bucket stringByAppendingPathComponent:p]; // doesn't add trailing /
-	if ([internalPath hasSuffix:separator])
-	{
-		p = [p stringByAppendingString:@"/"];
-	}
-	return p;
+	if (![dirPath hasSuffix:@"/"])
+		dirPath = [dirPath stringByAppendingString:@"/"];
+	return [self standardizePath:dirPath];
+}
+- (NSString *)fixPathToBeFilePath:(NSString *)filePath
+{
+	if ([filePath hasSuffix:@"/"])
+		filePath = [filePath substringToIndex:[filePath length] - 1];
+	return [self standardizePath:filePath];
 }
 
 #pragma mark -
@@ -289,7 +272,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				while ((cur = [e nextObject]))
 				{
-					NSString *name = [self externalRepresentationWithPath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
+					NSString *name = [self standardizePath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
 					NSString *date = [[[cur elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
 					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
 					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
@@ -331,7 +314,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				if (_flags.directoryContents)
 				{
-					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self externalRepresentationWithPath:myCurrentDirectory]];
+					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self fixPathToBeDirectoryPath:myCurrentDirectory]];
 				}
 			}
 			break;
@@ -376,9 +359,24 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			if (_flags.createDirectory)
 			{
-				[_forwarder connection:self didCreateDirectory:[self externalRepresentationWithPath:[[response request] uri]]];
+				[_forwarder connection:self didCreateDirectory:[self fixPathToBeDirectoryPath:[[response request] uri]]];
 			}
+			break;
 		}
+		case ConnectionAwaitingRenameState:
+		{
+			if (_flags.rename)
+				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1]];
+			[_fileRenames removeObjectAtIndex:0];
+			[_fileRenames removeObjectAtIndex:0];			
+			break;
+		}
+		case ConnectionRenameFromState:
+		{
+			[self setState:ConnectionRenameToState];
+			return;
+		}
+		default: break;
 	}
 	[self setState:ConnectionIdleState];
 }
@@ -391,25 +389,25 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			NSDictionary *headers = [CKHTTPResponse headersWithData:myResponseBuffer];
 			NSString *length = [headers objectForKey:@"Content-Length"];
-			if (length)
+			if (length > 0)
 			{
 				NSScanner *scanner = [NSScanner scannerWithString:length];
 				long long daBytes = 0;
 				[scanner scanLongLong:&daBytes];
 				bytesToTransfer = daBytes;
 				
-				NSDictionary *download = [self currentDownload];
+				CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
 				NSFileManager *fm = [NSFileManager defaultManager];
 				BOOL isDir;
-				if ([fm fileExistsAtPath:[download objectForKey:QueueDownloadDestinationFileKey] isDirectory:&isDir] && !isDir)
+				if ([fm fileExistsAtPath:[record propertyForKey:QueueDownloadDestinationFileKey] isDirectory:&isDir] && !isDir)
 				{
-					[fm removeFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey] handler:nil];
+					[fm removeFileAtPath:[record propertyForKey:QueueDownloadDestinationFileKey] handler:nil];
 				}
-				[fm createFileAtPath:[download objectForKey:QueueDownloadDestinationFileKey]
+				[fm createFileAtPath:[record propertyForKey:QueueDownloadDestinationFileKey]
 							contents:nil
 						  attributes:nil];
 				[myDownloadHandle release];
-				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[download objectForKey:QueueDownloadDestinationFileKey]] retain];
+				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[record propertyForKey:QueueDownloadDestinationFileKey]] retain];
 				
 				// file data starts after the header
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -431,13 +429,13 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				if (_flags.downloadProgressed)
 				{
-					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[fileData length]];
+					[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[fileData length]];
 				}
 				
 				if (_flags.downloadPercent)
 				{
 					int percent = (100 * bytesTransferred) / bytesToTransfer;
-					[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+					[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
 				}
 			}
 		}
@@ -447,15 +445,17 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myResponseBuffer setLength:0]; 
 			bytesTransferred += [data length];
 			
+			CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+			
 			if (_flags.downloadProgressed)
 			{
-				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
+				[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
 			}
 			
 			if (_flags.downloadPercent)
 			{
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[_forwarder connection:self download:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+				[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
 			}
 		}
 		
@@ -467,10 +467,10 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myDownloadHandle closeFile];
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
-			
 			if (_flags.downloadFinished)
 			{
-				[_forwarder connection:self downloadDidFinish:[[self currentDownload] objectForKey:QueueDownloadRemoteFileKey]];
+				CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey]];
 			}
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
@@ -545,7 +545,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			bytesTransferred += length;
 		}
-		
+
 		if (bytesToTransfer > 0)
 		{
 			int percent = (100 * bytesTransferred) / bytesToTransfer;
@@ -565,7 +565,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				myLastPercent = percent;
 			}
 		}
-		
 		if (_flags.uploadProgressed)
 		{
 			[_forwarder connection:self 
@@ -589,6 +588,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	{
 		dirPath = [dirPath stringByAppendingString:@"/"];
 	}
+	
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [dirPath copy];
 	if (_flags.changeDirectory)
@@ -627,20 +627,14 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	if (![dirPath hasSuffix:@"/"])
-	{
-		dirPath = [dirPath stringByAppendingString:@"/"];
-	}
+		dirPath = [dirPath stringByAppendingString:@"/"]; //Trailing slash indicates it's a directory.
 	
-	if ([[dirPath componentsSeparatedByString:@"/"] count] > 3) // 1 - first slash, 2 - bucket, 3 - trailing slash
-	{
-		dirPath = [self internalRepresentationWithPath:dirPath];
-	}
-	else
+	if ([[dirPath componentsSeparatedByString:@"/"] count] < 3)
 	{
 		// we are creating a bucket, so remove the trailing /
 		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
 	}
-		
+	
 	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -656,13 +650,43 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	//we don't support setting permissions
 	[self createDirectory:dirPath];
 }
+- (void)rename:(NSString *)fromPath to:(NSString *)toPath
+{
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+    NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	
+	/* 
+	 IMPORTANT NOTES ABOUT RENAMING/MOVING ON S3:
+	 Renaming (Moving) in the sense that we have in FTP/SFTP/WebDAV is not possible with Amazon S3 at the moment. This currently implementation is a temporary workaround until a RENAME or MOVE command is implemented into the API by Amazon.
+	 
+	 What we're doing here is really copying the fromPath to the toPath (with the COPY command), and then deleting fromPath. Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameDirectory:to: which is implemented and handled by StreamBasedConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
+	 */
+	
+	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:toPath];
+	[copyRequest setHeader:fromPath forKey:@"x-amz-copy-source"];
+	ConnectionCommand *copyCommand = [ConnectionCommand command:copyRequest
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionRenameFromState
+											  dependant:nil
+											   userInfo:nil];
+	CKHTTPRequest *deleteRequest = [CKHTTPRequest requestWithMethod:@"DELETE" uri:fromPath];
+	ConnectionCommand *deleteCommand = [ConnectionCommand command:deleteRequest
+													   awaitState:ConnectionRenameToState
+														sentState:ConnectionAwaitingRenameState
+														dependant:copyCommand
+														 userInfo:nil];
+	[self queueRename:fromPath];
+	[self queueRename:toPath];
+	[self queueCommand:copyCommand];	
+	[self queueCommand:deleteCommand];
+}
 
 - (void)deleteFile:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
 		
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[self internalRepresentationWithPath:path]] autorelease];
+															uri:[self fixPathToBeFilePath:path]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteFileState
@@ -675,9 +699,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 - (void)deleteDirectory:(NSString *)dirPath
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
-		
+	
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[self internalRepresentationWithPath:dirPath]] autorelease];
+															uri:[self fixPathToBeDirectoryPath:dirPath]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteDirectoryState
@@ -709,7 +733,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 {
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
-																	   uri:[self internalRepresentationWithPath:remotePath]];
+																	   uri:[self fixPathToBeFilePath:remotePath]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
 	
 	ConnectionCommand *cmd = [ConnectionCommand command:req
@@ -745,18 +769,22 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
-	NSString *thePath = [NSString stringWithFormat:@"/%@/%@", [remotePath firstPathComponent], [remotePath stringByDeletingFirstPathComponent]];
-	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:thePath];
+	remotePath = [self fixPathToBeFilePath:remotePath];
+	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:remotePath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionUploadingFileState
 											  dependant:nil
 											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:data forKey:QueueUploadLocalDataKey];
-	[attribs setObject:remotePath forKey:QueueUploadRemoteFileKey];
 	
-	[self queueUpload:attribs];
+	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil 
+																			data:data
+																		  offset:0
+																		  remote:remotePath
+																		delegate:nil
+																		userInfo:nil];
+	
+	[self queueUpload:upload];	
 	[self queueCommand:cmd];
 }
 
@@ -774,18 +802,51 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	NSString *thePath = [NSString stringWithFormat:@"/%@/%@", [remotePath firstPathComponent], [remotePath stringByDeletingFirstPathComponent]];
-	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:thePath to:dirPath];
+	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
+}
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
+{
+	remotePath = [self fixPathToBeFilePath:remotePath];
+	NSString *localPath = [dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
+	
+	if (!flag)
+	{
+		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
+		{
+			if (_flags.error) {
+				NSError *error = [NSError errorWithDomain:S3ErrorDomain
+													 code:S3DownloadFileExists
+												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error")
+																					  forKey:NSLocalizedDescriptionKey]];
+				[_forwarder connection:self didReceiveError:error];
+			}
+			return nil;
+		}
+	}
+	
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
+																			  data:nil
+																			offset:0
+																			remote:remotePath
+																		  delegate:(delegate) ? delegate : record
+																		  userInfo:record];
+	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
+	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
+	[record setProperty:[NSNumber numberWithInt:0] forKey:QueueDownloadTransferPercentReceived];
+	[self queueDownload:download];
+	
+	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:r
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDownloadingFileState
 											  dependant:nil
 											   userInfo:nil];
-	NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-	[attribs setObject:remotePath forKey:QueueDownloadRemoteFileKey];
-	[attribs setObject:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:QueueDownloadDestinationFileKey];
-	[self queueDownload:attribs];
 	[self queueCommand:cmd];
+	return record;
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
@@ -797,7 +858,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 {
 	NSString *theDir = dir != nil ? dir : myCurrentDirectory;
 
-	NSString *uri = [NSString stringWithFormat:@"/%@?max-keys=1000", [theDir firstPathComponent]];
+	NSString *uri = [NSString stringWithFormat:@"/%@", [theDir firstPathComponent]];
 	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:uri];
 	[myCurrentRequest autorelease];
 	myCurrentRequest = r;
@@ -833,7 +894,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
 													  target:self
-												   arguments:[NSArray arrayWithObject:[self internalRepresentationWithPath:dirPath]]];
+												   arguments:[NSArray arrayWithObject:[self fixPathToBeDirectoryPath:dirPath]]];
 	ConnectionCommand *cmd = [ConnectionCommand command:inv 
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionAwaitingDirectoryContentsState

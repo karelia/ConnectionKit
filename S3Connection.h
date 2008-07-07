@@ -46,3 +46,5 @@
 extern NSString *S3StorageClassKey; // file attribute extension keys
 
 extern NSString *S3ErrorDomain;
+
+enum { S3DownloadFileExists = 100 };
