@@ -657,9 +657,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	
 	/* 
 	 IMPORTANT NOTES ABOUT RENAMING/MOVING ON S3:
-	 Renaming (Moving) in the sense that we have in FTP/SFTP/WebDAV is not possible with Amazon S3 at the moment. This currently implementation is a temporary workaround until a RENAME or MOVE command is implemented into the API by Amazon.
+	 Renaming (Moving) in the sense that we have in FTP/SFTP/WebDAV is not possible with Amazon S3 at the moment. This current implementation is a temporary workaround until a RENAME or MOVE command is implemented into the API by Amazon.
 	 
-	 What we're doing here is really copying the fromPath to the toPath (with the COPY command), and then deleting fromPath. Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameDirectory:to: which is implemented and handled by StreamBasedConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
+	 What we're doing here is really copying the fromPath to the toPath (with the COPY command), and then deleting fromPath. Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameS3Directory:to: which is implemented and handled by StreamBasedConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
 	 */
 	
 	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:toPath];
