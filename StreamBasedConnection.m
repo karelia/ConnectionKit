@@ -43,6 +43,7 @@
 #import "CKCacheableHost.h"
 #import "CKTransferRecord.h"
 #import "AbstractConnectionProtocol.h"
+#import "CKInternalTransferRecord.h"
 #import "NSString+Connection.h"
 
 #import <sys/types.h> 
@@ -1076,6 +1077,16 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Recursive Downloading Support
+- (void)recursivelySendTransferDidFinishMessage:(CKTransferRecord *)record
+{
+	[record transferDidFinish:record];
+	NSEnumerator *contentsEnumerator = [[record contents] objectEnumerator];
+	CKTransferRecord *child;
+	while ((child = [contentsEnumerator nextObject]))
+	{
+		[self recursivelySendTransferDidFinishMessage:child];
+	}
+}
 - (void)temporarilyTakeOverRecursiveDownloadingDelegate
 {
 	previousWorkingDirectory = [[NSString stringWithString:[self currentDirectory]] retain];
@@ -1402,7 +1413,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
 			{
 				//We tried to download an entirely empty folder. We're finished.
-				[_forwarder connection:self downloadDidFinish:dirPath];
+				if (_flags.downloadFinished)
+					[_forwarder connection:self downloadDidFinish:dirPath];
+				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
+				[self recursivelySendTransferDidFinishMessage:root];
 			}
 			[_recursiveDownloadLock lock];
 			myStreamFlags.isDownloading = NO;
