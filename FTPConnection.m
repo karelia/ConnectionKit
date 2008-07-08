@@ -1378,11 +1378,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				CKInternalTransferRecord *upload = [self currentUpload];
 				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
+				[self dequeueUpload];
 			}
 			else if (GET_STATE == ConnectionDownloadingFileState)
 			{
 				CKInternalTransferRecord *download = [self currentDownload];
 				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
+				[self dequeueDownload];
 			}
 			else if (GET_STATE == ConnectionCreateDirectoryState)
 			{
@@ -1406,7 +1408,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
 				[self dequeueDeletion];
 			}
-			else if (GET_STATE == FTPChangeDirectoryListingStyle || GET_STATE == ConnectionSettingPermissionsState)			
+			else if (GET_STATE == ConnectionSettingPermissionsState)
+			{
+				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
+				[self dequeuePermissionChange];
+			}
+			else if (GET_STATE == FTPChangeDirectoryListingStyle)
 			{
 				[self setState:ConnectionIdleState];
 				break;

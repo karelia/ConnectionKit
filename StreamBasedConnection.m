@@ -1170,8 +1170,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		return;
 	}
 	else if (con == _recursiveDeletionConnection &&
-			 [[error localizedDescription] containsSubstring:@"failed to delete directory"] &&
-			 [[error localizedFailureReason] containsSubstring:@"permission denied"])
+			 [[error localizedDescription] containsSubstring:@"failed to delete directory"])
 	{
 		//Permission Error while deleting a directory in recursive deletion. We handle it as if it successfully deleted the directory. If the error is for the actual ancestor directory, we send out an error.
 		[_recursiveDeletionLock lock];
