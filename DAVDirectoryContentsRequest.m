@@ -29,6 +29,7 @@
 
 #import "DAVDirectoryContentsRequest.h"
 #import "DAVDirectoryContentsResponse.h"
+#import "NSString+Connection.h"
 
 @implementation DAVDirectoryContentsRequest
 
@@ -48,7 +49,8 @@
 		uri = [NSString stringWithFormat:@"%@/", uri];
 	}
 	
-	if (self = [super initWithMethod:@"PROPFIND" uri:uri])
+	//We are not passed a legally encoded URI because we need to keep myPath around as the original. 
+	if (self = [super initWithMethod:@"PROPFIND" uri:[uri encodeLegally]])
 	{
 		[self setHeader:@"1" forKey:@"Depth"];
 		
