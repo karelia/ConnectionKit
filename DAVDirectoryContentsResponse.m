@@ -61,7 +61,7 @@
 		
 		// filename
 		NSString *href = [[[response elementsForLocalName:@"href" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		if ([[href lowercaseString] isEqualToString:[[self path] lowercaseString]])
+		if ([[href lowercaseString] isEqualToString:[[[self path] encodeLegally] lowercaseString]])
 		{
 			continue;
 		}
