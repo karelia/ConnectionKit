@@ -775,6 +775,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self setState:ConnectionSentFeatureRequestState];
 				}
 			}
+			if (GET_STATE == ConnectionDeleteFileState)
+			{
+				if (_flags.deleteFile) 
+				{
+					[_forwarder connection:self didDeleteFile:[self currentDeletion]];
+				}
+				[self dequeueDeletion];
+			}
 			break;
 		}
 		case 221:
