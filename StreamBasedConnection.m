@@ -1263,7 +1263,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDownloadConnection release];
 		_recursiveDownloadConnection = nil;
 	}
-	else if (con = _recursiveS3RenameConnection)
+	else if (con == _recursiveS3RenameConnection)
 	{
 		[_recursiveS3RenameConnection release];
 		_recursiveS3RenameConnection = nil;
