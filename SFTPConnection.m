@@ -107,12 +107,12 @@ static char *lsform;
 	return [self numberOfUploads] + [self numberOfDownloads];
 }
 
-- (int)numberOfUploads
+- (unsigned)numberOfUploads
 {
 	return [uploadQueue count];
 }
 
-- (int)numberOfDownloads
+- (unsigned)numberOfDownloads
 {
 	return [downloadQueue count];
 }
@@ -414,19 +414,29 @@ static char *lsform;
 
 - (void)writeSFTPCommand:(void *)cmd
 {
-	int wr;
-	if ((wr = write(master, cmd, strlen(cmd))) != strlen(cmd))
+	size_t commandLength = strlen(cmd);
+	if ( commandLength > 0 )
 	{
-		goto WRITE_ERROR;
+		// Sandvox, at least, consistently gets -1 back after sending quit
+		// this trap allows execution to continue
+		// THIS MAY BE AN ISSUE FOR OTHER APPS
+		BOOL isQuitCommand = (0 == strcmp(cmd, "quit"));
+
+		ssize_t bytesWritten = write(master, cmd, strlen(cmd));
+		if ( bytesWritten != commandLength && !isQuitCommand )
+		{
+			NSLog(@"writeSFTPCommand: %@ failed writing command", [NSString stringWithUTF8String:cmd]);
+			exit(2);
+		}
+		
+		commandLength = strlen("\n");
+		bytesWritten = write(master, "\n", strlen("\n"));
+		if ( bytesWritten != commandLength && !isQuitCommand )
+		{
+			NSLog(@"writeSFTPCommand %@ failed writing newline", [NSString stringWithUTF8String:cmd]);
+			exit(2);
+		}
 	}
-	if ((wr = write(master, "\n", strlen("\n"))) != strlen("\n"))
-	{
-		goto WRITE_ERROR;
-	}
-	return;
-WRITE_ERROR:
-	NSLog(@"Write Failed, wrong number of bytes");
-	exit(2);
 }
 
 - (void)writeSFTPCommandWithString:(NSString *)commandString
@@ -458,6 +468,7 @@ WRITE_ERROR:
 {
 	NSPort *receivePort = [NSPort port];
 	NSPort *sendPort = [NSPort port];
+	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
 	NSConnection *connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
 	[connectionToTServer setRootObject:self];
 	theSFTPTServer = nil;
