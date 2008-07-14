@@ -1616,6 +1616,7 @@ if (![fn isEqualToString:@"."] && \
 			case 8: //No Group
 				//-rwx------ 1 user            2252 May 22 04:20 myFile.tiff
 				filenameColumnIndex = 6;
+				break;
 			default:
 				filenameColumnIndex = [words count] - 1;
 				break;
@@ -1852,6 +1853,7 @@ if (![fn isEqualToString:@"."] && \
 			if (*data++ == 'r')		perm |= 04;
 			if (*data++ == 'w')		perm |= 02;
 			if (*data++ == 'x')		perm |= 01;
+			// clang flags data++ above as not being read, but it's just being scanned and skipped
 			[attributes setObject:[NSNumber numberWithUnsignedLong:perm] forKey:NSFilePosixPermissions];
 			break;
 		}
@@ -1859,7 +1861,7 @@ if (![fn isEqualToString:@"."] && \
 		{
 			while (*data != ']')
 				data++;
-			data++;
+			data++; // clang flags this but data is just being scanned past here
 			break;
 		}
 		default:

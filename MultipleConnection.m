@@ -271,6 +271,7 @@
 	NSEnumerator *e = [_connections objectEnumerator];
 	id<AbstractConnectionProtocol>cur;
 	
+#warning clang flags cur as being enumerated but never used?
 	while (cur = [e nextObject]) {
 		[self createDirectory:dirPath];
 		[self setPermissions:permissions forFile:dirPath];

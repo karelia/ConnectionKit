@@ -45,6 +45,7 @@ sshversion()
         } else {
             if ( strlen( sshpath ) + strlen( "/ssh" ) >= MAXPATHLEN ) {
                 syslog( LOG_ERR, "%sssh: too long", sshpath );
+				CFRelease( sshbinary );
                 return( -1 );
             }
             strcat( sshpath, "/ssh" );

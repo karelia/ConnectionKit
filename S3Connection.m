@@ -188,9 +188,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	if (_flags.error)
 	{
 		NSError *error = nil;
-		NSXMLDocument *doc = [[NSXMLDocument alloc] initWithData:[response content] 
+		NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithData:[response content] 
 														 options:NSXMLDocumentTidyXML
-														   error:&error];
+														   error:&error] autorelease];
 		NSString *desc = [[[[doc rootElement] nodesForXPath:@"//Error/Message" error:&error] objectAtIndex:0] stringValue];
 		NSString *code = [[[[doc rootElement] nodesForXPath:@"//Error/Code" error:&error] objectAtIndex:0] stringValue];
 		
@@ -236,9 +236,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			if ([response code] / 100 == 2)
 			{
 				NSError *error = nil;
-				NSXMLDocument *doc = [[NSXMLDocument alloc] initWithData:[response content] 
+				NSXMLDocument *doc = [[[NSXMLDocument alloc] initWithData:[response content] 
 																 options:NSXMLDocumentTidyXML
-																   error:&error];
+																   error:&error] autorelease];
 				KTLog(ProtocolDomain, KTLogDebug, @"\n%@", [doc XMLStringWithOptions:NSXMLNodePrettyPrint]);
 				
 				//do the buckets first

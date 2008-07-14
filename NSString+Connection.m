@@ -103,14 +103,13 @@
 	NSMutableArray *result = [NSMutableArray array]; 
 	NSScanner *scanner = [NSScanner scannerWithString:self]; 
 	NSString *chunk = nil; 
-	BOOL found, sepFound; 
 	[scanner setCharactersToBeSkipped:nil]; 
-	sepFound = [scanner scanCharactersFromSet:set intoString:(NSString **)nil]; // skip any preceding separators 
+	BOOL sepFound = [scanner scanCharactersFromSet:set intoString:(NSString **)nil]; // skip any preceding separators 
 	if(sepFound) 
 	{ // if initial separator, start with empty component 
 		[result addObject:@""]; 
 	} 
-	while ((found = [scanner scanUpToCharactersFromSet:set intoString:&chunk])) 
+	while ([scanner scanUpToCharactersFromSet:set intoString:&chunk]) 
 	{ 
 		[result addObject:chunk]; 
 		sepFound = [scanner scanCharactersFromSet: set intoString: (NSString **) nil]; 

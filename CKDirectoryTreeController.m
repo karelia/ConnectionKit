@@ -2016,12 +2016,11 @@ static NSMutableParagraphStyle *sStyle = nil;
 	[label drawInRect:labelRect];
 	[label release];
 	
-	NSAffineTransform *flip;
+	NSAffineTransform *flip = [NSAffineTransform transform]; // initializing here since used in two places below
 	
 	if ([controlView isFlipped]) 
 	{
 		[[NSGraphicsContext currentContext] saveGraphicsState];
-		flip = [NSAffineTransform transform];
 		[flip translateXBy:0 yBy:NSMaxY(imageRect)];
 		[flip scaleXBy:1 yBy:-1];
 		[flip concat];
