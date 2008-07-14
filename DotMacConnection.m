@@ -92,6 +92,8 @@
 
 - (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
+	BOOL result = NO;
+	
 	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
 	if (accountName)
 	{
@@ -112,23 +114,24 @@
 		
 		if (noErr == theStatus)
 		{
-			buffer[passwordLen] = '\0';		// make it a legal C string by appending 0
-			if (password)
-				*password = [NSString stringWithUTF8String:buffer];
+			if (passwordLen > 0)
+			{
+				*password = [[[NSString alloc] initWithBytes:buffer length:passwordLen encoding:[NSString defaultCStringEncoding]] autorelease];
+			}
 			else
-				*password = nil;
+			{
+				*password = @""; // if we have noErr but also no length, password is empty
+			}
 
-			theStatus = SecKeychainItemFreeContent (
-												 NULL,           //No attribute data to release
-												 buffer    //Release data buffer allocated by 
-																 //SecKeychainFindGenericPassword
-												 );
+			// release buffer allocated by SecKeychainFindGenericPassword
+			theStatus = SecKeychainItemFreeContent(NULL, buffer);
 			
 			*account = accountName;
-			return YES;
+			result = YES;
 		}
 	}
-	return NO;
+	
+	return result;
 }
 
 - (id)initWithHost:(NSString *)host
