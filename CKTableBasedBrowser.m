@@ -382,7 +382,7 @@ static Class sCellClass = nil;
 
 - (void)selectItems:(NSArray *)items
 {
-	unsigned i, c = [items count];
+	//unsigned i, c = [items count];
 	
 	// remove current selection
 	[mySelection removeAllObjects];
@@ -392,17 +392,19 @@ static Class sCellClass = nil;
 		// [[myColumns objectAtIndex:0] deselectAll:self]; 
 	}
 	
-	NSTableView *firstSelectedItemColumn = nil;
+	//NSTableView *firstSelectedItemColumn = nil;
 	
 	if ([items count] > 0)
 	{
-		unsigned col, row;
+		//unsigned col, row;
 		id item = [items objectAtIndex:0];
 		
 		// set the path based on the first item
 		NSString *path = [myDataSource tableBrowser:self pathForItem:item];
 		[self setPath:path];
-		path = [myDataSource tableBrowser:self pathForItem:item];
+		
+		// this assignment to path does not appear to be used
+		// path = [myDataSource tableBrowser:self pathForItem:item];
 	}
 	
 //	for (i = 0; i < c; i++)
@@ -1115,7 +1117,9 @@ static Class sCellClass = nil;
 
 - (void)tableSelectedCell:(id)sender notifyTarget:(BOOL)flag scrollToVisible:(BOOL)showColumn
 {
-	NSString *lastSelectedPath = [[mySelection lastObject] copy];
+	/*
+	NSString *lastSelectedPath = [[[mySelection lastObject] copy] autorelease];
+	 */
 	
 	if (!myFlags.allowsMultipleSelection)
 	{
@@ -1183,6 +1187,8 @@ static Class sCellClass = nil;
 	 - selection is in the current directory
 	 - multiple selection is maintained to the last column
 	 */
+	
+	/* this code seems to be unused...
 	id currentContainerItem = nil;
     id lastSelectedItem = [myDataSource tableBrowser:self itemForPath:lastSelectedPath];
     
@@ -1194,6 +1200,7 @@ static Class sCellClass = nil;
 	{
 		currentContainerItem = [myDataSource tableBrowser:self itemForPath:path];
 	}
+	*/
 	
 	// remove the leaf view if it is visible
 	[self removeLeafView];

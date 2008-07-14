@@ -213,7 +213,7 @@
 	
 	uint8_t *find = (uint8_t *)[data bytes];
 	uint8_t *str = (uint8_t *)[self bytes];
-	unsigned i = 0, j = 1, start = 0, end = 0;
+	unsigned i = 0, j = 1, start = 0; // , end = 0;
 	
 	//wind it forward to the start of the range
 	unsigned offset = range.location;
@@ -232,7 +232,7 @@
 				}
 				j++;
 			}
-			end = j;
+			//end = j;
 			if (j == [data length])
 			{
 				r.location = start + offset;

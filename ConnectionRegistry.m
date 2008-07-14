@@ -310,7 +310,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	}
 	
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
-	unsigned idx;
+	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
 	if (!myUsesLeopardStyleSourceList)
 	{
 		idx = [myConnections indexOfObject:myBonjour];
@@ -411,9 +411,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	}
 	[self willChangeValueForKey:@"connections"];
 	int index = [myConnections indexOfObjectIdenticalTo:item];
-	id obj = [myConnections objectAtIndex:index];
+	//id obj = [myConnections objectAtIndex:index];
 	[myConnections removeObjectAtIndex:index];
-	obj = nil;
+	//obj = nil;
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
 }

@@ -124,7 +124,7 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		int version = [[dictionary objectForKey:@"version"] intValue];
+		(void) [[dictionary objectForKey:@"version"] intValue];
 #pragma unused (version)
 		myUUID = [[dictionary objectForKey:@"uuid"] copy];
 		if (!myUUID)
@@ -207,7 +207,7 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		int version = [coder decodeIntForKey:@"version"];
+		(void) [coder decodeIntForKey:@"version"];
 #pragma unused (version)
 		myUUID = [[coder decodeObjectForKey:@"uuid"] copy];
 		if (!myUUID)
@@ -837,9 +837,8 @@ static NSImage *sHostIcon = nil;
 	
 	// hide the .app extension
 	
-	OSStatus ret;
 	NSURL *url = [NSURL fileURLWithPath:app];
-	ret = LSSetExtensionHiddenForURL((CFURLRef)url, true);
+	(void)LSSetExtensionHiddenForURL((CFURLRef)url, true);
 	
 	return app;
 }

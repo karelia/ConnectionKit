@@ -197,12 +197,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)sendCommand:(id)command
 {
+	/* clang flagged these as not being used
 	NSString *stringOnlyCommand = command;
 	if ([command isKindOfClass:[NSInvocation class]])
 	{
 		stringOnlyCommand = NSStringFromSelector([command selector]);
 	}
-	
+	*/ 
 	
 	
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];

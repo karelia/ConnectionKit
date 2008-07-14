@@ -1753,9 +1753,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		size_t written = 0;
 		
-		int ret;
-		if (ret = SSLWrite(mySSLContext, buffer + processed, totalLength - processed, &written))
+		int ret = SSLWrite(mySSLContext, buffer + processed, totalLength - processed, &written);
+		if (noErr != ret)
+		{
 			return nil;
+		}
 		
 		processed += written;
 	}

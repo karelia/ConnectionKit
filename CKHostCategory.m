@@ -124,7 +124,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 {
 	if (self = [super init])
 	{
-		int version = [coder decodeIntForKey:@"version"];
+		(void) [coder decodeIntForKey:@"version"];
 #pragma unused (version)
 		myName = [[coder decodeObjectForKey:@"name"] copy];
 		myIsEditable = YES;

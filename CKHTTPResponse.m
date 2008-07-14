@@ -293,7 +293,6 @@ static NSMutableDictionary *responseMap = nil;
 			if ([line isEqualToString:@""])
 			{
 				//we hit the end of the headers
-				i++;
 				break;
 			}
 			NSRange colon = [line rangeOfString:@":"];

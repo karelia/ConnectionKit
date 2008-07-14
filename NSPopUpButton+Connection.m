@@ -39,12 +39,12 @@
 	NSArray *items = [self itemArray];
 	NSEnumerator *e = [items objectEnumerator];
 	NSMenuItem *cur;
-	int i = 0;
+	//int i = 0;
 	
 	while ((cur = [e nextObject]))
 	{
 		if ([[cur representedObject] isEqual:representedObject]) {
-			i++;
+			//i++;
 			break;
 		}
 		
