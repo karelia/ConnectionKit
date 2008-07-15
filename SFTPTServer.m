@@ -241,7 +241,7 @@ char	**environ;
 	
 	NSString *formattedAmountString = [NSString stringWithUTF8String:t_amount];
 	char *amountCharacter;
-	unsigned int baseMultiplier = 1.0;
+	unsigned long long baseMultiplier = 1.0;
 	if ([formattedAmountString hasSuffix:@"KB"])
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
@@ -264,7 +264,7 @@ char	**environ;
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfKBString UTF8String];
-		baseMultiplier = pow(1024, 3);
+		baseMultiplier = pow(1024, 4);
 	}	
 	else
 	{
@@ -275,11 +275,19 @@ char	**environ;
 	amountTransferred *= baseMultiplier;
     if ( uploading ) 
 	{
-		[wrapperConnection upload:[wrapperConnection currentUploadInfo] didProgressTo:progressPercentage withEstimatedCompletionIn:eta givenTransferRateOf:transferRate amountTransferred:amountTransferred];
+		[wrapperConnection upload:[wrapperConnection currentUploadInfo]
+					didProgressTo:progressPercentage
+		withEstimatedCompletionIn:eta
+			  givenTransferRateOf:transferRate
+				amountTransferred:amountTransferred];
     }
 	else
 	{
-		[wrapperConnection download:[wrapperConnection currentDownloadInfo] didProgressTo:progressPercentage withEstimatedCompletionIn:eta givenTransferRateOf:transferRate amountTransferred:amountTransferred];		
+		[wrapperConnection download:[wrapperConnection currentDownloadInfo]
+					  didProgressTo:progressPercentage
+		  withEstimatedCompletionIn:eta
+				givenTransferRateOf:transferRate
+				  amountTransferred:amountTransferred];		
     }
     
     free( tmp );
@@ -479,6 +487,7 @@ char	**environ;
 				else if ([self buffer:serverResponseBuffer containsString:"Couldn't create directory"])
 				{
 					localizedErrorString = @"Create directory operation failed";
+					failureReasonTitle = @"File exists";
 					createDirectoryError = YES;
 				}
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
