@@ -96,6 +96,8 @@
 
 - (BOOL)canConnect;
 
+- (void)didChange;
+
 @end
 
 extern NSString *CKHostChanged;
