@@ -3,31 +3,16 @@
 <plist version="1.0">
 <dict>
 	<key>IBDocumentLocation</key>
-	<string>135 51 356 240 0 0 1152 746 </string>
-	<key>IBEditorPositions</key>
-	<dict>
-		<key>5</key>
-		<string>268 300 615 397 0 0 1152 746 </string>
-		<key>54</key>
-		<string>459 323 234 350 0 0 1152 746 </string>
-	</dict>
+	<string>69 10 356 240 0 0 1920 1178 </string>
 	<key>IBFramework Version</key>
 	<string>446.1</string>
+	<key>IBLastKnownRelativeProjectPath</key>
+	<string>../../UberUpload.xcodeproj</string>
+	<key>IBOldestOS</key>
+	<integer>4</integer>
 	<key>IBSystem Version</key>
 	<string>8S165</string>
-	<key>IBUserGuides</key>
-	<dict>
-		<key>5</key>
-		<dict>
-			<key>guideLocations</key>
-			<array>
-				<string>Vertical:261.000000</string>
-			</array>
-			<key>guidesLocked</key>
-			<false/>
-		</dict>
-	</dict>
-	<key>IBUsesTextArchiving</key>
-	<true/>
+	<key>targetFramework</key>
+	<string>IBCocoaFramework</string>
 </dict>
 </plist>
