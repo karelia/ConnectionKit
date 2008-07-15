@@ -563,7 +563,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	NSDictionary *bonjourGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:[myBonjour childCategories], @"Children", 
 									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
 									  @"BONJOUR", @"Name", nil];
-//	[myLeopardSourceListGroups insertObject:bonjourGroupItem atIndex:0];
+	[myLeopardSourceListGroups insertObject:bonjourGroupItem atIndex:0];
 	
 	NSDictionary *bookmarksGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:myConnections, @"Children", 
 									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
