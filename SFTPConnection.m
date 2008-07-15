@@ -672,33 +672,26 @@ static char *lsform;
 #pragma mark -
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
 {
-	NSNumber *progress = [NSNumber numberWithDouble:progressPercentage];
-	
 	CKTransferRecord *record = [uploadInfo userInfo];
-	
+	NSNumber *progress = [NSNumber numberWithDouble:progressPercentage];
+
 	if ([uploadInfo delegateRespondsToTransferProgressedTo])
-	{
 		[[uploadInfo delegate] transfer:record progressedTo:progress];
+	if (_flags.uploadPercent)
+	{
+		NSString *remotePath = [uploadInfo remotePath];
+		[_forwarder connection:self upload:remotePath progressedTo:progress];
 	}
+	
 
 	if (progressPercentage == 100.0 && [uploadInfo delegateRespondsToTransferDidFinish])
-	{
 		[[uploadInfo delegate] transferDidFinish:record];
-	}
 	else
 	{
 		unsigned long long previousTransferred = [record transferred];
 		unsigned long long chunkLength = amountTransferred - previousTransferred;
 		if ([uploadInfo delegateRespondsToTransferTransferredData])
-		{
 			[[uploadInfo delegate] transfer:record transferredDataOfLength:chunkLength];
-		}
-	}
-
-	if (_flags.uploadPercent)
-	{
-		NSString *remotePath = [uploadInfo remotePath];
-		[_forwarder connection:self upload:remotePath progressedTo:progress];
 	}
 }
 
@@ -724,6 +717,8 @@ static char *lsform;
 	{
 		[_forwarder connection:self uploadDidFinish:remotePath];
 	}
+	if ([uploadInfo delegateRespondsToTransferDidFinish])
+		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
 }
 
 #pragma mark -
@@ -766,6 +761,8 @@ static char *lsform;
 		NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
 		[_forwarder connection:self downloadDidBegin:remotePath];
 	}
+	if ([downloadInfo delegateRespondsToTransferDidBegin])
+		[[downloadInfo delegate] transferDidBegin:[downloadInfo userInfo]];
 }
 
 - (void)downloadDidFinish:(CKInternalTransferRecord *)downloadInfo
@@ -776,6 +773,8 @@ static char *lsform;
 	{
 		[_forwarder connection:self downloadDidFinish:remotePath];
 	}
+	if ([downloadInfo delegateRespondsToTransferDidFinish])
+		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
 }
 
 #pragma mark -

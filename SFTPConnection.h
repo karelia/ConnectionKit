@@ -27,6 +27,8 @@
 	NSMutableArray *commandQueue;
 	
 	SFTPTServer *theSFTPTServer;
+	
+	NSTimer *animateTransferProgressTimer;
 }
 
 @end
