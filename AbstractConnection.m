@@ -882,6 +882,11 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
+- (void)recursivelyRenameS3Directory:(NSString *)fromDirectoryPath to:(NSString *)toDirectoryPath;
+{
+	SUBCLASS_RESPONSIBLE
+}
+
 - (void)deleteFile:(NSString *)path
 {
 	SUBCLASS_RESPONSIBLE
@@ -1627,6 +1632,7 @@ if (![fn isEqualToString:@"."] && \
 }
 + (NSArray *)attributedFilesFromListing:(NSString *)listing
 {
+//	listing = @"-rwxrwxrwx  1 owner    group        3665057 Jun 27 16:37 02 So Long,Radiant Flower.m4a\r\n-rwxrwxrwx  1 owner    group        2984792 Jun 27 16:47 03 The Hard Way.m4a\r\ndrwxrwxrwx  1 owner    group              0 Jul  6 13:12 ALASAC Files\r\n-rwxrwxrwx  1 owner    group        3633867 Jun 27 16:41 Blind Tonight.m4a\r\n";
 	if ([listing length] == 0)
 		return [NSArray array];
 	

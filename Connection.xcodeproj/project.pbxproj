@@ -1547,7 +1547,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "/usr/bin/install_name_tool -change @executable_path/../Frameworks/Connection.framework/Versions/A/Connection @executable_path/../../../../Connection $CONFIGURATION_BUILD_DIR/DropletHelper.app/Contents/MacOS/DropletHelper";
+			shellScript = "/Developer/usr/bin/install_name_tool -change @executable_path/../Frameworks/Connection.framework/Versions/A/Connection @executable_path/../../../../Connection $CONFIGURATION_BUILD_DIR/DropletHelper.app/Contents/MacOS/DropletHelper";
 		};
 /* End PBXShellScriptBuildPhase section */
 
