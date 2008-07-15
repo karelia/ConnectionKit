@@ -773,12 +773,16 @@ checkRemoteExistence:(NSNumber *)check;
 	//BOOL flag = [aFlag boolValue];
 	[self setCurrentOperation:kDownloadFile];
 	
+	CKInternalTransferRecord *download = [self currentDownload];
+	
 	NSString *name = [remotePath lastPathComponent];
 	if (_flags.didBeginDownload)
-	{
 		[_forwarder connection:self downloadDidBegin: remotePath];
-	}
-	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1) {
+	if ([download delegateRespondsToTransferDidBegin])
+		[[download delegate] transferDidBegin:[download userInfo]];
+	
+	if ([[remotePath componentsSeparatedByString:@"/"] count] == 1)
+	{
 		remotePath = [NSString stringWithFormat:@"%@/%@", [self currentDirectory], remotePath];
 	}
 	
@@ -810,19 +814,23 @@ checkRemoteExistence:(NSNumber *)check;
 		//
 		if (tempPath)
 			[myFileManager removeFileAtPath: tempPath handler: nil];
-		
+
 		//need to send the amount of bytes transferred.
-		if (_flags.downloadProgressed) {
+		if (_flags.downloadProgressed)
+		{
 			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
 			[_forwarder connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
 		} 
-		if (_flags.downloadPercent) {
+		
+		if (_flags.downloadPercent)
 			[_forwarder connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
-		}
+		if ([download delegateRespondsToTransferProgressedTo])
+			[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:100]];
+		
 		if (_flags.downloadFinished)
-		{
 			[_forwarder connection:self downloadDidFinish: remotePath];
-		}
+		if ([download delegateRespondsToTransferDidFinish])
+			[[download delegate] transferDidFinish:[download userInfo]];
 	}
 	else	// no handler, so we send error message 'manually'
 	{
@@ -863,6 +871,23 @@ checkRemoteExistence:(NSNumber *)check;
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
+}
+
+- (CKTransferRecord *)downloadFile:(NSString *)remotePath 
+					   toDirectory:(NSString *)dirPath 
+						 overwrite:(BOOL)flag
+						  delegate:(id)delegate
+{
+	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *download = [CKInternalTransferRecord recordWithLocal:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
+																	  data:nil
+																	offset:0
+																	remote:remotePath
+																  delegate:(delegate) ? delegate : record
+																  userInfo:record];
+	[self queueDownload:download];
+	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag];
+	return record;
 }
 
 - (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
