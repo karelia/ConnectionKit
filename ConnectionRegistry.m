@@ -390,71 +390,71 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 - (void)changed:(NSNotification *)notification
 {
-//	if (myIsGroupEditing) return;
-//	//write out the db to disk
-//	NSFileManager *fm = [NSFileManager defaultManager];
-//	NSString *lockPath = @"/tmp/connection.registry.lock";
-//	
-//	if ([fm fileExistsAtPath:lockPath])
-//	{
-//		databaseWriteFailCount++;
-//		if (databaseWriteFailCount > 4)
-//		{
-//			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
-//			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
-//			[fm removeFileAtPath:lockPath handler:nil];
-//			databaseWriteFailCount = 0;
-//		}
-//		else
-//		{
-//			[self performSelector:_cmd withObject:nil afterDelay:0.5];
-//			return;
-//		}
-//	}
-//	
-//	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
-//	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
-//	if (!myUsesLeopardStyleSourceList)
-//	{
-//		idx = [myConnections indexOfObject:myBonjour];
-//		[myConnections removeObject:myBonjour];
-//	}
-//	// write to the database
-//	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
-//	{
-//		NSMutableArray *plist = [NSMutableArray array];
-//		NSEnumerator *e = [myConnections objectEnumerator];
-//		id cur;
-//		
-//		while ((cur = [e nextObject]))
-//		{
-//			[plist addObject:[cur plistRepresentation]];
-//		}
-//		NSString *err = nil;
-//		[[NSPropertyListSerialization dataFromPropertyList:plist format:NSPropertyListXMLFormat_v1_0 errorDescription:&err] writeToFile:[self databaseFile] atomically:YES];
-//		if (err)
-//		{
-//			NSLog(@"%@", err);
-//		}
-//	}
-//	else
-//	{
-//		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
-//	}
-//	if (myUsesLeopardStyleSourceList)
-//	{
-//		[self setUsesLeopardStyleSourceList:YES];
-//	}
-//	else
-//	{
-//		[myConnections insertObject:myBonjour atIndex:idx];
-//	}
-//	[fm removeFileAtPath:lockPath handler:nil];
-//	
-//	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
-//	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
-//	[pid release];
-//	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
+	if (myIsGroupEditing) return;
+	//write out the db to disk
+	NSFileManager *fm = [NSFileManager defaultManager];
+	NSString *lockPath = @"/tmp/connection.registry.lock";
+	
+	if ([fm fileExistsAtPath:lockPath])
+	{
+		databaseWriteFailCount++;
+		if (databaseWriteFailCount > 4)
+		{
+			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
+			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
+			[fm removeFileAtPath:lockPath handler:nil];
+			databaseWriteFailCount = 0;
+		}
+		else
+		{
+			[self performSelector:_cmd withObject:nil afterDelay:0.5];
+			return;
+		}
+	}
+	
+	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
+	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
+	if (!myUsesLeopardStyleSourceList)
+	{
+		idx = [myConnections indexOfObject:myBonjour];
+		[myConnections removeObject:myBonjour];
+	}
+	// write to the database
+	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
+	{
+		NSMutableArray *plist = [NSMutableArray array];
+		NSEnumerator *e = [myConnections objectEnumerator];
+		id cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			[plist addObject:[cur plistRepresentation]];
+		}
+		NSString *err = nil;
+		[[NSPropertyListSerialization dataFromPropertyList:plist format:NSPropertyListXMLFormat_v1_0 errorDescription:&err] writeToFile:[self databaseFile] atomically:YES];
+		if (err)
+		{
+			NSLog(@"%@", err);
+		}
+	}
+	else
+	{
+		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
+	}
+	if (myUsesLeopardStyleSourceList)
+	{
+		[self setUsesLeopardStyleSourceList:YES];
+	}
+	else
+	{
+		[myConnections insertObject:myBonjour atIndex:idx];
+	}
+	[fm removeFileAtPath:lockPath handler:nil];
+	
+	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
+	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
+	[pid release];
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
     [myOutlineView reloadData];
 }
 #pragma mark Menu
@@ -563,7 +563,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	NSDictionary *bonjourGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:[myBonjour childCategories], @"Children", 
 									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
 									  @"BONJOUR", @"Name", nil];
-	[myLeopardSourceListGroups insertObject:bonjourGroupItem atIndex:0];
+//	[myLeopardSourceListGroups insertObject:bonjourGroupItem atIndex:0];
 	
 	NSDictionary *bookmarksGroupItem = [NSDictionary dictionaryWithObjectsAndKeys:myConnections, @"Children", 
 									  [NSNumber numberWithBool:YES], @"IsSourceGroup", 
