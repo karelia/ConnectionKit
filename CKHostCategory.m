@@ -79,20 +79,12 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 			{
 				CKHostCategory *cat = [[CKHostCategory alloc] initWithDictionary:cur];
 				[myChildCategories addObject:cat];
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(childChanged:)
-															 name:CKHostCategoryChanged
-														   object:cat];
 				[cat release];
 			}
 			else
 			{
 				CKHost *host = [[CKHost alloc] initWithDictionary:cur];
 				[myChildCategories addObject:host];
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(hostChanged:)
-															 name:CKHostChanged
-														   object:host];
 				[host release];
 			}
 		}
@@ -129,27 +121,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 		myName = [[coder decodeObjectForKey:@"name"] copy];
 		myIsEditable = YES;
 		myChildCategories = [[NSMutableArray arrayWithArray:[coder decodeObjectForKey:@"categories"]] retain];
-		
-		NSEnumerator *e = [myChildCategories objectEnumerator];
-		id cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			if ([cur isKindOfClass:[CKHostCategory class]])
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(childChanged:)
-															 name:CKHostCategoryChanged
-														   object:cur];
-			}
-			else
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(hostChanged:)
-															 name:CKHostChanged
-														   object:cur];
-			}
-		}
 	}
 	return self;
 }
@@ -181,27 +152,8 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostCategoryChanged object:self];
 }
 
-- (void)childChanged:(NSNotification *)n
-{
-	[self didChange];
-}
-
 - (void)addItem:(id)item
 {
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(hostChanged:)
-													 name:CKHostChanged
-												   object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(childChanged:) 
-													 name:CKHostCategoryChanged 
-												   object:item];
-	}
 	[self willChangeValueForKey:@"childCategories"];
 	[myChildCategories addObject:item];
 	[item setCategory:self];
@@ -216,20 +168,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 		[self addChildCategory:item];
 		return;
 	}
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(hostChanged:)
-													 name:CKHostChanged
-												   object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(childChanged:) 
-													 name:CKHostCategoryChanged 
-												   object:item];
-	}
 	[self willChangeValueForKey:@"childCategories"];
 	[myChildCategories insertObject:item atIndex:index];
 	[item setCategory:self];
@@ -239,14 +177,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
 - (void)removeItem:(id)item
 {
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostChanged object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
-	}
 	[self willChangeValueForKey:@"childCategories"];
     [item setCategory:nil];
 	[myChildCategories removeObjectIdenticalTo:item];
@@ -272,11 +202,6 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 - (NSArray *)childCategories
 {
 	return [NSArray arrayWithArray:myChildCategories];
-}
-
-- (void)hostChanged:(NSNotification *)n
-{
-	[self didChange];
 }
 
 - (void)addHost:(CKHost *)host

@@ -61,6 +61,7 @@
 	
 	int databaseWriteFailCount;
 }
+extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 // you can set a custom database if you don't want to use the default shared registry.
 // I don't recommend it, but there are situations where this is needed.

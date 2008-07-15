@@ -55,6 +55,8 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 @implementation ConnectionRegistry
 
+#pragma mark -
+#pragma mark Getting Started / Tearing Down
 + (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -111,31 +113,21 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 						 name:CKRegistryNotification
 		
 					   object:nil];
-		NSArray *hosts = [self hostsFromDatabaseFile];
 		
+		NSArray *hosts = [self hostsFromDatabaseFile];		
 		[myConnections addObjectsFromArray:hosts];
-		NSEnumerator *e = [hosts objectEnumerator];
-		id cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			if ([cur isKindOfClass:[CKHostCategory class]])
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(changed:)
-															 name:CKHostCategoryChanged
-														   object:cur];
-			}
-			else
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(changed:)
-															 name:CKHostChanged
-														   object:cur];
-			}
-		}
+				
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:)
+													 name:CKHostCategoryChanged
+												   object:nil];
+		[[NSNotificationCenter defaultCenter] addObserver:self
+												 selector:@selector(changed:)
+													 name:CKHostChanged
+												   object:nil];		
+
 		//Enumerate the categories so we can make sure the hosts know of their category
-		e = [[self allCategories] objectEnumerator];
+		NSEnumerator *e = [[self allCategories] objectEnumerator];
 		CKHostCategory *currentCategory;
 		while ((currentCategory = [e nextObject]))
 		{
@@ -178,6 +170,136 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return self;
 }
 
+#pragma mark -
+#pragma mark Item Management
+- (NSArray *)connections
+{
+	if (myFilter)
+	{
+		return [NSArray arrayWithArray:myFilteredHosts];
+	}
+	return [NSArray arrayWithArray:myConnections];
+}
+
+- (void)insertItem:(id)item atIndex:(unsigned)index
+{
+	[self willChangeValueForKey:@"connections"];
+	[myConnections insertObject:item atIndex:index];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
+- (void)addItem:(id)item
+{
+	[self willChangeValueForKey:@"connections"];
+	[myConnections addObject:item];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
+- (void)removeItem:(id)item
+{
+	[self willChangeValueForKey:@"connections"];
+	int index = [myConnections indexOfObjectIdenticalTo:item];
+	[myConnections removeObjectAtIndex:index];
+	[self didChangeValueForKey:@"connections"];
+	[self changed:nil];
+}
+
+#pragma mark CKHosts
+- (NSArray *)allHostsWithinItems:(NSArray *)itemsToSearch
+{
+	NSMutableArray *allHosts = [NSMutableArray array];
+	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
+	id currentItem;
+	while (currentItem = [itemsToSearchEnumerator nextObject])
+	{
+		if ([[currentItem className] isEqualToString:@"CKHost"])
+		{
+			[allHosts addObject:(CKHost *)currentItem];
+		}
+		else if ([[currentItem className] isEqualToString:@"CKHostCategory"])
+		{
+			[allHosts addObjectsFromArray:[self allHostsWithinItems:[(CKHostCategory *)currentItem hosts]]];
+		}
+	}
+	return allHosts;
+}
+
+- (NSArray *)allHosts
+{
+	return [self allHostsWithinItems:myConnections];
+}
+
+- (NSArray *)hostsMatching:(NSString *)query
+{
+	NSPredicate *filter = nil;
+	@try {
+		filter = [NSPredicate predicateWithFormat:query];
+	} 
+	@catch (NSException *ex) {
+		
+	}
+	if (!filter)
+	{
+		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@ OR protocol contains[cd] %@ OR url.absoluteString contains[cd] %@", query, query, query, query, query];
+	}
+	return [[self allHosts] filteredArrayUsingPredicate:filter];
+}
+
+- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+{
+	[self insertItem:host atIndex:index];
+}
+
+- (void)addHost:(CKHost *)connection
+{
+	[self addItem:connection];
+}
+
+- (void)removeHost:(CKHost *)connection
+{
+	[self removeItem:connection];
+}
+
+#pragma mark CKHostCategory
+- (NSArray *)allCategoriesWithinItems:(NSArray *)itemsToSearch
+{
+	NSMutableArray *allCategories = [NSMutableArray array];
+	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
+	id currentItem;
+	while (currentItem = [itemsToSearchEnumerator nextObject])
+	{
+		if ([[currentItem className] isEqualToString:@"CKHostCategory"])
+		{
+			[allCategories addObject:(CKHostCategory *)currentItem];
+			[allCategories addObjectsFromArray:[self allCategoriesWithinItems:[(CKHostCategory *)currentItem childCategories]]];
+		}
+	}
+	return allCategories;
+}
+
+- (NSArray *)allCategories
+{
+	return [self allCategoriesWithinItems:myConnections];
+}
+
+- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
+{
+	[self insertItem:category atIndex:index];
+}
+
+- (void)addCategory:(CKHostCategory *)category
+{
+	[self addItem:category];
+}
+
+- (void)removeCategory:(CKHostCategory *)category
+{
+	[self removeItem:category];
+}
+
+#pragma mark Database Management
 - (void)beginGroupEditing
 {
 	myIsGroupEditing = YES;
@@ -253,26 +375,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		[myConnections removeAllObjects];
 		NSArray *hosts = [self hostsFromDatabaseFile];
 		[myConnections addObjectsFromArray:hosts];
-		NSEnumerator *e = [hosts objectEnumerator];
-		id cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			if ([cur isKindOfClass:[CKHostCategory class]])
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(changed:)
-															 name:CKHostCategoryChanged
-														   object:cur];
-			}
-			else
-			{
-				[[NSNotificationCenter defaultCenter] addObserver:self
-														 selector:@selector(changed:)
-															 name:CKHostChanged
-														   object:cur];
-			}
-		}
+
 		if (myUsesLeopardStyleSourceList)
 		{
 			[self setUsesLeopardStyleSourceList:YES]; //Redoes all the jazz
@@ -287,177 +390,74 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 - (void)changed:(NSNotification *)notification
 {
-	if (myIsGroupEditing) return;
-	//write out the db to disk
-	NSFileManager *fm = [NSFileManager defaultManager];
-	NSString *lockPath = @"/tmp/connection.registry.lock";
-	
-	if ([fm fileExistsAtPath:lockPath])
-	{
-		databaseWriteFailCount++;
-		if (databaseWriteFailCount > 4)
-		{
-			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
-			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
-			[fm removeFileAtPath:lockPath handler:nil];
-			databaseWriteFailCount = 0;
-		}
-		else
-		{
-			[self performSelector:_cmd withObject:nil afterDelay:0.5];
-			return;
-		}
-	}
-	
-	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
-	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
-	if (!myUsesLeopardStyleSourceList)
-	{
-		idx = [myConnections indexOfObject:myBonjour];
-		[myConnections removeObject:myBonjour];
-	}
-	// write to the database
-	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
-	{
-		NSMutableArray *plist = [NSMutableArray array];
-		NSEnumerator *e = [myConnections objectEnumerator];
-		id cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			[plist addObject:[cur plistRepresentation]];
-		}
-		NSString *err = nil;
-		[[NSPropertyListSerialization dataFromPropertyList:plist format:NSPropertyListXMLFormat_v1_0 errorDescription:&err] writeToFile:[self databaseFile] atomically:YES];
-		if (err)
-		{
-			NSLog(@"%@", err);
-		}
-	}
-	else
-	{
-		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
-	}
-	if (myUsesLeopardStyleSourceList)
-	{
-		[self setUsesLeopardStyleSourceList:YES];
-	}
-	else
-	{
-		[myConnections insertObject:myBonjour atIndex:idx];
-	}
-	[fm removeFileAtPath:lockPath handler:nil];
-	
-	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
-	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
-	[pid release];
-	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
+//	if (myIsGroupEditing) return;
+//	//write out the db to disk
+//	NSFileManager *fm = [NSFileManager defaultManager];
+//	NSString *lockPath = @"/tmp/connection.registry.lock";
+//	
+//	if ([fm fileExistsAtPath:lockPath])
+//	{
+//		databaseWriteFailCount++;
+//		if (databaseWriteFailCount > 4)
+//		{
+//			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
+//			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
+//			[fm removeFileAtPath:lockPath handler:nil];
+//			databaseWriteFailCount = 0;
+//		}
+//		else
+//		{
+//			[self performSelector:_cmd withObject:nil afterDelay:0.5];
+//			return;
+//		}
+//	}
+//	
+//	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
+//	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
+//	if (!myUsesLeopardStyleSourceList)
+//	{
+//		idx = [myConnections indexOfObject:myBonjour];
+//		[myConnections removeObject:myBonjour];
+//	}
+//	// write to the database
+//	if ([[[NSUserDefaults standardUserDefaults] objectForKey:@"CKRegistryDatabaseUsesPlistFormat"] boolValue])
+//	{
+//		NSMutableArray *plist = [NSMutableArray array];
+//		NSEnumerator *e = [myConnections objectEnumerator];
+//		id cur;
+//		
+//		while ((cur = [e nextObject]))
+//		{
+//			[plist addObject:[cur plistRepresentation]];
+//		}
+//		NSString *err = nil;
+//		[[NSPropertyListSerialization dataFromPropertyList:plist format:NSPropertyListXMLFormat_v1_0 errorDescription:&err] writeToFile:[self databaseFile] atomically:YES];
+//		if (err)
+//		{
+//			NSLog(@"%@", err);
+//		}
+//	}
+//	else
+//	{
+//		[NSKeyedArchiver archiveRootObject:myConnections toFile:[self databaseFile]];
+//	}
+//	if (myUsesLeopardStyleSourceList)
+//	{
+//		[self setUsesLeopardStyleSourceList:YES];
+//	}
+//	else
+//	{
+//		[myConnections insertObject:myBonjour atIndex:idx];
+//	}
+//	[fm removeFileAtPath:lockPath handler:nil];
+//	
+//	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
+//	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
+//	[pid release];
+//	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
     [myOutlineView reloadData];
 }
-
-- (void)insertItem:(id)item atIndex:(unsigned)index
-{
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(changed:)
-													 name:CKHostChanged
-												   object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(changed:) 
-													 name:CKHostCategoryChanged 
-												   object:item];
-	}
-	[self willChangeValueForKey:@"connections"];
-	[myConnections insertObject:item atIndex:index];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
-}
-
-- (void)addItem:(id)item
-{
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(changed:)
-													 name:CKHostChanged
-												   object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] addObserver:self
-												 selector:@selector(changed:) 
-													 name:CKHostCategoryChanged 
-												   object:item];
-	}
-	[self willChangeValueForKey:@"connections"];
-	[myConnections addObject:item];
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
-}
-
-- (void)removeItem:(id)item
-{
-	if ([item isKindOfClass:[CKHost class]])
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostChanged object:item];
-	}
-	else if ([item isKindOfClass:[CKHostCategory class]])
-	{
-		[[NSNotificationCenter defaultCenter] removeObserver:self name:CKHostCategoryChanged object:item];
-	}
-	[self willChangeValueForKey:@"connections"];
-	int index = [myConnections indexOfObjectIdenticalTo:item];
-	//id obj = [myConnections objectAtIndex:index];
-	[myConnections removeObjectAtIndex:index];
-	//obj = nil;
-	[self didChangeValueForKey:@"connections"];
-	[self changed:nil];
-}
-
-- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
-{
-	[self insertItem:category atIndex:index];
-}
-
-- (void)addCategory:(CKHostCategory *)category
-{
-	[self addItem:category];
-}
-
-- (void)removeCategory:(CKHostCategory *)category
-{
-	[self removeItem:category];
-}
-
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
-{
-	[self insertItem:host atIndex:index];
-}
-
-- (void)addHost:(CKHost *)connection
-{
-	[self addItem:connection];
-}
-
-- (void)removeHost:(CKHost *)connection
-{
-	[self removeItem:connection];
-}
-
-- (NSArray *)connections
-{
-	if (myFilter)
-	{
-		return [NSArray arrayWithArray:myFilteredHosts];
-	}
-	return [NSArray arrayWithArray:myConnections];
-}
-
-extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
+#pragma mark Menu
 
 - (void)recursivelyCreate:(CKHostCategory *)cat withMenu:(NSMenu *)menu
 {
@@ -548,67 +548,6 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	return [menu autorelease];
 }
 
-- (NSArray *)allHostsWithinItems:(NSArray *)itemsToSearch
-{
-	NSMutableArray *allHosts = [NSMutableArray array];
-	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
-	id currentItem;
-	while (currentItem = [itemsToSearchEnumerator nextObject])
-	{
-		if ([[currentItem className] isEqualToString:@"CKHost"])
-		{
-			[allHosts addObject:(CKHost *)currentItem];
-		}
-		else if ([[currentItem className] isEqualToString:@"CKHostCategory"])
-		{
-			[allHosts addObjectsFromArray:[self allHostsWithinItems:[(CKHostCategory *)currentItem hosts]]];
-		}
-	}
-	return allHosts;
-}
-
-- (NSArray *)allHosts
-{
-	return [self allHostsWithinItems:myConnections];
-}
-
-- (NSArray *)hostsMatching:(NSString *)query
-{
-	NSPredicate *filter = nil;
-	@try {
-		filter = [NSPredicate predicateWithFormat:query];
-	} 
-	@catch (NSException *ex) {
-		
-	}
-	if (!filter)
-	{
-		filter = [NSPredicate predicateWithFormat:@"host contains[cd] %@ OR username contains[cd] %@ OR annotation contains[cd] %@ OR protocol contains[cd] %@ OR url.absoluteString contains[cd] %@", query, query, query, query, query];
-	}
-	return [[self allHosts] filteredArrayUsingPredicate:filter];
-}
-
-- (NSArray *)allCategoriesWithinItems:(NSArray *)itemsToSearch
-{
-	NSMutableArray *allCategories = [NSMutableArray array];
-	NSEnumerator *itemsToSearchEnumerator = [itemsToSearch objectEnumerator];
-	id currentItem;
-	while (currentItem = [itemsToSearchEnumerator nextObject])
-	{
-		if ([[currentItem className] isEqualToString:@"CKHostCategory"])
-		{
-			[allCategories addObject:(CKHostCategory *)currentItem];
-			[allCategories addObjectsFromArray:[self allCategoriesWithinItems:[(CKHostCategory *)currentItem childCategories]]];
-		}
-	}
-	return allCategories;
-}
-
-- (NSArray *)allCategories
-{
-	return [self allCategoriesWithinItems:myConnections];
-}
-
 #pragma mark Leopard Style Source List
 - (void)setUsesLeopardStyleSourceList:(BOOL)flag
 {
@@ -617,9 +556,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	*/
 	myUsesLeopardStyleSourceList = flag;
 	if (!flag)
-	{
 		return;
-	}
 	[myConnections removeObject:myBonjour];
 	[myLeopardSourceListGroups removeAllObjects];
 	
@@ -637,12 +574,35 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 {
 	return (item != nil && [item isKindOfClass:[NSDictionary class]] && [item objectForKey:@"IsSourceGroup"] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
 }
+
+#pragma mark Droplet
+- (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path
+{
+	NSEnumerator *e = [[category hosts] objectEnumerator];
+	id cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if ([cur isKindOfClass:[CKHost class]])
+		{
+			[cur createDropletAtPath:path];
+		}
+		else
+		{
+			NSString *catDir = [path stringByAppendingPathComponent:[cur name]];
+			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+			[self recursivelyWrite:cur to:catDir];
+		}
+	}
+}
+#pragma mark -
+#pragma mark NSOutlineView Management
 - (NSOutlineView *)outlineView
 {
 	return myOutlineView;
 }
-#pragma mark -
-#pragma mark Outline View Data Source
+
+#pragma mark Filtering
 - (void)setFilterString:(NSString *)filter
 {
 	if (filter == myFilter)
@@ -672,6 +632,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	[myOutlineView registerForDraggedTypes:[NSArray arrayWithObjects:CKDraggedBookmarksPboardType, NSFilenamesPboardType, nil]];
 }
 
+#pragma mark NSOutlineView DataSource
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	if (myFilter)
@@ -784,6 +745,8 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	return nil;
 }
 
+#pragma mark NSOutlineView Delegate
+
 - (void)outlineView:(NSOutlineView *)outlineView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
 	if ([item isKindOfClass:[CKHostCategory class]] && [item isEditable])
@@ -793,26 +756,6 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	else if ([item isKindOfClass:[CKHost class]] && [item isEditable])
 	{
 		[(CKHost *)item setAnnotation:object];
-	}
-}
-
-- (void)recursivelyWrite:(CKHostCategory *)category to:(NSString *)path
-{
-	NSEnumerator *e = [[category hosts] objectEnumerator];
-	id cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		if ([cur isKindOfClass:[CKHost class]])
-		{
-			[cur createDropletAtPath:path];
-		}
-		else
-		{
-			NSString *catDir = [path stringByAppendingPathComponent:[cur name]];
-			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
-			[self recursivelyWrite:cur to:catDir];
-		}
 	}
 }
 
