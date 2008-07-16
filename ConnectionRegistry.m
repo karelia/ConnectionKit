@@ -824,52 +824,32 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		id draggedItem = [myDraggedItems objectAtIndex:0];
 		BOOL isNotEditable = ([draggedItem category] && ![[draggedItem category] isEditable]) || ([item isKindOfClass:[CKHostCategory class]] && ![item isEditable]);		
 		if (isNotEditable)
-		{
 			return NSDragOperationNone;
-		}
 		// don't allow a recursive drop
 		if ([draggedItem isKindOfClass:[CKHostCategory class]])
 		{
 			if ([item isKindOfClass:[CKHostCategory class]] && [item isChildOf:draggedItem])
-			{
 				return NSDragOperationNone;
-			}
 		}
 		if (myUsesLeopardStyleSourceList && [item isKindOfClass:[NSDictionary class]] && [[item objectForKey:@"Name"] isEqualToString:@"BONJOUR"])
-		{
 			return NSDragOperationNone;
-		}
-//		// don't allow items to be dragged above bonjour
-//		if (([[myConnections objectAtIndex:0] isKindOfClass:[CKBonjourCategory class]] || myUsesLeopardStyleSourceList) && item == nil && proposedChildIndex == 0)
-//		{
-//			return NSDragOperationNone;
-//		}
 		// don't allow a host to get dropped on another host
 		if ([item isKindOfClass:[CKHost class]])
-		{
 			return NSDragOperationNone;
-		}
-		
 		return NSDragOperationMove;
 	}
 	else if ([[pboard types] indexOfObject:NSFilenamesPboardType] != NSNotFound)
 	{
 		NSString *itemPath = [[pboard propertyListForType:NSFilenamesPboardType] objectAtIndex:0];
 		if ([itemPath isEqualToString:@"/tmp/ck/Bonjour"] || [item isKindOfClass:[NSDictionary class]] || [item isKindOfClass:[CKBonjourCategory class]] || [[item category] isKindOfClass:[CKBonjourCategory class]])
-		{
 			return NSDragOperationNone;
-		}
 		if ([[NSFileManager defaultManager] fileExistsAtPath:[itemPath stringByAppendingPathComponent:@"Contents/Resources/configuration.ckhost"]] && ! [itemPath hasPrefix:@"/tmp/ck"])
 		{
 			//Drag From Finder
 			if ([item isKindOfClass:[CKHostCategory class]])
-			{
 				[outlineView setDropItem:item dropChildIndex:proposedChildIndex];
-			}
 			else
-			{
 				[outlineView setDropItem:nil dropChildIndex:proposedChildIndex];
-			}
 			return NSDragOperationCopy;
 		}
 		else if (item == nil || [item isKindOfClass:[CKHostCategory class]])
@@ -907,9 +887,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		itemEnumerator = [unarchivedHosts objectEnumerator];
 	}
 	else
-	{
 		itemEnumerator = [myDraggedItems objectEnumerator];
-	}
 	
 	id currentItem = nil;
 	[self beginGroupEditing];
@@ -918,51 +896,27 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		CKHostCategory *currentCategory = [currentItem category];
 		unsigned currentIndex = NSNotFound;
 		
-		if (currentCategory)
+		NSArray *parentConnections = (currentCategory) ? [currentCategory hosts] : myConnections;
+		currentIndex = [parentConnections indexOfObjectIdenticalTo:currentItem];
+		if (currentIndex != NSNotFound)
 		{
-			currentIndex = [[currentCategory hosts] indexOfObjectIdenticalTo:currentItem];
-			[currentCategory removeHost:currentItem];
-		}
-		else
-		{
-			currentIndex = [myConnections indexOfObjectIdenticalTo:currentItem];
-			[self removeHost:currentItem];
+			id parentOfCurrentItem = (currentCategory) ? (id)currentCategory : (id)self;
+			[parentOfCurrentItem removeHost:currentItem];
 		}
 		
 		// if we are moving around in the same category, then the index can get offset from the removal
 		if (currentCategory == item)
-		{
 			if (currentIndex < index) index--;
-		}
 		
 		//Add it in its new location
-		if (!item || [item isKindOfClass:[NSDictionary class]]) 
-		{
-			//Add new Host to the root.
-			if (index < 0)
-			{
-				[self addHost:currentItem];
-			}
-			else
-			{
-				[self insertHost:currentItem atIndex:index];
-			}
-		}
+		id dropTarget = (!item || [item isKindOfClass:[NSDictionary class]]) ? self : item;
+		if (index < 0 || index == NSNotFound)
+			[dropTarget addHost:currentItem];
 		else
-		{
-			//Add the Host to it's new parent category.
-			if (index == -1)
-			{
-				[item addHost:currentItem];
-			}
-			else
-			{
-				[item insertHost:currentItem atIndex: index];
-			}
-		}
+			[dropTarget insertHost:currentItem atIndex:index];
 	}
-	[myDraggedItems removeAllObjects];
 	[self endGroupEditing];
+	[myDraggedItems removeAllObjects];
 	
 	//Maintain the selected item. We need to reloadData on the outlineView so the changes in data we just made are are seen by the rowForItem: call.
 	[outlineView reloadData];
