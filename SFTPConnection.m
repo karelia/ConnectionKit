@@ -17,8 +17,10 @@
 #include "fdwrite.h"
 
 @implementation SFTPConnection
-
 static char *lsform;
+
+#pragma mark -
+#pragma mark Getting Started / Tearing Down
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -33,6 +35,7 @@ static char *lsform;
 {
 	return @"SFTP";
 }
+
 + (NSString *)urlScheme
 {
 	return @"sftp";
@@ -65,6 +68,36 @@ static char *lsform;
 	return self;
 }
 
+- (void)establishDistributedObjectsConnection
+{
+	NSPort *receivePort = [NSPort port];
+	NSPort *sendPort = [NSPort port];
+	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
+	NSConnection *connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
+	[connectionToTServer setRootObject:self];
+	theSFTPTServer = nil;
+	NSArray *portArray = [NSArray arrayWithObjects:sendPort, receivePort, nil];
+	[NSThread detachNewThreadSelector:@selector(connectWithPorts:) toTarget:[SFTPTServer class] withObject:portArray];
+}
+
+- (void)setMasterProxy:(int)masterProxy
+{
+	master = masterProxy;
+}
+
+- (void)setServerObject:(id)serverObject
+{
+	[serverObject setProtocolForProxy:@protocol(SFTPTServerInterface)];
+	theSFTPTServer = [(SFTPTServer<SFTPTServerInterface>*)serverObject retain];
+	
+	if ([connectToQueue count] > 0)
+	{
+		NSArray *parameters = [connectToQueue objectAtIndex:0];
+		[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
+		[connectToQueue removeObjectAtIndex:0];
+	}
+}
+
 - (void)dealloc
 {
 	[uploadQueue release];
@@ -81,43 +114,13 @@ static char *lsform;
 	[super dealloc];
 }
 
-#pragma mark Getters
+#pragma mark -
+#pragma mark Connecting
 - (BOOL)isConnected
 {
 	return isConnected;
 }
 
-- (BOOL)isUploading
-{
-	return isUploading;
-}
-
-- (BOOL)isDownloading
-{
-	return isDownloading;
-}
-
-- (BOOL)isBusy
-{
-	return [self isUploading] || [self isDownloading];
-}
-
-- (int)numberOfTransfers
-{
-	return [self numberOfUploads] + [self numberOfDownloads];
-}
-
-- (unsigned)numberOfUploads
-{
-	return [uploadQueue count];
-}
-
-- (unsigned)numberOfDownloads
-{
-	return [downloadQueue count];
-}
-
-#pragma mark SFTP Actions
 - (void)connect
 {
 	if (![self username])
@@ -170,9 +173,16 @@ static char *lsform;
 		[connectToQueue addObject:parameters];
 		return;
 	}
-	[theSFTPTServer connectToServerWithParams:parameters fromWrapperConnection:self];
+	[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
 }
 
+- (BOOL)isUploading
+{
+	return isUploading;
+}
+
+#pragma mark -
+#pragma mark Disconnecting
 - (void)disconnect
 {
 	[self queueSFTPCommandWithString:@"quit"];
@@ -182,12 +192,15 @@ static char *lsform;
 {
 	[self writeSFTPCommandWithString:@"quit"];
 }
+
 - (void)threadedForceDisconnect
 {
 	[theSFTPTServer forceDisconnect];
 }
 
+
 #pragma mark -
+#pragma mark Directory Changes
 - (NSString *)currentDirectory
 {
 	return [NSString stringWithString:currentDirectory];
@@ -216,6 +229,7 @@ static char *lsform;
 }
 
 #pragma mark -
+#pragma mark File Manipulation
 - (void)createDirectory:(NSString *)newDirectoryPath
 {
 	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"mkdir \"%@\"", newDirectoryPath]];
@@ -227,7 +241,24 @@ static char *lsform;
 	[self setPermissions:permissions forFile:newDirectoryPath];
 }
 
+- (void)rename:(NSString *)fromPath to:(NSString *)toPath
+{
+	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromPath, @"fromPath", toPath, @"toPath", nil];
+	[renameQueue addObject:renameDictionary];
+	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]];
+}
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
+{
+	NSDictionary *permissionChangeDictionary = [NSDictionary dictionaryWithObjectsAndKeys:path, @"remotePath", [NSNumber numberWithUnsignedLong:permissions], @"Permissions", nil];
+	[permissionChangeQueue addObject:permissionChangeDictionary];
+	
+	NSString *command = [NSString stringWithFormat:@"chmod %lo \"%@\"", permissions, path];
+	[self queueSFTPCommandWithString:command];
+}
+
 #pragma mark -
+#pragma mark Uploading
 - (void)uploadFile:(NSString *)localPath
 {
 	[self uploadFile:localPath orData:nil offset:0 remotePath:nil checkRemoteExistence:NO delegate:nil];
@@ -315,6 +346,7 @@ static char *lsform;
 }
 
 #pragma mark -
+#pragma mark Downloading
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
@@ -357,14 +389,7 @@ static char *lsform;
 }
 
 #pragma mark -
-- (void)threadedCancelTransfer
-{
-	[self forceDisconnect];
-	[self connect];
-//	[self writeSFTPCommandWithString:@"Interrupt"];
-}
-
-#pragma mark -
+#pragma mark Deletion
 - (void)deleteFile:(NSString *)remotePath
 {
 	[deleteFileQueue addObject:remotePath];
@@ -378,20 +403,40 @@ static char *lsform;
 }
 
 #pragma mark -
-- (void)rename:(NSString *)fromPath to:(NSString *)toPath
+#pragma mark Misc.
+- (void)threadedCancelTransfer
 {
-	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromPath, @"fromPath", toPath, @"toPath", nil];
-	[renameQueue addObject:renameDictionary];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]];
+	[self forceDisconnect];
+	[self connect];
 }
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
+
+#pragma mark -
+#pragma mark Accessors
+- (BOOL)isDownloading
 {
-	NSDictionary *permissionChangeDictionary = [NSDictionary dictionaryWithObjectsAndKeys:path, @"remotePath", [NSNumber numberWithUnsignedLong:permissions], @"Permissions", nil];
-	[permissionChangeQueue addObject:permissionChangeDictionary];
-	
-	NSString *command = [NSString stringWithFormat:@"chmod %lo \"%@\"", permissions, path];
-	[self queueSFTPCommandWithString:command];
+	return isDownloading;
 }
+
+- (BOOL)isBusy
+{
+	return [self isUploading] || [self isDownloading];
+}
+
+- (int)numberOfTransfers
+{
+	return [self numberOfUploads] + [self numberOfDownloads];
+}
+
+- (unsigned)numberOfUploads
+{
+	return [uploadQueue count];
+}
+
+- (unsigned)numberOfDownloads
+{
+	return [downloadQueue count];
+}
+
 #pragma mark -
 #pragma mark SFTPConnection Private
 #pragma mark Command Queueing
@@ -403,7 +448,6 @@ static char *lsform;
 
 - (void)queueSFTPCommandWithString:(NSString *)cmdString
 {
-	[self logForCommandQueue:[NSString stringWithFormat:@"Queued \"%@\"", cmdString]];
 	unsigned int queuePlacement = [commandQueue count];
 	[commandQueue addObject:cmdString];
 	if (queuePlacement == 0)
@@ -445,7 +489,6 @@ static char *lsform;
 	{
 		return;
 	}
-	[self logForCommandQueue:[NSString stringWithFormat:@"Dispatching \"%@\"", commandString]];
 	if ([commandString isEqualToString:@"CONNECT"])
 	{
 		return;
@@ -462,62 +505,6 @@ static char *lsform;
 	[self writeSFTPCommand:command];
 }
 
-#pragma mark Misc.
-#pragma mark CoreSetup
-- (void)establishDistributedObjectsConnection
-{
-	NSPort *receivePort = [NSPort port];
-	NSPort *sendPort = [NSPort port];
-	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
-	NSConnection *connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
-	[connectionToTServer setRootObject:self];
-	theSFTPTServer = nil;
-	NSArray *portArray = [NSArray arrayWithObjects:sendPort, receivePort, nil];
-	[NSThread detachNewThreadSelector:@selector(connectWithPorts:) toTarget:[SFTPTServer class] withObject:portArray];
-}
-
-- (void)logForCommandQueue:(NSString *)log
-{
-	BOOL shouldLogCommandQueue = [[NSUserDefaults standardUserDefaults] boolForKey:@"logCommandQueue"];
-	if (!shouldLogCommandQueue)
-	{
-		return;
-	}
-	NSLog(@"%@", log);
-}
-@end
-
-#pragma mark -
-#pragma mark SFTP Backend Interface
-@implementation SFTPConnection (BackendInterface)
-- (void)logServerResponseBuffer:(NSString *)serverBuffer
-{
-	BOOL shouldLogServerResponseBuffer = [[NSUserDefaults standardUserDefaults] boolForKey:@"logServerResponseBuffer"];
-	if (!shouldLogServerResponseBuffer)
-	{
-		return;
-	}
-	NSLog(@"%@", serverBuffer);
-}
-
-- (void)setMasterProxy:(int)masterProxy
-{
-	master = masterProxy;
-}
-
-- (void)setServerObject:(id)serverObject
-{
-	[serverObject setProtocolForProxy:@protocol(SFTPTServerInterface)];
-	theSFTPTServer = [(SFTPTServer<SFTPTServerInterface>*)serverObject retain];
-	
-	if ([connectToQueue count] > 0)
-	{
-		NSArray *parameters = [connectToQueue objectAtIndex:0];
-		[theSFTPTServer connectToServerWithParams:parameters fromWrapperConnection:self];
-		[connectToQueue removeObjectAtIndex:0];
-	}
-}
-
 - (void)finishedCommand
 {
 	if ([commandQueue count] <= 0)
@@ -525,7 +512,6 @@ static char *lsform;
 		return;
 	}
 	NSString *finishedCommand = [commandQueue objectAtIndex:0];
-	[self logForCommandQueue:[NSString stringWithFormat:@"Finished \"%@\"", finishedCommand]];
 	[self checkFinishedCommandStringForNotifications:finishedCommand];
 	[commandQueue removeObjectAtIndex:0];	
 	if ([commandQueue count] > 0)
@@ -543,7 +529,6 @@ static char *lsform;
 	}
 	else
 	{
-		[self logForCommandQueue:@"CommandQueue is now empty."];
 	}
 }
 
@@ -654,7 +639,41 @@ static char *lsform;
 	return [permissionChangeQueue objectAtIndex:0];
 }
 
+- (void)connectionError:(NSError *)theError
+{
+	if (_flags.error)
+	{
+		[_forwarder connection:self didReceiveError:theError];
+	}
+}
+
 #pragma mark -
+#pragma mark SFTPTServer Callbacks
+- (void)didConnect
+{
+	//Clear any failed pubkey authentications as we're now connected
+	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
+	
+	isConnected = YES;
+	if (_flags.didConnect)
+	{
+		[_forwarder connection:self didConnectToHost:[self host]];
+	}
+	if (_flags.didAuthenticate)
+	{
+		[_forwarder connection:self didAuthenticateToHost:[self host]];
+	}		
+}
+
+- (void)didDisconnect
+{
+	isConnected = NO;
+	if (_flags.didDisconnect)
+	{
+		[_forwarder connection:self didDisconnectFromHost:[self host]];
+	}
+}
+
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
 	if (_flags.directoryContents)
@@ -662,6 +681,7 @@ static char *lsform;
 		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory]];
 	}
 }
+
 - (void)didChangeToDirectory:(NSString *)path
 {
 	if (_flags.changeDirectory)
@@ -669,12 +689,12 @@ static char *lsform;
 		[_forwarder connection:self didChangeToDirectory:path];
 	}
 }
-#pragma mark -
+
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
 {
 	CKTransferRecord *record = [uploadInfo userInfo];
 	NSNumber *progress = [NSNumber numberWithDouble:progressPercentage];
-
+	
 	if ([uploadInfo delegateRespondsToTransferProgressedTo])
 		[[uploadInfo delegate] transfer:record progressedTo:progress];
 	if (_flags.uploadPercent)
@@ -683,7 +703,7 @@ static char *lsform;
 		[_forwarder connection:self upload:remotePath progressedTo:progress];
 	}
 	
-
+	
 	if (progressPercentage == 100.0 && [uploadInfo delegateRespondsToTransferDidFinish])
 		[[uploadInfo delegate] transferDidFinish:record];
 	else
@@ -721,7 +741,6 @@ static char *lsform;
 		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
 }
 
-#pragma mark -
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
 {
 	NSNumber *progress = [NSNumber numberWithDouble:progressPercentage];
@@ -777,7 +796,26 @@ static char *lsform;
 		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
 }
 
-#pragma mark -
+- (void)didRename:(NSDictionary *)renameInfo
+{
+	NSString *fromPath = [NSString stringWithString:[renameInfo objectForKey:@"fromPath"]];
+	NSString *toPath = [NSString stringWithString:[renameInfo objectForKey:@"toPath"]];
+	[self dequeueRename];
+	if (_flags.rename)
+	{
+		[_forwarder connection:self didRename:fromPath to:toPath];
+	}
+}
+- (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo
+{
+	NSString *remotePath = [NSString stringWithString:[permissionInfo objectForKey:@"remotePath"]];
+	[self dequeuePermissionChange];
+	if (_flags.permissions)
+	{
+		[_forwarder connection:self didSetPermissionsForFile:remotePath];
+	}
+}
+
 - (void)didDeleteFile:(NSString *)remotePath
 {
 	NSString *ourRemotePath = [NSString stringWithString:remotePath];
@@ -798,25 +836,9 @@ static char *lsform;
 	}
 }
 
-#pragma mark -
-- (void)didRename:(NSDictionary *)renameInfo
+- (void)setCurrentRemotePath:(NSString *)remotePath
 {
-	NSString *fromPath = [NSString stringWithString:[renameInfo objectForKey:@"fromPath"]];
-	NSString *toPath = [NSString stringWithString:[renameInfo objectForKey:@"toPath"]];
-	[self dequeueRename];
-	if (_flags.rename)
-	{
-		[_forwarder connection:self didRename:fromPath to:toPath];
-	}
-}
-- (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo
-{
-	NSString *remotePath = [NSString stringWithString:[permissionInfo objectForKey:@"remotePath"]];
-	[self dequeuePermissionChange];
-	if (_flags.permissions)
-	{
-		[_forwarder connection:self didSetPermissionsForFile:remotePath];
-	}
+	[currentDirectory setString:remotePath];
 }
 
 #pragma mark -
@@ -873,33 +895,6 @@ static char *lsform;
 	[self passwordErrorOccurred];
 }
 
-- (void)didConnect
-{
-	//Clear any failed pubkey authentications as we're now connected
-	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
-	
-	isConnected = YES;
-	if (_flags.didConnect)
-	{
-		[_forwarder connection:self didConnectToHost:[self host]];
-	}
-	if (_flags.didAuthenticate)
-	{
-		[_forwarder connection:self didAuthenticateToHost:[self host]];
-	}		
-}
-- (void)didDisconnect
-{
-	isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
-}
-- (void)setCurrentRemotePath:(NSString *)remotePath
-{
-	[currentDirectory setString:remotePath];
-}
 - (void)passwordErrorOccurred
 {
 	if (_flags.badPassword)
@@ -908,15 +903,9 @@ static char *lsform;
 	}
 }
 
-- (void)connectionError:(NSError *)theError
-{
-	if (_flags.error)
-	{
-		[_forwarder connection:self didReceiveError:theError];
-	}
-}
 - (void)addStringToTranscript:(NSString *)stringToAdd
 {
 	[self appendToTranscript:[NSAttributedString attributedStringWithString:stringToAdd attributes:[AbstractConnection receivedAttributes]]];
 }
+
 @end

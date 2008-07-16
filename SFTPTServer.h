@@ -1,40 +1,22 @@
-/*
- * Copyright (c) 2003 Regents of The University of Michigan.
- * All Rights Reserved.  See COPYRIGHT.
- */
-
 #import <Cocoa/Cocoa.h>
 @class SFTPConnection;
 
 @protocol SFTPTServerInterface
-
-- (oneway void)connectToServerWithParams:(NSArray *)params fromWrapperConnection:(SFTPConnection *)sftpWrapperConnection;
-- ( int )atSftpPrompt;
-- ( pid_t )getSftpPid;
-
+- (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(SFTPConnection *)sftpWrapperConnection;
 @end
 
-@interface SFTPTServer : NSObject <SFTPTServerInterface> {
-@private
-    int			atprompt;
-    NSString		*remoteDirBuf;
-    NSString		*_currentTransferPath;
-    NSString            *_sftpRemoteObjectList;
+@interface SFTPTServer : NSObject <SFTPTServerInterface>
+{
+    NSMutableArray *directoryContents;
 	NSMutableString *directoryListingBufferString;
-	
-	int		cancelflag;
-	pid_t		sftppid;
+
+	//Core
+	int master;
+	pid_t sftppid;
+	//Flags
+	BOOL cancelflag;
 	BOOL connecting;
-	int		connected;
-	int		master;
+	BOOL connected;
 }
-
-+ ( void )connectWithPorts: ( NSArray * )ports;
-- ( id )init;
 - (void)forceDisconnect;
-- ( NSString * )retrieveUnknownHostKeyFromStream: ( FILE * )stream;
-- ( BOOL )hasDirectoryListingFormInBuffer: ( char * )buf;
-- ( void )collectListingFromMaster: ( int )master fileStream: ( FILE * )mf forWrapperConnection: ( SFTPConnection * )wrapperConn;
-- (NSString *)currentTransferPath;
-
 @end
