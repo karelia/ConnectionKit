@@ -704,9 +704,7 @@ static char *lsform;
 	}
 	
 	
-	if (progressPercentage == 100.0 && [uploadInfo delegateRespondsToTransferDidFinish])
-		[[uploadInfo delegate] transferDidFinish:record];
-	else
+	if (progressPercentage != 100.0)
 	{
 		unsigned long long previousTransferred = [record transferred];
 		unsigned long long chunkLength = amountTransferred - previousTransferred;
@@ -732,13 +730,14 @@ static char *lsform;
 - (void)uploadDidFinish:(CKInternalTransferRecord *)uploadInfo
 {
 	NSString *remotePath = [NSString stringWithString:[uploadInfo remotePath]];
+	
+	[uploadInfo retain];
 	[self dequeueUpload];	
 	if (_flags.uploadFinished)
-	{
 		[_forwarder connection:self uploadDidFinish:remotePath];
-	}
 	if ([uploadInfo delegateRespondsToTransferDidFinish])
 		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
+	[uploadInfo release];
 }
 
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -752,11 +751,7 @@ static char *lsform;
 		[[downloadInfo delegate] transfer:record progressedTo:progress];
 	}
 	
-	if (progressPercentage == 100.0 && [downloadInfo delegateRespondsToTransferDidFinish])
-	{
-		[[downloadInfo delegate] transferDidFinish:record];
-	}
-	else
+	if (progressPercentage != 100.0)
 	{
 		unsigned long long previousTransferred = [record transferred];
 		unsigned long long chunkLength = amountTransferred - previousTransferred;
@@ -787,13 +782,15 @@ static char *lsform;
 - (void)downloadDidFinish:(CKInternalTransferRecord *)downloadInfo
 {
 	NSString *remotePath = [NSString stringWithString:[downloadInfo remotePath]];
+
+	[downloadInfo retain];
 	[self dequeueDownload];
+	
 	if (_flags.downloadFinished)
-	{
 		[_forwarder connection:self downloadDidFinish:remotePath];
-	}
 	if ([downloadInfo delegateRespondsToTransferDidFinish])
 		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
+	[downloadInfo release];
 }
 
 - (void)didRename:(NSDictionary *)renameInfo
