@@ -5,6 +5,7 @@
 //  Copyright 2008 Extendmac, LLC. All rights reserved.
 //
 
+#import "ConnectionRegistry.h"
 #import "LeopardSourceListTableColumn.h"
 
 @implementation LeopardSourceListTableColumn
@@ -14,7 +15,7 @@
 	if (row >= 0)
 	{
 		id item = [(NSOutlineView *)[self tableView] itemAtRow:row];
-		if ([item isKindOfClass:[NSDictionary class]] && [[item objectForKey:@"IsSourceGroup"] boolValue])
+		if ([[ConnectionRegistry sharedRegistry] itemIsLeopardSourceGroupHeader:item])
 		{
 			NSTextFieldCell *groupCell = [[[NSTextFieldCell alloc] init] autorelease];
 			[groupCell setFont:[[NSFontManager sharedFontManager] convertFont:[[self dataCell] font] toSize:11.0]];
