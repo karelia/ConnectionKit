@@ -106,6 +106,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		myDraggedItems = [[NSMutableArray alloc] init];
 		myDatabaseFile = [[ConnectionRegistry registryDatabase] copy];
 		myBonjour = [[CKBonjourCategory alloc] init];
+		myOutlineViews = [[NSMutableArray array] retain];
 		[myConnections addObject:myBonjour];
 		
 		[myCenter addObserver:self
@@ -151,6 +152,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	[myLock release];
 	[myConnections release];
 	[myDatabaseFile release];
+	[myOutlineViews release];
 	
 	[super dealloc];
 }
@@ -455,7 +457,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
 	[pid release];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKRegistryChangedNotification object:nil];
-    [myOutlineView reloadData];
+    [myOutlineViews makeObjectsPerformSelector:@selector(reloadData)];
 }
 #pragma mark Menu
 
@@ -473,7 +475,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
 											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
-			[item setTarget:[myOutlineView delegate]];
+			[item setTarget:[[self outlineView] delegate]];
 			[item setRepresentedObject:cur];
 			NSImage *icon = [[cur icon] copy];
 			[icon setScalesWhenResized:YES];
@@ -523,7 +525,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
 											  action:@selector(connectFromBookmarkMenuItem:)
 									   keyEquivalent:@""];
-			[item setTarget:[myOutlineView delegate]];
+			[item setTarget:[[self outlineView] delegate]];
 			[item setRepresentedObject:cur];
 			[item setImage:icon];
 			[menu addItem:item];
@@ -572,7 +574,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 }
 - (BOOL)itemIsLeopardSourceGroupHeader:(id)item
 {
-	return (item != nil && [item isKindOfClass:[NSDictionary class]] && [item objectForKey:@"IsSourceGroup"] && [[item objectForKey:@"IsSourceGroup"] boolValue]);
+	return ([myLeopardSourceListGroups containsObject:item]);
 }
 
 #pragma mark Droplet
@@ -599,7 +601,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 #pragma mark NSOutlineView Management
 - (NSOutlineView *)outlineView
 {
-	return myOutlineView;
+	return [myOutlineViews objectAtIndex:0];
 }
 
 #pragma mark Filtering
@@ -622,14 +624,14 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		myFilter = [filter copy];
 		myFilteredHosts = [[self hostsMatching:filter] retain];
 	}
-	[myOutlineView reloadData];
+	[myOutlineViews makeObjectsPerformSelector:@selector(reloadData)];
 }
 
 - (void)handleFilterableOutlineView:(NSOutlineView *)view
 {
-	myOutlineView = [view retain];
-	[myOutlineView setDataSource:self];
-	[myOutlineView registerForDraggedTypes:[NSArray arrayWithObjects:CKDraggedBookmarksPboardType, NSFilenamesPboardType, nil]];
+	[myOutlineViews addObject:view];
+	[view setDataSource:self];
+	[view registerForDraggedTypes:[NSArray arrayWithObjects:CKDraggedBookmarksPboardType, NSFilenamesPboardType, nil]];
 }
 
 #pragma mark NSOutlineView DataSource
@@ -702,7 +704,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
-{
+{	
 	if ([self itemIsLeopardSourceGroupHeader:item])
 		return [item objectForKey:@"Name"];
 	

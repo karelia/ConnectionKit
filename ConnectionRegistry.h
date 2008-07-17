@@ -52,7 +52,7 @@
 	NSDistributedNotificationCenter *myCenter;
 	NSLock *myLock;
 	
-	NSOutlineView *myOutlineView;
+	NSMutableArray *myOutlineViews;
 	NSString *myFilter;
 	NSArray *myFilteredHosts;
 	
