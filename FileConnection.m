@@ -584,6 +584,8 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
 	}
+	[upload	 retain];
+	[self dequeueUpload];
 	// send finished
 	if ( _flags.uploadFinished)
 	{
@@ -593,7 +595,7 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		[[upload delegate] transferDidFinish:[upload userInfo]];
 	}
-	
+	[upload release];
 	[self setState:ConnectionIdleState];
 }
 
@@ -611,7 +613,7 @@ checkRemoteExistence:(NSNumber *)check;
 																			data:nil
 																		  offset:0
 																		  remote:remotePath
-																		delegate:rec
+																		delegate:(delegate) ? delegate : rec
 																		userInfo:rec];
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
 													  target:self
@@ -621,6 +623,7 @@ checkRemoteExistence:(NSNumber *)check;
 											  sentState:ConnectionUploadingFileState
 											  dependant:nil
 											   userInfo:nil];
+	[self queueUpload:upload];
 	[self queueCommand:cmd];
 	return rec;
 }
@@ -827,10 +830,14 @@ checkRemoteExistence:(NSNumber *)check;
 		if ([download delegateRespondsToTransferProgressedTo])
 			[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:100]];
 		
+		[download retain];
+		[self dequeueDownload];
 		if (_flags.downloadFinished)
 			[_forwarder connection:self downloadDidFinish: remotePath];
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo]];
+		[download release];
+		
 	}
 	else	// no handler, so we send error message 'manually'
 	{
