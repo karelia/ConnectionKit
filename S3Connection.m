@@ -434,7 +434,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				if (_flags.downloadPercent)
 				{
-					int percent = (100 * bytesTransferred) / bytesToTransfer;
+					int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
 					[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
 				}
 			}
@@ -467,11 +467,17 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myDownloadHandle closeFile];
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
+			
+			CKInternalTransferRecord *downloadInfo = [self currentDownload];
 			if (_flags.downloadFinished)
 			{
-				CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+				CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
 				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey]];
 			}
+			
+			if ([downloadInfo delegateRespondsToTransferDidFinish])
+				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
+			
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
 			[self dequeueDownload];
@@ -748,7 +754,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 																			data:nil
 																		  offset:0
 																		  remote:remotePath
-																		delegate:rec
+																		delegate:(delegate) ? delegate : rec
 																		userInfo:nil];
 	[rec setUpload:YES];
 	
