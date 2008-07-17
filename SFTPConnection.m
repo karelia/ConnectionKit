@@ -6,6 +6,7 @@
 //  Copyright 2007 Extendmac, LLC.. All rights reserved.
 //
 
+#import "ConnectionThreadManager.h"
 #import "SFTPConnection.h"
 #import "RunLoopForwarder.h"
 #import "NSFileManager+Connection.h"
@@ -729,14 +730,15 @@ static char *lsform;
 
 - (void)uploadDidFinish:(CKInternalTransferRecord *)uploadInfo
 {
-	NSString *remotePath = [NSString stringWithString:[uploadInfo remotePath]];
-	
 	[uploadInfo retain];
-	[self dequeueUpload];	
+	
+	[self dequeueUpload];
+	
 	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:remotePath];
+		[_forwarder connection:self uploadDidFinish:[uploadInfo remotePath]];
 	if ([uploadInfo delegateRespondsToTransferDidFinish])
 		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
+	
 	[uploadInfo release];
 }
 
@@ -781,15 +783,14 @@ static char *lsform;
 
 - (void)downloadDidFinish:(CKInternalTransferRecord *)downloadInfo
 {
-	NSString *remotePath = [NSString stringWithString:[downloadInfo remotePath]];
-
 	[downloadInfo retain];
 	[self dequeueDownload];
 	
 	if (_flags.downloadFinished)
-		[_forwarder connection:self downloadDidFinish:remotePath];
+		[_forwarder connection:self downloadDidFinish:[downloadInfo remotePath]];
 	if ([downloadInfo delegateRespondsToTransferDidFinish])
 		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
+	
 	[downloadInfo release];
 }
 
