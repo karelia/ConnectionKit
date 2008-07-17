@@ -91,6 +91,8 @@ char **environ;
 
 - (BOOL)buffer:(char *)buffer containsString:(char *)stringCheck
 {
+	if (!buffer || !stringCheck)
+		return NO;
 	return strstr(buffer, stringCheck) != NULL;
 }
 
