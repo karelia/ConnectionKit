@@ -270,24 +270,35 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				NSString *currentPath = [myCurrentDirectory stringByDeletingFirstPathComponent];
 				
+				NSMutableArray *keyNames = [NSMutableArray array];
+				
 				while ((cur = [e nextObject]))
 				{
 					NSString *name = [self standardizePath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
-					NSString *date = [[[cur elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
-					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
-					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
-					
-					NSMutableDictionary *d = [NSMutableDictionary dictionary];
-					
+										
 					if ([name length] < [currentPath length]) continue; // this is a record from a parent folder
 					if ([name rangeOfString:currentPath].location == NSNotFound) continue; // this is an element in a different folder
 					
 					if ([name hasPrefix:currentPath])
-					{
 						name = [name substringFromIndex:[currentPath length]];
+					
+					/*We receive _all_ directory contents at once, so even when we ask for /brianamerige, we get /brianamerige/wp-admin/page.php, for example. Consequently, when currentpath is /wp-admin, we are only looking for things immediately inside /wp-admin. To achieve this, we only keep _one_ of each of the same first path components.
+					 */
+					if ([keyNames containsObject:[name firstPathComponent]])
+						continue;
+					[keyNames addObject:[name firstPathComponent]];
+					
+					if (![[name firstPathComponent] isEqualToString:[name lastPathComponent]])
+					{
+						//We have /wp-admin/page.php while we're only trying to list /wp-admin
+						name = [[name firstPathComponent] stringByAppendingString:@"/"];
 					}
 					
-					if ([name rangeOfString:@"/"].location < [name length] - 1) continue; // we are in a subfolder
+					NSString *date = [[[cur elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
+					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
+					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
+					
+					NSMutableDictionary *d = [NSMutableDictionary dictionary];				
 					
 					if ([name hasSuffix:@"/"])
 					{
