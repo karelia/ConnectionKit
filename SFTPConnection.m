@@ -213,6 +213,7 @@ static char *lsform;
 {
 	[super threadedDisconnect];
 	[theSFTPTServer forceDisconnect];
+	
 	[uploadQueue removeAllObjects];
 	[downloadQueue removeAllObjects];
 	[connectToQueue removeAllObjects];
@@ -866,7 +867,7 @@ static char *lsform;
 	
 	//Try to get it ourselves via keychain before asking client app for it
 	EMGenericKeychainItem *item = [[EMKeychainProxy sharedProxy] genericKeychainItemForService:@"SSH" withUsername:pubKeyPath];
-	if (item && [item password] && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
+	if (item && [item password] && [[item password] length] > 0 && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
 	{
 		[attemptedKeychainPublicKeyAuthentications addObject:pubKeyPath];
 		[self writeSFTPCommandWithString:[item password]];
