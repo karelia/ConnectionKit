@@ -150,7 +150,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					[self cacheDirectory:[dav path] withContents:contents];
 					if (_flags.directoryContents)
 					{
-						[_forwarder connection:self didReceiveContents:contents ofDirectory:[dav path]];
+						NSString *dirPath = [dav path];
+						if ([dirPath hasSuffix:@"/"])
+							dirPath = [dirPath substringToIndex:[dirPath length] - 1];
+						[_forwarder connection:self didReceiveContents:contents ofDirectory:dirPath];
 					}
 					break;
 				}
