@@ -325,7 +325,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				if (_flags.directoryContents)
 				{
-					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self fixPathToBeDirectoryPath:myCurrentDirectory]];
+					//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
+					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self fixPathToBeFilePath:myCurrentDirectory]];
 				}
 			}
 			break;
@@ -904,7 +905,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
 	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:[self standardizePath:dirPath]];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
 		{
 			return;
