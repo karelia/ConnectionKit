@@ -186,17 +186,42 @@ static char *lsform;
 #pragma mark Disconnecting
 - (void)disconnect
 {
-	[self queueSFTPCommandWithString:@"quit"];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedDisconnect];
+}
+
+- (void)threadedDisconnect
+{
+	[super threadedDisconnect];
+	[self writeSFTPCommandWithString:@"quit"];
+	[uploadQueue removeAllObjects];
+	[downloadQueue removeAllObjects];
+	[connectToQueue removeAllObjects];
+	[deleteFileQueue removeAllObjects];
+	[deleteDirectoryQueue removeAllObjects];
+	[renameQueue removeAllObjects];
+	[permissionChangeQueue removeAllObjects];
+	[commandQueue removeAllObjects];
+	[attemptedKeychainPublicKeyAuthentications removeAllObjects];	
 }
 
 - (void)forceDisconnect
 {
-	[self writeSFTPCommandWithString:@"quit"];
+	[[[ConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
 }
 
 - (void)threadedForceDisconnect
 {
+	[super threadedDisconnect];
 	[theSFTPTServer forceDisconnect];
+	[uploadQueue removeAllObjects];
+	[downloadQueue removeAllObjects];
+	[connectToQueue removeAllObjects];
+	[deleteFileQueue removeAllObjects];
+	[deleteDirectoryQueue removeAllObjects];
+	[renameQueue removeAllObjects];
+	[permissionChangeQueue removeAllObjects];
+	[commandQueue removeAllObjects];
+	[attemptedKeychainPublicKeyAuthentications removeAllObjects];		
 }
 
 
@@ -488,21 +513,13 @@ static char *lsform;
 - (void)writeSFTPCommandWithString:(NSString *)commandString
 {
 	if (!commandString)
-	{
 		return;
-	}
 	if ([commandString isEqualToString:@"CONNECT"])
-	{
 		return;
-	}
 	if ([commandString hasPrefix:@"put"])
-	{
 		[self uploadDidBegin:[self currentUploadInfo]];
-	}
 	else if ([commandString hasPrefix:@"get"])
-	{
 		[self downloadDidBegin:[self currentDownloadInfo]];
-	}
 	char *command = (char *)[commandString UTF8String];
 	[self writeSFTPCommand:command];
 }
@@ -510,28 +527,14 @@ static char *lsform;
 - (void)finishedCommand
 {
 	if ([commandQueue count] <= 0)
-	{
 		return;
-	}
+	
 	NSString *finishedCommand = [commandQueue objectAtIndex:0];
 	[self checkFinishedCommandStringForNotifications:finishedCommand];
 	[commandQueue removeObjectAtIndex:0];	
+	
 	if ([commandQueue count] > 0)
-	{
-		BOOL shouldConfirmQueuedCommandDispatch = [[NSUserDefaults standardUserDefaults] boolForKey:@"shouldConfirmQueuedCommandDispatch"];
-		BOOL performCommand = YES;
-		if (shouldConfirmQueuedCommandDispatch)
-		{
-			performCommand = NSRunAlertPanel(@"Dispatch Next Command?", [NSString stringWithFormat:@"There is an additional command in the queue, \"%@\". Would you like to dispatch this command?", [commandQueue objectAtIndex:0]], @"Dispatch", @"Ignore", nil) == 1;
-		}
-		if (performCommand)
-		{
-			[self writeSFTPCommandWithString:[commandQueue objectAtIndex:0]];
-		}
-	}
-	else
-	{
-	}
+		[self writeSFTPCommandWithString:[commandQueue objectAtIndex:0]];
 }
 
 - (void)checkFinishedCommandStringForNotifications:(NSString *)finishedCommand
@@ -546,7 +549,6 @@ static char *lsform;
 		//Download Finished
 		[self downloadDidFinish:[self currentDownloadInfo]];
 	}
-	//NOTE: We are checking for rmdir before rm because it would return yes for the "rm" prefix when it is really "rmdir
 	else if ([finishedCommand hasPrefix:@"rmdir"])
 	{
 		//Deleted Directory

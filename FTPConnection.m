@@ -1515,8 +1515,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)threadedDisconnect
 {
+	[super threadedDisconnect];
 	_state = ConnectionSentDisconnectState;
 	[self sendCommand:@"QUIT"];
+}
+
+- (void)threadedForceDisconnect
+{
+	[super threadedDisconnect];
+	[super threadedForceDisconnect];
 }
 
 - (void)threadedCancelTransfer
