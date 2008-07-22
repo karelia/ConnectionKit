@@ -553,6 +553,8 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 #pragma mark Leopard Style Source List
 - (void)setUsesLeopardStyleSourceList:(BOOL)flag
 {
+	if (myUsesLeopardStyleSourceList == flag)
+		return;
 	/*
 		See http://brianamerige.com/blog/2008/01/31/connectionkit-leopard-styled-source-list-notes/ for more information on how to fully implement the Leopard Style source list.
 	*/
