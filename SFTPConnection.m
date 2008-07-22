@@ -452,9 +452,7 @@ static char *lsform;
 	unsigned int queuePlacement = [commandQueue count];
 	[commandQueue addObject:cmdString];
 	if (queuePlacement == 0)
-	{
 		[self writeSFTPCommandWithString:cmdString];
-	}
 }
 
 - (void)writeSFTPCommand:(void *)cmd
