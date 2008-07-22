@@ -633,7 +633,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (NSString *)currentDirectory
 {
-	return myCurrentDirectory;
+	//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
+	return [self fixPathToBeFilePath:myCurrentDirectory];
 }
 
 - (NSString *)rootDirectory
