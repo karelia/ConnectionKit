@@ -244,6 +244,9 @@ static char *lsform;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
+	//SFTP does _not_ overwrite existing files when renaming. It'll just error if the target exists. Even if toPath doesn't exist, we'll just soft-error on it.
+	[self deleteFile:toPath];
+	
 	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromPath, @"fromPath", toPath, @"toPath", nil];
 	[renameQueue addObject:renameDictionary];
 	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]];
