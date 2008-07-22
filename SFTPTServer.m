@@ -557,7 +557,6 @@ char **environ;
 		[pool release];
 		pool = nil;
 	}
-	
 	int status;
 	sftppid = wait(&status);
 	free(executableArguments);
