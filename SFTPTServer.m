@@ -493,7 +493,7 @@ char **environ;
 					}
 				}
 			}
-			else if ([self buffer:serverResponseBuffer containsString:"passphrase for key"])
+			else if ([self buffer:serverResponseBuffer containsString:"passphrase for key"] && !cancelflag)
  			{
 				[sftpWrapperConnection passphraseRequested:[NSString stringWithUTF8String:(void *)serverResponseBuffer]];
 				passwordWasSent = YES;
