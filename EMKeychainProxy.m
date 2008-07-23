@@ -75,6 +75,7 @@ static EMKeychainProxy* sharedProxy;
 		return nil;
 	}
 	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	SecKeychainItemFreeContent(NULL, password);
 
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
 }
@@ -97,7 +98,15 @@ static EMKeychainProxy* sharedProxy;
 	char *password = nil;
 	
 	SecKeychainItemRef item = nil;
-	OSStatus returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, kSecAuthenticationTypeDefault, &passwordLength, (void **)&password, &item);
+	//0 is kSecAuthenticationTypeAny
+	OSStatus returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
+	
+	if (returnStatus != noErr && protocol == kSecProtocolTypeFTP)
+	{
+		//Some clients (like Transmit) still save passwords with kSecProtocolTypeFTPAccount, which was deprecated.  Let's check for that.
+		protocol = kSecProtocolTypeFTPAccount;		
+		returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
+	}
 	
 	if (returnStatus != noErr || !item)
 	{
@@ -108,6 +117,7 @@ static EMKeychainProxy* sharedProxy;
 		return nil;
 	}
 	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];
 }
