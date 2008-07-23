@@ -48,17 +48,15 @@
 		myPost = [[NSMutableDictionary dictionary] retain];
 		myUploads = [[NSMutableDictionary dictionary] retain];
 		
-		[self setHeader:@"Mac OS X Connection Kit http://opensource.utr-software.com/connection" forKey:@"User-Agent"];
+		NSString *userAgent = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKUserAgent"];
+		if (!userAgent)
+			userAgent = @"Mac OS X Connection Kit http://opensource.utr-software.com/connection";
+		[self setHeader:userAgent forKey:@"User-Agent"];
 		
 		// add date header
 		NSCalendarDate *now = [NSCalendarDate date];
 		[now setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
 		[self setHeader:[now descriptionWithCalendarFormat:@"%a, %d %b %Y %H:%M:%S %z"] forKey:@"Date"];
-		
-//		[self setHeader:@"text/xml; charset=\"utf-8\"" forKey:@"Content-Type"];
-//		[self setHeader:@"gzip" forKey:@"Accept-Encoding"];
-//		[self setHeader:@"chunked" forKey:@"Transfer-Encoding"];
-//		[self setHeader:@"gzip" forKey:@"Content-Coding"];
 	}
 	return self;
 }
