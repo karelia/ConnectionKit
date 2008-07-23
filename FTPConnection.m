@@ -1063,8 +1063,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 421: //service timed out.
 		{
 			[self closeDataStreams];
+			[super threadedDisconnect]; //This empties the queues, etc.
 			_flags.isConnected = NO;
-			
 			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
 			}
@@ -1515,15 +1515,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)threadedDisconnect
 {
-	[super threadedDisconnect];
 	_state = ConnectionSentDisconnectState;
 	[self sendCommand:@"QUIT"];
-}
-
-- (void)threadedForceDisconnect
-{
-	[super threadedDisconnect];
-	[super threadedForceDisconnect];
 }
 
 - (void)threadedCancelTransfer
