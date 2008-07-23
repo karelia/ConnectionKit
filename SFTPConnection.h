@@ -17,7 +17,7 @@
 @interface SFTPConnection : StreamBasedConnection 
 {
 	int master;
-	BOOL isConnected, isUploading, isDownloading;
+	BOOL isConnected, isConnecting, isUploading, isDownloading;
 	NSMutableString *currentDirectory;
 	NSTextStorage *myTextStorage;
 	
@@ -27,6 +27,7 @@
 	NSMutableArray *commandQueue;
 	
 	SFTPTServer *theSFTPTServer;
+	NSConnection *connectionToTServer;
 	
 	NSTimer *animateTransferProgressTimer;
 }
