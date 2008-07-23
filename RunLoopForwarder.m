@@ -68,13 +68,14 @@
 
 - (void) setDelegate:(id)aDelegate
 {
-	if (![lock tryLock])
-	{
-		[self performSelector:@selector(setDelegate:)
-				   withObject:aDelegate
-				   afterDelay:0.1];
-	}
-	//[lock lock];
+//	if (![lock tryLock])
+//	{
+//		[self performSelector:@selector(setDelegate:)
+//				   withObject:aDelegate
+//				   afterDelay:0.0];
+//		return;
+//	}
+	[lock lock];
 	myDelegate = aDelegate;
 	[lock unlock];
 }
