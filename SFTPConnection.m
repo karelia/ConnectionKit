@@ -188,7 +188,7 @@ static char *lsform;
 
 - (void)threadedDisconnect
 {
-	[self writeSFTPCommandWithString:@"quit"];	
+	[self queueSFTPCommandWithString:@"quit"];	
 }
 
 - (void)forceDisconnect
@@ -201,6 +201,7 @@ static char *lsform;
 	[connectionToTServer invalidate];
 	[theSFTPTServer release];
 	theSFTPTServer = nil;
+	
 	isConnected = NO;
 	isConnecting = NO;
 }
@@ -657,8 +658,7 @@ static char *lsform;
 
 - (void)didDisconnect
 {
-	NSLog(@"DidDisconnect");
-	[theSFTPTServer forceDisconnect];
+	[connectionToTServer invalidate];
 	[theSFTPTServer release];
 	theSFTPTServer = nil;
 	
