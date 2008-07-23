@@ -63,18 +63,16 @@ static char *lsform;
 		permissionChangeQueue = [[NSMutableArray array] retain];
 		commandQueue = [[NSMutableArray arrayWithObject:@"CONNECT"] retain];
 		attemptedKeychainPublicKeyAuthentications = [[NSMutableArray array] retain];
-		
-		[self establishDistributedObjectsConnection];
 	}
 	return self;
 }
 
 - (void)establishDistributedObjectsConnection
-{
+{	
 	NSPort *receivePort = [NSPort port];
 	NSPort *sendPort = [NSPort port];
 	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
-	NSConnection *connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
+	connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
 	[connectionToTServer setRootObject:self];
 	theSFTPTServer = nil;
 	NSArray *portArray = [NSArray arrayWithObjects:sendPort, receivePort, nil];
@@ -94,6 +92,7 @@ static char *lsform;
 	if ([connectToQueue count] > 0)
 	{
 		NSArray *parameters = [connectToQueue objectAtIndex:0];
+		isConnecting = YES;
 		[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
 		[connectToQueue removeObjectAtIndex:0];
 	}
@@ -124,6 +123,9 @@ static char *lsform;
 
 - (void)connect
 {
+	if (isConnecting)
+		return;
+	
 	if (![self username])
 	{
 		//Can't do anything here, throw an error.
@@ -132,17 +134,11 @@ static char *lsform;
 	NSMutableArray *parameters = [NSMutableArray array];
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
-	{
 		[parameters addObject:@"-C"];
-	}	
 	if (![[self port] isEqualToString:@""])
-	{
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [[self port] intValue]]];
-	}
 	if ([self password] && [[self password] length] > 0)
-	{
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
-	}
 	else
 	{
 		[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
@@ -169,17 +165,18 @@ static char *lsform;
 			lsform = "ls";
 			break;
     }
+	
+	if (isConnecting || isConnected)
+		return;
+	
 	if (!theSFTPTServer)
 	{
 		[connectToQueue addObject:parameters];
+		[self performSelectorOnMainThread:@selector(establishDistributedObjectsConnection) withObject:nil waitUntilDone:NO];
 		return;
 	}
+	isConnecting = YES;
 	[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
-}
-
-- (BOOL)isUploading
-{
-	return isUploading;
 }
 
 #pragma mark -
@@ -191,17 +188,7 @@ static char *lsform;
 
 - (void)threadedDisconnect
 {
-	[super threadedDisconnect];
-	[self writeSFTPCommandWithString:@"quit"];
-	[uploadQueue removeAllObjects];
-	[downloadQueue removeAllObjects];
-	[connectToQueue removeAllObjects];
-	[deleteFileQueue removeAllObjects];
-	[deleteDirectoryQueue removeAllObjects];
-	[renameQueue removeAllObjects];
-	[permissionChangeQueue removeAllObjects];
-	[commandQueue removeAllObjects];
-	[attemptedKeychainPublicKeyAuthentications removeAllObjects];	
+	[self writeSFTPCommandWithString:@"quit"];	
 }
 
 - (void)forceDisconnect
@@ -211,18 +198,11 @@ static char *lsform;
 
 - (void)threadedForceDisconnect
 {
-	[super threadedDisconnect];
-	[theSFTPTServer forceDisconnect];
-	
-	[uploadQueue removeAllObjects];
-	[downloadQueue removeAllObjects];
-	[connectToQueue removeAllObjects];
-	[deleteFileQueue removeAllObjects];
-	[deleteDirectoryQueue removeAllObjects];
-	[renameQueue removeAllObjects];
-	[permissionChangeQueue removeAllObjects];
-	[commandQueue removeAllObjects];
-	[attemptedKeychainPublicKeyAuthentications removeAllObjects];		
+	[connectionToTServer invalidate];
+	[theSFTPTServer release];
+	theSFTPTServer = nil;
+	isConnected = NO;
+	isConnecting = NO;
 }
 
 
@@ -354,7 +334,6 @@ static char *lsform;
 	
 	[uploadQueue addObject:internalRecord];
 	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"put \"%@\" \"%@\"", localPath, remotePath]];
-	
 	return record;
 }
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
@@ -442,6 +421,11 @@ static char *lsform;
 
 #pragma mark -
 #pragma mark Accessors
+- (BOOL)isUploading
+{
+	return isUploading;
+}
+
 - (BOOL)isDownloading
 {
 	return isDownloading;
@@ -459,7 +443,7 @@ static char *lsform;
 
 - (unsigned)numberOfUploads
 {
-	return [uploadQueue count];
+	return [super numberOfUploads];
 }
 
 - (unsigned)numberOfDownloads
@@ -658,7 +642,8 @@ static char *lsform;
 {
 	//Clear any failed pubkey authentications as we're now connected
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
-	
+
+	isConnecting = NO;
 	isConnected = YES;
 	if (_flags.didConnect)
 	{
@@ -672,6 +657,20 @@ static char *lsform;
 
 - (void)didDisconnect
 {
+	NSLog(@"DidDisconnect");
+	[theSFTPTServer forceDisconnect];
+	[theSFTPTServer release];
+	theSFTPTServer = nil;
+	
+	[uploadQueue removeAllObjects];
+	[downloadQueue removeAllObjects];
+	[deleteFileQueue removeAllObjects];
+	[deleteDirectoryQueue removeAllObjects];
+	[renameQueue removeAllObjects];
+	[permissionChangeQueue removeAllObjects];
+	[commandQueue removeAllObjects];
+	[attemptedKeychainPublicKeyAuthentications removeAllObjects];			
+	
 	isConnected = NO;
 	if (_flags.didDisconnect)
 	{

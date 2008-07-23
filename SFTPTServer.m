@@ -48,10 +48,10 @@ char **environ;
 		directoryContents = [[NSMutableArray array] retain];
 		directoryListingBufferString = [[NSMutableString string] retain];
 		
-		cancelflag = 0;
+		cancelflag = NO;
 		sftppid = 0;
 		connecting = NO;
-		connected = 0;
+		connected = NO;
 		master = 0;
 		return self;
 	}
@@ -386,6 +386,8 @@ char **environ;
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		if (cancelflag)
 		{
+			fclose(masterFileStream);
+			memset(serverResponseBuffer, '\0', strlen(serverResponseBuffer));
 			[pool release];
 			pool = nil;
 			break;
@@ -408,7 +410,7 @@ char **environ;
 			default:
 				break;
 		}
-		
+
 		if (FD_ISSET(master, &readMask) && !fgets((char *)serverResponseBuffer, MAXPATHLEN, masterFileStream))
 			break;
 		
@@ -474,7 +476,7 @@ char **environ;
 				NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
 				[sftpWrapperConnection connectionError:error];
 			}
-			else if ([sftpWrapperConnection isBusy])
+			else if ([sftpWrapperConnection isBusy] || cancelflag)
 			{
 				if ([sftpWrapperConnection isUploading])
 				{
@@ -557,10 +559,13 @@ char **environ;
 		[pool release];
 		pool = nil;
 	}
+	cancelflag = NO;
 	int status;
 	sftppid = wait(&status);
 	free(executableArguments);
 	connected = NO;
+	masterFileStream = nil;
+	master = 0;
 	(void)close(master);
 	
 	[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
