@@ -490,7 +490,11 @@ static NSImage *sHostIcon = nil;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
+																							   withUsername:myUsername
+																									   path:nil
+																									   port:[myPort intValue]
+																								   protocol:kSecProtocolTypeFTP];
 		return [keychainItem password];
 	}
 	return nil;
