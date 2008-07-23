@@ -1463,6 +1463,19 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		
 		_numberOfS3RenameListingsRemaining--;
 		[_recursivelyRenamedDirectoriesToDelete addObject:dirPath];
+		
+		if (_numberOfS3RenamesRemaining == 0 && _numberOfS3RenameListingsRemaining == 0)
+		{
+			NSEnumerator *renamedDirectoriesToDelete = [_recursivelyRenamedDirectoriesToDelete reverseObjectEnumerator];
+			NSString *path;
+			while ((path = [renamedDirectoriesToDelete nextObject]))
+			{
+				_numberOfS3RenameDirectoryDeletionsRemaining++;
+				[con deleteDirectory:path];
+			}
+			[_recursivelyRenamedDirectoriesToDelete removeAllObjects];
+		}		
+		
 		[_recursiveS3RenameLock unlock];
 	}
 }
