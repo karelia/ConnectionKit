@@ -653,7 +653,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		// we are creating a bucket, so remove the trailing /
 		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
 	}
-	
+		
 	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
@@ -684,7 +684,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	 */
 	
 	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:toPath];
-	[copyRequest setHeader:fromPath forKey:@"x-amz-copy-source"];
+	[copyRequest setHeader:[fromPath encodeLegally] forKey:@"x-amz-copy-source"];
 	ConnectionCommand *copyCommand = [ConnectionCommand command:copyRequest
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionRenameFromState
@@ -752,6 +752,11 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
+	if ([remotePath rangeOfString:@"+"].location != NSNotFound)
+	{
+		remotePath = [NSMutableString stringWithString:remotePath];
+		[(NSMutableString *)remotePath replaceOccurrencesOfString:@"+" withString:@"%2B" options:nil range:NSMakeRange(0, [remotePath length])];
+	}
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
 																	   uri:[self fixPathToBeFilePath:remotePath]];
