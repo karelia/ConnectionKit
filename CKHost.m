@@ -819,18 +819,20 @@ static NSImage *sHostIcon = nil;
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
-	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
-																						   withUsername:myUsername
-																								   path:nil
-																								   port:[myPort intValue]
-																							   protocol:kSecProtocolTypeFTP];
-	
-	if (!keychainItem && myPassword && [myPassword length] > 0 && myUsername && [myUsername length] > 0)
+	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
-		[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
-	}	
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
+																							   withUsername:myUsername
+																									   path:nil
+																									   port:[myPort intValue]
+																								   protocol:kSecProtocolTypeFTP];
+		
+		if (!keychainItem && myPassword && [myPassword length] > 0 && myUsername && [myUsername length] > 0)
+		{
+			//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
+			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+		}	
+	}
 }
 - (id)valueForUndefinedKey:(NSString *)key
 {
