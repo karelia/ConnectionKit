@@ -33,6 +33,7 @@
 @interface NSString (Connection)
 
 - (NSString *)encodeLegally;
+- (NSString *)encodeLegallyForS3;
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;

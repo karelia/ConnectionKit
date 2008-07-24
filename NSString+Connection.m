@@ -35,37 +35,18 @@
 
 - (NSString *)encodeLegally
 {
-    NSArray *escapeChars = [NSArray arrayWithObjects:@";" , @"?" , @":" ,
-							@"@" , @"&" , @"=" , @"+" ,
-							@"$" , @"," , @"[" , @"]",
-							@"#", @"!", @"'", @"(", 
-							@")", @"*", @" ", nil];
-	
-    NSArray *replaceChars = [NSArray arrayWithObjects:@"%3B" , @"%3F" ,
-							 @"%3A" , @"%40" , @"%26" ,
-							 @"%3D" , @"%2B" , @"%24" ,
-							 @"%2C" , @"%5B" , @"%5D", 
-							 @"%23", @"%21", @"%27",
-							 @"%28", @"%29", @"%2A", @"%20", nil];
-	
-    int len = [escapeChars count];
-	
-    NSMutableString *temp = [self mutableCopy];
-	
-    int i;
-    for(i = 0; i < len; i++)
-    {
-		
-        [temp replaceOccurrencesOfString: [escapeChars objectAtIndex:i]
-							  withString:[replaceChars objectAtIndex:i]
-								 options:NSLiteralSearch
-								   range:NSMakeRange(0, [temp length])];
-    }
-	
-    NSString *out = [NSString stringWithString: temp];
-	[temp release];	
-    return out;
+	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
+																			NULL, (CFStringRef)self, (CFStringRef)@"%+#", 
+																			NULL, CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+	return [result autorelease];
 }
+- (NSString *)encodeLegallyForS3
+{
+	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
+																			NULL, (CFStringRef)self, NULL, (CFStringRef)@"+",
+																			CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+	return [result autorelease];
+}	
 
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding
 {

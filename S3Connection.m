@@ -246,6 +246,17 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				NSEnumerator *e;
 				NSMutableArray *contents = [NSMutableArray array];
 				
+				BOOL isTruncated = NO;
+				NSArray *isTruncatedNodes = [[doc rootElement] nodesForXPath:@"//IsTruncated" error:&error];
+				if ([isTruncatedNodes count] > 0)
+				{
+					NSXMLNode *isTruncatedNode = [isTruncatedNodes objectAtIndex:0];
+					NSString *isTruncatedValue = [isTruncatedNode stringValue];
+					isTruncated = [isTruncatedValue isEqualToString:@"true"];
+				}
+				
+				NSLog(@"%i", isTruncated); // If we're YES, we need the rest!
+				
 				if ([myCurrentDirectory isEqualToString:@"/"])
 				{
 					NSArray *buckets = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
@@ -275,7 +286,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				while ((cur = [e nextObject]))
 				{
 					NSString *name = [self standardizePath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
-										
+
 					if ([name length] < [currentPath length]) continue; // this is a record from a parent folder
 					if ([name rangeOfString:currentPath].location == NSNotFound) continue; // this is an element in a different folder
 					
@@ -457,17 +468,26 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myResponseBuffer setLength:0]; 
 			bytesTransferred += [data length];
 			
-			CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+			CKInternalTransferRecord *downloadInfo = [self currentDownload];
+			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
 			
 			if (_flags.downloadProgressed)
 			{
 				[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
 			}
-			
+			if ([downloadInfo delegateRespondsToTransferTransferredData])
+			{
+				[[downloadInfo delegate] transfer:record transferredDataOfLength:[data length]];
+			}
 			if (_flags.downloadPercent)
 			{
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
 				[_forwarder connection:self download:[record propertyForKey:QueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
+			}
+			if ([downloadInfo delegateRespondsToTransferProgressedTo])
+			{
+				int percent = (100 * bytesTransferred) / bytesToTransfer;
+				[[downloadInfo delegate] transfer:record progressedTo:[NSNumber numberWithInt:percent]];
 			}
 		}
 		
@@ -486,7 +506,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
 				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey]];
 			}
-			
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
 				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
 			
@@ -654,7 +673,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
 	}
 		
-	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:dirPath];
+	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:[dirPath encodeLegallyForS3]];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionCreateDirectoryState
@@ -683,14 +702,14 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	 Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameS3Directory:to: which is implemented and handled by StreamBasedConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
 	 */
 	
-	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:toPath];
-	[copyRequest setHeader:[fromPath encodeLegally] forKey:@"x-amz-copy-source"];
+	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:[toPath encodeLegallyForS3]];
+	[copyRequest setHeader:[fromPath encodeLegallyForS3] forKey:@"x-amz-copy-source"];
 	ConnectionCommand *copyCommand = [ConnectionCommand command:copyRequest
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionRenameFromState
 											  dependant:nil
 											   userInfo:nil];
-	CKHTTPRequest *deleteRequest = [CKHTTPRequest requestWithMethod:@"DELETE" uri:fromPath];
+	CKHTTPRequest *deleteRequest = [CKHTTPRequest requestWithMethod:@"DELETE" uri:[fromPath encodeLegallyForS3]];
 	ConnectionCommand *deleteCommand = [ConnectionCommand command:deleteRequest
 													   awaitState:ConnectionRenameToState
 														sentState:ConnectionAwaitingRenameState
@@ -707,7 +726,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
 		
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[self fixPathToBeFilePath:path]] autorelease];
+															uri:[[self fixPathToBeFilePath:path] encodeLegallyForS3]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteFileState
@@ -722,7 +741,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[self fixPathToBeDirectoryPath:dirPath]] autorelease];
+															uri:[[self fixPathToBeDirectoryPath:dirPath] encodeLegallyForS3]] autorelease];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDeleteDirectoryState
@@ -752,14 +771,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
-	if ([remotePath rangeOfString:@"+"].location != NSNotFound)
-	{
-		remotePath = [NSMutableString stringWithString:remotePath];
-		[(NSMutableString *)remotePath replaceOccurrencesOfString:@"+" withString:@"%2B" options:nil range:NSMakeRange(0, [remotePath length])];
-	}
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
-																	   uri:[self fixPathToBeFilePath:remotePath]];
+																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForS3]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
 	
 	ConnectionCommand *cmd = [ConnectionCommand command:req
@@ -796,7 +810,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	remotePath = [self fixPathToBeFilePath:remotePath];
-	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:remotePath];
+	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:[remotePath encodeLegallyForS3]];
 	ConnectionCommand *cmd = [ConnectionCommand command:req
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionUploadingFileState
@@ -883,9 +897,18 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 - (void)s3DirectoryContents:(NSString *)dir
 {
 	NSString *theDir = dir != nil ? dir : myCurrentDirectory;
+	
+	NSString *bucketName = [theDir firstPathComponent];
+	NSString *prefixString = @"";
+	if ([bucketName length] > 1)
+	{
+		NSString *subpath = [theDir substringFromIndex:[bucketName length] + 2];
+		if ([subpath length] > 0)
+			prefixString = [NSString stringWithFormat:@"?prefix=%@", subpath];
+	}
 
-	NSString *uri = [NSString stringWithFormat:@"/%@", [theDir firstPathComponent]];
-	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:uri];
+	NSString *uri = [NSString stringWithFormat:@"/%@%@", bucketName, prefixString];
+	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
 	[myCurrentRequest autorelease];
 	myCurrentRequest = r;
 	[self sendCommand:r];
