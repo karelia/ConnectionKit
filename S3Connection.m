@@ -255,7 +255,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 					isTruncated = [isTruncatedValue isEqualToString:@"true"];
 				}
 				
-				NSLog(@"%i", isTruncated); // If we're YES, we need the rest!
+				//NSLog(@"%i", isTruncated); // If we're YES, we need the rest!
 				
 				if ([myCurrentDirectory isEqualToString:@"/"])
 				{
