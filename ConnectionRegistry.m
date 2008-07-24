@@ -34,9 +34,7 @@
 #import "AbstractConnection.h"
 #import "CKHostCell.h"
 
-static NSLock *sRegistryLock = nil;
-static BOOL sRegistryCanInit = NO;
-static ConnectionRegistry *sRegistry = nil;
+static ConnectionRegistry *sharedRegistry = nil;
 static NSString *sRegistryDatabase = nil;
 
 NSString *CKRegistryNotification = @"CKRegistryNotification";
@@ -57,23 +55,11 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
-+ (void)load
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	sRegistryLock = [[NSLock alloc] init];
-	[pool release];
-}
-
 + (id)sharedRegistry
 {
-	if (!sRegistry)
-	{
-		[sRegistryLock lock];
-		sRegistryCanInit = YES;
-		sRegistry = [[ConnectionRegistry alloc] init];
-		sRegistryCanInit = NO;
-	}
-	return sRegistry;
+	if (!sharedRegistry)
+		[[ConnectionRegistry alloc] init];
+	return sharedRegistry;
 }
 
 + (void)setRegistryDatabase:(NSString *)file
@@ -93,10 +79,6 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 - (id)init
 {
-	if (!sRegistryCanInit)
-	{
-		return nil;
-	}
 	if ((self = [super init]))
 	{
 		myLock = [[NSLock alloc] init];
@@ -157,19 +139,39 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	[super dealloc];
 }
 
-- (oneway void)release
++ (id)allocWithZone:(NSZone *)zone
 {
-	
+	if (!sharedRegistry)
+	{
+		sharedRegistry = [super allocWithZone:zone];
+		return sharedRegistry;
+	}
+	return nil;
 }
 
-- (id)autorelease
+- (id)copyWithZone:(NSZone *)zone
 {
-	return self;
+    return self;
 }
 
 - (id)retain
 {
-	return self;
+    return self;
+}
+
+- (unsigned)retainCount
+{
+    return UINT_MAX;  //denotes an object that cannot be released
+}
+
+- (void)release
+{
+    //do nothing
+}
+
+- (id)autorelease
+{
+    return self;
 }
 
 #pragma mark -
