@@ -113,6 +113,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
                           password:password
 							 error:error])
 	{
+		incompleteDirectoryContents = [[NSMutableArray array] retain];
 		myCurrentDirectory = @"/";
 	}
 	return self;
@@ -120,6 +121,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)dealloc
 {
+	[incompleteDirectoryContents release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
 	
@@ -254,9 +256,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 					NSString *isTruncatedValue = [isTruncatedNode stringValue];
 					isTruncated = [isTruncatedValue isEqualToString:@"true"];
 				}
-				
-				//NSLog(@"%i", isTruncated); // If we're YES, we need the rest!
-				
+								
 				if ([myCurrentDirectory isEqualToString:@"/"])
 				{
 					NSArray *buckets = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
@@ -282,10 +282,10 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				NSString *currentPath = [myCurrentDirectory stringByDeletingFirstPathComponent];
 				
 				NSMutableArray *keyNames = [NSMutableArray array];
-				
 				while ((cur = [e nextObject]))
 				{
-					NSString *name = [self standardizePath:[[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue]];
+					NSString *rawKeyName = [[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue];
+					NSString *name = [self standardizePath:rawKeyName];
 
 					if ([name length] < [currentPath length]) continue; // this is a record from a parent folder
 					if ([name rangeOfString:currentPath].location == NSNotFound) continue; // this is an element in a different folder
@@ -332,6 +332,41 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 					[d setObject:[NSNumber numberWithLongLong:filesize] forKey:NSFileSize];
 					[contents addObject:d];
 				}
+				
+				if (isTruncated)
+				{
+					//Keep the contents for the next time around
+					[incompleteDirectoryContents addObjectsFromArray:contents];
+					
+					//We aren't done yet. There are more keys to be listed in this 'directory'
+					NSString *bucketName = [myCurrentDirectory firstPathComponent];
+					NSString *prefixString = @"";
+					if ([bucketName length] > 1)
+					{
+						NSString *subpath = [myCurrentDirectory substringFromIndex:[bucketName length] + 2];
+						if ([subpath length] > 0)
+							prefixString = [NSString stringWithFormat:@"?prefix=%@", subpath];
+					}
+					
+					if ([prefixString length] == 0)
+						prefixString = @"?"; //If we have no prefix, we need the ? to be /brianamerige?marker=bleh
+					else
+						prefixString = [prefixString stringByAppendingString:@"&"]; //If we do have a prefix, we need the & to be /brianameige?prefix=dir/&marker=bleh
+					
+					NSString *lastKeyName = [[[[bucketContents lastObject] elementsForName:@"Key"] objectAtIndex:0] stringValue];
+					NSString *markerString = [NSString stringWithFormat:@"marker=%@", lastKeyName];
+					
+					NSString *uri = [NSString stringWithFormat:@"/%@%@%@", bucketName, prefixString, markerString];
+					CKHTTPRequest *request = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
+					[myCurrentRequest autorelease];
+					myCurrentRequest = request;
+					[self sendCommand:request];					
+					return; //Don't break. We are not idle yet, so we can't set ConnectionIdleState as we do at the bottom of the method.
+				}
+				
+				[contents addObjectsFromArray:incompleteDirectoryContents];
+				[incompleteDirectoryContents removeAllObjects];
+				
 				[self cacheDirectory:myCurrentDirectory withContents:contents];
 				
 				if (_flags.directoryContents)
