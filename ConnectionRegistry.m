@@ -35,6 +35,7 @@
 #import "CKHostCell.h"
 
 static ConnectionRegistry *sharedRegistry = nil;
+static BOOL sharedRegistryIsInitializing = NO;
 static NSString *sRegistryDatabase = nil;
 
 NSString *CKRegistryNotification = @"CKRegistryNotification";
@@ -57,8 +58,15 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 #pragma mark Getting Started / Tearing Down
 + (id)sharedRegistry
 {
+	if (sharedRegistryIsInitializing)
+		return nil;
+	
 	if (!sharedRegistry)
+	{
+		sharedRegistryIsInitializing = YES;
 		[[ConnectionRegistry alloc] init];
+		sharedRegistryIsInitializing = NO;
+	}
 	return sharedRegistry;
 }
 
@@ -122,8 +130,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 				[currentHost setCategory:currentCategory];
 			}
 		}
+		return self;
 	}
-	return self;
+	return nil;
 }
 
 - (void)dealloc
