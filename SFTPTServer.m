@@ -75,25 +75,24 @@ char **environ;
 
 #pragma mark -
 #pragma mark Buffer Prompt Checks
-- (BOOL)buffer:(char *)buf containsAnyPrompts:(char *[])prompts
-{
-	if (!buf)
-		return NO;
-	int numberOfPromptsToCheck = (sizeof(prompts) / sizeof(prompts[0]));
-	int index;
-	for (index = 0; index < numberOfPromptsToCheck; index++)
-	{
-		if (strstr(buf, prompts[index]) != nil)
-			return YES;
-	}
-	return NO;
-}
-
 - (BOOL)buffer:(char *)buffer containsString:(char *)stringCheck
 {
 	if (!buffer || !stringCheck)
 		return NO;
 	return strstr(buffer, stringCheck) != NULL;
+}
+
+- (BOOL)buffer:(char *)buf containsAnyPrompts:(char *[])prompts
+{
+	if (!buf)
+		return NO;
+	
+	while (*prompts)
+	{
+		if (strstr(buf, *prompts++) != nil)
+			return YES;
+	}
+	return NO;
 }
 
 - (BOOL)bufferContainsPasswordPrompt:(char *)buf
@@ -104,7 +103,8 @@ char **environ;
 	"PASSCODE:",
 	"Password for ",
 	"Passcode for ",
-	"CryptoCard Challenge" };	
+	"CryptoCard Challenge", NULL};	
+	
 	return [self buffer:buf containsAnyPrompts:prompts];
 }
 
@@ -121,19 +121,20 @@ char **environ;
 	"ssh_exchange_identification",
 	"Operation timed out",
 	"no address associated with",
-	"Error:"};
+	"Error:",
+	NULL};
 	return [self buffer:buf containsAnyPrompts:prompts];
 }	
 
 - (BOOL)bufferContainsDirectoryListing:(char *)buf
 {
-    char *prompts[] = {"ls -l", "ls", "ls "};
+    char *prompts[] = {"ls -l", "ls", "ls ", NULL};
 	return [self buffer:buf containsAnyPrompts:prompts];
 }	
 
 - (BOOL)unknownHostKeyPromptInBuffer:(char *)buf
 {
-    char *prompts[] = {"The authenticity of ", "Host key not found "};
+    char *prompts[] = {"The authenticity of ", "Host key not found ", NULL};
 	return [self buffer:buf containsAnyPrompts:prompts];
 }
 

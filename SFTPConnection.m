@@ -688,6 +688,7 @@ static char *lsform;
 
 - (void)didChangeToDirectory:(NSString *)path
 {
+	[self setCurrentRemotePath:path];
 	if (_flags.changeDirectory)
 	{
 		[_forwarder connection:self didChangeToDirectory:path];
