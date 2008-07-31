@@ -114,6 +114,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 							 error:error])
 	{
 		incompleteDirectoryContents = [[NSMutableArray array] retain];
+		incompleteKeyNames = [[NSMutableArray array] retain];
 		myCurrentDirectory = @"/";
 	}
 	return self;
@@ -122,6 +123,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 - (void)dealloc
 {
 	[incompleteDirectoryContents release];
+	[incompleteKeyNames release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
 	
@@ -281,7 +283,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				NSString *currentPath = [myCurrentDirectory stringByDeletingFirstPathComponent];
 				
-				NSMutableArray *keyNames = [NSMutableArray array];
+				NSMutableArray *keyNames = [NSMutableArray arrayWithArray:incompleteKeyNames];
 				while ((cur = [e nextObject]))
 				{
 					NSString *rawKeyName = [[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue];
@@ -337,6 +339,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				{
 					//Keep the contents for the next time around
 					[incompleteDirectoryContents addObjectsFromArray:contents];
+					[incompleteKeyNames addObjectsFromArray:keyNames];
 					
 					//We aren't done yet. There are more keys to be listed in this 'directory'
 					NSString *bucketName = [myCurrentDirectory firstPathComponent];
@@ -366,6 +369,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				[contents addObjectsFromArray:incompleteDirectoryContents];
 				[incompleteDirectoryContents removeAllObjects];
+				[incompleteKeyNames removeAllObjects];
 				
 				[self cacheDirectory:myCurrentDirectory withContents:contents];
 				
