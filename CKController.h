@@ -22,21 +22,21 @@
 	IBOutlet NSTextView		*oTranscript;
 	
 	@private
-	NSString				*myLocalDirectory;
-	NSString				*myRemoteDirectory;
-	CKHost					*myHost;
-	id <AbstractConnectionProtocol> myConnection;
-	id <AbstractConnectionProtocol> myLocalConnection;
+// UNUSED:	NSString				*myLocalDirectory;
+// UNUSED:	NSString				*myRemoteDirectory;
+// UNUSED:	CKHost					*myHost;
+// UNUSED:	id <AbstractConnectionProtocol> myConnection;
+// UNUSED:	id <AbstractConnectionProtocol> myLocalConnection;
 	
-	NSMutableArray			*myTransfers;
+// UNUSED:	NSMutableArray			*myTransfers;
 	
-	struct __ckcontroller_flags {
-		unsigned canUpload: 1;
-		unsigned canDownload: 1;
-		unsigned canDeleteFiles: 1;
-		unsigned canDeleteFolders: 1;
-		unsigned unsued: 28;
-	} myFlags;
+// UNUSED:	struct __ckcontroller_flags {
+//		unsigned canUpload: 1;
+//		unsigned canDownload: 1;
+//		unsigned canDeleteFiles: 1;
+//		unsigned canDeleteFolders: 1;
+//		unsigned unsued: 28;
+//	} myFlags;
 }
 
 - (id)init;
