@@ -68,14 +68,26 @@
 	{
 		myLocalFilename = [local copy];
 		myFilename = [remote copy];
-		//get the mime type from lauch services
+		//get the mime type from launch services
 		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																		  (CFStringRef)[remote pathExtension],
 																		  NULL) autorelease];
 		NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
 		if (!mime || [mime length] == 0)
 		{
-			mime = @"application/octet-stream";
+			// if this list grows, consider using a dictionary of corrected UTI to MIME mappings instead
+			if ([UTI isEqualToString:@"public.css"])
+			{
+				mime = @"text/css";
+			}
+			else if ([UTI isEqualToString:(NSString *)kUTTypeICO])
+			{
+				mime = @"image/vnd.microsoft.icon";
+			}
+			else
+			{
+				mime = @"application/octet-stream";
+			}
 		}
 		[self setHeader:mime forKey:@"Content-Type"];
 	}
