@@ -1793,6 +1793,8 @@ if (![fn isEqualToString:@"."] && \
 	if ([fileType isEqualToString:NSFileTypeCharacterSpecial] || [fileType isEqualToString:NSFileTypeBlockSpecial])
 	{
 		index++;
+		if (index >= [words count]) // sftp listings do not have the extra column
+			index = [words count] - 1;
 	}
 	
 	if ([fileType isEqualToString:NSFileTypeSymbolicLink])
