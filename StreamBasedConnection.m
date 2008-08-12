@@ -1415,23 +1415,18 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				//We tried to download an entirely empty folder. We're finished.
 				if (_flags.downloadFinished)
 					[_forwarder connection:self downloadDidFinish:dirPath];
-				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
+				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will not be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
 				[self recursivelySendTransferDidFinishMessage:root];
 			}
 			[_recursiveDownloadLock lock];
 			myStreamFlags.isDownloading = NO;
 			[_recursiveDownloadQueue removeObjectAtIndex:0];
+			[_recursiveDownloadLock unlock];
 			
 			if ([_recursiveDownloadQueue count] > 0)
-			{
 				[self performSelector:@selector(processRecursiveDownloadingQueue) withObject:nil afterDelay:0.0];
-			}
 			else
-			{
 				[self restoreRecursiveDownloadingDelegate];
-			}
-			
-			[_recursiveDownloadLock unlock];
 		}
 	}
 	else if (con == _recursiveS3RenameConnection)
