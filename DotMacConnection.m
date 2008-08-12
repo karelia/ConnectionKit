@@ -66,7 +66,7 @@
 
 + (NSString *)name
 {
-	return @".Mac";
+	return @"MobileMe";
 }
 
 + (id)connectionToHost:(NSString *)host
@@ -158,7 +158,7 @@
 			{
 				NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
 												   code:ConnectionNoUsernameOrPassword
-											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Failed to retrieve .mac account details", @"No .mac account or password")
+											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Failed to retrieve MobileMe account details", @"No MobileMe account or password")
 																					forKey:NSLocalizedDescriptionKey]];
 				*error = err;
 			}
@@ -204,7 +204,7 @@
 				}
 				case 404:
 				{		
-					err = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no .Mac access to the directory", @".Mac Directory Contents Error"), [dav path]];
+					err = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no MobileMe access to the directory", @"MobileMe Directory Contents Error"), [dav path]];
 					break;
 				}
 				default: 
@@ -246,7 +246,7 @@
 				}
 				case 403:
 				{		
-					err = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"MobileMe Create Directory Error");
 						//we fake the directory exists as this is usually the case if it is the root directory
 					[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
@@ -255,29 +255,29 @@
 				{		
 					if (_flags.isRecursiveUploading)
 					{
-						err = LocalizedStringInConnectionKitBundle(@"The directory already exists", @".Mac Create Directory Error");
+						err = LocalizedStringInConnectionKitBundle(@"The directory already exists", @"MobileMe Create Directory Error");
 						[ui setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					}
 					break;
 				}
 				case 409:
 				{
-					err = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"MobileMe Create Directory Error");
 					break;
 				}
 				case 415:
 				{
-					err = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @"MobileMe Create Directory Error");
 					break;
 				}
 				case 507:
 				{
-					err = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"MobileMe Create Directory Error");
 					break;
 				}
 				default: 
 				{
-					err = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @".Mac Create Directory Error");
+					err = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"MobileMe Create Directory Error");
 					break;
 				}
 			}
@@ -318,7 +318,7 @@
 				{		
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @".Mac File Uploading Error")
+						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"MobileMe File Uploading Error")
 																					 forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -355,7 +355,7 @@
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @".Mac file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] forKey:NSLocalizedDescriptionKey];
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"MobileMe file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 						
@@ -391,7 +391,7 @@
 					if (_flags.error)
 					{
 						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @".Mac Directory Deletion Error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] 
+						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"MobileMe Directory Deletion Error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] 
 							   forKey:NSLocalizedDescriptionKey];
 						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
 						[ui setObject:[dav className] forKey:@"DAVResponseClass"];

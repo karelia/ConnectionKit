@@ -13,7 +13,7 @@
 
 - (NSString *)connectionName
 {
-	return @".Mac";
+	return @"MobileMe";
 }
 
 - (void) setUp
