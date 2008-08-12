@@ -299,6 +299,10 @@ NSDictionary *sDataAttributes = nil;
 	}
 	else
 	{
+		if ([[name lowercaseString] isEqualToString:@".mac"])
+		{
+			name = @"MobileMe";		// shim to allow for clients to continue using .Mac name internally
+		}
 		while (cur = [e nextObject])
 		{
 			Class class = NSClassFromString([cur objectForKey:ACClassKey]);
