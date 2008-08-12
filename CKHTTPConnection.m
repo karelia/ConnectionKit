@@ -275,7 +275,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		//make sure we set the host name and set anything else which is needed
 		[req setHeader:[self host] forKey:@"Host"];
-		[req setHeader:@"Keep-Alive" forKey:@"Connection"];
+		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		[self setAuthenticationWithRequest:req];
 		
