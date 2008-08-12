@@ -128,8 +128,7 @@ char **environ;
 
 - (BOOL)bufferContainsDirectoryListing:(char *)buf
 {
-    char *prompts[] = {"ls -l", "ls", "ls ", NULL};
-	return [self buffer:buf containsAnyPrompts:prompts];
+	return [self buffer:buf containsString:"ls -la"];
 }	
 
 - (BOOL)unknownHostKeyPromptInBuffer:(char *)buf
@@ -378,7 +377,7 @@ char **environ;
 	char serverResponseBuffer[MAXPATHLEN *2];
 	BOOL hasValidPassword = NO;
 	BOOL passwordWasSent = NO;
-	BOOL homeDirectoryWasSet = NO;
+	BOOL rootDirectoryWasSet = NO;
 	BOOL wasChanging = NO;
 	BOOL wasListing = NO;
 	BOOL atSFTPPrompt = NO;
@@ -435,8 +434,11 @@ char **environ;
 				connected = YES;
 				[sftpWrapperConnection didConnect];
 			}
-			else if (!homeDirectoryWasSet)
-				homeDirectoryWasSet = YES;
+			else if (!rootDirectoryWasSet)
+			{
+				rootDirectoryWasSet = YES;
+				[sftpWrapperConnection didSetRootDirectory];
+			}
 			else if (wasChanging)
 			{
 				[sftpWrapperConnection directoryContents];

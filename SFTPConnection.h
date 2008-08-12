@@ -17,7 +17,8 @@
 @interface SFTPConnection : StreamBasedConnection 
 {
 	int master;
-	BOOL isConnected, isConnecting, isUploading, isDownloading;
+	BOOL isConnected, isConnecting, isUploading, isDownloading, isChangingDirectory;
+	NSString *rootDirectory;
 	NSMutableString *currentDirectory;
 	NSTextStorage *myTextStorage;
 	
@@ -54,6 +55,7 @@
 - (void)setMasterProxy:(int)masterProxy;
 - (void)finishedCommand;
 - (void)didConnect;
+- (void)didSetRootDirectory;
 - (void)didDisconnect;
 - (void)didReceiveDirectoryContents:(NSArray*)items;
 - (void)didChangeToDirectory:(NSString *)path;
