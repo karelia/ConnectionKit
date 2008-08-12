@@ -108,6 +108,7 @@ static char *lsform;
 	[renameQueue release];
 	[permissionChangeQueue release];
 	[currentDirectory release];
+	[rootDirectory release];
 	[commandQueue release];
 	[attemptedKeychainPublicKeyAuthentications release];
 	
@@ -209,6 +210,11 @@ static char *lsform;
 
 #pragma mark -
 #pragma mark Directory Changes
+- (NSString *)rootDirectory
+{
+	return rootDirectory;
+}
+
 - (NSString *)currentDirectory
 {
 	return [NSString stringWithString:currentDirectory];
@@ -229,10 +235,6 @@ static char *lsform;
 
 - (void)directoryContents
 {
-	if ([currentDirectory length] == 0)
-	{
-		[self changeToDirectory:@"./"];
-	}
 	[self queueSFTPCommand:lsform];
 }
 
@@ -514,7 +516,7 @@ static char *lsform;
 {
 	if ([commandQueue count] <= 0)
 		return;
-	
+
 	NSString *finishedCommand = [commandQueue objectAtIndex:0];
 	[self checkFinishedCommandStringForNotifications:finishedCommand];
 	[commandQueue removeObjectAtIndex:0];	
@@ -556,8 +558,13 @@ static char *lsform;
 	}
 	else if ([finishedCommand hasPrefix:@"cd"])
 	{
-		NSString *directory = [finishedCommand substringWithRange:NSMakeRange(4, [finishedCommand length] - 5)]; // from cd "httpdocs" to httpdocs
-		[self didChangeToDirectory:directory];
+		// send didChangeToDirectory to the delegate only when a changeToDirectory: was requested
+		isChangingDirectory = YES;
+	}
+	else if ([finishedCommand hasPrefix:@"pwd"] && isChangingDirectory)
+	{
+		isChangingDirectory = NO;
+		[self didChangeToDirectory:[NSString stringWithString:currentDirectory]];
 	}
 }
 
@@ -565,19 +572,17 @@ static char *lsform;
 - (void)dequeueUpload
 {
 	[uploadQueue removeObjectAtIndex:0];
+	
 	if ([uploadQueue count] == 0)
-	{
 		isUploading = NO;
-	}
 }
 
 - (void)dequeueDownload
 {
 	[downloadQueue removeObjectAtIndex:0];
+
 	if ([downloadQueue count] == 0)
-	{
 		isDownloading = NO;
-	}
 }
 
 - (void)dequeueFileDeletion
@@ -602,31 +607,43 @@ static char *lsform;
 #pragma mark -
 - (CKInternalTransferRecord *)currentUploadInfo
 {
-	return [uploadQueue objectAtIndex:0];
+	if ([uploadQueue count] > 0)
+		return [uploadQueue objectAtIndex:0];
+	return nil;
 }
 
 - (CKInternalTransferRecord *)currentDownloadInfo
 {
-	return [downloadQueue objectAtIndex:0];
+	if ([downloadQueue count] > 0)
+		return [downloadQueue objectAtIndex:0];
+	return nil;
 }
 
 - (NSString *)currentFileDeletionPath
 {
-	return [deleteFileQueue objectAtIndex:0];
+	if ([deleteFileQueue count] > 0)
+		return [deleteFileQueue objectAtIndex:0];
+	return nil;
 }
 
 - (NSString *)currentDirectoryDeletionPath
 {
-	return [deleteDirectoryQueue objectAtIndex:0];
+	if ([deleteDirectoryQueue count] > 0)
+		return [deleteDirectoryQueue objectAtIndex:0];
+	return nil;
 }
 
 - (NSDictionary *)currentRenameInfo
 {
-	return [renameQueue objectAtIndex:0];
+	if ([renameQueue count] > 0)
+		return [renameQueue objectAtIndex:0];
+	return nil;
 }
 - (NSDictionary *)currentPermissionChangeInfo
 {
-	return [permissionChangeQueue objectAtIndex:0];
+	if ([permissionChangeQueue count] > 0)
+		return [permissionChangeQueue objectAtIndex:0];
+	return nil;
 }
 
 - (void)connectionError:(NSError *)theError
@@ -643,9 +660,18 @@ static char *lsform;
 {
 	//Clear any failed pubkey authentications as we're now connected
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
+	
+	//Request the remote working directory
+	[self queueSFTPCommandWithString:@"pwd"];
+}
 
+- (void)didSetRootDirectory
+{
+	rootDirectory = [[NSString alloc] initWithString:currentDirectory];
+	
 	isConnecting = NO;
 	isConnected = YES;
+	
 	if (_flags.didConnect)
 	{
 		[_forwarder connection:self didConnectToHost:[self host]];
@@ -688,11 +714,8 @@ static char *lsform;
 
 - (void)didChangeToDirectory:(NSString *)path
 {
-	[self setCurrentRemotePath:path];
 	if (_flags.changeDirectory)
-	{
 		[_forwarder connection:self didChangeToDirectory:path];
-	}
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
