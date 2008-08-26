@@ -89,8 +89,10 @@
 
 - (void) setUseMainThread:(BOOL)flag
 {
+	[lock lock];
 	useMainThread = flag;
 	createdOnThread = nil;
+	[lock unlock];
 }
 
 /*!	Take an invocation that didn't get recognized ... pretty much every one ... and run it on the main thread's runloop.
@@ -163,12 +165,14 @@
 	{
 		implementation = [super methodForSelector:aSelector];
 	}
+	[lock unlock];
 	return implementation;
 }
 
 - (BOOL)respondsToSelector:(SEL)selector
 {
 	BOOL result = NO;
+	[lock lock];
 	if (myDelegate)
 	{
 		result = [myDelegate respondsToSelector:selector];
@@ -177,6 +181,7 @@
 	{
 		result = [super respondsToSelector:selector];
 	}
+	[lock unlock];
 	return result;
 }
 
