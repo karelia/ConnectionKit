@@ -1187,9 +1187,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
-	if (error && _flags.downloadFinished)
-	{
+	if (_flags.downloadFinished)
 		[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
+	if (error)
+	{
+		CKTransferRecord *record = [[self currentDownload] delegate];
+		if (record && [record isKindOfClass:[CKTransferRecord class]])
+			[record setError:error];
 		[self dequeueDownload];
 		[self setState:ConnectionIdleState];
 	}
@@ -1443,6 +1447,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:error];
 	if (error)
 	{
+		CKTransferRecord *record = [[self currentUpload] delegate];
+		if (record && [record isKindOfClass:[CKTransferRecord class]])
+			[record setError:error];		
 		[self dequeueUpload];
 		[self setState:ConnectionIdleState];
 	}

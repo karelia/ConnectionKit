@@ -267,7 +267,7 @@ enum {
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con; // this is deprecated. Use method below
 - (void)connection:(id <AbstractConnectionProtocol>)con didCancelTransfer:(NSString *)remotePath;
 
-- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists;
+- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
 @end
 
 @interface NSObject (ConnectionTransferDelegate)

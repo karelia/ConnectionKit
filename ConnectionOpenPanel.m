@@ -72,7 +72,7 @@
 	//
 	[directoryContents addObserver: self
 						forKeyPath: @"selection"
-						   options: nil
+						   options: NSKeyValueObservingOptionNew
 						   context: nil];
 }
 

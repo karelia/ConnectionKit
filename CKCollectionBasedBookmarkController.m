@@ -34,12 +34,11 @@
 
 - (void)selectItem:(id)item
 {
-	
 }
 
 - (id)selectedItem
 {
-	
+	return nil;
 }
 
 #pragma mark -
@@ -51,12 +50,12 @@
 
 - (int)numberOfRowsInTableView:(NSTableView *)aTableView
 {
-	
+	return 0;
 }
 
 - (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
 {
-	
+	return nil;
 }
 
 - (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
@@ -69,7 +68,7 @@
 
 - (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-	
+	return 0;
 }
 
 
