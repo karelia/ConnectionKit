@@ -14,6 +14,8 @@
 #import "EMKeychainProxy.h"
 #import "SFTPTServer.h"
 
+extern NSString *SFTPErrorDomain;
+
 @interface SFTPConnection : StreamBasedConnection 
 {
 	int master;

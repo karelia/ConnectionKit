@@ -216,11 +216,11 @@
 			{
 				if (_flags.error)
 				{
-					NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:err forKey:NSLocalizedDescriptionKey];
-					[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
-														 code:[dav code]
-													 userInfo:ui];
+					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+											  err, NSLocalizedDescriptionKey,
+											  [dav className], @"DAVResponseClass",
+											  [dav path], NSFilePathErrorKey, nil];
+					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}				
@@ -240,7 +240,7 @@
 					if (_flags.createDirectory)
 					{
 						[_forwarder connection:self 
-							didCreateDirectory:[[dav directory] stringByDeletingFirstPathComponent]];
+							didCreateDirectory:[[dav directory] stringByDeletingFirstPathComponent] error:nil];
 					}
 					break;
 				}
@@ -288,10 +288,8 @@
 					[ui setObject:err forKey:NSLocalizedDescriptionKey];
 					[ui setObject:[dav className] forKey:@"DAVResponseClass"];
 					[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-					[ui setObject:[(DAVCreateDirectoryRequest *)[dav request] path] forKey:@"directory"];
-					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain
-														 code:[dav code]
-													 userInfo:ui];
+					[ui setObject:[(DAVCreateDirectoryRequest *)[dav request] path] forKey:NSFilePathErrorKey];
+					NSError *error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:ui];
 					[_forwarder connection:self didReceiveError:error];
 				}
 			}
@@ -318,17 +316,15 @@
 				{		
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"MobileMe File Uploading Error")
-																					 forKey:NSLocalizedDescriptionKey];
-						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-						
-						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-														   code:[dav code]
-													   userInfo:ui];
+						NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+												  LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"MobileMe File Uploading Error"), NSLocalizedDescriptionKey,
+												  [[self currentUpload] remotePath], NSFilePathErrorKey, 
+												  [dav className], @"DAVResponseClass", nil];
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
 						[_forwarder connection:self didReceiveError:err];
 					}
 				}
-					break;
+				break;
 			}
 			[self dequeueUpload];
 			[self setState:ConnectionIdleState];
@@ -345,8 +341,7 @@
 				{
 					if (_flags.deleteFile)
 					{
-						[_forwarder connection:self 
-								 didDeleteFile:[[self currentDeletion] stringByDeletingFirstPathComponent]];
+						[_forwarder connection:self didDeleteFile:[[self currentDeletion] stringByDeletingFirstPathComponent] error:nil];
 					}
 					break;
 				}
@@ -354,14 +349,13 @@
 				{
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"MobileMe file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] forKey:NSLocalizedDescriptionKey];
-						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-						
-						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-														   code:[dav code]
-													   userInfo:ui];
+						NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"MobileMe file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]];
+						NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+												  localizedDescription, NSLocalizedDescriptionKey,
+												  [[dav request] description], @"DAVRequest",
+												  [dav className], @"DAVResponseClass",
+												  [[self currentDeletion] stringByDeletingFirstPathComponent], NSFilePathErrorKey, nil];
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
 						[_forwarder connection:self didReceiveError:err];
 					}
 				}
@@ -382,7 +376,7 @@
 					if (_flags.deleteDirectory)
 					{
 						[_forwarder connection:self 
-							didDeleteDirectory:[[self currentDeletion] stringByDeletingFirstPathComponent]];
+							didDeleteDirectory:[[self currentDeletion] stringByDeletingFirstPathComponent] error:nil];
 					}
 					break;
 				}
@@ -390,15 +384,14 @@
 				{
 					if (_flags.error)
 					{
-						NSMutableDictionary *ui = [NSMutableDictionary dictionary];
-						[ui setObject:[NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"MobileMe Directory Deletion Error"), [[self currentDeletion] stringByDeletingFirstPathComponent]] 
-							   forKey:NSLocalizedDescriptionKey];
-						[ui setObject:[[dav request] description] forKey:@"DAVRequest"];
-						[ui setObject:[dav className] forKey:@"DAVResponseClass"];
-						
-						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-														   code:[dav code]
-													   userInfo:ui];
+						NSString *path = [[self currentDeletion] stringByDeletingFirstPathComponent];
+						NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"MobileMe Directory Deletion Error"), path];
+						NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+												  localizedDescription, NSLocalizedDescriptionKey,
+												  [[dav request] description], @"DAVRequest",
+												  [dav className], @"DAVResponseClass",
+												  path, NSFilePathErrorKey, nil];
+						NSError *err = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code]  userInfo:userInfo];
 						[_forwarder connection:self didReceiveError:err];
 					}
 				}
@@ -515,7 +508,7 @@
 	myCurrentDirectory = [dirPath copy];
 	if (_flags.changeDirectory)
 	{
-		[_forwarder connection:self didChangeToDirectory:[dirPath stringByDeletingFirstPathComponent]];
+		[_forwarder connection:self didChangeToDirectory:[dirPath stringByDeletingFirstPathComponent] error:nil];
 	}
 	[myCurrentRequest release];
 	myCurrentRequest = nil;

@@ -87,6 +87,34 @@ const double kDelegateNotificationTheshold = 0.5;
 - (void)setDataInputStreamAndOpen:(NSInputStream *)iStream outputStream:(NSOutputStream *)oStream socket:(CFSocketNativeHandle)socket;
 - (void)prepareAndOpenDataStreams;
 
+//Command Handling
+- (void)_receivedCodeInConnectionNotConnectedState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentUsernameState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentAccountState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentPasswordState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingCurrentDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionChangingDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionCreateDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDeleteDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionRenameFromState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingRenameState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDeleteFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDownloadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionUploadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentOffsetState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentFeatureRequestState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentQuitState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSettingPermissionsState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentDisconnectState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingPassiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingEPSVState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingActiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingEPRTState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPAwaitingRemoteSystemTypeState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPChangeDirectoryListingStyleState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+
 @end
 
 void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type, 
@@ -349,7 +377,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 		}
 	}
-
+	
 	if ([self transcript])
 	{
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer] attributes:[AbstractConnection receivedAttributes]] autorelease]];
@@ -357,451 +385,34 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	KTLog(ProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
+	int stateToHandle = GET_STATE;
+	//State independent handling	
 	switch (code)
 	{
-#pragma mark 100 series codes
-		case 110: //restart file transfer marker reply 
+		case 200:
+		case 202:
+		case 215:
+		case 250:
+		case 257:
+		case 450:
+		case 451:
+		case 551:
 		{
-			//this was never called in testing so I don't know if it works properly
-			//MARK uuuu = ssss (u user s server)
-			if (GET_STATE == ConnectionUploadingFileState)
-			{
-				CKInternalTransferRecord *d = [self currentUpload];
-				NSString *file = [d localPath];	// actual path to file, or destination name if from data
-				NSString *remoteFile = [d remotePath];
-				unsigned long long offset = [d offset];
-				NSData *data = [d data];
-				unsigned chunkLength = 0;
-				const uint8_t bytes [kStreamChunkSize];
-				_transferSent = 0;
-				_transferCursor = offset;
-				_transferLastPercent = 0;
-
-				if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
-				{
-					[self setReadData:data];
-					[self setReadHandle:nil];		// make sure we're not also trying to read from file
-
-					// Calculate size to transfer is total data size minus offset
-					_transferSize = [data length] - offset;
-
-					chunkLength = MAX([data length] - offset, kStreamChunkSize);						
-					[data getBytes:&bytes range:NSMakeRange(offset, chunkLength)];
-				}
-				else	// use file
-				{
-					[self setReadData:nil];		// make sure we're not also trying to read from data
-					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-					NSAssert((nil != _readHandle), @"_readHandle is nil!");
-					
-					// Calculate size to transfer is total file size minus offset
-					_transferSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize] longLongValue] - offset;
-
-					[_readHandle seekToFileOffset:offset]; 
-					NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
-					[chunk getBytes:&bytes];
-					chunkLength = [chunk length];		// actual length of bytes read
-				}
-				
-				//kick start the transfer
-				[_dataSendStream write:bytes maxLength:chunkLength];
-				_transferSent += chunkLength;
-				_transferCursor += chunkLength;
-				
-				if (_flags.uploadProgressed)
-				{
-					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-				}
-				if ([d delegateRespondsToTransferTransferredData])
-				{
-					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
-				}
-				
-				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
-				if (percent > _transferLastPercent)
-				{
-					if (_flags.uploadPercent)
-					{
-						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-					}
-					if ([d delegateRespondsToTransferProgressedTo])
-					{
-						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
-					}
-				}
-				_transferLastPercent = percent;
-			}
-			else if (GET_STATE == ConnectionDownloadingFileState)
-			{
-				
-			}
-			
+			[self setState:ConnectionIdleState];
 			break;
-		}
-		case 120:
+		}			
+		case 150:
 		{
-			if (GET_STATE == ConnectionNotConnectedState)
-			{
-				if (_flags.error) {
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain 
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys: LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), 
-														 NSLocalizedDescriptionKey,
-														 command, NSLocalizedFailureReasonErrorKey,
-														 _connectionHost, @"host", nil]];
-					[_forwarder connection:self didReceiveError:error];
-				}
-				[self setState:ConnectionNotConnectedState]; //don't really need.
-			}
-			break;
-		}
-		case 125: // Windows ftp server returns this code for starting a directory contents.
-		{
-			/*if (GET_STATE == ConnectionAwaitingDirectoryContentsState) 
-			{
-				KTLog(ProtocolDomain, KTLogDebug, @"Getting Directory Contents");
-				break;
-			}
-			break;*/
-		}
-		case 150: //con about to open
-		{
-			if (GET_STATE == ConnectionUploadingFileState)
-			{
-				CKInternalTransferRecord *d = [self currentUpload];
-				NSString *file = [d localPath];	// actual path to file, or destination name if from data
-				NSString *remoteFile = [d remotePath];
-				NSData *data = [d data];
-				
-				if (nil == file && nil == data)
-				{
-					NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: no file or data.  currrentUpload = %p remotePath = %@",
-						d, remoteFile ];
-					NSLog(@"%@", str);
-					//NSAssert(NO, str);		// hacky way to throw an exception.
-				}
-				else
-				{
-					
-					unsigned chunkLength = 0;
-					const uint8_t *bytes;
-					_transferLastPercent = 0;
-					_transferSent = 0;
-					_transferCursor = 0;
-									
-					if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
-					{
-						[self setReadData:data];
-						[self setReadHandle:nil];		// make sure we're not also trying to read from file
-						
-						_transferSize = [data length];
-						chunkLength = MIN(_transferSize, kStreamChunkSize);						
-						bytes = (uint8_t *)[data bytes];
-					}
-					else	// use file
-					{
-						[self setReadData:nil];		// make sure we're not also trying to read from data
-						if (![[NSFileManager defaultManager] fileExistsAtPath:file])
-						{
-							NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
-							NSAssert(NO, str);		// hacky way to throw an exception.
-						}
-						[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-						NSAssert((nil != _readHandle), @"_readHandle is nil!");
-						NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
-						bytes = (uint8_t *)[chunk bytes];
-						chunkLength = [chunk length];		// actual length of bytes read
-
-						NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
-						_transferSize = [size unsignedLongLongValue];
-					}
-					
-					//kick start the transfer
-					[_dataSendStream write:bytes maxLength:chunkLength];
-					_transferSent += chunkLength;
-					_transferCursor += chunkLength;
-					
-					
-					if ([d delegateRespondsToTransferTransferredData])
-					{
-						[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
-					}
-					
-					if (_flags.uploadProgressed)
-					{
-						[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-					}
-					
-					int percent = (float)_transferSent / ((float)_transferSize * 1.0);
-					if (percent > _transferLastPercent)
-					{
-						if (_flags.uploadPercent)
-						{
-							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-						}
-						if ([d delegateRespondsToTransferProgressedTo])
-						{
-							[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
-						}
-					}
-					_transferLastPercent = percent;
-				}
-			}
-			else if (GET_STATE == ConnectionDownloadingFileState)
-			{
-				CKInternalTransferRecord *download = [self currentDownload];
-				if (_writeHandle == nil) // we can get setup in the handleDataReceievedEvent: method
-				{
-					NSFileManager *fm = [NSFileManager defaultManager];
-					
-					// check the file offset of the current download to see if we resume the transfer
-					unsigned long long fileOffset = [download offset];
-					bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
-					
-					if ( !isResume ) {
-						[fm removeFileAtPath:[download localPath] handler:nil];
-						[fm createFileAtPath:[download localPath]
-									contents:nil
-								  attributes:nil];
-						_transferSent = 0;
-					}
-					
-					[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
-					if ( isResume ) {
-						[_writeHandle seekToEndOfFile];
-						_transferSent = fileOffset;
-					}
-				}
-				//start to read in the data to kick start it
-				uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
-				int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
-				if (len >= 0) {
-					[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
-					_transferSent += len;
-					
-					if (_flags.downloadProgressed)
-					{
-						[_forwarder connection:self download:[download remotePath] receivedDataOfLength:len];
-					}
-					if ([download delegateRespondsToTransferTransferredData])
-					{
-						[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
-					}
-					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
-					if (_flags.downloadPercent)
-					{
-						[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
-					}
-					if ([download delegateRespondsToTransferProgressedTo])
-					{
-						[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
-					}
-					_transferLastPercent = percent;
-				}
-				
-				free(buf);
-			}
-			else if ([command rangeOfString:@"directory listing"].location != NSNotFound) //Sometimes we get "150 Here comes the directory listing"
+			if ([command rangeOfString:@"directory listing"].location != NSNotFound) //Sometimes we get "150 Here comes the directory listing"
 			{
 				//we'll clean the buffer
 				[_buffer setLength:0];
 			}
 			break;
 		}
-#pragma mark 200 series codes
-		case 200: //command OK
-		{
-			if (GET_STATE == ConnectionSettingPermissionsState)
-			{
-				if (_flags.permissions) {
-					[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0]];
-				}
-				[self dequeuePermissionChange];
-			} 
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 202: //command not implemented
-		{
-			//Just skip over and hopefully the next command will be ok.
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 211:
-		{
-			if (_state == ConnectionSentFeatureRequestState)
-			{
-				//parse features
-				if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
-					_ftpFlags.hasSize = YES;
-				else
-					_ftpFlags.hasSize = NO;
-				if ([buffer rangeOfString:@"ADAT"].location != NSNotFound)
-					_ftpFlags.hasADAT = YES;
-				else
-					_ftpFlags.hasADAT = NO;
-				if ([buffer rangeOfString:@"AUTH"].location != NSNotFound)
-					_ftpFlags.hasAUTH = YES;
-				else
-					_ftpFlags.hasAUTH = NO;
-				if ([buffer rangeOfString:@"CCC"].location != NSNotFound)
-					_ftpFlags.hasCCC = YES;
-				else
-					_ftpFlags.hasCCC = NO;
-				if ([buffer rangeOfString:@"CONF"].location != NSNotFound)
-					_ftpFlags.hasCONF = YES;
-				else
-					_ftpFlags.hasCONF = NO;
-				if ([buffer rangeOfString:@"ENC"].location != NSNotFound)
-					_ftpFlags.hasENC = YES;
-				else
-					_ftpFlags.hasENC = NO;
-				if ([buffer rangeOfString:@"MIC"].location != NSNotFound)
-					_ftpFlags.hasMIC = YES;
-				else
-					_ftpFlags.hasMIC = NO;
-				if ([buffer rangeOfString:@"PBSZ"].location != NSNotFound)
-					_ftpFlags.hasPBSZ = YES;
-				else
-					_ftpFlags.hasPBSZ = NO;
-				if ([buffer rangeOfString:@"PROT"].location != NSNotFound)
-					_ftpFlags.hasPROT = YES;
-				else
-					_ftpFlags.hasPROT = NO;
-				if ([buffer rangeOfString:@"MDTM"].location != NSNotFound)
-					_ftpFlags.hasMDTM = YES;
-				else
-					_ftpFlags.hasMDTM = NO;
-				if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
-					_ftpFlags.hasSITE = YES;
-				else
-					_ftpFlags.hasSITE = NO;
-				if (_ftpFlags.loggedIn == NO) {
-					[self sendCommand:[NSString stringWithFormat:@"USER %@", _username]];
-					[self setState:ConnectionSentUsernameState];
-				} else {
-					[self setState:ConnectionIdleState];
-				}
-			}
-			break;
-		}
-		case 213:
-		{
-			if (GET_STATE == ConnectionSentSizeState)
-			{
-				CKInternalTransferRecord *download = [self currentDownload];
-				if ([command rangeOfString:@"("].location != NSNotFound)
-				{
-					NSScanner *sizeScanner = [NSScanner scannerWithString:command];
-					NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
-					[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-					if ( [sizeScanner scanLocation] < [command length] )
-					{
-						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-						sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
-							   "%llu", &_transferSize);
-					}
-				}
-				else
-				{
-					// some servers return 213 4937728
-					NSScanner *sizeScanner = [NSScanner scannerWithString:command];
-					NSCharacterSet *sp = [NSCharacterSet whitespaceCharacterSet];
-					[sizeScanner scanUpToCharactersFromSet:sp intoString:nil];
-					if ( [sizeScanner scanLocation] < [command length] )
-					{
-						[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-						sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
-							   "%llu", &_transferSize);
-					}
-					else
-					{
-						_transferSize = LONG_MAX;
-					}
-				}
-				if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
-				{
-					[(CKTransferRecord *)[download delegate] setSize:_transferSize];
-				}
-				
-				_transferSent = 0;
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case 215:
-		{
-			if (GET_STATE == FTPAwaitingRemoteSystemTypeState)
-			{
-				if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
-				{
-					_ftpFlags.isMicrosoft = YES;
-					[self setState:FTPChangeDirectoryListingStyle];
-					[self sendCommand:@"SITE DIRSTYLE"];
-					break;
-				}
-				else
-				{
-					_ftpFlags.isMicrosoft = NO;
-				}
-			}
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 220:
-		{
-			if (GET_STATE == ConnectionNotConnectedState && _ftpFlags.loggedIn == NO)
-			{				
-				if ([command rangeOfString:@"Microsoft FTP Service"].location != NSNotFound ||
-					[buffer rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
-				{
-					_ftpFlags.isMicrosoft = YES;
-				}
-				else
-				{
-					_ftpFlags.isMicrosoft = NO;
-				}
-				
-				// Some servers do not accept the FEAT command before logging in. They either ignore it or close the connection
-				// after. The user default CKDisableFEATCommandBeforeFTPLogin enables applications to disable sending of the
-				// command until after login.
-				if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-				{
-					[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-					[self setState:ConnectionSentUsernameState];
-				}
-				else
-				{
-					[self sendCommand:@"FEAT"];
-					[self setState:ConnectionSentFeatureRequestState];
-				}
-			}
-			if (GET_STATE == ConnectionDeleteFileState)
-			{
-				if (_flags.deleteFile) 
-				{
-					[_forwarder connection:self didDeleteFile:[self currentDeletion]];
-				}
-				[self dequeueDeletion];
-			}
-			break;
-		}
-		case 221:
-		{
-			if (GET_STATE == ConnectionSentQuitState || GET_STATE == ConnectionSentDisconnectState)
-			{
-				[super threadedDisconnect];
-			}
-			break;
-		}
-		//skip 225 (no transfer to ABOR)
 		case 226:
 		{
 			_ftpFlags.received226 = YES;
-			if (_ftpFlags.isActiveDataConn == YES) 
-			{
-			//	[self closeDataConnection];
-			}
 			if ([command rangeOfString:@"abort" options:NSCaseInsensitiveSearch].location != NSNotFound)
 			{
 				NSString *remotePath = [NSString string];
@@ -834,204 +445,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_dataSendStream == nil || _dataReceiveStream == nil)
 			{
 				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case 227:
-		{
-			if (GET_STATE == FTPSettingPassiveState)//parse the ip and port.
-			{
-				int i[6];
-				int j;
-				unsigned char n[6];
-				char *buf = (char *)[command UTF8String];
-				char *start = strchr(buf,'(');
-				if ( !start )
-					start = strchr(buf,'=');
-				if ( !start ||
-					 ( sscanf(start, "(%d,%d,%d,%d,%d,%d)",&i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 &&
-					   sscanf(start, "=%d,%d,%d,%d,%d,%d", &i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 ) )
-				{
-					_ftpFlags.canUsePASV = NO;
-					if (_flags.error)
-					{
-						NSError *err = [NSError errorWithDomain:FTPErrorDomain 
-														   code:FTPErrorNoDataModes 
-													   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available"), 
-														   NSLocalizedDescriptionKey, 
-														   command, NSLocalizedFailureReasonErrorKey,
-														   nil]];
-						[_forwarder connection:self didReceiveError:err];
-					}
-					_state = ConnectionSentQuitState;
-					[self sendCommand:@"QUIT"];
-				}
-				for (j=0; j<6; j++)
-				{
-					n[j] = (unsigned char) (i[j] & 0xff);
-				}
-				int port = i[4] << 8 | i[5];
-				//port = ntohs(i[5] << 8 | i[4]);
-				NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
-
-				//Connecting to local machine causes PASV to sit idle.
-//				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
-//				{
-//					_ftpFlags.canUsePASV = NO;
-//					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
-//					_state = [cmd sentState];
-//					[self sendCommand:[cmd command]];						
-//					break;
-//				}
-				
-				NSHost *host = [CKCacheableHost hostWithAddress:hostString];
-				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
-				
-				[self closeDataStreams];
-				[self setState:FTPAwaitingDataConnectionToOpen];
-				[self openDataStreamsToHost:host port:port];
-			}
-			break;
-		}
-		case 229:
-		{
-			if (GET_STATE == FTPSettingEPSVState)
-			{
-				//get the port number
-				int port = 0;
-				char *cmd = (char *)[command UTF8String];
-				char *start = strchr(cmd,'|');
-				if ( !start || sscanf(start, "|||%d|", &port) != 1)
-				{
-					_ftpFlags.canUseEPSV = NO;
-					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
-					_state = [cmd sentState];
-					[self sendCommand:[cmd command]];
-				}
-				NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
-				[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
-					
-				[self closeDataStreams];
-				[self setState:FTPAwaitingDataConnectionToOpen];
-				[self openDataStreamsToHost:host port:port];
-			}
-			break;
-		}
-		case 230:
-		{
-			if (GET_STATE == ConnectionSentPasswordState || ([[self username] isEqualToString:@"anonymous"] && GET_STATE == ConnectionSentUsernameState)) //Login successful, set up session
-			{	
-				_ftpFlags.sentAuthenticated = NO;
-				// Queue up the commands we want to insert in the queue before notifying client we're connected
-				[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
-															awaitState:ConnectionIdleState
-															 sentState:ConnectionAwaitingCurrentDirectoryState
-															 dependant:nil
-															  userInfo:nil]
-									atIndex:0];
-				[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
-															awaitState:ConnectionIdleState
-															 sentState:FTPAwaitingRemoteSystemTypeState
-															 dependant:nil
-															  userInfo:nil]
-									atIndex:0];
-				// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
-				// we are starting in.
-
-				[self setState:ConnectionIdleState];
-			}
-			if (GET_STATE == ConnectionSentAccountState)
-			{
-				[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
-				[self setState:ConnectionSentPasswordState];
-			}
-			break;
-		}
-		case 250:
-		{
-			if (GET_STATE == ConnectionDeleteFileState)
-			{
-				if (_flags.deleteFile) {
-					[_forwarder connection:self didDeleteFile:[_fileDeletes objectAtIndex:0]];
-				}
-				[_fileDeletes removeObjectAtIndex:0];
-			}
-			else if (GET_STATE == ConnectionDeleteDirectoryState)
-			{
-				// Uses same _fileDeletes queue, hope that's safe to do.  (Any chance one could get ahead of another?)
-				if (_flags.deleteDirectory) {
-					[_forwarder connection:self didDeleteDirectory:[_fileDeletes objectAtIndex:0]];
-				}
-				[_fileDeletes removeObjectAtIndex:0];
-			}
-			else if (GET_STATE == ConnectionAwaitingRenameState)
-			{
-				if (_flags.rename) {
-					[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1]];
-				}
-				[_fileRenames removeObjectAtIndex:0];
-				[_fileRenames removeObjectAtIndex:0];
-			}
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 253:
-		{		
-			if (GET_STATE == ConnectionSettingPermissionsState)
-			{
-				[self setState:ConnectionIdleState];
-				break;
-			}
-		}
-		case 257:
-		{
-			if (GET_STATE == ConnectionAwaitingCurrentDirectoryState) //scan for the directory
-			{
-				NSString *path = [self scanBetweenQuotes:command];
-				if (!path || [path length] == 0)
-				{
-					path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-				}
-				[self setCurrentPath:path];
-				
-				if (_rootPath == nil) 
-					_rootPath = [path copy];
-				
-				if (!_ftpFlags.sentAuthenticated && _flags.didAuthenticate)
-				{
-					[_forwarder connection:self didAuthenticateToHost:[self host]];
-					_ftpFlags.sentAuthenticated = YES;
-				}
-				
-				if (_flags.changeDirectory) {
-					[_forwarder connection:self didChangeToDirectory:_currentPath];
-				}
-				
-				
-			}
-			else if (GET_STATE == ConnectionCreateDirectoryState)
-			{
-				if (_flags.createDirectory)
-				{
-					NSString *path = [self scanBetweenQuotes:command];
-					if (!path || [path length] == 0)
-					{
-						path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-					}
-					[_forwarder connection:self didCreateDirectory:path];
-				}
-			}
-			[self setState:ConnectionIdleState];
-			break;
-		}
-#pragma mark 300 series codes
-		case 331: //need password
-		{
-			if (GET_STATE == ConnectionSentUsernameState)
-			{
-				[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
-				[self setState:ConnectionSentPasswordState];
-			}
+			}			
 			break;
 		}
 		case 332: //need account
@@ -1046,20 +460,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self setState:ConnectionSentAccountState];
 				}
 			}
-		}
-		case 350:
-		{
-			if (GET_STATE == ConnectionRenameFromState)
-			{
-				[self setState:ConnectionRenameToState];
-			}
-			else if (GET_STATE == ConnectionSentOffsetState)
-			{
-				[self setState:ConnectionIdleState];
-			}
 			break;
-		}
-#pragma mark 400 series codes
+		}		
 		case 421: //service timed out.
 		{
 			[self closeDataStreams];
@@ -1068,202 +470,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.didDisconnect) {
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
 			}
-
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out"),
-													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey, nil]];
+			
+			if (_flags.error)
+			{
+				NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  localizedDescription, NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [self host], ConnectionHostKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			[self setState:ConnectionNotConnectedState]; 
 			break;
-		}
-		case 425:
-		{
-			// 425 can't open data connection
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState ||
-				GET_STATE == ConnectionUploadingFileState ||
-				GET_STATE == ConnectionDownloadingFileState)
-			{
-				ConnectionCommand *last = [self lastCommand];
-				ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
-				
-				if (lastState == FTPSettingEPSVState)
-				{
-					_ftpFlags.canUseEPSV = NO;
-					[self closeDataStreams];
-					[self sendCommand:@"DATA_CON"];
-					[self pushCommandOnCommandQueue:last];
-				}
-				else if (lastState == FTPSettingEPRTState)
-				{
-					_ftpFlags.canUseEPRT = NO;
-					[self closeDataStreams];
-					[self sendCommand:@"DATA_CON"];
-					[self pushCommandOnCommandQueue:last];
-				}
-				else if (lastState == FTPSettingActiveState)
-				{
-					_ftpFlags.canUseActive = NO;
-					[self closeDataStreams];
-					[self sendCommand:@"DATA_CON"];
-					[self pushCommandOnCommandQueue:last];
-				}
-				else if (lastState == FTPSettingPassiveState)
-				{
-					_ftpFlags.canUsePASV = NO;
-					[self closeDataStreams];
-					[self sendCommand:@"DATA_CON"];
-					[self pushCommandOnCommandQueue:last];
-				}
-			}
-			else
-			{
-				//technically we should never get here unless the ftp server doesn't support pasv or epsv
-				KTLog(ProtocolDomain, KTLogError, @"FTP Internal Error: %@", command);
-				[self setState:ConnectionIdleState];
-			}
-			break;
-		}
-		case 426: //con closed
-		{
-			//We don handle this here because we handle the data port connection closure in the
-			// NSStream event management.
-			// However, send our abort callback.
-			
-			/*
-			 I am fairly sure we don't need these calls here. When we ABOR a transfer, (either upload or download), we get caught by 226 anyway, so we 
-			 end up sending two delegate calls for the one transfer cancellation. - bamerige (12/12/07)
-			 */
-			
-//			if (_flags.cancel)
-//			{
-//				[_forwarder connectionDidCancelTransfer:self];
-//			}
-//			if (_flags.didCancel)
-//			{
-//				NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
-//				[_forwarder connection:self didCancelTransfer:remotePath];
-//			}
-			
-			break;
-		}
-		case 450: //file in use
-		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"),
-													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey, nil]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			[self setState:ConnectionIdleState];
-		}
-		case 451: //local error caused abortion
-		{
-			//don't know why so will pass it to the delegate
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Action Aborted. Local Error", @"FTP Abort"),
-													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey, nil]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-				
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 452: //no storage space
-		{
-			if (GET_STATE == ConnectionUploadingFileState)
-			{
-				if (_flags.error) {
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"),
-														 NSLocalizedDescriptionKey,
-														 command, NSLocalizedFailureReasonErrorKey,
-														 nil]];
-					[_forwarder connection:self didReceiveError:error];
-				}
-				[self sendCommand:@"ABOR"];
-			}
-			break;
-		}
-#pragma mark 500 series codes 
-		case 500: //Syntax Error
-		case 501: //Syntax Error in arguments
-		case 502: //Command not implemented
-		{
-			if (GET_STATE == FTPSettingEPSVState)
-			{
-				_ftpFlags.canUseEPSV = NO;
-				[self closeDataStreams];
-				[self sendCommand:@"DATA_CON"];
-				break;
-			}
-			if (GET_STATE == FTPSettingEPRTState)
-			{
-				_ftpFlags.canUseEPRT = NO;
-				[self sendCommand:@"DATA_CON"];
-				break;
-			}
-			if (GET_STATE == FTPSettingActiveState)
-			{
-				_ftpFlags.canUseActive = NO;
-				[self closeDataStreams];
-				[self sendCommand:@"DATA_CON"];
-				break;
-			}
-			if (GET_STATE == FTPSettingPassiveState)
-			{
-				_ftpFlags.canUsePASV = NO;
-				[self closeDataStreams];
-				[self sendCommand:@"DATA_CON"];
-				break;
-			}
-			if (GET_STATE == ConnectionSentFeatureRequestState)
-			{
-				[self setState:ConnectionSentUsernameState];
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-				break;
-			}
-			if (GET_STATE == ConnectionSettingPermissionsState)
-			{
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			if (GET_STATE == FTPAwaitingRemoteSystemTypeState)
-			{
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			if (GET_STATE == FTPChangeDirectoryListingStyle)
-			{
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			if (GET_STATE == ConnectionChangingDirectoryState)
-			{
-				if (_flags.error)
-				{
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain
-													   code:ConnectionErrorChangingDirectory
-												   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"),
-													   NSLocalizedDescriptionKey,
-													   command, NSLocalizedFailureReasonErrorKey, nil]];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				
-				[self setState:ConnectionIdleState];
-				break;
-			}
-			break;
-		}
+		}	
 		case 503: //Bad sequence of commands
 		{
 			//This is an internal error in the syntax of the commands and arguments sent.
@@ -1281,79 +501,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
 				break;
 			}
-		}
-		case 521:
-		{
-			if (GET_STATE == ConnectionCreateDirectoryState)
-			{
-				if (_flags.error && !_flags.isRecursiveUploading)
-				{
-					NSString *error = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
-					NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-					if ([command rangeOfString:@"exists"].location != NSNotFound) 
-					{
-						[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-						if ([command rangeOfString:@":"].location != NSNotFound)
-						{
-							[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
-						}
-					}
-					[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
-					[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
-					NSError *err = [NSError errorWithDomain:FTPErrorDomain
-													   code:code
-												   userInfo:userInfo];
-					[_forwarder connection:self didReceiveError:err];
-				}
-				[self setState:ConnectionIdleState];
-			}
-			break;	
-		}
+		}			
 		case 522:
 		{
 			_ftpFlags.canUseEPRT = NO;
 			[self sendCommand:@"DATA_CON"];
 			break;
-		}
+		}		
 		case 530:
 		{
-			if (GET_STATE == ConnectionSentPasswordState)//bad password
+			if (_flags.error)
 			{
-				if (_flags.badPassword) {
-					[_forwarder connectionDidSendBadPassword:self];
-				}
-					
-			}
-			else if (GET_STATE == ConnectionSentAccountState) //bad account
-			{
-				if (_flags.error) {
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Invalid Account name", @"FTP Error"),
-														 NSLocalizedDescriptionKey,
-														 command, NSLocalizedFailureReasonErrorKey,
-														 nil]];
-					[_forwarder connection:self didReceiveError:error];
-				}
-			}
-			else if (GET_STATE == ConnectionSentFeatureRequestState)
-			{
-				// the server doesn't support FEAT before login
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-				[self setState:ConnectionSentUsernameState];
-				return;
-			}
-			else //any other error here is that we are not logged in
-			{
-				if (_flags.error) {
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"),
-														 NSLocalizedDescriptionKey,
-														 command, NSLocalizedFailureReasonErrorKey,
-														 nil]];
-					[_forwarder connection:self didReceiveError:error];
-				}
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [self host], ConnectionHostKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];
 			}
 			if (GET_STATE != ConnectionSentQuitState)
 			{
@@ -1361,77 +525,656 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[self setState:ConnectionSentQuitState];
 			}
 			break;
-		}
-		case 532:
+		}			
+		default:
+			break;
+	}
+	
+	switch (stateToHandle)
+	{
+		case ConnectionNotConnectedState:
+			[self _receivedCodeInConnectionNotConnectedState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentUsernameState:
+			[self _receivedCodeInConnectionSentUsernameState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentAccountState:
+			[self _receivedCodeInConnectionSentAccountState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentPasswordState:
+			[self _receivedCodeInConnectionSentPasswordState:code command:command buffer:buffer];
+			break;
+		case ConnectionAwaitingCurrentDirectoryState:
+			[self _receivedCodeInConnectionAwaitingCurrentDirectoryState:code command:command buffer:buffer];
+			break;
+		case ConnectionAwaitingDirectoryContentsState:
+			[self _receivedCodeInConnectionAwaitingDirectoryContentsState:code command:command buffer:buffer];
+			break;
+		case ConnectionChangingDirectoryState:
+			[self _receivedCodeInConnectionChangingDirectoryState:code command:command buffer:buffer];
+			break;
+		case ConnectionCreateDirectoryState:
+			[self _receivedCodeInConnectionCreateDirectoryState:code command:command buffer:buffer];
+			break;
+		case ConnectionDeleteDirectoryState:
+			[self _receivedCodeInConnectionDeleteDirectoryState:code command:command buffer:buffer];
+			break;
+		case ConnectionRenameFromState:		
+			[self _receivedCodeInConnectionRenameFromState:code command:command buffer:buffer];
+			break;
+		case ConnectionAwaitingRenameState:  
+			[self _receivedCodeInConnectionAwaitingRenameState:code command:command buffer:buffer];
+			break;
+		case ConnectionDeleteFileState:
+			[self _receivedCodeInConnectionDeleteFileState:code command:command buffer:buffer];
+			break;
+		case ConnectionDownloadingFileState:
+			[self _receivedCodeInConnectionDownloadingFileState:code command:command buffer:buffer];
+			break;
+		case ConnectionUploadingFileState:
+			[self _receivedCodeInConnectionUploadingFileState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentOffsetState:
+			[self _receivedCodeInConnectionSentOffsetState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentFeatureRequestState:
+			[self _receivedCodeInConnectionSentFeatureRequestState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentQuitState:		
+			[self _receivedCodeInConnectionSentQuitState:code command:command buffer:buffer];
+			break;
+		case ConnectionSettingPermissionsState:
+			[self _receivedCodeInConnectionSettingPermissionsState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentSizeState:		
+			[self _receivedCodeInConnectionSentSizeState:code command:command buffer:buffer];
+			break;
+		case ConnectionSentDisconnectState: 
+			[self _receivedCodeInConnectionSentDisconnectState:code command:command buffer:buffer];
+			break;
+		case FTPSettingPassiveState:
+			[self _receivedCodeInFTPSettingPassiveState:code command:command buffer:buffer];
+			break;
+		case FTPSettingEPSVState:
+			[self _receivedCodeInFTPSettingEPSVState:code command:command buffer:buffer];
+			break;
+		case FTPSettingActiveState:
+			[self _receivedCodeInFTPSettingActiveState:code command:command buffer:buffer];
+			break;
+		case FTPSettingEPRTState:
+			[self _receivedCodeInFTPSettingEPRTState:code command:command buffer:buffer];
+			break;
+		case FTPAwaitingRemoteSystemTypeState:
+			[self _receivedCodeInFTPAwaitingRemoteSystemTypeState:code command:command buffer:buffer];
+			break;
+		case FTPChangeDirectoryListingStyle:
+			[self _receivedCodeInFTPChangeDirectoryListingStyleState:code command:command buffer:buffer];
+			break;
+		default:
+			break;		
+	}
+}
+- (void)_receivedCodeInConnectionNotConnectedState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 120:
 		{
-			if (GET_STATE == ConnectionUploadingFileState)
+			if (_flags.didConnect)
 			{
-				if (_flags.error) {
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"),
-														 NSLocalizedDescriptionKey,
-														 command, NSLocalizedFailureReasonErrorKey,
-														 nil]];
-					[_forwarder connection:self didReceiveError:error];
-				}
-				[self setState:ConnectionIdleState];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  _connectionHost, ConnectionHostKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didConnectToHost:_connectionHost error:error];
 			}
+			[self setState:ConnectionNotConnectedState]; //don't really need.
+			break;
 		}
-		case 550: //directory or file does not exist
+		case 220:
 		{
-			NSString *error = nil;
-			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-			
-			if (GET_STATE == ConnectionUploadingFileState)
-			{
-				CKInternalTransferRecord *upload = [self currentUpload];
-				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
-				[self dequeueUpload];
-			}
-			else if (GET_STATE == ConnectionDownloadingFileState)
-			{
-				CKInternalTransferRecord *download = [self currentDownload];
-				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
-				[self dequeueDownload];
-			}
-			else if (GET_STATE == ConnectionCreateDirectoryState)
-			{
-				error = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
-				//Some servers won't say that the directory exists. Once I get peer connections going, I will be able to ask the
-				//peer if the dir exists for confirmation until then we will make the assumption that it exists.
-				//if ([command rangeOfString:@"exists"].location != NSNotFound) {
-					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-					[userInfo setObject:[[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]
-								 forKey:ConnectionDirectoryExistsFilenameKey];
-					//[userInfo setObject:[command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)] forKey:ConnectionDirectoryExistsFilenameKey];
-				//}
-			}
-			else if (GET_STATE == ConnectionDeleteFileState)
-			{
-				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
-				[self dequeueDeletion];
-			}
-			else if (GET_STATE == ConnectionDeleteDirectoryState)
-			{
-				error = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
-				[self dequeueDeletion];
-			}
-			else if (GET_STATE == ConnectionSettingPermissionsState)
-			{
-				error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
-				[self dequeuePermissionChange];
-			}
-			else if (GET_STATE == FTPChangeDirectoryListingStyle)
-			{
-				[self setState:ConnectionIdleState];
+			if (_ftpFlags.loggedIn != NO)
 				break;
+			if ([command rangeOfString:@"Microsoft FTP Service"].location != NSNotFound ||
+				[buffer rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
+			{
+				_ftpFlags.isMicrosoft = YES;
 			}
 			else
 			{
-				error = LocalizedStringInConnectionKitBundle(@"File / Directory does not exist", @"FTP error");
+				_ftpFlags.isMicrosoft = NO;
 			}
 			
+			// Some servers do not accept the FEAT command before logging in. They either ignore it or close the connection
+			// after. The user default CKDisableFEATCommandBeforeFTPLogin enables applications to disable sending of the
+			// command until after login.
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
+			{
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+				[self setState:ConnectionSentUsernameState];
+			}
+			else
+			{
+				[self sendCommand:@"FEAT"];
+				[self setState:ConnectionSentFeatureRequestState];
+			}			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentUsernameState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 230:
+		{
+			if (![[self username] isEqualToString:@"anonymous"])
+				break;
+			_ftpFlags.sentAuthenticated = NO;
+			// Queue up the commands we want to insert in the queue before notifying client we're connected
+			[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
+														awaitState:ConnectionIdleState
+														 sentState:ConnectionAwaitingCurrentDirectoryState
+														 dependant:nil
+														  userInfo:nil]
+								atIndex:0];
+			[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
+														awaitState:ConnectionIdleState
+														 sentState:FTPAwaitingRemoteSystemTypeState
+														 dependant:nil
+														  userInfo:nil]
+								atIndex:0];
+			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
+			// we are starting in.
+			
+			[self setState:ConnectionIdleState];			
+			break;
+		}
+		case 331:
+		{
+			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
+			[self setState:ConnectionSentPasswordState];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentAccountState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 230:
+		{
+			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
+			[self setState:ConnectionSentPasswordState];
+			break;
+		}
+		case 530:
+		{
+			if (_flags.didAuthenticate)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"Invalid Account name", @"FTP Error"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [self host], ConnectionHostKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didAuthenticateToHost:[self host] error:error];
+			}			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentPasswordState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch(code)
+	{
+		case 230:
+		{
+			_ftpFlags.sentAuthenticated = NO;
+			// Queue up the commands we want to insert in the queue before notifying client we're connected
+			[_commandQueue insertObject:[ConnectionCommand command:@"PWD"
+														awaitState:ConnectionIdleState
+														 sentState:ConnectionAwaitingCurrentDirectoryState
+														 dependant:nil
+														  userInfo:nil]
+								atIndex:0];
+			[_commandQueue insertObject:[ConnectionCommand command:@"SYST"
+														awaitState:ConnectionIdleState
+														 sentState:FTPAwaitingRemoteSystemTypeState
+														 dependant:nil
+														  userInfo:nil]
+								atIndex:0];
+			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
+			// we are starting in.
+			
+			[self setState:ConnectionIdleState];			
+			break;
+		}
+		case 530:
+		{
+			if (_flags.badPassword)
+				[_forwarder connectionDidSendBadPassword:self];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionAwaitingCurrentDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 257:
+		{
+			NSString *path = [self scanBetweenQuotes:command];
+			if (!path || [path length] == 0)
+				path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+			[self setCurrentPath:path];
+			
+			if (_rootPath == nil) 
+				_rootPath = [path copy];
+			
+			if (!_ftpFlags.sentAuthenticated && _flags.didAuthenticate)
+			{
+				[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
+				_ftpFlags.sentAuthenticated = YES;
+			}
+			
+			if (_flags.changeDirectory)
+				[_forwarder connection:self didChangeToDirectory:_currentPath error:nil];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 425:
+		{
+			ConnectionCommand *last = [self lastCommand];
+			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
+			
+			if (lastState == FTPSettingEPSVState)
+			{
+				_ftpFlags.canUseEPSV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingEPRTState)
+			{
+				_ftpFlags.canUseEPRT = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingActiveState)
+			{
+				_ftpFlags.canUseActive = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingPassiveState)
+			{
+				_ftpFlags.canUsePASV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionChangingDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	NSError *error = nil;
+	switch (code)
+	{
+		case 500:
+		case 501:
+		case 502:
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
+			break;			
+		}			
+		default:
+			break;
+	}
+	
+	if (_flags.changeDirectory)
+	{
+		NSString *path = [self scanBetweenQuotes:command];
+		if (!path || [path length] == 0)
+			path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
+		[_forwarder connection:self didChangeToDirectory:path error:error];
+	}
+	[self setState:ConnectionIdleState];
+}
+
+- (void)_receivedCodeInConnectionCreateDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	NSError *error = nil;
+	switch (code)
+	{
+		case 521:
+		{
+			if (!_flags.isRecursiveUploading)
+			{
+				NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
+				NSString *path = nil;
+				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+				if ([command rangeOfString:@"exists"].location != NSNotFound) 
+				{
+					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+					if ([command rangeOfString:@":"].location != NSNotFound)
+					{
+						path = [command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)];
+						[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
+						[userInfo setObject:path forKey:NSFilePathErrorKey];
+					}
+				}
+				[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+				[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+				error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			}
+			break;
+		}
+		case 550:
+		{
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
+			//Some servers won't say that the directory exists. Once I get peer connections going, I will be able to ask the
+			//peer if the dir exists for confirmation until then we will make the assumption that it exists.
+			//if ([command rangeOfString:@"exists"].location != NSNotFound) {
+			[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+			NSString *path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+			[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
+			[userInfo setObject:path forKey:NSFilePathErrorKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;			
+		}			
+		default:
+			break;
+	}
+	
+	if (_flags.createDirectory)
+	{
+		NSString *path = [self scanBetweenQuotes:command];
+		if (!path || [path length] == 0)
+		{
+			path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+		}
+		[_forwarder connection:self didCreateDirectory:path error:error];
+	}
+	[self setState:ConnectionIdleState];
+}
+
+- (void)_receivedCodeInConnectionDeleteDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	NSError *error = nil;
+	switch (code)
+	{
+		case 550:
+		{
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+			[userInfo setObject:[self currentDeletion] forKey:NSFilePathErrorKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;			
+		}									
+		default:
+			break;
+	}
+	
+	// Uses same _fileDeletes queue, hope that's safe to do.  (Any chance one could get ahead of another?)
+	if (_flags.deleteDirectory)
+		[_forwarder connection:self didDeleteDirectory:[_fileDeletes objectAtIndex:0] error:error];
+	[self dequeueDeletion];
+	[self setState:ConnectionIdleState];
+}
+
+- (void)_receivedCodeInConnectionRenameFromState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 350:
+		{
+			[self setState:ConnectionRenameToState];
+			break;
+		}
+		default:
+		{
+			[_fileRenames removeObjectAtIndex:0];
+			[_fileRenames removeObjectAtIndex:0];
+			[self setState:ConnectionIdleState];
+			break;
+		}
+	}
+}
+
+- (void)_receivedCodeInConnectionAwaitingRenameState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	NSError *error = nil;
+	switch (code)
+	{
+		case 450: //File in Use
+		{
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;
+		}			
+		case 550: //Permission Denied
+		{
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;			
+		}
+		default:
+			break;
+	}
+	
+	if (_flags.rename)
+		[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+	[_fileRenames removeObjectAtIndex:0];
+	[_fileRenames removeObjectAtIndex:0];							 
+	[self setState:ConnectionIdleState];	
+}
+
+- (void)_receivedCodeInConnectionDeleteFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	NSError *error = nil;
+	switch (code)
+	{
+		case 450:
+		{
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;
+		}			
+		case 550:
+		{
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+			[userInfo setObject:[self currentDeletion] forKey:NSFilePathErrorKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;			
+		}						
+		default:
+			break;
+	}
+	
+	if (_flags.deleteFile) 
+		[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
+	[self dequeueDeletion];	
+	[self setState:ConnectionIdleState];
+}
+
+- (void)_receivedCodeInConnectionDownloadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 150:
+		{
+			CKInternalTransferRecord *download = [self currentDownload];
+			if (_writeHandle == nil) // we can get setup in the handleDataReceievedEvent: method
+			{
+				NSFileManager *fm = [NSFileManager defaultManager];
+				
+				// check the file offset of the current download to see if we resume the transfer
+				unsigned long long fileOffset = [download offset];
+				bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
+				
+				if ( !isResume ) {
+					[fm removeFileAtPath:[download localPath] handler:nil];
+					[fm createFileAtPath:[download localPath]
+								contents:nil
+							  attributes:nil];
+					_transferSent = 0;
+				}
+				
+				[self setWriteHandle:[NSFileHandle fileHandleForWritingAtPath:[download localPath]]];
+				if ( isResume ) {
+					[_writeHandle seekToEndOfFile];
+					_transferSent = fileOffset;
+				}
+			}
+			//start to read in the data to kick start it
+			uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
+			int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
+			if (len >= 0) {
+				[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
+				_transferSent += len;
+				
+				if (_flags.downloadProgressed)
+				{
+					[_forwarder connection:self download:[download remotePath] receivedDataOfLength:len];
+				}
+				if ([download delegateRespondsToTransferTransferredData])
+				{
+					[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
+				}
+				int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
+				if (_flags.downloadPercent)
+				{
+					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				if ([download delegateRespondsToTransferProgressedTo])
+				{
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+				_transferLastPercent = percent;
+			}
+			
+			free(buf);			
+			break;
+		}
+		case 425:
+		{
+			ConnectionCommand *last = [self lastCommand];
+			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
+			
+			if (lastState == FTPSettingEPSVState)
+			{
+				_ftpFlags.canUseEPSV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingEPRTState)
+			{
+				_ftpFlags.canUseEPRT = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingActiveState)
+			{
+				_ftpFlags.canUseActive = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingPassiveState)
+			{
+				_ftpFlags.canUsePASV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}			
+			break;
+		}		
+		case 450:
+		{
+			if (_flags.error)
+			{
+				NSString *remotePath = [[self currentUpload] remotePath];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  remotePath, NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];			
+			}
+			break;
+		}	
+		case 451:
+		{
+			NSString *remotePath = [[self currentDownload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Action Aborted. Local Error", @"FTP Abort"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			[_forwarder connection:self didReceiveError:error];			
+			break;
+		}
+		case 550:
+		{
+			NSString *error = nil;
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			CKInternalTransferRecord *download = [self currentDownload];
+			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
+			[userInfo setObject:[download remotePath] forKey:NSFilePathErrorKey];
+			[self dequeueDownload];
 			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
 			if (_flags.error) {
@@ -1440,74 +1183,730 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   userInfo:userInfo];
 				[_forwarder connection:self didReceiveError:err];
 			}
+			
+			[self setState:ConnectionIdleState];
+			break;			
+		}			
+		default:
+			break;
+	}
+}
 
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 551: //request aborted. page type unknown
+- (void)_receivedCodeInConnectionUploadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 110:
 		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Request Aborted. Page Type Unknown", @"FTP Error"), 
-													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey,
-													 nil]];
-				[_forwarder connection:self didReceiveError:error];
-			}		
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 552: //request aborted quota exceeded
-		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:code
-												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), 
-													 NSLocalizedDescriptionKey,
-													 command, NSLocalizedFailureReasonErrorKey,
-													 nil]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			[self setState:ConnectionIdleState];
-			break;
-		}
-		case 553:
-		{
-			if (GET_STATE == ConnectionSettingPermissionsState)
+			CKInternalTransferRecord *d = [self currentUpload];
+			NSString *file = [d localPath];	// actual path to file, or destination name if from data
+			NSString *remoteFile = [d remotePath];
+			unsigned long long offset = [d offset];
+			NSData *data = [d data];
+			unsigned chunkLength = 0;
+			const uint8_t bytes [kStreamChunkSize];
+			_transferSent = 0;
+			_transferCursor = offset;
+			_transferLastPercent = 0;
+			
+			if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
 			{
-				if (_flags.error) 
+				[self setReadData:data];
+				[self setReadHandle:nil];		// make sure we're not also trying to read from file
+				
+				// Calculate size to transfer is total data size minus offset
+				_transferSize = [data length] - offset;
+				
+				chunkLength = MAX([data length] - offset, kStreamChunkSize);						
+				[data getBytes:&bytes range:NSMakeRange(offset, chunkLength)];
+			}
+			else	// use file
+			{
+				[self setReadData:nil];		// make sure we're not also trying to read from data
+				[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
+				NSAssert((nil != _readHandle), @"_readHandle is nil!");
+				
+				// Calculate size to transfer is total file size minus offset
+				_transferSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize] longLongValue] - offset;
+				
+				[_readHandle seekToFileOffset:offset]; 
+				NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
+				[chunk getBytes:&bytes];
+				chunkLength = [chunk length];		// actual length of bytes read
+			}
+			
+			//kick start the transfer
+			[_dataSendStream write:bytes maxLength:chunkLength];
+			_transferSent += chunkLength;
+			_transferCursor += chunkLength;
+			
+			if (_flags.uploadProgressed)
+			{
+				[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
+			}
+			if ([d delegateRespondsToTransferTransferredData])
+			{
+				[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
+			}
+			
+			int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+			if (percent > _transferLastPercent)
+			{
+				if (_flags.uploadPercent)
 				{
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]],
-															   NSLocalizedDescriptionKey,
-															   command, NSLocalizedFailureReasonErrorKey,
-															   nil]];
-					[_forwarder connection:self didReceiveError:error];
+					[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
 				}
-				[self dequeuePermissionChange];
-				[self setState:ConnectionIdleState];
+				if ([d delegateRespondsToTransferProgressedTo])
+				{
+					[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				}
+			}
+			_transferLastPercent = percent;			
+			break;
+		}
+		case 150:
+		{
+			CKInternalTransferRecord *d = [self currentUpload];
+			NSString *file = [d localPath];	// actual path to file, or destination name if from data
+			NSString *remoteFile = [d remotePath];
+			NSData *data = [d data];
+			
+			if (nil == file && nil == data)
+			{
+				NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: no file or data.  currrentUpload = %p remotePath = %@",
+								 d, remoteFile ];
+				NSLog(@"%@", str);
+				//NSAssert(NO, str);		// hacky way to throw an exception.
 			}
 			else
 			{
-				if (_flags.error) 
+				
+				unsigned chunkLength = 0;
+				const uint8_t *bytes;
+				_transferLastPercent = 0;
+				_transferSent = 0;
+				_transferCursor = 0;
+				
+				if (nil != data)	// use data.  (Note that data only can be as big as an insigned in, not a long long)
 				{
-					NSError *error = [NSError errorWithDomain:FTPErrorDomain
-														 code:code
-													 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Filename not Allowed", @"FTP Upload error"),
-															   NSLocalizedDescriptionKey,
-															   command, NSLocalizedFailureReasonErrorKey,
-															   nil]];
-					[_forwarder connection:self didReceiveError:error];
+					[self setReadData:data];
+					[self setReadHandle:nil];		// make sure we're not also trying to read from file
+					
+					_transferSize = [data length];
+					chunkLength = MIN(_transferSize, kStreamChunkSize);						
+					bytes = (uint8_t *)[data bytes];
 				}
-				// Should we set the state to idle or just sit here?
-			}
-			
+				else	// use file
+				{
+					[self setReadData:nil];		// make sure we're not also trying to read from data
+					if (![[NSFileManager defaultManager] fileExistsAtPath:file])
+					{
+						NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
+						NSAssert(NO, str);		// hacky way to throw an exception.
+					}
+					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
+					NSAssert((nil != _readHandle), @"_readHandle is nil!");
+					NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
+					bytes = (uint8_t *)[chunk bytes];
+					chunkLength = [chunk length];		// actual length of bytes read
+					
+					NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
+					_transferSize = [size unsignedLongLongValue];
+				}
+				
+				//kick start the transfer
+				[_dataSendStream write:bytes maxLength:chunkLength];
+				_transferSent += chunkLength;
+				_transferCursor += chunkLength;
+				
+				
+				if ([d delegateRespondsToTransferTransferredData])
+				{
+					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
+				}
+				
+				if (_flags.uploadProgressed)
+				{
+					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
+				}
+				
+				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+				if (percent > _transferLastPercent)
+				{
+					if (_flags.uploadPercent)
+					{
+						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+					}
+					if ([d delegateRespondsToTransferProgressedTo])
+					{
+						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					}
+				}
+				_transferLastPercent = percent;
+			}			
 			break;
 		}
+		case 425:
+		{
+			ConnectionCommand *last = [self lastCommand];
+			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
+			
+			if (lastState == FTPSettingEPSVState)
+			{
+				_ftpFlags.canUseEPSV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingEPRTState)
+			{
+				_ftpFlags.canUseEPRT = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingActiveState)
+			{
+				_ftpFlags.canUseActive = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}
+			else if (lastState == FTPSettingPassiveState)
+			{
+				_ftpFlags.canUsePASV = NO;
+				[self closeDataStreams];
+				[self sendCommand:@"DATA_CON"];
+				[self pushCommandOnCommandQueue:last];
+			}			
+			break;
+		}
+		case 450:
+		{
+			if (_flags.error)
+			{
+				NSString *remotePath = [[self currentUpload] remotePath];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  remotePath, NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];			
+			}
+			break;
+		}
+		case 452:
+		{
+			if (_flags.error)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];
+			}
+			[self sendCommand:@"ABOR"];			
+			break;
+		}
+		case 532:
+		{
+			if (_flags.error)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [self host], ConnectionHostKey,
+										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];
+			}
+			[self setState:ConnectionIdleState];			
+			break;
+		}
+		case 550:
+		{
+			NSString *error = nil;
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			CKInternalTransferRecord *upload = [self currentUpload];
+			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
+			[userInfo setObject:[upload remotePath] forKey:NSFilePathErrorKey];
+			[self dequeueUpload];			
+			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			if (_flags.error) {
+				NSError *err = [NSError errorWithDomain:FTPErrorDomain
+												   code:code
+											   userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:err];
+			}
+			
+			[self setState:ConnectionIdleState];
+			break;			
+		}
+		case 552:
+		{
+			if (_flags.error)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];
+			}
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		default:
+			break;
 	}
-	
+}
+
+- (void)_receivedCodeInConnectionSentOffsetState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 350:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentFeatureRequestState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 211:
+		{
+			//parse features
+			if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
+				_ftpFlags.hasSize = YES;
+			else
+				_ftpFlags.hasSize = NO;
+			if ([buffer rangeOfString:@"ADAT"].location != NSNotFound)
+				_ftpFlags.hasADAT = YES;
+			else
+				_ftpFlags.hasADAT = NO;
+			if ([buffer rangeOfString:@"AUTH"].location != NSNotFound)
+				_ftpFlags.hasAUTH = YES;
+			else
+				_ftpFlags.hasAUTH = NO;
+			if ([buffer rangeOfString:@"CCC"].location != NSNotFound)
+				_ftpFlags.hasCCC = YES;
+			else
+				_ftpFlags.hasCCC = NO;
+			if ([buffer rangeOfString:@"CONF"].location != NSNotFound)
+				_ftpFlags.hasCONF = YES;
+			else
+				_ftpFlags.hasCONF = NO;
+			if ([buffer rangeOfString:@"ENC"].location != NSNotFound)
+				_ftpFlags.hasENC = YES;
+			else
+				_ftpFlags.hasENC = NO;
+			if ([buffer rangeOfString:@"MIC"].location != NSNotFound)
+				_ftpFlags.hasMIC = YES;
+			else
+				_ftpFlags.hasMIC = NO;
+			if ([buffer rangeOfString:@"PBSZ"].location != NSNotFound)
+				_ftpFlags.hasPBSZ = YES;
+			else
+				_ftpFlags.hasPBSZ = NO;
+			if ([buffer rangeOfString:@"PROT"].location != NSNotFound)
+				_ftpFlags.hasPROT = YES;
+			else
+				_ftpFlags.hasPROT = NO;
+			if ([buffer rangeOfString:@"MDTM"].location != NSNotFound)
+				_ftpFlags.hasMDTM = YES;
+			else
+				_ftpFlags.hasMDTM = NO;
+			if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
+				_ftpFlags.hasSITE = YES;
+			else
+				_ftpFlags.hasSITE = NO;
+			if (_ftpFlags.loggedIn == NO) {
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", _username]];
+				[self setState:ConnectionSentUsernameState];
+			} else {
+				[self setState:ConnectionIdleState];
+			}			
+			break;
+		}
+		case 500:
+		case 501:
+		case 502:
+		{
+			[self setState:ConnectionSentUsernameState];
+			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];		
+			break;
+		}
+		case 530:
+		{
+			// the server doesn't support FEAT before login
+			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+			[self setState:ConnectionSentUsernameState];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentQuitState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 221:
+		{
+			[super threadedDisconnect];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSettingPermissionsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 200:
+		{
+			if (_flags.permissions) {
+				[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0]];
+			}
+			[self dequeuePermissionChange];			
+			break;
+		}
+		case 253:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case 450:
+		{
+			if (_flags.error)
+			{
+				NSString *remotePath = [[self currentUpload] remotePath];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  remotePath, NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];			
+			}
+			break;
+		}		
+		case 500:
+		case 501:
+		case 502:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case 550:
+		{
+			NSString *error = nil;
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
+			[userInfo setObject:[self currentPermissionChange] forKey:NSFilePathErrorKey];
+			[self dequeuePermissionChange];
+			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			if (_flags.error) {
+				NSError *err = [NSError errorWithDomain:FTPErrorDomain
+												   code:code
+											   userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:err];
+			}
+			
+			[self setState:ConnectionIdleState];
+			break;			
+		}				
+		case 553:
+		{
+			if (_flags.error) 
+			{
+				NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  localizedDescription, NSLocalizedDescriptionKey,
+										  command, NSLocalizedFailureReasonErrorKey,
+										  [self currentPermissionChange], NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+				[_forwarder connection:self didReceiveError:error];
+			}
+			[self dequeuePermissionChange];
+			[self setState:ConnectionIdleState];			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 213:
+		{
+			CKInternalTransferRecord *download = [self currentDownload];
+			if ([command rangeOfString:@"("].location != NSNotFound)
+			{
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
+				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
+				if ( [sizeScanner scanLocation] < [command length] )
+				{
+					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+					sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+						   "%llu", &_transferSize);
+				}
+			}
+			else
+			{
+				// some servers return 213 4937728
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
+				NSCharacterSet *sp = [NSCharacterSet whitespaceCharacterSet];
+				[sizeScanner scanUpToCharactersFromSet:sp intoString:nil];
+				if ( [sizeScanner scanLocation] < [command length] )
+				{
+					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
+					sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+						   "%llu", &_transferSize);
+				}
+				else
+				{
+					_transferSize = LONG_MAX;
+				}
+			}
+			if ([[download delegate] isKindOfClass:[CKTransferRecord class]])
+			{
+				[(CKTransferRecord *)[download delegate] setSize:_transferSize];
+			}
+			
+			_transferSent = 0;
+			[self setState:ConnectionIdleState];			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInConnectionSentDisconnectState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 221:
+		{
+			[super threadedDisconnect];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPSettingPassiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 227:
+		{
+			int i[6];
+			int j;
+			unsigned char n[6];
+			char *buf = (char *)[command UTF8String];
+			char *start = strchr(buf,'(');
+			if ( !start )
+				start = strchr(buf,'=');
+			if ( !start ||
+				( sscanf(start, "(%d,%d,%d,%d,%d,%d)",&i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 &&
+				 sscanf(start, "=%d,%d,%d,%d,%d,%d", &i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 ) )
+			{
+				_ftpFlags.canUsePASV = NO;
+				if (_flags.error)
+				{
+					NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available");
+					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+											  localizedDescription, NSLocalizedDescriptionKey,
+											  command, NSLocalizedFailureReasonErrorKey,
+											  [self host], ConnectionHostKey, nil];
+					NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
+					[_forwarder connection:self didReceiveError:err];
+				}
+				_state = ConnectionSentQuitState;
+				[self sendCommand:@"QUIT"];
+			}
+			for (j=0; j<6; j++)
+			{
+				n[j] = (unsigned char) (i[j] & 0xff);
+			}
+			int port = i[4] << 8 | i[5];
+			//port = ntohs(i[5] << 8 | i[4]);
+			NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
+			
+			//Connecting to local machine causes PASV to sit idle.
+			//				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
+			//				{
+			//					_ftpFlags.canUsePASV = NO;
+			//					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+			//					_state = [cmd sentState];
+			//					[self sendCommand:[cmd command]];						
+			//					break;
+			//				}
+			
+			NSHost *host = [CKCacheableHost hostWithAddress:hostString];
+			[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
+			
+			[self closeDataStreams];
+			[self setState:FTPAwaitingDataConnectionToOpen];
+			[self openDataStreamsToHost:host port:port];			
+			break;
+		}
+		case 500:
+		case 501:
+		case 502:
+		{
+			_ftpFlags.canUsePASV = NO;
+			[self closeDataStreams];
+			[self sendCommand:@"DATA_CON"];
+			break;			
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPSettingEPSVState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 229:
+		{
+			//get the port number
+			int port = 0;
+			char *cmd = (char *)[command UTF8String];
+			char *start = strchr(cmd,'|');
+			if ( !start || sscanf(start, "|||%d|", &port) != 1)
+			{
+				_ftpFlags.canUseEPSV = NO;
+				ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
+				_state = [cmd sentState];
+				[self sendCommand:[cmd command]];
+			}
+			NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
+			[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
+			
+			[self closeDataStreams];
+			[self setState:FTPAwaitingDataConnectionToOpen];
+			[self openDataStreamsToHost:host port:port];			
+			break;
+		}
+		case 500:
+		case 501:
+		case 502:
+		{
+			_ftpFlags.canUseEPSV = NO;
+			[self closeDataStreams];
+			[self sendCommand:@"DATA_CON"];
+			break;			
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPSettingActiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 500:
+		case 501:
+		case 502:
+		{
+			_ftpFlags.canUseActive = NO;
+			[self closeDataStreams];
+			[self sendCommand:@"DATA_CON"];			
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPSettingEPRTState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 500:
+		case 501:
+		case 502:
+		{
+			_ftpFlags.canUseEPRT = NO;
+			[self sendCommand:@"DATA_CON"];
+			break;
+		}
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPAwaitingRemoteSystemTypeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 215:
+		{
+			if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
+			{
+				_ftpFlags.isMicrosoft = YES;
+				[self setState:FTPChangeDirectoryListingStyle];
+				[self sendCommand:@"SITE DIRSTYLE"];
+				break;
+			}
+			else
+			{
+				_ftpFlags.isMicrosoft = NO;
+			}			
+			break;
+		}
+		case 500:
+		case 501:
+		case 502:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}			
+		default:
+			break;
+	}
+}
+
+- (void)_receivedCodeInFTPChangeDirectoryListingStyleState:(int)code command:(NSString *)command buffer:(NSString *)buffer
+{
+	switch (code)
+	{
+		case 500:
+		case 501:
+		case 502:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		case 550:
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 #pragma mark -
@@ -2467,11 +2866,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
 		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:FTPDownloadFileExists
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error")
-																					  forKey:NSLocalizedDescriptionKey]];
+			if (_flags.error)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+										  remotePath, NSFilePathErrorKey, nil];
+				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
 				[_forwarder connection:self didReceiveError:error];
 			}
 			return nil;
@@ -2745,11 +3145,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else
 	{
-		if (_flags.error) {
-			NSError *err = [NSError errorWithDomain:FTPErrorDomain
-											   code:FTPErrorNoDataModes
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available")
-																				forKey:NSLocalizedDescriptionKey]];
+		if (_flags.error)
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  [self host], ConnectionHostKey, nil];
+			NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:err];
 		}
 		cmd = [ConnectionCommand command:@"QUIT"

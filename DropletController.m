@@ -1,4 +1,66 @@
+//This file replaces CK's DropletController.m upon building. We do not incorporate it into CK as it contains proprietary Extendmac Auto URL Copying code.
+
 #import "DropletController.h"
+
+@interface NSString (URLComponents)
+- (NSString *)stringByDeletingLastURLComponent;
+- (NSString *)lastURLComponent;
+- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
+- (NSString *)stringByStandardizingURLComponents;
+@end
+
+@implementation NSString (URLComponents)
+- (NSString *)stringByDeletingLastURLComponent
+{
+	NSString *standardizedSelf = [self stringByStandardizingURLComponents];
+	NSRange lastURLComponentRange = [standardizedSelf rangeOfString:@"/" options:NSBackwardsSearch];
+	return [standardizedSelf substringToIndex:NSMaxRange(lastURLComponentRange)];
+}
+- (NSString *)lastURLComponent
+{
+	if ([self isEqualToString:@"/"])
+	{
+		return self;
+	}
+	NSString *standardizedSelf = [self stringByStandardizingURLComponents];
+	NSRange lastSlashRange = [standardizedSelf rangeOfString:@"/" options:NSBackwardsSearch];
+	if (lastSlashRange.location == NSNotFound)
+	{
+		return standardizedSelf;
+	}
+	return [standardizedSelf substringFromIndex:NSMaxRange(lastSlashRange)];
+} 
+- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent
+{
+	URLComponent = [URLComponent stringByStandardizingURLComponents];
+	
+	if ([URLComponent hasPrefix:@"/"])
+		URLComponent = [URLComponent substringFromIndex:1];
+	if ([URLComponent hasSuffix:@"/"])
+		URLComponent = [URLComponent substringToIndex:[URLComponent length] - 1];
+	
+	if (![self hasSuffix:@"/"])
+		URLComponent = [@"/" stringByAppendingString:URLComponent];
+	return [self stringByAppendingString:URLComponent];	
+}
+- (NSString *)stringByStandardizingURLComponents
+{
+	NSString *returnString = [NSString stringWithString:self];
+	
+	//Make sure we've got one (and only one) leading slash
+	while ([returnString hasPrefix:@"//"])
+	{
+		returnString = [returnString substringFromIndex:1];
+	}
+	
+	//Make sure we've got no tailing slashes
+	while ([returnString hasSuffix:@"/"] && ![returnString isEqualToString:@"/"])
+	{
+		returnString = [returnString substringToIndex:[returnString length] - 1];
+	}
+	return returnString;
+}
+@end
 
 @interface DropletController (Private)
 - (void)startUpload;
@@ -149,20 +211,13 @@ static NSSize sFilesCollapsedSize = {375, 105};
 											  forKey:@"DisplayFiles"];
 }
 
-- (void)notifyGrowlOfSuccessfulUpload
+- (void)notifyGrowlOfSuccessfulUpload:(BOOL)didCopyURL
 {
-	NSString *dropletName = [[NSProcessInfo processInfo] processName];
-	NSString *scriptSource = [NSString stringWithFormat:@"tell application \"System Events\"\n"
-		"set growlIsRunning to count of (every process whose name is \"GrowlHelperApp\") > 0\n"
-		"end tell\n"
-		"if growlIsRunning\n"
-		"tell application \"GrowlHelperApp\"\n"
-		"set the allNotificationsList to {\"Upload Complete\"}\n"
-		"set the enabledNotificationsList to {\"Upload Complete\"}\n"
-		"register as application \"Connection Droplet\" all notifications allNotificationsList default notifications enabledNotificationsList icon of application \"%@\"\n"
-		"notify with name \"Upload Complete\" title \"Upload Complete\" description \"The items have been uploaded successfully.\" application name \"Connection Droplet\"\n"
-		"end tell\n"		
-		"end if\n", dropletName];
+	NSString *urlMessage = (didCopyURL) ? @"Additionally, its URL has been copied to the cliboard." : @"";
+	NSString *theText = [NSString stringWithFormat:@"The items have been uploaded successfully. %@", urlMessage];
+	
+	NSString *scriptSource = [NSString stringWithFormat:@"set myApp to \"\"\ntell application \"System Events\" to set GrowlRunning to ((application processes whose (name is equal to \"GrowlHelperApp\")) count)\nif GrowlRunning >= 1 then\n	try\n		set myApp to \"GrowlHelperApp\"\n		set appName to \"Flow\"\n		set notifs to \"{\\\"Upload Complete\\\"}\"\n		set myTitle to \"Upload Complete\"\n		set myText to \"%@\"\n		tell application myApp to run script \"register as application \\\"\" & appName & \"\\\" all notifications \" & notifs & \" default notifications \" & notifs & \" icon of application \\\"Flow\\\"\"\n		tell application myApp to run script \"notify with name \\\"Upload Complete\\\" title \\\"\" & myTitle & \"\\\" application name \\\"\" & appName & \"\\\" description \\\"\" & myText & \"\\\" icon of application \\\"Flow\\\"\"\n	end try\nend if", theText];
+
 	NSDictionary *errorDictionary;
 	NSAppleEventDescriptor *returnDescriptor = nil;
 	
@@ -206,6 +261,68 @@ static NSSize sFilesCollapsedSize = {375, 105};
 }
 
 #pragma mark -
+#pragma mark Flow Internal Auto URL Copying Functionality
+- (NSString *)webPathForRemotePath:(NSString *)theRemotePath basedOnExampleRemotePath:(NSString *)exampleRemotePath exampleWebPath:(NSString *)exampleWebPath
+{
+	if (!exampleRemotePath || [exampleRemotePath length] == 0 || !exampleWebPath || [exampleWebPath length] == 0 || !theRemotePath || [theRemotePath length] == 0)
+	{
+		return nil;
+	}
+	
+	NSString *rootRemotePath = exampleRemotePath;
+	NSString *rootWebPath = exampleWebPath;
+	while ([[rootRemotePath lastURLComponent] isEqualToString:[rootWebPath lastURLComponent]])
+	{
+		rootRemotePath = [rootRemotePath stringByDeletingLastURLComponent];
+		rootWebPath = [rootWebPath stringByDeletingLastURLComponent];
+	}
+	
+	//Remove any slashes from the front or back.
+	if ([rootRemotePath hasPrefix:@"/"])
+		rootRemotePath = [rootRemotePath substringFromIndex:1];
+	
+	NSRange rootRemotePathRangeInDemoRemotePath = [theRemotePath rangeOfString:rootRemotePath];
+	if (rootRemotePathRangeInDemoRemotePath.location == NSNotFound)
+	{
+		return nil;
+	}
+	NSString *remotePathRelativeToRootRemotePath = [theRemotePath substringFromIndex:NSMaxRange(rootRemotePathRangeInDemoRemotePath)];
+	NSString *finalWebPath = [rootWebPath stringByAppendingURLComponent:remotePathRelativeToRootRemotePath];
+	finalWebPath = [finalWebPath stringByReplacingOccurrencesOfString:@" " withString:@"%20"];
+	return finalWebPath;
+}
+- (BOOL)attemptToCopyURLOfRemoteFile:(NSString *)remotePath
+{
+	NSDictionary *autoURLCopyingDictionary = [NSDictionary dictionaryWithContentsOfFile:[@"~/Library/Application Support/Flow/AutoURLCopyingDictionary.plist" stringByExpandingTildeInPath]];
+
+	if (!autoURLCopyingDictionary)
+		return NO;
+	
+	NSDictionary *exampleDataForHost = [autoURLCopyingDictionary objectForKey:[myHost uuid]];
+
+	if (!exampleDataForHost)
+		return NO;
+	
+	BOOL copyURLAfterUpload = [[exampleDataForHost objectForKey:@"copyAfterUploadFlag"] boolValue];
+	if (!copyURLAfterUpload)
+		return NO;
+	
+	NSString *exampleRemotePath = [exampleDataForHost objectForKey:@"remotePath"];
+	NSString *exampleWebPath = [exampleDataForHost objectForKey:@"webPath"];
+	
+	NSString *webPath = [self webPathForRemotePath:remotePath basedOnExampleRemotePath:exampleRemotePath exampleWebPath:exampleWebPath];
+	
+	if (!webPath)
+		return NO;
+	
+	NSPasteboard *pasteBoard = [NSPasteboard generalPasteboard];
+	[pasteBoard declareTypes:[NSArray arrayWithObject:NSStringPboardType] owner:nil];
+	[[NSPasteboard generalPasteboard] setString:webPath forType:NSStringPboardType];	
+	
+	return YES;
+}
+
+#pragma mark -
 #pragma mark Connection Delegate Methods
 
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
@@ -236,7 +353,6 @@ static NSSize sFilesCollapsedSize = {375, 105};
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
 	[oStatus setStringValue:NSLocalizedString(@"Disconnected", @"status")];
-	[self notifyGrowlOfSuccessfulUpload];
 	[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.5];
 }
 
@@ -329,6 +445,9 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[record setProgress:100];
 	
 	[oFiles reloadData];
+	
+	BOOL didCopyURL = [self attemptToCopyURLOfRemoteFile:remotePath];
+	[self notifyGrowlOfSuccessfulUpload:didCopyURL];
 }
 
 - (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con
