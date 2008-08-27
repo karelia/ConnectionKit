@@ -39,7 +39,7 @@ sshversion()
     } else {
         range.length = CFStringGetLength( sshbinary );
         if ( CFStringGetBytes( sshbinary, range, kCFStringEncodingUTF8, '?',
-                                FALSE, sshpath, MAXPATHLEN, NULL ) == 0 ) {
+                                FALSE, (UInt8 *)sshpath, MAXPATHLEN, NULL ) == 0 ) {
             syslog( LOG_ERR, "CFStringGetBytes failed" );
             strcpy( sshpath, "/usr/bin/ssh" );
         } else {
@@ -127,7 +127,7 @@ sshversion()
         
         for ( i = 0; i < 3; i++ ) 
 		{
-            if ( *p == NULL ) break;
+            if (!*p) break;
             tmp[ i ] = *p;
             p++;
         }
