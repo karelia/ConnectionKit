@@ -791,11 +791,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}
+<<<<<<< .mine
+		case 550: //Permission Denied
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;
+		}
+=======
 		case 550: //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 		}
+>>>>>>> .r999
 		default:
 			break;
 	}
@@ -850,6 +859,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)_receivedCodeInConnectionChangingDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
+	NSString *path = [self scanBetweenQuotes:command];
+	if (!path || [path length] == 0)
+		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
 	switch (code)
 	{
 		case 500:
@@ -858,21 +870,22 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
-									  command, NSLocalizedFailureReasonErrorKey, nil];
+									  command, NSLocalizedFailureReasonErrorKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			break;			
-		}			
+		}		
+		case 550: //Permission Denied
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;
+		}
 		default:
 			break;
 	}
 	
 	if (_flags.changeDirectory)
-	{
-		NSString *path = [self scanBetweenQuotes:command];
-		if (!path || [path length] == 0)
-			path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
 		[_forwarder connection:self didChangeToDirectory:path error:error];
-	}
 	[self setState:ConnectionIdleState];
 }
 
