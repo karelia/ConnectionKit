@@ -744,7 +744,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.didDisconnect					= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
 	_flags.directoryContents				= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:)];
 	_flags.didBeginDownload					= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
-	_flags.downloadFinished					= [del respondsToSelector:@selector(connection:downloadDidFinish:)];
+	_flags.downloadFinished					= [del respondsToSelector:@selector(connection:downloadDidFinish:error:)];
 	_flags.downloadPercent					= [del respondsToSelector:@selector(connection:download:progressedTo:)];
 	_flags.downloadProgressed				= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
 	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
@@ -1351,11 +1351,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
 	if (_flags.downloadFinished)
 	{
-		[_forwarder connection:self downloadDidFinish:remotePath];
+		[_forwarder connection:self downloadDidFinish:remotePath error:error];
 	}
 	KTLog(EditingDomain, KTLogDebug, @"Downloaded file %@... watching for changes", remotePath);
 	NSEnumerator *e = [_edits keyEnumerator];

@@ -815,7 +815,7 @@ static char *lsform;
 	[self dequeueDownload];
 	
 	if (_flags.downloadFinished)
-		[_forwarder connection:self downloadDidFinish:[downloadInfo remotePath]];
+		[_forwarder connection:self downloadDidFinish:[downloadInfo remotePath] error:nil];
 	if ([downloadInfo delegateRespondsToTransferDidFinish])
 		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
 	

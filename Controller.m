@@ -977,7 +977,7 @@ static NSImage *_folder = nil;
 	[transferTable reloadData];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
 	[self refreshLocal];
 	[transferTable reloadData];
