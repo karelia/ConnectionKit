@@ -58,6 +58,7 @@
 #import <sys/sysctl.h>
 
 #import <Security/Security.h>
+#import <CoreServices/CoreServices.h>
 
 const unsigned int kStreamChunkSize = 2048;
 const NSTimeInterval kStreamTimeOutValue = 10.0; // 10 second timeout
@@ -105,6 +106,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.initializedSSL = NO;
 		myStreamFlags.isDeleting = NO;
 		
+		_fileCheckLock = [[NSLock alloc] init];
+		
 		_recursiveS3RenamesQueue = [[NSMutableArray alloc] init];
 		_recursivelyRenamedDirectoriesToDelete = [[NSMutableArray alloc] init];
 		_recursiveS3RenameLock = [[NSLock alloc] init];
@@ -145,6 +148,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection setDelegate:nil];
 	[_fileCheckingConnection forceDisconnect];
 	[_fileCheckingConnection release];
+	[_fileCheckLock release];
 	[_fileCheckInFlight release];
 	
 	[_recursiveS3RenameLock release];
@@ -339,10 +343,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		NSLog(@"Failed to set socket keep alive setting");
 	}
-	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)))
-	{
-		NSLog(@"Failed to set tcp no delay setting");
-	}
 	
 	struct sockaddr_in addr;
 	bzero((char *) &addr, sizeof(addr));
@@ -377,7 +377,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
 									  _connectionHost, ConnectionHostKey, nil];
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
-			NSLog(@"2");
 			[_forwarder connection:self didReceiveError:error];
 		}
 		return NO;
@@ -940,14 +939,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_fileCheckingConnection) 
 	{
-		_fileCheckingConnection = [[[self class] alloc] initWithHost:[self host]
-																port:[self port]
-															username:[self username]
-															password:[self password]
-															   error:nil];
+		_fileCheckingConnection = [self copy];
 		[_fileCheckingConnection setDelegate:self];
+		[_fileCheckingConnection setName:@"File Checking Connection"];
 		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
-		[_fileCheckingConnection connect];
+		[_fileCheckingConnection connect];		
 	}
 	[_fileCheckLock lock];
 	if (!_fileCheckInFlight && [self numberOfFileChecks] > 0)
@@ -1245,7 +1241,41 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDownloadConnection directoryContents];
 	}
 }
-
+- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
+{
+	if (!error)
+		return;
+	//We had some difficulty changing to a directory. We're obviously not going to list that directory, we lets just remove it from whatever queue we need to
+	if (con == _fileCheckingConnection)
+	{
+		[_fileCheckLock lock];
+		for (NSString *filePathToCheck in [NSArray arrayWithArray:_fileCheckQueue])
+		{
+			if (![[filePathToCheck stringByDeletingLastPathComponent] isEqualToString:dirPath])
+				continue;
+			if (_flags.fileCheck)
+				[_forwarder connection:self checkedExistenceOfPath:filePathToCheck pathExists:NO error:error];
+			
+			[_fileCheckQueue removeObject:filePathToCheck];
+			if ([filePathToCheck isEqualToString:_fileCheckInFlight])
+			{
+				[_fileCheckInFlight autorelease];
+				_fileCheckInFlight = nil;
+				[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0];
+			}
+		}
+		[_fileCheckLock unlock];
+	}
+	else if (con == _recursiveDeletionConnection)
+	{
+	}
+	else if (con == _recursiveDownloadConnection)
+	{
+	}
+	else if (con == _recursiveS3RenameConnection)
+	{
+	}
+}
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
 	if (con == _fileCheckingConnection)
@@ -1278,6 +1308,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			NSArray *currentDirectoryContentsFilenames = [contents valueForKey:cxFilenameKey];
 			NSMutableArray *fileChecksToRemoveFromQueue = [NSMutableArray array];
+			[_fileCheckLock lock];
 			NSEnumerator *pathsToCheckForEnumerator = [_fileCheckQueue objectEnumerator];
 			NSString *currentPathToCheck;
 			while ((currentPathToCheck = [pathsToCheckForEnumerator nextObject]))
@@ -1288,9 +1319,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				}
 				[fileChecksToRemoveFromQueue addObject:currentPathToCheck];
 				BOOL currentDirectoryContainsFile = [currentDirectoryContentsFilenames containsObject:[currentPathToCheck lastPathComponent]];
-				[_forwarder connection:self checkedExistenceOfPath:currentPathToCheck pathExists:currentDirectoryContainsFile];
+				[_forwarder connection:self checkedExistenceOfPath:currentPathToCheck pathExists:currentDirectoryContainsFile error:nil];
 			}
 			[_fileCheckQueue removeObjectsInArray:fileChecksToRemoveFromQueue];
+			[_fileCheckLock unlock];
 		}
 		[_fileCheckInFlight autorelease];
 		_fileCheckInFlight = nil;

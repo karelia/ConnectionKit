@@ -683,14 +683,14 @@
 		{
 			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
 			{
-				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES];
+				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES error:nil];
 				foundFile = YES;
 				break;
 			}
 		}
 		if (!foundFile)
 		{
-			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO];
+			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO error:nil];
 		}
 	}
 	[self dequeueFileCheck];

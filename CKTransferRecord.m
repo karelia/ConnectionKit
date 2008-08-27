@@ -300,6 +300,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)setError:(NSError *)error
 {
+	NSLog(@"%@ setError: %@", self, error);
 	if (error != myError)
 	{
 		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error

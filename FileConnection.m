@@ -954,9 +954,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 	if (_flags.fileCheck)
 	{
-		[_forwarder connection: self 
-		 checkedExistenceOfPath: path
-					 pathExists: fileExists];
+		[_forwarder connection:self checkedExistenceOfPath:path pathExists:fileExists error:nil];
 	}
 }
 
