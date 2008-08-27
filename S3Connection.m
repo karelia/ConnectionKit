@@ -229,7 +229,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	{
 		if (_flags.didAuthenticate)
 		{
-			[_forwarder connection:self didAuthenticateToHost:[self host]];
+			[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
 		}
 		hasSentAuthenticationToDelegate = YES;
 	}
@@ -403,7 +403,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			if (_flags.deleteFile)
 			{
-				[_forwarder connection:self didDeleteFile:[self currentDeletion]];
+				[_forwarder connection:self didDeleteFile:[self currentDeletion] error:nil];
 			}
 			[self dequeueDeletion];
 			break;
@@ -412,7 +412,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			if (_flags.deleteDirectory)
 			{
-				[_forwarder connection:self didDeleteDirectory:[self currentDeletion]];
+				[_forwarder connection:self didDeleteDirectory:[self currentDeletion] error:nil];
 			}
 			[self dequeueDeletion];
 			break;
@@ -421,14 +421,14 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		{
 			if (_flags.createDirectory)
 			{
-				[_forwarder connection:self didCreateDirectory:[self fixPathToBeDirectoryPath:[[response request] uri]]];
+				[_forwarder connection:self didCreateDirectory:[self fixPathToBeDirectoryPath:[[response request] uri]] error:nil];
 			}
 			break;
 		}
 		case ConnectionAwaitingRenameState:
 		{
 			if (_flags.rename)
-				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1]];
+				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:nil];
 			[_fileRenames removeObjectAtIndex:0];
 			[_fileRenames removeObjectAtIndex:0];			
 			break;
@@ -669,7 +669,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	myCurrentDirectory = [dirPath copy];
 	if (_flags.changeDirectory)
 	{
-		[_forwarder connection:self didChangeToDirectory:dirPath];
+		[_forwarder connection:self didChangeToDirectory:dirPath error:nil];
 	}
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
@@ -888,37 +888,35 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
-	remotePath = [self fixPathToBeFilePath:remotePath];
-	NSString *localPath = [dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
+	NSString *fixedRemotePath = [self fixPathToBeFilePath:remotePath];
+	NSString *localPath = [dirPath stringByAppendingPathComponent:[fixedRemotePath lastPathComponent]];
 	
-	if (!flag)
+	if (!flag && [[NSFileManager defaultManager] fileExistsAtPath:localPath])
 	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
+		if (_flags.error)
 		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:S3ErrorDomain
-													 code:S3DownloadFileExists
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error")
-																					  forKey:NSLocalizedDescriptionKey]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			return nil;
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			NSError *error = [NSError errorWithDomain:S3ErrorDomain code:S3DownloadFileExists userInfo:userInfo];
+			[_forwarder connection:self didReceiveError:error];
 		}
+		return nil;
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord recordWithName:fixedRemotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0
-																			remote:remotePath
+																			remote:fixedRemotePath
 																		  delegate:(delegate) ? delegate : record
 																		  userInfo:record];
-	[record setProperty:remotePath forKey:QueueDownloadRemoteFileKey];
+	[record setProperty:fixedRemotePath forKey:QueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
 	[record setProperty:[NSNumber numberWithInt:0] forKey:QueueDownloadTransferPercentReceived];
 	[self queueDownload:download];
 	
-	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
+	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:fixedRemotePath to:dirPath];
 	ConnectionCommand *cmd = [ConnectionCommand command:r
 											 awaitState:ConnectionIdleState
 											  sentState:ConnectionDownloadingFileState

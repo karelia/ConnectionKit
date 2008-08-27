@@ -71,6 +71,7 @@ NSString *cxFilenameKey = @"cxFilenameKey";
 NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
 
 // User Info Error Keys
+NSString *ConnectionHostKey = @"ConnectionHostKey";
 NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";
 NSString *ConnectionDirectoryExistsFilenameKey = @"ConnectionDirectoryExistsFilenameKey";
 
@@ -726,37 +727,37 @@ NSDictionary *sDataAttributes = nil;
 	
 	// There are 21 callbacks & flags.
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	_flags.permissions				= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:)];
-	_flags.badPassword				= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
-	_flags.cancel					= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
-	_flags.didCancel				= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
-	_flags.changeDirectory			= [del respondsToSelector:@selector(connection:didChangeToDirectory:)];
-	_flags.createDirectory			= [del respondsToSelector:@selector(connection:didCreateDirectory:)];
-	_flags.deleteDirectory			= [del respondsToSelector:@selector(connection:didDeleteDirectory:)];
-	_flags.deleteDirectoryInAncestor= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
-	_flags.deleteFileInAncestor		= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
-	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
-	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:)];
-	_flags.deleteFile				= [del respondsToSelector:@selector(connection:didDeleteFile:)];
-	_flags.didBeginUpload			= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
-	_flags.didConnect				= [del respondsToSelector:@selector(connection:didConnectToHost:)];
-	_flags.didDisconnect			= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
-	_flags.directoryContents		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:)];
-	_flags.didBeginDownload			= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
-	_flags.downloadFinished			= [del respondsToSelector:@selector(connection:downloadDidFinish:)];
-	_flags.downloadPercent			= [del respondsToSelector:@selector(connection:download:progressedTo:)];
-	_flags.downloadProgressed		= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
-	_flags.error					= [del respondsToSelector:@selector(connection:didReceiveError:)];
-	_flags.needsAccount				= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
-	_flags.rename					= [del respondsToSelector:@selector(connection:didRename:to:)];
-	_flags.uploadFinished			= [del respondsToSelector:@selector(connection:uploadDidFinish:)];
-	_flags.uploadPercent			= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
-	_flags.uploadProgressed			= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
-	_flags.directoryContentsStreamed= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
-	_flags.fileCheck				= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:)];
-	_flags.authorizeConnection		= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
-	_flags.didAuthenticate			= [del respondsToSelector:@selector(connection:didAuthenticateToHost:)];
-	_flags.passphrase				= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
+	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:)];
+	_flags.badPassword						= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
+	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
+	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
+	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
+	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
+	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
+	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
+	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
+	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:error:)];
+	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:error:)];
+	_flags.deleteFile						= [del respondsToSelector:@selector(connection:didDeleteFile:error:)];
+	_flags.didBeginUpload					= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
+	_flags.didConnect						= [del respondsToSelector:@selector(connection:didConnectToHost:error:)];
+	_flags.didDisconnect					= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
+	_flags.directoryContents				= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:)];
+	_flags.didBeginDownload					= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
+	_flags.downloadFinished					= [del respondsToSelector:@selector(connection:downloadDidFinish:)];
+	_flags.downloadPercent					= [del respondsToSelector:@selector(connection:download:progressedTo:)];
+	_flags.downloadProgressed				= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
+	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
+	_flags.needsAccount						= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
+	_flags.rename							= [del respondsToSelector:@selector(connection:didRename:to:error:)];
+	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:)];
+	_flags.uploadPercent					= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
+	_flags.uploadProgressed					= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
+	_flags.directoryContentsStreamed		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
+	_flags.fileCheck						= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:)];
+	_flags.authorizeConnection				= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
+	_flags.didAuthenticate					= [del respondsToSelector:@selector(connection:didAuthenticateToHost:error:)];
+	_flags.passphrase						= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
 }
 
 - (id)delegate
@@ -811,7 +812,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = YES;
 	if (_flags.didConnect)
 	{
-		[_forwarder connection:self didConnectToHost:[self host]];
+		[_forwarder connection:self didConnectToHost:[self host] error:nil];
 	}
 }
 

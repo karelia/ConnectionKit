@@ -252,7 +252,10 @@ char **environ;
 		
 		if ([self bufferContainsError:buf])
 		{
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Could not list directory.", NSLocalizedDescriptionKey, @"The directory could not be found", NSLocalizedFailureReasonErrorKey, nil]];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
+									  [wrapperConnection currentDirectory], NSFilePathErrorKey, nil];
+			NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			[wrapperConnection connectionError:error];
 			return;
 		}
@@ -475,8 +478,12 @@ char **environ;
 					failureReasonTitle = @"File exists";
 					createDirectoryError = YES;
 				}
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
-				NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+										  localizedErrorString, NSLocalizedDescriptionKey,
+										  [sftpWrapperConnection host], ConnectionHostKey,
+										  failureReasonTitle, NSLocalizedFailureReasonErrorKey,
+										  [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
+				NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:code userInfo:userInfo];
 				[sftpWrapperConnection connectionError:error];
 			}
 			else if ([sftpWrapperConnection isBusy] || cancelflag)
@@ -505,15 +512,16 @@ char **environ;
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"Changing owner on"] || [self buffer:serverResponseBuffer containsString:"Changing group on"] || [self buffer:serverResponseBuffer containsString:"Changing mode on"])
 			{
-				//[sftpWrapperConnection setBusyWithStatusMessage:[NSString stringWithUTF8String:(void *)serverResponseBuffer]];
 				wasChanging = YES;
 				if ([self buffer:serverResponseBuffer containsString:"Couldn't "])
 				{
 					NSString *failureReasonTitle = @"Error!";
-					int code = 0;
 					NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
-					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, nil];
-					NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
+					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+											  localizedErrorString, NSLocalizedDescriptionKey,
+											  [sftpWrapperConnection host], ConnectionHostKey,
+											  failureReasonTitle, NSLocalizedFailureReasonErrorKey, nil];
+					NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 					[sftpWrapperConnection connectionError:error];
 				}
 			}

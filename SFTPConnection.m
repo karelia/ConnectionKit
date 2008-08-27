@@ -18,6 +18,8 @@
 #include "fdwrite.h"
 
 @implementation SFTPConnection
+
+NSString *SFTPErrorDomain = @"SFTPErrorDomain";
 static char *lsform;
 
 #pragma mark -
@@ -142,9 +144,15 @@ static char *lsform;
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
 	else
 	{
-		[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
-		[parameters addObject:@"-o IdentityFile=~/.ssh/id_rsa"];
-		[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
+		NSString *publicKeyPath = [self propertyForKey:@"CKSFTPPublicKeyPath"];
+		if (publicKeyPath && [publicKeyPath length] > 0)
+			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=%@", publicKeyPath]];
+		else
+		{
+			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
+			[parameters addObject:@"-o IdentityFile=~/.ssh/id_rsa"];
+			[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
+		}
 	}
 	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
 	
@@ -253,9 +261,6 @@ static char *lsform;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	//SFTP does _not_ overwrite existing files when renaming. It'll just error if the target exists. Even if toPath doesn't exist, we'll just soft-error on it.
-	[self deleteFile:toPath];
-	
 	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromPath, @"fromPath", toPath, @"toPath", nil];
 	[renameQueue addObject:renameDictionary];
 	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]];
@@ -372,19 +377,17 @@ static char *lsform;
 	NSString *remoteFileName = [remotePath lastPathComponent];
 	NSString *localPath = [dirPath stringByAppendingPathComponent:remoteFileName];
 	
-	if (!flag)
+	if (!flag && [[NSFileManager defaultManager] fileExistsAtPath:localPath])
 	{
-		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
+		if (_flags.error)
 		{
-			if (_flags.error) {
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain
-													 code:FTPDownloadFileExists
-												 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error")
-																					  forKey:NSLocalizedDescriptionKey]];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			return nil;
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
+			[_forwarder connection:self didReceiveError:error];
 		}
+		return nil;
 	}
 	
 	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
@@ -649,9 +652,7 @@ static char *lsform;
 - (void)connectionError:(NSError *)theError
 {
 	if (_flags.error)
-	{
 		[_forwarder connection:self didReceiveError:theError];
-	}
 }
 
 #pragma mark -
@@ -674,11 +675,11 @@ static char *lsform;
 	
 	if (_flags.didConnect)
 	{
-		[_forwarder connection:self didConnectToHost:[self host]];
+		[_forwarder connection:self didConnectToHost:[self host] error:nil];
 	}
 	if (_flags.didAuthenticate)
 	{
-		[_forwarder connection:self didAuthenticateToHost:[self host]];
+		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
 	}		
 }
 
@@ -715,7 +716,7 @@ static char *lsform;
 - (void)didChangeToDirectory:(NSString *)path
 {
 	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path];
+		[_forwarder connection:self didChangeToDirectory:path error:nil];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -828,7 +829,7 @@ static char *lsform;
 	[self dequeueRename];
 	if (_flags.rename)
 	{
-		[_forwarder connection:self didRename:fromPath to:toPath];
+		[_forwarder connection:self didRename:fromPath to:toPath error:nil];
 	}
 }
 - (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo
@@ -847,7 +848,7 @@ static char *lsform;
 	[self dequeueFileDeletion];
 	if (_flags.deleteFile)
 	{
-		[_forwarder connection:self didDeleteFile:ourRemotePath];
+		[_forwarder connection:self didDeleteFile:ourRemotePath error:nil];
 	}
 }
 
@@ -857,7 +858,7 @@ static char *lsform;
 	[self dequeueDirectoryDeletion];
 	if (_flags.deleteDirectory)
 	{
-		[_forwarder connection:self didDeleteDirectory:ourRemotePath];
+		[_forwarder connection:self didDeleteDirectory:ourRemotePath error:nil];
 	}
 }
 

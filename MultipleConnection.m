@@ -463,7 +463,7 @@
 	return [_delegate connection:self authorizeConnectionToHost:host message:message];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
+- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host error:(NSError *)error
 {
 	_flags.isConnected = YES;
 	[_connectedConnections addObject:con];
@@ -472,7 +472,7 @@
 		//we notify as soon as the first connection makes contact
 		if (_flags.didConnect)
 		{
-			[_delegate connection:self didConnectToHost:host];
+			[_delegate connection:self didConnectToHost:host error:nil];
 		}
 	}
 }
@@ -546,7 +546,7 @@
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath
+- (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error
 {
 	NSMutableDictionary *rec = [self renameWithRemotePath:toPath];
 	NSMutableArray *connections = [rec objectForKey:@"Connections"];
@@ -556,7 +556,7 @@
 	{
 		if (_flags.rename)
 		{
-			[_delegate connection:self didRename:fromPath to:toPath];
+			[_delegate connection:self didRename:fromPath to:toPath error:error];
 		}
 		[_fileRenames removeObject:rec];
 	}

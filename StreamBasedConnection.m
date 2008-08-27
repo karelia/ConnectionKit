@@ -298,13 +298,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if(!host){
 		KTLog(TransportDomain, KTLogError, @"Cannot find the host: %@", _connectionHost);
 		
-        if (_flags.error) {
+        if (_flags.didConnect) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
 				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
-					_connectionHost, @"host", nil]];
-            [_forwarder connection:self didReceiveError:error];
+					_connectionHost, ConnectionHostKey, nil]];
+			[_forwarder connection:self didConnectToHost:_connectionHost error:error];
 		}
 		return NO;
 	}
@@ -371,11 +371,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if(!_receiveStream || !_sendStream){
 		KTLog(TransportDomain, KTLogError, @"Cannot create a stream to the host: %@", _connectionHost);
 		
-		if (_flags.error) {
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
-												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream")
-																				  forKey:NSLocalizedDescriptionKey]];
+		if (_flags.error)
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
+									  _connectionHost, ConnectionHostKey, nil];
+			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
+			NSLog(@"2");
 			[_forwarder connection:self didReceiveError:error];
 		}
 		return NO;
@@ -719,8 +721,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																			 forKey:NSLocalizedDescriptionKey]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			}
 			else
 			{
@@ -832,8 +833,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																			 forKey:NSLocalizedDescriptionKey]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			}
 			else 
 			{
@@ -1475,7 +1475,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(AbstractConnection *)conn didRename:(NSString *)fromPath to:(NSString *)toPath
+- (void)connection:(AbstractConnection *)conn didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error
 {
 	if (conn == _recursiveS3RenameConnection)
 	{
@@ -1496,12 +1496,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path error:(NSError *)error
 {
 	if (con == _recursiveDeletionConnection)
 	{
 		if (_flags.deleteFileInAncestor) {
-			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0] error:error];
 		}
 		
 		[_recursiveDeletionLock lock];
@@ -1521,7 +1521,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	if (con == _recursiveDeletionConnection)
 	{
@@ -1537,13 +1537,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					//In connection:didReceiveError, we were notified that the deletion connection we attempted to open up failed to open. To remedy this, we used OURSELF as the deletion connection, temporarily setting our delegate to OURSELF so we'd receive the calls we needed to perform the deletion. 
 					//Now that we're done, let's restore our delegate.
 					[self restoreRecursiveDeletionDelegate];
-					[_forwarder connection:self didDeleteDirectory:dirPath];
+					[_forwarder connection:self didDeleteDirectory:dirPath error:error];
 					if ([_recursiveDeletionsQueue count] > 0)
 						[self temporarilyTakeOverRecursiveDeletionDelegate];
 				}
 				else
 				{
-					[_forwarder connection:self didDeleteDirectory:dirPath];
+					[_forwarder connection:self didDeleteDirectory:dirPath error:error];
 				}
 			}			
 			if ([_recursiveDeletionsQueue count] == 0)
@@ -1569,8 +1569,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				if (previousDelegate && _recursiveDeletionConnection == self && [_recursiveDeletionConnection delegate] == self)
 				{
 					[self restoreRecursiveDeletionDelegate];
-					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory];
+					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory error:error];
 					[self temporarilyTakeOverRecursiveDeletionDelegate];
+				}
+				else
+				{
+					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory error:error];
 				}
 			}
 		}
@@ -1600,7 +1604,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				[con disconnect];
 				if (_flags.rename)
-					[_forwarder connection:self didRename:fromDirectoryPath to:toDirectoryPath];
+					[_forwarder connection:self didRename:fromDirectoryPath to:toDirectoryPath error:nil];
 			}
 		}
 		
@@ -1660,7 +1664,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:@"SSL Error Occurred" forKey:NSLocalizedDescriptionKey]];
+			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 		return;
