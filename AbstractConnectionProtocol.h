@@ -263,7 +263,7 @@ enum {
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath;
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath;
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con; // this is deprecated. Use method below
 - (void)connection:(id <AbstractConnectionProtocol>)con didCancelTransfer:(NSString *)remotePath;
 

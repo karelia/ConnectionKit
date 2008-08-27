@@ -575,7 +575,7 @@ checkRemoteExistence:(NSNumber *)check;
 	// send finished
 	if ( _flags.uploadFinished)
 	{
-		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
 	}
 	if ([upload delegateRespondsToTransferDidFinish])
 	{
@@ -686,7 +686,7 @@ checkRemoteExistence:(NSNumber *)check;
 	// send finished
 	if (success && _flags.uploadFinished)
 	{
-		[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
 	}
 	if (success && [upload delegateRespondsToTransferDidFinish])
 	{
