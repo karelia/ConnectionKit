@@ -526,7 +526,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	
 	FILE *from = fopen([[upload localPath] fileSystemRepresentation], "r"); // Must use -fileSystemRepresentation to handle non-ASCII paths
-	FILE *to = fopen([[upload remotePath] cString], "a");
+	FILE *to = fopen([[upload remotePath] UTF8String], "a");
 	
 		// I put these assertions back in; it's better to get an assertion failure than a crash!
 	NSAssert(from, @"path from cannot be found");

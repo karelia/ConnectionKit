@@ -2084,9 +2084,12 @@ static NSMutableParagraphStyle *sStyle = nil;
 		"%e/%m/%y %1I:%M %p";
 		"%e/%m/%y";
 	 */
-	NSString *dateFormat = [[NSUserDefaults standardUserDefaults] objectForKey:NSShortTimeDateFormatString];
-	NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:dateFormat allowNaturalLanguage:YES] autorelease];
-	[self setFormatter:formatter];
+	
+	//This is deprecated, and also unused. Not sure what we should be doing here. -Brian.
+	
+//	NSString *dateFormat = [[NSUserDefaults standardUserDefaults] objectForKey:NSShortTimeDateFormatString];
+//	NSDateFormatter *formatter = [[[NSDateFormatter alloc] initWithDateFormat:dateFormat allowNaturalLanguage:YES] autorelease];
+//	[self setFormatter:formatter];
 	
 	return self;
 }

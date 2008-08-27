@@ -348,7 +348,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	bzero((char *) &addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = inet_addr([[host address] cString]);
+	addr.sin_addr.s_addr = inet_addr([[host address] UTF8String]);
 	
 	KTLog(TransportDomain, KTLogDebug, @"Connecting to %@:%d", [host address], port);
 	

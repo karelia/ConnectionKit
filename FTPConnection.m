@@ -3320,7 +3320,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	NSString *betweenQuotes = [aString substringWithRange:NSMakeRange(r1.location + 1, r2.location - (r1.location +1))];
 	NSMutableString *result = [NSMutableString stringWithString:betweenQuotes];
-	[result replaceOccurrencesOfString:@"\"\"" withString:@"\"" options:nil range:NSMakeRange(0, [result length])];
+	[result replaceOccurrencesOfString:@"\"\"" withString:@"\"" options:NSLiteralSearch range:NSMakeRange(0, [result length])];
 	return result;
 }
 
