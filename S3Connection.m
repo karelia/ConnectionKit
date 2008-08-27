@@ -543,7 +543,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			if (_flags.downloadFinished)
 			{
 				CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
-				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey]];
+				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey] error:nil];
 			}
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
 				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];

@@ -1414,7 +1414,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				//We tried to download an entirely empty folder. We're finished.
 				if (_flags.downloadFinished)
-					[_forwarder connection:self downloadDidFinish:dirPath];
+					[_forwarder connection:self downloadDidFinish:dirPath error:nil];
 				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will not be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
 				[self recursivelySendTransferDidFinishMessage:root];
 			}

@@ -487,7 +487,7 @@ const NSTimeInterval kTestTimeout = -15.0;
                                            handler: nil];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
   remoteDownloadedPath = [remotePath retain];
   didDownload = YES;

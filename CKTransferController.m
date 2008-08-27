@@ -149,7 +149,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
-#warning I have not tested this method yet -- Greg
 	CKTransferRecord *root = [self rootRecordWithPath:[remotePath stringByDeletingLastPathComponent]];
 	CKTransferRecord *upload = [[self connection] recursivelyUpload:localPath to:remotePath];
 	

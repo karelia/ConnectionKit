@@ -772,15 +772,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionAwaitingCurrentDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
+	NSString *path = [self scanBetweenQuotes:command];
+	if (!path || [path length] == 0)
+		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];	
 	switch (code)
 	{
 		case 257:
 		{
-			NSString *path = [self scanBetweenQuotes:command];
-			if (!path || [path length] == 0)
-				path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-			[self setCurrentPath:path];
-			
+			[self setCurrentPath:path];			
 			if (_rootPath == nil) 
 				_rootPath = [path copy];
 			
@@ -789,14 +789,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
 				_ftpFlags.sentAuthenticated = YES;
 			}
-			
-			if (_flags.changeDirectory)
-				[_forwarder connection:self didChangeToDirectory:_currentPath error:nil];
 			break;
+		}
+		case 550: //Permission Denied
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 		}
 		default:
 			break;
 	}
+	if (_flags.changeDirectory)
+		[_forwarder connection:self didChangeToDirectory:path error:error];
 }
 
 - (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
@@ -1050,6 +1054,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionDownloadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
 	switch (code)
 	{
 		case 150:
@@ -1144,16 +1149,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}		
 		case 450:
 		{
-			if (_flags.error)
-			{
-				NSString *remotePath = [[self currentUpload] remotePath];
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  remotePath, NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];			
-			}
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}	
 		case 451:
@@ -1163,32 +1164,30 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 									  LocalizedStringInConnectionKitBundle(@"Action Aborted. Local Error", @"FTP Abort"), NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];			
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 550:
 		{
-			NSString *error = nil;
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			CKInternalTransferRecord *download = [self currentDownload];
-			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
+			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
 			[userInfo setObject:[download remotePath] forKey:NSFilePathErrorKey];
-			[self dequeueDownload];
-			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
-			if (_flags.error) {
-				NSError *err = [NSError errorWithDomain:FTPErrorDomain
-												   code:code
-											   userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:err];
-			}
-			
-			[self setState:ConnectionIdleState];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}			
 		default:
 			break;
+	}
+	
+	//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
+	if (error && _flags.downloadFinished)
+	{
+		[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
+		[self dequeueDownload];
+		[self setState:ConnectionIdleState];
 	}
 }
 
@@ -2407,7 +2406,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		if (_flags.downloadFinished)
 		{
-			[_forwarder connection:self downloadDidFinish:[download remotePath]];
+			[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
 		}
 		if ([download delegateRespondsToTransferDidFinish])
 		{
@@ -3206,8 +3205,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CFSocketInvalidate(s);
 	CFRelease(s);
 }
-
-#warning crash in Karelia case 18263, EXC_BAD_ACCESS @  __spin_lock + 9 <--  -[FTPConnection setupActiveConnectionWithPort:] + 141
 
 - (BOOL)setupActiveConnectionWithPort:(unsigned)port
 {

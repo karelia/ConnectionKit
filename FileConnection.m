@@ -549,9 +549,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	fclose(from);
 	fclose(to);
-	
-#warning TODO: for now we won't send progress - just 100%
-	
+		
 	//need to send the amount of bytes transferred.
 	
 	if (_flags.uploadProgressed)
@@ -814,7 +812,7 @@ checkRemoteExistence:(NSNumber *)check;
 		[download retain];
 		[self dequeueDownload];
 		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish: remotePath];
+			[_forwarder connection:self downloadDidFinish:remotePath error:nil];
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo]];
 		[download release];
@@ -1025,8 +1023,6 @@ checkRemoteExistence:(NSNumber *)check;
 
 #pragma mark -
 #pragma mark Delegate Methods
-
-#warning -- doesn't seem to be used?
 
 - (BOOL)fileManager:(NSFileManager *)manager shouldProceedAfterError:(NSDictionary *)errorInfo
 {

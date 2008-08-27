@@ -526,7 +526,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			
 			if (_flags.downloadFinished)
 			{
-				[_forwarder connection:self downloadDidFinish:[download remotePath]];
+				[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
 			}
 			if ([download delegateRespondsToTransferDidFinish])
 			{
