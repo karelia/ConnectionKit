@@ -791,20 +791,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}
-<<<<<<< .mine
-		case 550: //Permission Denied
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-			break;
-		}
-=======
 		case 550: //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 		}
->>>>>>> .r999
 		default:
 			break;
 	}
@@ -1206,6 +1197,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionUploadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
 	switch (code)
 	{
 		case 110:
@@ -1395,83 +1387,64 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 450:
 		{
-			if (_flags.error)
-			{
-				NSString *remotePath = [[self currentUpload] remotePath];
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  remotePath, NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];			
-			}
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 452:
 		{
-			if (_flags.error)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			[self sendCommand:@"ABOR"];			
 			break;
 		}
 		case 532:
 		{
-			if (_flags.error)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [self host], ConnectionHostKey,
-										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			[self setState:ConnectionIdleState];			
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey,
+									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 550:
 		{
-			NSString *error = nil;
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			CKInternalTransferRecord *upload = [self currentUpload];
-			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
+			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
 			[userInfo setObject:[upload remotePath] forKey:NSFilePathErrorKey];
 			[self dequeueUpload];			
-			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
-			if (_flags.error) {
-				NSError *err = [NSError errorWithDomain:FTPErrorDomain
-												   code:code
-											   userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:err];
-			}
-			
-			[self setState:ConnectionIdleState];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}
 		case 552:
 		{
-			if (_flags.error)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			[self setState:ConnectionIdleState];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		default:
 			break;
+	}
+	if (_flags.uploadFinished)
+		[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:error];
+	if (error)
+	{
+		[self dequeueUpload];
+		[self setState:ConnectionIdleState];
 	}
 }
 
@@ -2441,7 +2414,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		if (_flags.uploadFinished) 
 		{
-			[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+			[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
 		}
 		if ([upload delegateRespondsToTransferDidFinish])
 		{

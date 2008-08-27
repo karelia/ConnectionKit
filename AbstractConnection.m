@@ -750,7 +750,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
 	_flags.needsAccount						= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
 	_flags.rename							= [del respondsToSelector:@selector(connection:didRename:to:error:)];
-	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:)];
+	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:error:)];
 	_flags.uploadPercent					= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
 	_flags.uploadProgressed					= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
 	_flags.directoryContentsStreamed		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
@@ -1403,11 +1403,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
 	if (_flags.uploadFinished)
 	{
-		[_forwarder connection:self uploadDidFinish:remotePath];
+		[_forwarder connection:self uploadDidFinish:remotePath error:error];
 	}
 }
 

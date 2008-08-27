@@ -387,7 +387,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			
 			if (_flags.uploadFinished)
 			{
-				[_forwarder connection:self uploadDidFinish:[upload remotePath]];
+				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
 			}
 			
 			if ([upload delegateRespondsToTransferDidFinish])

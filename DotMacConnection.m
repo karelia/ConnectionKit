@@ -307,8 +307,7 @@
 				{
 					if (_flags.uploadFinished)
 					{
-						[_forwarder connection:self
-							   uploadDidFinish:[[self currentUpload] remotePath]];
+						[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:nil];
 					}
 					break;
 				}

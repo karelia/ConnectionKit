@@ -763,7 +763,7 @@ static char *lsform;
 	[self dequeueUpload];
 	
 	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[uploadInfo remotePath]];
+		[_forwarder connection:self uploadDidFinish:[uploadInfo remotePath] error:nil];
 	if ([uploadInfo delegateRespondsToTransferDidFinish])
 		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
 	
