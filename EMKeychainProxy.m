@@ -26,37 +26,61 @@
 
 @implementation EMKeychainProxy
 
-static EMKeychainProxy* sharedProxy;
+@synthesize logsErrors = _logErrors;
 
+static EMKeychainProxy *sharedProxy = nil;
+
+#pragma mark -
+#pragma mark Shared Singleton
 + (id)sharedProxy
 {
 	if (!sharedProxy)
-	{
-		sharedProxy = [[EMKeychainProxy alloc] init];
-	}
+		[[EMKeychainProxy alloc] init];
 	return sharedProxy;
 }
-- (void)lockKeychain
+
++ (id)allocWithZone:(NSZone *)zone
 {
-	SecKeychainLock(NULL);
+	if (!sharedProxy)
+	{
+		sharedProxy = [super allocWithZone:zone];
+		return sharedProxy;
+	}
+	return nil;
 }
-- (void)unlockKeychain
+
+- (id)copyWithZone:(NSZone *)zone
 {
-	SecKeychainUnlock(NULL, 0, NULL, NO);
+    return self;
 }
-- (void)setLogsErrors:(BOOL)flag
+
+- (id)retain
 {
-	_logErrors = flag;
+    return self;
+}
+
+- (unsigned)retainCount
+{
+    return UINT_MAX;  //denotes an object that cannot be released
+}
+
+- (void)release
+{
+    //do nothing
+}
+
+- (id)autorelease
+{
+    return self;
 }
 
 #pragma mark -
 #pragma mark Getting Keychain Items
-- (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString
+- (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString 
+											withUsername:(NSString *)usernameString
 {
 	if (!usernameString || [usernameString length] == 0)
-	{
 		return nil;
-	}
 	
 	const char *serviceName = [serviceNameString UTF8String];
 	const char *username = [usernameString UTF8String];
@@ -79,12 +103,15 @@ static EMKeychainProxy* sharedProxy;
 
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
 }
-- (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol
+
+- (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString
+											 withUsername:(NSString *)usernameString
+													 path:(NSString *)pathString
+													 port:(NSInteger)port
+												 protocol:(SecProtocolType)protocol
 {
 	if (!usernameString || [usernameString length] == 0 || !serverString || [serverString length] == 0)
-	{
 		return nil;
-	}
 	const char *server = [serverString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *path = [pathString UTF8String];
@@ -124,12 +151,12 @@ static EMKeychainProxy* sharedProxy;
 
 #pragma mark -
 #pragma mark Saving Passwords
-- (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString password:(NSString *)passwordString
+- (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceNameString
+											   withUsername:(NSString *)usernameString
+												   password:(NSString *)passwordString
 {
 	if (!usernameString || [usernameString length] == 0 || !serviceNameString || [serviceNameString length] == 0)
-	{
 		return nil;
-	}	
 	const char *serviceName = [serviceNameString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *password = [passwordString UTF8String];
@@ -144,12 +171,16 @@ static EMKeychainProxy* sharedProxy;
 	}
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
 }
-- (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString password:(NSString *)passwordString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol
+
+- (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString
+												withUsername:(NSString *)usernameString
+													password:(NSString *)passwordString
+														path:(NSString *)pathString
+														port:(NSInteger)port
+													protocol:(SecProtocolType)protocol
 {
 	if (!usernameString || [usernameString length] == 0 || !serverString || [serverString length] == 0 || !passwordString || [passwordString length] == 0)
-	{
 		return nil;
-	}	
 	const char *server = [serverString UTF8String];
 	const char *username = [usernameString UTF8String];
 	const char *password = [passwordString UTF8String];
@@ -170,4 +201,17 @@ static EMKeychainProxy* sharedProxy;
 	}
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];
 }
+
+#pragma mark -
+#pragma mark Misc
+- (void)lockKeychain
+{
+	SecKeychainLock(NULL);
+}
+
+- (void)unlockKeychain
+{
+	SecKeychainUnlock(NULL, 0, NULL, NO);
+}
+
 @end
