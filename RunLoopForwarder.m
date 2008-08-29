@@ -103,8 +103,10 @@
 	SEL aSelector = [anInvocation selector];
 	if ([myDelegate respondsToSelector:aSelector])
 	{
-		if ([[anInvocation methodSignature] methodReturnLength] == 0) {
-			[anInvocation retainArguments];
+		[anInvocation retainArguments];
+
+		if ([[anInvocation methodSignature] methodReturnLength] == 0)
+		{
 			if (useMainThread)
 			{
 				[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:)
@@ -122,7 +124,9 @@
 								   withObject:myDelegate
 									 inThread:createdOnThread];
 			}
-		} else {
+		} 
+		else 
+		{
 			//we need to get the return value
 			unsigned int length = [[anInvocation methodSignature] methodReturnLength];
 			void * buffer = (void *)malloc(length);
