@@ -269,7 +269,7 @@ static NSImage *sHostIcon = nil;
 	if (!oldServerString || [oldServerString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:myUsername path:nil port:[myPort integerValue] protocol:kSecProtocolTypeFTP];
 	[keychainItem setServer:host];		
 }
 
@@ -289,8 +289,8 @@ static NSImage *sHostIcon = nil;
 	if (!oldPortString || [oldPortString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
-	[keychainItem setPort:[port intValue]];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[oldPortString integerValue] protocol:kSecProtocolTypeFTP];
+	[keychainItem setPort:[port integerValue]];
 }
 
 - (void)setUsername:(NSString *)username
@@ -314,7 +314,7 @@ static NSImage *sHostIcon = nil;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:oldUsernameString path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:oldUsernameString path:nil port:[myPort integerValue] protocol:kSecProtocolTypeFTP];
 		[keychainItem setUsername:username];
 	}
 }
@@ -342,7 +342,7 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
 																							   withUsername:myUsername
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[myPort integerValue]
 																								   protocol:kSecProtocolTypeFTP];
 		if (keychainItem)
 			[keychainItem setPassword:password];
@@ -352,7 +352,7 @@ static NSImage *sHostIcon = nil;
 															   withUsername:myUsername
 																   password:myPassword
 																	   path:nil
-																	   port:[myPort intValue]
+																	   port:[myPort integerValue]
 																   protocol:kSecProtocolTypeFTP];
 		}
 	}
@@ -493,7 +493,7 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
 																							   withUsername:myUsername
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[myPort integerValue]
 																								   protocol:kSecProtocolTypeFTP];
 		return [keychainItem password];
 	}
@@ -824,13 +824,13 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
 																							   withUsername:myUsername
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[myPort integerValue]
 																								   protocol:kSecProtocolTypeFTP];
 		
 		if (!keychainItem && myPassword && [myPassword length] > 0 && myUsername && [myUsername length] > 0)
 		{
 			//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
-			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort integerValue] protocol:kSecProtocolTypeFTP];
 		}	
 	}
 }
