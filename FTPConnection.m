@@ -977,9 +977,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		default:
 		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"No such file", @"No such file"), NSLocalizedDescriptionKey, nil];
+			NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			if (_flags.rename)
+				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
 			[_fileRenames removeObjectAtIndex:0];
-			[_fileRenames removeObjectAtIndex:0];
-			[self setState:ConnectionIdleState];
+			[_fileRenames removeObjectAtIndex:0];							 
+			[self setState:ConnectionIdleState];				
 			break;
 		}
 	}
@@ -2721,7 +2725,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
     NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
-	
+			
 	[self queueRename:fromPath];
 	[self queueRename:toPath];
 

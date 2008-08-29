@@ -1268,9 +1268,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	else if (con == _recursiveDeletionConnection)
 	{
+		[_recursiveDeletionLock lock];
+		_numberOfDeletionListingsRemaining--;
+		[_recursiveDeletionLock unlock];
 	}
 	else if (con == _recursiveDownloadConnection)
 	{
+		
 	}
 	else if (con == _recursiveS3RenameConnection)
 	{

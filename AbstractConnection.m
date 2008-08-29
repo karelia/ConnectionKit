@@ -734,10 +734,10 @@ NSDictionary *sDataAttributes = nil;
 	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
 	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
 	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
-	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
-	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
-	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:error:)];
-	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:error:)];
+	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:error:)];
+	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:error:)];
+	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
+	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:)];
 	_flags.deleteFile						= [del respondsToSelector:@selector(connection:didDeleteFile:error:)];
 	_flags.didBeginUpload					= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
 	_flags.didConnect						= [del respondsToSelector:@selector(connection:didConnectToHost:error:)];
@@ -1571,15 +1571,27 @@ if (![fn isEqualToString:@"."] && \
 }
 + (NSArray *)_wordsFromLine:(NSString *)line
 {
-	NSArray *words = [line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	NSArray *words = [line componentsSeparatedByString:@" "]; //Is NOT the same as componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]. Separating by character set interprets multiple whitespaces next to each other as a _single_ separator. We don't want that
 	NSMutableArray *finalWords = [NSMutableArray arrayWithArray:words];
-	NSEnumerator *wordEnumerator = [words objectEnumerator];
-	NSString *word;
-	while ((word = [wordEnumerator nextObject]))
+
+	//Remove all blank spaces before the date. After the date, blank spaces (even next to each other) are _valid_ characters in a filename. They cannot be removed.
+	NSString *dateString = [self _dateStringFromListing:line];
+
+	/*
+		We loop by index instead of fast enumeration or an enumerator because we _need_ the index anyway. We need the index because we cannot remove objects from finalWords using removeObject, as it would simply remove _all_ the objects that return YES to isEqual:, which in the case of NSString, is more than just the object we've iterated to –– it would include all objects of equivalent value (i.e., all empty strings). That being said, we could use -removeObjectIdenticalTo:, but the documentation states that -removeObjectIdenticalTo: simply asks for the index, which we already have if loop by index ourselves.
+	 */
+	NSUInteger currentIndex = 0;
+	NSMutableIndexSet *indexesOfBlankSpacesBeforeDate = [NSMutableIndexSet indexSet];
+	while (currentIndex < [words count])
 	{
+		NSString *word = [words objectAtIndex:currentIndex];
 		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
-			[finalWords removeObject:word];
+			[indexesOfBlankSpacesBeforeDate addIndex:currentIndex];
+		if ([dateString containsSubstring:word])
+			break;
+		currentIndex++;
 	}
+	[finalWords removeObjectsAtIndexes:indexesOfBlankSpacesBeforeDate];
 	return finalWords;
 }
 + (NSString *)_dateStringFromListing:(NSString *)listing
@@ -1637,7 +1649,6 @@ if (![fn isEqualToString:@"."] && \
 }
 + (NSArray *)attributedFilesFromListing:(NSString *)listing
 {
-//	listing = @"-rwxrwxrwx  1 owner    group        3665057 Jun 27 16:37 02 So Long,Radiant Flower.m4a\r\n-rwxrwxrwx  1 owner    group        2984792 Jun 27 16:47 03 The Hard Way.m4a\r\ndrwxrwxrwx  1 owner    group              0 Jul  6 13:12 ALASAC Files\r\n-rwxrwxrwx  1 owner    group        3633867 Jun 27 16:41 Blind Tonight.m4a\r\n";
 	if ([listing length] == 0)
 		return [NSArray array];
 	
