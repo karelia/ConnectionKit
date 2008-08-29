@@ -48,6 +48,15 @@
 	return nil;
 }
 
+- (void)dealloc
+{
+	[_username release];
+	[_password release];
+	[_label release];
+	
+	[super dealloc];
+}
+
 - (BOOL)setPassword:(NSString *)newPasswordString
 {
 	if (!newPasswordString)
@@ -118,6 +127,13 @@
 	return nil;
 }
 
+- (void)dealloc
+{
+	[_serviceName release];
+	
+	[super dealloc];
+}
+
 + (id)genericKeychainItem:(SecKeychainItemRef)item 
 		   forServiceName:(NSString *)serviceName
 				 username:(NSString *)username
@@ -161,6 +177,14 @@
 		return self;
 	}
 	return nil;
+}
+
+- (void)dealloc
+{
+	[_server release];
+	[_path release];
+	
+	[super dealloc];
 }
 
 + (id)internetKeychainItem:(SecKeychainItemRef)item
