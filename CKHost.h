@@ -34,22 +34,36 @@
 
 @interface CKHost : NSObject <NSCoding, NSCopying>
 {
-	NSString	*myUUID;
-	NSString	*myHost;
-	NSString	*myPort;
-	NSString	*myUsername;
-	NSString	*myPassword;
-	NSString	*myConnectionType;
-	NSString	*myInitialPath;
-	NSURL		*myURL;
-	NSString	*myDescription;
-	NSImage		*myIcon;
-	NSMutableDictionary *myProperties;
+	NSString *_UUID;
+	NSString *_host;
+	NSString *_port;
+	NSString *_username;
+	NSString *_password;
+	NSString *_connectionType;
+	NSString *_initialPath;
+	NSURL *_URL;
+	NSString *_description;
+	NSImage	 *_icon;
+	NSMutableDictionary *_properties;
 	
-	id			myUserInfo;
+	id _userInfo;
 	
-	CKHostCategory *myCategory; // not retained
+	CKHostCategory *_category; // not retained
 }
+
+@property (readonly) NSString *UUID;
+@property (readonly) NSString *uuid; //Same as UUID
+@property (readonly) NSString *host;
+@property (readonly) NSString *port;
+@property (readonly) NSString *username;
+@property (readonly) NSString *password;
+@property (readonly) NSString *connectionType;
+@property (readonly) NSString *initialPath;
+@property (readonly) NSURL *URL;
+@property (readonly) NSString *annotation;
+@property (readonly) NSImage *icon;
+@property (readonly) id userInfo;
+@property (readonly) CKHostCategory *category;
 
 - (id)init;
 
@@ -68,23 +82,13 @@
 - (void)setIcon:(NSImage *)icon;
 
 - (NSString *)uuid;
-- (NSString *)host;
-- (NSString *)port;
-- (NSString *)username;
-- (NSString *)password;
-- (NSString *)connectionType;
-- (NSString *)initialPath;
 - (BOOL)isAbsoluteInitialPath;
 - (NSURL *)baseURL; // doesn't contain initialPath
-- (NSURL *)URL;
 - (NSString *)annotation;
-- (id)userInfo;
 - (BOOL)isEditable;
-- (NSImage *)icon;
 - (NSImage *)iconWithSize:(NSSize)size;
 
 - (void)setCategory:(CKHostCategory *)cat;
-- (CKHostCategory *)category;
 
 // returns a new autoreleased connection of this type;
 - (id <AbstractConnectionProtocol>)connection; 
