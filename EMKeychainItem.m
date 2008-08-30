@@ -25,6 +25,7 @@
 #import "EMKeychainItem.h"
 
 @implementation EMKeychainItem
+
 - (id)initWithCoreKeychainItem:(SecKeychainItemRef)item username:(NSString *)username password:(NSString *)password
 {
 	if ((self = [super init]))
@@ -36,14 +37,26 @@
 	}
 	return nil;
 }
+
+- (void)dealloc
+{
+	[myUsername release];
+	[myPassword release];
+	[myLabel release];
+	
+	[super dealloc];
+}
+
 - (NSString *)password
 {
 	return myPassword;
 }
+
 - (NSString *)username
 {
 	return myUsername;
 }
+
 - (NSString *)label
 {
 	return myLabel;
@@ -121,6 +134,13 @@
 	return myServiceName;
 }
 
+- (void)dealloc
+{
+	[myServiceName release];
+	
+	[super dealloc];
+}
+
 - (BOOL)setServiceName:(NSString *)newServiceName
 {
 	[self willChangeValueForKey:@"serviceName"];
@@ -149,6 +169,15 @@
 {
 	return [[[EMInternetKeychainItem alloc] initWithCoreKeychainItem:item server:server username:username password:password path:path port:port protocol:protocol] autorelease];
 }
+
+- (void)dealloc
+{
+	[myServer release];
+	[myPath release];
+	
+	[super dealloc];
+}
+
 - (NSString *)server
 {
 	return myServer;
