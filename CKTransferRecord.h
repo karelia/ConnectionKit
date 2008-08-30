@@ -31,51 +31,47 @@
 
 @interface CKTransferRecord : NSObject
 {
-	BOOL				isUpload;
-	NSString			*myName;
-	unsigned long long	mySize;
-	unsigned long long  myTransferred;
-	unsigned long long  myIntermediateTransferred;
-	NSTimeInterval		myLastTransferTime;
-	NSTimeInterval		myTransferStartTime;
-	NSTimeInterval		myLastDirectorySpeedUpdate;
-	double				mySpeed;
-	int					myProgress;
-	NSMutableArray		*myContents;
-	CKTransferRecord	*myParent; //not retained
-	NSMutableDictionary *myProperties;
+	BOOL _isUpload;
+	NSString *_name;
+	unsigned long long _size;
+	unsigned long long _transferred;
+	unsigned long long _intermediateTransferred;
+	NSTimeInterval _lastTransferTime;
+	NSTimeInterval _transferStartTime;
+	NSTimeInterval _lastDirectorySpeedUpdate;
+	CGFloat _speed;
+	NSUInteger _progress;
+	NSMutableArray *_contents;
+	CKTransferRecord *_parent; //not retained
+	NSMutableDictionary *_properties;
 	
-	id <AbstractConnectionProtocol> myConnection; //not retained
-	NSError				*myError;
+	id <AbstractConnectionProtocol> _connection; //not retained
+	NSError *_error;
 }
+
+@property (readwrite, assign, setter=setUpload:) BOOL isUpload;
+@property (readwrite, copy) NSString *name;
+@property (readwrite, assign) unsigned long long size;
+@property (readwrite, assign) CGFloat speed;
+@property (readonly) NSError *error;
+@property (readwrite, assign) id <AbstractConnectionProtocol> connection;
+@property (readwrite, assign) CKTransferRecord *parent;
 
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
-
-- (BOOL)isUpload;
-
-- (NSString *)name;
-- (void)setName:(NSString *)name;
-- (void)setProgress:(int)progress; 
-
 - (void)cancel:(id)sender;
 
-- (NSNumber *)progress;
-- (unsigned long long)size;
-- (unsigned long long)transferred;
-- (double)speed; // bytes per second
-- (BOOL)hasError;
-- (NSError *)error;
-
-- (id <AbstractConnectionProtocol>)connection;
-
 - (BOOL)isDirectory;
+- (unsigned long long)transferred;
+- (NSNumber *)progress;
+- (void)setProgress:(NSInteger)progress;
 
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
 
+- (BOOL)hasError;
+
 - (CKTransferRecord *)root;
-- (CKTransferRecord *)parent;
 - (NSString *)path; 
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
