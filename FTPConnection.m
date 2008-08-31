@@ -389,19 +389,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	//State independent handling	
 	switch (code)
 	{
-		case 200:
+		case 200: //Command okay
 		case 202:
-		case 215:
+		case 215: //NAME system type
 		case 250:
-		case 257:
-		case 450:
-		case 451:
+		case 257: //Path Created
+		case 450: //Requested file action not taken. File unavailable.
+		case 451: //Requested acion aborted, local error in processing
 		case 551:
 		{
 			[self setState:ConnectionIdleState];
 			break;
 		}			
-		case 150:
+		case 150: //File status okay, about to open data connection.
 		{
 			if ([command rangeOfString:@"directory listing"].location != NSNotFound) //Sometimes we get "150 Here comes the directory listing"
 			{
@@ -508,7 +508,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self sendCommand:@"DATA_CON"];
 			break;
 		}		
-		case 530:
+		case 530: //User not logged in
 		{
 			if (_flags.error)
 			{
@@ -618,7 +618,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 120:
+		case 120: //Service Ready
 		{
 			if (_flags.didConnect)
 			{
@@ -632,7 +632,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionNotConnectedState]; //don't really need.
 			break;
 		}
-		case 220:
+		case 220: //Service Ready For New User
 		{
 			if (_ftpFlags.loggedIn != NO)
 				break;
@@ -670,7 +670,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 230:
+		case 230: //User logged in, proceed
 		{
 			if (![[self username] isEqualToString:@"anonymous"])
 				break;
@@ -694,7 +694,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];			
 			break;
 		}
-		case 331:
+		case 331: //User name okay, need password.
 		{
 			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
 			[self setState:ConnectionSentPasswordState];
@@ -709,13 +709,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 230:
+		case 230: //User logged in, proceed
 		{
 			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
 			[self setState:ConnectionSentPasswordState];
 			break;
 		}
-		case 530:
+		case 530: //User not logged in
 		{
 			if (_flags.didAuthenticate)
 			{
@@ -737,7 +737,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch(code)
 	{
-		case 230:
+		case 230: //User logged in, proceed
 		{
 			_ftpFlags.sentAuthenticated = NO;
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
@@ -759,7 +759,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];			
 			break;
 		}
-		case 530:
+		case 530: //User not logged in
 		{
 			if (_flags.badPassword)
 				[_forwarder connectionDidSendBadPassword:self];
@@ -778,7 +778,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];	
 	switch (code)
 	{
-		case 257:
+		case 257: //Path Created
 		{
 			[self setCurrentPath:path];			
 			if (_rootPath == nil) 
@@ -791,7 +791,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}
-		case 550: //Permission Denied
+		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
@@ -807,7 +807,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 425:
+		case 425: //Couldn't open data connection
 		{
 			ConnectionCommand *last = [self lastCommand];
 			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
@@ -855,9 +855,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
 	switch (code)
 	{
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
@@ -865,7 +865,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			break;			
 		}		
-		case 550: //Permission Denied
+		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
@@ -885,7 +885,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 521:
+		case 521: //Supported Address Families
 		{
 			if (!_flags.isRecursiveUploading)
 			{
@@ -908,7 +908,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
@@ -945,7 +945,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
@@ -970,7 +970,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 350:
+		case 350: //Requested action pending further information
 		{
 			[self setState:ConnectionRenameToState];
 			break;
@@ -994,7 +994,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 450: //File in Use
+		case 450: //Requested file action not taken. File unavailable. //File in Use
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1004,7 +1004,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}			
-		case 550: //Permission Denied
+		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1030,7 +1030,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 450:
+		case 450: //Requested file action not taken. File unavailable.
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1040,7 +1040,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}			
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
@@ -1065,7 +1065,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 150:
+		case 150: //File status okay, about to open data connection.
 		{
 			CKInternalTransferRecord *download = [self currentDownload];
 			if (_writeHandle == nil) // we can get setup in the handleDataReceievedEvent: method
@@ -1120,7 +1120,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			free(buf);			
 			break;
 		}
-		case 425:
+		case 425: //Couldn't open data connection
 		{
 			ConnectionCommand *last = [self lastCommand];
 			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
@@ -1155,7 +1155,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}		
-		case 450:
+		case 450: //Requested file action not taken. File unavailable.
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1165,7 +1165,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}	
-		case 451:
+		case 451: //Requested acion aborted, local error in processing
 		{
 			NSString *remotePath = [[self currentDownload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1175,7 +1175,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			CKInternalTransferRecord *download = [self currentDownload];
@@ -1218,7 +1218,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 110:
+		case 110: //Restart marker reply
 		{
 			CKInternalTransferRecord *d = [self currentUpload];
 			NSString *file = [d localPath];	// actual path to file, or destination name if from data
@@ -1286,7 +1286,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			_transferLastPercent = percent;			
 			break;
 		}
-		case 150:
+		case 150: //File status okay, about to open data connection.
 		{
 			CKInternalTransferRecord *d = [self currentUpload];
 			NSString *file = [d localPath];	// actual path to file, or destination name if from data
@@ -1368,7 +1368,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}
-		case 425:
+		case 425: //Couldn't open data connection
 		{
 			ConnectionCommand *last = [self lastCommand];
 			ConnectionState lastState = [[[self commandHistory] objectAtIndex:1] sentState];
@@ -1403,7 +1403,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}
-		case 450:
+		case 450: //Requested file action not taken. File unavailable.
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -1413,7 +1413,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
-		case 452:
+		case 452: //Requested action not taken. Insufficient storage space in system.
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"), NSLocalizedDescriptionKey,
@@ -1423,7 +1423,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self sendCommand:@"ABOR"];			
 			break;
 		}
-		case 532:
+		case 532: //Need account for storing files.
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
@@ -1433,7 +1433,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			CKInternalTransferRecord *upload = [self currentUpload];
@@ -1445,7 +1445,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}
-		case 552:
+		case 552: //Requested file action aborted, storage allocation exceeded.
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), NSLocalizedDescriptionKey,
@@ -1483,7 +1483,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 350:
+		case 350: //Requested action pending further information
 		{
 			[self setState:ConnectionIdleState];
 			break;
@@ -1497,7 +1497,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 211:
+		case 211: //System status, or system help ready
 		{
 			//parse features
 			if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
@@ -1552,15 +1552,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			[self setState:ConnectionSentUsernameState];
 			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];		
 			break;
 		}
-		case 530:
+		case 530: //User not logged in
 		{
 			// the server doesn't support FEAT before login
 			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
@@ -1576,7 +1576,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 221:
+		case 221: //Service closing control connection.
 		{
 			[super threadedDisconnect];
 			break;
@@ -1590,7 +1590,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 200:
+		case 200: //Command okay
 		{
 			if (_flags.permissions) {
 				[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0]];
@@ -1603,7 +1603,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];
 			break;
 		}
-		case 450:
+		case 450: //Requested file action not taken. File unavailable.
 		{
 			if (_flags.error)
 			{
@@ -1617,14 +1617,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}		
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			[self setState:ConnectionIdleState];
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSString *error = nil;
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
@@ -1643,7 +1643,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];
 			break;			
 		}				
-		case 553:
+		case 553: //Requested action not taken. Illegal file name.
 		{
 			if (_flags.error) 
 			{
@@ -1669,7 +1669,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
-		case 213:
+		case 213: //File status
 		{
 			CKInternalTransferRecord *download = [self currentDownload];
 			if ([command rangeOfString:@"("].location != NSNotFound)
@@ -1710,7 +1710,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];			
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
 			CKInternalTransferRecord *download = [self currentDownload];
@@ -1752,7 +1752,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 221:
+		case 221: //Service closing control connection.
 		{
 			[super threadedDisconnect];
 			break;
@@ -1766,7 +1766,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 227:
+		case 227: //Entering Passive Mode
 		{
 			int i[6];
 			int j;
@@ -1819,9 +1819,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self openDataStreamsToHost:host port:port];			
 			break;
 		}
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			_ftpFlags.canUsePASV = NO;
 			[self closeDataStreams];
@@ -1837,7 +1837,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 229:
+		case 229: //Extended Passive Mode Entered
 		{
 			//get the port number
 			int port = 0;
@@ -1858,9 +1858,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self openDataStreamsToHost:host port:port];			
 			break;
 		}
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			_ftpFlags.canUseEPSV = NO;
 			[self closeDataStreams];
@@ -1876,9 +1876,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			_ftpFlags.canUseActive = NO;
 			[self closeDataStreams];
@@ -1894,9 +1894,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			_ftpFlags.canUseEPRT = NO;
 			[self sendCommand:@"DATA_CON"];
@@ -1911,7 +1911,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 215:
+		case 215: //NAME system type
 		{
 			if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
 			{
@@ -1926,9 +1926,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			[self setState:ConnectionIdleState];
 			break;
@@ -1942,14 +1942,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	switch (code)
 	{
-		case 500:
-		case 501:
-		case 502:
+		case 500: //Syntax error, command unrecognized.
+		case 501: //Syntax error in parameters or arguments.
+		case 502: //Command not implemented
 		{
 			[self setState:ConnectionIdleState];
 			break;
 		}
-		case 550:
+		case 550: //Requested action not taken, file not found.
 		{
 			[self setState:ConnectionIdleState];
 			break;
