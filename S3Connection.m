@@ -392,7 +392,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			
 			if ([upload delegateRespondsToTransferDidFinish])
 			{
-				[[upload delegate] transferDidFinish:[upload delegate]];
+				[[upload delegate] transferDidFinish:[upload delegate] error:nil];
 			}
 			
 			[self dequeueUpload];
@@ -546,7 +546,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[_forwarder connection:self downloadDidFinish:[record propertyForKey:QueueDownloadRemoteFileKey] error:nil];
 			}
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
-				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
+				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
 			
 			[myCurrentRequest release];
 			myCurrentRequest = nil;

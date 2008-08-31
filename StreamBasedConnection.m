@@ -1075,7 +1075,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 #pragma mark Recursive Downloading Support
 - (void)recursivelySendTransferDidFinishMessage:(CKTransferRecord *)record
 {
-	[record transferDidFinish:record];
+	[record transferDidFinish:record error:nil];
 	NSEnumerator *contentsEnumerator = [[record contents] objectEnumerator];
 	CKTransferRecord *child;
 	while ((child = [contentsEnumerator nextObject]))

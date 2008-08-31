@@ -1194,10 +1194,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
 		if (_flags.downloadFinished)
 			[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
-		CKTransferRecord *record = [[self currentDownload] delegate];
+		CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
 		if (record && [record isKindOfClass:[CKTransferRecord class]])
-			[record setError:error];
+			[record transferDidFinish:record error:error];
+		
 		[self dequeueDownload];
+		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
+		[_queueLock lock];
+		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+		if (nextCommand)
+		{
+			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+				[_commandQueue removeObject:dependent];
+			[_commandQueue removeObject:nextCommand];
+		}
+		[_queueLock unlock];
 		[self setState:ConnectionIdleState];
 	}
 }
@@ -1450,10 +1461,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		if (_flags.uploadFinished)
 			[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:error];
-		CKTransferRecord *record = [[self currentUpload] delegate];
+		CKTransferRecord *record = (CKTransferRecord *)[[self currentUpload] userInfo];
 		if (record && [record isKindOfClass:[CKTransferRecord class]])
-			[record setError:error];		
+			[record transferDidFinish:record error:error];
 		[self dequeueUpload];
+		//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
+		[_queueLock lock];
+		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+		if (nextCommand)
+		{
+			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+				[_commandQueue removeObject:dependent];
+			[_commandQueue removeObject:nextCommand];
+		}
+		[_queueLock unlock];		
 		[self setState:ConnectionIdleState];
 	}
 }
@@ -1645,6 +1666,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
 	switch (code)
 	{
 		case 213:
@@ -1688,8 +1710,41 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];			
 			break;
 		}
+		case 550:
+		{
+			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
+			CKInternalTransferRecord *download = [self currentDownload];
+			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
+			[userInfo setObject:[download remotePath] forKey:NSFilePathErrorKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
+			break;			
+		}			
 		default:
 			break;
+	}
+	if (error)
+	{	
+		//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
+		if (_flags.downloadFinished)
+			[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
+		CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+		if (record && [record isKindOfClass:[CKTransferRecord class]])
+			[record transferDidFinish:record error:error];
+		
+		[self dequeueDownload];
+		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
+		[_queueLock lock];
+		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+		if (nextCommand)
+		{
+			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+				[_commandQueue removeObject:dependent];
+			[_commandQueue removeObject:nextCommand];
+		}
+		[_queueLock unlock];
+		[self setState:ConnectionIdleState];
 	}
 }
 
@@ -2406,7 +2461,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		if ([download delegateRespondsToTransferDidFinish])
 		{
-			[[download delegate] transferDidFinish:[download userInfo]];
+			[[download delegate] transferDidFinish:[download userInfo] error:nil];
 		}
 		[_writeHandle closeFile];
 		[self setWriteHandle:nil];
@@ -2428,7 +2483,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		if ([upload delegateRespondsToTransferDidFinish])
 		{
-			[[upload delegate] transferDidFinish:[upload userInfo]];
+			[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
 		}
 		[self setReadData:nil];
 		[self setReadHandle:nil];

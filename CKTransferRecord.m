@@ -261,7 +261,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)setError:(NSError *)error
 {
-	NSLog(@"%@ setError: %@", self, error);
 	if (error != _error)
 	{
 		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
@@ -437,8 +436,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[self setError:error];
 }
 
-- (void)transferDidFinish:(CKTransferRecord *)transfer
+- (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
+	[self setError:error];
 	_intermediateTransferred = (_size - _transferred);
 	_transferred = _size;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
@@ -449,7 +449,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	//If parent is finished, they need notifications too.
 	CKTransferRecord *parent = [self parent];
 	if (parent && [parent transferred] == [parent size])
-		[parent transferDidFinish:parent];
+		[parent transferDidFinish:parent error:error];
 }
 
 #pragma mark -

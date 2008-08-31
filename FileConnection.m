@@ -579,7 +579,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if ([upload delegateRespondsToTransferDidFinish])
 	{
-		[[upload delegate] transferDidFinish:[upload userInfo]];
+		[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
 	}
 	[upload release];
 	[self setState:ConnectionIdleState];
@@ -690,7 +690,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (success && [upload delegateRespondsToTransferDidFinish])
 	{
-		[[upload delegate] transferDidFinish:[upload userInfo]];
+		[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
 	}
 
 	 if (!success)
@@ -814,7 +814,7 @@ checkRemoteExistence:(NSNumber *)check;
 		if (_flags.downloadFinished)
 			[_forwarder connection:self downloadDidFinish:remotePath error:nil];
 		if ([download delegateRespondsToTransferDidFinish])
-			[[download delegate] transferDidFinish:[download userInfo]];
+			[[download delegate] transferDidFinish:[download userInfo] error:nil];
 		[download release];
 		
 	}

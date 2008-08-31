@@ -269,7 +269,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					}
 					if ([[self currentUpload] delegateRespondsToTransferDidFinish])
 					{
-						[[[self currentUpload] delegate] transferDidFinish:[[self currentUpload] delegate]];
+						[[[self currentUpload] delegate] transferDidFinish:[[self currentUpload] delegate] error:nil];
 					}
 					break;
 				}
@@ -529,7 +529,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			if ([download delegateRespondsToTransferDidFinish])
 			{
-				[[download delegate] transferDidFinish:[download userInfo]];
+				[[download delegate] transferDidFinish:[download userInfo] error:nil];
 			}
 			[download release];
 			

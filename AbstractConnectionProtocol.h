@@ -275,7 +275,7 @@ enum {
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
 - (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
-- (void)transferDidFinish:(CKTransferRecord *)transfer;
+- (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
 
 //registration type dictionary keys

@@ -765,7 +765,7 @@ static char *lsform;
 	if (_flags.uploadFinished)
 		[_forwarder connection:self uploadDidFinish:[uploadInfo remotePath] error:nil];
 	if ([uploadInfo delegateRespondsToTransferDidFinish])
-		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo]];
+		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo] error:nil];
 	
 	[uploadInfo release];
 }
@@ -817,7 +817,7 @@ static char *lsform;
 	if (_flags.downloadFinished)
 		[_forwarder connection:self downloadDidFinish:[downloadInfo remotePath] error:nil];
 	if ([downloadInfo delegateRespondsToTransferDidFinish])
-		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo]];
+		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
 	
 	[downloadInfo release];
 }
