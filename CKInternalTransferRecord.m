@@ -71,7 +71,7 @@
 		myUserInfo = [ui retain];
 		
 		myFlags.didBegin = [myDelegate respondsToSelector:@selector(transferDidBegin:)];
-		myFlags.didFinish = [myDelegate respondsToSelector:@selector(transferDidFinish:)];
+		myFlags.didFinish = [myDelegate respondsToSelector:@selector(transferDidFinish:error:)];
 		myFlags.error = [myDelegate respondsToSelector:@selector(transfer:didReceiveError:)];
 		myFlags.percent = [myDelegate respondsToSelector:@selector(transfer:progressedTo:)];
 		myFlags.progressed = [myDelegate respondsToSelector:@selector(transfer:transferredDataOfLength:)];
