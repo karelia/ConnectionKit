@@ -1282,6 +1282,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				break;
 			}
 		}
+		case 504: //Command not implemented for that parameter (Karelia Case 28078, FileZilla servers do not allow CHMOD, returning 504)
+		{
+			[self setState:ConnectionIdleState];
+			break;
+		}
 		case 521:
 		{
 			if (GET_STATE == ConnectionCreateDirectoryState)
