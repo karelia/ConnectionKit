@@ -433,7 +433,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error
 {
-	[self setError:error];
+	//If we get _any_ error while we're uploading, we're "finished" albeit with an error. Handle it as such.
+	[self transferDidFinish:transfer error:error];
 }
 
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
