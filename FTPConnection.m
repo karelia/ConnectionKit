@@ -2259,19 +2259,44 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				if (GET_STATE == ConnectionUploadingFileState)
 				{
-					CKInternalTransferRecord *rec = [self currentUpload];
-					if ([rec delegateRespondsToError])
+					if (_flags.uploadFinished)
+						[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:[_receiveStream streamError]];
+					CKTransferRecord *record = (CKTransferRecord *)[[self currentUpload] userInfo];
+					if (record && [record isKindOfClass:[CKTransferRecord class]])
+						[record transferDidFinish:record error:[_receiveStream streamError]];
+					[self dequeueUpload];
+					//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
 					{
-						[[rec delegate] transfer:[rec userInfo] receivedError:[_receiveStream streamError]];
+						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+							[_commandQueue removeObject:dependent];
+						[_commandQueue removeObject:nextCommand];
 					}
+					[_queueLock unlock];		
+					[self setState:ConnectionIdleState];
 				}
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
-					CKInternalTransferRecord *rec = [self currentDownload];
-					if ([rec delegateRespondsToError])
+					if (_flags.downloadFinished)
+						[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:[_receiveStream streamError]];
+					CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+					if (record && [record isKindOfClass:[CKTransferRecord class]])
+						[record transferDidFinish:record error:[_receiveStream streamError]];
+					
+					[self dequeueDownload];
+					//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
 					{
-						[[rec delegate] transfer:[rec userInfo] receivedError:[_receiveStream streamError]];
+						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+							[_commandQueue removeObject:dependent];
+						[_commandQueue removeObject:nextCommand];
 					}
+					[_queueLock unlock];
+					[self setState:ConnectionIdleState];
 				}
 				//This will most likely occur when there is a misconfig of the server and we cannot open a data connection so we have unroll the command stack
 				[self closeDataStreams];
