@@ -316,7 +316,7 @@ checkRemoteExistence:(NSNumber *)check;
 	{
 		if (_flags.permissions)
 		{
-			[_forwarder connection:self didSetPermissionsForFile:path];
+			[_forwarder connection:self didSetPermissionsForFile:path error:nil];
 		}
 	}
 	else

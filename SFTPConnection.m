@@ -838,7 +838,7 @@ static char *lsform;
 	[self dequeuePermissionChange];
 	if (_flags.permissions)
 	{
-		[_forwarder connection:self didSetPermissionsForFile:remotePath];
+		[_forwarder connection:self didSetPermissionsForFile:remotePath error:nil];
 	}
 }
 
