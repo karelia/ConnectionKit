@@ -250,7 +250,7 @@ enum {
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error;
 - (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
-- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path;
+- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
 
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent;

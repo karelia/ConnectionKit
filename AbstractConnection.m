@@ -727,7 +727,7 @@ NSDictionary *sDataAttributes = nil;
 	
 	// There are 21 callbacks & flags.
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:)];
+	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
 	_flags.badPassword						= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
 	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
 	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
@@ -990,14 +990,15 @@ NSDictionary *sDataAttributes = nil;
 	
 	NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
 	NSString *path;
-	
+	NSUInteger numberOfSubRecordsAdded = 0;
 	while ((path = [e nextObject]))
 	{
 		path = [localPath stringByAppendingPathComponent:path];
 		if (ignoreHiddenFilesFlag && [[path lastPathComponent] hasPrefix:@"."])
-		{
 			continue;
-		}
+		
+		numberOfSubRecordsAdded++;
+		
 		if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
 		{
 			[self recursivelyUpload:path 
@@ -1027,6 +1028,25 @@ NSDictionary *sDataAttributes = nil;
 			}
 		}
 	}
+	
+	if (numberOfSubRecordsAdded == 0)
+	{
+		CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:4];
+		if (![[root path] isEqualToString:@"/"])
+		{
+			[self _mergeRecord:record into:root];
+		}
+		else
+		{
+			CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
+			root = parent;
+			[root setName:[[root name] lastPathComponent]];		
+			[record setName:[[record name] lastPathComponent]];		
+			[root addContent:record];
+		}		
+		[record transferDidFinish:record error:nil];
+	}
+	
 	[pool release];
 	return root;
 }

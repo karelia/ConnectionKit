@@ -396,6 +396,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 257: //Path Created
 		case 450: //Requested file action not taken. File unavailable.
 		case 451: //Requested acion aborted, local error in processing
+		case 504: //Command not implemented for that parameter (Karelia Case 28078, FileZilla servers do not allow CHMOD, returning 504)
 		case 551:
 		{
 			[self setState:ConnectionIdleState];
@@ -791,6 +792,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			break;
 		}
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
@@ -855,6 +866,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
 	switch (code)
 	{
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 500: //Syntax error, command unrecognized.
 		case 501: //Syntax error in parameters or arguments.
 		case 502: //Command not implemented
@@ -885,6 +906,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 521: //Supported Address Families
 		{
 			if (!_flags.isRecursiveUploading)
@@ -945,6 +976,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
@@ -968,6 +1009,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionRenameFromState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
 	switch (code)
 	{
 		case 350: //Requested action pending further information
@@ -975,17 +1017,32 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionRenameToState];
 			break;
 		}
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		default:
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"No such file", @"No such file"), NSLocalizedDescriptionKey, nil];
-			NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-			if (_flags.rename)
-				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
-			[_fileRenames removeObjectAtIndex:0];
-			[_fileRenames removeObjectAtIndex:0];							 
-			[self setState:ConnectionIdleState];				
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
+	}
+	
+	//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
+	if (error)
+	{
+		if (_flags.rename)
+			[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+		[_fileRenames removeObjectAtIndex:0];
+		[_fileRenames removeObjectAtIndex:0];							 
+		[self setState:ConnectionIdleState];				
 	}
 }
 
@@ -994,6 +1051,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 450: //Requested file action not taken. File unavailable. //File in Use
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
@@ -1030,6 +1097,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	switch (code)
 	{
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 450: //Requested file action not taken. File unavailable.
 		{
 			NSString *remotePath = [[self currentUpload] remotePath];
@@ -1120,6 +1197,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			free(buf);			
 			break;
 		}
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 425: //Couldn't open data connection
 		{
 			ConnectionCommand *last = [self lastCommand];
@@ -1368,6 +1455,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}			
 			break;
 		}
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 425: //Couldn't open data connection
 		{
 			ConnectionCommand *last = [self lastCommand];
@@ -1588,80 +1685,56 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionSettingPermissionsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSError *error = nil;
 	switch (code)
 	{
-		case 200: //Command okay
+		case 421:
 		{
-			if (_flags.permissions) {
-				[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0]];
-			}
-			[self dequeuePermissionChange];			
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
 			break;
-		}
-		case 253:
-		{
-			[self setState:ConnectionIdleState];
-			break;
-		}
+		}			
 		case 450: //Requested file action not taken. File unavailable.
 		{
-			if (_flags.error)
-			{
-				NSString *remotePath = [[self currentUpload] remotePath];
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  remotePath, NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];			
-			}
+			NSString *remotePath = [[self currentUpload] remotePath];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  remotePath, NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}		
-		case 500: //Syntax error, command unrecognized.
-		case 501: //Syntax error in parameters or arguments.
-		case 502: //Command not implemented
-		{
-			[self setState:ConnectionIdleState];
-			break;
-		}
 		case 550: //Requested action not taken, file not found.
 		{
-			NSString *error = nil;
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-			error = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
+			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
 			[userInfo setObject:[self currentPermissionChange] forKey:NSFilePathErrorKey];
-			[self dequeuePermissionChange];
-			[userInfo setObject:error forKey:NSLocalizedDescriptionKey];
+			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
-			if (_flags.error) {
-				NSError *err = [NSError errorWithDomain:FTPErrorDomain
-												   code:code
-											   userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:err];
-			}
-			
-			[self setState:ConnectionIdleState];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}				
 		case 553: //Requested action not taken. Illegal file name.
 		{
-			if (_flags.error) 
-			{
-				NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  localizedDescription, NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [self currentPermissionChange], NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
-			[self dequeuePermissionChange];
-			[self setState:ConnectionIdleState];			
+			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self currentPermissionChange], NSFilePathErrorKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		default:
 			break;
 	}
+	if (_flags.permissions)
+		[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0] error:error];
+	[self dequeuePermissionChange];
+	[self setState:ConnectionIdleState];
 }
 
 - (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
@@ -1710,6 +1783,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:ConnectionIdleState];			
 			break;
 		}
+		case 421:
+		{
+			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  localizedDescription, NSLocalizedDescriptionKey,
+									  command, NSLocalizedFailureReasonErrorKey,
+									  [self host], ConnectionHostKey, nil];
+			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];			
+			break;
+		}			
 		case 550: //Requested action not taken, file not found.
 		{
 			NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
@@ -2647,6 +2730,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self closeDataStreams];
 		[self sendCommand:@"DATA_CON"];
 	}			
+}
+
+- (void)closeStreams
+{
+	_ftpFlags.setTransferMode = NO;
+	[super closeStreams];
 }
 
 #pragma mark -
