@@ -1617,7 +1617,12 @@ if (![fn isEqualToString:@"."] && \
 + (NSString *)_dateStringFromListing:(NSString *)listing
 {
 	//This regex finds the entire date. "May 12 2006" or "May 12 12:15"
-	NSRange dateRange = [listing rangeOfRegex:@"((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))( )+((0*[1-9])|([12][0-9])|(3[01]))( )+((([012][0-9])|(3[01])):([0-5][0-9])|[0-9]{4})"];
+	NSString *anyMonthRegex = @"((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))";
+	NSString *anyDayRegex = @"((0*[1-9])|([12][0-9])|(3[01]))";
+	NSString *anyTimeRegex = @"(([012]*[0-9]):([0-5][0-9]))";
+	NSString *anyYearRegex = @"[0-9]{4}";
+	NSString *anyDateRegex = [NSString stringWithFormat:@"%@( )+%@( )+(%@|%@)", anyMonthRegex, anyDayRegex, anyTimeRegex, anyYearRegex, nil];
+	NSRange dateRange = [listing rangeOfRegex:anyDateRegex];
 	if (dateRange.location == NSNotFound)
 		return nil;
 
