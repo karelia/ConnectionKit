@@ -6,21 +6,54 @@
 //  Copyright 2007 Extendmac, LLC.. All rights reserved.
 //
 
-#import "ConnectionThreadManager.h"
 #import "SFTPConnection.h"
+
+#import "ConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
-#import "NSFileManager+Connection.h"
-#import "AbstractConnectionProtocol.h"
-#import "NSString+Connection.h"
 #import "SSHPassphrase.h"
+#import "CKTransferRecord.h"
+#import "CKInternalTransferRecord.h"
+#import "EMKeychainProxy.h"
+#import "FTPConnection.h"
+#import "AbstractConnectionProtocol.h"
+
+#import "NSFileManager+Connection.h"
+#import "NSString+Connection.h"
 
 #include "sshversion.h"
 #include "fdwrite.h"
 
+@interface SFTPConnection (Private)
+- (void)_writeSFTPCommandWithString:(NSString *)commandString;
+- (void)_handleFinishedCommand:(ConnectionCommand *)command serverErrorResponse:(NSString *)errorResponse;
+//
+- (void)_finishedCommandInConnectionAwaitingCurrentDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionChangingDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionCreateDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionAwaitingRenameState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionSettingPermissionState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionDeleteFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionDeleteDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionUploadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+- (void)_finishedCommandInConnectionDownloadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse;
+//
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  orData:(NSData *)data 
+						  offset:(unsigned long long)offset 
+					  remotePath:(NSString *)remotePath
+			checkRemoteExistence:(BOOL)flag
+						delegate:(id)delegate;
+- (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo;
+//
+- (void)passwordErrorOccurred;
+@end
+
 @implementation SFTPConnection
 
+@synthesize masterProxy;
+
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
-static char *lsform;
+static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
@@ -43,7 +76,12 @@ static char *lsform;
 {
 	return @"sftp";
 }
-+ (id)connectionToHost:(NSString *)host port:(NSString *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
+
++ (id)connectionToHost:(NSString *)host
+				  port:(NSString *)port
+			  username:(NSString *)username
+			  password:(NSString *)password
+				 error:(NSError **)error
 {
 	return [[[SFTPConnection alloc] initWithHost:host
 											port:port
@@ -55,35 +93,29 @@ static char *lsform;
 {
 	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
 	{
-		uploadQueue = [[NSMutableArray array] retain];
-		downloadQueue = [[NSMutableArray array] retain];
 		connectToQueue = [[NSMutableArray array] retain];
 		currentDirectory = [[NSMutableString string] retain];
-		deleteFileQueue = [[NSMutableArray array] retain];
-		deleteDirectoryQueue = [[NSMutableArray array] retain];
-		renameQueue = [[NSMutableArray array] retain];
-		permissionChangeQueue = [[NSMutableArray array] retain];
-		commandQueue = [[NSMutableArray arrayWithObject:@"CONNECT"] retain];
 		attemptedKeychainPublicKeyAuthentications = [[NSMutableArray array] retain];
 	}
 	return self;
 }
 
-- (void)establishDistributedObjectsConnection
+- (void)_establishDistributedObjectsConnection
 {	
 	NSPort *receivePort = [NSPort port];
 	NSPort *sendPort = [NSPort port];
 	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
+	if (connectionToTServer)
+	{
+		[connectionToTServer invalidate];
+		[connectionToTServer release];
+		connectionToTServer = nil;
+	}
 	connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
 	[connectionToTServer setRootObject:self];
 	theSFTPTServer = nil;
 	NSArray *portArray = [NSArray arrayWithObjects:sendPort, receivePort, nil];
 	[NSThread detachNewThreadSelector:@selector(connectWithPorts:) toTarget:[SFTPTServer class] withObject:portArray];
-}
-
-- (void)setMasterProxy:(int)masterProxy
-{
-	master = masterProxy;
 }
 
 - (void)setServerObject:(id)serverObject
@@ -102,16 +134,9 @@ static char *lsform;
 
 - (void)dealloc
 {
-	[uploadQueue release];
-	[downloadQueue release];
 	[connectToQueue release];
-	[deleteFileQueue release];
-	[deleteDirectoryQueue release];
-	[renameQueue release];
-	[permissionChangeQueue release];
 	[currentDirectory release];
 	[rootDirectory release];
-	[commandQueue release];
 	[attemptedKeychainPublicKeyAuthentications release];
 	
 	[super dealloc];
@@ -119,11 +144,6 @@ static char *lsform;
 
 #pragma mark -
 #pragma mark Connecting
-- (BOOL)isConnected
-{
-	return isConnected;
-}
-
 - (void)connect
 {
 	if (isConnecting)
@@ -162,26 +182,26 @@ static char *lsform;
 			//Not Supported.
 			return;
 		case SFTP_LS_LONG_FORM:
-			lsform = "ls -l";
+			lsform = @"ls -l";
 			break;
 			
 		case SFTP_LS_EXTENDED_LONG_FORM:
-			lsform = "ls -la";
+			lsform = @"ls -la";
 			break;
 			
 		case SFTP_LS_SHORT_FORM:
 		default:
-			lsform = "ls";
+			lsform = @"ls";
 			break;
     }
 	
-	if (isConnecting || isConnected)
+	if (isConnecting || _flags.isConnected)
 		return;
 	
 	if (!theSFTPTServer)
 	{
 		[connectToQueue addObject:parameters];
-		[self performSelectorOnMainThread:@selector(establishDistributedObjectsConnection) withObject:nil waitUntilDone:NO];
+		[self performSelectorOnMainThread:@selector(_establishDistributedObjectsConnection) withObject:nil waitUntilDone:NO];
 		return;
 	}
 	isConnecting = YES;
@@ -197,7 +217,12 @@ static char *lsform;
 
 - (void)threadedDisconnect
 {
-	[self queueSFTPCommandWithString:@"quit"];	
+	ConnectionCommand *quit = [ConnectionCommand command:@"quit"
+											  awaitState:ConnectionIdleState
+											   sentState:ConnectionSentDisconnectState
+											   dependant:nil
+												userInfo:nil];
+	[self queueCommand:quit];
 }
 
 - (void)forceDisconnect
@@ -207,12 +232,7 @@ static char *lsform;
 
 - (void)threadedForceDisconnect
 {
-	[connectionToTServer invalidate];
-	[theSFTPTServer release];
-	theSFTPTServer = nil;
-	
-	isConnected = NO;
-	isConnecting = NO;
+	[self didDisconnect];
 }
 
 
@@ -230,9 +250,18 @@ static char *lsform;
 
 - (void)changeToDirectory:(NSString *)newDir
 {
-	NSString *changeDirString = [NSString stringWithFormat:@"cd \"%@\"", newDir];
-	[self queueSFTPCommandWithString:changeDirString];
-	[self queueSFTPCommandWithString:@"pwd"];
+	ConnectionCommand *pwd = [ConnectionCommand command:@"pwd" 
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionAwaitingCurrentDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	ConnectionCommand *cd = [ConnectionCommand command:[NSString stringWithFormat:@"cd \"%@\"", newDir]
+											awaitState:ConnectionIdleState
+											 sentState:ConnectionChangingDirectoryState
+											 dependant:pwd
+											  userInfo:nil];
+	[self queueCommand:cd];
+	[self queueCommand:pwd];
 }
 
 - (void)contentsOfDirectory:(NSString *)newDir
@@ -243,14 +272,26 @@ static char *lsform;
 
 - (void)directoryContents
 {
-	[self queueSFTPCommand:lsform];
+	ConnectionCommand *ls = [ConnectionCommand command:lsform
+											awaitState:ConnectionIdleState
+											 sentState:ConnectionAwaitingDirectoryContentsState
+											 dependant:nil
+											  userInfo:nil];
+	[self queueCommand:ls];
 }
 
 #pragma mark -
 #pragma mark File Manipulation
 - (void)createDirectory:(NSString *)newDirectoryPath
 {
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"mkdir \"%@\"", newDirectoryPath]];
+	NSAssert(newDirectoryPath && ![newDirectoryPath isEqualToString:@""], @"no directory specified");
+	
+	ConnectionCommand *mkd = [ConnectionCommand command:[NSString stringWithFormat:@"mkdir \"%@\"", newDirectoryPath]
+											 awaitState:ConnectionIdleState
+											  sentState:ConnectionCreateDirectoryState
+											  dependant:nil
+											   userInfo:nil];
+	[self queueCommand:mkd];
 }
 
 - (void)createDirectory:(NSString *)newDirectoryPath permissions:(unsigned long)permissions
@@ -261,18 +302,31 @@ static char *lsform;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	NSDictionary *renameDictionary = [NSDictionary dictionaryWithObjectsAndKeys:fromPath, @"fromPath", toPath, @"toPath", nil];
-	[renameQueue addObject:renameDictionary];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]];
+	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
+	NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
+	
+	[self queueRename:fromPath];
+	[self queueRename:toPath];
+	
+	ConnectionCommand *rename = [ConnectionCommand command:[NSString stringWithFormat:@"rename \"%@\" \"%@\"", fromPath, toPath]
+												awaitState:ConnectionIdleState
+												 sentState:ConnectionAwaitingRenameState
+												 dependant:nil
+												  userInfo:nil];
+	[self queueCommand:rename];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
-	NSDictionary *permissionChangeDictionary = [NSDictionary dictionaryWithObjectsAndKeys:path, @"remotePath", [NSNumber numberWithUnsignedLong:permissions], @"Permissions", nil];
-	[permissionChangeQueue addObject:permissionChangeDictionary];
+	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
 	
-	NSString *command = [NSString stringWithFormat:@"chmod %lo \"%@\"", permissions, path];
-	[self queueSFTPCommandWithString:command];
+	[self queuePermissionChange:path];
+	ConnectionCommand *chmod = [ConnectionCommand command:[NSString stringWithFormat:@"chmod %lo \"%@\"", permissions, path]
+											   awaitState:ConnectionIdleState
+												sentState:ConnectionSettingPermissionsState
+												dependant:nil
+												 userInfo:nil];
+	[self queueCommand:chmod];
 }
 
 #pragma mark -
@@ -306,13 +360,9 @@ static char *lsform;
 - (CKTransferRecord *)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(unsigned long long)offset remotePath:(NSString *)remotePath checkRemoteExistence:(BOOL)checkRemoteExistenceFlag delegate:(id)delegate
 {
 	if (!localPath)
-	{
 		localPath = [remotePath lastPathComponent];
-	}
 	if (!remotePath)
-	{
 		remotePath = [[self currentDirectory] stringByAppendingPathComponent:[localPath lastPathComponent]];
-	}
 	
 	unsigned long long uploadSize = 0;
 	if (data)
@@ -340,8 +390,14 @@ static char *lsform;
 		
 	CKInternalTransferRecord *internalRecord = [CKInternalTransferRecord recordWithLocal:localPath data:data offset:offset remote:remotePath delegate:internalTransferRecordDelegate userInfo:record];
 	
-	[uploadQueue addObject:internalRecord];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"put \"%@\" \"%@\"", localPath, remotePath]];
+	[self queueUpload:internalRecord];
+	
+	ConnectionCommand *upload = [ConnectionCommand command:[NSString stringWithFormat:@"put \"%@\" \"%@\"", localPath, remotePath]
+												awaitState:ConnectionIdleState
+												 sentState:ConnectionUploadingFileState
+												 dependant:nil
+												  userInfo:nil];
+	[self queueCommand:upload];
 	return record;
 }
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
@@ -397,8 +453,14 @@ static char *lsform;
 	
 	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath data:nil offset:0 remote:remotePath delegate:delegate ? delegate : record userInfo:record];
 
-	[downloadQueue addObject:internalTransferRecord];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"get \"%@\" \"%@\"", remotePath, localPath]];
+	[self queueDownload:internalTransferRecord];
+	
+	ConnectionCommand *download = [ConnectionCommand command:[NSString stringWithFormat:@"get \"%@\" \"%@\"", remotePath, localPath]
+												  awaitState:ConnectionIdleState
+												   sentState:ConnectionDownloadingFileState
+												   dependant:nil
+													userInfo:nil];
+	[self queueCommand:download];
 	
 	return record;
 }
@@ -407,14 +469,30 @@ static char *lsform;
 #pragma mark Deletion
 - (void)deleteFile:(NSString *)remotePath
 {
-	[deleteFileQueue addObject:remotePath];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rm \"%@\"", remotePath]];
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"path is nil!");
+	
+	[self queueDeletion:remotePath];
+	
+	ConnectionCommand *delete = [ConnectionCommand command:[NSString stringWithFormat:@"rm \"%@\"", remotePath]
+												awaitState:ConnectionIdleState
+												 sentState:ConnectionDeleteFileState
+												 dependant:nil
+												  userInfo:nil];
+	[self queueCommand:delete];
 }
 
 - (void)deleteDirectory:(NSString *)remotePath
 {
-	[deleteDirectoryQueue addObject:remotePath];
-	[self queueSFTPCommandWithString:[NSString stringWithFormat:@"rmdir \"%@\"", remotePath]];
+	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	
+	[self queueDeletion:remotePath];
+	
+	ConnectionCommand *delete = [ConnectionCommand command:[NSString stringWithFormat:@"rmdir \"%@\"", remotePath]
+												awaitState:ConnectionIdleState
+												 sentState:ConnectionDeleteDirectoryState
+												 dependant:nil
+												  userInfo:nil];
+	[self queueCommand:delete];
 }
 
 #pragma mark -
@@ -426,56 +504,16 @@ static char *lsform;
 }
 
 #pragma mark -
-#pragma mark Accessors
-- (BOOL)isUploading
-{
-	return isUploading;
-}
-
-- (BOOL)isDownloading
-{
-	return isDownloading;
-}
-
-- (BOOL)isBusy
-{
-	return [self isUploading] || [self isDownloading];
-}
-
-- (int)numberOfTransfers
-{
-	return [self numberOfUploads] + [self numberOfDownloads];
-}
-
-- (unsigned)numberOfUploads
-{
-	return [super numberOfUploads];
-}
-
-- (unsigned)numberOfDownloads
-{
-	return [downloadQueue count];
-}
-
-#pragma mark -
-#pragma mark SFTPConnection Private
 #pragma mark Command Queueing
-- (void)queueSFTPCommand:(void *)cmd
+- (void)sendCommand:(id)command
 {
-	NSString *cmdString = [NSString stringWithUTF8String:(char *)cmd];
-	[self queueSFTPCommandWithString:cmdString];
+	[self _writeSFTPCommandWithString:command];
 }
 
-- (void)queueSFTPCommandWithString:(NSString *)cmdString
+- (void)_writeSFTPCommand:(void *)cmd
 {
-	unsigned int queuePlacement = [commandQueue count];
-	[commandQueue addObject:cmdString];
-	if (queuePlacement == 0)
-		[self writeSFTPCommandWithString:cmdString];
-}
-
-- (void)writeSFTPCommand:(void *)cmd
-{
+	if (!theSFTPTServer)
+		return;
 	size_t commandLength = strlen(cmd);
 	if ( commandLength > 0 )
 	{
@@ -484,175 +522,251 @@ static char *lsform;
 		// THIS MAY BE AN ISSUE FOR OTHER APPS
 		BOOL isQuitCommand = (0 == strcmp(cmd, "quit"));
 
-		ssize_t bytesWritten = write(master, cmd, strlen(cmd));
+		ssize_t bytesWritten = write(masterProxy, cmd, strlen(cmd));
 		if ( bytesWritten != commandLength && !isQuitCommand )
 		{
-			NSLog(@"writeSFTPCommand: %@ failed writing command", [NSString stringWithUTF8String:cmd]);
-			exit(2);
+			NSLog(@"_writeSFTPCommand: %@ failed writing command", [NSString stringWithUTF8String:cmd]);
 		}
 		
 		commandLength = strlen("\n");
-		bytesWritten = write(master, "\n", strlen("\n"));
+		bytesWritten = write(masterProxy, "\n", strlen("\n"));
 		if ( bytesWritten != commandLength && !isQuitCommand )
 		{
-			NSLog(@"writeSFTPCommand %@ failed writing newline", [NSString stringWithUTF8String:cmd]);
-			exit(2);
+			NSLog(@"_writeSFTPCommand %@ failed writing newline", [NSString stringWithUTF8String:cmd]);
 		}
 	}
 }
 
-- (void)writeSFTPCommandWithString:(NSString *)commandString
+- (void)_writeSFTPCommandWithString:(NSString *)commandString
 {
 	if (!commandString)
 		return;
 	if ([commandString isEqualToString:@"CONNECT"])
 		return;
 	if ([commandString hasPrefix:@"put"])
-		[self uploadDidBegin:[self currentUploadInfo]];
+		[self uploadDidBegin:[self currentUpload]];
 	else if ([commandString hasPrefix:@"get"])
-		[self downloadDidBegin:[self currentDownloadInfo]];
+		[self downloadDidBegin:[self currentDownload]];
 	char *command = (char *)[commandString UTF8String];
-	[self writeSFTPCommand:command];
+	[self _writeSFTPCommand:command];
 }
+
+#pragma mark -
 
 - (void)finishedCommand
 {
-	if ([commandQueue count] <= 0)
-		return;
-
-	NSString *finishedCommand = [commandQueue objectAtIndex:0];
-	[self checkFinishedCommandStringForNotifications:finishedCommand];
-	[commandQueue removeObjectAtIndex:0];	
-	
-	if ([commandQueue count] > 0)
-		[self writeSFTPCommandWithString:[commandQueue objectAtIndex:0]];
+	ConnectionCommand *finishedCommand = [self lastCommand];
+	[self _handleFinishedCommand:finishedCommand serverErrorResponse:nil];
 }
 
-- (void)checkFinishedCommandStringForNotifications:(NSString *)finishedCommand
+- (void)receivedErrorInServerResponse:(NSString *)serverResponse
 {
-	if ([finishedCommand hasPrefix:@"put"])
+	ConnectionCommand *erroredCommand = [self lastCommand];
+	[self _handleFinishedCommand:erroredCommand serverErrorResponse:serverResponse];
+}
+
+- (void)_handleFinishedCommand:(ConnectionCommand *)command serverErrorResponse:(NSString *)errorResponse
+{
+	ConnectionState finishedState = GET_STATE;
+	switch (finishedState)
 	{
-		//Upload Finished
-		[self uploadDidFinish:[self currentUploadInfo]];
+		case ConnectionAwaitingCurrentDirectoryState:
+			[self _finishedCommandInConnectionAwaitingCurrentDirectoryState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionChangingDirectoryState:
+			[self _finishedCommandInConnectionChangingDirectoryState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionCreateDirectoryState:
+			[self _finishedCommandInConnectionCreateDirectoryState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionAwaitingRenameState:
+			[self _finishedCommandInConnectionAwaitingRenameState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionSettingPermissionsState:
+			[self _finishedCommandInConnectionSettingPermissionState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionDeleteFileState:
+			[self _finishedCommandInConnectionDeleteFileState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionDeleteDirectoryState:
+			[self _finishedCommandInConnectionDeleteDirectoryState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionUploadingFileState:
+			[self _finishedCommandInConnectionUploadingFileState:[command command] serverErrorResponse:errorResponse];
+			break;
+		case ConnectionDownloadingFileState:
+			[self _finishedCommandInConnectionDownloadingFileState:[command command] serverErrorResponse:errorResponse];
+			break;
+		default:
+			break;
 	}
-	else if ([finishedCommand hasPrefix:@"get"])
-	{
-		//Download Finished
-		[self downloadDidFinish:[self currentDownloadInfo]];
-	}
-	else if ([finishedCommand hasPrefix:@"rmdir"])
-	{
-		//Deleted Directory
-		[self didDeleteDirectory:[self currentDirectoryDeletionPath]];
-	}	
-	else if ([finishedCommand hasPrefix:@"rm"])
-	{
-		//Deleted File
-		[self didDeleteFile:[self currentFileDeletionPath]];
-	}
-	else if ([finishedCommand hasPrefix:@"rename"])
-	{
-		//Renamed File/Directory
-		[self didRename:[self currentRenameInfo]];
-	}
-	else if ([finishedCommand hasPrefix:@"chmod"])
-	{
-		[self didSetPermissionsForFile:[self currentPermissionChangeInfo]];
-	}
-	else if ([finishedCommand hasPrefix:@"cd"])
-	{
-		// send didChangeToDirectory to the delegate only when a changeToDirectory: was requested
-		isChangingDirectory = YES;
-	}
-	else if ([finishedCommand hasPrefix:@"pwd"] && isChangingDirectory)
-	{
-		isChangingDirectory = NO;
-		[self didChangeToDirectory:[NSString stringWithString:currentDirectory]];
-	}
+	[self setState:ConnectionIdleState];
 }
 
 #pragma mark -
-- (void)dequeueUpload
+
+- (void)_finishedCommandInConnectionAwaitingCurrentDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	[uploadQueue removeObjectAtIndex:0];
+	//We don't need to do anything.
+}
+
+- (void)_finishedCommandInConnectionChangingDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
+{
+	//Typical Command string is			cd "/blah/blah/blah"
+	NSRange pathRange = NSMakeRange(4, [commandString length] - 5);
+	NSString *path = ([commandString length] > NSMaxRange(pathRange)) ? [commandString substringWithRange:pathRange] : nil;
 	
-	if ([uploadQueue count] == 0)
-		isUploading = NO;
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Failed to change to directory");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+	}
+	else
+		[currentDirectory setString:path];
+	
+	[_forwarder connection:self didChangeToDirectory:path error:error];	
 }
 
-- (void)dequeueDownload
+- (void)_finishedCommandInConnectionCreateDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	[downloadQueue removeObjectAtIndex:0];
-
-	if ([downloadQueue count] == 0)
-		isDownloading = NO;
+	//CommandString typically is	mkdir "/path/to/new/dir"
+	NSRange pathRange = NSMakeRange(7, [commandString length] - 8); //8 chops off last quote too
+	NSString *path = ([commandString length] > NSMaxRange(pathRange)) ? [commandString substringWithRange:pathRange] : nil;
+	
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"Create directory operation failed");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+	}
+	
+	if (_flags.createDirectory)
+		[_forwarder connection:self didCreateDirectory:path error:error];
+	
 }
 
-- (void)dequeueFileDeletion
+- (void)_finishedCommandInConnectionAwaitingRenameState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	[deleteFileQueue removeObjectAtIndex:0];
+	NSString *fromPath = [_fileRenames objectAtIndex:0];
+	NSString *toPath = [_fileRenames objectAtIndex:1];
+
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, fromPath, @"fromPath", toPath, @"toPath", nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];		
+	}
+	if (_flags.rename)
+		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+	[_fileRenames removeObjectAtIndex:0];
+	[_fileRenames removeObjectAtIndex:0];							 
 }
 
-- (void)dequeueDirectoryDeletion
+- (void)_finishedCommandInConnectionSettingPermissionState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	[deleteDirectoryQueue removeObjectAtIndex:0];
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"SFTP Upload error");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey, 
+								  [self currentPermissionChange], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
+	
+	if (_flags.permissions)
+		[_forwarder connection:self didSetPermissionsForFile:[self currentPermissionChange] error:error];
+	[self dequeuePermissionChange];
 }
 
-- (void)dequeueRename
+- (void)_finishedCommandInConnectionDeleteFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	[renameQueue removeObjectAtIndex:0];
-}
-- (void)dequeuePermissionChange
-{
-	[permissionChangeQueue removeObjectAtIndex:0];
-}
-
-#pragma mark -
-- (CKInternalTransferRecord *)currentUploadInfo
-{
-	if ([uploadQueue count] > 0)
-		return [uploadQueue objectAtIndex:0];
-	return nil;
-}
-
-- (CKInternalTransferRecord *)currentDownloadInfo
-{
-	if ([downloadQueue count] > 0)
-		return [downloadQueue objectAtIndex:0];
-	return nil;
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [self currentDeletion], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
+	
+	if (_flags.deleteFile)
+		[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
+	[self dequeueDeletion];
 }
 
-- (NSString *)currentFileDeletionPath
+- (void)_finishedCommandInConnectionDeleteDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	if ([deleteFileQueue count] > 0)
-		return [deleteFileQueue objectAtIndex:0];
-	return nil;
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [self currentDeletion], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
+	
+	if (_flags.deleteDirectory)
+		[_forwarder connection:self didDeleteDirectory:[self currentDeletion] error:error];
+	[self dequeueDeletion];
 }
 
-- (NSString *)currentDirectoryDeletionPath
+- (void)_finishedCommandInConnectionUploadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	if ([deleteDirectoryQueue count] > 0)
-		return [deleteDirectoryQueue objectAtIndex:0];
-	return nil;
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to upload file.", @"Failed to upload file.");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
+	
+	CKInternalTransferRecord *upload = [[self currentUpload] retain]; 
+	[self dequeueUpload];
+	
+	if (_flags.uploadFinished)
+		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+	CKTransferRecord *record = (CKTransferRecord *)[upload userInfo];
+	if (record && [record isKindOfClass:[CKTransferRecord class]])
+		[record transferDidFinish:record error:error];
+	
+	[upload release];
 }
 
-- (NSDictionary *)currentRenameInfo
+- (void)_finishedCommandInConnectionDownloadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	if ([renameQueue count] > 0)
-		return [renameQueue objectAtIndex:0];
-	return nil;
-}
-- (NSDictionary *)currentPermissionChangeInfo
-{
-	if ([permissionChangeQueue count] > 0)
-		return [permissionChangeQueue objectAtIndex:0];
-	return nil;
-}
-
-- (void)connectionError:(NSError *)theError
-{
-	if (_flags.error)
-		[_forwarder connection:self didReceiveError:theError];
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
+	
+	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
+	[self dequeueDownload];
+	
+	if (_flags.downloadFinished)
+		[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+	CKTransferRecord *record = (CKTransferRecord *)[download userInfo];
+	if (record && [record isKindOfClass:[CKTransferRecord class]])
+		[record transferDidFinish:record error:error];
+	
+	[download release];	
 }
 
 #pragma mark -
@@ -663,7 +777,13 @@ static char *lsform;
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
 	
 	//Request the remote working directory
-	[self queueSFTPCommandWithString:@"pwd"];
+	ConnectionCommand *getCurrentDirectoryCommand = [ConnectionCommand command:@"pwd"
+																	awaitState:ConnectionIdleState
+																	 sentState:ConnectionAwaitingCurrentDirectoryState
+																	 dependant:nil
+																	  userInfo:nil];
+	[self pushCommandOnHistoryQueue:getCurrentDirectoryCommand];
+	[self sendCommand:[getCurrentDirectoryCommand command]];
 }
 
 - (void)didSetRootDirectory
@@ -671,34 +791,31 @@ static char *lsform;
 	rootDirectory = [[NSString alloc] initWithString:currentDirectory];
 	
 	isConnecting = NO;
-	isConnected = YES;
+	_flags.isConnected = YES;
 	
 	if (_flags.didConnect)
-	{
 		[_forwarder connection:self didConnectToHost:[self host] error:nil];
-	}
 	if (_flags.didAuthenticate)
-	{
 		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-	}		
 }
 
 - (void)didDisconnect
 {
-	[connectionToTServer invalidate];
-	[theSFTPTServer release];
-	theSFTPTServer = nil;
-	
-	[uploadQueue removeAllObjects];
-	[downloadQueue removeAllObjects];
-	[deleteFileQueue removeAllObjects];
-	[deleteDirectoryQueue removeAllObjects];
-	[renameQueue removeAllObjects];
-	[permissionChangeQueue removeAllObjects];
-	[commandQueue removeAllObjects];
+	if (connectionToTServer)
+	{
+		[connectionToTServer invalidate];
+		[connectionToTServer release];
+		connectionToTServer = nil;
+	}
+	if (theSFTPTServer)
+	{
+		[theSFTPTServer release];
+		theSFTPTServer = nil;
+	}
+		
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];			
 	
-	isConnected = NO;
+	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
 		[_forwarder connection:self didDisconnectFromHost:[self host]];
@@ -708,15 +825,7 @@ static char *lsform;
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
 	if (_flags.directoryContents)
-	{
 		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory]];
-	}
-}
-
-- (void)didChangeToDirectory:(NSString *)path
-{
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:nil];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -744,7 +853,6 @@ static char *lsform;
 
 - (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo
 {
-	isUploading = YES;
 	if ([uploadInfo delegateRespondsToTransferDidBegin])
 	{
 		[[uploadInfo delegate] transferDidBegin:[uploadInfo userInfo]];
@@ -799,7 +907,6 @@ static char *lsform;
 }
 - (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo
 {
-	isDownloading = YES;
 	if (_flags.didBeginDownload)
 	{
 		NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
@@ -822,51 +929,6 @@ static char *lsform;
 	[downloadInfo release];
 }
 
-- (void)didRename:(NSDictionary *)renameInfo
-{
-	NSString *fromPath = [NSString stringWithString:[renameInfo objectForKey:@"fromPath"]];
-	NSString *toPath = [NSString stringWithString:[renameInfo objectForKey:@"toPath"]];
-	[self dequeueRename];
-	if (_flags.rename)
-	{
-		[_forwarder connection:self didRename:fromPath to:toPath error:nil];
-	}
-}
-- (void)didSetPermissionsForFile:(NSDictionary *)permissionInfo
-{
-	NSString *remotePath = [NSString stringWithString:[permissionInfo objectForKey:@"remotePath"]];
-	[self dequeuePermissionChange];
-	if (_flags.permissions)
-	{
-		[_forwarder connection:self didSetPermissionsForFile:remotePath error:nil];
-	}
-}
-
-- (void)didDeleteFile:(NSString *)remotePath
-{
-	NSString *ourRemotePath = [NSString stringWithString:remotePath];
-	[self dequeueFileDeletion];
-	if (_flags.deleteFile)
-	{
-		[_forwarder connection:self didDeleteFile:ourRemotePath error:nil];
-	}
-}
-
-- (void)didDeleteDirectory:(NSString *)remotePath
-{
-	NSString *ourRemotePath = [NSString stringWithString:remotePath];
-	[self dequeueDirectoryDeletion];
-	if (_flags.deleteDirectory)
-	{
-		[_forwarder connection:self didDeleteDirectory:ourRemotePath error:nil];
-	}
-}
-
-- (void)setCurrentRemotePath:(NSString *)remotePath
-{
-	[currentDirectory setString:remotePath];
-}
-
 #pragma mark -
 - (void)requestPasswordWithPrompt:(char *)header
 {
@@ -875,13 +937,13 @@ static char *lsform;
 		[self passwordErrorOccurred];
 		return;
 	}
-	[self writeSFTPCommandWithString:[self password]];
+	[self _writeSFTPCommandWithString:[self password]];
 }
 
 - (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo
 {
 	//Authenticity of the host couldn't be established. yes/no scenario
-	[self writeSFTPCommandWithString:@"yes"];
+	[self _writeSFTPCommandWithString:@"yes"];
 }
 - (void)passphraseRequested:(NSString *)buffer
 {
@@ -894,7 +956,7 @@ static char *lsform;
 	if (item && [item password] && [[item password] length] > 0 && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
 	{
 		[attemptedKeychainPublicKeyAuthentications addObject:pubKeyPath];
-		[self writeSFTPCommandWithString:[item password]];
+		[self _writeSFTPCommandWithString:[item password]];
 		return;
 	}
 	
@@ -914,7 +976,7 @@ static char *lsform;
 	
 	if (passphrase)
 	{
-		[self writeSFTPCommandWithString:passphrase];
+		[self _writeSFTPCommandWithString:passphrase];
 		return;
 	}	
 	
