@@ -5,6 +5,7 @@
 
 #import "SFTPTServer.h"
 #import "SFTPConnection.h"
+#import "CKInternalTransferRecord.h"
 #import "NSArray+Connection.h"
 #import "NSString+Connection.h"
 
@@ -208,9 +209,9 @@ char **environ;
 	
 	unsigned long long amountTransferred = strtoull(amountCharacter, NULL, 0);
 	amountTransferred *= baseMultiplier;
-    if (isUploading) 
+    if ([wrapperConnection numberOfUploads] > 0) 
 	{
-		[wrapperConnection upload:[wrapperConnection currentUploadInfo]
+		[wrapperConnection upload:[wrapperConnection currentUpload]
 					didProgressTo:progressPercentage
 		withEstimatedCompletionIn:eta
 			  givenTransferRateOf:transferRate
@@ -218,7 +219,7 @@ char **environ;
     }
 	else
 	{
-		[wrapperConnection download:[wrapperConnection currentDownloadInfo]
+		[wrapperConnection download:[wrapperConnection currentDownload]
 					  didProgressTo:progressPercentage
 		  withEstimatedCompletionIn:eta
 				givenTransferRateOf:transferRate
@@ -252,11 +253,7 @@ char **environ;
 		
 		if ([self bufferContainsError:buf])
 		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
-									  [wrapperConnection currentDirectory], NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
-			[wrapperConnection connectionError:error];
+			[wrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:buf]];
 			return;
 		}
 		if ([self buffer:buf containsString:"<Press any key"])
@@ -463,42 +460,21 @@ char **environ;
 			}
 			else if ([self bufferContainsError:serverResponseBuffer])
 			{
-				NSString *failureReasonTitle = @"Error!";
-				int code = 0;
-				BOOL createDirectoryError = NO;
-				NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
-				if ([self buffer:serverResponseBuffer containsString:"Error resolving"])
-				{
-					failureReasonTitle = @"Host Unavailable";
-					code = EHOSTUNREACH;
-				}
-				else if ([self buffer:serverResponseBuffer containsString:"Couldn't create directory"])
-				{
-					localizedErrorString = @"Create directory operation failed";
-					failureReasonTitle = @"File exists";
-					createDirectoryError = YES;
-				}
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  localizedErrorString, NSLocalizedDescriptionKey,
-										  [sftpWrapperConnection host], ConnectionHostKey,
-										  failureReasonTitle, NSLocalizedFailureReasonErrorKey,
-										  [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
-				NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:code userInfo:userInfo];
-				[sftpWrapperConnection connectionError:error];
+				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
 			else if ([sftpWrapperConnection isBusy] || cancelflag)
 			{
-				if ([sftpWrapperConnection isUploading])
+				if ([sftpWrapperConnection numberOfUploads] > 0)
 				{
-					NSString *localPath = [[sftpWrapperConnection currentUploadInfo] localPath];
+					NSString *localPath = [[sftpWrapperConnection currentUpload] localPath];
 					if ([self buffer:serverResponseBuffer containsString:"%"] && [self buffer:serverResponseBuffer containsString:(char *)[localPath UTF8String]])
 					{
 						[self parseTransferProgressString:(char *)serverResponseBuffer isUploading:YES forWrapperConnection:sftpWrapperConnection];
 					}
 				}
-				else if ([sftpWrapperConnection isDownloading])
+				else if ([sftpWrapperConnection numberOfDownloads] > 0)
 				{
-					NSString *remotePath = [[sftpWrapperConnection currentDownloadInfo] remotePath];
+					NSString *remotePath = [[sftpWrapperConnection currentDownload] remotePath];
 					if ([self buffer:serverResponseBuffer containsString:"%"] && [self buffer:serverResponseBuffer containsString:(char *)[remotePath UTF8String]])
 					{
 						[self parseTransferProgressString:(char *)serverResponseBuffer isUploading:NO forWrapperConnection:sftpWrapperConnection];
@@ -515,14 +491,7 @@ char **environ;
 				wasChanging = YES;
 				if ([self buffer:serverResponseBuffer containsString:"Couldn't "])
 				{
-					NSString *failureReasonTitle = @"Error!";
-					NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
-					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-											  localizedErrorString, NSLocalizedDescriptionKey,
-											  [sftpWrapperConnection host], ConnectionHostKey,
-											  failureReasonTitle, NSLocalizedFailureReasonErrorKey, nil];
-					NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
-					[sftpWrapperConnection connectionError:error];
+					[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 				}
 			}
 			else if ([self unknownHostKeyPromptInBuffer:serverResponseBuffer])
@@ -540,19 +509,6 @@ char **environ;
 				
 				[sftpWrapperConnection getContinueQueryForUnknownHost:hostInfo];
 			}
-		}
-		if ([self buffer:serverResponseBuffer containsString:"Remote working"])
-		{
-			char *bufferDump = strdup((char *)serverResponseBuffer);
-			char *newline = strrchr(bufferDump, '\r');
-			if (newline)
-			{
-				*newline = '\0';
-			}
-			char *path = strchr(bufferDump, '/');
-			NSString *remotePath = [NSString stringWithBytesOfUnknownEncoding:path length:strlen(path)];
-			[sftpWrapperConnection setCurrentRemotePath:remotePath];
-			free(bufferDump);
 		}
 		if ([self bufferContainsDirectoryListing:serverResponseBuffer])
 		{
