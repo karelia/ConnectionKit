@@ -392,7 +392,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					[self setReadData:nil];		// make sure we're not also trying to read from data
 					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-					NSAssert((nil != _readHandle), @"_readHandle is nil!");
+					NSAssert((nil != _readHandle), ([NSString stringWithFormat:@"code 110 _readHandle is nil for file at %@", file]));
 					
 					// Calculate size to transfer is total file size minus offset
 					_transferSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize] longLongValue] - offset;
@@ -507,7 +507,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 							NSAssert(NO, str);		// hacky way to throw an exception.
 						}
 						[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-						NSAssert((nil != _readHandle), @"_readHandle is nil!");
+						NSAssert((nil != _readHandle), ([NSString stringWithFormat:@"code 150 _readHandle is nil for file at %@", file]));
 						NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
 						bytes = (uint8_t *)[chunk bytes];
 						chunkLength = [chunk length];		// actual length of bytes read
