@@ -1048,6 +1048,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)_receivedCodeInConnectionAwaitingRenameState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
+	NSString *fromPath = [_fileRenames objectAtIndex:0];
+	NSString *toPath = [_fileRenames objectAtIndex:1];
+	
 	NSError *error = nil;
 	switch (code)
 	{
@@ -1073,11 +1076,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}			
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
-			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  remotePath, NSFilePathErrorKey, nil];
+									  fromPath, @"fromPath", 
+									  toPath, @"toPath", nil];
 			error = [NSError errorWithDomain:FTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}
@@ -1086,7 +1089,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	if (_flags.rename)
-		[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+		[_forwarder connection:self didRename:fromPath to:toPath error:error];
 	[_fileRenames removeObjectAtIndex:0];
 	[_fileRenames removeObjectAtIndex:0];							 
 	[self setState:ConnectionIdleState];	
@@ -1279,13 +1282,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (error)
 	{	
 		//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
+		CKInternalTransferRecord *download = [[self currentDownload] retain];
+		[self dequeueDownload];
+		
 		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
-		CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
+			[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+		CKTransferRecord *record = (CKTransferRecord *)[download userInfo];
 		if (record && [record isKindOfClass:[CKTransferRecord class]])
 			[record transferDidFinish:record error:error];
 		
-		[self dequeueDownload];
+		[download release];
+		
 		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
 		[_queueLock lock];
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
@@ -1556,12 +1563,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	if (error)
 	{
+		CKInternalTransferRecord *upload = [[self currentUpload] retain];
+		[self dequeueUpload];
+		
 		if (_flags.uploadFinished)
-			[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:error];
-		CKTransferRecord *record = (CKTransferRecord *)[[self currentUpload] userInfo];
+			[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+		CKTransferRecord *record = (CKTransferRecord *)[upload userInfo];
 		if (record && [record isKindOfClass:[CKTransferRecord class]])
 			[record transferDidFinish:record error:error];
-		[self dequeueUpload];
+		
+		[upload release];
+		
 		//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
 		[_queueLock lock];
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
