@@ -261,32 +261,22 @@ checkRemoteExistence:(NSNumber *)check;
 		fmDictionary = [NSDictionary dictionaryWithObject:[NSNumber numberWithLong:aPermissions] forKey:NSFilePosixPermissions];
 	}
 	
-	BOOL success = [myFileManager createDirectoryAtPath:aName attributes:fmDictionary];
+	NSError *error = nil;	
+	if (![myFileManager createDirectoryAtPath:aName attributes:fmDictionary])
+	{
+		BOOL exists;
+		[myFileManager fileExistsAtPath:aName isDirectory:&exists];
+		NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:
+							LocalizedStringInConnectionKitBundle(@"Could not create directory", @"FileConnection create directory error"), NSLocalizedDescriptionKey,
+							aName, NSFilePathErrorKey,
+							[NSNumber numberWithBool:exists], ConnectionDirectoryExistsKey,
+							aName, ConnectionDirectoryExistsFilenameKey, nil];		
+		error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:ui];
+	}
 	
-	if (success)
-	{
-		if (_flags.createDirectory)
-		{
-			[_forwarder connection:self didCreateDirectory:aName error:nil];
-		}
-	}
-	else
-	{
-		if (_flags.error)
-		{
-			BOOL exists;
-			[myFileManager fileExistsAtPath:aName isDirectory:&exists];
-			NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:
-				LocalizedStringInConnectionKitBundle(@"Could not create directory", @"FileConnection create directory error"), NSLocalizedDescriptionKey,
-				aName, NSFilePathErrorKey,
-				[NSNumber numberWithBool:exists], ConnectionDirectoryExistsKey,
-				aName, ConnectionDirectoryExistsFilenameKey, nil];
-			[_forwarder connection:self
-				   didReceiveError:[NSError errorWithDomain:FileConnectionErrorDomain
-													   code:[self currentOperation]
-												   userInfo:ui]];
-		}
-	}
+	if (_flags.createDirectory)
+		[_forwarder connection:self didCreateDirectory:aName error:error];
+
 	[self setState:ConnectionIdleState];
 }
 
@@ -312,24 +302,18 @@ checkRemoteExistence:(NSNumber *)check;
 	NSMutableDictionary *attribs = [[myFileManager fileAttributesAtPath:path traverseLink:NO] mutableCopy];
 	[attribs setObject:perms forKey:NSFilePosixPermissions];
 	
-	if ([myFileManager changeFileAttributes:attribs atPath:path])
+	NSError *error = nil;
+	if (![myFileManager changeFileAttributes:attribs atPath:path])
 	{
-		if (_flags.permissions)
-		{
-			[_forwarder connection:self didSetPermissionsForFile:path error:nil];
-		}
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  LocalizedStringInConnectionKitBundle(@"Could not change file permissions", @"FileConnection set permissions error"), NSLocalizedDescriptionKey,
+								  path, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];		
 	}
-	else
-	{
-		if (_flags.error)
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Could not change file permissions", @"FileConnection set permissions error"), NSLocalizedDescriptionKey,
-									  path, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
-	}
+	
+	if (_flags.permissions)
+		[_forwarder connection:self didSetPermissionsForFile:path error:error];
+
 	[attribs release];
 	[self setState:ConnectionIdleState];
 }
@@ -358,11 +342,17 @@ checkRemoteExistence:(NSNumber *)check;
 																  attributes:[AbstractConnection sentAttributes]] autorelease]];
 	}
 	
-	BOOL success = [myFileManager movePath:fromPath toPath:toPath handler:self];
-	if (success && _flags.rename)
+	NSError *error = nil;	
+	if (![myFileManager movePath:fromPath toPath:toPath handler:self])
 	{
-		[_forwarder connection:self didRename:fromPath to:toPath error:nil];
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, nil];
+		error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
 	}
+	
+	if (_flags.rename)
+		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+
 	[self setState:ConnectionIdleState];
 }
 
@@ -392,25 +382,18 @@ checkRemoteExistence:(NSNumber *)check;
 																  attributes:[AbstractConnection sentAttributes]] autorelease]];
 	}
 	
-	if ([myFileManager removeFileAtPath:path handler:self])
+	NSError *error = nil;	
+	if (![myFileManager removeFileAtPath:path handler:self])
 	{
-		if (_flags.deleteFile)
-		{
-			[_forwarder connection:self didDeleteFile:path error:nil];
-		}
+		NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete file: %@", @"error for deleting a file"), path];
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey, 
+								  path, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:FileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];		
 	}
-	else
-	{
-		if (_flags.error)
-		{
-			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete file: %@", @"error for deleting a file"), path];
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  localizedDescription, NSLocalizedDescriptionKey, 
-									  path, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
-	}
+	
+	if (_flags.deleteFile)
+		[_forwarder connection:self didDeleteFile:path error:error];
 	
 	[self setState:ConnectionIdleState];
 }
@@ -434,26 +417,19 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteDirectory];
 	
-	if ([myFileManager removeFileAtPath:dirPath handler:self])
+	NSError *error = nil;
+	if (![myFileManager removeFileAtPath:dirPath handler:self])
 	{
-		if (_flags.deleteDirectory)
-		{
-			[_forwarder connection:self didDeleteDirectory:dirPath error:nil];
-		}
-	}
-	else
-	{
-		if (_flags.error)
-		{
-			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete directory: %@", @"error for deleting a directory"), dirPath];
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  localizedDescription, NSLocalizedDescriptionKey,
-									  dirPath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
+		NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete directory: %@", @"error for deleting a directory"), dirPath];
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey,
+								  dirPath, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:FileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];
 	}
 	
+	if (_flags.deleteDirectory)
+		[_forwarder connection:self didDeleteDirectory:dirPath error:error];
+
 	[self setState:ConnectionIdleState];
 }
 
@@ -497,7 +473,7 @@ checkRemoteExistence:(NSNumber *)check;
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]] 
 																  attributes:[AbstractConnection sentAttributes]] autorelease]];
 	}
-	
+		
 	if (flag)
 	{
 		if ([fm fileExistsAtPath:[upload remotePath]])
@@ -506,24 +482,25 @@ checkRemoteExistence:(NSNumber *)check;
 									  LocalizedStringInConnectionKitBundle(@"File Already Exists", @"FileConnection error"), NSLocalizedDescriptionKey, 
 									  [upload remotePath], NSFilePathErrorKey, nil];
 			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:kFileExists userInfo:userInfo];
-			
-			if ([upload delegateRespondsToError])
-				[[upload delegate] transfer:[upload userInfo] receivedError:error];
-			if (_flags.error)
-				[_forwarder connection:self didReceiveError:error];
+			[upload retain];
+			[self dequeueUpload];
+			// send finished
+			if ( _flags.uploadFinished)
+				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+			if ([upload delegateRespondsToTransferDidFinish])
+				[[upload delegate] transferDidFinish:[upload userInfo] error:error];
+			[upload release];
+			[self setState:ConnectionIdleState];			
 			return;
 		}
 	}
+	
 	[fm removeFileAtPath:[upload remotePath] handler:nil];
 	
 	if ([upload delegateRespondsToTransferDidBegin])
-	{
 		[[upload delegate] transferDidBegin:[upload userInfo]];
-	} 
 	if (_flags.didBeginUpload)
-	{
 		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
-	}
 	
 	FILE *from = fopen([[upload localPath] fileSystemRepresentation], "r"); // Must use -fileSystemRepresentation to handle non-ASCII paths
 	FILE *to = fopen([[upload remotePath] UTF8String], "a");
@@ -553,34 +530,26 @@ checkRemoteExistence:(NSNumber *)check;
 	//need to send the amount of bytes transferred.
 	
 	if (_flags.uploadProgressed)
-	{
 		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
-	}
 	if ([upload delegateRespondsToTransferTransferredData])
-	{
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
-	}
 	
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
-	{
 		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
-	}
 	if (_flags.uploadPercent) 
-	{
 		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
-	}
-	[upload	 retain];
+	
+	
+	[upload retain];
 	[self dequeueUpload];
+	
 	// send finished
 	if ( _flags.uploadFinished)
-	{
 		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
-	}
 	if ([upload delegateRespondsToTransferDidFinish])
-	{
 		[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
-	}
+	
 	[upload release];
 	[self setState:ConnectionIdleState];
 }
@@ -644,10 +613,11 @@ checkRemoteExistence:(NSNumber *)check;
 									  [upload remotePath], NSFilePathErrorKey, nil];
 			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:kFileExists userInfo:userInfo];
 			
-			if ([upload delegateRespondsToError])
-				[[upload delegate] transfer:[upload userInfo] receivedError:error];
-			if (_flags.error)
-				[_forwarder connection:self didReceiveError:error];
+			// send finished
+			if (_flags.uploadFinished)
+				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+			if ([upload delegateRespondsToTransferDidFinish])
+				[[upload delegate] transferDidFinish:[upload userInfo] error:error];			
 			return;
 		}
 	}
@@ -657,54 +627,35 @@ checkRemoteExistence:(NSNumber *)check;
 										attributes:nil];
 
 	if ([upload delegateRespondsToTransferDidBegin])
-	{
 		[[upload delegate] transferDidBegin:[upload userInfo]];
-	}
 	if (_flags.didBeginUpload)
-	{
 		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
-	}
 	//need to send the amount of bytes transferred.
 	unsigned long long size = [[[myFileManager fileAttributesAtPath:[upload remotePath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
 	if (_flags.uploadProgressed)
-	{
 		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
-	}
 	if ([upload delegateRespondsToTransferTransferredData])
-	{
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
-	}
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
-	{
 		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
-	}
 	if (_flags.uploadPercent) 
-	{
 		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
-	}
-	// send finished
-	if (success && _flags.uploadFinished)
+	
+	NSError *error = nil;
+	if (!success)
 	{
-		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
-	}
-	if (success && [upload delegateRespondsToTransferDidFinish])
-	{
-		[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
-	}
-
-	 if (!success)
-	 {
 		 NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								   LocalizedStringInConnectionKitBundle(@"Failed to upload data", @"FileConnection copy data error"), NSLocalizedDescriptionKey,
 								   [upload remotePath], NSFilePathErrorKey,nil];
-		 NSError *err = [NSError errorWithDomain:ConnectionErrorDomain code:ConnectionErrorUploading userInfo:userInfo];
-		 
-		 if (_flags.error)
-			 [_forwarder connection:self didReceiveError:err];
-		 if ([upload delegateRespondsToError])
-			 [[upload delegate] transfer:[upload userInfo] receivedError:err];
-	 }
+		 error = [NSError errorWithDomain:ConnectionErrorDomain code:ConnectionErrorUploading userInfo:userInfo];
+	}
+	
+	// send finished
+	if (_flags.uploadFinished)
+		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+	if ([upload delegateRespondsToTransferDidFinish])
+		[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 
 	[self setState:ConnectionIdleState];
 }
@@ -823,21 +774,23 @@ checkRemoteExistence:(NSNumber *)check;
 		if (tempPath)
 		{
 			//restore the file, hopefully this will work:-)
-			//
-			[myFileManager movePath: tempPath
-											  toPath: destinationPath
-											 handler: nil];
-    }
-		
-		if (_flags.error)
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Unable to store data in file", @"FileConnection failed to copy file"), NSLocalizedDescriptionKey,
-									  remotePath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
+			[myFileManager movePath:tempPath toPath:destinationPath handler:nil];
 		}
+		
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  LocalizedStringInConnectionKitBundle(@"Unable to store data in file", @"FileConnection failed to copy file"), NSLocalizedDescriptionKey,
+								  remotePath, NSFilePathErrorKey, nil];
+		NSError *error = [NSError errorWithDomain:FileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
+		
+		[download retain];
+		[self dequeueDownload];
+		if (_flags.downloadFinished)
+			[_forwarder connection:self downloadDidFinish:remotePath error:error];
+		if ([download delegateRespondsToTransferDidFinish])
+			[[download delegate] transferDidFinish:[download userInfo] error:error];
+		[download release];		
 	}
+	
 	[self setState:ConnectionIdleState];
 }
 
