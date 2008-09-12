@@ -35,7 +35,8 @@
 #import "NSString+Connection.h"
 #import "CKTransferRecord.h"
 #import "FileConnection.h"
-#import "RunLoopForwarder.h" 
+#import "RunLoopForwarder.h"
+#import "FTPConnection.h"
 #import "SFTPConnection.h"
 #import "InterThreadMessaging.h"
 

@@ -88,6 +88,29 @@
 	}
 	return [comps componentsJoinedByString:@"/"];
 }
+
+- (NSString *)stringByStandardizingHTTPPath
+{
+	NSString *result = [NSString stringWithString:self];
+	if (![result hasPrefix:@"/"])
+		result = [@"/" stringByAppendingPathComponent:result];
+	return [result stringByStandardizingPath];
+}
+
+- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent
+{
+	URLComponent = [URLComponent stringByStandardizingURLComponents];
+	
+	if ([URLComponent hasPrefix:@"/"])
+		URLComponent = [URLComponent substringFromIndex:1];
+	if ([URLComponent hasSuffix:@"/"])
+		URLComponent = [URLComponent substringToIndex:[URLComponent length] - 1];
+	
+	if (![self hasSuffix:@"/"])
+		URLComponent = [@"/" stringByAppendingString:URLComponent];
+	return [self stringByAppendingString:URLComponent];	
+}
+
 - (NSString *)stringByStandardizingURLComponents
 {
 	NSString *returnString = [NSString stringWithString:self];

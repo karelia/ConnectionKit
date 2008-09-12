@@ -825,7 +825,7 @@ static NSString *lsform = nil;
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
 	if (_flags.directoryContents)
-		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory]];
+		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred

@@ -919,7 +919,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	if (_flags.directoryContents)
 	{
-		[_forwarder connection:self didReceiveContents:packaged ofDirectory:dirPath];
+		[_forwarder connection:self didReceiveContents:packaged ofDirectory:dirPath error:nil];
 	}
 	[self setState:ConnectionIdleState];
 }

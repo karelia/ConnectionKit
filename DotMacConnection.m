@@ -198,7 +198,8 @@
 						[self cacheDirectory:[dav path] withContents:contents];
 						[_forwarder connection:self 
 							didReceiveContents:contents
-								   ofDirectory:[[dav path] stringByDeletingFirstPathComponent]];
+								   ofDirectory:[[dav path] stringByDeletingFirstPathComponent]
+										 error:nil];
 					}
 					break;
 				}
