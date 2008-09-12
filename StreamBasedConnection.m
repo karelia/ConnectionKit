@@ -114,6 +114,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		
 		_recursiveDeletionsQueue = [[NSMutableArray alloc] init];
 		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_filesToDelete = [[NSMutableArray alloc] init];
 		_recursiveDeletionLock = [[NSLock alloc] init];
 		
 		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
@@ -160,6 +161,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_recursiveDeletionConnection forceDisconnect];
 	[_recursiveDeletionConnection release];
 	[_emptyDirectoriesToDelete release];
+	[_filesToDelete release];
 	[_recursiveDeletionLock release];
 	
 	[_recursiveDownloadConnection setDelegate:nil];
@@ -1161,8 +1163,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		//Permission Error while deleting a file in recursive deletion. We handle it as if it successfully deleted the file, but don't give any delegate notifications about this specific file.
 		[_recursiveDeletionLock lock];
-		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		if ([_filesToDelete count] == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1191,7 +1192,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}
 			if ([_recursiveDeletionsQueue count] == 0)
 			{
-				_numberOfDeletionsRemaining = 0;
 				myStreamFlags.isDeleting = NO;				
 				[_recursiveDeletionConnection disconnect];
 			}
@@ -1304,7 +1304,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	if (con == _fileCheckingConnection)
 	{
@@ -1340,59 +1340,48 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		NSDictionary *cur;
 		
 		if (_flags.discoverFilesToDeleteInAncestor) 
-		{
 			[_forwarder connection:self didDiscoverFilesToDelete:contents inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
-		}
 		if (_flags.discoverFilesToDeleteInDirectory)
-		{
 			[_forwarder connection:self didDiscoverFilesToDelete:contents inDirectory:dirPath];
-		}
-		
-		NSMutableArray *pathsToList = [NSMutableArray array];
-		NSMutableArray *pathsToDelete = [NSMutableArray array];
 		
 		while ((cur = [e nextObject]))
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
 				_numberOfDeletionListingsRemaining++;
-				[pathsToList addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDeletionConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDeletionConnection directoryContents];
 			}
 			else
 			{
-				_numberOfDeletionsRemaining++;
-				[pathsToDelete addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_filesToDelete addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
-		NSString *currentPath;
-		e = [pathsToDelete objectEnumerator];
-		while ((currentPath = [e nextObject]))
-		{
-			[_recursiveDeletionConnection deleteFile:currentPath];
-		}
-		
-		e = [pathsToList objectEnumerator];
-		while ((currentPath = [e nextObject]))
-		{
-			[_recursiveDeletionConnection changeToDirectory:currentPath];
-			[_recursiveDeletionConnection directoryContents];
-		}
-		
 		
 		if (![_recursiveDeletionsQueue containsObject:[dirPath stringByStandardizingPath]])
 		{
 			[_emptyDirectoriesToDelete addObject:[dirPath stringByStandardizingPath]];
 		}
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		if (_numberOfDeletionListingsRemaining == 0)
 		{
-			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
-			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
-			NSString *cur;
-			while (cur = [e nextObject])
+			if ([_filesToDelete count] > 0)
 			{
-				[_recursiveDeletionConnection deleteDirectory:cur];
+				//We finished listing what we need to delete. Let's delete it now.
+				for (NSString *pathToDelete in _filesToDelete)
+					[_recursiveDeletionConnection deleteFile:pathToDelete];
 			}
-			[_emptyDirectoriesToDelete removeAllObjects];
+			else
+			{
+				//We've finished listing directories and deleting files. Let's delete directories.
+				_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
+				NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
+				NSString *cur;
+				while (cur = [e nextObject])
+				{
+					[_recursiveDeletionConnection deleteDirectory:cur];
+				}
+				[_emptyDirectoriesToDelete removeAllObjects];				
+			}
 		}
 		[_recursiveDeletionLock unlock];
 	}
@@ -1541,8 +1530,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		
 		[_recursiveDeletionLock lock];
-		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		[_filesToDelete removeObject:path];
+		if ([_filesToDelete count] == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1584,7 +1573,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}			
 			if ([_recursiveDeletionsQueue count] == 0)
 			{
-				_numberOfDeletionsRemaining = 0;
 				myStreamFlags.isDeleting = NO;				
 				[_recursiveDeletionConnection disconnect];
 			}
