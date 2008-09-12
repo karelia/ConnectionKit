@@ -2639,7 +2639,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		if (_flags.directoryContents)
 		{
-			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath];
+			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath error:nil];
 		}
 		[results release];
 		[_dataBuffer setLength:0];
@@ -3249,7 +3249,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
 	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath];
+		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath error:nil];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
 		{
 			return;

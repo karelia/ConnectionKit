@@ -149,7 +149,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		if (responseRange.location == NSNotFound)
 		{
 			return;
-		}\
+		}
 	}
 	else
 	{
@@ -277,6 +277,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[req setHeader:[self host] forKey:@"Host"];
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
+		
 		[self setAuthenticationWithRequest:req];
 		
 		NSData *packet = [req serialized];
