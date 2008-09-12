@@ -84,9 +84,9 @@
 	NSString						*previousWorkingDirectory;
 	id <AbstractConnectionProtocol> _recursiveDeletionConnection;
 	unsigned						_numberOfDeletionListingsRemaining;
-	unsigned						_numberOfDeletionsRemaining;
 	unsigned						_numberOfDirDeletionsRemaining;
 	NSMutableArray					*_emptyDirectoriesToDelete;
+	NSMutableArray					*_filesToDelete;
 	NSLock							*_recursiveDeletionLock;
 	
 	// Peer connection support for recursive download
