@@ -124,7 +124,7 @@
 			}
 
 			// release buffer allocated by SecKeychainFindGenericPassword
-			theStatus = SecKeychainItemFreeContent(NULL, buffer);
+			(void) SecKeychainItemFreeContent(NULL, buffer);
 			
 			*account = accountName;
 			result = YES;
