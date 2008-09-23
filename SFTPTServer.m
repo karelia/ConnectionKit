@@ -85,15 +85,22 @@ char **environ;
 - (BOOL)buffer:(char *)buf containsAnyPrompts:(char *[])prompts
 {
 	if (!buf)
+	{
 		return NO;
+	}
 	
 	while (*prompts)
 	{
-		if (strstr(buf, *prompts++) != nil)
+		if (strstr(buf, *prompts) != NULL)
+		{
 			return YES;
+		}
+		prompts++;
 	}
 	return NO;
 }
+
+
 
 - (BOOL)bufferContainsPasswordPrompt:(char *)buf
 {
