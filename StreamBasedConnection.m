@@ -1336,6 +1336,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_recursiveDeletionLock lock];
 		_numberOfDeletionListingsRemaining--;
+		
+		if (![dirPath hasPrefix:[_recursiveDeletionsQueue objectAtIndex:0]])
+		{
+			//If we get here, we received a listing for something that is *not* a subdirectory of the root path we were asked to delete. Log it, and return.
+			NSLog(@"Received Listing For Inappropriate Path when Recursively Deleting.");
+			[_recursiveDeletionLock unlock];
+			return;
+		}
+		
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
