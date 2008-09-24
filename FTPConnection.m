@@ -1287,9 +1287,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		if (_flags.downloadFinished)
 			[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
-		CKTransferRecord *record = (CKTransferRecord *)[download userInfo];
-		if (record && [record isKindOfClass:[CKTransferRecord class]])
-			[record transferDidFinish:record error:error];
+		if ([download delegateRespondsToTransferDidFinish])
+			[[download delegate] transferDidFinish:[download userInfo] error:error];
 		
 		[download release];
 		
@@ -1568,9 +1567,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		if (_flags.uploadFinished)
 			[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-		CKTransferRecord *record = (CKTransferRecord *)[upload userInfo];
-		if (record && [record isKindOfClass:[CKTransferRecord class]])
-			[record transferDidFinish:record error:error];
+		if ([upload delegateRespondsToTransferDidFinish])
+			[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 		
 		[upload release];
 		
@@ -1822,13 +1820,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (error)
 	{	
 		//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:error];
-		CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
-		if (record && [record isKindOfClass:[CKTransferRecord class]])
-			[record transferDidFinish:record error:error];
-		
+		CKInternalTransferRecord *download = [[self currentDownload] retain];
 		[self dequeueDownload];
+		
+		if (_flags.downloadFinished)
+			[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+		if ([download delegateRespondsToTransferDidFinish])
+			[[download delegate] transferDidFinish:[download userInfo] error:error];
+		
+		[download release];
+		
 		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
 		[_queueLock lock];
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
@@ -2271,12 +2272,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				if (GET_STATE == ConnectionUploadingFileState)
 				{
-					if (_flags.uploadFinished)
-						[_forwarder connection:self uploadDidFinish:[[self currentUpload] remotePath] error:[_receiveStream streamError]];
-					CKTransferRecord *record = (CKTransferRecord *)[[self currentUpload] userInfo];
-					if (record && [record isKindOfClass:[CKTransferRecord class]])
-						[record transferDidFinish:record error:[_receiveStream streamError]];
+					CKInternalTransferRecord *upload = [[self currentUpload] retain];
 					[self dequeueUpload];
+					
+					if (_flags.uploadFinished)
+						[_forwarder connection:self uploadDidFinish:[upload remotePath] error:[_receiveStream streamError]];
+					if ([upload delegateRespondsToTransferDidFinish])
+						[[upload delegate] transferDidFinish:[upload userInfo] error:[_receiveStream streamError]];
+					
+					[upload release];
+
 					//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
 					[_queueLock lock];
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
@@ -2291,13 +2296,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				}
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
-					if (_flags.downloadFinished)
-						[_forwarder connection:self downloadDidFinish:[[self currentDownload] remotePath] error:[_receiveStream streamError]];
-					CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
-					if (record && [record isKindOfClass:[CKTransferRecord class]])
-						[record transferDidFinish:record error:[_receiveStream streamError]];
-					
+					CKInternalTransferRecord *download = [[self currentDownload] retain];
 					[self dequeueDownload];
+					
+					if (_flags.downloadFinished)
+						[_forwarder connection:self downloadDidFinish:[download remotePath] error:[_receiveStream streamError]];
+					if ([download delegateRespondsToTransferDidFinish])
+						[[download delegate] transferDidFinish:[download userInfo] error:[_receiveStream streamError]];
+					
+					[download release];
+					
 					//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
 					[_queueLock lock];
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;

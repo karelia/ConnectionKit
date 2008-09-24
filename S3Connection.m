@@ -370,19 +370,15 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		}
 		case ConnectionUploadingFileState:
 		{
-			CKInternalTransferRecord *upload = [self currentUpload];
+			CKInternalTransferRecord *upload = [[self currentUpload] retain];
+			[self dequeueUpload];
 			
 			if (_flags.uploadFinished)
-			{
 				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-			}
-			
 			if ([upload delegateRespondsToTransferDidFinish])
-			{
 				[[upload delegate] transferDidFinish:[upload delegate] error:error];
-			}
 			
-			[self dequeueUpload];
+			[upload release];
 			
 			break;
 		}
@@ -526,7 +522,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
 			
-			CKInternalTransferRecord *downloadInfo = [self currentDownload];
+			CKInternalTransferRecord *downloadInfo = [[self currentDownload] retain];
+			[self dequeueDownload];
+			
 			if (_flags.downloadFinished)
 			{
 				CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
@@ -537,7 +535,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			
 			[myCurrentRequest release];
 			myCurrentRequest = nil;
-			[self dequeueDownload];
+			[downloadInfo release];
 			[self setState:ConnectionIdleState];
 		}
 		return NO;
