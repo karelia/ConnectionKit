@@ -83,15 +83,16 @@ char **environ;
 	return strstr(buffer, stringCheck) != NULL;
 }
 
-- (BOOL)buffer:(char *)buf containsAnyPrompts:(char *[])prompts
+- (BOOL)buffer:(char *)buf containsAnyPrompts:(char **)prompts
 {
 	if (!buf)
 		return NO;
 	
 	while (*prompts)
 	{
-		if (strstr(buf, *prompts++) != nil)
+		if (strstr(buf, *prompts) != NULL)
 			return YES;
+		prompts++;
 	}
 	return NO;
 }
@@ -510,6 +511,19 @@ char **environ;
 				[sftpWrapperConnection getContinueQueryForUnknownHost:hostInfo];
 			}
 		}
+		if ([self buffer:serverResponseBuffer containsString:"Remote working"])
+		{
+			char *bufferDump = strdup((char *)serverResponseBuffer);
+			char *newline = strrchr(bufferDump, '\r');
+			if (newline)
+			{
+				*newline = '\0';
+			}
+			char *path = strchr(bufferDump, '/');
+			NSString *remotePath = [NSString stringWithBytesOfUnknownEncoding:path length:strlen(path)];
+			[sftpWrapperConnection setCurrentDirectory:remotePath];
+			free(bufferDump);
+		}		
 		if ([self bufferContainsDirectoryListing:serverResponseBuffer])
 		{
 			wasListing = YES;

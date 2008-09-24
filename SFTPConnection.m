@@ -451,7 +451,12 @@ static NSString *lsform = nil;
 	[record setProperty:localPath forKey:QueueDownloadDestinationFileKey];
 	[record setProperty:[NSNumber numberWithInt:0] forKey:QueueDownloadTransferPercentReceived];
 	
-	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath data:nil offset:0 remote:remotePath delegate:delegate ? delegate : record userInfo:record];
+	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath
+																							data:nil
+																						  offset:0
+																						  remote:remotePath
+																						delegate:delegate ? delegate : record
+																						userInfo:record];
 
 	[self queueDownload:internalTransferRecord];
 	
@@ -607,7 +612,7 @@ static NSString *lsform = nil;
 
 - (void)_finishedCommandInConnectionAwaitingCurrentDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	//We don't need to do anything.
+	//We don't need to do anything. The currentDirectory is set by SFTPTServer by calling setCurrentDirectory when we receive the PWD.
 }
 
 - (void)_finishedCommandInConnectionChangingDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
@@ -625,8 +630,6 @@ static NSString *lsform = nil;
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
-	else
-		[currentDirectory setString:path];
 	
 	[_forwarder connection:self didChangeToDirectory:path error:error];	
 }
@@ -738,10 +741,9 @@ static NSString *lsform = nil;
 	
 	if (_flags.uploadFinished)
 		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-	CKTransferRecord *record = (CKTransferRecord *)[upload userInfo];
-	if (record && [record isKindOfClass:[CKTransferRecord class]])
-		[record transferDidFinish:record error:error];
-	
+	if ([upload delegateRespondsToTransferDidFinish])
+		[[upload delegate] transferDidFinish:[upload userInfo] error:error];
+
 	[upload release];
 }
 
@@ -762,9 +764,8 @@ static NSString *lsform = nil;
 	
 	if (_flags.downloadFinished)
 		[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
-	CKTransferRecord *record = (CKTransferRecord *)[download userInfo];
-	if (record && [record isKindOfClass:[CKTransferRecord class]])
-		[record transferDidFinish:record error:error];
+	if ([download delegateRespondsToTransferDidFinish])
+		[[download delegate] transferDidFinish:[download userInfo] error:error];
 	
 	[download release];	
 }
@@ -797,6 +798,11 @@ static NSString *lsform = nil;
 		[_forwarder connection:self didConnectToHost:[self host] error:nil];
 	if (_flags.didAuthenticate)
 		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
+}
+
+- (void)setCurrentDirectory:(NSString *)current
+{
+	[currentDirectory setString:current];
 }
 
 - (void)didDisconnect
@@ -864,20 +870,6 @@ static NSString *lsform = nil;
 	}
 }
 
-- (void)uploadDidFinish:(CKInternalTransferRecord *)uploadInfo
-{
-	[uploadInfo retain];
-	
-	[self dequeueUpload];
-	
-	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[uploadInfo remotePath] error:nil];
-	if ([uploadInfo delegateRespondsToTransferDidFinish])
-		[[uploadInfo delegate] transferDidFinish:[uploadInfo userInfo] error:nil];
-	
-	[uploadInfo release];
-}
-
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
 {
 	NSNumber *progress = [NSNumber numberWithDouble:progressPercentage];
@@ -914,19 +906,6 @@ static NSString *lsform = nil;
 	}
 	if ([downloadInfo delegateRespondsToTransferDidBegin])
 		[[downloadInfo delegate] transferDidBegin:[downloadInfo userInfo]];
-}
-
-- (void)downloadDidFinish:(CKInternalTransferRecord *)downloadInfo
-{
-	[downloadInfo retain];
-	[self dequeueDownload];
-	
-	if (_flags.downloadFinished)
-		[_forwarder connection:self downloadDidFinish:[downloadInfo remotePath] error:nil];
-	if ([downloadInfo delegateRespondsToTransferDidFinish])
-		[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
-	
-	[downloadInfo release];
 }
 
 #pragma mark -
