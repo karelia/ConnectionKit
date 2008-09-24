@@ -35,8 +35,14 @@
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
-	NSString		*myAuthorization;
-		
+	NSString		*myBasicAuthorization;
+	
+	
+	NSString *myDigestRealm;
+	NSString *myDigestNonce;
+	NSString *myDigestOpaque;
+	NSInteger myDigestNonceCount;
+	
 	struct __httpconflags {
 		unsigned didFailWithError:1;
 		unsigned didReceiveData:1;
@@ -45,6 +51,7 @@
 		unsigned needsReconnection: 1;
 		unsigned isInReconnection: 1;
 		unsigned finishedReconnection: 1;
+		unsigned didFailAttemptedDigestAuthentication: 1;
 		unsigned unused: 27;
 	} myHTTPFlags;
 }
