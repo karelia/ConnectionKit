@@ -41,6 +41,7 @@
 - (NSString *)stringByStandardizingHTTPPath;
 - (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
 - (NSString *)stringByStandardizingURLComponents;
+- (NSString *)md5Hash;
 + (NSString *)formattedFileSize:(double)size;
 + (NSString *)formattedSpeed:(double)speed;
 + (id)uuid;
