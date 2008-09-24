@@ -50,6 +50,7 @@ extern NSString *SFTPErrorDomain;
 - (void)didConnect;
 - (void)didDisconnect;
 - (void)didSetRootDirectory;
+- (void)setCurrentDirectory:(NSString *)current;
 - (void)didReceiveDirectoryContents:(NSArray*)items;
 - (void)addStringToTranscript:(NSString *)stringToAdd;
 @end
