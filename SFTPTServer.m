@@ -463,7 +463,7 @@ char **environ;
 			{
 				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
-			else if ([sftpWrapperConnection isBusy] || cancelflag)
+			else if ([sftpWrapperConnection numberOfTransfers] > 0 || cancelflag)
 			{
 				if ([sftpWrapperConnection numberOfUploads] > 0)
 				{
