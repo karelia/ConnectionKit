@@ -756,6 +756,7 @@ static NSImage *sHostIcon = nil;
 	NSFileManager *fm = [NSFileManager defaultManager];
 	NSMutableString *appName = [NSMutableString stringWithString:[self annotation] != nil ? [self annotation] : [self host]];
 	[appName replaceOccurrencesOfString:@"." withString:@"_" options:NSLiteralSearch range:NSMakeRange(0,[appName length])];
+	[appName replaceOccurrencesOfString:@"/" withString:@":" options:NSLiteralSearch range:NSMakeRange(0,[appName length])];
 	NSString *app = [[path stringByAppendingPathComponent:appName] stringByAppendingPathExtension:@"app"];
 	NSString *contents = [app stringByAppendingPathComponent:@"Contents"];
 	NSString *exe = [contents stringByAppendingPathComponent:@"MacOS"];
