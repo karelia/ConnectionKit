@@ -1584,7 +1584,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (len >= 0)
 			{	
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [data shortDescription]);
+				/*
+				 If this is uncommented, it'll cause massive CPU load when we're doing downloads.
+				 From Greg: "if you enable this, you computer will heat your house this winter"
+				 KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [data shortDescription]);
+				 */
 				
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
