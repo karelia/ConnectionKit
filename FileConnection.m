@@ -537,10 +537,11 @@ checkRemoteExistence:(NSNumber *)check;
 		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
 	}
 	
-	FILE *from = fopen([[upload localPath] fileSystemRepresentation], "r"); // Must use -fileSystemRepresentation to handle non-ASCII paths
-	FILE *to = fopen([[upload remotePath] cString], "a");
+	// Must use -fileSystemRepresentation to handle non-ASCII paths
+	FILE *from = fopen([[upload localPath] fileSystemRepresentation], "r");
+	FILE *to = fopen([[upload remotePath] fileSystemRepresentation], "a");
 	
-		// I put these assertions back in; it's better to get an assertion failure than a crash!
+	// I put these assertions back in; it's better to get an assertion failure than a crash!
 	NSAssert(from, @"path from cannot be found");
 	NSAssert(to, @"path to cannot be found");
 	int fno = fileno(from), tno = fileno(to);
