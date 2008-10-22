@@ -1593,12 +1593,27 @@ if (![fn isEqualToString:@"."] && \
 {
 	NSArray *words = [line componentsSeparatedByString:@" "]; //Is NOT the same as componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]. Separating by character set interprets multiple whitespaces next to each other as a _single_ separator. We don't want that
 	NSMutableArray *finalWords = [NSMutableArray arrayWithArray:words];
-
+	
 	//Remove all blank spaces before the date. After the date, blank spaces (even next to each other) are _valid_ characters in a filename. They cannot be removed.
 	NSString *dateString = [self _dateStringFromListing:line];
-
+	if (!dateString)
+		return finalWords;
+	NSString *lastDateWord = dateString;
+	NSUInteger currentLocation = [dateString length] - 1;
+	while (currentLocation >= 0)
+	{
+		unichar currentCharacter = [dateString characterAtIndex:currentLocation];
+		if (currentCharacter == ' ')
+		{
+			//Everything after this index is part of the last word.
+			lastDateWord = [dateString substringFromIndex:currentLocation+1];
+			break;
+		}
+		currentLocation--;
+	}
+	
 	/*
-		We loop by index instead of fast enumeration or an enumerator because we _need_ the index anyway. We need the index because we cannot remove objects from finalWords using removeObject, as it would simply remove _all_ the objects that return YES to isEqual:, which in the case of NSString, is more than just the object we've iterated to –– it would include all objects of equivalent value (i.e., all empty strings). That being said, we could use -removeObjectIdenticalTo:, but the documentation states that -removeObjectIdenticalTo: simply asks for the index, which we already have if loop by index ourselves.
+	 We loop by index instead of fast enumeration or an enumerator because we _need_ the index anyway. We need the index because we cannot remove objects from finalWords using removeObject, as it would simply remove _all_ the objects that return YES to isEqual:, which in the case of NSString, is more than just the object we've iterated to –– it would include all objects of equivalent value (i.e., all empty strings). That being said, we could use -removeObjectIdenticalTo:, but the documentation states that -removeObjectIdenticalTo: simply asks for the index, which we already have if loop by index ourselves.
 	 */
 	NSUInteger currentIndex = 0;
 	NSMutableIndexSet *indexesOfBlankSpacesBeforeDate = [NSMutableIndexSet indexSet];
@@ -1607,13 +1622,14 @@ if (![fn isEqualToString:@"."] && \
 		NSString *word = [words objectAtIndex:currentIndex];
 		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
 			[indexesOfBlankSpacesBeforeDate addIndex:currentIndex];
-		if ([dateString containsSubstring:word])
+		if ([lastDateWord containsSubstring:word])
 			break;
 		currentIndex++;
 	}
 	[finalWords removeObjectsAtIndexes:indexesOfBlankSpacesBeforeDate];
 	return finalWords;
 }
+
 + (NSString *)_dateStringFromListing:(NSString *)listing
 {
 	//This regex finds the entire date. "May 12 2006" or "May 12 12:15"
@@ -1685,6 +1701,9 @@ if (![fn isEqualToString:@"."] && \
 	NSString *line;
 	while ((line = [lineEnumerator nextObject]))
 	{
+		if ([line length] <= 0)
+			continue;
+		
 		NSArray *words = [NSFileManager _wordsFromLine:line];
 		
 		//index should be 
@@ -1701,9 +1720,7 @@ if (![fn isEqualToString:@"."] && \
 		// 10 - link target
 		
 		if ([words count] < 4)
-		{
 			continue;
-		}
 		
 		NSString *wordZero = [words objectAtIndex:0];
 		NSString *wordOne = [words objectAtIndex:1];
