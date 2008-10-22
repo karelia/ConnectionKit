@@ -718,7 +718,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			
 			NSError *error = nil;
 			
-			if (GET_STATE == ConnectionNotConnectedState) 
+			ConnectionState theState = GET_STATE;
+			
+			if (theState == ConnectionNotConnectedState) 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
@@ -728,11 +730,25 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				// we want to catch the connection reset by peer error
 				error = [_receiveStream streamError];
-				if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				BOOL isResetByPeerError = [[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE);
+				if (isResetByPeerError)
 				{
 					KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_receiveStream streamError]);
 					error = nil;
-					
+				}
+
+				_flags.isConnected = NO;
+				if (_flags.didDisconnect)
+					[_forwarder connection:self didDisconnectFromHost:[self host]];
+				
+				if (_flags.error && !myStreamFlags.reportedError) 
+				{
+					myStreamFlags.reportedError = YES;
+					[_forwarder connection:self didReceiveError:error];
+				}
+				
+				if (isResetByPeerError)
+				{
 					// resetup connection again
 					[self closeStreams];
 					[self setState:ConnectionNotConnectedState];
@@ -763,11 +779,61 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				}
 			}
 			
-			if (_flags.error && !myStreamFlags.reportedError) 
+			if (theState == ConnectionUploadingFileState || [self numberOfUploads] > 0) 
 			{
-				myStreamFlags.reportedError = YES;
-				[_forwarder connection:self didReceiveError:error];
+				//We have uploads in the queue, so we need to dequeue them with the error
+				while ([self numberOfUploads] > 0)
+				{
+					CKInternalTransferRecord *upload = [[self currentUpload] retain];
+					[self dequeueUpload];
+					
+					if (_flags.uploadFinished)
+						[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+					if ([upload delegateRespondsToTransferDidFinish])
+						[[upload delegate] transferDidFinish:[upload userInfo] error:error];
+					
+					[upload release];
+					
+					//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
+					{
+						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+							[_commandQueue removeObject:dependent];
+						[_commandQueue removeObject:nextCommand];
+					}
+					[_queueLock unlock];		
+				}
 			}
+			if (theState == ConnectionDownloadingFileState || theState == ConnectionSentSizeState || [self numberOfDownloads] > 0)
+			{
+				//We have downloads in the queue, so we need to dequeue them with the error
+				while ([self numberOfDownloads] > 0)
+				{
+					CKInternalTransferRecord *download = [[self currentDownload] retain];
+					[self dequeueDownload];
+					
+					if (_flags.downloadFinished)
+						[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+					if ([download delegateRespondsToTransferDidFinish])
+						[[download delegate] transferDidFinish:[download userInfo] error:error];
+					
+					[download release];
+					
+					//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
+					{
+						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+							[_commandQueue removeObject:dependent];
+						[_commandQueue removeObject:nextCommand];
+					}
+					[_queueLock unlock];
+				}
+			}
+			
 			break;
 		}
 		case NSStreamEventEndEncountered:
