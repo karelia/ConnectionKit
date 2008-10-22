@@ -126,10 +126,29 @@ static NSString *lsform = nil;
 	if ([connectToQueue count] > 0)
 	{
 		NSArray *parameters = [connectToQueue objectAtIndex:0];
+		
+		[self _setupConnectTimeOut];
+		
 		isConnecting = YES;
 		[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
 		[connectToQueue removeObjectAtIndex:0];
 	}
+}
+
+- (void)_setupConnectTimeOut
+{
+	//Set up a timeout for connecting. If we're not connected in 10 seconds, error!
+	unsigned timeout = 10;
+	NSNumber *defaultsValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKFTPDataConnectionTimeoutValue"];
+	if (defaultsValue) {
+		timeout = [defaultsValue unsignedIntValue];
+	}
+	
+	_connectTimeoutTimer = [[NSTimer scheduledTimerWithTimeInterval:timeout
+															 target:self
+														   selector:@selector(_connectTimeoutTimerFire:)
+														   userInfo:nil
+															repeats:NO] retain];
 }
 
 - (void)dealloc
@@ -148,7 +167,7 @@ static NSString *lsform = nil;
 {
 	if (isConnecting)
 		return;
-	
+		
 	if (![self username])
 	{
 		//Can't do anything here, throw an error.
@@ -204,6 +223,9 @@ static NSString *lsform = nil;
 		[self performSelectorOnMainThread:@selector(_establishDistributedObjectsConnection) withObject:nil waitUntilDone:NO];
 		return;
 	}
+	
+	[self _setupConnectTimeOut];
+	
 	isConnecting = YES;
 	[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
 }
@@ -526,7 +548,6 @@ static NSString *lsform = nil;
 		// this trap allows execution to continue
 		// THIS MAY BE AN ISSUE FOR OTHER APPS
 		BOOL isQuitCommand = (0 == strcmp(cmd, "quit"));
-
 		ssize_t bytesWritten = write(masterProxy, cmd, strlen(cmd));
 		if ( bytesWritten != commandLength && !isQuitCommand )
 		{
@@ -573,6 +594,12 @@ static NSString *lsform = nil;
 - (void)_handleFinishedCommand:(ConnectionCommand *)command serverErrorResponse:(NSString *)errorResponse
 {
 	ConnectionState finishedState = GET_STATE;
+	
+	if (finishedState == ConnectionNotConnectedState && [[command command] isEqualToString:@"pwd"])
+	{
+		[self _finishedCommandInConnectionAwaitingCurrentDirectoryState:[command command] serverErrorResponse:errorResponse];
+	}
+	
 	switch (finishedState)
 	{
 		case ConnectionAwaitingCurrentDirectoryState:
@@ -612,11 +639,27 @@ static NSString *lsform = nil;
 
 - (void)_finishedCommandInConnectionAwaitingCurrentDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	//We don't need to do anything. The currentDirectory is set by SFTPTServer by calling setCurrentDirectory when we receive the PWD.
+	NSError *error = nil;
+	NSString *path = [self currentDirectory];
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Failed to change to directory");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+	}
+	
+	//We don't need to parse anything for the current directory, it's set by SFTPTServer.
+	if (_flags.changeDirectory)
+		[_forwarder connection:self didChangeToDirectory:path error:error];
 }
 
 - (void)_finishedCommandInConnectionChangingDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
+	//Temporarily don't do anything here (handled by PWD)
+	return;
+	
 	//Typical Command string is			cd "/blah/blah/blah"
 	NSRange pathRange = NSMakeRange(4, [commandString length] - 5);
 	NSString *path = ([commandString length] > NSMaxRange(pathRange)) ? [commandString substringWithRange:pathRange] : nil;
@@ -631,7 +674,8 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
-	[_forwarder connection:self didChangeToDirectory:path error:error];	
+	if (_flags.changeDirectory)
+		[_forwarder connection:self didChangeToDirectory:path error:error];	
 }
 
 - (void)_finishedCommandInConnectionCreateDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
@@ -667,10 +711,18 @@ static NSString *lsform = nil;
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, fromPath, @"fromPath", toPath, @"toPath", nil];
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];		
 	}
-	if (_flags.rename)
-		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+	
+	[fromPath retain];
+	[toPath retain];
+	
 	[_fileRenames removeObjectAtIndex:0];
 	[_fileRenames removeObjectAtIndex:0];							 
+	
+	if (_flags.rename)
+		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+
+	[fromPath release];
+	[toPath release];
 }
 
 - (void)_finishedCommandInConnectionSettingPermissionState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
@@ -774,6 +826,12 @@ static NSString *lsform = nil;
 #pragma mark SFTPTServer Callbacks
 - (void)didConnect
 {
+	if (_connectTimeoutTimer && [_connectTimeoutTimer isValid])
+	{
+		[_connectTimeoutTimer invalidate];
+		[_connectTimeoutTimer release];
+	}
+	
 	//Clear any failed pubkey authentications as we're now connected
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];
 	
@@ -785,6 +843,22 @@ static NSString *lsform = nil;
 																	  userInfo:nil];
 	[self pushCommandOnHistoryQueue:getCurrentDirectoryCommand];
 	[self sendCommand:[getCurrentDirectoryCommand command]];
+}
+
+- (void)_connectTimeoutTimerFire:(NSTimer *)timer
+{
+	[timer release];
+	
+	if (_flags.didConnect)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey, 
+								  [self host], ConnectionHostKey, nil];
+		
+		NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
+		[_forwarder connection:self didConnectToHost:[self host] error:error];
+	}
 }
 
 - (void)didSetRootDirectory
