@@ -801,15 +801,15 @@ static NSString *lsform = nil;
 
 - (void)_finishedCommandInConnectionDownloadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	NSError *error = nil;
-	if (errorResponse)
-	{
-		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
-		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
-			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
-	}
+	//We only act here if there is an error. We otherwise handle dequeueing and download notifications when the progress reaches 100.
+	if (!errorResponse)
+		return;
+	
+	NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
+	if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+		localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+	NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
+	NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	
 	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
 	[self dequeueDownload];
@@ -818,6 +818,8 @@ static NSString *lsform = nil;
 		[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
 	if ([download delegateRespondsToTransferDidFinish])
 		[[download delegate] transferDidFinish:[download userInfo] error:error];
+	if (_flags.error)
+		[_forwarder connection:self didReceiveError:error];
 	
 	[download release];	
 }
@@ -963,6 +965,18 @@ static NSString *lsform = nil;
 		{
 			[[downloadInfo delegate] transfer:record transferredDataOfLength:chunkLength];
 		}
+	}
+	else
+	{
+		CKInternalTransferRecord *download = [[self currentDownload] retain]; 
+		[self dequeueDownload];
+		
+		if (_flags.downloadFinished)
+			[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
+		if ([download delegateRespondsToTransferDidFinish])
+			[[download delegate] transferDidFinish:[download userInfo] error:nil];
+
+		[download release];			
 	}
 	
 	if (_flags.downloadPercent)
