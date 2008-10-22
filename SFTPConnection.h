@@ -26,6 +26,7 @@ extern NSString *SFTPErrorDomain;
 
 	NSMutableArray *attemptedKeychainPublicKeyAuthentications;
 	NSMutableArray *connectToQueue;
+	NSTimer *_connectTimeoutTimer;
 
 }
 
@@ -36,6 +37,7 @@ extern NSString *SFTPErrorDomain;
 @interface SFTPConnection (SFTPTServerCallback)
 //
 - (void)setServerObject:(id)serverObject;
+- (void)_setupConnectTimeOut;
 //
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
