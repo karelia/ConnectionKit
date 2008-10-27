@@ -801,15 +801,20 @@ static NSString *lsform = nil;
 
 - (void)_finishedCommandInConnectionDownloadingFileState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	//We only act here if there is an error. We otherwise handle dequeueing and download notifications when the progress reaches 100.
-	if (!errorResponse)
-		return;
+	//We only act here if there is an error OR if the file we're downloaded finished without delivering progress (usually small files). We otherwise handle dequeueing and download notifications when the progress reaches 100.
 	
-	NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
-	if ([errorResponse containsSubstring:@"permission"]) //Permission issue
-		localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
-	NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
-	NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	if (!errorResponse && [self numberOfDownloads] == 0)
+		return;
+		
+	NSError *error = nil;
+	if (errorResponse)
+	{
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
+		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
+			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
+		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+	}
 	
 	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
 	[self dequeueDownload];
