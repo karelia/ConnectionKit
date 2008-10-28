@@ -6,13 +6,8 @@
 	<string>131 189 356 240 0 0 1920 1178 </string>
 	<key>IBFramework Version</key>
 	<string>489.0</string>
-	<key>IBOpenObjects</key>
-	<array>
-		<integer>5</integer>
-		<integer>14</integer>
-	</array>
 	<key>IBSystem Version</key>
-	<string>9E17</string>
+	<string>9F33</string>
 	<key>IBUsesTextArchiving</key>
 	<true/>
 </dict>
