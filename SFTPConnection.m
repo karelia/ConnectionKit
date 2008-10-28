@@ -594,12 +594,7 @@ static NSString *lsform = nil;
 - (void)_handleFinishedCommand:(ConnectionCommand *)command serverErrorResponse:(NSString *)errorResponse
 {
 	ConnectionState finishedState = GET_STATE;
-	
-	if (finishedState == ConnectionNotConnectedState && [[command command] isEqualToString:@"pwd"])
-	{
-		[self _finishedCommandInConnectionAwaitingCurrentDirectoryState:[command command] serverErrorResponse:errorResponse];
-	}
-	
+		
 	switch (finishedState)
 	{
 		case ConnectionAwaitingCurrentDirectoryState:
@@ -803,9 +798,6 @@ static NSString *lsform = nil;
 {
 	//We only act here if there is an error OR if the file we're downloaded finished without delivering progress (usually small files). We otherwise handle dequeueing and download notifications when the progress reaches 100.
 	
-	if (!errorResponse && [self numberOfDownloads] == 0)
-		return;
-		
 	NSError *error = nil;
 	if (errorResponse)
 	{
@@ -848,8 +840,7 @@ static NSString *lsform = nil;
 																	 sentState:ConnectionAwaitingCurrentDirectoryState
 																	 dependant:nil
 																	  userInfo:nil];
-	[self pushCommandOnHistoryQueue:getCurrentDirectoryCommand];
-	[self sendCommand:[getCurrentDirectoryCommand command]];
+	[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
 }
 
 - (void)_connectTimeoutTimerFire:(NSTimer *)timer
@@ -971,19 +962,7 @@ static NSString *lsform = nil;
 			[[downloadInfo delegate] transfer:record transferredDataOfLength:chunkLength];
 		}
 	}
-	else
-	{
-		CKInternalTransferRecord *download = [[self currentDownload] retain]; 
-		[self dequeueDownload];
-		
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
-		if ([download delegateRespondsToTransferDidFinish])
-			[[download delegate] transferDidFinish:[download userInfo] error:nil];
 
-		[download release];			
-	}
-	
 	if (_flags.downloadPercent)
 	{
 		NSString *remotePath = [downloadInfo remotePath];
