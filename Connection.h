@@ -27,6 +27,26 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
+// For Mac OS X < 10.5.
+#ifndef NSINTEGER_DEFINED
+#define NSINTEGER_DEFINED
+#ifdef __LP64__ || NS_BUILD_32_LIKE_64
+typedef long           NSInteger;
+typedef unsigned long  NSUInteger;
+#define NSIntegerMin   LONG_MIN
+#define NSIntegerMax   LONG_MAX
+#define NSUIntegerMax  ULONG_MAX
+#else
+typedef int            NSInteger;
+typedef unsigned int   NSUInteger;
+#define NSIntegerMin   INT_MIN
+#define NSIntegerMax   INT_MAX
+#define NSUIntegerMax  UINT_MAX
+#endif
+#endif // NSINTEGER_DEFINED
+
+
 #import <Cocoa/Cocoa.h>
 #import <Connection/AbstractConnectionProtocol.h>
 #import <Connection/KTLog.h>

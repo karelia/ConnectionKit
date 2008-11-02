@@ -35,7 +35,8 @@ OTHER DEALINGS IN THE SOFTWARE.
 	BOOL _logErrors;
 }
 
-@property (readwrite, assign) BOOL logsErrors;
+- (BOOL)logsErrors;
+- (void)setLogsErrors:(BOOL)flag;
 
 //Shared Accessors
 + (id)sharedProxy;

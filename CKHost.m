@@ -42,19 +42,16 @@ static NSImage *sHostIcon = nil;
 
 @implementation CKHost
 
-@synthesize UUID = _UUID;
-@synthesize uuid = _UUID;
-@synthesize host = _host;
-@synthesize port = _port;
-@synthesize username = _username;
-@synthesize password = _password;
-@synthesize connectionType = _connectionType;
-@synthesize initialPath = _initialPath;
-@synthesize URL = _URL;
-@synthesize annotation = _description;
-@synthesize icon = _icon;
-@synthesize userInfo = _userInfo;
-@synthesize category = _category;
+- (NSString *)UUID { return _UUID; }
+
+- (NSString *)uuid { return _UUID; }
+- (NSString *)host { return _host; }
+- (NSString *)port { return _port; }
+- (NSString *)username { return _username; }
+- (NSString *)connectionType { return _connectionType; }
+- (NSString *)initialPath { return _initialPath; }
+- (id) userInfo { return _userInfo; }
+- (CKHostCategory *)category { return _category; }
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
@@ -277,7 +274,7 @@ static NSImage *sHostIcon = nil;
 	if (!oldServerString || [oldServerString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:_username path:nil port:[_port integerValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:_username path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 	[keychainItem setServer:host];		
 }
 
@@ -297,8 +294,8 @@ static NSImage *sHostIcon = nil;
 	if (!oldPortString || [oldPortString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:_username path:nil port:[oldPortString integerValue] protocol:kSecProtocolTypeFTP];
-	[keychainItem setPort:[port integerValue]];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:_username path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
+	[keychainItem setPort:[port intValue]];
 }
 
 - (void)setUsername:(NSString *)username
@@ -322,7 +319,7 @@ static NSImage *sHostIcon = nil;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:oldUsernameString path:nil port:[_port integerValue] protocol:kSecProtocolTypeFTP];
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:oldUsernameString path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		[keychainItem setUsername:username];
 	}
 }
@@ -350,7 +347,7 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
 																									   path:nil
-																									   port:[_port integerValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		if (keychainItem)
 			[keychainItem setPassword:password];
@@ -360,7 +357,7 @@ static NSImage *sHostIcon = nil;
 															   withUsername:_username
 																   password:_password
 																	   path:nil
-																	   port:[_port integerValue]
+																	   port:[_port intValue]
 																   protocol:kSecProtocolTypeFTP];
 		}
 	}
@@ -484,7 +481,7 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
 																									   path:nil
-																									   port:[_port integerValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		return [keychainItem password];
 	}
@@ -796,13 +793,13 @@ static NSImage *sHostIcon = nil;
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
 																									   path:nil
-																									   port:[_port integerValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		
 		if (!keychainItem && _password && [_password length] > 0 && _username && [_username length] > 0)
 		{
 			//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
-			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:_host withUsername:_username password:_password path:nil port:[_port integerValue] protocol:kSecProtocolTypeFTP];
+			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:_host withUsername:_username password:_password path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		}	
 	}
 }

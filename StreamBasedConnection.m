@@ -799,8 +799,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 					if (nextCommand)
 					{
-						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
 							[_commandQueue removeObject:dependent];
+						}
+						
 						[_commandQueue removeObject:nextCommand];
 					}
 					[_queueLock unlock];		
@@ -826,8 +831,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 					if (nextCommand)
 					{
-						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
 							[_commandQueue removeObject:dependent];
+						}
+						
 						[_commandQueue removeObject:nextCommand];
 					}
 					[_queueLock unlock];
@@ -1307,6 +1317,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		[_recursiveDownloadConnection directoryContents];
 	}
 }
+
 - (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 {
 	if (!error)
@@ -1315,7 +1326,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if (con == _fileCheckingConnection)
 	{
 		[_fileCheckLock lock];
-		for (NSString *filePathToCheck in [NSArray arrayWithArray:_fileCheckQueue])
+		
+		NSEnumerator *e = [[NSArray arrayWithArray:_fileCheckQueue] nextObject];
+		NSString *filePathToCheck;
+		while (filePathToCheck = [e nextObject])
 		{
 			if (![[filePathToCheck stringByDeletingLastPathComponent] isEqualToString:dirPath])
 				continue;
@@ -1442,8 +1456,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if ([_filesToDelete count] > 0)
 			{
 				//We finished listing what we need to delete. Let's delete it now.
-				for (NSString *pathToDelete in _filesToDelete)
+				NSEnumerator *e = [_filesToDelete objectEnumerator];
+				NSString *pathToDelete;
+				while (pathToDelete = [e nextObject])
+				{
 					[_recursiveDeletionConnection deleteFile:pathToDelete];
+				}
 			}
 			else
 			{

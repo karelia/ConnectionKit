@@ -51,35 +51,43 @@
 	CKHostCategory *_category; // not retained
 }
 
-@property (readonly) NSString *UUID;
-@property (readonly) NSString *uuid; //Same as UUID
-@property (readonly) NSString *host;
-@property (readonly) NSString *port;
-@property (readonly) NSString *username;
-@property (readonly) NSString *password;
-@property (readonly) NSString *connectionType;
-@property (readonly) NSString *initialPath;
-@property (readonly) NSURL *URL;
-@property (readonly) NSString *annotation;
-@property (readonly) NSImage *icon;
-@property (readonly) id userInfo;
-@property (readonly) CKHostCategory *category;
-
 - (id)init;
 
 - (id)initWithDictionary:(NSDictionary *)dictionary;
 - (NSDictionary *)plistRepresentation;
 
+- (NSString *)host;
 - (void)setHost:(NSString *)host;
+
+- (NSString *)port;
 - (void)setPort:(NSString *)port;
+
+- (NSString *)username;
 - (void)setUsername:(NSString *)username;
+
+- (NSString *)password;
 - (void)setPassword:(NSString *)password;
+
+- (NSString *)connectionType;
 - (void)setConnectionType:(NSString *)type;
+
+- (NSString *)initialPath;
 - (void)setInitialPath:(NSString *)path;
+
+- (NSURL *)URL;
 - (void)setURL:(NSURL *)url;
+
+- (NSString *)annotation;
 - (void)setAnnotation:(NSString *)description;
-- (void)setUserInfo:(id)ui;
+
+- (NSImage *)icon;
 - (void)setIcon:(NSImage *)icon;
+
+- (id)userInfo;
+- (void)setUserInfo:(id)ui;
+
+- (CKHostCategory *)category;
+
 
 - (NSString *)uuid;
 - (BOOL)isAbsoluteInitialPath;

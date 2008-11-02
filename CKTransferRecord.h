@@ -27,7 +27,9 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 @protocol AbstractConnectionProtocol;
+
 
 @interface CKTransferRecord : NSObject
 {
@@ -39,7 +41,7 @@
 	NSTimeInterval _lastTransferTime;
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;
-	CGFloat _speed;
+	float _speed;
 	NSUInteger _progress;
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
@@ -49,13 +51,26 @@
 	NSError *_error;
 }
 
-@property (readwrite, assign, setter=setUpload:) BOOL isUpload;
-@property (readwrite, copy) NSString *name;
-@property (readwrite, assign) unsigned long long size;
-@property (readwrite, assign) CGFloat speed;
-@property (readonly) NSError *error;
-@property (readwrite, assign) id <AbstractConnectionProtocol> connection;
-@property (readwrite, assign) CKTransferRecord *parent;
+- (BOOL)isUpload;
+- (void)setUpload:(BOOL)flag;
+
+- (NSString *)name;
+- (void)setName:(NSString *)name;
+
+- (unsigned long long)size;
+- (void)setSize:(unsigned long long)size;
+
+- (float)speed;
+- (void)setSpeed:(float)speed;	// TODO: Switch to CGFloat
+
+- (NSError *)error;
+
+- (id <AbstractConnectionProtocol>)connection;
+- (void)setConnection:(id <AbstractConnectionProtocol>)connection;	// Weak ref
+
+- (CKTransferRecord *)parent;
+- (void)setParent:(CKTransferRecord *)parent;	// Weak ref
+
 
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
@@ -63,7 +78,7 @@
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
-- (NSNumber *)progress;
+- (NSInteger)progress;
 - (void)setProgress:(NSInteger)progress;
 
 - (void)addContent:(CKTransferRecord *)record;

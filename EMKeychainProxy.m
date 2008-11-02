@@ -26,8 +26,6 @@
 
 @implementation EMKeychainProxy
 
-@synthesize logsErrors = _logErrors;
-
 static EMKeychainProxy *sharedProxy = nil;
 
 #pragma mark -
@@ -73,6 +71,13 @@ static EMKeychainProxy *sharedProxy = nil;
 {
     return self;
 }
+
+#pragma mark -
+#pragma mark Accessors
+
+- (BOOL)logsErrors { return _logErrors; }
+
+- (void)setLogsErrors:(BOOL)flag { _logErrors = flag; }
 
 #pragma mark -
 #pragma mark Getting Keychain Items

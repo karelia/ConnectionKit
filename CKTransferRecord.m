@@ -37,13 +37,33 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 @implementation CKTransferRecord
 
-@synthesize isUpload = _isUpload;
-@synthesize name = _name;
-@synthesize size = _size;
-@synthesize speed = _speed;
-@synthesize error = _error;
-@synthesize connection = _connection;
-@synthesize parent = _parent;
+- (BOOL)isUpload { return _isUpload; }
+
+- (void)setUpload:(BOOL)flag { _isUpload = flag; }
+
+- (NSString *)name { return _name; }
+
+- (void)setName:(NSString *)name
+{
+	if (_name != name)
+	{
+		[self willChangeValueForKey:@"name"];
+		name = [name copy];
+		[_name release];
+		_name = name;
+		[self didChangeValueForKey:@"name"];
+	}
+}
+
+- (NSError *)error { return _error; }
+
+- (id <AbstractConnectionProtocol>)connection { return _connection; }
+
+- (void)setConnection:(id <AbstractConnectionProtocol>)connection { _connection = connection; }
+
+- (CKTransferRecord *)parent { return _parent; }
+
+- (void)setParent:(CKTransferRecord *)parent { _parent = parent; }
 
 + (void)initialize
 {
@@ -107,6 +127,13 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return size;
 }
 
+- (void)setSize:(unsigned long long)size
+{
+	[self willChangeValueForKey:@"progress"];
+	_size = size;
+	[self didChangeValueForKey:@"progress"];
+}
+
 - (unsigned long long)transferred
 {
 	if ([self isDirectory]) 
@@ -128,7 +155,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return _transferred;
 }
 
-- (CGFloat)speed
+- (float)speed
 {
 	if ([self isDirectory]) 
 	{
@@ -157,6 +184,16 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		}
 	}
 	return _speed;
+}
+
+- (void)setSpeed:(float)speed
+{
+	if (speed != _speed)
+	{
+		[self willChangeValueForKey:@"speed"];
+		_speed = speed;
+		[self didChangeValueForKey:@"speed"];
+	}
 }
 
 - (void)forceAnimationUpdate
@@ -191,12 +228,12 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	}
 }
 
-- (NSNumber *)progress
+- (NSInteger)progress
 {
 	// Check if self of descendents have an error, so we can show that error.
 	if ([self hasError])
 	{
-		return [NSNumber numberWithInt:-1];
+		return -1;
 	}
 	
 	if ([self isDirectory]) 
@@ -206,9 +243,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		unsigned long long transferred = [self transferred];
 		if (size == 0) size = 1;
 		NSInteger percent = (NSInteger)((transferred / (size * 1.0)) * 100);
-		return [NSNumber numberWithInt:percent];
+		return percent;
 	}
-	return [NSNumber numberWithInt:_progress];
+	return _progress;
 }
 
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
@@ -649,7 +686,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	}
 	else
 	{
-		progress = [self progress];
+		progress = [NSNumber numberWithInt:[self progress]];
 	}
 	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
 }

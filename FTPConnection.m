@@ -1297,8 +1297,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 		if (nextCommand)
 		{
-			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+			NSEnumerator *enumerator = [[nextCommand dependantCommands] objectEnumerator];
+			ConnectionCommand *dependent;
+			while (dependent = [enumerator nextObject])
+			{
 				[_commandQueue removeObject:dependent];
+			}
+			
 			[_commandQueue removeObject:nextCommand];
 		}
 		[_queueLock unlock];
@@ -1577,8 +1582,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 		if (nextCommand)
 		{
-			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+			NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+			ConnectionCommand *dependent;
+			while (dependent = [e nextObject])
+			{
 				[_commandQueue removeObject:dependent];
+			}
+			
 			[_commandQueue removeObject:nextCommand];
 		}
 		[_queueLock unlock];		
@@ -1835,8 +1845,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 		if (nextCommand)
 		{
-			for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+			NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+			ConnectionCommand *dependent;
+			while (dependent = [e nextObject])
+			{
 				[_commandQueue removeObject:dependent];
+			}
 			[_commandQueue removeObject:nextCommand];
 		}
 		[_queueLock unlock];
@@ -2287,8 +2301,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 					if (nextCommand)
 					{
-						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
 							[_commandQueue removeObject:dependent];
+						}
+						
 						[_commandQueue removeObject:nextCommand];
 					}
 					[_queueLock unlock];		
@@ -2311,8 +2330,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
 					if (nextCommand)
 					{
-						for (ConnectionCommand *dependent in [nextCommand dependantCommands])
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
 							[_commandQueue removeObject:dependent];
+						}
+						
 						[_commandQueue removeObject:nextCommand];
 					}
 					[_queueLock unlock];

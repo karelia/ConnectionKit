@@ -30,10 +30,6 @@
 
 @implementation EMKeychainItem
 
-@synthesize username = _username;
-@synthesize password = _password;
-@synthesize label = _label;
-
 - (id)initWithCoreKeychainItem:(SecKeychainItemRef)item
 					  username:(NSString *)username
 					  password:(NSString *)password
@@ -57,6 +53,8 @@
 	[super dealloc];
 }
 
+- (NSString *)password { return _password; }
+
 - (BOOL)setPassword:(NSString *)newPasswordString
 {
 	if (!newPasswordString)
@@ -73,6 +71,8 @@
 	return (returnStatus == noErr);	
 }
 
+- (NSString *)username { return _username; }
+
 - (BOOL)setUsername:(NSString *)newUsername
 {
 	[self willChangeValueForKey:@"username"];
@@ -82,6 +82,8 @@
 	
 	return [self _modifyAttributeWithTag:kSecAccountItemAttr toBeString:newUsername];
 }
+
+- (NSString *)label { return _label; }
 
 - (BOOL)setLabel:(NSString *)newLabel
 {
@@ -108,11 +110,10 @@
 	OSStatus returnStatus = SecKeychainItemModifyAttributesAndData(coreKeychainItem, &list, 0, NULL);
 	return (returnStatus == noErr);
 }
+
 @end
 
 @implementation EMGenericKeychainItem
-
-@synthesize serviceName = _serviceName;
 
 - (id)initWithCoreKeychainItem:(SecKeychainItemRef)item
 				   serviceName:(NSString *)serviceName
@@ -142,6 +143,8 @@
 	return [[[EMGenericKeychainItem alloc] initWithCoreKeychainItem:item serviceName:serviceName username:username password:password] autorelease];
 }
 
+- (NSString *)serviceName { return _serviceName; }
+
 - (BOOL)setServiceName:(NSString *)newServiceName
 {
 	[self willChangeValueForKey:@"serviceName"];
@@ -151,14 +154,10 @@
 	
 	return [self _modifyAttributeWithTag:kSecServiceItemAttr toBeString:newServiceName];
 }
+
 @end
 
 @implementation EMInternetKeychainItem
-
-@synthesize server = _server;
-@synthesize path = _path;
-@synthesize port = _port;
-@synthesize protocol = _protocol;
 
 - (id)initWithCoreKeychainItem:(SecKeychainItemRef)item
 						server:(NSString *)server
@@ -198,6 +197,8 @@
 	return [[[EMInternetKeychainItem alloc] initWithCoreKeychainItem:item server:server username:username password:password path:path port:port protocol:protocol] autorelease];
 }
 
+- (NSString *)server { return _server; }
+
 - (BOOL)setServer:(NSString *)newServer
 {
 	[self willChangeValueForKey:@"server"];
@@ -207,6 +208,9 @@
 	
 	return [self _modifyAttributeWithTag:kSecServerItemAttr toBeString:newServer];
 }
+
+- (NSString *)path { return _path; }
+
 - (BOOL)setPath:(NSString *)newPath
 {
 	[self willChangeValueForKey:@"path"];
@@ -216,7 +220,10 @@
 	
 	return [self _modifyAttributeWithTag:kSecPathItemAttr toBeString:newPath];
 }
-- (BOOL)setPort:(int)newPort
+
+- (NSInteger)port { return _port; }
+
+- (BOOL)setPort:(NSInteger)newPort
 {
 	[self willChangeValueForKey:@"port"];
 	_port = newPort;
@@ -224,6 +231,9 @@
 	
 	return [self _modifyAttributeWithTag:kSecPortItemAttr toBeString:[NSString stringWithFormat:@"%i", newPort]];
 }
+
+- (SecProtocolType)protocol { return _protocol; }
+
 - (BOOL)setProtocol:(SecProtocolType)newProtocol
 {
 	[self willChangeValueForKey:@"protocol"];
