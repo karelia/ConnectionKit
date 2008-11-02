@@ -50,8 +50,6 @@
 
 @implementation SFTPConnection
 
-@synthesize masterProxy;
-
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
 static NSString *lsform = nil;
 
@@ -159,6 +157,16 @@ static NSString *lsform = nil;
 	[attemptedKeychainPublicKeyAuthentications release];
 	
 	[super dealloc];
+}
+
+#pragma mark -
+#pragma mark Accessors
+
+- (int)masterProxy { return masterProxy; }
+
+- (void)setMasterProxy:(int)proxy
+{
+	masterProxy = proxy;
 }
 
 #pragma mark -

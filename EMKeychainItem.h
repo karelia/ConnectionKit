@@ -35,9 +35,9 @@
 	SecKeychainItemRef coreKeychainItem;
 }
 
-@property (readonly) NSString *password;
-@property (readonly) NSString *username;
-@property (readonly) NSString *label;
+- (NSString *)password;
+- (NSString *)username;
+- (NSString *)label;
 
 - (BOOL)setPassword:(NSString *)newPasswordString;
 - (BOOL)setUsername:(NSString *)newUsername;
@@ -49,7 +49,7 @@
 	NSString *_serviceName;
 }
 
-@property (readonly) NSString *serviceName;
+- (NSString *)serviceName;
 
 + (id)genericKeychainItem:(SecKeychainItemRef)item 
 		   forServiceName:(NSString *)serviceName
@@ -66,10 +66,6 @@
 	SecProtocolType _protocol;
 }
 
-@property (readonly) NSString *server;
-@property (readonly) NSString *path;
-@property (readonly) NSInteger port;
-@property (readonly) SecProtocolType protocol;
 
 + (id)internetKeychainItem:(SecKeychainItemRef)item
 				 forServer:(NSString *)server
@@ -78,8 +74,16 @@
 					  path:(NSString *)path
 					  port:(NSInteger)port
 				  protocol:(SecProtocolType)protocol;
+
+- (NSString *)server;
 - (BOOL)setServer:(NSString *)newServer;
+
+- (NSString *)path;
 - (BOOL)setPath:(NSString *)newPath;
-- (BOOL)setPort:(int)newPort;
+
+- (NSInteger)port;
+- (BOOL)setPort:(NSInteger)newPort;
+
+- (SecProtocolType)protocol;
 - (BOOL)setProtocol:(SecProtocolType)newProtocol;
 @end

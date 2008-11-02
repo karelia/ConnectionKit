@@ -30,7 +30,8 @@ extern NSString *SFTPErrorDomain;
 
 }
 
-@property (readwrite, assign) int masterProxy;
+- (int)masterProxy;
+- (void)setMasterProxy:(int)proxy;
 
 @end
 

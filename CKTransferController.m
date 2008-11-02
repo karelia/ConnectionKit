@@ -656,7 +656,7 @@ static NSSize closedSize = { 452, 152 };
 	if (myFlags.verifyTransfers)
 	{
 		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
-		if ([[enclosedFolder progress] intValue] == 100 && nil != [enclosedFolder error])
+		if ([enclosedFolder progress] == 100 && nil != [enclosedFolder error])
 		{
 			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
 			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
@@ -904,7 +904,7 @@ static NSSize closedSize = { 452, 152 };
 	NSString *ident = [tableColumn identifier];
 	if ([ident isEqualToString:@"progress"])
 	{
-		return [NSDictionary dictionaryWithObjectsAndKeys:[item progress], @"progress", [item name], @"name", nil];
+		return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:[item progress]], @"progress", [item name], @"name", nil];
 	}
 	else if ([ident isEqualToString:@"file"])
 	{
