@@ -1,11 +1,6 @@
 {
     IBClasses =     (
                 {
-            CLASS = CKOutlineView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSOutlineView;
-        },
-                {
             ACTIONS =             {
                 alternateButtonPressed = id;
                 cancelPassword = id;
@@ -32,21 +27,6 @@
                 oTitle = NSTextField;
             };
             SUPERCLASS = NSWindowController;
-        },
-                {
-            CLASS = CKTransferProgressCell;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSCell;
-        },
-                {
-            CLASS = DropletOutlineView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSOutlineView;
-        },
-                {
-            CLASS = DropletPanel;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPanel;
         },
                 {
             CLASS = FirstResponder;
