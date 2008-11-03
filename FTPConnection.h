@@ -102,7 +102,7 @@ typedef enum {
 		unsigned isActiveDataConn: 1;
 		unsigned loggedIn: 1;
 		unsigned isMicrosoft: 1;
-		unsigned setTransferMode: 1;
+		unsigned setBinaryTransferMode: 1;
 		unsigned received226: 1;
 		unsigned sentAuthenticated: 1;
 		unsigned unused: 11;

@@ -1910,17 +1910,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			int port = i[4] << 8 | i[5];
 			//port = ntohs(i[5] << 8 | i[4]);
 			NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
-			
-			//Connecting to local machine causes PASV to sit idle.
-			//				if ([hostString isEqualToString:[[NSHost currentHost] ipv4Address]])
-			//				{
-			//					_ftpFlags.canUsePASV = NO;
-			//					ConnectionCommand *cmd = [self nextAvailableDataConnectionType];
-			//					_state = [cmd sentState];
-			//					[self sendCommand:[cmd command]];						
-			//					break;
-			//				}
-			
+						
 			NSHost *host = [CKCacheableHost hostWithAddress:hostString];
 			[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
 			
@@ -2138,7 +2128,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (len >= 0)
 			{	
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [data shortDescription]);
+				/*
+				 If this is uncommented, it'll cause massive CPU load when we're doing downloads.
+				 From Greg: "if you enable this, you computer will heat your house this winter"
+				 KTLog(StreamDomain, KTLogDebug, @"FTPD << %@", [data shortDescription]);
+				 */
 				
 				if (GET_STATE == ConnectionDownloadingFileState)
 				{
@@ -2803,7 +2797,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)closeStreams
 {
-	_ftpFlags.setTransferMode = NO;
+	_ftpFlags.setBinaryTransferMode = NO;
 	[super closeStreams];
 }
 
@@ -3122,14 +3116,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   dependant:dataCmd
 												userInfo:nil];
 	
-	if (!_ftpFlags.setTransferMode) {
+	if (!_ftpFlags.setBinaryTransferMode) {
 		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
-		_ftpFlags.setTransferMode = YES;
+		_ftpFlags.setBinaryTransferMode = YES;
 	}
 	
 	
@@ -3197,14 +3191,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   dependant:dataCmd
 												userInfo:nil];
 	
-	if (!_ftpFlags.setTransferMode) {
+	if (!_ftpFlags.setBinaryTransferMode) {
 		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 												 awaitState:ConnectionIdleState
 												  sentState:FTPModeChangeState
 												  dependant:nil
 												   userInfo:nil];
 		[self queueCommand:bin];
-		_ftpFlags.setTransferMode = YES;
+		_ftpFlags.setBinaryTransferMode = YES;
 	}
 	
 	if (_ftpFlags.hasSize)
@@ -3606,14 +3600,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	[self startBulkCommands];
 	
-	if (!_ftpFlags.setTransferMode) {
+	if (!_ftpFlags.setBinaryTransferMode) {
 		ConnectionCommand *bin = [ConnectionCommand command:@"TYPE I"
 											 awaitState:ConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
-		_ftpFlags.setTransferMode = YES;
+		_ftpFlags.setBinaryTransferMode = YES;
 	}
 	
 	
@@ -3709,7 +3703,3 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 }
 
 @end
-
-
-
-
