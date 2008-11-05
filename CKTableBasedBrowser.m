@@ -30,10 +30,10 @@
  */
 
 #import "CKTableBasedBrowser.h"
+#import "CKDirectoryBrowserCell.h"
 #import <Carbon/Carbon.h>
 
 @class CKResizingButton;
-@class CKDirectoryBrowserCell;
 
 @interface CKBrowserTableView : NSTableView
 {

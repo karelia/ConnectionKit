@@ -35,7 +35,8 @@
 #import "NSString+Connection.h"
 #import "CKTransferRecord.h"
 #import "FileConnection.h"
-#import "RunLoopForwarder.h" 
+#import "RunLoopForwarder.h"
+#import "FTPConnection.h"
 #import "SFTPConnection.h"
 #import "InterThreadMessaging.h"
 
@@ -149,7 +150,6 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 - (void)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
-#warning I have not tested this method yet -- Greg
 	CKTransferRecord *root = [self rootRecordWithPath:[remotePath stringByDeletingLastPathComponent]];
 	CKTransferRecord *upload = [[self connection] recursivelyUpload:localPath to:remotePath];
 	
@@ -656,7 +656,7 @@ static NSSize closedSize = { 452, 152 };
 	if (myFlags.verifyTransfers)
 	{
 		CKTransferRecord *enclosedFolder = [(CKTransferRecord *)[n object] parent];
-		if ([[enclosedFolder progress] intValue] == 100 && nil != [enclosedFolder error])
+		if ([enclosedFolder progress] == 100 && nil != [enclosedFolder error])
 		{
 			KTLog(ControllerDomain, KTLogDebug, @"Verifying directory %@", [enclosedFolder path]);
 			[myVerificationConnection contentsOfDirectory:[enclosedFolder path]];
@@ -904,7 +904,7 @@ static NSSize closedSize = { 452, 152 };
 	NSString *ident = [tableColumn identifier];
 	if ([ident isEqualToString:@"progress"])
 	{
-		return [NSDictionary dictionaryWithObjectsAndKeys:[item progress], @"progress", [item name], @"name", nil];
+		return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:[item progress]], @"progress", [item name], @"name", nil];
 	}
 	else if ([ident isEqualToString:@"file"])
 	{

@@ -71,6 +71,7 @@ NSString *cxFilenameKey = @"cxFilenameKey";
 NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
 
 // User Info Error Keys
+NSString *ConnectionHostKey = @"ConnectionHostKey";
 NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";
 NSString *ConnectionDirectoryExistsFilenameKey = @"ConnectionDirectoryExistsFilenameKey";
 
@@ -726,37 +727,37 @@ NSDictionary *sDataAttributes = nil;
 	
 	// There are 21 callbacks & flags.
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	_flags.permissions				= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:)];
-	_flags.badPassword				= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
-	_flags.cancel					= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
-	_flags.didCancel				= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
-	_flags.changeDirectory			= [del respondsToSelector:@selector(connection:didChangeToDirectory:)];
-	_flags.createDirectory			= [del respondsToSelector:@selector(connection:didCreateDirectory:)];
-	_flags.deleteDirectory			= [del respondsToSelector:@selector(connection:didDeleteDirectory:)];
-	_flags.deleteDirectoryInAncestor= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:)];
-	_flags.deleteFileInAncestor		= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:)];
+	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
+	_flags.badPassword						= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
+	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
+	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
+	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
+	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
+	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
+	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:error:)];
+	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:error:)];
 	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
 	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:)];
-	_flags.deleteFile				= [del respondsToSelector:@selector(connection:didDeleteFile:)];
-	_flags.didBeginUpload			= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
-	_flags.didConnect				= [del respondsToSelector:@selector(connection:didConnectToHost:)];
-	_flags.didDisconnect			= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
-	_flags.directoryContents		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:)];
-	_flags.didBeginDownload			= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
-	_flags.downloadFinished			= [del respondsToSelector:@selector(connection:downloadDidFinish:)];
-	_flags.downloadPercent			= [del respondsToSelector:@selector(connection:download:progressedTo:)];
-	_flags.downloadProgressed		= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
-	_flags.error					= [del respondsToSelector:@selector(connection:didReceiveError:)];
-	_flags.needsAccount				= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
-	_flags.rename					= [del respondsToSelector:@selector(connection:didRename:to:)];
-	_flags.uploadFinished			= [del respondsToSelector:@selector(connection:uploadDidFinish:)];
-	_flags.uploadPercent			= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
-	_flags.uploadProgressed			= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
-	_flags.directoryContentsStreamed= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
-	_flags.fileCheck				= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:)];
-	_flags.authorizeConnection		= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
-	_flags.didAuthenticate			= [del respondsToSelector:@selector(connection:didAuthenticateToHost:)];
-	_flags.passphrase				= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
+	_flags.deleteFile						= [del respondsToSelector:@selector(connection:didDeleteFile:error:)];
+	_flags.didBeginUpload					= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
+	_flags.didConnect						= [del respondsToSelector:@selector(connection:didConnectToHost:error:)];
+	_flags.didDisconnect					= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
+	_flags.directoryContents				= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:error:)];
+	_flags.didBeginDownload					= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
+	_flags.downloadFinished					= [del respondsToSelector:@selector(connection:downloadDidFinish:error:)];
+	_flags.downloadPercent					= [del respondsToSelector:@selector(connection:download:progressedTo:)];
+	_flags.downloadProgressed				= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
+	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
+	_flags.needsAccount						= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
+	_flags.rename							= [del respondsToSelector:@selector(connection:didRename:to:error:)];
+	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:error:)];
+	_flags.uploadPercent					= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
+	_flags.uploadProgressed					= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
+	_flags.directoryContentsStreamed		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
+	_flags.fileCheck						= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:error:)];
+	_flags.authorizeConnection				= [del respondsToSelector:@selector(connection:authorizeConnectionToHost:message:)];
+	_flags.didAuthenticate					= [del respondsToSelector:@selector(connection:didAuthenticateToHost:error:)];
+	_flags.passphrase						= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
 }
 
 - (id)delegate
@@ -811,7 +812,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = YES;
 	if (_flags.didConnect)
 	{
-		[_forwarder connection:self didConnectToHost:[self host]];
+		[_forwarder connection:self didConnectToHost:[self host] error:nil];
 	}
 }
 
@@ -989,14 +990,15 @@ NSDictionary *sDataAttributes = nil;
 	
 	NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
 	NSString *path;
-	
+	NSUInteger numberOfSubRecordsAdded = 0;
 	while ((path = [e nextObject]))
 	{
 		path = [localPath stringByAppendingPathComponent:path];
 		if (ignoreHiddenFilesFlag && [[path lastPathComponent] hasPrefix:@"."])
-		{
 			continue;
-		}
+		
+		numberOfSubRecordsAdded++;
+		
 		if ([fm fileExistsAtPath:path isDirectory:&isDir] && isDir)
 		{
 			[self recursivelyUpload:path 
@@ -1026,6 +1028,25 @@ NSDictionary *sDataAttributes = nil;
 			}
 		}
 	}
+	
+	if (numberOfSubRecordsAdded == 0)
+	{
+		CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:4];
+		if (![[root path] isEqualToString:@"/"])
+		{
+			[self _mergeRecord:record into:root];
+		}
+		else
+		{
+			CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
+			root = parent;
+			[root setName:[[root name] lastPathComponent]];		
+			[record setName:[[record name] lastPathComponent]];		
+			[root addContent:record];
+		}		
+		[record transferDidFinish:record error:nil];
+	}
+	
 	[pool release];
 	return root;
 }
@@ -1350,11 +1371,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
 	if (_flags.downloadFinished)
 	{
-		[_forwarder connection:self downloadDidFinish:remotePath];
+		[_forwarder connection:self downloadDidFinish:remotePath error:error];
 	}
 	KTLog(EditingDomain, KTLogDebug, @"Downloaded file %@... watching for changes", remotePath);
 	NSEnumerator *e = [_edits keyEnumerator];
@@ -1402,11 +1423,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
 	if (_flags.uploadFinished)
 	{
-		[_forwarder connection:self uploadDidFinish:remotePath];
+		[_forwarder connection:self uploadDidFinish:remotePath error:error];
 	}
 }
 
@@ -1570,17 +1591,45 @@ if (![fn isEqualToString:@"."] && \
 }
 + (NSArray *)_wordsFromLine:(NSString *)line
 {
-	NSArray *words = [line componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+	NSArray *words = [line componentsSeparatedByString:@" "]; //Is NOT the same as componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]. Separating by character set interprets multiple whitespaces next to each other as a _single_ separator. We don't want that
 	NSMutableArray *finalWords = [NSMutableArray arrayWithArray:words];
-	NSEnumerator *wordEnumerator = [words objectEnumerator];
-	NSString *word;
-	while ((word = [wordEnumerator nextObject]))
+	
+	//Remove all blank spaces before the date. After the date, blank spaces (even next to each other) are _valid_ characters in a filename. They cannot be removed.
+	NSString *dateString = [self _dateStringFromListing:line];
+	if (!dateString)
+		return finalWords;
+	NSString *lastDateWord = dateString;
+	NSUInteger currentLocation = [dateString length] - 1;
+	while (currentLocation >= 0)
 	{
-		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
-			[finalWords removeObject:word];
+		unichar currentCharacter = [dateString characterAtIndex:currentLocation];
+		if (currentCharacter == ' ')
+		{
+			//Everything after this index is part of the last word.
+			lastDateWord = [dateString substringFromIndex:currentLocation+1];
+			break;
+		}
+		currentLocation--;
 	}
+	
+	/*
+	 We loop by index instead of fast enumeration or an enumerator because we _need_ the index anyway. We need the index because we cannot remove objects from finalWords using removeObject, as it would simply remove _all_ the objects that return YES to isEqual:, which in the case of NSString, is more than just the object we've iterated to –– it would include all objects of equivalent value (i.e., all empty strings). That being said, we could use -removeObjectIdenticalTo:, but the documentation states that -removeObjectIdenticalTo: simply asks for the index, which we already have if loop by index ourselves.
+	 */
+	NSUInteger currentIndex = 0;
+	NSMutableIndexSet *indexesOfBlankSpacesBeforeDate = [NSMutableIndexSet indexSet];
+	while (currentIndex < [words count])
+	{
+		NSString *word = [words objectAtIndex:currentIndex];
+		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
+			[indexesOfBlankSpacesBeforeDate addIndex:currentIndex];
+		if ([lastDateWord containsSubstring:word])
+			break;
+		currentIndex++;
+	}
+	[finalWords removeObjectsAtIndexes:indexesOfBlankSpacesBeforeDate];
 	return finalWords;
 }
+
 + (NSString *)_dateStringFromListing:(NSString *)listing
 {
 	//This regex finds the entire date. "May 12 2006" or "May 12 12:15"
@@ -1641,7 +1690,6 @@ if (![fn isEqualToString:@"."] && \
 }
 + (NSArray *)attributedFilesFromListing:(NSString *)listing
 {
-//	listing = @"-rwxrwxrwx  1 owner    group        3665057 Jun 27 16:37 02 So Long,Radiant Flower.m4a\r\n-rwxrwxrwx  1 owner    group        2984792 Jun 27 16:47 03 The Hard Way.m4a\r\ndrwxrwxrwx  1 owner    group              0 Jul  6 13:12 ALASAC Files\r\n-rwxrwxrwx  1 owner    group        3633867 Jun 27 16:41 Blind Tonight.m4a\r\n";
 	if ([listing length] == 0)
 		return [NSArray array];
 	
@@ -1653,6 +1701,9 @@ if (![fn isEqualToString:@"."] && \
 	NSString *line;
 	while ((line = [lineEnumerator nextObject]))
 	{
+		if ([line length] <= 0)
+			continue;
+		
 		NSArray *words = [NSFileManager _wordsFromLine:line];
 		
 		//index should be 
@@ -1669,9 +1720,7 @@ if (![fn isEqualToString:@"."] && \
 		// 10 - link target
 		
 		if ([words count] < 4)
-		{
 			continue;
-		}
 		
 		NSString *wordZero = [words objectAtIndex:0];
 		NSString *wordOne = [words objectAtIndex:1];

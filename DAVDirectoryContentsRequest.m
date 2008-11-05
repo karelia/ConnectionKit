@@ -59,7 +59,11 @@
 		NSMutableString *xml = [NSMutableString string];
 		[xml appendString:@"<?xml version=\"1.0\" encoding=\"utf-8\" ?>\n"];
 		[xml appendString:@"<D:propfind xmlns:D=\"DAV:\">\n"];
-		[xml appendString:@"<D:allprop/>\n"];
+		[xml appendString:@"<D:prop>\n"];
+		[xml appendString:@"<D:getlastmodified/>\n"];
+		[xml appendString:@"<D:getcontentlength/>\n"];
+		[xml appendString:@"<D:resourcetype/>\n"];
+		[xml appendString:@"</D:prop>\n"];
 		[xml appendString:@"</D:propfind>\n"];
 		
 		[self setContentString:xml];

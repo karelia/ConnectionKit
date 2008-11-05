@@ -22,7 +22,7 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 */
 
-//Last Changed on 2/07/08. Version 0.14
+//Last Changed on 8/29/08. Version 0.18
 
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
@@ -34,15 +34,36 @@ OTHER DEALINGS IN THE SOFTWARE.
 {
 	BOOL _logErrors;
 }
-+ (id)sharedProxy;
-- (void)lockKeychain;
-- (void)unlockKeychain;
+
+- (BOOL)logsErrors;
 - (void)setLogsErrors:(BOOL)flag;
 
-- (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString;
-- (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol;
+//Shared Accessors
++ (id)sharedProxy;
 
-- (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceNameString withUsername:(NSString *)usernameString password:(NSString *)passwordString;
-- (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString withUsername:(NSString *)usernameString password:(NSString *)passwordString path:(NSString *)pathString port:(int)port protocol:(SecProtocolType)protocol;
+//Getting Keychain Items
+- (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString
+											withUsername:(NSString *)usernameString;
 
+- (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString
+											 withUsername:(NSString *)usernameString
+													 path:(NSString *)pathString
+													 port:(NSInteger)port
+												 protocol:(SecProtocolType)protocol;
+
+//Adding Keychain Items
+- (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceNameString
+											   withUsername:(NSString *)usernameString
+												   password:(NSString *)passwordString;
+
+- (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString
+												withUsername:(NSString *)usernameString
+													password:(NSString *)passwordString
+														path:(NSString *)pathString
+														port:(NSInteger)port
+													protocol:(SecProtocolType)protocol;
+
+//Misc.
+- (void)lockKeychain;
+- (void)unlockKeychain;
 @end

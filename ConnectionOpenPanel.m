@@ -72,7 +72,7 @@
 	//
 	[directoryContents addObserver: self
 						forKeyPath: @"selection"
-						   options: nil
+						   options: NSKeyValueObservingOptionNew
 						   context: nil];
 }
 
@@ -126,7 +126,6 @@
     NSEnumerator *theEnum = [[directoryContents selectedObjects] objectEnumerator];
     NSDictionary *currentItem;
     BOOL wholeSelectionIsValid = YES;
-#warning what's going on here? currentItem isn't actually being used for anything?
     while ((currentItem = [theEnum nextObject]) && wholeSelectionIsValid)
     {
       if ([[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])

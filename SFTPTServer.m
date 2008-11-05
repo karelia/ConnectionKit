@@ -5,6 +5,7 @@
 
 #import "SFTPTServer.h"
 #import "SFTPConnection.h"
+#import "CKInternalTransferRecord.h"
 #import "NSArray+Connection.h"
 #import "NSString+Connection.h"
 
@@ -82,25 +83,19 @@ char **environ;
 	return strstr(buffer, stringCheck) != NULL;
 }
 
-- (BOOL)buffer:(char *)buf containsAnyPrompts:(char *[])prompts
+- (BOOL)buffer:(char *)buf containsAnyPrompts:(char **)prompts
 {
 	if (!buf)
-	{
 		return NO;
-	}
 	
 	while (*prompts)
 	{
 		if (strstr(buf, *prompts) != NULL)
-		{
 			return YES;
-		}
 		prompts++;
 	}
 	return NO;
 }
-
-
 
 - (BOOL)bufferContainsPasswordPrompt:(char *)buf
 {
@@ -215,9 +210,9 @@ char **environ;
 	
 	unsigned long long amountTransferred = strtoull(amountCharacter, NULL, 0);
 	amountTransferred *= baseMultiplier;
-    if (isUploading) 
+    if ([wrapperConnection numberOfUploads] > 0) 
 	{
-		[wrapperConnection upload:[wrapperConnection currentUploadInfo]
+		[wrapperConnection upload:[wrapperConnection currentUpload]
 					didProgressTo:progressPercentage
 		withEstimatedCompletionIn:eta
 			  givenTransferRateOf:transferRate
@@ -225,7 +220,7 @@ char **environ;
     }
 	else
 	{
-		[wrapperConnection download:[wrapperConnection currentDownloadInfo]
+		[wrapperConnection download:[wrapperConnection currentDownload]
 					  didProgressTo:progressPercentage
 		  withEstimatedCompletionIn:eta
 				givenTransferRateOf:transferRate
@@ -259,8 +254,7 @@ char **environ;
 		
 		if ([self bufferContainsError:buf])
 		{
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"Could not list directory.", NSLocalizedDescriptionKey, @"The directory could not be found", NSLocalizedFailureReasonErrorKey, nil]];
-			[wrapperConnection connectionError:error];
+			[wrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:buf]];
 			return;
 		}
 		if ([self buffer:buf containsString:"<Press any key"])
@@ -467,38 +461,21 @@ char **environ;
 			}
 			else if ([self bufferContainsError:serverResponseBuffer])
 			{
-				NSString *failureReasonTitle = @"Error!";
-				int code = 0;
-				BOOL createDirectoryError = NO;
-				NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
-				if ([self buffer:serverResponseBuffer containsString:"Error resolving"])
-				{
-					failureReasonTitle = @"Host Unavailable";
-					code = EHOSTUNREACH;
-				}
-				else if ([self buffer:serverResponseBuffer containsString:"Couldn't create directory"])
-				{
-					localizedErrorString = @"Create directory operation failed";
-					failureReasonTitle = @"File exists";
-					createDirectoryError = YES;
-				}
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, [NSNumber numberWithBool:createDirectoryError], ConnectionDirectoryExistsKey, nil];
-				NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
-				[sftpWrapperConnection connectionError:error];
+				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
-			else if ([sftpWrapperConnection isBusy] || cancelflag)
+			else if ([sftpWrapperConnection numberOfTransfers] > 0 || cancelflag)
 			{
-				if ([sftpWrapperConnection isUploading])
+				if ([sftpWrapperConnection numberOfUploads] > 0)
 				{
-					NSString *localPath = [[sftpWrapperConnection currentUploadInfo] localPath];
+					NSString *localPath = [[sftpWrapperConnection currentUpload] localPath];
 					if ([self buffer:serverResponseBuffer containsString:"%"] && [self buffer:serverResponseBuffer containsString:(char *)[localPath UTF8String]])
 					{
 						[self parseTransferProgressString:(char *)serverResponseBuffer isUploading:YES forWrapperConnection:sftpWrapperConnection];
 					}
 				}
-				else if ([sftpWrapperConnection isDownloading])
+				else if ([sftpWrapperConnection numberOfDownloads] > 0)
 				{
-					NSString *remotePath = [[sftpWrapperConnection currentDownloadInfo] remotePath];
+					NSString *remotePath = [[sftpWrapperConnection currentDownload] remotePath];
 					if ([self buffer:serverResponseBuffer containsString:"%"] && [self buffer:serverResponseBuffer containsString:(char *)[remotePath UTF8String]])
 					{
 						[self parseTransferProgressString:(char *)serverResponseBuffer isUploading:NO forWrapperConnection:sftpWrapperConnection];
@@ -512,16 +489,10 @@ char **environ;
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"Changing owner on"] || [self buffer:serverResponseBuffer containsString:"Changing group on"] || [self buffer:serverResponseBuffer containsString:"Changing mode on"])
 			{
-				//[sftpWrapperConnection setBusyWithStatusMessage:[NSString stringWithUTF8String:(void *)serverResponseBuffer]];
 				wasChanging = YES;
 				if ([self buffer:serverResponseBuffer containsString:"Couldn't "])
 				{
-					NSString *failureReasonTitle = @"Error!";
-					int code = 0;
-					NSString *localizedErrorString = [NSString stringWithUTF8String:serverResponseBuffer];
-					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedErrorString, NSLocalizedDescriptionKey, [sftpWrapperConnection host], @"host", failureReasonTitle, NSLocalizedFailureReasonErrorKey, nil];
-					NSError *error = [NSError errorWithDomain:@"ConnectionErrorDomain" code:code userInfo:userInfo];
-					[sftpWrapperConnection connectionError:error];
+					[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 				}
 			}
 			else if ([self unknownHostKeyPromptInBuffer:serverResponseBuffer])
@@ -550,9 +521,9 @@ char **environ;
 			}
 			char *path = strchr(bufferDump, '/');
 			NSString *remotePath = [NSString stringWithBytesOfUnknownEncoding:path length:strlen(path)];
-			[sftpWrapperConnection setCurrentRemotePath:remotePath];
+			[sftpWrapperConnection setCurrentDirectory:remotePath];
 			free(bufferDump);
-		}
+		}		
 		if ([self bufferContainsDirectoryListing:serverResponseBuffer])
 		{
 			wasListing = YES;

@@ -11,8 +11,6 @@
 
 @implementation CKController
 
-#warning TODO: CKController HAS ONLY STUB IMPLEMENTATIONS!
-
 - (id)init
 {
 	[super init];

@@ -40,13 +40,18 @@ enum {
 	ConnectionErrorUploading = 49101,
 	ConnectionErrorDownloading,
 	ConnectionErrorCreatingDirectory,
-	ConnectionErrorChangingDirectory
+	ConnectionErrorChangingDirectory,
+	ConnectionErrorDeleting,
+	ConnectionErrorConnecting,
+	ConnectionErrorDisconnecting,
+	ConnectionErrorUnexpectedlyDisconnected,
+	ConnectionErrorListingDirectory,
+	ConnectionErrorGeneric,
 };
 
 @protocol AbstractConnectionProtocol <NSObject, NSCopying>
 
 + (NSString *)name;
-
 
 + (id <AbstractConnectionProtocol>)connectionToHost:(NSString *)host
 											   port:(NSString *)port
@@ -218,51 +223,51 @@ enum {
 // There are 21 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host; // this only guarantees that the socket connected.
-- (void)connection:(id <AbstractConnectionProtocol>)con didAuthenticateToHost:(NSString *)host; // this is a successful login
+- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+- (void)connection:(id <AbstractConnectionProtocol>)con didAuthenticateToHost:(NSString *)host error:(NSError *)error; // this is a successful login
 - (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con;
 
 //SFTP Passphrase Support
 - (NSString *)connection:(id <AbstractConnectionProtocol>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didCreateDirectory:(NSString *)dirPath;
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath;
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path;
+- (void)connection:(id <AbstractConnectionProtocol>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path error:(NSError *)error;
 
 
 // recursivelyDeleteDirectory
 //     These methods may change soon -- Seth
 - (void)connection:(id <AbstractConnectionProtocol>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
 - (void)connection:(id <AbstractConnectionProtocol>)con didDiscoverFilesToDelete:(NSArray *)contents inDirectory:(NSString *)dirPath;
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath;
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host;
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error;
-- (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath;
-- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path;
+- (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
+- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
 
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length; 
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath;
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath;
+- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error;
 
 
 - (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath;
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath;
+- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con; // this is deprecated. Use method below
 - (void)connection:(id <AbstractConnectionProtocol>)con didCancelTransfer:(NSString *)remotePath;
 
-- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists;
+- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
 @end
 
 @interface NSObject (ConnectionTransferDelegate)
@@ -270,7 +275,7 @@ enum {
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
 - (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
-- (void)transferDidFinish:(CKTransferRecord *)transfer;
+- (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
 
 //registration type dictionary keys
@@ -284,6 +289,7 @@ extern NSString *cxFilenameKey;
 extern NSString *cxSymbolicLinkTargetKey;
 
 //User Info Keys for Errors
+extern NSString *ConnectionHostKey;
 extern NSString *ConnectionDirectoryExistsKey;
 extern NSString *ConnectionDirectoryExistsFilenameKey;
 

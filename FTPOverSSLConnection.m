@@ -79,13 +79,13 @@
 		//if ([AbstractConnection debugEnabled])
 			NSLog(@"Cannot find the host: %@", _connectionHost);
 		
-        if (_flags.error) {
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
-												 code:EHOSTUNREACH
-											 userInfo:
-				[NSDictionary dictionaryWithObjectsAndKeys: @"Host Unavailable", NSLocalizedDescriptionKey,
-					_connectionHost, @"host", nil]];
-            [_forwarder connection:self didReceiveError:error];
+        if (_flags.error)
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Host Unavailable"), NSLocalizedDescriptionKey,
+									  _connectionHost, ConnectionHostKey, nil];
+			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
+			[_forwarder connection:self didReceiveError:error];
 		}
 		
 		
@@ -134,11 +134,12 @@
 		//if ([AbstractConnection debugEnabled])
 			NSLog(@"Cannot create a stream for the host: %@", _connectionHost);
 		
-		if (_flags.error) {
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
-												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:@"FTP Stream Unavailable"
-																				  forKey:NSLocalizedDescriptionKey]];
+		if (_flags.error)
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
+									  _connectionHost, ConnectionHostKey, nil];
+			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:error];
 		}
 		return;

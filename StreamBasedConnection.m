@@ -58,6 +58,7 @@
 #import <sys/sysctl.h>
 
 #import <Security/Security.h>
+#import <CoreServices/CoreServices.h>
 
 const unsigned int kStreamChunkSize = 2048;
 const NSTimeInterval kStreamTimeOutValue = 10.0; // 10 second timeout
@@ -105,12 +106,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.initializedSSL = NO;
 		myStreamFlags.isDeleting = NO;
 		
+		_fileCheckLock = [[NSLock alloc] init];
+		
 		_recursiveS3RenamesQueue = [[NSMutableArray alloc] init];
 		_recursivelyRenamedDirectoriesToDelete = [[NSMutableArray alloc] init];
 		_recursiveS3RenameLock = [[NSLock alloc] init];
 		
 		_recursiveDeletionsQueue = [[NSMutableArray alloc] init];
 		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_filesToDelete = [[NSMutableArray alloc] init];
 		_recursiveDeletionLock = [[NSLock alloc] init];
 		
 		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
@@ -145,6 +149,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_fileCheckingConnection setDelegate:nil];
 	[_fileCheckingConnection forceDisconnect];
 	[_fileCheckingConnection release];
+	[_fileCheckLock release];
 	[_fileCheckInFlight release];
 	
 	[_recursiveS3RenameLock release];
@@ -156,6 +161,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_recursiveDeletionConnection forceDisconnect];
 	[_recursiveDeletionConnection release];
 	[_emptyDirectoriesToDelete release];
+	[_filesToDelete release];
 	[_recursiveDeletionLock release];
 	
 	[_recursiveDownloadConnection setDelegate:nil];
@@ -298,13 +304,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if(!host){
 		KTLog(TransportDomain, KTLogError, @"Cannot find the host: %@", _connectionHost);
 		
-        if (_flags.error) {
+        if (_flags.didConnect) {
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
 				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
-					_connectionHost, @"host", nil]];
-            [_forwarder connection:self didReceiveError:error];
+					_connectionHost, ConnectionHostKey, nil]];
+			[_forwarder connection:self didConnectToHost:_connectionHost error:error];
 		}
 		return NO;
 	}
@@ -339,16 +345,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		NSLog(@"Failed to set socket keep alive setting");
 	}
-	if (setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, &opt, sizeof(opt)))
-	{
-		NSLog(@"Failed to set tcp no delay setting");
-	}
 	
 	struct sockaddr_in addr;
 	bzero((char *) &addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = inet_addr([[host address] cString]);
+	addr.sin_addr.s_addr = inet_addr([[host address] UTF8String]);
 	
 	KTLog(TransportDomain, KTLogDebug, @"Connecting to %@:%d", [host address], port);
 	
@@ -371,11 +373,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if(!_receiveStream || !_sendStream){
 		KTLog(TransportDomain, KTLogError, @"Cannot create a stream to the host: %@", _connectionHost);
 		
-		if (_flags.error) {
-			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain 
-												 code:EHOSTUNREACH
-											 userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream")
-																				  forKey:NSLocalizedDescriptionKey]];
+		if (_flags.error)
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
+									  _connectionHost, ConnectionHostKey, nil];
+			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:error];
 		}
 		return NO;
@@ -715,22 +718,37 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			
 			NSError *error = nil;
 			
-			if (GET_STATE == ConnectionNotConnectedState) 
+			ConnectionState theState = GET_STATE;
+			
+			if (theState == ConnectionNotConnectedState) 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																			 forKey:NSLocalizedDescriptionKey]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			}
 			else
 			{
 				// we want to catch the connection reset by peer error
 				error = [_receiveStream streamError];
-				if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE))
+				BOOL isResetByPeerError = [[error domain] isEqualToString:NSPOSIXErrorDomain] && ([error code] == ECONNRESET || [error code] == EPIPE);
+				if (isResetByPeerError)
 				{
 					KTLog(TransportDomain, KTLogInfo, @"Connection was reset by peer/broken pipe, attempting to reconnect.", [_receiveStream streamError]);
 					error = nil;
-					
+				}
+
+				_flags.isConnected = NO;
+				if (_flags.didDisconnect)
+					[_forwarder connection:self didDisconnectFromHost:[self host]];
+				
+				if (_flags.error && !myStreamFlags.reportedError) 
+				{
+					myStreamFlags.reportedError = YES;
+					[_forwarder connection:self didReceiveError:error];
+				}
+				
+				if (isResetByPeerError)
+				{
 					// resetup connection again
 					[self closeStreams];
 					[self setState:ConnectionNotConnectedState];
@@ -761,11 +779,71 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				}
 			}
 			
-			if (_flags.error && !myStreamFlags.reportedError) 
+			if (theState == ConnectionUploadingFileState || [self numberOfUploads] > 0) 
 			{
-				myStreamFlags.reportedError = YES;
-				[_forwarder connection:self didReceiveError:error];
+				//We have uploads in the queue, so we need to dequeue them with the error
+				while ([self numberOfUploads] > 0)
+				{
+					CKInternalTransferRecord *upload = [[self currentUpload] retain];
+					[self dequeueUpload];
+					
+					if (_flags.uploadFinished)
+						[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+					if ([upload delegateRespondsToTransferDidFinish])
+						[[upload delegate] transferDidFinish:[upload userInfo] error:error];
+					
+					[upload release];
+					
+					//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
+					{
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
+							[_commandQueue removeObject:dependent];
+						}
+						
+						[_commandQueue removeObject:nextCommand];
+					}
+					[_queueLock unlock];		
+				}
 			}
+			if (theState == ConnectionDownloadingFileState || theState == ConnectionSentSizeState || [self numberOfDownloads] > 0)
+			{
+				//We have downloads in the queue, so we need to dequeue them with the error
+				while ([self numberOfDownloads] > 0)
+				{
+					CKInternalTransferRecord *download = [[self currentDownload] retain];
+					[self dequeueDownload];
+					
+					if (_flags.downloadFinished)
+						[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+					if ([download delegateRespondsToTransferDidFinish])
+						[[download delegate] transferDidFinish:[download userInfo] error:error];
+					
+					[download release];
+					
+					//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
+					[_queueLock lock];
+					ConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
+					if (nextCommand)
+					{
+						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
+						ConnectionCommand *dependent;
+						while (dependent = [e nextObject])
+						{
+							[_commandQueue removeObject:dependent];
+						}
+						
+						[_commandQueue removeObject:nextCommand];
+					}
+					[_queueLock unlock];
+				}
+			}
+			
 			break;
 		}
 		case NSStreamEventEndEncountered:
@@ -832,8 +910,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:ConnectionErrorDomain
 											code:ConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]]
-																			 forKey:NSLocalizedDescriptionKey]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			}
 			else 
 			{
@@ -940,14 +1017,11 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_fileCheckingConnection) 
 	{
-		_fileCheckingConnection = [[[self class] alloc] initWithHost:[self host]
-																port:[self port]
-															username:[self username]
-															password:[self password]
-															   error:nil];
+		_fileCheckingConnection = [self copy];
 		[_fileCheckingConnection setDelegate:self];
+		[_fileCheckingConnection setName:@"File Checking Connection"];
 		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
-		[_fileCheckingConnection connect];
+		[_fileCheckingConnection connect];		
 	}
 	[_fileCheckLock lock];
 	if (!_fileCheckInFlight && [self numberOfFileChecks] > 0)
@@ -1079,7 +1153,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 #pragma mark Recursive Downloading Support
 - (void)recursivelySendTransferDidFinishMessage:(CKTransferRecord *)record
 {
-	[record transferDidFinish:record];
+	[record transferDidFinish:record error:nil];
 	NSEnumerator *contentsEnumerator = [[record contents] objectEnumerator];
 	CKTransferRecord *child;
 	while ((child = [contentsEnumerator nextObject]))
@@ -1165,8 +1239,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		//Permission Error while deleting a file in recursive deletion. We handle it as if it successfully deleted the file, but don't give any delegate notifications about this specific file.
 		[_recursiveDeletionLock lock];
-		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		if ([_filesToDelete count] == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1195,7 +1268,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			}
 			if ([_recursiveDeletionsQueue count] == 0)
 			{
-				_numberOfDeletionsRemaining = 0;
 				myStreamFlags.isDeleting = NO;				
 				[_recursiveDeletionConnection disconnect];
 			}
@@ -1246,6 +1318,48 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
+- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
+{
+	if (!error)
+		return;
+	//We had some difficulty changing to a directory. We're obviously not going to list that directory, we lets just remove it from whatever queue we need to
+	if (con == _fileCheckingConnection)
+	{
+		[_fileCheckLock lock];
+		
+		NSEnumerator *e = [[NSArray arrayWithArray:_fileCheckQueue] nextObject];
+		NSString *filePathToCheck;
+		while (filePathToCheck = [e nextObject])
+		{
+			if (![[filePathToCheck stringByDeletingLastPathComponent] isEqualToString:dirPath])
+				continue;
+			if (_flags.fileCheck)
+				[_forwarder connection:self checkedExistenceOfPath:filePathToCheck pathExists:NO error:error];
+			
+			[_fileCheckQueue removeObject:filePathToCheck];
+			if ([filePathToCheck isEqualToString:_fileCheckInFlight])
+			{
+				[_fileCheckInFlight autorelease];
+				_fileCheckInFlight = nil;
+				[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0];
+			}
+		}
+		[_fileCheckLock unlock];
+	}
+	else if (con == _recursiveDeletionConnection)
+	{
+		[_recursiveDeletionLock lock];
+		_numberOfDeletionListingsRemaining--;
+		[_recursiveDeletionLock unlock];
+	}
+	else if (con == _recursiveDownloadConnection)
+	{
+		
+	}
+	else if (con == _recursiveS3RenameConnection)
+	{
+	}
+}
 - (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
 {
 	if (con == _fileCheckingConnection)
@@ -1270,7 +1384,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
+- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	if (con == _fileCheckingConnection)
 	{
@@ -1278,6 +1392,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			NSArray *currentDirectoryContentsFilenames = [contents valueForKey:cxFilenameKey];
 			NSMutableArray *fileChecksToRemoveFromQueue = [NSMutableArray array];
+			[_fileCheckLock lock];
 			NSEnumerator *pathsToCheckForEnumerator = [_fileCheckQueue objectEnumerator];
 			NSString *currentPathToCheck;
 			while ((currentPathToCheck = [pathsToCheckForEnumerator nextObject]))
@@ -1288,9 +1403,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				}
 				[fileChecksToRemoveFromQueue addObject:currentPathToCheck];
 				BOOL currentDirectoryContainsFile = [currentDirectoryContentsFilenames containsObject:[currentPathToCheck lastPathComponent]];
-				[_forwarder connection:self checkedExistenceOfPath:currentPathToCheck pathExists:currentDirectoryContainsFile];
+				[_forwarder connection:self checkedExistenceOfPath:currentPathToCheck pathExists:currentDirectoryContainsFile error:nil];
 			}
 			[_fileCheckQueue removeObjectsInArray:fileChecksToRemoveFromQueue];
+			[_fileCheckLock unlock];
 		}
 		[_fileCheckInFlight autorelease];
 		_fileCheckInFlight = nil;
@@ -1300,63 +1416,65 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_recursiveDeletionLock lock];
 		_numberOfDeletionListingsRemaining--;
+		
+		if (![dirPath hasPrefix:[_recursiveDeletionsQueue objectAtIndex:0]])
+		{
+			//If we get here, we received a listing for something that is *not* a subdirectory of the root path we were asked to delete. Log it, and return.
+			NSLog(@"Received Listing For Inappropriate Path when Recursively Deleting.");
+			[_recursiveDeletionLock unlock];
+			return;
+		}
+		
 		NSEnumerator *e = [contents objectEnumerator];
 		NSDictionary *cur;
 		
 		if (_flags.discoverFilesToDeleteInAncestor) 
-		{
 			[_forwarder connection:self didDiscoverFilesToDelete:contents inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
-		}
 		if (_flags.discoverFilesToDeleteInDirectory)
-		{
 			[_forwarder connection:self didDiscoverFilesToDelete:contents inDirectory:dirPath];
-		}
-		
-		NSMutableArray *pathsToList = [NSMutableArray array];
-		NSMutableArray *pathsToDelete = [NSMutableArray array];
 		
 		while ((cur = [e nextObject]))
 		{
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
 				_numberOfDeletionListingsRemaining++;
-				[pathsToList addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDeletionConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDeletionConnection directoryContents];
 			}
 			else
 			{
-				_numberOfDeletionsRemaining++;
-				[pathsToDelete addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_filesToDelete addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
 			}
 		}
-		NSString *currentPath;
-		e = [pathsToDelete objectEnumerator];
-		while ((currentPath = [e nextObject]))
-		{
-			[_recursiveDeletionConnection deleteFile:currentPath];
-		}
-		
-		e = [pathsToList objectEnumerator];
-		while ((currentPath = [e nextObject]))
-		{
-			[_recursiveDeletionConnection changeToDirectory:currentPath];
-			[_recursiveDeletionConnection directoryContents];
-		}
-		
 		
 		if (![_recursiveDeletionsQueue containsObject:[dirPath stringByStandardizingPath]])
 		{
 			[_emptyDirectoriesToDelete addObject:[dirPath stringByStandardizingPath]];
 		}
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		if (_numberOfDeletionListingsRemaining == 0)
 		{
-			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
-			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
-			NSString *cur;
-			while (cur = [e nextObject])
+			if ([_filesToDelete count] > 0)
 			{
-				[_recursiveDeletionConnection deleteDirectory:cur];
+				//We finished listing what we need to delete. Let's delete it now.
+				NSEnumerator *e = [_filesToDelete objectEnumerator];
+				NSString *pathToDelete;
+				while (pathToDelete = [e nextObject])
+				{
+					[_recursiveDeletionConnection deleteFile:pathToDelete];
+				}
 			}
-			[_emptyDirectoriesToDelete removeAllObjects];
+			else
+			{
+				//We've finished listing directories and deleting files. Let's delete directories.
+				_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
+				NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
+				NSString *cur;
+				while (cur = [e nextObject])
+				{
+					[_recursiveDeletionConnection deleteDirectory:cur];
+				}
+				[_emptyDirectoriesToDelete removeAllObjects];				
+			}
 		}
 		[_recursiveDeletionLock unlock];
 	}
@@ -1414,7 +1532,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				//We tried to download an entirely empty folder. We're finished.
 				if (_flags.downloadFinished)
-					[_forwarder connection:self downloadDidFinish:dirPath];
+					[_forwarder connection:self downloadDidFinish:dirPath error:nil];
 				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will not be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
 				[self recursivelySendTransferDidFinishMessage:root];
 			}
@@ -1475,7 +1593,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(AbstractConnection *)conn didRename:(NSString *)fromPath to:(NSString *)toPath
+- (void)connection:(AbstractConnection *)conn didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error
 {
 	if (conn == _recursiveS3RenameConnection)
 	{
@@ -1496,17 +1614,17 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path error:(NSError *)error
 {
 	if (con == _recursiveDeletionConnection)
 	{
 		if (_flags.deleteFileInAncestor) {
-			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
+			[_forwarder connection:self didDeleteFile:[path stringByStandardizingPath] inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0] error:error];
 		}
 		
 		[_recursiveDeletionLock lock];
-		_numberOfDeletionsRemaining--;
-		if (_numberOfDeletionsRemaining == 0 && _numberOfDeletionListingsRemaining == 0)
+		[_filesToDelete removeObject:path];
+		if ([_filesToDelete count] == 0 && _numberOfDeletionListingsRemaining == 0)
 		{
 			_numberOfDirDeletionsRemaining += [_emptyDirectoriesToDelete count];
 			NSEnumerator *e = [_emptyDirectoriesToDelete reverseObjectEnumerator];
@@ -1521,7 +1639,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath
+- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	if (con == _recursiveDeletionConnection)
 	{
@@ -1537,18 +1655,17 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					//In connection:didReceiveError, we were notified that the deletion connection we attempted to open up failed to open. To remedy this, we used OURSELF as the deletion connection, temporarily setting our delegate to OURSELF so we'd receive the calls we needed to perform the deletion. 
 					//Now that we're done, let's restore our delegate.
 					[self restoreRecursiveDeletionDelegate];
-					[_forwarder connection:self didDeleteDirectory:dirPath];
+					[_forwarder connection:self didDeleteDirectory:dirPath error:error];
 					if ([_recursiveDeletionsQueue count] > 0)
 						[self temporarilyTakeOverRecursiveDeletionDelegate];
 				}
 				else
 				{
-					[_forwarder connection:self didDeleteDirectory:dirPath];
+					[_forwarder connection:self didDeleteDirectory:dirPath error:error];
 				}
 			}			
 			if ([_recursiveDeletionsQueue count] == 0)
 			{
-				_numberOfDeletionsRemaining = 0;
 				myStreamFlags.isDeleting = NO;				
 				[_recursiveDeletionConnection disconnect];
 			}
@@ -1569,8 +1686,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 				if (previousDelegate && _recursiveDeletionConnection == self && [_recursiveDeletionConnection delegate] == self)
 				{
 					[self restoreRecursiveDeletionDelegate];
-					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory];
+					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory error:error];
 					[self temporarilyTakeOverRecursiveDeletionDelegate];
+				}
+				else
+				{
+					[_forwarder connection:self didDeleteDirectory:[dirPath stringByStandardizingPath] inAncestorDirectory:ancestorDirectory error:error];
 				}
 			}
 		}
@@ -1600,7 +1721,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				[con disconnect];
 				if (_flags.rename)
-					[_forwarder connection:self didRename:fromDirectoryPath to:toDirectoryPath];
+					[_forwarder connection:self didRename:fromDirectoryPath to:toDirectoryPath error:nil];
 			}
 		}
 		
@@ -1660,7 +1781,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:@"SSL Error Occurred" forKey:NSLocalizedDescriptionKey]];
+			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 		return;

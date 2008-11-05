@@ -54,70 +54,91 @@
 	NSArray *responses = [xml elementsForLocalName:@"response" URI:@"DAV:"];
 	NSEnumerator *e = [responses objectEnumerator];
 	NSXMLElement *response;
-	
+			
 	while (response = [e nextObject])
 	{
 		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
-		//NSLog(@"\n%@", [response XMLStringWithOptions:NSXMLNodePrettyPrint]);
 		
 		// filename
-		NSString *href = [[[response elementsForLocalName:@"href" URI:@"DAV:"] objectAtIndex:0] stringValue];
-		if ([[href lowercaseString] isEqualToString:[[[self path] encodeLegally] lowercaseString]])
-		{
+		NSArray *hrefElements = [response elementsForLocalName:@"href" URI:@"DAV:"];
+		if ([hrefElements count] <= 0)
 			continue;
-		}
-		NSURL *url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [self headerForKey:@"Host"], href]];
+		NSString *href = [[hrefElements objectAtIndex:0] stringValue];
+		
+		NSURL *url = nil;
+		//If we have the http prefix already, we already have a full URL.
+		if ([href hasPrefix:@"http://"])
+			url = [NSURL URLWithString:href];
+		else
+			url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [self headerForKey:@"Host"], href]];
 		NSString *path = [url path];
+		
+		NSString *standardizedPathForComparison = [path stringByStandardizingHTTPPath];
+		NSString *standardizedCurrentPathForComparison = [[self path] stringByStandardizingHTTPPath];		
+		if ([path isEqualToString:@"/"] || [standardizedPathForComparison isEqualToString:standardizedCurrentPathForComparison])
+			continue;
 		
 		[attribs setObject:href forKey:@"DAVURI"];
 		[attribs setObject:[path lastPathComponent] forKey:cxFilenameKey];
 		
-		NSXMLElement *props = [[[[response elementsForLocalName:@"propstat" URI:@"DAV:"] objectAtIndex:0] elementsForLocalName:@"prop" URI:@"DAV:"] objectAtIndex:0];
-		
-		@try {
-			NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
-			NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
-			[attribs setObject:created forKey:NSFileCreationDate];
-		} 
-		@catch (NSException *e) {
-			
-		}
-		
-		@try {
-			NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
-			NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
-			[attribs setObject:modified forKey:NSFileModificationDate];
-		}
-		@catch (NSException *e) {
-			
-		}
-		
-		@try {
-			// we could be a directory
-			if ([[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] count] > 0)
-			{
-				NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
-				NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
-				
-				long long size;
-				[sizeScanner scanLongLong:&size];
-				[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
-			}
-		}
-		@catch (NSException *e) {
-			
-		}
-
-		//see if we are a directory or file
-		NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
-		if ([resourceType childCount] == 0)
+		NSArray *propstatElements = [response elementsForLocalName:@"propstat" URI:@"DAV:"];
+		//We do not always have property elements.
+		if ([propstatElements count] > 0)
 		{
-			[attribs setObject:NSFileTypeRegular forKey:NSFileType];
+			NSXMLElement *props = [[[propstatElements objectAtIndex:0] elementsForLocalName:@"prop" URI:@"DAV:"] objectAtIndex:0];
+			
+			@try {
+				NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
+				NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
+				[attribs setObject:created forKey:NSFileCreationDate];
+			} 
+			@catch (NSException *e) {
+				
+			}
+			
+			@try {
+				NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
+				NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
+				[attribs setObject:modified forKey:NSFileModificationDate];
+			}
+			@catch (NSException *e) {
+				
+			}
+			
+			@try {
+				// we could be a directory
+				if ([[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] count] > 0)
+				{
+					NSString *sizeString = [[[props elementsForLocalName:@"getcontentlength" URI:@"DAV:"] objectAtIndex:0] stringValue];
+					NSScanner *sizeScanner = [NSScanner scannerWithString:sizeString];
+					
+					long long size;
+					[sizeScanner scanLongLong:&size];
+					[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
+				}
+			}
+			@catch (NSException *e) {
+				
+			}
+
+			//see if we are a directory or file
+			NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
+			if ([resourceType childCount] == 0)
+			{
+				[attribs setObject:NSFileTypeRegular forKey:NSFileType];
+			}
+			else
+			{
+				// WebDAV does not support the notion of Symbolic Links so currently we can take it to be a directory if the node has any children
+				[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+			}
 		}
 		else
 		{
-			// WebDAV does not support the notion of Symbolic Links so currently we can take it to be a directory if the node has any children
-			[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+			if ([path hasSuffix:@"/"])
+				[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+			else
+				[attribs setObject:NSFileTypeRegular forKey:NSFileType];
 		}
 		
 		[contents addObject:attribs];
