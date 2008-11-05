@@ -42,6 +42,17 @@ static NSImage *sHostIcon = nil;
 
 @implementation CKHost
 
+- (NSString *)UUID { return _UUID; }
+
+- (NSString *)uuid { return _UUID; }
+- (NSString *)host { return _host; }
+- (NSString *)port { return _port; }
+- (NSString *)username { return _username; }
+- (NSString *)connectionType { return _connectionType; }
+- (NSString *)initialPath { return _initialPath; }
+- (id) userInfo { return _userInfo; }
+- (CKHostCategory *)category { return _category; }
+
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
 + (void)initialize
@@ -62,32 +73,32 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		myUUID = [[NSString uuid] retain];
-		myConnectionType = @"FTP";
-		myHost = @"";
-		myUsername = @"";
-		myInitialPath = @"";
-		myPort = @"";
-		myIcon = [sHostIcon retain];
-		myProperties = [[NSMutableDictionary alloc] init];
+		_UUID = [[NSString uuid] retain];
+		_connectionType = @"FTP";
+		_host = @"";
+		_username = @"";
+		_initialPath = @"";
+		_port = @"";
+		_icon = [sHostIcon retain];
+		_properties = [[NSMutableDictionary alloc] init];
 	}
 	return self;
 }
 
 - (void)dealloc
 {
-	[myUUID release];
-	[myProperties release];
-	[myHost release];
-	[myPort release];
-	[myUsername release];
-	[myPassword release];
-	[myConnectionType release];
-	[myURL release];
-	[myDescription release];
-	[myInitialPath release];
-	[myUserInfo release];
-	[myIcon release];
+	[_UUID release];
+	[_properties release];
+	[_host release];
+	[_port release];
+	[_username release];
+	[_password release];
+	[_connectionType release];
+	[_URL release];
+	[_description release];
+	[_initialPath release];
+	[_userInfo release];
+	[_icon release];
 	
 	[super dealloc];
 }
@@ -128,36 +139,30 @@ static NSImage *sHostIcon = nil;
 	{
 		(void) [[dictionary objectForKey:@"version"] intValue];
 #pragma unused (version)
-		myUUID = [[dictionary objectForKey:@"uuid"] copy];
-		if (!myUUID)
+		_UUID = [[dictionary objectForKey:@"uuid"] copy];
+		if (!_UUID)
 		{
-			myUUID = [[NSString uuid] retain];
+			_UUID = [[NSString uuid] retain];
 		}
-		myHost = [[dictionary objectForKey:@"host"] copy];
-		myPort = [[dictionary objectForKey:@"port"] copy];
-		myUsername = [[dictionary objectForKey:@"username"] copy];
-		myConnectionType = [[dictionary objectForKey:@"type"] copy];
-		myDescription = [[dictionary objectForKey:@"description"] copy];
-		myInitialPath = [[dictionary objectForKey:@"initialPath"] copy];
-		if (!myInitialPath)
+		_host = [[dictionary objectForKey:@"host"] copy];
+		_port = [[dictionary objectForKey:@"port"] copy];
+		_username = [[dictionary objectForKey:@"username"] copy];
+		_connectionType = [[dictionary objectForKey:@"type"] copy];
+		_description = [[dictionary objectForKey:@"description"] copy];
+		_initialPath = [[dictionary objectForKey:@"initialPath"] copy];
+		if (!_initialPath)
 		{
-			myInitialPath = @"";
+			_initialPath = @"";
 		}
 		NSData *data = [dictionary objectForKey:@"icon"];
 		if (data)
-		{
-			myIcon = [[NSImage alloc] initWithData:data];
-		}
+			_icon = [[NSImage alloc] initWithData:data];
 		else
-		{
-			myIcon = [sHostIcon retain];
-		}
+			_icon = [sHostIcon retain];
 		NSDictionary *props = [dictionary objectForKey:@"properties"];
-		myProperties = [[NSMutableDictionary alloc] init];
+		_properties = [[NSMutableDictionary alloc] init];
 		if (props)
-		{
-			[myProperties addEntriesFromDictionary:props];
-		}
+			[_properties addEntriesFromDictionary:props];
 	}
 	return self;
 }
@@ -168,38 +173,38 @@ static NSImage *sHostIcon = nil;
 	
 	[plist setObject:@"host" forKey:@"class"];
 	[plist setObject:[NSNumber numberWithInt:[CKHost version]] forKey:@"version"];
-	[plist setObject:myUUID forKey:@"uuid"];
-	if (myHost)
+	[plist setObject:_UUID forKey:@"uuid"];
+	if (_host)
 	{
-		[plist setObject:myHost forKey:@"host"];
+		[plist setObject:_host forKey:@"host"];
 	}
-	if (myPort)
+	if (_port)
 	{
-		[plist setObject:myPort forKey:@"port"];
+		[plist setObject:_port forKey:@"port"];
 	}
-	if (myUsername)
+	if (_username)
 	{
-		[plist setObject:myUsername forKey:@"username"];
+		[plist setObject:_username forKey:@"username"];
 	}
-	if (myConnectionType)
+	if (_connectionType)
 	{
-		[plist setObject:myConnectionType forKey:@"type"];
+		[plist setObject:_connectionType forKey:@"type"];
 	}
-	if (myDescription)
+	if (_description)
 	{
-		[plist setObject:myDescription forKey:@"description"];
+		[plist setObject:_description forKey:@"description"];
 	}
-	if (myInitialPath)
+	if (_initialPath)
 	{
-		[plist setObject:myInitialPath forKey:@"initialPath"];
+		[plist setObject:_initialPath forKey:@"initialPath"];
 	}
-	if (myIcon)
+	if (_icon)
 	{
-		[plist setObject:[myIcon TIFFRepresentation] forKey:@"icon"];
+		[plist setObject:[_icon TIFFRepresentation] forKey:@"icon"];
 	}
-	if (myProperties)
+	if (_properties)
 	{
-		[plist setObject:myProperties forKey:@"properties"];
+		[plist setObject:_properties forKey:@"properties"];
 	}
 	
 	return plist;
@@ -211,28 +216,28 @@ static NSImage *sHostIcon = nil;
 	{
 		(void) [coder decodeIntForKey:@"version"];
 #pragma unused (version)
-		myUUID = [[coder decodeObjectForKey:@"uuid"] copy];
-		if (!myUUID)
+		_UUID = [[coder decodeObjectForKey:@"uuid"] copy];
+		if (!_UUID)
 		{
-			myUUID = [[NSString uuid] retain];
+			_UUID = [[NSString uuid] retain];
 		}
-		myHost = [[coder decodeObjectForKey:@"host"] copy];
-		myPort = [[coder decodeObjectForKey:@"port"] copy];
-		myUsername = [[coder decodeObjectForKey:@"username"] copy];
-		myConnectionType = [[coder decodeObjectForKey:@"type"] copy];
-		myDescription = [[coder decodeObjectForKey:@"description"] copy];
-		myInitialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
-		if (!myInitialPath)
-			myInitialPath = @"";
+		_host = [[coder decodeObjectForKey:@"host"] copy];
+		_port = [[coder decodeObjectForKey:@"port"] copy];
+		_username = [[coder decodeObjectForKey:@"username"] copy];
+		_connectionType = [[coder decodeObjectForKey:@"type"] copy];
+		_description = [[coder decodeObjectForKey:@"description"] copy];
+		_initialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
+		if (!_initialPath)
+			_initialPath = @"";
 		NSData *data = [coder decodeObjectForKey:@"icon"];
 		if (data)
-			myIcon = [[NSImage alloc] initWithData:data];
+			_icon = [[NSImage alloc] initWithData:data];
 		else
-			myIcon = [sHostIcon retain];
+			_icon = [sHostIcon retain];
 		NSDictionary *props = [coder decodeObjectForKey:@"properties"];
-		myProperties = [[NSMutableDictionary alloc] init];
+		_properties = [[NSMutableDictionary alloc] init];
 		if (props)
-			[myProperties addEntriesFromDictionary:props];
+			[_properties addEntriesFromDictionary:props];
 	}
 	return self;
 }
@@ -240,56 +245,56 @@ static NSImage *sHostIcon = nil;
 - (void)encodeWithCoder:(NSCoder *)coder
 {
 	[coder encodeInt:[CKHost version] forKey:@"version"];
-	[coder encodeObject:myUUID forKey:@"uuid"];
-	[coder encodeObject:myHost forKey:@"host"];
-	[coder encodeObject:myPort forKey:@"port"];
-	[coder encodeObject:myUsername forKey:@"username"];
-	[coder encodeObject:myConnectionType forKey:@"type"];
-	[coder encodeObject:myDescription forKey:@"description"];
-	[coder encodeObject:myInitialPath forKey:@"initialPath"];
-	if (myIcon)
-		[coder encodeObject:[myIcon TIFFRepresentation] forKey:@"icon"];
-	[coder encodeObject:myProperties forKey:@"properties"];
+	[coder encodeObject:_UUID forKey:@"uuid"];
+	[coder encodeObject:_host forKey:@"host"];
+	[coder encodeObject:_port forKey:@"port"];
+	[coder encodeObject:_username forKey:@"username"];
+	[coder encodeObject:_connectionType forKey:@"type"];
+	[coder encodeObject:_description forKey:@"description"];
+	[coder encodeObject:_initialPath forKey:@"initialPath"];
+	if (_icon)
+		[coder encodeObject:[_icon TIFFRepresentation] forKey:@"icon"];
+	[coder encodeObject:_properties forKey:@"properties"];
 }
 
 #pragma mark -
 #pragma mark Setters
 - (void)setHost:(NSString *)host
 {
-	if ([host isEqualToString:myHost])
+	if ([host isEqualToString:_host])
 		return;
-	NSString *oldServerString = (myHost != nil) ? [NSString stringWithString:myHost] : nil;
+	NSString *oldServerString = (_host != nil) ? [NSString stringWithString:_host] : nil;
 
 	[self willChangeValueForKey:@"host"];
-	[myHost autorelease];
-	myHost = [host copy];
+	[_host autorelease];
+	_host = [host copy];
 	[self didChangeValueForKey:@"host"];
 	[self didChange];
 	
 	if (!oldServerString || [oldServerString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:myUsername path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:_username path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 	[keychainItem setServer:host];		
 }
 
 - (void)setPort:(NSString *)port
 {
-	if (port == myPort)
+	if (port == _port)
 		return;
 	
-	NSString *oldPortString = (myPort) ? [NSString stringWithString:myPort] : nil;
+	NSString *oldPortString = (_port) ? [NSString stringWithString:_port] : nil;
 	
 	[self willChangeValueForKey:@"port"];
-	[myPort autorelease];
-	myPort = [port copy];
+	[_port autorelease];
+	_port = [port copy];
 	[self didChangeValueForKey:@"port"];
 	[self didChange];
 	
 	if (!oldPortString || [oldPortString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:myUsername path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:_username path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
 	[keychainItem setPort:[port intValue]];
 }
 
@@ -298,14 +303,14 @@ static NSImage *sHostIcon = nil;
 	if (!username)
 		username = @"";
 	
-	if (username == myUsername)
+	if (username == _username)
 		return;
 	
-	NSString *oldUsernameString = (myUsername) ? [NSString stringWithString:myUsername] : nil;
+	NSString *oldUsernameString = (_username) ? [NSString stringWithString:_username] : nil;
 	
 	[self willChangeValueForKey:@"username"];
-	[myUsername autorelease];
-	myUsername = [username copy];
+	[_username autorelease];
+	_username = [username copy];
 	[self didChangeValueForKey:@"username"];
 	[self didChange];
 	
@@ -314,7 +319,7 @@ static NSImage *sHostIcon = nil;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost withUsername:oldUsernameString path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:oldUsernameString path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		[keychainItem setUsername:username];
 	}
 }
@@ -324,35 +329,35 @@ static NSImage *sHostIcon = nil;
 	if (!password)
 		password = @"";
 	
-	if ([myPassword isEqualToString:password])
+	if ([_password isEqualToString:password])
 		return;
 
 	[self willChangeValueForKey:@"password"];
-	[myPassword autorelease];
-	myPassword = [password copy];
+	[_password autorelease];
+	_password = [password copy];
 	[self didChangeValueForKey:@"password"];
 	[self didChange];
 	
 	//Save to keychain
-	if (!myUsername || [myUsername length] == 0 || !myHost || [myHost length] == 0)
+	if (!_username || [_username length] == 0 || !_host || [_host length] == 0)
 		return;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
-																							   withUsername:myUsername
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
+																							   withUsername:_username
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		if (keychainItem)
 			[keychainItem setPassword:password];
 		else
 		{
-			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost 
-															   withUsername:myUsername
-																   password:myPassword
+			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:_host 
+															   withUsername:_username
+																   password:_password
 																	   path:nil
-																	   port:[myPort intValue]
+																	   port:[_port intValue]
 																   protocol:kSecProtocolTypeFTP];
 		}
 	}
@@ -360,11 +365,11 @@ static NSImage *sHostIcon = nil;
 
 - (void)setConnectionType:(NSString *)type
 {
-	if (type != myConnectionType)
+	if (type != _connectionType)
 	{
 		[self willChangeValueForKey:@"type"];
-		[myConnectionType autorelease];
-		myConnectionType = [type copy];
+		[_connectionType autorelease];
+		_connectionType = [type copy];
 		[self didChangeValueForKey:@"type"];
 		[self didChange];
 	}
@@ -375,12 +380,12 @@ static NSImage *sHostIcon = nil;
 	if (!path)
 		path = @"";
 	
-	if (path == myInitialPath)
+	if (path == _initialPath)
 		return;
 	
 	[self willChangeValueForKey:@"initialPath"];
-	[myInitialPath autorelease];
-	myInitialPath = [path copy];
+	[_initialPath autorelease];
+	_initialPath = [path copy];
 	[self didChangeValueForKey:@"initialPath"];
 	[self didChange];
 }
@@ -393,15 +398,20 @@ static NSImage *sHostIcon = nil;
 	[self setInitialPath:[url path]];
 	[self setPort:[NSString stringWithFormat:@"%@",[url port]]];
 	[self setConnectionType:[url scheme]];
+	
+	[self willChangeValueForKey:@"URL"];
+	[_URL autorelease];
+	_URL = [url copy];
+	[self didChangeValueForKey:@"URL"];
 }
 
 - (void)setAnnotation:(NSString *)description
 {
-	if (description != myDescription)
+	if (description != _description)
 	{
 		[self willChangeValueForKey:@"annotation"];
-		[myDescription autorelease];
-		myDescription = [description copy];
+		[_description autorelease];
+		_description = [description copy];
 		[self didChangeValueForKey:@"annotation"];
 		[self didChange];
 	}
@@ -409,11 +419,11 @@ static NSImage *sHostIcon = nil;
 
 - (void)setUserInfo:(id)ui
 {
-	if (ui != myUserInfo)
+	if (ui != _userInfo)
 	{
 		[self willChangeValueForKey:@"userInfo"];
-		[myUserInfo autorelease];
-		myUserInfo = [ui retain];
+		[_userInfo autorelease];
+		_userInfo = [ui retain];
 		[self didChangeValueForKey:@"userInfo"];
 		[self didChange];
 	}
@@ -421,20 +431,20 @@ static NSImage *sHostIcon = nil;
 
 - (void)setCategory:(CKHostCategory *)cat
 {
-	if (cat != myCategory)
+	if (cat != _category)
 	{
-		myCategory = cat;
+		_category = cat;
 		[self didChange];
 	}
 }
 
 - (void)setIcon:(NSImage *)icon
 {
-	if (icon != myIcon)
+	if (icon != _icon)
 	{
 		[self willChangeValueForKey:@"icon"];
-		[myIcon autorelease];
-		myIcon = [icon retain];
+		[_icon autorelease];
+		_icon = [icon retain];
 		[self didChangeValueForKey:@"icon"];
 		[self didChange];
 	}
@@ -443,46 +453,24 @@ static NSImage *sHostIcon = nil;
 - (void)setProperty:(id)property forKey:(NSString *)key
 {
 	[self willChangeValueForKey:key];
-	[myProperties setObject:property forKey:key];
+	[_properties setObject:property forKey:key];
 	[self didChangeValueForKey:key];
 }
 
 - (void)setProperties:(NSDictionary *)properties
 {
-	[myProperties removeAllObjects];
-	[myProperties addEntriesFromDictionary:properties];
+	[_properties removeAllObjects];
+	[_properties addEntriesFromDictionary:properties];
 }
 
 #pragma mark -
 #pragma mark Accessors
-- (NSString *)uuid
-{
-	return myUUID;
-}
-
-- (NSString *)host
-{
-	return myHost;
-}
-
-- (NSString *)port
-{
-	return myPort;
-}
-
-- (NSString *)username
-{
-	return myUsername;
-}
-
 - (NSString *)password
 {
-	if (myPassword)
-	{
-		return myPassword;
-	}
+	if (_password)
+		return _password;
 	
-	if (!myHost || !myUsername || [myHost isEqualToString:@""] || [myUsername isEqualToString:@""])
+	if (!_host || !_username || [_host isEqualToString:@""] || [_username isEqualToString:@""])
 	{
 		//We don't have anything to go on, so let's die here.
 		return nil;
@@ -490,24 +478,14 @@ static NSImage *sHostIcon = nil;
 	
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
-																							   withUsername:myUsername
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
+																							   withUsername:_username
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		return [keychainItem password];
 	}
 	return nil;
-}
-
-- (NSString *)connectionType
-{
-	return myConnectionType;
-}
-
-- (NSString *)initialPath
-{
-	return myInitialPath;
 }
 
 - (BOOL)isAbsoluteInitialPath
@@ -535,7 +513,7 @@ static NSImage *sHostIcon = nil;
 	if ([self host])
 		[url appendString:[self host]];
 	
-	NSString *port = myPort;
+	NSString *port = _port;
 	if (!port || [port isEqualToString:@""])
 	{
 		port = [AbstractConnection registeredPortForConnectionType:[self connectionType]];
@@ -596,12 +574,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)annotation
 {
-	return myDescription;
-}
-
-- (id)userInfo
-{
-	return myUserInfo;
+	return _description;
 }
 
 - (BOOL)isEditable
@@ -609,36 +582,31 @@ static NSImage *sHostIcon = nil;
 	return YES;
 }
 
-- (CKHostCategory *)category
-{
-	return myCategory;
-}
-
 - (id <AbstractConnectionProtocol>)connection
 {
 	id <AbstractConnectionProtocol> connection = nil;
 	NSError *error = nil;
 	
-	if (myURL)
+	if (_URL)
 	{
-		connection = [AbstractConnection connectionWithURL:myURL error:&error];
+		connection = [AbstractConnection connectionWithURL:_URL error:&error];
 	}
 	
-	if (!connection && myConnectionType && ![myConnectionType isEqualToString:@""] && ![myConnectionType isEqualToString:@"Auto Select"])
+	if (!connection && _connectionType && ![_connectionType isEqualToString:@""] && ![_connectionType isEqualToString:@"Auto Select"])
 	{
-		connection = [AbstractConnection connectionWithName:myConnectionType
-													   host:myHost
-													   port:myPort
-												   username:myUsername
+		connection = [AbstractConnection connectionWithName:_connectionType
+													   host:_host
+													   port:_port
+												   username:_username
 												   password:[self password]
 													  error:&error];
 	}
 	
 	if (!connection)
 	{
-		connection = [AbstractConnection connectionToHost:myHost
-													 port:myPort
-												 username:myUsername
+		connection = [AbstractConnection connectionToHost:_host
+													 port:_port
+												 username:_username
 												 password:[self password]
 													error:&error];
 	}
@@ -699,7 +667,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSImage *)icon
 {
-	return myIcon;
+	return _icon;
 }
 
 - (NSImage *)iconWithSize:(NSSize)size
@@ -712,12 +680,12 @@ static NSImage *sHostIcon = nil;
 
 - (id)propertyForKey:(NSString *)key
 {
-	return [myProperties objectForKey:key];
+	return [_properties objectForKey:key];
 }
 
 - (NSDictionary *)properties
 {
-	return myProperties;
+	return _properties;
 }
 
 #pragma mark -
@@ -822,16 +790,16 @@ static NSImage *sHostIcon = nil;
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
 	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
-		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:myHost
-																							   withUsername:myUsername
+		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
+																							   withUsername:_username
 																									   path:nil
-																									   port:[myPort intValue]
+																									   port:[_port intValue]
 																								   protocol:kSecProtocolTypeFTP];
 		
-		if (!keychainItem && myPassword && [myPassword length] > 0 && myUsername && [myUsername length] > 0)
+		if (!keychainItem && _password && [_password length] > 0 && _username && [_username length] > 0)
 		{
 			//We don't have any keychain item created for us, but we have all the info we need to make one. Let's do it.
-			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:myHost withUsername:myUsername password:myPassword path:nil port:[myPort intValue] protocol:kSecProtocolTypeFTP];
+			[[EMKeychainProxy sharedProxy] addInternetKeychainItemForServer:_host withUsername:_username password:_password path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		}	
 	}
 }

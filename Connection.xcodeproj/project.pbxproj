@@ -2420,6 +2420,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
@@ -2433,6 +2434,7 @@
 				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
 				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;
@@ -2451,7 +2453,7 @@
 				79A857920B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */ = {
 			isa = XCConfigurationList;
@@ -2461,7 +2463,7 @@
 				79A857930B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		795FF4F70B0C013300EA9292 /* Build configuration list for PBXNativeTarget "DropletHelper" */ = {
 			isa = XCConfigurationList;
@@ -2471,7 +2473,7 @@
 				79A8578F0B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		7983E6E20B0C4E1E00F5078E /* Build configuration list for PBXNativeTarget "DropletLauncher" */ = {
 			isa = XCConfigurationList;
@@ -2481,7 +2483,7 @@
 				79A8578D0B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */ = {
 			isa = XCConfigurationList;
@@ -2491,7 +2493,7 @@
 				79A857900B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
@@ -2501,7 +2503,7 @@
 				79A8578E0B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Connection" */ = {
 			isa = XCConfigurationList;
@@ -2511,7 +2513,7 @@
 				79A857910B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */ = {
 			isa = XCConfigurationList;
@@ -2521,7 +2523,7 @@
 				79A857940B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

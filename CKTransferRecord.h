@@ -27,55 +27,66 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+
 @protocol AbstractConnectionProtocol;
+
 
 @interface CKTransferRecord : NSObject
 {
-	BOOL				isUpload;
-	NSString			*myName;
-	unsigned long long	mySize;
-	unsigned long long  myTransferred;
-	unsigned long long  myIntermediateTransferred;
-	NSTimeInterval		myLastTransferTime;
-	NSTimeInterval		myTransferStartTime;
-	NSTimeInterval		myLastDirectorySpeedUpdate;
-	double				mySpeed;
-	int					myProgress;
-	NSMutableArray		*myContents;
-	CKTransferRecord	*myParent; //not retained
-	NSMutableDictionary *myProperties;
+	BOOL _isUpload;
+	NSString *_name;
+	unsigned long long _size;
+	unsigned long long _transferred;
+	unsigned long long _intermediateTransferred;
+	NSTimeInterval _lastTransferTime;
+	NSTimeInterval _transferStartTime;
+	NSTimeInterval _lastDirectorySpeedUpdate;
+	float _speed;
+	NSUInteger _progress;
+	NSMutableArray *_contents;
+	CKTransferRecord *_parent; //not retained
+	NSMutableDictionary *_properties;
 	
-	id <AbstractConnectionProtocol> myConnection; //not retained
-	NSError				*myError;
+	id <AbstractConnectionProtocol> _connection; //not retained
+	NSError *_error;
 }
 
-+ (id)recordWithName:(NSString *)name size:(unsigned long long)size;
-- (id)initWithName:(NSString *)name size:(unsigned long long)size;
-
 - (BOOL)isUpload;
+- (void)setUpload:(BOOL)flag;
 
 - (NSString *)name;
 - (void)setName:(NSString *)name;
-- (void)setProgress:(int)progress; 
 
-- (void)cancel:(id)sender;
-
-- (NSNumber *)progress;
 - (unsigned long long)size;
-- (unsigned long long)transferred;
-- (double)speed; // bytes per second
-- (BOOL)hasError;
+- (void)setSize:(unsigned long long)size;
+
+- (float)speed;
+- (void)setSpeed:(float)speed;	// TODO: Switch to CGFloat
+
 - (NSError *)error;
 
 - (id <AbstractConnectionProtocol>)connection;
+- (void)setConnection:(id <AbstractConnectionProtocol>)connection;	// Weak ref
+
+- (CKTransferRecord *)parent;
+- (void)setParent:(CKTransferRecord *)parent;	// Weak ref
+
+
++ (id)recordWithName:(NSString *)name size:(unsigned long long)size;
+- (id)initWithName:(NSString *)name size:(unsigned long long)size;
+- (void)cancel:(id)sender;
 
 - (BOOL)isDirectory;
+- (unsigned long long)transferred;
+- (NSInteger)progress;
+- (void)setProgress:(NSInteger)progress;
 
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
 
+- (BOOL)hasError;
+
 - (CKTransferRecord *)root;
-- (CKTransferRecord *)parent;
 - (NSString *)path; 
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
