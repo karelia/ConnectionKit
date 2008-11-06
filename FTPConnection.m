@@ -3314,36 +3314,47 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (ConnectionCommand *)nextAvailableDataConnectionType
 {
-	ConnectionCommand *cmd = nil;
-	if (_ftpFlags.canUsePASV) {
-		cmd = [ConnectionCommand command:@"PASV" 
-							  awaitState:ConnectionIdleState
-							   sentState:FTPSettingPassiveState
-							   dependant:nil 
-								userInfo:nil];
+	/*
+	 This property is a string specifying the preferred data connection type. If it's specified, we will keep trying with *that* connection type. This is desired behavior because as is often the case, the second or third (or 10th, if we experience a connection drop) try at setting a given data type will work –– whereas falling back to other (typically unsupported) types will not. Thus, by setting this property, you are *explicitly* asking this connection to connect *only* with that connection type.
+	 
+	 If it's not specified, we'll continually fall back to different connection types until we find that works (or fail.)
+	 
+	 Supported Types (as strings) are:
+	 (1) "Passive"
+	 (2) "Extended Passive"
+	 (3) "Extended Active"
+	 (4) "Active"
+	 */
+	NSString *preferredDataConnectionType = [self propertyForKey:@"CKFTPDataConnectionType"];
+	
+	NSString *connectionTypeString = nil;
+	ConnectionState sendState;
+	
+	BOOL explicitlySetConnectionType = (preferredDataConnectionType && [preferredDataConnectionType length] > 0);
+	BOOL prefersPASV = (explicitlySetConnectionType && [preferredDataConnectionType isEqualToString:@"Passive"]);
+	BOOL prefersEPSV = (explicitlySetConnectionType && [preferredDataConnectionType isEqualToString:@"Extended Passive"]);
+	BOOL prefersEPRT = (explicitlySetConnectionType && [preferredDataConnectionType isEqualToString:@"Extended Active"]);
+	BOOL prefersPORT = (explicitlySetConnectionType && [preferredDataConnectionType isEqualToString:@"Active"]);
+	
+	if (prefersPASV || (!explicitlySetConnectionType && _ftpFlags.canUsePASV))
+	{
+		connectionTypeString = @"PASV";
+		sendState = FTPSettingPassiveState;
 	}
-	else if (_ftpFlags.canUseEPSV) {
-		cmd = [ConnectionCommand command:@"EPSV" 
-							  awaitState:ConnectionIdleState
-							   sentState:FTPSettingEPSVState
-							   dependant:nil 
-								userInfo:nil];
+	else if (prefersEPSV || (!explicitlySetConnectionType && _ftpFlags.canUseEPSV))
+	{
+		connectionTypeString = @"EPSV";
+		sendState = FTPSettingEPSVState;
 	}
-	else if (_ftpFlags.canUseEPRT) {
-		//we scan for this in the send command to setup the connection
-		cmd = [ConnectionCommand command:@"EPRT" 
-							  awaitState:ConnectionIdleState
-							   sentState:FTPSettingEPRTState
-							   dependant:nil 
-								userInfo:nil];
+	else if (prefersEPRT || (!explicitlySetConnectionType && _ftpFlags.canUseEPRT))
+	{
+		connectionTypeString = @"EPRT";
+		sendState = FTPSettingEPRTState;
 	}
-	else if (_ftpFlags.canUseActive) {
-		//we scan for this in the send command to setup the connection
-		cmd = [ConnectionCommand command:@"PORT" 
-							  awaitState:ConnectionIdleState
-							   sentState:FTPSettingActiveState
-							   dependant:nil 
-								userInfo:nil];
+	else if (prefersPORT || (!explicitlySetConnectionType && _ftpFlags.canUseActive))
+	{
+		connectionTypeString = @"PORT";
+		sendState = FTPSettingActiveState;
 	}
 	else
 	{
@@ -3356,15 +3367,29 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSError *err = [NSError errorWithDomain:FTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:err];
 		}
-		cmd = [ConnectionCommand command:@"QUIT"
-							  awaitState:ConnectionIdleState	
-							   sentState:ConnectionSentQuitState
-							   dependant:nil
-								userInfo:nil];
+	}
+	
+	ConnectionCommand *command;
+	if (connectionTypeString)
+	{
+		command = [ConnectionCommand command:connectionTypeString
+								  awaitState:ConnectionIdleState
+								   sentState:sendState
+								   dependant:nil
+									userInfo:nil];
+	}
+	else
+	{
+		command = [ConnectionCommand command:@"QUIT"
+								  awaitState:ConnectionIdleState	
+								   sentState:ConnectionSentQuitState
+								   dependant:nil
+									userInfo:nil];		
 	}
 	_ftpFlags.received226 = NO;
 	
-	return cmd;
+	
+	return command;
 }
 
 - (ConnectionCommand *)pushDataConnectionOnCommandQueue
