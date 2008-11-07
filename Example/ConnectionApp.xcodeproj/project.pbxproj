@@ -1,0 +1,1610 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		7983E7E80B0C4F2200F5078E /* Build All */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */;
+			buildPhases = (
+				7983E7EE0B0C4F5100F5078E /* ShellScript */,
+			);
+			dependencies = (
+				7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */,
+				7983E7EC0B0C4F4600F5078E /* PBXTargetDependency */,
+			);
+			name = "Build All";
+			productName = "Build All";
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */; };
+		790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = 790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */; };
+		790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0E30ACCE966004B4021 /* KTLogController.m */; };
+		790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97324FDCFA39411CA2CEA /* AppKit.framework */; };
+		790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
+		792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
+		792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
+		794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD10A5CD6CA00913151 /* libcrypto.dylib */; };
+		794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD40A5CD6F900913151 /* libssl.dylib */; };
+		795A010A0B116832006905FA /* edit.png in Resources */ = {isa = PBXBuildFile; fileRef = 795A01090B116832006905FA /* edit.png */; };
+		795FF5020B0C018100EA9292 /* DropletMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF5010B0C018100EA9292 /* DropletMain.m */; };
+		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
+		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
+		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
+		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
+		798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */ = {isa = PBXBuildFile; fileRef = 798300050B0D4A2600F5078E /* DropletLauncher.nib */; };
+		7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E0940B0C1A8500F5078E /* DropletOutlineView.m */; };
+		7983E2310B0C244700F5078E /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
+		7983E6DE0B0C4E0000F5078E /* DropletLauncher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E6730B0C41E300F5078E /* DropletLauncher.m */; };
+		7983E7000B0C4E2800F5078E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		7983E7050B0C4E4E00F5078E /* DropletLauncher in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6D20B0C4DF000F5078E /* DropletLauncher */; };
+		7983EDF90B0C802C00F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
+		7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */; };
+		79CFD8D709F706F500172CDD /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8CE09F706F500172CDD /* Controller.m */; };
+		79CFD8D809F706F500172CDD /* FileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D009F706F500172CDD /* FileTransfer.m */; };
+		79CFD8D909F706F500172CDD /* InputDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D209F706F500172CDD /* InputDialog.m */; };
+		79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D409F706F500172CDD /* PermissionsController.m */; };
+		79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D609F706F500172CDD /* ProgressCell.m */; };
+		79CFD8E009F7071400172CDD /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8DC09F7071400172CDD /* InputDialog.nib */; };
+		79CFD8E109F7071400172CDD /* Permissions.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8DE09F7071400172CDD /* Permissions.nib */; };
+		79CFD8F409F7076200172CDD /* connect.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8E809F7076200172CDD /* connect.tiff */; };
+		79CFD8F509F7076200172CDD /* console.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8E909F7076200172CDD /* console.tiff */; };
+		79CFD8F609F7076200172CDD /* delete.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EA09F7076200172CDD /* delete.tiff */; };
+		79CFD8F709F7076200172CDD /* download.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EB09F7076200172CDD /* download.tif */; };
+		79CFD8F909F7076200172CDD /* home.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8ED09F7076200172CDD /* home.tiff */; };
+		79CFD8FA09F7076200172CDD /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EE09F7076200172CDD /* icon.icns */; };
+		79CFD8FB09F7076200172CDD /* lock.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EF09F7076200172CDD /* lock.tiff */; };
+		79CFD8FC09F7076200172CDD /* redo.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F009F7076200172CDD /* redo.tif */; };
+		79CFD8FD09F7076200172CDD /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
+		79CFD8FE09F7076200172CDD /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
+		79CFD8FF09F7076200172CDD /* upload.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F309F7076200172CDD /* upload.tif */; };
+		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
+		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
+		79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
+		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
+		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
+		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
+		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
+		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
+		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
+		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
+		CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */ = {isa = PBXBuildFile; fileRef = CE4F78E80B9C8F530083B946 /* Logs.icns */; };
+		D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */; };
+		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
+		D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
+		D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
+		D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8D1107260486CEB800E47090;
+			remoteInfo = Connection;
+		};
+		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
+			remoteInfo = Framework;
+		};
+		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
+			remoteInfo = Framework;
+		};
+		7983E7030B0C4E3300F5078E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7983E6D10B0C4DF000F5078E;
+			remoteInfo = DropletLauncher;
+		};
+		7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
+			remoteInfo = Framework;
+		};
+		7983E7EB0B0C4F4600F5078E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 795FF4F00B0C013200EA9292;
+			remoteInfo = DropletHelper;
+		};
+		7983E8360B0C5B9800F5078E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 7983E7E80B0C4F2200F5078E;
+			remoteInfo = "Build All";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		79CFD96909F70A4D00172CDD /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		089C165DFE840E0CC02AAC07 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
+		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		29B97319FDCFA39411CA2CEA /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/MainMenu.nib; sourceTree = "<group>"; };
+		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
+		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
+		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
+		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
+		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
+		790FF0DC0ACCE8EA004B4021 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLogViewer.nib; sourceTree = "<group>"; };
+		790FF0E20ACCE966004B4021 /* KTLogController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = KTLogController.h; sourceTree = "<group>"; };
+		790FF0E30ACCE966004B4021 /* KTLogController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = KTLogController.m; sourceTree = "<group>"; };
+		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
+		794EFDD40A5CD6F900913151 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
+		795A01090B116832006905FA /* edit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = edit.png; sourceTree = "<group>"; };
+		795FF4F10B0C013200EA9292 /* DropletHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DropletHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DropletHelper-Info.plist"; sourceTree = "<group>"; };
+		795FF5010B0C018100EA9292 /* DropletMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletMain.m; sourceTree = "<group>"; };
+		795FF5060B0C048700EA9292 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Droplet.nib; sourceTree = "<group>"; };
+		795FF50C0B0C05F400EA9292 /* DropletController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DropletController.m; sourceTree = "<group>"; };
+		795FF50D0B0C05F400EA9292 /* DropletController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DropletController.h; sourceTree = "<group>"; };
+		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
+		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		798300060B0D4A2600F5078E /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		7983E0930B0C1A8500F5078E /* DropletOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropletOutlineView.h; sourceTree = "<group>"; };
+		7983E0940B0C1A8500F5078E /* DropletOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletOutlineView.m; sourceTree = "<group>"; };
+		7983E6730B0C41E300F5078E /* DropletLauncher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletLauncher.m; sourceTree = "<group>"; };
+		7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = DropletIcon.icns; sourceTree = "<group>"; };
+		7983E6D20B0C4DF000F5078E /* DropletLauncher */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DropletLauncher; sourceTree = BUILT_PRODUCTS_DIR; };
+		7983F3EC0B0D1B8B00F5078E /* DropletPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropletPanel.h; sourceTree = "<group>"; };
+		7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletPanel.m; sourceTree = "<group>"; };
+		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		79CFD12709F702BE00172CDD /* Framework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
+		79CFD8CD09F706F500172CDD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = SOURCE_ROOT; };
+		79CFD8CE09F706F500172CDD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = SOURCE_ROOT; };
+		79CFD8CF09F706F500172CDD /* FileTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileTransfer.h; sourceTree = SOURCE_ROOT; };
+		79CFD8D009F706F500172CDD /* FileTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransfer.m; sourceTree = SOURCE_ROOT; };
+		79CFD8D109F706F500172CDD /* InputDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputDialog.h; sourceTree = SOURCE_ROOT; };
+		79CFD8D209F706F500172CDD /* InputDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InputDialog.m; sourceTree = SOURCE_ROOT; };
+		79CFD8D309F706F500172CDD /* PermissionsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PermissionsController.h; sourceTree = SOURCE_ROOT; };
+		79CFD8D409F706F500172CDD /* PermissionsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PermissionsController.m; sourceTree = SOURCE_ROOT; };
+		79CFD8D509F706F500172CDD /* ProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressCell.h; sourceTree = SOURCE_ROOT; };
+		79CFD8D609F706F500172CDD /* ProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressCell.m; sourceTree = SOURCE_ROOT; };
+		79CFD8DD09F7071400172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/InputDialog.nib; sourceTree = "<group>"; };
+		79CFD8DF09F7071400172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Permissions.nib; sourceTree = "<group>"; };
+		79CFD8E809F7076200172CDD /* connect.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = connect.tiff; sourceTree = SOURCE_ROOT; };
+		79CFD8E909F7076200172CDD /* console.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = console.tiff; sourceTree = SOURCE_ROOT; };
+		79CFD8EA09F7076200172CDD /* delete.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = delete.tiff; sourceTree = SOURCE_ROOT; };
+		79CFD8EB09F7076200172CDD /* download.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = download.tif; sourceTree = SOURCE_ROOT; };
+		79CFD8ED09F7076200172CDD /* home.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = home.tiff; sourceTree = SOURCE_ROOT; };
+		79CFD8EE09F7076200172CDD /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = SOURCE_ROOT; };
+		79CFD8EF09F7076200172CDD /* lock.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = lock.tiff; sourceTree = SOURCE_ROOT; };
+		79CFD8F009F7076200172CDD /* redo.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = redo.tif; sourceTree = SOURCE_ROOT; };
+		79CFD8F109F7076200172CDD /* symlink_file.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = symlink_file.tif; sourceTree = SOURCE_ROOT; };
+		79CFD8F209F7076200172CDD /* symlink_folder.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = symlink_folder.tif; sourceTree = SOURCE_ROOT; };
+		79CFD8F309F7076200172CDD /* upload.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = upload.tif; sourceTree = SOURCE_ROOT; };
+		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
+		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
+		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
+		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
+		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
+		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
+		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE4F78E80B9C8F530083B946 /* Logs.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Logs.icns; sourceTree = "<group>"; };
+		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE9FC9550DF70F32002330B2 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95B0DF70F3D002330B2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95C0DF70F44002330B2 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95D0DF70F49002330B2 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC95E0DF70F50002330B2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC9610DF70F56002330B2 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9FC9620DF70F5C002330B2 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEF894CF0BD72A45002886AA /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894E90BD72A55002886AA /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894EE0BD72A5C002886AA /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894F30BD72A62002886AA /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894F80BD72A6A002886AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF894FD0BD72A70002886AA /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CEF895020BD72A76002886AA /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = /usr/lib/libicucore.A.dylib; sourceTree = "<absolute>"; };
+		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
+		D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		09D6601A09FD37990000BA00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		790FF0CA0ACCE4B7004B4021 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */,
+				790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		795FF4EF0B0C013200EA9292 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */,
+				7983E2310B0C244700F5078E /* Connection.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7983E6D00B0C4DF000F5078E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7983E7000B0C4E2800F5078E /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79CFD12409F702BE00172CDD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
+				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
+				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
+				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
+				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
+				794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */,
+				794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */,
+				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D11072E0486CEB800E47090 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */,
+				79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */,
+				79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */,
+				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
+				794EFDD40A5CD6F900913151 /* libssl.dylib */,
+				794EFDD10A5CD6CA00913151 /* libcrypto.dylib */,
+				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
+				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
+				79FB807109F74185006E7D11 /* Carbon.framework */,
+				79CFD93609F7084000172CDD /* Security.framework */,
+				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
+				79CFD92D09F7080B00172CDD /* libz.dylib */,
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+			);
+			name = "Linked Frameworks";
+			sourceTree = "<group>";
+		};
+		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
+				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
+				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
+			);
+			name = "Other Frameworks";
+			sourceTree = "<group>";
+		};
+		19C28FACFE9D520D11CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8D1107320486CEB800E47090 /* Connection.app */,
+				79CFD12609F702BE00172CDD /* Connection.framework */,
+				09D6601D09FD37990000BA00 /* UnitTest.octest */,
+				790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */,
+				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
+				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		29B97314FDCFA39411CA2CEA /* Connection */ = {
+			isa = PBXGroup;
+			children = (
+				790FF0C30ACCE483004B4021 /* KTLog Viewer */,
+				795FF4EA0B0C00FF00EA9292 /* Droplet */,
+				79CFD11709F7020500172CDD /* Test Application */,
+				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				29B97317FDCFA39411CA2CEA /* Resources */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
+				19C28FACFE9D520D11CA2CBB /* Products */,
+			);
+			name = Connection;
+			sourceTree = "<group>";
+		};
+		29B97315FDCFA39411CA2CEA /* Other Sources */ = {
+			isa = PBXGroup;
+			children = (
+				32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */,
+				29B97316FDCFA39411CA2CEA /* main.m */,
+			);
+			name = "Other Sources";
+			sourceTree = "<group>";
+		};
+		29B97317FDCFA39411CA2CEA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				CE4F78E80B9C8F530083B946 /* Logs.icns */,
+				797CC8C509F861770063FF9B /* Localizable.strings */,
+				79CFD8E709F7072100172CDD /* Interfaces */,
+				79CFD8E409F7071E00172CDD /* Images */,
+				79CFD12709F702BE00172CDD /* Framework-Info.plist */,
+				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		790FF0C30ACCE483004B4021 /* KTLog Viewer */ = {
+			isa = PBXGroup;
+			children = (
+				790FF0E20ACCE966004B4021 /* KTLogController.h */,
+				790FF0E30ACCE966004B4021 /* KTLogController.m */,
+				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
+				790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */,
+				790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */,
+			);
+			name = "KTLog Viewer";
+			sourceTree = "<group>";
+		};
+		795FF4EA0B0C00FF00EA9292 /* Droplet */ = {
+			isa = PBXGroup;
+			children = (
+				7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */,
+				795FF50D0B0C05F400EA9292 /* DropletController.h */,
+				795FF50C0B0C05F400EA9292 /* DropletController.m */,
+				795FF5010B0C018100EA9292 /* DropletMain.m */,
+				795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */,
+				7983E0930B0C1A8500F5078E /* DropletOutlineView.h */,
+				7983E0940B0C1A8500F5078E /* DropletOutlineView.m */,
+				7983E6730B0C41E300F5078E /* DropletLauncher.m */,
+				798300050B0D4A2600F5078E /* DropletLauncher.nib */,
+				795FF5050B0C048700EA9292 /* Droplet.nib */,
+				7983F3EC0B0D1B8B00F5078E /* DropletPanel.h */,
+				7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */,
+			);
+			name = Droplet;
+			sourceTree = "<group>";
+		};
+		79CFD11709F7020500172CDD /* Test Application */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD8CD09F706F500172CDD /* Controller.h */,
+				79CFD8CE09F706F500172CDD /* Controller.m */,
+				79CFD8CF09F706F500172CDD /* FileTransfer.h */,
+				79CFD8D009F706F500172CDD /* FileTransfer.m */,
+				79CFD8D109F706F500172CDD /* InputDialog.h */,
+				79CFD8D209F706F500172CDD /* InputDialog.m */,
+				79CFD8D309F706F500172CDD /* PermissionsController.h */,
+				79CFD8D409F706F500172CDD /* PermissionsController.m */,
+				79CFD8D509F706F500172CDD /* ProgressCell.h */,
+				79CFD8D609F706F500172CDD /* ProgressCell.m */,
+			);
+			name = "Test Application";
+			sourceTree = "<group>";
+		};
+		79CFD8E409F7071E00172CDD /* Images */ = {
+			isa = PBXGroup;
+			children = (
+				D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */,
+				D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */,
+				795A01090B116832006905FA /* edit.png */,
+				79CFD97A09F70AA700172CDD /* network_icon.png */,
+				79CFD97B09F70AA700172CDD /* Stop.tiff */,
+				79CFD8E809F7076200172CDD /* connect.tiff */,
+				79CFD8E909F7076200172CDD /* console.tiff */,
+				79CFD8EA09F7076200172CDD /* delete.tiff */,
+				79CFD8EB09F7076200172CDD /* download.tif */,
+				79CFD8ED09F7076200172CDD /* home.tiff */,
+				79CFD8EE09F7076200172CDD /* icon.icns */,
+				79CFD8EF09F7076200172CDD /* lock.tiff */,
+				79CFD8F009F7076200172CDD /* redo.tif */,
+				79CFD8F109F7076200172CDD /* symlink_file.tif */,
+				79CFD8F209F7076200172CDD /* symlink_folder.tif */,
+				79CFD8F309F7076200172CDD /* upload.tif */,
+			);
+			name = Images;
+			sourceTree = "<group>";
+		};
+		79CFD8E709F7072100172CDD /* Interfaces */ = {
+			isa = PBXGroup;
+			children = (
+				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
+				79CFD8DC09F7071400172CDD /* InputDialog.nib */,
+				79CFD8DE09F7071400172CDD /* Permissions.nib */,
+			);
+			name = Interfaces;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		79CFD12109F702BE00172CDD /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		09D6601C09FD37990000BA00 /* UnitTest */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */;
+			buildPhases = (
+				09D6601809FD37990000BA00 /* Resources */,
+				09D6601909FD37990000BA00 /* Sources */,
+				09D6601A09FD37990000BA00 /* Frameworks */,
+				09D6601B09FD37990000BA00 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				09D6604509FD37DD0000BA00 /* PBXTargetDependency */,
+				09D6604709FD37DD0000BA00 /* PBXTargetDependency */,
+			);
+			name = UnitTest;
+			productName = UnitTest;
+			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
+			productType = "com.apple.product-type.bundle";
+		};
+		790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */;
+			buildPhases = (
+				790FF0C80ACCE4B7004B4021 /* Resources */,
+				790FF0C90ACCE4B7004B4021 /* Sources */,
+				790FF0CA0ACCE4B7004B4021 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "KTLog Viewer";
+			productName = "KTLog Viewer";
+			productReference = 790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */;
+			productType = "com.apple.product-type.application";
+		};
+		795FF4F00B0C013200EA9292 /* DropletHelper */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 795FF4F70B0C013300EA9292 /* Build configuration list for PBXNativeTarget "DropletHelper" */;
+			buildPhases = (
+				795FF4ED0B0C013200EA9292 /* Resources */,
+				795FF4EE0B0C013200EA9292 /* Sources */,
+				795FF4EF0B0C013200EA9292 /* Frameworks */,
+				7983ED650B0C749800F5078E /* Reset Install Path */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */,
+			);
+			name = DropletHelper;
+			productName = DropletHelper;
+			productReference = 795FF4F10B0C013200EA9292 /* DropletHelper.app */;
+			productType = "com.apple.product-type.application";
+		};
+		7983E6D10B0C4DF000F5078E /* DropletLauncher */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7983E6E20B0C4E1E00F5078E /* Build configuration list for PBXNativeTarget "DropletLauncher" */;
+			buildPhases = (
+				7983E6CF0B0C4DF000F5078E /* Sources */,
+				7983E6D00B0C4DF000F5078E /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = DropletLauncher;
+			productName = DropletLauncher;
+			productReference = 7983E6D20B0C4DF000F5078E /* DropletLauncher */;
+			productType = "com.apple.product-type.tool";
+		};
+		79CFD12509F702BE00172CDD /* Framework */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
+			buildPhases = (
+				797CBBEB09F854B60063FF9B /* Generate Localizable.strings */,
+				79CFD12309F702BE00172CDD /* Sources */,
+				79CFD12409F702BE00172CDD /* Frameworks */,
+				79CFD12109F702BE00172CDD /* Headers */,
+				79CFD12209F702BE00172CDD /* Resources */,
+				7931260F0B3684B2002FF80D /* Strip UKKQueue */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7983E7040B0C4E3300F5078E /* PBXTargetDependency */,
+			);
+			name = Framework;
+			productName = Framework;
+			productReference = 79CFD12609F702BE00172CDD /* Connection.framework */;
+			productType = "com.apple.product-type.framework";
+		};
+		8D1107260486CEB800E47090 /* Connection */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Connection" */;
+			buildPhases = (
+				8D1107290486CEB800E47090 /* Resources */,
+				8D11072C0486CEB800E47090 /* Sources */,
+				8D11072E0486CEB800E47090 /* Frameworks */,
+				79CFD96909F70A4D00172CDD /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				7983E8370B0C5B9800F5078E /* PBXTargetDependency */,
+			);
+			name = Connection;
+			productInstallPath = "$(HOME)/Applications";
+			productName = Connection;
+			productReference = 8D1107320486CEB800E47090 /* Connection.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		29B97313FDCFA39411CA2CEA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ConnectionApp" */;
+			compatibilityVersion = "Xcode 2.4";
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+				ja,
+				fr,
+				de,
+				zh_TW,
+				da,
+				it,
+				zh_CN,
+			);
+			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7983E7E80B0C4F2200F5078E /* Build All */,
+				8D1107260486CEB800E47090 /* Connection */,
+				79CFD12509F702BE00172CDD /* Framework */,
+				09D6601C09FD37990000BA00 /* UnitTest */,
+				790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */,
+				795FF4F00B0C013200EA9292 /* DropletHelper */,
+				7983E6D10B0C4DF000F5078E /* DropletLauncher */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		09D6601809FD37990000BA00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		790FF0C80ACCE4B7004B4021 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */,
+				CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		795FF4ED0B0C013200EA9292 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7983EDF90B0C802C00F5078E /* DropletIcon.icns in Resources */,
+				795FF5070B0C048700EA9292 /* Droplet.nib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79CFD12209F702BE00172CDD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7983E7050B0C4E4E00F5078E /* DropletLauncher in Resources */,
+				797CC8C709F861770063FF9B /* Localizable.strings in Resources */,
+				7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */,
+				798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */,
+				792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */,
+				792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */,
+				D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */,
+				D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D1107290486CEB800E47090 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
+				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
+				79CFD8E009F7071400172CDD /* InputDialog.nib in Resources */,
+				79CFD8E109F7071400172CDD /* Permissions.nib in Resources */,
+				79CFD8F409F7076200172CDD /* connect.tiff in Resources */,
+				79CFD8F509F7076200172CDD /* console.tiff in Resources */,
+				79CFD8F609F7076200172CDD /* delete.tiff in Resources */,
+				79CFD8F709F7076200172CDD /* download.tif in Resources */,
+				79CFD8F909F7076200172CDD /* home.tiff in Resources */,
+				79CFD8FA09F7076200172CDD /* icon.icns in Resources */,
+				79CFD8FB09F7076200172CDD /* lock.tiff in Resources */,
+				79CFD8FC09F7076200172CDD /* redo.tif in Resources */,
+				79CFD8FD09F7076200172CDD /* symlink_file.tif in Resources */,
+				79CFD8FE09F7076200172CDD /* symlink_folder.tif in Resources */,
+				79CFD8FF09F7076200172CDD /* upload.tif in Resources */,
+				79CFD97C09F70AA700172CDD /* network_icon.png in Resources */,
+				79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */,
+				795A010A0B116832006905FA /* edit.png in Resources */,
+				D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */,
+				D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		09D6601B09FD37990000BA00 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+		};
+		7931260F0B3684B2002FF80D /* Strip UKKQueue */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Strip UKKQueue";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "HAS_SYMBOLS=`nm ${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH} |grep .objc_class_name_UKKQueue |grep -w A`\necho $HAS_SYMBOLS\nif [ \"$HAS_SYMBOLS\" == \"\" ]\nthen\n\techo \"No need to strip symbols\"\nelse\n\tnmedit -R \"${SOURCE_ROOT}/UKKQueue_Symbols\" \"${BUILT_PRODUCTS_DIR}/${EXECUTABLE_PATH}\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		797CBBEB09F854B60063FF9B /* Generate Localizable.strings */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 8;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Localizable.strings";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+			shellPath = /bin/sh;
+			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n";
+			showEnvVarsInLog = 0;
+		};
+		7983E7EE0B0C4F5100F5078E /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n\n# Copy the DropletHelper application into the Resources folder of the framework\n\nLAUNCHER_PATH=$CONFIGURATION_BUILD_DIR/DropletHelper.app\nCK_FRAMEWORK_PATH=$CONFIGURATION_BUILD_DIR/Connection.framework/Versions/A/Resources\n\nrm -rf $CK_FRAMEWORK_PATH/DropletHelper.app\n\nmv $LAUNCHER_PATH $CK_FRAMEWORK_PATH\n";
+		};
+		7983ED650B0C749800F5078E /* Reset Install Path */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Reset Install Path";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "/Developer/usr/bin/install_name_tool -change @executable_path/../Frameworks/Connection.framework/Versions/A/Connection @executable_path/../../../../Connection $CONFIGURATION_BUILD_DIR/DropletHelper.app/Contents/MacOS/DropletHelper";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		09D6601909FD37990000BA00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		790FF0C90ACCE4B7004B4021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */,
+				790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		795FF4EE0B0C013200EA9292 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				795FF5020B0C018100EA9292 /* DropletMain.m in Sources */,
+				795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */,
+				7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */,
+				7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7983E6CF0B0C4DF000F5078E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7983E6DE0B0C4E0000F5078E /* DropletLauncher.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		79CFD12309F702BE00172CDD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8D11072C0486CEB800E47090 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D11072D0486CEB800E47090 /* main.m in Sources */,
+				79CFD8D709F706F500172CDD /* Controller.m in Sources */,
+				79CFD8D809F706F500172CDD /* FileTransfer.m in Sources */,
+				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
+				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
+				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		09D6604509FD37DD0000BA00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 8D1107260486CEB800E47090 /* Connection */;
+			targetProxy = 09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
+		09D6604709FD37DD0000BA00 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79CFD12509F702BE00172CDD /* Framework */;
+			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
+		795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79CFD12509F702BE00172CDD /* Framework */;
+			targetProxy = 795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */;
+		};
+		7983E7040B0C4E3300F5078E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7983E6D10B0C4DF000F5078E /* DropletLauncher */;
+			targetProxy = 7983E7030B0C4E3300F5078E /* PBXContainerItemProxy */;
+		};
+		7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 79CFD12509F702BE00172CDD /* Framework */;
+			targetProxy = 7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */;
+		};
+		7983E7EC0B0C4F4600F5078E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 795FF4F00B0C013200EA9292 /* DropletHelper */;
+			targetProxy = 7983E7EB0B0C4F4600F5078E /* PBXContainerItemProxy */;
+		};
+		7983E8370B0C5B9800F5078E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 7983E7E80B0C4F2200F5078E /* Build All */;
+			targetProxy = 7983E8360B0C5B9800F5078E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				089C165DFE840E0CC02AAC07 /* en */,
+				CE9FC9550DF70F32002330B2 /* da */,
+				CE9FC95B0DF70F3D002330B2 /* de */,
+				CE9FC95C0DF70F44002330B2 /* fr */,
+				CE9FC95D0DF70F49002330B2 /* it */,
+				CE9FC95E0DF70F50002330B2 /* ja */,
+				CE9FC9610DF70F56002330B2 /* zh_CN */,
+				CE9FC9620DF70F5C002330B2 /* zh_TW */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		29B97318FDCFA39411CA2CEA /* MainMenu.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				29B97319FDCFA39411CA2CEA /* en */,
+			);
+			name = MainMenu.nib;
+			sourceTree = "<group>";
+		};
+		790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				790FF0DC0ACCE8EA004B4021 /* en */,
+			);
+			name = KTLogViewer.nib;
+			sourceTree = "<group>";
+		};
+		795FF5050B0C048700EA9292 /* Droplet.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				795FF5060B0C048700EA9292 /* en */,
+			);
+			name = Droplet.nib;
+			sourceTree = "<group>";
+		};
+		797CC8C509F861770063FF9B /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				797CC8C609F861770063FF9B /* en */,
+				3C2D8EC10A63FF31008FE1B0 /* zh_TW */,
+				3C2D8EC20A63FF3B008FE1B0 /* fr */,
+				3C2D8EC30A63FF41008FE1B0 /* da */,
+				CEA9AFD30A64224100855897 /* ja */,
+				CEB563850A7AB7070081179A /* de */,
+				CE1AD3DF0A7E845A0083C01E /* it */,
+				CE55A6620AD194740091C8AE /* zh_CN */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		798300050B0D4A2600F5078E /* DropletLauncher.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				798300060B0D4A2600F5078E /* en */,
+				CEF894CF0BD72A45002886AA /* da */,
+				CEF894E90BD72A55002886AA /* de */,
+				CEF894EE0BD72A5C002886AA /* fr */,
+				CEF894F30BD72A62002886AA /* it */,
+				CEF894F80BD72A6A002886AA /* ja */,
+				CEF894FD0BD72A70002886AA /* zh_CN */,
+				CEF895020BD72A76002886AA /* zh_TW */,
+			);
+			name = DropletLauncher.nib;
+			sourceTree = "<group>";
+		};
+		79CFD8DC09F7071400172CDD /* InputDialog.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				79CFD8DD09F7071400172CDD /* en */,
+			);
+			name = InputDialog.nib;
+			sourceTree = "<group>";
+		};
+		79CFD8DE09F7071400172CDD /* Permissions.nib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				79CFD8DF09F7071400172CDD /* en */,
+			);
+			name = Permissions.nib;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		09D6602709FD379A0000BA00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(value)",
+					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
+				);
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		09D6602809FD379A0000BA00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(value)",
+					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		790FF0D00ACCE4B8004B4021 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		790FF0D10ACCE4B8004B4021 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		795FF4F80B0C013300EA9292 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "DropletHelper-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletHelper;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		795FF4F90B0C013300EA9292 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "DropletHelper-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletHelper;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		7983E6E30B0C4E1E00F5078E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletLauncher;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		7983E6E40B0C4E1E00F5078E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletLauncher;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		7983E7F10B0C4F6F00F5078E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				PRODUCT_NAME = "Build All";
+			};
+			name = Debug;
+		};
+		7983E7F20B0C4F6F00F5078E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Build All";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		79A8578D0B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INSTALL_PATH = "$(HOME)/bin";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletLauncher;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A8578E0B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Connection_Prefix.pch;
+				INFOPLIST_FILE = "Framework-Info.plist";
+				INSTALL_PATH = "@loader_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
+				OTHER_CFLAGS = "-falign-loops=16";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+					"-seg1addr",
+					0xcf200000,
+					"-header-pad_max_install_names",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A8578F0B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "DropletHelper-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = DropletHelper;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A857900B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				PRODUCT_NAME = "Build All";
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A857910B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = Connection;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A857920B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(value)",
+					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
+				);
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Cocoa,
+					"-framework",
+					SenTestingKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = UnitTest;
+				WRAPPER_EXTENSION = octest;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A857930B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
+				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "KTLog Viewer";
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Plugin;
+		};
+		79A857940B9267CA00D9C844 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Plugin;
+		};
+		79CFD12909F702BF00172CDD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Connection_Prefix.pch;
+				INFOPLIST_FILE = "Framework-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
+				OTHER_CFLAGS = "-falign-loops=16";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+					"-seg1addr",
+					0xcf200000,
+					"-header-pad_max_install_names",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		79CFD12A09F702BF00172CDD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				DEPLOYMENT_POSTPROCESSING = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				FRAMEWORK_VERSION = A;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = Connection_Prefix.pch;
+				INFOPLIST_FILE = "Framework-Info.plist";
+				INSTALL_PATH = "@executable_path/../Frameworks";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+				);
+				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
+				OTHER_CFLAGS = "-falign-loops=16";
+				OTHER_LDFLAGS = (
+					"-framework",
+					Foundation,
+					"-framework",
+					AppKit,
+					"-seg1addr",
+					0xcf200000,
+					"-header-pad_max_install_names",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = Connection;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		C01FCF4B08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				OTHER_LDFLAGS = "";
+				PRODUCT_NAME = Connection;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		C01FCF4C08A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = (
+					ppc,
+					i386,
+				);
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INFOPLIST_FILE = Info.plist;
+				INSTALL_PATH = "$(HOME)/Applications";
+				PRODUCT_NAME = Connection;
+				WRAPPER_EXTENSION = app;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		C01FCF4F08A954540054247B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		C01FCF5008A954540054247B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_BIT_PRE_XCODE_3_1 = "ppc i386";
+				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				09D6602709FD379A0000BA00 /* Debug */,
+				09D6602809FD379A0000BA00 /* Release */,
+				79A857920B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				790FF0D00ACCE4B8004B4021 /* Debug */,
+				790FF0D10ACCE4B8004B4021 /* Release */,
+				79A857930B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		795FF4F70B0C013300EA9292 /* Build configuration list for PBXNativeTarget "DropletHelper" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				795FF4F80B0C013300EA9292 /* Debug */,
+				795FF4F90B0C013300EA9292 /* Release */,
+				79A8578F0B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7983E6E20B0C4E1E00F5078E /* Build configuration list for PBXNativeTarget "DropletLauncher" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7983E6E30B0C4E1E00F5078E /* Debug */,
+				7983E6E40B0C4E1E00F5078E /* Release */,
+				79A8578D0B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7983E7F10B0C4F6F00F5078E /* Debug */,
+				7983E7F20B0C4F6F00F5078E /* Release */,
+				79A857900B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				79CFD12909F702BF00172CDD /* Debug */,
+				79CFD12A09F702BF00172CDD /* Release */,
+				79A8578E0B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Connection" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4B08A954540054247B /* Debug */,
+				C01FCF4C08A954540054247B /* Release */,
+				79A857910B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ConnectionApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C01FCF4F08A954540054247B /* Debug */,
+				C01FCF5008A954540054247B /* Release */,
+				79A857940B9267CA00D9C844 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 29B97313FDCFA39411CA2CEA /* Project object */;
+}
