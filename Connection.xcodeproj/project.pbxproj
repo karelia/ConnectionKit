@@ -34,12 +34,6 @@
 		7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999680CA8376B00A22156 /* gear_disabled.tiff */; };
 		7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999690CA8376B00A22156 /* gear_normal.tiff */; };
 		7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7909996A0CA8376B00A22156 /* gear_pressed.tiff */; };
-		790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */; };
-		790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */ = {isa = PBXBuildFile; fileRef = 790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */; };
-		790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */ = {isa = PBXBuildFile; fileRef = 790FF0E30ACCE966004B4021 /* KTLogController.m */; };
-		790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
-		790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97324FDCFA39411CA2CEA /* AppKit.framework */; };
-		790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 29B97325FDCFA39411CA2CEA /* Foundation.framework */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -49,8 +43,6 @@
 		792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB50A806145001A00C6 /* CKHTTPRequest.m */; };
 		792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 792CFCB60A806145001A00C6 /* CKHTTPResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
-		792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
-		792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
 		79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79318F2E0CA9F3A1005C4AB6 /* gear.tiff */; };
 		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
@@ -69,7 +61,6 @@
 		794DC3280A5A0EDC007157BE /* ConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */; };
 		794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD10A5CD6CA00913151 /* libcrypto.dylib */; };
 		794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD40A5CD6F900913151 /* libssl.dylib */; };
-		795A010A0B116832006905FA /* edit.png in Resources */ = {isa = PBXBuildFile; fileRef = 795A01090B116832006905FA /* edit.png */; };
 		795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
 		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
 		795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */; };
@@ -173,32 +164,10 @@
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD8C809F7069100172CDD /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */; };
 		79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8CA09F706C700172CDD /* KTLog.nib */; };
-		79CFD8D709F706F500172CDD /* Controller.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8CE09F706F500172CDD /* Controller.m */; };
-		79CFD8D809F706F500172CDD /* FileTransfer.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D009F706F500172CDD /* FileTransfer.m */; };
-		79CFD8D909F706F500172CDD /* InputDialog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D209F706F500172CDD /* InputDialog.m */; };
-		79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D409F706F500172CDD /* PermissionsController.m */; };
-		79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD8D609F706F500172CDD /* ProgressCell.m */; };
-		79CFD8E009F7071400172CDD /* InputDialog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8DC09F7071400172CDD /* InputDialog.nib */; };
-		79CFD8E109F7071400172CDD /* Permissions.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8DE09F7071400172CDD /* Permissions.nib */; };
-		79CFD8F409F7076200172CDD /* connect.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8E809F7076200172CDD /* connect.tiff */; };
-		79CFD8F509F7076200172CDD /* console.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8E909F7076200172CDD /* console.tiff */; };
-		79CFD8F609F7076200172CDD /* delete.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EA09F7076200172CDD /* delete.tiff */; };
-		79CFD8F709F7076200172CDD /* download.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EB09F7076200172CDD /* download.tif */; };
-		79CFD8F909F7076200172CDD /* home.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8ED09F7076200172CDD /* home.tiff */; };
-		79CFD8FA09F7076200172CDD /* icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EE09F7076200172CDD /* icon.icns */; };
-		79CFD8FB09F7076200172CDD /* lock.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8EF09F7076200172CDD /* lock.tiff */; };
-		79CFD8FC09F7076200172CDD /* redo.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F009F7076200172CDD /* redo.tif */; };
-		79CFD8FD09F7076200172CDD /* symlink_file.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F109F7076200172CDD /* symlink_file.tif */; };
-		79CFD8FE09F7076200172CDD /* symlink_folder.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F209F7076200172CDD /* symlink_folder.tif */; };
-		79CFD8FF09F7076200172CDD /* upload.tif in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8F309F7076200172CDD /* upload.tif */; };
 		79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD90009F7077900172CDD /* NSData+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD90109F7077900172CDD /* NSData+Connection.m */; };
 		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
 		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
-		79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		79CFD97C09F70AA700172CDD /* network_icon.png in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97A09F70AA700172CDD /* network_icon.png */; };
-		79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD97B09F70AA700172CDD /* Stop.tiff */; };
 		79CFE13009F712AF00172CDD /* StreamBasedConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84709F7048500172CDD /* StreamBasedConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
@@ -206,23 +175,15 @@
 		79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18AB50CFF1D5B009F0324 /* CKDirectoryBrowserCell.m */; };
 		79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
-		79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB6A4D09F71867006E7D11 /* FileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* FileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
-		79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA8D70AC23C25009EDAF9 /* CKHTTPPutRequest.m */; };
 		79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9E70AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */; };
 		79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */; };
-		8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */ = {isa = PBXBuildFile; fileRef = 29B97318FDCFA39411CA2CEA /* MainMenu.nib */; };
-		8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 089C165CFE840E0CC02AAC07 /* InfoPlist.strings */; };
-		8D11072D0486CEB800E47090 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 29B97316FDCFA39411CA2CEA /* main.m */; settings = {ATTRIBUTES = (); }; };
-		8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		CE10A48D0B9CE94A004C85F8 /* AbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81009F7048400172CDD /* AbstractQueueConnection.m */; };
-		CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */ = {isa = PBXBuildFile; fileRef = CE4F78E80B9C8F530083B946 /* Logs.icns */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
 		D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */ = {isa = PBXBuildFile; fileRef = D305393B0DE5F30C008646CE /* RegexKitLite.h */; };
@@ -245,8 +206,6 @@
 		D3C04AE50D4C1BA900C83775 /* LeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */; };
 		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
-		D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
-		D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
 		D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -254,13 +213,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 8D1107260486CEB800E47090;
-			remoteInfo = Connection;
-		};
 		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -296,30 +248,9 @@
 			remoteGlobalIDString = 795FF4F00B0C013200EA9292;
 			remoteInfo = DropletHelper;
 		};
-		7983E8360B0C5B9800F5078E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7983E7E80B0C4F2200F5078E;
-			remoteInfo = "Build All";
-		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		79CFD96909F70A4D00172CDD /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				79CFD96B09F70A5C00172CDD /* Connection.framework in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
-		089C165DFE840E0CC02AAC07 /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
 		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
@@ -329,7 +260,6 @@
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		29B97319FDCFA39411CA2CEA /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/MainMenu.nib; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
@@ -346,12 +276,6 @@
 		790999680CA8376B00A22156 /* gear_disabled.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_disabled.tiff; sourceTree = "<group>"; };
 		790999690CA8376B00A22156 /* gear_normal.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_normal.tiff; sourceTree = "<group>"; };
 		7909996A0CA8376B00A22156 /* gear_pressed.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = gear_pressed.tiff; sourceTree = "<group>"; };
-		790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "KTLog Viewer.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "KTLog Viewer-Info.plist"; sourceTree = "<group>"; };
-		790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ktlogviewer_main.m; sourceTree = "<group>"; };
-		790FF0DC0ACCE8EA004B4021 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLogViewer.nib; sourceTree = "<group>"; };
-		790FF0E20ACCE966004B4021 /* KTLogController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = KTLogController.h; sourceTree = "<group>"; };
-		790FF0E30ACCE966004B4021 /* KTLogController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = KTLogController.m; sourceTree = "<group>"; };
 		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
 		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
@@ -380,7 +304,6 @@
 		794DC3260A5A0EDC007157BE /* ConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ConnectionThreadManager.m; sourceTree = "<group>"; };
 		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		794EFDD40A5CD6F900913151 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
-		795A01090B116832006905FA /* edit.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = edit.png; sourceTree = "<group>"; };
 		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
 		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
 		795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFNSubscribeFileWatcher.h; sourceTree = "<group>"; };
@@ -457,7 +380,6 @@
 		79CA054A0B852037005BED50 /* CKCacheableHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCacheableHost.h; sourceTree = "<group>"; };
 		79CA054B0B852037005BED50 /* CKCacheableHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCacheableHost.m; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		79CFD12709F702BE00172CDD /* Framework-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		79CFD80C09F7048400172CDD /* AbstractConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnection.h; sourceTree = SOURCE_ROOT; };
 		79CFD80D09F7048400172CDD /* AbstractConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractConnection.m; sourceTree = SOURCE_ROOT; };
 		79CFD80E09F7048400172CDD /* AbstractConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionProtocol.h; sourceTree = SOURCE_ROOT; };
@@ -515,36 +437,11 @@
 		79CFD8C709F7069100172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79CFD8C909F706B000172CDD /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79CFD8CB09F706C700172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLog.nib; sourceTree = "<group>"; };
-		79CFD8CD09F706F500172CDD /* Controller.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Controller.h; sourceTree = SOURCE_ROOT; };
-		79CFD8CE09F706F500172CDD /* Controller.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = Controller.m; sourceTree = SOURCE_ROOT; };
-		79CFD8CF09F706F500172CDD /* FileTransfer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileTransfer.h; sourceTree = SOURCE_ROOT; };
-		79CFD8D009F706F500172CDD /* FileTransfer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileTransfer.m; sourceTree = SOURCE_ROOT; };
-		79CFD8D109F706F500172CDD /* InputDialog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InputDialog.h; sourceTree = SOURCE_ROOT; };
-		79CFD8D209F706F500172CDD /* InputDialog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InputDialog.m; sourceTree = SOURCE_ROOT; };
-		79CFD8D309F706F500172CDD /* PermissionsController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PermissionsController.h; sourceTree = SOURCE_ROOT; };
-		79CFD8D409F706F500172CDD /* PermissionsController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PermissionsController.m; sourceTree = SOURCE_ROOT; };
-		79CFD8D509F706F500172CDD /* ProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProgressCell.h; sourceTree = SOURCE_ROOT; };
-		79CFD8D609F706F500172CDD /* ProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ProgressCell.m; sourceTree = SOURCE_ROOT; };
-		79CFD8DD09F7071400172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/InputDialog.nib; sourceTree = "<group>"; };
-		79CFD8DF09F7071400172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Permissions.nib; sourceTree = "<group>"; };
-		79CFD8E809F7076200172CDD /* connect.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = connect.tiff; sourceTree = SOURCE_ROOT; };
-		79CFD8E909F7076200172CDD /* console.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = console.tiff; sourceTree = SOURCE_ROOT; };
-		79CFD8EA09F7076200172CDD /* delete.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = delete.tiff; sourceTree = SOURCE_ROOT; };
-		79CFD8EB09F7076200172CDD /* download.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = download.tif; sourceTree = SOURCE_ROOT; };
-		79CFD8ED09F7076200172CDD /* home.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = home.tiff; sourceTree = SOURCE_ROOT; };
-		79CFD8EE09F7076200172CDD /* icon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = icon.icns; sourceTree = SOURCE_ROOT; };
-		79CFD8EF09F7076200172CDD /* lock.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = lock.tiff; sourceTree = SOURCE_ROOT; };
-		79CFD8F009F7076200172CDD /* redo.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = redo.tif; sourceTree = SOURCE_ROOT; };
-		79CFD8F109F7076200172CDD /* symlink_file.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = symlink_file.tif; sourceTree = SOURCE_ROOT; };
-		79CFD8F209F7076200172CDD /* symlink_folder.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = symlink_folder.tif; sourceTree = SOURCE_ROOT; };
-		79CFD8F309F7076200172CDD /* upload.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = upload.tif; sourceTree = SOURCE_ROOT; };
 		79CFD90009F7077900172CDD /* NSData+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Connection.h"; sourceTree = SOURCE_ROOT; };
 		79CFD90109F7077900172CDD /* NSData+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Connection.m"; sourceTree = SOURCE_ROOT; };
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
 		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		79CFD97A09F70AA700172CDD /* network_icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = network_icon.png; sourceTree = "<group>"; };
-		79CFD97B09F70AA700172CDD /* Stop.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = Stop.tiff; sourceTree = "<group>"; };
 		79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Connection.h"; sourceTree = "<group>"; };
 		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
 		79F18AB40CFF1D5B009F0324 /* CKDirectoryBrowserCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryBrowserCell.h; sourceTree = "<group>"; };
@@ -565,8 +462,6 @@
 		79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadRequest.m; sourceTree = "<group>"; };
 		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
-		8D1107310486CEB800E47090 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		8D1107320486CEB800E47090 /* Connection.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Connection.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CE0180830DB6C72E003E008B /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CE05A3530B6A947800A25808 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE05A3540B6A947E00A25808 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKTransferController.nib; sourceTree = "<group>"; };
@@ -577,17 +472,10 @@
 		CE05A3680B6A94C000A25808 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE1AD3DE0A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CE4F78E80B9C8F530083B946 /* Logs.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = Logs.icns; sourceTree = "<group>"; };
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CE9FC9550DF70F32002330B2 /* da */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = da; path = da.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC95B0DF70F3D002330B2 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC95C0DF70F44002330B2 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC95D0DF70F49002330B2 /* it */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = it; path = it.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC95E0DF70F50002330B2 /* ja */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ja; path = ja.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC9610DF70F56002330B2 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_CN; path = zh_CN.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		CE9FC9620DF70F5C002330B2 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = zh_TW; path = zh_TW.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -650,15 +538,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		790FF0CA0ACCE4B7004B4021 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				790FF23E0ACCEB46004B4021 /* AppKit.framework in Frameworks */,
-				790FF23F0ACCEB46004B4021 /* Foundation.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		795FF4EF0B0C013200EA9292 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -688,17 +567,6 @@
 				794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */,
 				794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */,
 				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		8D11072E0486CEB800E47090 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				79FB808A09F741D6006E7D11 /* Carbon.framework in Frameworks */,
-				79F563FF0AC8C5F2006AD3E2 /* Security.framework in Frameworks */,
-				79CFD97009F70A7E00172CDD /* Connection.framework in Frameworks */,
-				8D11072F0486CEB800E47090 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -767,10 +635,8 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8D1107320486CEB800E47090 /* Connection.app */,
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
-				790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */,
 				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
 				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
 			);
@@ -780,11 +646,9 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				790FF0C30ACCE483004B4021 /* KTLog Viewer */,
 				080E96DDFE201D6D7F000001 /* Framework */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				795FF4EA0B0C00FF00EA9292 /* Droplet */,
-				79CFD11709F7020500172CDD /* Test Application */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -805,14 +669,11 @@
 		29B97317FDCFA39411CA2CEA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				CE4F78E80B9C8F530083B946 /* Logs.icns */,
 				797CC8C509F861770063FF9B /* Localizable.strings */,
 				79CFD8E709F7072100172CDD /* Interfaces */,
 				79CFD8E409F7071E00172CDD /* Images */,
-				8D1107310486CEB800E47090 /* Info.plist */,
-				79CFD12709F702BE00172CDD /* Framework-Info.plist */,
 				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
-				089C165CFE840E0CC02AAC07 /* InfoPlist.strings */,
+				CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */,
 			);
 			name = Resources;
 			sourceTree = "<group>";
@@ -824,18 +685,6 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		790FF0C30ACCE483004B4021 /* KTLog Viewer */ = {
-			isa = PBXGroup;
-			children = (
-				790FF0E20ACCE966004B4021 /* KTLogController.h */,
-				790FF0E30ACCE966004B4021 /* KTLogController.m */,
-				790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */,
-				790FF0D60ACCE4F2004B4021 /* ktlogviewer_main.m */,
-				790FF0CE0ACCE4B7004B4021 /* KTLog Viewer-Info.plist */,
-			);
-			name = "KTLog Viewer";
 			sourceTree = "<group>";
 		};
 		792CFCA70A806108001A00C6 /* HTTP */ = {
@@ -917,23 +766,6 @@
 				7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */,
 			);
 			name = "Bookmark Registry";
-			sourceTree = "<group>";
-		};
-		79CFD11709F7020500172CDD /* Test Application */ = {
-			isa = PBXGroup;
-			children = (
-				79CFD8CD09F706F500172CDD /* Controller.h */,
-				79CFD8CE09F706F500172CDD /* Controller.m */,
-				79CFD8CF09F706F500172CDD /* FileTransfer.h */,
-				79CFD8D009F706F500172CDD /* FileTransfer.m */,
-				79CFD8D109F706F500172CDD /* InputDialog.h */,
-				79CFD8D209F706F500172CDD /* InputDialog.m */,
-				79CFD8D309F706F500172CDD /* PermissionsController.h */,
-				79CFD8D409F706F500172CDD /* PermissionsController.m */,
-				79CFD8D509F706F500172CDD /* ProgressCell.h */,
-				79CFD8D609F706F500172CDD /* ProgressCell.m */,
-			);
-			name = "Test Application";
 			sourceTree = "<group>";
 		};
 		79CFD11A09F7022900172CDD /* Connections */ = {
@@ -1100,20 +932,6 @@
 				7978FC140B117D7C0048168B /* bookmark.tif */,
 				79906BAD0B1175A800FE9681 /* host.png */,
 				79906BAE0B1175A800FE9681 /* bonjour.png */,
-				795A01090B116832006905FA /* edit.png */,
-				79CFD97A09F70AA700172CDD /* network_icon.png */,
-				79CFD97B09F70AA700172CDD /* Stop.tiff */,
-				79CFD8E809F7076200172CDD /* connect.tiff */,
-				79CFD8E909F7076200172CDD /* console.tiff */,
-				79CFD8EA09F7076200172CDD /* delete.tiff */,
-				79CFD8EB09F7076200172CDD /* download.tif */,
-				79CFD8ED09F7076200172CDD /* home.tiff */,
-				79CFD8EE09F7076200172CDD /* icon.icns */,
-				79CFD8EF09F7076200172CDD /* lock.tiff */,
-				79CFD8F009F7076200172CDD /* redo.tif */,
-				79CFD8F109F7076200172CDD /* symlink_file.tif */,
-				79CFD8F209F7076200172CDD /* symlink_folder.tif */,
-				79CFD8F309F7076200172CDD /* upload.tif */,
 			);
 			name = Images;
 			sourceTree = "<group>";
@@ -1125,9 +943,6 @@
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
 				D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */,
-				29B97318FDCFA39411CA2CEA /* MainMenu.nib */,
-				79CFD8DC09F7071400172CDD /* InputDialog.nib */,
-				79CFD8DE09F7071400172CDD /* Permissions.nib */,
 			);
 			name = Interfaces;
 			sourceTree = "<group>";
@@ -1251,30 +1066,12 @@
 			buildRules = (
 			);
 			dependencies = (
-				09D6604509FD37DD0000BA00 /* PBXTargetDependency */,
 				09D6604709FD37DD0000BA00 /* PBXTargetDependency */,
 			);
 			name = UnitTest;
 			productName = UnitTest;
 			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
 			productType = "com.apple.product-type.bundle";
-		};
-		790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */;
-			buildPhases = (
-				790FF0C80ACCE4B7004B4021 /* Resources */,
-				790FF0C90ACCE4B7004B4021 /* Sources */,
-				790FF0CA0ACCE4B7004B4021 /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = "KTLog Viewer";
-			productName = "KTLog Viewer";
-			productReference = 790FF0CC0ACCE4B7004B4021 /* KTLog Viewer.app */;
-			productType = "com.apple.product-type.application";
 		};
 		795FF4F00B0C013200EA9292 /* DropletHelper */ = {
 			isa = PBXNativeTarget;
@@ -1332,26 +1129,6 @@
 			productReference = 79CFD12609F702BE00172CDD /* Connection.framework */;
 			productType = "com.apple.product-type.framework";
 		};
-		8D1107260486CEB800E47090 /* Connection */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Connection" */;
-			buildPhases = (
-				8D1107290486CEB800E47090 /* Resources */,
-				8D11072C0486CEB800E47090 /* Sources */,
-				8D11072E0486CEB800E47090 /* Frameworks */,
-				79CFD96909F70A4D00172CDD /* CopyFiles */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				7983E8370B0C5B9800F5078E /* PBXTargetDependency */,
-			);
-			name = Connection;
-			productInstallPath = "$(HOME)/Applications";
-			productName = Connection;
-			productReference = 8D1107320486CEB800E47090 /* Connection.app */;
-			productType = "com.apple.product-type.application";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -1375,10 +1152,8 @@
 			projectRoot = "";
 			targets = (
 				7983E7E80B0C4F2200F5078E /* Build All */,
-				8D1107260486CEB800E47090 /* Connection */,
 				79CFD12509F702BE00172CDD /* Framework */,
 				09D6601C09FD37990000BA00 /* UnitTest */,
-				790FF0CB0ACCE4B7004B4021 /* KTLog Viewer */,
 				795FF4F00B0C013200EA9292 /* DropletHelper */,
 				7983E6D10B0C4DF000F5078E /* DropletLauncher */,
 			);
@@ -1390,15 +1165,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		790FF0C80ACCE4B7004B4021 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				790FF0DD0ACCE8EA004B4021 /* KTLogViewer.nib in Resources */,
-				CE4F78E90B9C8F530083B946 /* Logs.icns in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1434,8 +1200,6 @@
 				79B09AA80C85CDFD00E7F1CC /* column_mode.tiff in Resources */,
 				79B09AA90C85CDFD00E7F1CC /* list_mode.tiff in Resources */,
 				79B09AAA0C85CDFD00E7F1CC /* icon_mode.tiff in Resources */,
-				792E57860C8E2C2F00276AA2 /* symlink_folder.tif in Resources */,
-				792E57890C8E2C3300276AA2 /* symlink_file.tif in Resources */,
 				79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */,
 				794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */,
 				794213E80C961B510002B99D /* container_triangle.tiff in Resources */,
@@ -1446,33 +1210,6 @@
 				D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */,
 				D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */,
 				D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		8D1107290486CEB800E47090 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8D11072A0486CEB800E47090 /* MainMenu.nib in Resources */,
-				8D11072B0486CEB800E47090 /* InfoPlist.strings in Resources */,
-				79CFD8E009F7071400172CDD /* InputDialog.nib in Resources */,
-				79CFD8E109F7071400172CDD /* Permissions.nib in Resources */,
-				79CFD8F409F7076200172CDD /* connect.tiff in Resources */,
-				79CFD8F509F7076200172CDD /* console.tiff in Resources */,
-				79CFD8F609F7076200172CDD /* delete.tiff in Resources */,
-				79CFD8F709F7076200172CDD /* download.tif in Resources */,
-				79CFD8F909F7076200172CDD /* home.tiff in Resources */,
-				79CFD8FA09F7076200172CDD /* icon.icns in Resources */,
-				79CFD8FB09F7076200172CDD /* lock.tiff in Resources */,
-				79CFD8FC09F7076200172CDD /* redo.tif in Resources */,
-				79CFD8FD09F7076200172CDD /* symlink_file.tif in Resources */,
-				79CFD8FE09F7076200172CDD /* symlink_folder.tif in Resources */,
-				79CFD8FF09F7076200172CDD /* upload.tif in Resources */,
-				79CFD97C09F70AA700172CDD /* network_icon.png in Resources */,
-				79CFD97D09F70AA700172CDD /* Stop.tiff in Resources */,
-				795A010A0B116832006905FA /* edit.png in Resources */,
-				D3F1D3000D3BFF6A008F6C35 /* AquaFolder.png in Resources */,
-				D3F1D3030D3BFF72008F6C35 /* LeopardFolder.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1558,17 +1295,6 @@
 			files = (
 				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
 				09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		790FF0C90ACCE4B7004B4021 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				790FF0D70ACCE4F2004B4021 /* ktlogviewer_main.m in Sources */,
-				790FF0E40ACCE966004B4021 /* KTLogController.m in Sources */,
-				790FF1130ACCEB1A004B4021 /* KTLog.m in Sources */,
-				CE10A48D0B9CE94A004C85F8 /* AbstractQueueConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1670,27 +1396,9 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8D11072C0486CEB800E47090 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				8D11072D0486CEB800E47090 /* main.m in Sources */,
-				79CFD8D709F706F500172CDD /* Controller.m in Sources */,
-				79CFD8D809F706F500172CDD /* FileTransfer.m in Sources */,
-				79CFD8D909F706F500172CDD /* InputDialog.m in Sources */,
-				79CFD8DA09F706F500172CDD /* PermissionsController.m in Sources */,
-				79CFD8DB09F706F500172CDD /* ProgressCell.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		09D6604509FD37DD0000BA00 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 8D1107260486CEB800E47090 /* Connection */;
-			targetProxy = 09D6604409FD37DD0000BA00 /* PBXContainerItemProxy */;
-		};
 		09D6604709FD37DD0000BA00 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
@@ -1716,45 +1424,9 @@
 			target = 795FF4F00B0C013200EA9292 /* DropletHelper */;
 			targetProxy = 7983E7EB0B0C4F4600F5078E /* PBXContainerItemProxy */;
 		};
-		7983E8370B0C5B9800F5078E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7983E7E80B0C4F2200F5078E /* Build All */;
-			targetProxy = 7983E8360B0C5B9800F5078E /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		089C165CFE840E0CC02AAC07 /* InfoPlist.strings */ = {
-			isa = PBXVariantGroup;
-			children = (
-				089C165DFE840E0CC02AAC07 /* en */,
-				CE9FC9550DF70F32002330B2 /* da */,
-				CE9FC95B0DF70F3D002330B2 /* de */,
-				CE9FC95C0DF70F44002330B2 /* fr */,
-				CE9FC95D0DF70F49002330B2 /* it */,
-				CE9FC95E0DF70F50002330B2 /* ja */,
-				CE9FC9610DF70F56002330B2 /* zh_CN */,
-				CE9FC9620DF70F5C002330B2 /* zh_TW */,
-			);
-			name = InfoPlist.strings;
-			sourceTree = "<group>";
-		};
-		29B97318FDCFA39411CA2CEA /* MainMenu.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				29B97319FDCFA39411CA2CEA /* en */,
-			);
-			name = MainMenu.nib;
-			sourceTree = "<group>";
-		};
-		790FF0DB0ACCE8EA004B4021 /* KTLogViewer.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				790FF0DC0ACCE8EA004B4021 /* en */,
-			);
-			name = KTLogViewer.nib;
-			sourceTree = "<group>";
-		};
 		795FF5050B0C048700EA9292 /* Droplet.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1853,22 +1525,6 @@
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
 		};
-		79CFD8DC09F7071400172CDD /* InputDialog.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				79CFD8DD09F7071400172CDD /* en */,
-			);
-			name = InputDialog.nib;
-			sourceTree = "<group>";
-		};
-		79CFD8DE09F7071400172CDD /* Permissions.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				79CFD8DF09F7071400172CDD /* en */,
-			);
-			name = Permissions.nib;
-			sourceTree = "<group>";
-		};
 		D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1943,58 +1599,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = UnitTest;
 				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		790FF0D00ACCE4B8004B4021 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = "KTLog Viewer";
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		790FF0D10ACCE4B8004B4021 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = "KTLog Viewer";
-				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2212,24 +1816,6 @@
 			};
 			name = Plugin;
 		};
-		79A857910B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = Connection;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
-		};
 		79A857920B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2255,31 +1841,6 @@
 				PREBINDING = NO;
 				PRODUCT_NAME = UnitTest;
 				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
-		};
-		79A857930B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "KTLog Viewer-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = "KTLog Viewer";
-				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -2379,43 +1940,6 @@
 			};
 			name = Release;
 		};
-		C01FCF4B08A954540054247B /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = "";
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = "";
-				PRODUCT_NAME = Connection;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
-			};
-			name = Debug;
-		};
-		C01FCF4C08A954540054247B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = (
-					ppc,
-					i386,
-				);
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "$(HOME)/Applications";
-				PRODUCT_NAME = Connection;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -2451,16 +1975,6 @@
 				09D6602709FD379A0000BA00 /* Debug */,
 				09D6602809FD379A0000BA00 /* Release */,
 				79A857920B9267CA00D9C844 /* Plugin */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		790FF0CF0ACCE4B8004B4021 /* Build configuration list for PBXNativeTarget "KTLog Viewer" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				790FF0D00ACCE4B8004B4021 /* Debug */,
-				790FF0D10ACCE4B8004B4021 /* Release */,
-				79A857930B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2501,16 +2015,6 @@
 				79CFD12909F702BF00172CDD /* Debug */,
 				79CFD12A09F702BF00172CDD /* Release */,
 				79A8578E0B9267CA00D9C844 /* Plugin */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		C01FCF4A08A954540054247B /* Build configuration list for PBXNativeTarget "Connection" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				C01FCF4B08A954540054247B /* Debug */,
-				C01FCF4C08A954540054247B /* Release */,
-				79A857910B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
