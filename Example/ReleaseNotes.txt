@@ -1,0 +1,16 @@
+Connection Framework version 3 Release Notes
+
+There have been quite a few changes to the API so take note when moving to this version. This is mainly in the arguments passed back in the upload/download of the delegate methods.
+
+What's New
+
+1. FTP can now connect to hosts that have multiple DNS names.
+2. FTP has been fully tested.
+3. SFTP support has been added.
+4. WebDav and .Mac support has been added.
+5. File Connection.
+6. New class heirachy. AbstractQueueConnection and StreamBasedConnection makes writing a new connection class very easy. If subclassing from StreamBasedConnection all background threading issues are handled for you and all you have to do is create a state machine for the sending and receiving of commands. If your connection is not state based, then it is suggested not to subclass AbstractConnection, but rather implement the protocol.
+7. Sample application has had more of the delegate methods implemented and better upload/download support.
+
+All feedback is appreciated. ghulands@framedphotographics.com
+
