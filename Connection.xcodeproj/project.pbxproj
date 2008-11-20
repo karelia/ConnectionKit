@@ -30,9 +30,9 @@
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE2ED30ED3073A00AB81E7 /* CKController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7978FC240B1183DE0048168B /* CKController.h */; };
 		27AE2ED40ED3073B00AB81E7 /* CKController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7978FC250B1183DE0048168B /* CKController.m */; };
-		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; };
+		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
-		27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; };
+		27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE3A320ED427F500AB81E7 /* LeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */; };
 		3C231A5A0A66ECB100951F9E /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84909F7048500172CDD /* CKWebDAVConnection.h */; };
 		3C231A5B0A66ECB200951F9E /* CKDotMacConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82B09F7048400172CDD /* CKDotMacConnection.h */; };
