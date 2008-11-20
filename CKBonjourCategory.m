@@ -29,8 +29,8 @@
 
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
-#import "AbstractConnection.h"
-#import "ConnectionRegistry.h"
+#import "CKAbstractConnection.h"
+#import "CKConnectionRegistry.h"
 
 @interface CKBonjourHost : CKHost
 {
@@ -165,7 +165,7 @@ static NSImage *sBonjourIcon = nil;
 	
 	if (!moreServicesComing)
 	{
-		[[[ConnectionRegistry sharedRegistry] outlineView] reloadData];
+		[[[CKConnectionRegistry sharedRegistry] outlineView] reloadData];
 	}
 }
 
@@ -196,9 +196,9 @@ static NSImage *sBonjourIcon = nil;
 		[h setConnectionType:@"WebDAV"];
 		[myHTTPCategory addHost:h];
 	}
-	[h setPort:[AbstractConnection registeredPortForConnectionType:[h connectionType]]];
+	[h setPort:[CKAbstractConnection registeredPortForConnectionType:[h connectionType]]];
 	[h release];
-	[[[ConnectionRegistry sharedRegistry] outlineView] reloadData];
+	[[[CKConnectionRegistry sharedRegistry] outlineView] reloadData];
 }
 
 - (void)netService:(NSNetService *)sender didNotResolve:(NSDictionary *)errorDict

@@ -67,7 +67,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		SecKeychainCopyDefault(&kc);
 		if (!kc)
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to get the default keychain");
+			KTLog(CKTransportDomain, KTLogFatal, @"Failed to get the default keychain");
 			[self release];
 			return nil;
 		}
@@ -76,7 +76,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		CFRelease(kc);
 		if (!search)
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to create SSL identity search");
+			KTLog(CKTransportDomain, KTLogFatal, @"Failed to create SSL identity search");
 			[self release];
 			return nil;
 		}
@@ -84,7 +84,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		CFRelease(search);
 		if (!_sslIdentity)
 		{
-			KTLog(TransportDomain, KTLogFatal, @"Failed to create SSL identity");
+			KTLog(CKTransportDomain, KTLogFatal, @"Failed to create SSL identity");
 			[self release];
 			return nil;
 		}
@@ -211,7 +211,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		{
 			if (_flags.isHandshaking) 
 			{
-				KTLog(StreamDomain, KTLogDebug, @"SSL Tried to activate while handshake in progress");
+				KTLog(CKStreamDomain, KTLogDebug, @"SSL Tried to activate while handshake in progress");
 				return;
 			}
 			
@@ -225,7 +225,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 			}
 			if (ret < 0)
 			{
-				KTLog(StreamDomain, KTLogFatal, @"Failed to complete SSL Handshake");
+				KTLog(CKStreamDomain, KTLogFatal, @"Failed to complete SSL Handshake");
 				return;
 			}
 			
@@ -369,24 +369,24 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	{
 		if (ret = SSLNewContext((Boolean)_flags.sslServerMode, &_sslContext))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Failed to create SSL Context");
+			KTLog(CKStreamDomain, KTLogFatal, @"Failed to create SSL Context");
 		}
 		
 		if (ret = SSLSetConnection(_sslContext, self))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Failed to set SSL connection reference");
+			KTLog(CKStreamDomain, KTLogFatal, @"Failed to set SSL connection reference");
 			return ret;
 		}
 		
 		if (ret = SSLSetIOFuncs(_sslContext, SSLReadFunction, SSLWriteFunction))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Failed to set SSL IO Functions");
+			KTLog(CKStreamDomain, KTLogFatal, @"Failed to set SSL IO Functions");
 			return ret;
 		}
 		
 		if (ret = SSLSetEnableCertVerify(_sslContext, true))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Failed to set verify certificates");
+			KTLog(CKStreamDomain, KTLogFatal, @"Failed to set verify certificates");
 			return ret;
 		}
 		
@@ -399,7 +399,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		
 		if (ret)
 		{
-			KTLog(StreamDomain, KTLogDebug, @"Failed to set SSL Certificate");
+			KTLog(CKStreamDomain, KTLogDebug, @"Failed to set SSL Certificate");
 		}
 		
 		_inputData = input;
@@ -408,7 +408,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		
 		if (ret == errSSLWouldBlock)
 		{
-			KTLog(StreamDomain, KTLogDebug, @"SSL Handshake would block");
+			KTLog(CKStreamDomain, KTLogDebug, @"SSL Handshake would block");
 			return 0;
 		}
 		
@@ -440,7 +440,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		int ret;
 		if (ret = SSLWrite(_sslContext, buffer + processed, inputLength - processed, &written))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
+			KTLog(CKStreamDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
 			return nil;
 		}
 		processed += written;
@@ -469,7 +469,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		ret = SSLRead(_sslContext, buf, 1024, &read);
 		if (ret && (ret != errSSLWouldBlock) && (ret != errSSLClosedGraceful))
 		{
-			KTLog(StreamDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
+			KTLog(CKStreamDomain, KTLogFatal, @"Error in SSLRead: %d", ret);
 			return nil;
 		}
 		

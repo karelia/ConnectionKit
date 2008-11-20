@@ -208,7 +208,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
-- (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
+- (BOOL)connection:(id <CKConnection>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
 {
 	NSAlert *alert = [NSAlert alertWithMessageText:NSLocalizedString(@"Authorize Connection?", @"authorise")
 									 defaultButton:NSLocalizedString(@"Authorize", @"authorise")
@@ -223,7 +223,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	return NO;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host
 {
 	[oStatus setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Connected to %@", @"connected message"), [myHost host]]];
 	
@@ -233,14 +233,14 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[oProgressBar setDoubleValue:0.0];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host
 {
 	[oStatus setStringValue:NSLocalizedString(@"Disconnected", @"status")];
 	[self notifyGrowlOfSuccessfulUpload];
 	[NSApp performSelector:@selector(terminate:) withObject:nil afterDelay:0.5];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error
 {
 	if ([[error userInfo] objectForKey:ConnectionDirectoryExistsKey]) 
 	{
@@ -251,7 +251,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[a runModal];
 }
 
-//- (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username
+//- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username
 //{
 //	
 //}
@@ -274,7 +274,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	return nil;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)aPercent
+- (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)aPercent
 {
 	CKTransferRecord *record = [self recordWithPath:remotePath];
 	int oldValue = [[record progress] intValue];
@@ -313,7 +313,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[oProgressBar setDoubleValue:(totalTransferred * 1.0) / (totalBytes * 1.0)];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath
+- (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath
 {
 	CKTransferRecord *record = [self recordWithPath:remotePath];
 	[record setProgress:1];
@@ -323,7 +323,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[oStatus setStringValue:[NSString stringWithFormat:NSLocalizedString(@"Uploading %@", @"status"), [record name]]];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
+- (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath
 {
 	CKTransferRecord *record = [self recordWithPath:remotePath];
 	[record setProgress:100];
@@ -331,7 +331,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[oFiles reloadData];
 }
 
-- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con
+- (void)connectionDidSendBadPassword:(id <CKConnection>)con
 {
 	NSLog(@"Bad Password");
 }

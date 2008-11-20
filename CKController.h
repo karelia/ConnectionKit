@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 @class CKHost;
-@protocol AbstractConnectionProtocol;
+@protocol CKConnection;
 
 @interface CKController : NSObject 
 {
@@ -25,8 +25,8 @@
 // UNUSED:	NSString				*myLocalDirectory;
 // UNUSED:	NSString				*myRemoteDirectory;
 // UNUSED:	CKHost					*myHost;
-// UNUSED:	id <AbstractConnectionProtocol> myConnection;
-// UNUSED:	id <AbstractConnectionProtocol> myLocalConnection;
+// UNUSED:	id <CKConnection> myConnection;
+// UNUSED:	id <CKConnection> myLocalConnection;
 	
 // UNUSED:	NSMutableArray			*myTransfers;
 	
@@ -44,7 +44,7 @@
 - (void)setHost:(CKHost *)host;
 - (CKHost *)host;
 
-- (id <AbstractConnectionProtocol>)connection;
+- (id <CKConnection>)connection;
 
 - (void)setCanUpload:(BOOL)flag;
 - (void)setCanDownload:(BOOL)flag;

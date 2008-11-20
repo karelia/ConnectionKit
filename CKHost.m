@@ -317,7 +317,7 @@ static NSImage *sHostIcon = nil;
 	if (!oldUsernameString || [oldUsernameString length] == 0)
 		return;
 	
-	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:oldUsernameString path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		[keychainItem setUsername:username];
@@ -342,7 +342,7 @@ static NSImage *sHostIcon = nil;
 	if (!_username || [_username length] == 0 || !_host || [_host length] == 0)
 		return;
 	
-	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
@@ -476,7 +476,7 @@ static NSImage *sHostIcon = nil;
 		return nil;
 	}
 	
-	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
@@ -495,7 +495,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)baseURLString
 {
-	NSString *scheme = [AbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
+	NSString *scheme = [CKAbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
 	NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", scheme];
 	if ([self username])
 	{
@@ -516,7 +516,7 @@ static NSImage *sHostIcon = nil;
 	NSString *port = _port;
 	if (!port || [port isEqualToString:@""])
 	{
-		port = [AbstractConnection registeredPortForConnectionType:[self connectionType]];
+		port = [CKAbstractConnection registeredPortForConnectionType:[self connectionType]];
 	}
 	
 	if (port)
@@ -582,19 +582,19 @@ static NSImage *sHostIcon = nil;
 	return YES;
 }
 
-- (id <AbstractConnectionProtocol>)connection
+- (id <CKConnection>)connection
 {
-	id <AbstractConnectionProtocol> connection = nil;
+	id <CKConnection> connection = nil;
 	NSError *error = nil;
 	
 	if (_URL)
 	{
-		connection = [AbstractConnection connectionWithURL:_URL error:&error];
+		connection = [CKAbstractConnection connectionWithURL:_URL error:&error];
 	}
 	
 	if (!connection && _connectionType && ![_connectionType isEqualToString:@""] && ![_connectionType isEqualToString:@"Auto Select"])
 	{
-		connection = [AbstractConnection connectionWithName:_connectionType
+		connection = [CKAbstractConnection connectionWithName:_connectionType
 													   host:_host
 													   port:_port
 												   username:_username
@@ -604,7 +604,7 @@ static NSImage *sHostIcon = nil;
 	
 	if (!connection)
 	{
-		connection = [AbstractConnection connectionToHost:_host
+		connection = [CKAbstractConnection connectionToHost:_host
 													 port:_port
 												 username:_username
 												 password:[self password]
@@ -629,7 +629,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)name
 {
-	NSString *type = [AbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
+	NSString *type = [CKAbstractConnection urlSchemeForConnectionName:[self connectionType] port:[self port]];
 	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : LocalizedStringInConnectionKitBundle(@"auto", @"connection type")];
 	if ([self username] && ![[self username] isEqualToString:@""])
 	{
@@ -788,7 +788,7 @@ static NSImage *sHostIcon = nil;
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
-	if ([[[ConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username

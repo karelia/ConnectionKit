@@ -34,10 +34,10 @@
 #import "NSObject+Connection.h"
 #import "NSString+Connection.h"
 #import "CKTransferRecord.h"
-#import "FileConnection.h"
+#import "CKFileConnection.h"
 #import "RunLoopForwarder.h"
-#import "FTPConnection.h"
-#import "SFTPConnection.h"
+#import "CKFTPConnection.h"
+#import "CKSFTPConnection.h"
 #import "InterThreadMessaging.h"
 
 NSString *ControllerDomain = @"Controller";
@@ -379,10 +379,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	if (CKDisconnectedStatus != myConnectionStatus)	// don't proceed if we already had an error connecting
 	{
 		// temporarily turn off verification for sftp until I can sort out the double connection problem
-		if ([[self connection] isKindOfClass:[SFTPConnection class]]) myFlags.verifyTransfers = NO;
+		if ([[self connection] isKindOfClass:[CKSFTPConnection class]]) myFlags.verifyTransfers = NO;
 		
 		/// temporarily turn off FTP verification too  just for simplification
-		if ([[self connection] isKindOfClass:[FTPConnection class]]) myFlags.verifyTransfers = NO;
+		if ([[self connection] isKindOfClass:[CKFTPConnection class]]) myFlags.verifyTransfers = NO;
 
 		if (!myVerificationConnection && myFlags.verifyTransfers)
 		{
@@ -515,7 +515,7 @@ static NSSize closedSize = { 452, 152 };
 // set a connection.  Generally called when this class maintains its collection.
 // If delegate provides collection, then we do not deal with retaining.
 
-- (void)setConnection:(id <AbstractConnectionProtocol>)connection
+- (void)setConnection:(id <CKConnection>)connection
 {
 	if ([myConnection delegate] == self) [myConnection setDelegate:nil];
 	if (!myFlags.delegateProvidesConnection)
@@ -529,23 +529,23 @@ static NSSize closedSize = { 452, 152 };
 	}
 }
 
-- (id <AbstractConnectionProtocol>)connection
+- (id <CKConnection>)connection
 {
 	if (!myConnection && myFlags.delegateProvidesConnection)
 	{
 		// delegate returns a connection; we do not retain it.
-		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:YES];
+		id <CKConnection> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:YES];
 		[con setDelegate:self];
 		return con;
 	}
 	return myConnection;
 }
 
-- (id <AbstractConnectionProtocol>)connectionIfAleadyCreated
+- (id <CKConnection>)connectionIfAleadyCreated
 {
 	if (!myConnection && myFlags.delegateProvidesConnection)
 	{
-		id <AbstractConnectionProtocol> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:NO];
+		id <CKConnection> con = [myDelegate transferControllerNeedsConnection:self createIfNeeded:NO];
 		return con;
 	}
 	return myConnection;
@@ -942,7 +942,7 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
-- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con
+- (void)connectionDidSendBadPassword:(id <CKConnection>)con
 {
 	if (con == [self connection])
 	{
@@ -969,7 +969,7 @@ static NSSize closedSize = { 452, 152 };
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host
 {
 	if (con == [self connection])
 	{
@@ -981,7 +981,7 @@ static NSSize closedSize = { 452, 152 };
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host
 {
 	if (con == [self connection])
 	{
@@ -1039,7 +1039,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 	}
 } 
 
-- (BOOL)connection:(id <AbstractConnectionProtocol>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
+- (BOOL)connection:(id <CKConnection>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message
 {
 	NSAlert *alert = [NSAlert alertWithMessageText:LocalizedStringInConnectionKitBundle(@"Authorize Connection?", @"authorise")
 									 defaultButton:LocalizedStringInConnectionKitBundle(@"Authorize", @"authorise")
@@ -1054,7 +1054,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 	return NO;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error
 {
 	if ([error code] == ConnectionErrorUploading) 
 	{
@@ -1101,7 +1101,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 	}
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath
+- (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath
 {
 	NSMutableString *msg = [NSMutableString string];
 	if (myUploadingPrefix)
@@ -1116,7 +1116,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 	[self setStatusMessage:msg];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
+- (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
 	CKTransferRecord *folder = [self recordWithPath:dirPath];
 	NSEnumerator *e = [[folder contents] objectEnumerator];

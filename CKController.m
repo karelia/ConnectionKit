@@ -26,7 +26,7 @@
 	return nil;
 }
 
-- (id <AbstractConnectionProtocol>)connection
+- (id <CKConnection>)connection
 {
 	return nil;
 }
