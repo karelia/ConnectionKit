@@ -277,7 +277,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)aPercent
 {
 	CKTransferRecord *record = [self recordWithPath:remotePath];
-	int oldValue = [[record progress] intValue];
+	int oldValue = [record progress];
 	int percent = [aPercent intValue];
 	
 	if (oldValue == 1 && percent == 100)
@@ -365,7 +365,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
 {
-	return [NSDictionary dictionaryWithObjectsAndKeys:[item progress], @"progress", [item name], @"name", nil];
+	return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:[item progress]], @"progress", [item name], @"name", nil];
 }
 
 #pragma mark -
