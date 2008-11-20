@@ -419,8 +419,8 @@
 		79CFD83609F7048400172CDD /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
 		79CFD83709F7048400172CDD /* CKMultipleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKMultipleConnection.h; sourceTree = "<group>"; };
 		79CFD83809F7048400172CDD /* CKMultipleConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKMultipleConnection.m; sourceTree = "<group>"; };
-		79CFD83909F7048400172CDD /* NNTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNTPConnection.h; sourceTree = SOURCE_ROOT; };
-		79CFD83A09F7048400172CDD /* NNTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNTPConnection.m; sourceTree = SOURCE_ROOT; };
+		79CFD83909F7048400172CDD /* NNTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNTPConnection.h; sourceTree = "<group>"; };
+		79CFD83A09F7048400172CDD /* NNTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNTPConnection.m; sourceTree = "<group>"; };
 		79CFD83B09F7048400172CDD /* ONBSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ONBSocket.h; sourceTree = "<group>"; };
 		79CFD83C09F7048400172CDD /* ONBSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ONBSocket.m; sourceTree = "<group>"; };
 		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
@@ -643,6 +643,69 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		27FD90C10ED5BF640068D634 /* Abstract */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */,
+				79CFD80C09F7048400172CDD /* CKAbstractConnection.h */,
+				79CFD80D09F7048400172CDD /* CKAbstractConnection.m */,
+				79CFD80F09F7048400172CDD /* CKAbstractQueueConnection.h */,
+				79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */,
+				79CFD84709F7048500172CDD /* CKStreamBasedConnection.h */,
+				79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */,
+				79CFD83709F7048400172CDD /* CKMultipleConnection.h */,
+				79CFD83809F7048400172CDD /* CKMultipleConnection.m */,
+			);
+			name = Abstract;
+			sourceTree = "<group>";
+		};
+		27FD90C20ED5BFA40068D634 /* S3 */ = {
+			isa = PBXGroup;
+			children = (
+				7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */,
+				7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */,
+			);
+			name = S3;
+			sourceTree = "<group>";
+		};
+		27FD90C60ED5BFC00068D634 /* FTP */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD82F09F7048400172CDD /* CKFTPConnection.h */,
+				79CFD83009F7048400172CDD /* CKFTPConnection.m */,
+				79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */,
+				79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */,
+			);
+			name = FTP;
+			sourceTree = "<group>";
+		};
+		27FD90C70ED5BFDB0068D634 /* File System */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD82D09F7048400172CDD /* CKFileConnection.h */,
+				79CFD82E09F7048400172CDD /* CKFileConnection.m */,
+			);
+			name = "File System";
+			sourceTree = "<group>";
+		};
+		27FD90C80ED5BFFD0068D634 /* Other */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD83909F7048400172CDD /* NNTPConnection.h */,
+				79CFD83A09F7048400172CDD /* NNTPConnection.m */,
+			);
+			name = Other;
+			sourceTree = "<group>";
+		};
+		27FD90C90ED5C0070068D634 /* .Mac */ = {
+			isa = PBXGroup;
+			children = (
+				79CFD82B09F7048400172CDD /* CKDotMacConnection.h */,
+				79CFD82C09F7048400172CDD /* CKDotMacConnection.m */,
+			);
+			name = .Mac;
+			sourceTree = "<group>";
+		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
@@ -771,35 +834,16 @@
 		79CFD11A09F7022900172CDD /* Connections */ = {
 			isa = PBXGroup;
 			children = (
+				27FD90C10ED5BF640068D634 /* Abstract */,
+				27FD90C60ED5BFC00068D634 /* FTP */,
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
 				792CFCA70A806108001A00C6 /* HTTP */,
-				79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */,
-				79CFD80C09F7048400172CDD /* CKAbstractConnection.h */,
-				79CFD80D09F7048400172CDD /* CKAbstractConnection.m */,
-				79CFD80F09F7048400172CDD /* CKAbstractQueueConnection.h */,
-				79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */,
-				79CFD84709F7048500172CDD /* CKStreamBasedConnection.h */,
-				79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */,
-				79CFD84909F7048500172CDD /* CKWebDAVConnection.h */,
-				79CFD84A09F7048500172CDD /* CKWebDAVConnection.m */,
-				79CFD82B09F7048400172CDD /* CKDotMacConnection.h */,
-				79CFD82C09F7048400172CDD /* CKDotMacConnection.m */,
-				79CFD84B09F7048500172CDD /* CKWebDAVSecureConnection.h */,
-				79CFD84C09F7048500172CDD /* CKWebDAVSecureConnection.m */,
-				79CFD82D09F7048400172CDD /* CKFileConnection.h */,
-				79CFD82E09F7048400172CDD /* CKFileConnection.m */,
-				79CFD82F09F7048400172CDD /* CKFTPConnection.h */,
-				79CFD83009F7048400172CDD /* CKFTPConnection.m */,
-				79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */,
-				79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */,
-				79CFD83909F7048400172CDD /* NNTPConnection.h */,
-				79CFD83A09F7048400172CDD /* NNTPConnection.m */,
-				7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */,
-				7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */,
-				79CFD83709F7048400172CDD /* CKMultipleConnection.h */,
-				79CFD83809F7048400172CDD /* CKMultipleConnection.m */,
-				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				79CFD11D09F7023D00172CDD /* DAV */,
+				27FD90C70ED5BFDB0068D634 /* File System */,
+				27FD90C90ED5C0070068D634 /* .Mac */,
+				27FD90C20ED5BFA40068D634 /* S3 */,
+				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
+				27FD90C80ED5BFFD0068D634 /* Other */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -807,6 +851,10 @@
 		79CFD11D09F7023D00172CDD /* DAV */ = {
 			isa = PBXGroup;
 			children = (
+				79CFD84909F7048500172CDD /* CKWebDAVConnection.h */,
+				79CFD84A09F7048500172CDD /* CKWebDAVConnection.m */,
+				79CFD84B09F7048500172CDD /* CKWebDAVSecureConnection.h */,
+				79CFD84C09F7048500172CDD /* CKWebDAVSecureConnection.m */,
 				79CFD82509F7048400172CDD /* CKDAVResponse.h */,
 				79CFD82609F7048400172CDD /* CKDAVResponse.m */,
 				79CFD81309F7048400172CDD /* CKDAVCreateDirectoryRequest.h */,
