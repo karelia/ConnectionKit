@@ -29,7 +29,7 @@
  */
 
 #import "SSLStream.h"
-#import "AbstractConnection.h"
+#import "CKAbstractConnection.h"
 #import "RunLoopForwarder.h"
 #import "InterThreadMessaging.h"
 

@@ -289,7 +289,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 }
 
 #pragma mark -
-#pragma mark AbstractConnection Overrides
+#pragma mark CKAbstractConnection Overrides
 
 - (void)setDelegate:(id)delegate
 {
