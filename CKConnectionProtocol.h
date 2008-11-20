@@ -54,19 +54,19 @@ enum {
 + (NSString *)name;
 
 + (id <CKConnection>)connectionToHost:(NSString *)host
-											   port:(NSString *)port
-										   username:(NSString *)username
-										   password:(NSString *)password
-											  error:(NSError **)error;
+                                 port:(NSString *)port
+                             username:(NSString *)username
+                             password:(NSString *)password
+                                error:(NSError **)error;
 
 + (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
 
 + (id <CKConnection>)connectionWithName:(NSString *)name
-												 host:(NSString *)host
-												 port:(NSString *)port
-											 username:(NSString *)username
-											 password:(NSString *)password
-												error:(NSError **)error;
+                                   host:(NSString *)host
+                                   port:(NSString *)port
+                               username:(NSString *)username
+                               password:(NSString *)password
+                                  error:(NSError **)error;
 
 - (id)initWithHost:(NSString *)host
 			  port:(NSString *)port
@@ -172,7 +172,7 @@ enum {
 
 /* 
 	New method that allows you to set a custom delegate for the download.
-	You must implement the ConnectionTransferDelegate informal protocol.
+	You must implement the CKConnectionTransferDelegate informal protocol.
 	By default the transfer record returned is the delegate of the transfer.
 */
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
