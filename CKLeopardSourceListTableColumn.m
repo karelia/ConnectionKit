@@ -6,9 +6,9 @@
 //
 
 #import "CKConnectionRegistry.h"
-#import "LeopardSourceListTableColumn.h"
+#import "CKLeopardSourceListTableColumn.h"
 
-@implementation LeopardSourceListTableColumn
+@implementation CKLeopardSourceListTableColumn
 
 - (id)dataCellForRow:(int)row
 {
