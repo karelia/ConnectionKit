@@ -76,7 +76,7 @@
 	
 	NSHost *host = [NSHost hostWithName:_connectionHost];
 	if(!host){
-		//if ([AbstractConnection debugEnabled])
+		//if ([CKAbstractConnection debugEnabled])
 			NSLog(@"Cannot find the host: %@", _connectionHost);
 		
         if (_flags.error)
@@ -131,7 +131,7 @@
 	}
 	
 	if(!_receiveStream && _sendStream){
-		//if ([AbstractConnection debugEnabled])
+		//if ([CKAbstractConnection debugEnabled])
 			NSLog(@"Cannot create a stream for the host: %@", _connectionHost);
 		
 		if (_flags.error)

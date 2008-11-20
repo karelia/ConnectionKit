@@ -36,7 +36,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"news://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"usenet://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url3 = [NSDictionary dictionaryWithObjectsAndKeys:@"nntp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[AbstractConnection registerConnectionClass:[NNTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, url3, nil]];
+	[CKAbstractConnection registerConnectionClass:[NNTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, url3, nil]];
 	[pool release];
 }
 
@@ -104,7 +104,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", cmd];
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:formattedCommand
-															  attributes:[AbstractConnection sentAttributes]] autorelease]];
+															  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
 	
 	[self sendData:[formattedCommand dataUsingEncoding:NSUTF8StringEncoding]];
 }
@@ -119,7 +119,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[scanner scanInt:&code];
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
-															  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+															  attributes:[CKAbstractConnection receivedAttributes]] autorelease]];
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
 	switch (code) {
@@ -472,7 +472,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 						NSString *line = [_inputBuffer substringToIndex:newLinePosition.location + newLinePosition.length];
 						[_inputBuffer deleteCharactersInRange:NSMakeRange(0,newLinePosition.location+newLinePosition.length)]; // delete the parsed part
 						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@", line]
-																				  attributes:[AbstractConnection dataAttributes]] autorelease]];
+																				  attributes:[CKAbstractConnection dataAttributes]] autorelease]];
 						KTLog(CKProtocolDomain, KTLogError, @"%@", line);
 						if ([line rangeOfString:@"."].location == 0)
 							atEnd = YES;

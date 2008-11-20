@@ -21,7 +21,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 
 - (NSString *)connectionName
 {
-	return @"AbstractConnection";
+	return @"CKAbstractConnection";
 }
 
 - (NSString *)host

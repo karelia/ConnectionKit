@@ -789,7 +789,7 @@
 	[self closePanel:nil];
 }
 
-/*- (NSString *)connection:(AbstractConnection *)aConn needsAccountForUsername:(NSString *)username
+/*- (NSString *)connection:(CKAbstractConnection *)aConn needsAccountForUsername:(NSString *)username
 {
 	//	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
 }*/

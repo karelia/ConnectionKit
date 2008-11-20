@@ -31,7 +31,7 @@
 #import <Foundation/Foundation.h>
 #import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
 
-/*!	AbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
+/*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
  Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
  It also functions as a registry for automatic subclass detection.
  */
