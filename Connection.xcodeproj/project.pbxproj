@@ -28,8 +28,6 @@
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
-		27AE2ED30ED3073A00AB81E7 /* CKController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7978FC240B1183DE0048168B /* CKController.h */; };
-		27AE2ED40ED3073B00AB81E7 /* CKController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7978FC250B1183DE0048168B /* CKController.m */; };
 		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
 		27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1093,7 +1091,6 @@
 				D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */,
 				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
 				27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */,
-				27AE2ED30ED3073A00AB81E7 /* CKController.h in Headers */,
 				27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */,
 				27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */,
 			);
@@ -1438,7 +1435,6 @@
 				D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */,
 				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
 				27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */,
-				27AE2ED40ED3073B00AB81E7 /* CKController.m in Sources */,
 				27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */,
 				27AE3A320ED427F500AB81E7 /* LeopardSourceListTableColumn.m in Sources */,
 			);
