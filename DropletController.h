@@ -16,7 +16,7 @@
 	IBOutlet NSButton *oToggleFiles;
 	
 	CKHost *myHost;
-	id <AbstractConnectionProtocol>myConnection;
+	id <CKConnection>myConnection;
 	NSArray *myFilesDropped;
 	NSMutableArray *myTransfers;
 }

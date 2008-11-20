@@ -28,7 +28,7 @@
  */
 
 
-@protocol AbstractConnectionProtocol;
+@protocol CKConnection;
 
 
 @interface CKTransferRecord : NSObject
@@ -47,7 +47,7 @@
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
 	
-	id <AbstractConnectionProtocol> _connection; //not retained
+	id <CKConnection> _connection; //not retained
 	NSError *_error;
 }
 
@@ -65,8 +65,8 @@
 
 - (NSError *)error;
 
-- (id <AbstractConnectionProtocol>)connection;
-- (void)setConnection:(id <AbstractConnectionProtocol>)connection;	// Weak ref
+- (id <CKConnection>)connection;
+- (void)setConnection:(id <CKConnection>)connection;	// Weak ref
 
 - (CKTransferRecord *)parent;
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
@@ -119,7 +119,7 @@ extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 @interface CKTransferRecord (Private)
-- (void)setConnection:(id <AbstractConnectionProtocol>)connection; 
+- (void)setConnection:(id <CKConnection>)connection; 
 - (void)setSpeed:(double)bps;
 - (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;

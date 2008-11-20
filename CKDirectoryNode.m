@@ -30,7 +30,7 @@
  */
 
 #import "CKDirectoryNode.h"
-#import "AbstractConnectionProtocol.h"
+#import "CKConnectionProtocol.h"
 #import "NSString+Connection.h"
 #import "NSNumber+Connection.h"
 

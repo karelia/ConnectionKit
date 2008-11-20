@@ -32,8 +32,8 @@
 
 #import "CKHTTPRequest.h"
 #import "CKHTTPResponse.h"
-#import "ConnectionThreadManager.h"
-#import "DAVResponse.h"
+#import "CKConnectionThreadManager.h"
+#import "CKDAVResponse.h"
 #import "NSData+Connection.h"
 #import "NSString+Connection.h"
 #import "NSObject+Connection.h"
@@ -117,8 +117,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 - (void)sendRequest:(CKHTTPRequest *)request
 {
-	ConnectionCommand *cmd = [ConnectionCommand command:request 
-											 awaitState:ConnectionIdleState 
+	CKConnectionCommand *cmd = [CKConnectionCommand command:request 
+											 awaitState:CKConnectionIdleState 
 											  sentState:HTTPSentGenericRequestState 
 											  dependant:nil
 											   userInfo:nil];
@@ -147,7 +147,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	myHTTPFlags.didFailAttemptedDigestAuthentication = NO;
 	
 	[super threadedConnect];
-	[self setState:ConnectionIdleState];
+	[self setState:CKConnectionIdleState];
 }
 
 - (void)processReceivedData:(NSData *)data
@@ -176,14 +176,14 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[myResponseBuffer setLength:0];
 	[self closeStreams];
 		
-	KTLog(ProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
+	KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
 	
 	if ([self transcript])
 	{
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
-																  attributes:[AbstractConnection receivedAttributes]] autorelease]];
+																  attributes:[CKAbstractConnection receivedAttributes]] autorelease]];
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
-																  attributes:[AbstractConnection dataAttributes]] autorelease]];
+																  attributes:[CKAbstractConnection dataAttributes]] autorelease]];
 	}
 	
 	if ([response code] == 401)
@@ -205,7 +205,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 			if ([self transcript])
 			{
 				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
-																		  attributes:[AbstractConnection sentAttributes]] autorelease]];
+																		  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
 			}
 			// need to append authorization
 			NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
@@ -254,7 +254,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 				if ([self transcript])
 				{
 					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"] 
-																			  attributes:[AbstractConnection sentAttributes]] autorelease]];
+																			  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
 				}
 				@throw [NSException exceptionWithName:NSInternalInconsistencyException
 											   reason:@"Failed at Basic and Digest Authentication"
@@ -268,7 +268,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 	[self processResponse:response];
 	if ([response code] == 401)
-		[self setState:ConnectionNotConnectedState];
+		[self setState:CKConnectionNotConnectedState];
 }
 
 - (BOOL)processBufferWithNewData:(NSData *)data
@@ -285,7 +285,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	{
 		[(NSObject *)_forwarder connection:self didReceiveResponse:response];
 	}
-	[self setState:ConnectionIdleState];
+	[self setState:CKConnectionIdleState];
 }
 
 - (void)sendCommand:(id)command
@@ -324,12 +324,12 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		if ([self transcript])
 		{
 			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
-																	  attributes:[AbstractConnection sentAttributes]] autorelease]];
+																	  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
 		}
 		
 		[self initiatingNewRequest:req withPacket:packet];
 		
-		KTLog(ProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsUTF8String]);
+		KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsUTF8String]);
 		[self sendData:packet];
 	}
 	else 
@@ -398,7 +398,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	{
 		case NSStreamEventEndEncountered: 
 		{
-			KTLog(InputStreamDomain, KTLogDebug, @"Stream Closed");
+			KTLog(CKInputStreamDomain, KTLogDebug, @"Stream Closed");
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myHTTPFlags.needsReconnection = YES;
@@ -430,7 +430,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	{
 		case NSStreamEventEndEncountered: 
 		{
-			KTLog(OutputStreamDomain, KTLogDebug, @"Stream Closed");
+			KTLog(CKOutputStreamDomain, KTLogDebug, @"Stream Closed");
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myHTTPFlags.needsReconnection = YES;

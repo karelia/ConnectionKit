@@ -48,7 +48,7 @@
 */
 
 #import <Cocoa/Cocoa.h>
-#import "AbstractConnectionProtocol.h"
+#import "CKConnectionProtocol.h"
 
 #define ONBSocketErrorDomain		@"ONBSocketErrorDomain"
 #define ONBSocketSSLErrorDomain		@"ONBSocketSSLErrorDomain"

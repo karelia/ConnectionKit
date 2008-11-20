@@ -10,7 +10,7 @@
 #import <Connection/Connection.h>
 
 @interface AbstractConnectionTest : SenTestCase {
-  id <AbstractConnectionProtocol> connection;
+  id <CKConnection> connection;
   NSString *initialDirectory;
   NSString *fileNameExistingOnServer;       //used to check that checkForFileExistance calls work, this file has to already exist on the server
   NSString* existingFolder;

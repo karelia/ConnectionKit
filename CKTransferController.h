@@ -28,7 +28,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import "AbstractConnectionProtocol.h"
+#import "CKConnectionProtocol.h"
 
 extern NSString *ControllerDomain; // used for logging
 extern NSString *CKTransferControllerDomain; // used for errors
@@ -65,8 +65,8 @@ typedef enum {
 
 @interface CKTransferController : NSWindowController 
 {
-	id <AbstractConnectionProtocol>		myConnection;		// may not be retained
-	id <AbstractConnectionProtocol>		myVerificationConnection;
+	id <CKConnection>		myConnection;		// may not be retained
+	id <CKConnection>		myVerificationConnection;
 	
 	CKTransferControllerStatus			myReturnStatus;
 	CKTransferConnectionStatus			myConnectionStatus;
@@ -116,8 +116,8 @@ typedef enum {
 
 - (id)init;
 
-- (void)setConnection:(id <AbstractConnectionProtocol>)connection;
-- (id <AbstractConnectionProtocol>)connection;
+- (void)setConnection:(id <CKConnection>)connection;
+- (id <CKConnection>)connection;
 
 - (void)setRootPath:(NSString *)path;
 
@@ -178,7 +178,7 @@ typedef enum {
 
 @interface NSObject (CKTransferControllerDelegate)
 
-- (id <AbstractConnectionProtocol>)transferControllerNeedsConnection:(CKTransferController *)controller createIfNeeded:(BOOL)aCreate;
+- (id <CKConnection>)transferControllerNeedsConnection:(CKTransferController *)controller createIfNeeded:(BOOL)aCreate;
 - (BOOL)transferControllerNeedsContent:(CKTransferController *)controller; // this will be called on a new thread if you setContentGeneratedInSeparateThread:YES
 - (void)transferControllerFinishedContentGeneration:(CKTransferController *)controller completed:(BOOL)aFlag; // called on the main thread
 // return YES if you want the controllers default action to also be invoked

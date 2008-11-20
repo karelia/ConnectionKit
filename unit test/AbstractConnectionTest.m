@@ -53,7 +53,7 @@ const NSTimeInterval kTestTimeout = -15.0;
 	initialDirectory = [[NSString stringWithString:NSHomeDirectory()] retain];
   existingFolder = @"Sites";
 	NSError *err = nil;
-	connection = [[AbstractConnection connectionWithName: [self connectionName]
+	connection = [[CKAbstractConnection connectionWithName: [self connectionName]
 													host: [self host]
 													port: [self port]
 												username: [self username]
@@ -487,36 +487,36 @@ const NSTimeInterval kTestTimeout = -15.0;
                                            handler: nil];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
+- (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
   remoteDownloadedPath = [remotePath retain];
   didDownload = YES;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didConnectToHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host
 {
   isConnected = YES;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDisconnectFromHost:(NSString *)host
+- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host
 {
 	isConnected = NO;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error
 {
   //NSLog (@"%@\n%@", NSStringFromSelector(_cmd), error);
   NSLog (@"error: %@", error);
   receivedError = YES;
 }
 
-- (void)connectionDidSendBadPassword:(id <AbstractConnectionProtocol>)con
+- (void)connectionDidSendBadPassword:(id <CKConnection>)con
 {
   receivedError = YES;
 }
 
 
-- (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath
+- (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath
 {
   if (![con numberOfTransfers])
     didUpload = YES;
@@ -524,31 +524,31 @@ const NSTimeInterval kTestTimeout = -15.0;
 }
 
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didDeleteFile:(NSString *)path
+- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path
 {
   didDelete = YES;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists
+- (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists
 {
   fileExists = exists;
   returnedFromFileExists = YES;
 }
 
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
+- (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
 	//NSLog(@"received contents: %@", dirPath);
 	
   directoryContents = [contents retain];
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path
+- (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path
 {
   didSetPermission = YES;
 }
 
-- (void)connection:(id <AbstractConnectionProtocol>)con didChangeToDirectory:(NSString *)dirPath
+- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath
 {
   didChangeDirectory = YES;
 }

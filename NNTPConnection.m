@@ -99,7 +99,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 - (void)sendCommand:(NSString *)cmd
 {
-	KTLog(ProtocolDomain, KTLogDebug, @">> %@", cmd);
+	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", cmd);
 	
 	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", cmd];
 	
@@ -120,7 +120,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
 															  attributes:[AbstractConnection receivedAttributes]] autorelease]];
-	KTLog(ProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
+	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
 	switch (code) {
 #pragma mark -
@@ -134,41 +134,41 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 #pragma mark -
 #pragma mark 200 Series Codes
 		case 200: {
-			if (GET_STATE == ConnectionNotConnectedState) {
+			if (GET_STATE == CKConnectionNotConnectedState) {
 				_newsflags.canPost = YES;
 				if (_flags.didConnect)
 					[_forwarder connection:self didConnectToHost:[self host]];
-				[self setState:ConnectionIdleState];
+				[self setState:CKConnectionIdleState];
 			}
 		} break;
 		case 201: {
-			if (GET_STATE == ConnectionNotConnectedState) {
+			if (GET_STATE == CKConnectionNotConnectedState) {
 				_newsflags.canPost = NO;
 				if (_flags.didConnect)
 					[_forwarder connection:self didConnectToHost:[self host]];
-				[self setState:ConnectionIdleState];
+				[self setState:CKConnectionIdleState];
 			}
 		} break;
 		case 202: {
-			if (GET_STATE == ConnectionNotConnectedState) {
+			if (GET_STATE == CKConnectionNotConnectedState) {
 				_newsflags.isSlave = YES;
 				if (_flags.didConnect)
 					[_forwarder connection:self didConnectToHost:[self host]];
-				[self setState:ConnectionIdleState];
+				[self setState:CKConnectionIdleState];
 			}
 		} break;
 		case 205: {
 			if (_flags.didDisconnect)
 				[_forwarder connection:self didDisconnectFromHost:[self host]];
-			[self setState:ConnectionNotConnectedState];
+			[self setState:CKConnectionNotConnectedState];
 		} break;
 		case 211: {
 			
 		} break;
 		case 215: {
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState) {
+			if (GET_STATE == CKConnectionAwaitingDirectoryContentsState) {
 				[self receiveNewsGroupsListing];
-				[self setState:ConnectionIdleState];
+				[self setState:CKConnectionIdleState];
 			}
 		} break;
 		case 220: {
@@ -178,9 +178,9 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 			
 		} break;
 		case 223: {
-			if (GET_STATE == ConnectionAwaitingDirectoryContentsState) {
+			if (GET_STATE == CKConnectionAwaitingDirectoryContentsState) {
 				[self receiveNewsGroupsListing];
-				[self setState:ConnectionIdleState];
+				[self setState:CKConnectionIdleState];
 			}
 		} break;
 		case 231: {
@@ -250,7 +250,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 			
 		} break;
 		case 502: {
-			if (GET_STATE == ConnectionNotConnectedState) {
+			if (GET_STATE == CKConnectionNotConnectedState) {
 				NSError *err = [NSError errorWithDomain:NNTPErrorDomain
 												   code:502
 											   userInfo:nil];
@@ -267,8 +267,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 - (void)changeToDirectory:(NSString *)dirPath
 {
 	[self queueCommand:[ConnectionCommand command:[NSString stringWithFormat:@"GROUP %@", dirPath]
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionChangedDirectoryState
+									   awaitState:CKConnectionIdleState
+										sentState:CKConnectionChangedDirectoryState
 										dependant:nil
 										 userInfo:nil]];
 }
@@ -428,8 +428,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 - (void)directoryContents
 {
 	[self queueCommand:[ConnectionCommand command:@"LIST -a"
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionAwaitingDirectoryContentsState
+									   awaitState:CKConnectionIdleState
+										sentState:CKConnectionAwaitingDirectoryContentsState
 										dependant:nil
 										 userInfo:nil]];
 }
@@ -439,8 +439,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
 	[self queueCommand:[ConnectionCommand command:@"LIST -a"
-									   awaitState:ConnectionIdleState
-										sentState:ConnectionAwaitingDirectoryContentsState
+									   awaitState:CKConnectionIdleState
+										sentState:CKConnectionAwaitingDirectoryContentsState
 										dependant:nil
 										 userInfo:nil]];
 }
@@ -473,7 +473,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 						[_inputBuffer deleteCharactersInRange:NSMakeRange(0,newLinePosition.location+newLinePosition.length)]; // delete the parsed part
 						[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@", line]
 																				  attributes:[AbstractConnection dataAttributes]] autorelease]];
-						KTLog(ProtocolDomain, KTLogError, @"%@", line);
+						KTLog(CKProtocolDomain, KTLogError, @"%@", line);
 						if ([line rangeOfString:@"."].location == 0)
 							atEnd = YES;
 						else {
@@ -523,7 +523,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 		if (rn.location == NSNotFound)
 		{
 			NSError *error = [NSError errorWithDomain:ConnectionErrorDomain
-												 code:ConnectionErrorParsingDirectoryListing
+												 code:CKConnectionErrorParsingDirectoryListing
 											 userInfo:[NSDictionary dictionaryWithObject:@"Error parsing directory listing" forKey:NSLocalizedDescriptionKey]];
 			
 			KTLog(ParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");

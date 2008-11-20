@@ -29,7 +29,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@protocol AbstractConnectionProtocol;
+@protocol CKConnection;
 @class CKHostCategory;
 
 @interface CKHost : NSObject <NSCoding, NSCopying>
@@ -99,7 +99,7 @@
 - (void)setCategory:(CKHostCategory *)cat;
 
 // returns a new autoreleased connection of this type;
-- (id <AbstractConnectionProtocol>)connection; 
+- (id <CKConnection>)connection; 
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;

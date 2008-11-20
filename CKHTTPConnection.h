@@ -27,11 +27,11 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "StreamBasedConnection.h"
+#import "CKStreamBasedConnection.h"
 
 @class CKHTTPRequest, CKHTTPResponse;
 
-@interface CKHTTPConnection : StreamBasedConnection 
+@interface CKHTTPConnection : CKStreamBasedConnection 
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
