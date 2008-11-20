@@ -30,8 +30,8 @@
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
-		27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27AE3A320ED427F500AB81E7 /* LeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */; };
+		27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */; };
 		3C231A5A0A66ECB100951F9E /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84909F7048500172CDD /* CKWebDAVConnection.h */; };
 		3C231A5B0A66ECB200951F9E /* CKDotMacConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82B09F7048400172CDD /* CKDotMacConnection.h */; };
 		3C231A5C0A66ECB400951F9E /* CKWebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* CKWebDAVSecureConnection.h */; };
@@ -517,8 +517,8 @@
 		D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSSHPassphrase.m; sourceTree = "<group>"; };
 		D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSSHPassphrase.h; sourceTree = "<group>"; };
 		D3A2B7A20D90A2E2002F02EF /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeopardSourceListTableColumn.h; sourceTree = "<group>"; };
-		D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeopardSourceListTableColumn.m; sourceTree = "<group>"; };
+		D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKLeopardSourceListTableColumn.h; sourceTree = "<group>"; };
+		D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKLeopardSourceListTableColumn.m; sourceTree = "<group>"; };
 		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
 		D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
 		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
@@ -807,8 +807,8 @@
 		7983E2120B0C22D600F5078E /* Bookmark Registry */ = {
 			isa = PBXGroup;
 			children = (
-				D3C04AE20D4C1BA900C83775 /* LeopardSourceListTableColumn.h */,
-				D3C04AE30D4C1BA900C83775 /* LeopardSourceListTableColumn.m */,
+				D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */,
+				D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */,
 				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
 				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
 				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
@@ -1092,7 +1092,7 @@
 				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
 				27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */,
 				27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */,
-				27AE3A310ED427F400AB81E7 /* LeopardSourceListTableColumn.h in Headers */,
+				27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1436,7 +1436,7 @@
 				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
 				27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */,
 				27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */,
-				27AE3A320ED427F500AB81E7 /* LeopardSourceListTableColumn.m in Sources */,
+				27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
