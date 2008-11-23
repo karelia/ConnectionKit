@@ -44,7 +44,7 @@
 
 /* Just keep the framework happy with this */
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error

@@ -14,7 +14,7 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"990", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:990], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"ftps://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKFTPOverSSLConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -26,7 +26,7 @@
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 {
@@ -38,7 +38,7 @@
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 {

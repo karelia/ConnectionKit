@@ -58,7 +58,7 @@ static NSString *lsform = nil;
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"22", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:22], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"sftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"ssh://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKSFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, nil]];
@@ -76,7 +76,7 @@ static NSString *lsform = nil;
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -87,7 +87,7 @@ static NSString *lsform = nil;
 										password:password
 										   error:error] autorelease];
 }
-- (id)initWithHost:(NSString *)host port:(NSString *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
+- (id)initWithHost:(NSString *)host port:(NSNumber *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
 {
 	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
 	{
@@ -185,8 +185,8 @@ static NSString *lsform = nil;
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
 		[parameters addObject:@"-C"];
-	if (![[self port] isEqualToString:@""])
-		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [[self port] intValue]]];
+	if ([self port])
+		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
 	if ([self password] && [[self password] length] > 0)
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
 	else

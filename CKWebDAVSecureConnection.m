@@ -35,7 +35,7 @@
 + (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"443", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:443], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKWebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -49,7 +49,7 @@
 #pragma mark init methods
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -63,14 +63,14 @@
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!port || [port isEqualToString:@""])
+	if (!port)
 	{
-		port = @"443";
+		port = [NSNumber numberWithInt:443];
 	}
 	
 	if (self = [super initWithHost:host

@@ -58,7 +58,7 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"80", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:80], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"http://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKDotMacConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -70,7 +70,7 @@
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -135,7 +135,7 @@
 }
 
 - (id)initWithHost:(NSString *)host
-              port:(NSString *)port
+              port:(NSNumber *)port
           username:(NSString *)user
           password:(NSString *)pass
              error:(NSError **)error

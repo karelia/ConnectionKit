@@ -125,7 +125,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"21", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:21], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"ftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -137,7 +137,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -151,7 +151,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
@@ -170,9 +170,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		return nil;
 	}
 	
-	if (!port || [port isEqualToString:@""])
+	if (!port)
 	{
-		port = @"21";
+		port = [NSNumber numberWithInt:21];
 	}
 	
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
