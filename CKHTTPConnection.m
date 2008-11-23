@@ -48,7 +48,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 @implementation CKHTTPConnection
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -62,14 +62,14 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!port || [port isEqualToString:@""])
+	if (!port)
 	{
-		port = @"80";
+		port = [NSNumber numberWithInt:80];
 	}
 	
 	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
@@ -305,7 +305,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		{
 			myHTTPFlags.needsReconnection = NO;
 			myHTTPFlags.isInReconnection = YES;
-			[self openStreamsToPort:[[self port] intValue]];
+			[self openStreamsToPort:[self port]];
 			[self scheduleStreamsOnRunLoop];
 			
 			[self performSelector:@selector(sendCommand:) withObject:command afterDelay:0.2];

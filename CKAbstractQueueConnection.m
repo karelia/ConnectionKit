@@ -53,7 +53,7 @@ NSString *CKQueueDomain = @"Queuing";
 @implementation CKAbstractQueueConnection
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error

@@ -133,11 +133,11 @@ typedef struct __flags {
 
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
-	NSString *_name;
-	NSString *_connectionHost;
-	NSString *_connectionPort;
-	NSString *_username;
-	NSString *_password;
+	NSString    *_name;
+	NSString    *_connectionHost;
+	NSInteger   _connectionPort;
+	NSString    *_username;
+	NSString    *_password;
     
 	CKConnectionState _state;
 	
@@ -161,32 +161,20 @@ typedef struct __flags {
 
 + (id <CKConnection>)connectionWithName:(NSString *)name
                                    host:(NSString *)host
-                                   port:(NSString *)port
+                                   port:(NSNumber *)port
                                username:(NSString *)username
                                password:(NSString *)password
                                   error:(NSError **)error;
 
 + (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port;
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
 
-// Convenience Superclass methods for basic getting & setting
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error;
-
-- (void)setHost:(NSString *)host;
-- (void)setPort:(NSString *)port;
+- (NSString *)username;
+- (NSString *)password;
 - (void)setUsername:(NSString *)username;
 - (void)setPassword:(NSString *)password;
 
-- (NSString *)host;
-- (NSString *)port;
-- (NSString *)username;
-- (NSString *)password;
 
 - (void)setState:(CKConnectionState)state;
 - (CKConnectionState)state;
@@ -209,7 +197,7 @@ typedef struct __flags {
 + (void)registerConnectionClass:(Class)inClass forTypes:(NSArray *)types;
 + (NSArray *)registeredConnectionTypes;
 + (NSMutableArray *)connectionTypes;
-+ (NSString *)registeredPortForConnectionType:(NSString *)type;
++ (NSNumber *)registeredPortForConnectionType:(NSString *)type;
 
 // Transcript support
 - (void)setTranscript:(NSTextStorage *)transcript;

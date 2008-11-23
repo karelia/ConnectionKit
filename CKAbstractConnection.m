@@ -39,14 +39,14 @@
 
 @interface CKAbstractConnection (Deprecated)
 + (id <CKConnection>)connectionWithName:(NSString *)name
-												 host:(NSString *)host
-												 port:(NSString *)port
-											 username:(NSString *)username
-											 password:(NSString *)password;
+                                   host:(NSString *)host
+                                   port:(NSNumber *)port
+                               username:(NSString *)username
+                               password:(NSString *)password;
 + (id <CKConnection>)connectionToHost:(NSString *)host
-											   port:(NSString *)port
-										   username:(NSString *)username
-										   password:(NSString *)password;
+                                 port:(NSNumber *)port
+                             username:(NSString *)username
+                             password:(NSString *)password;
 + (id <CKConnection>)connectionWithURL:(NSURL *)url;
 @end
 
@@ -159,7 +159,7 @@ NSDictionary *sDataAttributes = nil;
 	return names;
 }
 
-+ (NSString *)registeredPortForConnectionType:(NSString *)type
++ (NSNumber *)registeredPortForConnectionType:(NSString *)type
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -185,10 +185,10 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark Protocol Class Methods
 
 + (id <CKConnection>)connectionWithName:(NSString *)name
-												 host:(NSString *)host
-												 port:(NSString *)port
-											 username:(NSString *)username
-											 password:(NSString *)password
+                                   host:(NSString *)host
+                                   port:(NSNumber *)port
+                               username:(NSString *)username
+                               password:(NSString *)password
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -225,7 +225,7 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port and:(BOOL)flag
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port and:(BOOL)flag
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -248,7 +248,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *connType = [type objectForKey:ACTypeKey];
 			if ([connType isEqualToString:ACPortTypeKey])
 			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				if ([[type objectForKey:ACTypeValueKey] intValue] == port)
 				{
 					if (flag)
 					{
@@ -273,17 +273,17 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSString *)port
++ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port
 {
 	return [CKAbstractConnection urlSchemeForConnectionName:name port:port and:YES];
 }
 
 + (id <CKConnection>)connectionWithName:(NSString *)name
-												 host:(NSString *)host
-												 port:(NSString *)port
-											 username:(NSString *)username
-											 password:(NSString *)password
-												error:(NSError **)error
+                                   host:(NSString *)host
+                                   port:(NSNumber *)port
+                               username:(NSString *)username
+                               password:(NSString *)password
+                                  error:(NSError **)error
 {
 	id result = nil;
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
@@ -315,9 +315,12 @@ NSDictionary *sDataAttributes = nil;
 				if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
 				{
 					KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
-					if (port == nil)
-						port = [CKAbstractConnection registeredPortForConnectionType:[class name]];
 					
+                    if (!port)
+                    {
+						port = [CKAbstractConnection registeredPortForConnectionType:[class name]];
+					}
+                    
 					result = [class connectionToHost:host
 												port:port
 											username:username
@@ -348,9 +351,9 @@ NSDictionary *sDataAttributes = nil;
  */
 
 + (id <CKConnection>)connectionToHost:(NSString *)host
-											   port:(NSString *)port
-										   username:(NSString *)username
-										   password:(NSString *)password
+                                 port:(NSNumber *)port
+                             username:(NSString *)username
+                             password:(NSString *)password
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -365,7 +368,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *connType = [type objectForKey:ACTypeKey];
 			if ([connType isEqualToString:ACPortTypeKey])
 			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
 					return [class connectionToHost:host
@@ -393,10 +396,10 @@ NSDictionary *sDataAttributes = nil;
 }
 
 + (id <CKConnection>)connectionToHost:(NSString *)host
-											   port:(NSString *)port
-										   username:(NSString *)username
-										   password:(NSString *)password
-											  error:(NSError **)error
+                                 port:(NSNumber *)port
+                             username:(NSString *)username
+                             password:(NSString *)password
+                                error:(NSError **)error
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -411,7 +414,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *connType = [type objectForKey:ACTypeKey];
 			if ([connType isEqualToString:ACPortTypeKey])
 			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
 					return [class connectionToHost:host
@@ -455,7 +458,7 @@ NSDictionary *sDataAttributes = nil;
 	NSString *host = [url host];
 	NSString *user = [url user];
 	NSString *pass = [url password];
-	NSString *port = [NSString stringWithFormat:@"%@",[url port]];
+	NSNumber *port = [url port];
 	
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -470,7 +473,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *connType = [type objectForKey:ACTypeKey];
 			if ([connType isEqualToString:ACPortTypeKey])
 			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
 					return [class connectionToHost:host
@@ -503,7 +506,7 @@ NSDictionary *sDataAttributes = nil;
 	NSString *host = [url host];
 	NSString *user = [url user];
 	NSString *pass = [url password];
-	NSString *port = [NSString stringWithFormat:@"%@",[url port]];
+	NSNumber *port = [url port];
 	
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -518,7 +521,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *connType = [type objectForKey:ACTypeKey];
 			if ([connType isEqualToString:ACPortTypeKey])
 			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:port])
+				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
 					return [class connectionToHost:host
@@ -559,17 +562,19 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark Inheritable methods
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
 	if (self = [super init])
 	{
-		[self setHost:host];
-		[self setPort:port];
+		_connectionHost = [host copy];
+		_connectionPort = [port intValue];  // Will be 0 for connections requiring no port
+        
 		[self setUsername:username];
 		[self setPassword:password];
+        
 		_edits = [[NSMutableDictionary dictionary] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
@@ -591,7 +596,6 @@ NSDictionary *sDataAttributes = nil;
 	[_name release];
 	[_forwarder release];
 	[_connectionHost release];
-	[_connectionPort release];
 	[_username release];
 	[_password release];
 	[_transcript release];
@@ -609,10 +613,10 @@ NSDictionary *sDataAttributes = nil;
 {
 	NSError *err = nil;
 	id <CKConnection>copy = [[[self class] allocWithZone:zone] initWithHost:[self host]
-																					 port:[self port]
-																				 username:[self username]
-																				 password:[self password]
-																					error:&err];
+                                                                       port:[NSNumber numberWithInt:[self port]]
+                                                                   username:[self username]
+                                                                   password:[self password]
+                                                                      error:&err];
 	if (err)
 	{
 		NSLog(@"Failed to copy connection: %@", err);
@@ -635,18 +639,6 @@ NSDictionary *sDataAttributes = nil;
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
-- (void)setHost:(NSString *)host
-{
-	[_connectionHost autorelease];
-	_connectionHost = [host copy];
-}
-
-- (void)setPort:(NSString *)port
-{
-	[_connectionPort autorelease];
-	_connectionPort = [port copy];
-}
-
 - (void)setUsername:(NSString *)username
 {
 	[_username autorelease];
@@ -664,7 +656,7 @@ NSDictionary *sDataAttributes = nil;
 	return _connectionHost;
 }
 
-- (NSString *)port
+- (NSInteger)port
 {
 	return _connectionPort;
 }

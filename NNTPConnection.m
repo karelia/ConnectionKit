@@ -32,7 +32,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"119", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:119], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"news://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"usenet://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url3 = [NSDictionary dictionaryWithObjectsAndKeys:@"nntp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
@@ -46,7 +46,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 {
@@ -57,7 +57,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 }
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 {

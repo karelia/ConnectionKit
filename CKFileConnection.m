@@ -55,7 +55,7 @@ checkRemoteExistence:(NSNumber *)check;
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:@"0", ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"file://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKFileConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -96,7 +96,7 @@ checkRemoteExistence:(NSNumber *)check;
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 {
@@ -109,7 +109,7 @@ checkRemoteExistence:(NSNumber *)check;
 }
 
 + (id)connectionToHost:(NSString *)host
-				  port:(NSString *)port
+				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
 				 error:(NSError **)error
@@ -125,12 +125,12 @@ checkRemoteExistence:(NSNumber *)check;
 /*!	Designated Initilizer
 */
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	port = @"0";
+	port = nil;
 	
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{

@@ -196,7 +196,7 @@ static NSImage *sBonjourIcon = nil;
 		[h setConnectionType:@"WebDAV"];
 		[myHTTPCategory addHost:h];
 	}
-	[h setPort:[CKAbstractConnection registeredPortForConnectionType:[h connectionType]]];
+	[h setPort:[[CKAbstractConnection registeredPortForConnectionType:[h connectionType]] description]];
 	[h release];
 	[[[CKConnectionRegistry sharedRegistry] outlineView] reloadData];
 }

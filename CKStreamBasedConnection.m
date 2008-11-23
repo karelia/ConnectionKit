@@ -86,7 +86,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 @implementation CKStreamBasedConnection
 
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error
@@ -397,7 +397,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	_isForceDisconnecting = NO;
 	
-	int connectionPort = [_connectionPort intValue];
+	int connectionPort = [self port];
 	if (0 == connectionPort)
 	{
 		connectionPort = 21;	// standard FTP control port
@@ -765,7 +765,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
 																	  target:self
 																   arguments:[NSArray array]];
-					int port = [[self port] intValue];
+					int port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];
 					
@@ -938,7 +938,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
 																	  target:self
 																   arguments:[NSArray array]];
-					int port = [[self port] intValue];
+					int port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];
 					

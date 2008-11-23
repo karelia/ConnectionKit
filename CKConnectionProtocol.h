@@ -54,7 +54,7 @@ enum {
 + (NSString *)name;
 
 + (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSString *)port
+                                 port:(NSNumber *)port
                              username:(NSString *)username
                              password:(NSString *)password
                                 error:(NSError **)error;
@@ -63,26 +63,35 @@ enum {
 
 + (id <CKConnection>)connectionWithName:(NSString *)name
                                    host:(NSString *)host
-                                   port:(NSString *)port
+                                   port:(NSNumber *)port
                                username:(NSString *)username
                                password:(NSString *)password
                                   error:(NSError **)error;
 
+/*!
+ @method initWithHost:port:username:password:error:
+ @abstract The designated initializer for connections.
+ @discussion Initializes a connection object with the supplied parameters.
+ @param host The host address to connect to.
+ @param port The port to connect on. Supply nil to use the connection's default port, or if no port is required.
+ @param username The username to use when connecting.
+ @param password The password to use when connecting.
+ @param error If an error occurs, upon return contains an NSError object that describes the problem.
+ @result Returns an initialized connection object or nil if there was an error.
+ */
 - (id)initWithHost:(NSString *)host
-			  port:(NSString *)port
+			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
 			 error:(NSError **)error;
 
-- (void)setHost:(NSString *)host;
-- (void)setPort:(NSString *)port;
-- (void)setUsername:(NSString *)username;
-- (void)setPassword:(NSString *)password;
-
 - (NSString *)host;
-- (NSString *)port;
+- (NSInteger)port;
 - (NSString *)username;
 - (NSString *)password;
+
+- (void)setUsername:(NSString *)username;
+- (void)setPassword:(NSString *)password;
 
 // you can set a name on a connection to help with debugging
 - (void)setName:(NSString *)name;
