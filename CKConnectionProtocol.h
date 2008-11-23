@@ -87,11 +87,6 @@ enum {
 
 - (NSString *)host;
 - (NSInteger)port;
-- (NSString *)username;
-- (NSString *)password;
-
-- (void)setUsername:(NSString *)username;
-- (void)setPassword:(NSString *)password;
 
 // you can set a name on a connection to help with debugging
 - (void)setName:(NSString *)name;

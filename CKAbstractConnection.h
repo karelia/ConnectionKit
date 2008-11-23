@@ -172,9 +172,6 @@ typedef struct __flags {
 
 - (NSString *)username;
 - (NSString *)password;
-- (void)setUsername:(NSString *)username;
-- (void)setPassword:(NSString *)password;
-
 
 - (void)setState:(CKConnectionState)state;
 - (CKConnectionState)state;

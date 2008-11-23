@@ -658,7 +658,7 @@
 {
 	if (_flags.badPassword)
 	{
-		NSLog(@"Bad Password for actual connection: %@@%@", [con username], [con host]);
+		NSLog(@"Bad Password for actual connection: %@", [con host]);
 		[_delegate connectionDidSendBadPassword:self];
 	}
 }
