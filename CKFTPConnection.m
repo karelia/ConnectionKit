@@ -454,7 +454,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.needsAccount)
 			{
 				NSString *account;
-				account = [_forwarder connection:self needsAccountForUsername:_username];
+				account = [_forwarder connection:self needsAccountForUsername:[self username]];
 				if (account)
 				{
 					[self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];
@@ -697,7 +697,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 331: //User name okay, need password.
 		{
-			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
+			[self sendCommand:[NSString stringWithFormat:@"PASS %@", [self password]]];
 			[self setState:CKConnectionSentPasswordState];
 			break;
 		}
@@ -712,7 +712,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			[self sendCommand:[NSString stringWithFormat:@"PASS %@", _password]];
+			[self sendCommand:[NSString stringWithFormat:@"PASS %@", [self password]]];
 			[self setState:CKConnectionSentPasswordState];
 			break;
 		}
@@ -1662,7 +1662,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			else
 				_ftpFlags.hasSITE = NO;
 			if (_ftpFlags.loggedIn == NO) {
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", _username]];
+				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
 				[self setState:CKConnectionSentUsernameState];
 			} else {
 				[self setState:CKConnectionIdleState];
