@@ -572,8 +572,8 @@ NSDictionary *sDataAttributes = nil;
 		_connectionHost = [host copy];
 		_connectionPort = [port intValue];  // Will be 0 for connections requiring no port
         
-		[self setUsername:username];
-		[self setPassword:password];
+		_username = [username copy];
+		_password = [password copy];
         
 		_edits = [[NSMutableDictionary dictionary] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
@@ -637,18 +637,6 @@ NSDictionary *sDataAttributes = nil;
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
-}
-
-- (void)setUsername:(NSString *)username
-{
-	[_username autorelease];
-	_username = [username copy];
-}
-
-- (void)setPassword:(NSString *)password
-{
-	[_password autorelease];
-	_password = [password copy];
 }
 
 - (NSString *)host
