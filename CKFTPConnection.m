@@ -117,8 +117,21 @@ const double kDelegateNotificationTheshold = 0.5;
 
 @end
 
+@interface CKFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+- (void)authenticateConnection;
+- (void)sendPassword;
+@end
+
+
+#pragma mark -
+
+
 void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type, 
 							  CFDataRef address, const void *data, void *info);
+
+
+#pragma mark -
+
 
 @implementation CKFTPConnection
 
@@ -209,6 +222,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_lastNotified release];
 	[_noopTimer invalidate];
 	[_noopTimer release];
+    
+    [_lastAuthenticationChallenge release];
+    [_currentAuthenticationCredential release];
 	
 	[super dealloc];
 }
@@ -498,8 +514,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			else
 			{
-				[self setState:CKConnectionSentUsernameState];
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
+				[self authenticateConnection];
 				break;
 			}
 		}			
@@ -652,8 +667,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			// command until after login.
 			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
 			{
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-				[self setState:CKConnectionSentUsernameState];
+				[self authenticateConnection];
 			}
 			else
 			{
@@ -673,9 +687,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			if (![[self username] isEqualToString:@"anonymous"])
+			if (![[_currentAuthenticationCredential user] isEqualToString:@"anonymous"])
+            {
 				break;
-			_ftpFlags.sentAuthenticated = NO;
+			}
+            
+            _ftpFlags.sentAuthenticated = NO;
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
 			[_commandQueue insertObject:[CKConnectionCommand command:@"PWD"
 														awaitState:CKConnectionIdleState
@@ -697,8 +714,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 331: //User name okay, need password.
 		{
-			[self sendCommand:[NSString stringWithFormat:@"PASS %@", [self password]]];
-			[self setState:CKConnectionSentPasswordState];
+			[self sendPassword];
 			break;
 		}
 		default:
@@ -712,8 +728,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			[self sendCommand:[NSString stringWithFormat:@"PASS %@", [self password]]];
-			[self setState:CKConnectionSentPasswordState];
+			[self sendPassword];
 			break;
 		}
 		case 530: //User not logged in
@@ -1621,49 +1636,59 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				_ftpFlags.hasSize = YES;
 			else
 				_ftpFlags.hasSize = NO;
-			if ([buffer rangeOfString:@"ADAT"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"ADAT"].location != NSNotFound)
 				_ftpFlags.hasADAT = YES;
 			else
 				_ftpFlags.hasADAT = NO;
-			if ([buffer rangeOfString:@"AUTH"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"AUTH"].location != NSNotFound)
 				_ftpFlags.hasAUTH = YES;
 			else
 				_ftpFlags.hasAUTH = NO;
-			if ([buffer rangeOfString:@"CCC"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"CCC"].location != NSNotFound)
 				_ftpFlags.hasCCC = YES;
 			else
 				_ftpFlags.hasCCC = NO;
-			if ([buffer rangeOfString:@"CONF"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"CONF"].location != NSNotFound)
 				_ftpFlags.hasCONF = YES;
 			else
 				_ftpFlags.hasCONF = NO;
-			if ([buffer rangeOfString:@"ENC"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"ENC"].location != NSNotFound)
 				_ftpFlags.hasENC = YES;
 			else
 				_ftpFlags.hasENC = NO;
-			if ([buffer rangeOfString:@"MIC"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"MIC"].location != NSNotFound)
 				_ftpFlags.hasMIC = YES;
 			else
 				_ftpFlags.hasMIC = NO;
-			if ([buffer rangeOfString:@"PBSZ"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"PBSZ"].location != NSNotFound)
 				_ftpFlags.hasPBSZ = YES;
 			else
 				_ftpFlags.hasPBSZ = NO;
-			if ([buffer rangeOfString:@"PROT"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"PROT"].location != NSNotFound)
 				_ftpFlags.hasPROT = YES;
 			else
 				_ftpFlags.hasPROT = NO;
-			if ([buffer rangeOfString:@"MDTM"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"MDTM"].location != NSNotFound)
 				_ftpFlags.hasMDTM = YES;
 			else
 				_ftpFlags.hasMDTM = NO;
-			if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
+			
+            if ([buffer rangeOfString:@"SITE"].location != NSNotFound)
 				_ftpFlags.hasSITE = YES;
 			else
 				_ftpFlags.hasSITE = NO;
-			if (_ftpFlags.loggedIn == NO) {
-				[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-				[self setState:CKConnectionSentUsernameState];
+			
+            if (_ftpFlags.loggedIn == NO) {
+				[self authenticateConnection];
 			} else {
 				[self setState:CKConnectionIdleState];
 			}			
@@ -1673,15 +1698,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 501: //Syntax error in parameters or arguments.
 		case 502: //Command not implemented
 		{
-			[self setState:CKConnectionSentUsernameState];
-			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];		
+			[self authenticateConnection];	
 			break;
 		}
 		case 530: //User not logged in
 		{
 			// the server doesn't support FEAT before login
-			[self sendCommand:[NSString stringWithFormat:@"USER %@", [self username]]];
-			[self setState:CKConnectionSentUsernameState];
+            [self authenticateConnection];
 			break;
 		}
 		default:
@@ -3728,3 +3751,103 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 }
 
 @end
+
+
+#pragma mark -
+
+
+@implementation CKFTPConnection (Authentication)
+
+- (NSURLCredential *)currentAuthenticationCredential { return _currentAuthenticationCredential; }
+
+- (void)setCurrentAuthenticationCredential:(NSURLCredential *)credential
+{
+    credential = [credential copy];
+    [_currentAuthenticationCredential release]; // Should generally be nil already
+    _currentAuthenticationCredential = credential;
+}
+
+/*  Uses the delegate to authenticate the connection. If the delegate (heaven forbid) doesn't
+ *  implement authentication, we will fall back to annonymous login if possible.
+ */
+- (void)authenticateConnection
+{
+    // Cancel old credentials
+    [self setCurrentAuthenticationCredential:nil];
+    
+    
+    if (_flags.authorizeConnection) // TODO: Handle the else situation
+    {
+        // Create authentication challenge object and store it as the last authentication attempt
+        NSInteger previousFailureCount = 0;
+        if (_lastAuthenticationChallenge)
+        {
+            previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
+        }
+        
+        
+        [_lastAuthenticationChallenge release];
+        
+        _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
+                                        initWithProtectionSpace:nil
+                                        proposedCredential:nil
+                                        previousFailureCount:previousFailureCount
+                                        failureResponse:nil
+                                        error:nil
+                                        sender:self];
+        
+        // As the delegate to handle the challenge
+        [_forwarder connection:self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+    }
+    
+}
+
+/*  FTP's horrible design requires us to send the username or account name and then wait for a response
+ *  before sending the password. This method performs the second half of the operation and sends the
+ *  password that our delegate previously supplied.
+ */
+- (void)sendPassword
+{
+    NSString *password = [[[self currentAuthenticationCredential] password] copy];
+    
+    // Dispose of the credentials once the password has been sent
+    [self setCurrentAuthenticationCredential:nil];
+       
+    if (password)   // Should we do anything special if this fails?
+    {
+        [self sendCommand:[NSString stringWithFormat:@"PASS %@", password]];
+        [self setState:CKConnectionSentPasswordState];
+        [password release];
+    }
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        [self disconnect];
+    }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    // TODO: Attempt to continue downloading or attempt to login anonymously?
+}
+
+/*  Start login
+ */
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        // Store the credentials ready for the password request
+        [self setCurrentAuthenticationCredential:credential];
+        
+        // Send the username
+        [self setState:CKConnectionSentUsernameState];
+        [self sendCommand:[NSString stringWithFormat:@"USER %@", [credential user]]];
+    }
+}
+
+@end
+

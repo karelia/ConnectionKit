@@ -228,13 +228,18 @@ enum {
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
 - (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
-- (BOOL)connection:(id <CKConnection>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+
+
+// Authentication
+- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
+- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 - (void)connection:(id <CKConnection>)con didAuthenticateToHost:(NSString *)host error:(NSError *)error; // this is a successful login
 - (void)connectionDidSendBadPassword:(id <CKConnection>)con;
 
-//SFTP Passphrase Support
-- (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;
+
+
 
 - (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
@@ -263,7 +268,6 @@ enum {
 - (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error;
 
 
-- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath;
