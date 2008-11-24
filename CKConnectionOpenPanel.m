@@ -732,7 +732,7 @@
 	return NO;
 }
 	
-- (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host
+- (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
 {
 	[timer invalidate];
 	timer = nil;
@@ -794,14 +794,14 @@
 	//	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
 }*/
 
-- (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
+- (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	[aConn changeToDirectory:dirPath];
 	createdDirectory = [[dirPath lastPathComponent] retain]; 
 	[aConn directoryContents];
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didSetPermissionsForFile:(NSString *)path
+- (void)connection:(CKAbstractConnection *)aConn didSetPermissionsForFile:(NSString *)path error:(NSError *)error
 {
 	
 }
@@ -809,7 +809,7 @@
 static NSImage *folder = nil;
 static NSImage *symFolder = nil;
 static NSImage *symFile = nil;
-- (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
+- (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	contents = [contents filteredArrayByRemovingHiddenFiles];
 	//set the parent directory (in reverse order)
