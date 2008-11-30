@@ -732,14 +732,23 @@
 	return NO;
 }
 
+/*	Attempt to send password just once
+ */
 - (void)connection:(id <CKConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)aConnection username]
-															   password:[(CKAbstractConnection *)aConnection password]
-															persistence:NSURLCredentialPersistenceNone];
-	
-	[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-	[credential release];
+	if ([challenge previousFailureCount] == 0)
+	{
+		NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)aConnection username]
+																   password:[(CKAbstractConnection *)aConnection password]
+																persistence:NSURLCredentialPersistenceNone];
+		
+		[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+		[credential release];
+	}
+	else
+	{
+		[[challenge sender] cancelAuthenticationChallenge:challenge];
+	}
 }
 
 - (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
