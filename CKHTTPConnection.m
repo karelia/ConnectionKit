@@ -45,7 +45,17 @@ enum {
 
 NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
+
+@interface CKHTTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+@end
+
+
+#pragma mark -
+
+
 @implementation CKHTTPConnection
+
+#pragma mark -
 
 + (id)connectionToHost:(NSString *)host
 				  port:(NSNumber *)port
@@ -75,14 +85,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
 	{
 		myResponseBuffer = [[NSMutableData data] retain];
-		if (username && password)
-		{
-			myDigestNonceCount = 0;
-			NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
-			//We use Basic by default
-			myBasicAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
-		}
 	}
+	
 	return self;
 }
 
@@ -90,7 +94,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
 	[myCurrentRequest release];
 	[myResponseBuffer release];
-	[myBasicAuthorization release];
+	[_basicAccessAuthorizationHeader release];
+	[_lastAuthenticationChallenge release];
 	
 	[myDigestNonce release];
 	[myDigestOpaque release];
@@ -190,7 +195,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	{
 		BOOL prefersDigest = ([[self propertyForKey:@"CKPrefersHTTPDigestAuthorization"] boolValue]);
 		//Send bad password if we don't prefer digest, or if we do and we failed at it.
-		if (myBasicAuthorization != nil && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
+		if (_basicAccessAuthorizationHeader != nil && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
 		{
 			// the user or password supplied is bad
 			if (_flags.badPassword)
@@ -220,12 +225,27 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 			
 			if ([authMethod isEqualToString:@"Basic"] || myHTTPFlags.didFailAttemptedDigestAuthentication)
 			{
-				NSData *authData = [[NSString stringWithFormat:@"%@:%@", [self username], [self password]] dataUsingEncoding:NSUTF8StringEncoding];
-				[myBasicAuthorization autorelease];
-				myBasicAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
-
-				//resend the request with auth
-				[self sendCommand:myCurrentRequest];
+				// Create authentication challenge object and store it as the last authentication attempt
+				NSInteger previousFailureCount = 0;
+				if (_lastAuthenticationChallenge)
+				{
+					previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
+				}
+				
+				
+				[_lastAuthenticationChallenge release];
+				
+				_lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+																						  proposedCredential:nil
+																						previousFailureCount:previousFailureCount
+																							 failureResponse:nil
+																									   error:nil
+																									  sender:self];
+				
+				[_forwarder connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];	// FIXME: This shouldn't require typecasting
+				
+				
+				
 				return;
 			}
 			else if ([authMethod isEqualToString:@"Digest"] && prefersDigest)
@@ -350,8 +370,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	NSString *authorization = nil;
 	BOOL prefersDigest = ([[self propertyForKey:@"CKPrefersHTTPDigestAuthorization"] boolValue]);
 	
-	if (myBasicAuthorization && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
-		authorization = myBasicAuthorization;
+	if (_basicAccessAuthorizationHeader && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
+		authorization = _basicAccessAuthorizationHeader;
 	else if ((myDigestRealm || myDigestOpaque || myDigestNonce) && prefersDigest)
 	{
 		if (!myDigestNonce)
@@ -385,8 +405,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[tempAuth appendFormat:@", opaque=\"%@\"", myDigestOpaque];
 		authorization = [NSString stringWithString:tempAuth];
 	}
+	
 	if (authorization)
+	{
 		[request setHeader:authorization forKey:@"Authorization"];
+	}
 }
 
 #pragma mark -
@@ -472,3 +495,45 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 }
 
 @end
+
+
+#pragma mark -
+
+
+@implementation CKHTTPConnection (Authentication)
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        [self disconnect];
+    }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    // TODO: Retry the connection
+}
+
+/*  Start login
+ */
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        // Store the new credential
+		NSString *authString = [[NSString alloc] initWithFormat:@"%@:%@", [credential user], [credential password]];
+		NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+		[authString release];
+		
+		NSAssert(!_basicAccessAuthorizationHeader, @"_basicAccessAuthorizationHeader is not nil. It should be reset to nil straight after failing authentication");
+		_basicAccessAuthorizationHeader = [[NSString alloc] initWithFormat:@"Basic %@", [authData base64Encoding]];
+		
+		// Resend the request with auth.	// FIXME:This be on the background thread
+		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+    }
+}
+
+
+@end
+
