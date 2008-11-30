@@ -460,7 +460,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    // TODO: Retry the connection
+	if (challenge == _lastAuthenticationChallenge)
+    {
+		// Retry the command, although I can't see how it would change anything!
+		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+	}
 }
 
 /*  Retry the request, this time with authentication information.
