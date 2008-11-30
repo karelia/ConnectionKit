@@ -56,6 +56,13 @@ enum { kChangeToDirectory = 7000,
 	NSFileManager	*myFileManager;
 }
 
+/*!
+ @method init
+ @discussion Convenience method as file connections do not use -host or -port to operate.
+ @result Returns an initialized CKFileConnection object or nil if there was an error.
+ */
+- (id)init;
+
 - (int)currentOperation;
 - (void)setCurrentOperation:(int)aCurrentOperation;
 

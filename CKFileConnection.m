@@ -84,12 +84,6 @@ checkRemoteExistence:(NSNumber *)check;
 	return [c autorelease];
 }
 
-- (id)init
-{
-	[self initWithHost:LocalizedStringInConnectionKitBundle(@"the File System", @"name of a host to connect to; in this case, the local file system rather than a remote server") port:@"ignored" username:@"ignored" password:@"ignored" error:nil];
-	return self;
-}
-
 + (NSString *)name
 {
 	return @"File";
@@ -137,6 +131,15 @@ checkRemoteExistence:(NSNumber *)check;
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
 	}
 	return self;
+}
+
+- (id)init
+{
+	return [self initWithHost:LocalizedStringInConnectionKitBundle(@"the File System", @"name of a host to connect to; in this case, the local file system rather than a remote server")
+						 port:@"ignored"
+					 username:@"ignored"
+					 password:@"ignored"
+						error:nil];
 }
 
 - (void)dealloc
