@@ -194,92 +194,84 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	if ([response code] == 401)
 	{
 		BOOL prefersDigest = ([[self propertyForKey:@"CKPrefersHTTPDigestAuthorization"] boolValue]);
-		//Send bad password if we don't prefer digest, or if we do and we failed at it.
-		if (_basicAccessAuthorizationHeader != nil && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
+		
+		if ([self transcript])
 		{
-			// the user or password supplied is bad
-			if (_flags.badPassword)
+			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
+																	  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		}
+		// need to append authorization
+		NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+		NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+		
+		//Auth Method
+		NSRange rangeOfFirstWhitespace = [auth rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *authMethod = (rangeOfFirstWhitespace.location != NSNotFound) ? [auth substringToIndex:rangeOfFirstWhitespace.location] : nil;
+		
+		//If we already tried, mark it.
+		myHTTPFlags.didFailAttemptedDigestAuthentication = (prefersDigest && myDigestNonce && myDigestRealm && myDigestOpaque);
+		
+		if ([authMethod isEqualToString:@"Basic"] || myHTTPFlags.didFailAttemptedDigestAuthentication)
+		{
+			// Throw away the old authentication info
+			[_basicAccessAuthorizationHeader release];
+			_basicAccessAuthorizationHeader = nil;
+			
+			
+			// Create authentication challenge object and store it as the last authentication attempt
+			NSInteger previousFailureCount = 0;
+			if (_lastAuthenticationChallenge)
 			{
-				[_forwarder connectionDidSendBadPassword:self];
-				if (_flags.didDisconnect)
-					[_forwarder connection:self didDisconnectFromHost:[self host]];
+				previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
 			}
+			
+			
+			[_lastAuthenticationChallenge release];
+			
+			_lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+																					  proposedCredential:nil
+																					previousFailureCount:previousFailureCount
+																						 failureResponse:nil
+																								   error:nil
+																								  sender:self];
+			
+			[_forwarder connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];	// FIXME: This shouldn't require typecasting
+			
+			
+			
+			return;
+		}
+		else if ([authMethod isEqualToString:@"Digest"] && prefersDigest)
+		{
+			//Realm
+			NSString *realmMatchingString = [auth stringByMatching:@"realm=\"[^\"]+\""]; //This is	realm="blahblahblah"
+			[myDigestRealm autorelease];
+			myDigestRealm = [[[realmMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
+			
+			//Nonce
+			NSString *nonceMatchingString = [auth stringByMatching:@"nonce=\"[^\"]+\""]; //This is	nonce="blahblahblah"
+			[myDigestNonce autorelease];
+			myDigestNonce = [[[nonceMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
+			
+			//Opaque
+			NSString *opaqueMatchingString = [auth stringByMatching:@"opaque=\"[^\"]+\""]; //This is	opaque="blahblahblah"
+			[myDigestOpaque autorelease];
+			myDigestOpaque = [[[opaqueMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];				
+			
+			//resend the request with auth
+			[self sendCommand:myCurrentRequest];
+			return;				
 		}
 		else
-		{			
+		{
 			if ([self transcript])
 			{
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
+				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"] 
 																		  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
 			}
-			// need to append authorization
-			NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-			NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
-			
-			//Auth Method
-			NSRange rangeOfFirstWhitespace = [auth rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
-			NSString *authMethod = (rangeOfFirstWhitespace.location != NSNotFound) ? [auth substringToIndex:rangeOfFirstWhitespace.location] : nil;
-			
-			//If we already tried, mark it.
-			myHTTPFlags.didFailAttemptedDigestAuthentication = (prefersDigest && myDigestNonce && myDigestRealm && myDigestOpaque);
-			
-			if ([authMethod isEqualToString:@"Basic"] || myHTTPFlags.didFailAttemptedDigestAuthentication)
-			{
-				// Create authentication challenge object and store it as the last authentication attempt
-				NSInteger previousFailureCount = 0;
-				if (_lastAuthenticationChallenge)
-				{
-					previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
-				}
-				
-				
-				[_lastAuthenticationChallenge release];
-				
-				_lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
-																						  proposedCredential:nil
-																						previousFailureCount:previousFailureCount
-																							 failureResponse:nil
-																									   error:nil
-																									  sender:self];
-				
-				[_forwarder connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];	// FIXME: This shouldn't require typecasting
-				
-				
-				
-				return;
-			}
-			else if ([authMethod isEqualToString:@"Digest"] && prefersDigest)
-			{
-				//Realm
-				NSString *realmMatchingString = [auth stringByMatching:@"realm=\"[^\"]+\""]; //This is	realm="blahblahblah"
-				[myDigestRealm autorelease];
-				myDigestRealm = [[[realmMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
-				
-				//Nonce
-				NSString *nonceMatchingString = [auth stringByMatching:@"nonce=\"[^\"]+\""]; //This is	nonce="blahblahblah"
-				[myDigestNonce autorelease];
-				myDigestNonce = [[[nonceMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
-				
-				//Opaque
-				NSString *opaqueMatchingString = [auth stringByMatching:@"opaque=\"[^\"]+\""]; //This is	opaque="blahblahblah"
-				[myDigestOpaque autorelease];
-				myDigestOpaque = [[[opaqueMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];				
-				
-				//resend the request with auth
-				[self sendCommand:myCurrentRequest];
-				return;				
-			}
-			else
-			{
-				if ([self transcript])
-				{
-					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"] 
-																			  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-				}
-				@throw [NSException exceptionWithName:NSInternalInconsistencyException
-											   reason:@"Failed at Basic and Digest Authentication"
-											 userInfo:nil];
-			}
+			@throw [NSException exceptionWithName:NSInternalInconsistencyException
+										   reason:@"Failed at Basic and Digest Authentication"
+										 userInfo:nil];
 		}
 	}
 	
@@ -529,7 +521,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		NSAssert(!_basicAccessAuthorizationHeader, @"_basicAccessAuthorizationHeader is not nil. It should be reset to nil straight after failing authentication");
 		_basicAccessAuthorizationHeader = [[NSString alloc] initWithFormat:@"Basic %@", [authData base64Encoding]];
 		
-		// Resend the request with auth.	// FIXME:This be on the background thread
+		// Resend the request with auth.
 		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
     }
 }
