@@ -35,7 +35,10 @@
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
-	NSString		*myBasicAuthorization;
+	
+	// Authentication
+	NSString						*_basicAccessAuthorizationHeader;
+	NSURLAuthenticationChallenge	*_lastAuthenticationChallenge;
 	
 	
 	NSString *myDigestRealm;

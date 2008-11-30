@@ -731,7 +731,17 @@
 		return YES;
 	return NO;
 }
+
+- (void)connection:(id <CKConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)aConnection username]
+															   password:[(CKAbstractConnection *)aConnection password]
+															persistence:NSURLCredentialPersistenceNone];
 	
+	[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+	[credential release];
+}
+
 - (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
 {
 	[timer invalidate];
