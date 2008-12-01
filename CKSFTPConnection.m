@@ -1044,10 +1044,8 @@ static NSString *lsform = nil;
 
 - (void)passwordErrorOccurred
 {
-	if (_flags.badPassword)
-	{
-		[_forwarder connectionDidSendBadPassword:self];
-	}
+	// TODO: Use the new authentication APIs instead
+	// [_forwarder connectionDidSendBadPassword:self];
 }
 
 - (void)addStringToTranscript:(NSString *)stringToAdd

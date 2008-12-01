@@ -92,7 +92,6 @@ typedef struct __flags {
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
 	
 	unsigned permissions:1;
-	unsigned badPassword:1;
 	unsigned cancel:1; // deprecated
 	unsigned didCancel:1;
 	unsigned changeDirectory:1;

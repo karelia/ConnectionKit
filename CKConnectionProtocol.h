@@ -236,7 +236,6 @@ enum {
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 - (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 - (void)connection:(id <CKConnection>)con didAuthenticateToHost:(NSString *)host error:(NSError *)error; // this is a successful login
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con;
 
 
 

@@ -942,30 +942,44 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
+- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-	if (con == [self connection])
+	if (connection == [self connection])
 	{
-		KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
-		[oProgress setIndeterminate:NO];
-		[oProgress setDoubleValue:0.0];
-		[oProgress displayIfNeeded];
-		
-		NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
-											 code:CKPasswordError
-										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-											 LocalizedStringInConnectionKitBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
-		[self setFatalError:error];
-		myReturnStatus = CKFatalErrorStatus;
-		[self setStatusMessage:LocalizedStringInConnectionKitBundle(@"Password was not accepted.", @"")];
-		
-		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
-		[self forceDisconnectAll];
-		if (myFlags.delegateDidFinish)
+		if ([challenge previousFailureCount] == 0)
 		{
-			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+			NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)connection username]
+																	   password:[(CKAbstractConnection *)connection password]
+																	persistence:NSURLCredentialPersistenceNone];
+			
+			[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+			[credential release];
 		}
-		[self postABogusEvent];
+		else
+		{
+			[[challenge sender] cancelAuthenticationChallenge:challenge];
+			
+			KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
+			[oProgress setIndeterminate:NO];
+			[oProgress setDoubleValue:0.0];
+			[oProgress displayIfNeeded];
+			
+			NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
+												 code:CKPasswordError
+											 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
+													   LocalizedStringInConnectionKitBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
+			[self setFatalError:error];
+			myReturnStatus = CKFatalErrorStatus;
+			[self setStatusMessage:LocalizedStringInConnectionKitBundle(@"Password was not accepted.", @"")];
+			
+			myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
+			[self forceDisconnectAll];
+			if (myFlags.delegateDidFinish)
+			{
+				[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
+			}
+			[self postABogusEvent];
+		}
 	}
 }
 
