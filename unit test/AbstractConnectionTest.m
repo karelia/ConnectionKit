@@ -510,12 +510,6 @@ const NSTimeInterval kTestTimeout = -15.0;
   receivedError = YES;
 }
 
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
-{
-  receivedError = YES;
-}
-
-
 - (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath
 {
   if (![con numberOfTransfers])

@@ -775,10 +775,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:CKConnectionIdleState];			
 			break;
 		}
-		case 530: //User not logged in
+		case 530: // Authentication failed. We shall request fresh authentication
 		{
-			if (_flags.badPassword)
-				[_forwarder connectionDidSendBadPassword:self];
+			[self authenticateConnection];
 			break;
 		}
 		default:

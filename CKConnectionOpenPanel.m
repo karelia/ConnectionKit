@@ -748,6 +748,18 @@
 	else
 	{
 		[[challenge sender] cancelAuthenticationChallenge:challenge];
+		
+		if ([[self window] isSheet])
+			[[NSApplication sharedApplication] endSheet:[self window] returnCode: connectionBadPasswordUserName];
+		else
+			[[NSApplication sharedApplication] stopModalWithCode: connectionBadPasswordUserName];
+		
+		if ([delegate respondsToSelector:@selector(connectionOpenPanel:didSendBadPasswordToHost:)])
+		{
+			[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConnection host]];
+		}
+		
+		[self closePanel:nil];
 	}
 }
 
@@ -791,21 +803,6 @@
 		[[NSApplication sharedApplication] stopModalWithCode: [error code]];
 	
 	[self closePanel: nil];
-}
-
-- (void)connectionDidSendBadPassword:(CKAbstractConnection *)aConn
-{
-	if ([[self window] isSheet])
-		[[NSApplication sharedApplication] endSheet:[self window] returnCode: connectionBadPasswordUserName];
-	else
-		[[NSApplication sharedApplication] stopModalWithCode: connectionBadPasswordUserName];
-
-	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didSendBadPasswordToHost:)])
-	{
-		[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConn host]];
-	}
-	
-	[self closePanel:nil];
 }
 
 /*- (NSString *)connection:(CKAbstractConnection *)aConn needsAccountForUsername:(NSString *)username

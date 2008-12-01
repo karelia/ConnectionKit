@@ -654,13 +654,4 @@
 	// we don't pass this on at the moment
 }
 
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
-{
-	if (_flags.badPassword)
-	{
-		NSLog(@"Bad Password for actual connection: %@", [con host]);
-		[_delegate connectionDidSendBadPassword:self];
-	}
-}
-
 @end

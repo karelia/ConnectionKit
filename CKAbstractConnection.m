@@ -708,7 +708,6 @@ NSDictionary *sDataAttributes = nil;
 	// There are 21 callbacks & flags.
 	// Need to keep NSObject Category, __flags list, setDelegate: updated
 	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
-	_flags.badPassword						= [del respondsToSelector:@selector(connectionDidSendBadPassword:)];
 	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
 	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
 	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];

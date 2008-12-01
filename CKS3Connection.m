@@ -210,7 +210,10 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		[doc release];
 		
 		if ([code isEqualToString:@"SignatureDoesNotMatch"])
-			[_forwarder connectionDidSendBadPassword:self];
+		{
+			// TODO: Use the new authentication API instead
+			//[_forwarder connectionDidSendBadPassword:self];
+		}
 		else
 		{
 			if (desc)

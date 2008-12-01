@@ -331,11 +331,6 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[oFiles reloadData];
 }
 
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
-{
-	NSLog(@"Bad Password");
-}
-
 #pragma mark -
 #pragma mark Outline View Data Source Methods
 
