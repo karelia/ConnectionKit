@@ -37,20 +37,6 @@
 #import "KTLog.h"
 #import "RegexKitLite.h"
 
-@interface CKAbstractConnection (Deprecated)
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password;
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password;
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url;
-@end
-
-
 
 NSString *ACClassKey = @"Class";
 NSString *ACTypesKey = @"Types";
@@ -184,47 +170,6 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Protocol Class Methods
 
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	KTLog(CKConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
-	
-	if (!name) {
-		return [CKAbstractConnection connectionToHost:host
-											   port:port
-										   username:username
-										   password:password];
-	}
-	
-	while (cur = [e nextObject])
-	{
-		Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-		NSString *n = [[class name] lowercaseString];
-		NSString *searchName = [name lowercaseString];
-		
-		if ([n isEqualToString:searchName])
-		{
-			if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
-			{
-				KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
-				if (port == nil)
-					port = [CKAbstractConnection registeredPortForConnectionType:[class name]];
-				return [class connectionToHost:host
-										  port:port
-									  username:username
-									  password:password];
-			}
-		}
-	}
-	return nil;
-}
-
 + (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port and:(BOOL)flag
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
@@ -347,54 +292,6 @@ NSDictionary *sDataAttributes = nil;
 	return result;
 }
 
-/*!	Tries to guess what kind of connection to make based upon the port or ..... ?????????
- */
-
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
-		NSDictionary *type;
-		
-		while (type = [f nextObject])
-		{
-			NSString *connType = [type objectForKey:ACTypeKey];
-			if ([connType isEqualToString:ACPortTypeKey])
-			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					return [class connectionToHost:host
-											  port:port
-										  username:username
-										  password:password];
-				}
-			}
-			else if ([connType isEqualToString:ACURLTypeKey])
-			{
-				NSRange r;
-				if ((r = [host rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
-					return [class connectionToHost:hostWithOutSpecifier
-											  port:port
-										  username:username
-										  password:password];
-				}
-			}
-		}
-	}
-	return nil;
-}
-
 + (id <CKConnection>)connectionToHost:(NSString *)host
                                  port:(NSNumber *)port
                              username:(NSString *)username
@@ -449,54 +346,6 @@ NSDictionary *sDataAttributes = nil;
 		*error = err;
 	}
 	
-	return nil;
-}
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url
-{
-	NSString *resourceSpec = [url resourceSpecifier];
-	NSString *host = [url host];
-	NSString *user = [url user];
-	NSString *pass = [url password];
-	NSNumber *port = [url port];
-	
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
-		NSDictionary *type;
-		
-		while (type = [f nextObject])
-		{
-			NSString *connType = [type objectForKey:ACTypeKey];
-			if ([connType isEqualToString:ACPortTypeKey])
-			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					return [class connectionToHost:host
-											  port:port
-										  username:user
-										  password:pass];
-				}
-			}
-			else if ([connType isEqualToString:ACURLTypeKey])
-			{
-				NSRange r;
-				if ((r = [resourceSpec rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
-					return [class connectionToHost:hostWithOutSpecifier
-											  port:port
-										  username:user
-										  password:pass];
-				}
-			}
-		}
-	}
 	return nil;
 }
 

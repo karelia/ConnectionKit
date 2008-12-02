@@ -158,14 +158,20 @@ typedef struct __flags {
 	NSMutableDictionary *_cachedDirectoryContents;
 }
 
++ (id <CKConnection>)connectionToHost:(NSString *)host
+                                 port:(NSNumber *)port
+                             username:(NSString *)username
+                             password:(NSString *)password
+                                error:(NSError **)error;
+
++ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
+
 + (id <CKConnection>)connectionWithName:(NSString *)name
                                    host:(NSString *)host
                                    port:(NSNumber *)port
                                username:(NSString *)username
                                password:(NSString *)password
                                   error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
 
 + (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
 

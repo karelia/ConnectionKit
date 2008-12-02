@@ -48,6 +48,10 @@
 - (void)passwordErrorOccurred;
 @end
 
+
+#pragma mark -
+
+
 @implementation CKSFTPConnection
 
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";

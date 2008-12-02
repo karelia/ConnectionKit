@@ -45,17 +45,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	return @"NNTP";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-{
-	return [[[NNTPConnection alloc] initWithHost:host
-											port:port
-										username:username
-										password:password] autorelease];
-}
-
 - (id)initWithHost:(NSString *)host
 			  port:(NSNumber *)port
 		  username:(NSString *)username
