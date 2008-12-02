@@ -88,22 +88,43 @@ enum {
 - (NSString *)host;
 - (NSInteger)port;
 
-// you can set a name on a connection to help with debugging
+// you can set a name on a connection to help with debugging.
+// TODO: Should this really be part of the protocol, or a CKAbstractConnection implementation detail?
 - (void)setName:(NSString *)name;
 - (NSString *)name; 
 
-- (void)setDelegate:(id)delegate;   // we do not retain the delegate
+/*!
+ @method delegate:
+ @result Returns the receiver's delegate.
+ */
 - (id)delegate;
+/*!
+ @method setDelegate:
+ @abstract Sets the receiver's delegate.
+ @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
+ */
+- (void)setDelegate:(id)delegate;
 
+
+/*!
+ @method connect
+ @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
+ */
 - (void)connect;
 - (BOOL)isConnected;
 - (BOOL)isBusy;
 
-/* disconnect queues a disconnection where as forceDisconnect '
-   will terminate at the next available opportunity. */
+/*!
+ @method disconnect
+ @abstract Ends the connection after any other items in the queue have been processed.
+ */
 - (void)disconnect;
+/*!
+ @method forceDisconnect
+ @abstract Ends the connection at the next available opportunity.
+ */
 - (void)forceDisconnect;
-- (void)cleanupConnection;
+ - (void)cleanupConnection;
 
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;
@@ -220,6 +241,8 @@ enum {
 
 @end
 
+
+#pragma mark -
 
 
 @interface NSObject (CKConnectionDelegate)
