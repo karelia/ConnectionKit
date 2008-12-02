@@ -20,6 +20,8 @@
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 443; }
+
 + (NSString *)name
 {
 	return @"Secure HTTP";

@@ -51,6 +51,13 @@ enum {
 
 @protocol CKConnection <NSObject, NSCopying>
 
+/*!
+ @method port
+ @discussion Return 0 for abstract classes or connections that do not use a port.
+ @result The default port for connections of the receiver's class.
+ */
++ (NSInteger)defaultPort;
+
 + (NSString *)name;
 
 /*!
@@ -109,7 +116,7 @@ enum {
  @abstract Ends the connection at the next available opportunity.
  */
 - (void)forceDisconnect;
- - (void)cleanupConnection;
+- (void)cleanupConnection;
 
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;

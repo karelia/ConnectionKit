@@ -57,6 +57,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 #pragma mark -
 
++ (NSInteger)defaultPort { return 80; }
+
 + (id)connectionToHost:(NSString *)host
 				  port:(NSNumber *)port
 			  username:(NSString *)username
@@ -77,11 +79,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:80];
-	}
-	
 	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
 	{
 		myResponseBuffer = [[NSMutableData data] retain];

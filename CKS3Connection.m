@@ -102,11 +102,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		host = @"s3.amazonaws.com";
 	}
 	
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:80];
-	}
-	
 	if (self = [super initWithHost:host
                               port:port
                           username:username

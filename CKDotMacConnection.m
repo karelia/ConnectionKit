@@ -145,7 +145,7 @@
 	
 	if (user && password)
 	{
-		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:user password:pass error:error])
+		if (self = [super initWithHost:@"idisk.mac.com" port:nil username:user password:pass error:error])
 		{
 			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
 		}
