@@ -93,19 +93,6 @@ checkRemoteExistence:(NSNumber *)check;
 				  port:(NSNumber *)port
 			  username:(NSString *)username
 			  password:(NSString *)password
-{
-	CKFileConnection *c = [[CKFileConnection alloc] initWithHost:host
-														port:port
-													username:username
-													password:password
-													   error:nil];
-	return [c autorelease];
-}
-
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
 				 error:(NSError **)error
 {
 	CKFileConnection *c = [[CKFileConnection alloc] initWithHost:host

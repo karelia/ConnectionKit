@@ -53,21 +53,6 @@ enum {
 
 + (NSString *)name;
 
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password
-                                error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error;
-
 /*!
  @method initWithHost:port:username:password:error:
  @abstract The designated initializer for connections.
