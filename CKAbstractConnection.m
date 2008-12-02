@@ -112,6 +112,8 @@ NSDictionary *sDataAttributes = nil;
     return sDataAttributes;
 }
 
++ (NSInteger)defaultPort { return 0; }
+
 + (NSString *)name
 {
 	return @"Abstract Connection";
@@ -419,7 +421,7 @@ NSDictionary *sDataAttributes = nil;
 	if (self = [super init])
 	{
 		_connectionHost = [host copy];
-		_connectionPort = [port intValue];  // Will be 0 for connections requiring no port
+		_connectionPort = (port) ? [port intValue] : [[self class] defaultPort];
         
 		_username = [username copy];
 		_password = [password copy];

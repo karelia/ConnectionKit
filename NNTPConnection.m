@@ -40,6 +40,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 119; }
+
 + (NSString *)name
 {
 	return @"NNTP";
