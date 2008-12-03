@@ -35,9 +35,9 @@
 {
 	CKSecureHTTPConnection *c = [[self alloc] initWithHost:host
                                                       port:port
-	username:username
-	password:password
-	error:error];
+                                                  username:username
+                                                  password:password
+                                                     error:error];
 	return [c autorelease];
 }
 

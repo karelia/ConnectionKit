@@ -29,6 +29,7 @@
 			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
 	if (self = [super initWithHost:host port:port username:username password:password]) {
 		_ssl = SSLVersionNegotiated;

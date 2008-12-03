@@ -41,6 +41,8 @@
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 443; }
+
 + (NSString *)name
 {
 	return @"Secure WebDAV";
@@ -68,11 +70,6 @@
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:443];
-	}
-	
 	if (self = [super initWithHost:host
 							  port:port
 						  username:username
