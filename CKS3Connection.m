@@ -82,20 +82,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!username || [username length] == 0 || !password || [password length] == 0)
-	{
-		if (error)
-		{
-			NSError *err = [NSError errorWithDomain:S3ErrorDomain
-											   code:CKConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username and Password are required for S3 connections", @"No username or password")
-																				forKey:NSLocalizedDescriptionKey]];
-			*error = err;
-		}
-		[self release];
-		return nil;
-	}
-	
 	// allow for subdomains of s3
 	if ([host rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
 	{

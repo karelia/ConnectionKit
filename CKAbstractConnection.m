@@ -433,11 +433,6 @@ NSDictionary *sDataAttributes = nil;
 		_forwarder = [[RunLoopForwarder alloc] init];
 		_name = @"Default";
 		[_forwarder setReturnValueDelegate:self];
-		
-		if (error)
-		{
-			*error = nil;
-		}
 	}
 	return self;
 }

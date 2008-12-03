@@ -34,7 +34,7 @@
 
 - (id)init
 {
-	if (self = [super initWithHost:@"na" port:@"na" username:@"na" password:@"na" error:nil]) {
+	if (self = [super initWithHost:nil port:nil username:nil password:nil error:nil]) {
 		_connections = [[NSMutableArray array] retain];
 		_folderCreations = [[NSMutableArray array] retain];
 		_connectedConnections = [[NSMutableArray array] retain];

@@ -103,7 +103,7 @@ checkRemoteExistence:(NSNumber *)check;
 	return [c autorelease];
 }
 
-/*!	Designated Initilizer
+/*!	Designated Initializer
 */
 - (id)initWithHost:(NSString *)host
 			  port:(NSNumber *)port

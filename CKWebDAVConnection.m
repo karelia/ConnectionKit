@@ -81,37 +81,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	return [c autorelease];
 }
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	if (!username || [username length] == 0 || !password || [password length] == 0)
-	{
-		if (error)
-		{
-			NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-											   code:CKConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username and Password are required for WebDAV connections", @"No username or password")
-																				forKey:NSLocalizedDescriptionKey]];
-			*error = err;
-		}
-		[self release];
-		return nil;
-	}
-	
-	if (self = [super initWithHost:host
-                              port:port
-                          username:username
-                          password:password
-							 error:error])
-	{
-		
-	}
-	return self;
-}
-
 - (void)dealloc
 {
 	[myCurrentDirectory release];

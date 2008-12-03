@@ -51,8 +51,9 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 			  port:(NSNumber *)port
 		  username:(NSString *)username
 		  password:(NSString *)password
+			 error:(NSError **)error
 {
-	if (self = [super initWithHost:host port:port username:username password:password]) {
+	if (self = [super initWithHost:host port:port username:username password:password error:error]) {
 		_inputBuffer = [[NSMutableString alloc] init];
 		_newsflags.isSlave = NO;
 	}

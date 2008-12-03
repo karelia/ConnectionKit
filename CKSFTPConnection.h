@@ -14,7 +14,7 @@ extern NSString *SFTPErrorDomain;
 
 @class CKInternalTransferRecord;
 
-@interface CKSFTPConnection : CKStreamBasedConnection
+@interface CKSFTPConnection : CKAbstractQueueConnection
 {
 	int masterProxy;
 	CKSFTPTServer *theSFTPTServer;
