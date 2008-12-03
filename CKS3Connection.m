@@ -150,16 +150,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 #pragma mark -
 #pragma mark HTTP Overrides
-- (void)threadedConnect
-{
-	[super threadedConnect];
-	
-	//Like WebDAV, send it right away.
-	if (_flags.didAuthenticate)
-	{
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-	}
-}
 
 - (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {

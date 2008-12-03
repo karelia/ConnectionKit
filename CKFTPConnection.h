@@ -110,7 +110,6 @@ typedef enum {
 		unsigned isMicrosoft: 1;
 		unsigned setBinaryTransferMode: 1;
 		unsigned received226: 1;
-		unsigned sentAuthenticated: 1;
 		unsigned unused: 11;
 	} _ftpFlags;
 	
