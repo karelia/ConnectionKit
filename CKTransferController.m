@@ -944,43 +944,10 @@ static NSSize closedSize = { 452, 152 };
 
 - (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-	if (connection == [self connection])
-	{
-		if ([challenge previousFailureCount] == 0)
-		{
-			NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)connection username]
-																	   password:[(CKAbstractConnection *)connection password]
-																	persistence:NSURLCredentialPersistenceNone];
-			
-			[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-			[credential release];
-		}
-		else
-		{
-			[[challenge sender] cancelAuthenticationChallenge:challenge];
-			
-			KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
-			[oProgress setIndeterminate:NO];
-			[oProgress setDoubleValue:0.0];
-			[oProgress displayIfNeeded];
-			
-			NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
-												 code:CKPasswordError
-											 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-													   LocalizedStringInConnectionKitBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
-			[self setFatalError:error];
-			myReturnStatus = CKFatalErrorStatus;
-			[self setStatusMessage:LocalizedStringInConnectionKitBundle(@"Password was not accepted.", @"")];
-			
-			myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
-			[self forceDisconnectAll];
-			if (myFlags.delegateDidFinish)
-			{
-				[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
-			}
-			[self postABogusEvent];
-		}
-	}
+	// For now, we're considering authentication to be the delegate's responsibility. Continuing without credentials
+    // should generally end up causing the connection to fail.
+    // If anyone needs it, we can probably provide a CKTransferController delegate method to request authentication.
+    [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host
