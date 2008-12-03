@@ -69,6 +69,8 @@ static NSString *lsform = nil;
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 22; }
+
 + (NSString *)name
 {
 	return @"SFTP";

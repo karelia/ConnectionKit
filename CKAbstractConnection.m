@@ -259,7 +259,7 @@ NSDictionary *sDataAttributes = nil;
 			
 			if ([n isEqualToString:searchName])
 			{
-				if ([class respondsToSelector:@selector(connectionToHost:port:username:password:)])
+				if ([class respondsToSelector:@selector(connectionToHost:port:username:password:error:)])
 				{
 					KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
 					
