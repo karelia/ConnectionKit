@@ -28,6 +28,9 @@ extern NSString *SFTPErrorDomain;
 	NSMutableArray *connectToQueue;
 	NSTimer *_connectTimeoutTimer;
 
+@private
+    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
+    NSString                        *_currentPassword;
 }
 
 - (int)masterProxy;

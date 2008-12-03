@@ -49,6 +49,10 @@
 @end
 
 
+@interface CKSFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+@end
+
+
 #pragma mark -
 
 
@@ -161,6 +165,8 @@ static NSString *lsform = nil;
 	[currentDirectory release];
 	[rootDirectory release];
 	[attemptedKeychainPublicKeyAuthentications release];
+    [_lastAuthenticationChallenge release];
+    [_currentPassword release];
 	
 	[super dealloc];
 }
@@ -177,24 +183,44 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Connecting
+
 - (void)connect
 {
 	if (isConnecting)
 		return;
-		
-	if (![self username])
-	{
-		//Can't do anything here, throw an error.
-		return;
-	}
-	NSMutableArray *parameters = [NSMutableArray array];
+    
+    
+    // Can't connect till we have a password (due to using the SFTP command-line tool)
+    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+                                                                              proposedCredential:nil
+                                                                            previousFailureCount:0
+                                                                                 failureResponse:nil
+                                                                                           error:nil
+                                                                                          sender:self];
+    
+    [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    // FIXME: Why does this require typecasting?
+}
+
+/*  Support method. Called once the delegate has provided a username to connect with
+ */
+- (void)connectWithUsername:(NSString *)username
+{
+    NSAssert(username, @"Can't create an SFTP connection without a username");
+    
+    NSMutableArray *parameters = [NSMutableArray array];
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
 		[parameters addObject:@"-C"];
-	if ([self port])
+	
+    if ([self port])
+    {
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
-	if ([self password] && [[self password] length] > 0)
+    }
+    
+	if (_currentPassword && [_currentPassword length] > 0)
+    {
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
+    }
 	else
 	{
 		NSString *publicKeyPath = [self propertyForKey:@"CKSFTPPublicKeyPath"];
@@ -202,12 +228,12 @@ static NSString *lsform = nil;
 			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=%@", publicKeyPath]];
 		else
 		{
-			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
+			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", username]];
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_rsa"];
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
 		}
 	}
-	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
+	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [self host]]];
 	
 	switch (sshversion())
 	{
@@ -997,12 +1023,15 @@ static NSString *lsform = nil;
 #pragma mark -
 - (void)requestPasswordWithPrompt:(char *)header
 {
-	if (![self password])
+	if (_currentPassword)
+    {
+        [self _writeSFTPCommandWithString:_currentPassword];
+        [_currentPassword release]; _currentPassword = nil;
+    }
+    else
 	{
 		[self passwordErrorOccurred];
-		return;
 	}
-	[self _writeSFTPCommandWithString:[self password]];
 }
 
 - (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo
@@ -1060,3 +1089,40 @@ static NSString *lsform = nil;
 }
 
 @end
+
+
+#pragma mark -
+#pragma mark Authentication
+
+
+@implementation CKSFTPConnection (Authentication)
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        [self disconnect];
+    }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    // TODO: Handle this case
+}
+
+/*  Start login
+ */
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        // Store the password ready for after we've connected
+        _currentPassword = [[credential password] copy];
+        
+        // Start login with the supplied username
+        [self connectWithUsername:[credential user]];
+    }
+}
+
+@end
+
