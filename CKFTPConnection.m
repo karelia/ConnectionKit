@@ -144,6 +144,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 21; }
+
 + (NSString *)name
 {
 	return @"FTP";
@@ -169,25 +171,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		  password:(NSString *)password
 			 error:(NSError **)error
 {
-	if (!username || [username length] == 0 || !password || [password length] == 0)
-	{
-		if (error)
-		{
-			NSError *err = [NSError errorWithDomain:CKFTPErrorDomain
-											   code:CKConnectionNoUsernameOrPassword
-										   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Username and Password are required for FTP connections", @"No username or password")
-																				forKey:NSLocalizedDescriptionKey]];
-			*error = err;
-		}
-		[self release];
-		return nil;
-	}
-	
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:21];
-	}
-	
 	if (self = [super initWithHost:host port:port username:username password:password error:error])
 	{
 		[self setState:CKConnectionNotConnectedState];
@@ -692,7 +675,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				break;
 			}
             
-            _ftpFlags.sentAuthenticated = NO;
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
 			[_commandQueue insertObject:[CKConnectionCommand command:@"PWD"
 														awaitState:CKConnectionIdleState
@@ -733,15 +715,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 530: //User not logged in
 		{
-			if (_flags.didAuthenticate)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+			// TODO: Attempt authentication again
+            /*NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 										  LocalizedStringInConnectionKitBundle(@"Invalid Account name", @"FTP Error"), NSLocalizedDescriptionKey,
 										  command, NSLocalizedFailureReasonErrorKey,
 										  [self host], ConnectionHostKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didAuthenticateToHost:[self host] error:error];
-			}			
+			*/			
 			break;
 		}
 		default:
@@ -755,7 +734,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			_ftpFlags.sentAuthenticated = NO;
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
 			[_commandQueue insertObject:[CKConnectionCommand command:@"PWD"
 														awaitState:CKConnectionIdleState
@@ -799,11 +777,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_rootPath == nil) 
 				_rootPath = [path copy];
 			
-			if (!_ftpFlags.sentAuthenticated && _flags.didAuthenticate)
-			{
-				[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-				_ftpFlags.sentAuthenticated = YES;
-			}
 			break;
 		}
 		case 421:
@@ -1433,19 +1406,31 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				else	// use file
 				{
 					[self setReadData:nil];		// make sure we're not also trying to read from data
-					if (![[NSFileManager defaultManager] fileExistsAtPath:file])
-					{
-						NSString *str = [NSString stringWithFormat:@"FTPConnection parseCommand: File doesn't exist: %@", file];
-						NSAssert(NO, str);		// hacky way to throw an exception.
-					}
-					[self setReadHandle:[NSFileHandle fileHandleForReadingAtPath:file]];
-					NSAssert((nil != _readHandle), @"_readHandle is nil!");
-					NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
-					bytes = (uint8_t *)[chunk bytes];
-					chunkLength = [chunk length];		// actual length of bytes read
 					
-					NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
-					_transferSize = [size unsignedLongLongValue];
+                    // The file handle will be nil if the file doesn't exist. Cancel the transfer and report the error
+                    NSFileHandle *fileHandle = [NSFileHandle fileHandleForReadingAtPath:file];
+					if (fileHandle)
+                    {
+                        [self setReadHandle:fileHandle];
+                        
+                        NSData *chunk = [fileHandle readDataOfLength:kStreamChunkSize];
+                        bytes = (uint8_t *)[chunk bytes];
+                        chunkLength = [chunk length];		// actual length of bytes read
+                        
+                        NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
+                        _transferSize = [size unsignedLongLongValue];
+                    }
+                    else
+                    {
+                        NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Local file %@ doesn't exist", @"File doesn't exist"), [file lastPathComponent]];
+                        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                                  localizedDescription, NSLocalizedDescriptionKey,
+                                                  file, NSFilePathErrorKey,
+                                                  [self host], ConnectionHostKey, nil];
+                        error = [NSError errorWithDomain:CKConnectionErrorDomain code:ConnectionErrorUploading userInfo:userInfo];			
+                        [self threadedCancelTransfer];			
+                        break;
+                    }
 				}
 				
 				//kick start the transfer
@@ -1579,6 +1564,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		default:
 			break;
 	}
+    
+    
+    // If there was an error, report it to the delegate
 	if (error)
 	{
 		CKInternalTransferRecord *upload = [[self currentUpload] retain];
