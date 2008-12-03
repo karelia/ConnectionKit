@@ -907,9 +907,9 @@ static NSString *lsform = nil;
 	_flags.isConnected = YES;
 	
 	if (_flags.didConnect)
+    {
 		[_forwarder connection:self didConnectToHost:[self host] error:nil];
-	if (_flags.didAuthenticate)
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
+    }
 }
 
 - (void)setCurrentDirectory:(NSString *)current

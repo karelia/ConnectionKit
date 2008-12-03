@@ -239,18 +239,42 @@ enum {
 
 @interface NSObject (CKConnectionDelegate)
 
-// There are 21 callbacks & flags.
+// There are 29 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
 - (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
 
 
-// Authentication
+#pragma mark Authentication
+/*!
+ @method connection:didReceiveAuthenticationChallenge:
+ @abstract Requests authentication for the connection.
+ @discussion This method gives the delegate the opportunity to determine the course of action taken
+ for the challenge: provide credentials, continue without providing credentials, or cancel the
+ authentication challenge and the connection.
+ The delegate can determine the number of previous authentication challenges by sending the message
+ -previousFailureCount to challenge.
+ If the previous failure count is 0 and the value returned by proposedCredential is nil, the
+ delegate can create a new NSURLCredential object, providing a user name and password, and send a
+ useCredential:forAuthenticationChallenge: message to [challenge sender], passing the credential and
+ challenge as parameters. If proposedCredential is not nil, the value is a credential from the URL
+ or the shared credential storage that can be provided to the user as feedback.
+ // TODO: Decide whether CK should support the persistent stroage of passwords.
+ If the delegate does not implement this method the default implementation is used. If a valid
+ credential for the request is provided as part of the URL, or is available from the
+ NSURLCredentialStorage the [challenge sender] is sent a useCredential:forAuthenticationChallenge:
+ with the credential. If the challenge has no credential or the credentials fail to authorize
+ access, then continueWithoutCredentialForAuthenticationChallenge: is sent to [challenge sender]
+ instead.
+ // TODO: This portion is not implemented right now.
+ @param connection The connection for which authentication is needed
+ @param challenge The NSURLAuthenticationChallenge to start authentication for
+ */
 - (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 - (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
-- (void)connection:(id <CKConnection>)con didAuthenticateToHost:(NSString *)host error:(NSError *)error; // this is a successful login
 
 
 

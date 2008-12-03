@@ -158,11 +158,8 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)threadedConnect
 {
 	[super threadedConnect];
-	if (_flags.didAuthenticate)
-	{
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-	}
-	myFileManager = [[NSFileManager alloc] init];
+	
+    myFileManager = [[NSFileManager alloc] init];
 	if ([self transcript])
 	{
 		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInConnectionKitBundle(@"Connected to File System\n", @"file transcript") 
