@@ -101,11 +101,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		return nil;
 	}
 	
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:80];
-	}
-	
 	if (self = [super initWithHost:host
                               port:port
                           username:username
@@ -553,11 +548,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	[super threadedConnect];
-	
-	if (_flags.didAuthenticate)
-	{
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-	}
 }
 
 - (void)davDidChangeToDirectory:(NSString *)dirPath
