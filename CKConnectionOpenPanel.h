@@ -62,7 +62,7 @@ enum {
 	IBOutlet NSTableView *tableView;
     IBOutlet NSButton *openButton;
     IBOutlet NSButton *openCancelButton;
-	id delegate;
+	id _delegate;
 	SEL delegateSelector;
 	BOOL isSelectionValid;
 	NSTimeInterval timeout;
@@ -128,7 +128,15 @@ enum {
 @end
 
 @interface NSObject (CKConnectionOpenPanelDelegate)
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didSendBadPasswordToHost:(NSString *)host;
+/*!
+ @method connectionOpenPanel:didReceiveAuthenticationChallenge:
+ @abstract Sent when the connection panel must authenticate a challenge in order to browse the connection.
+ @discussion Operates just like the CKConnection delegate method -connection:didReceiveAuthenticationChallenge:
+ See that for full documentation.
+ @param panel The connection panel object sending the message.
+ @param challenge The authentication challenge that must be authenticated in order to make the connection.
+ */
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveError:(NSError *)error;
 @end
 

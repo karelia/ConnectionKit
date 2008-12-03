@@ -569,15 +569,15 @@
 {
 	//NSLog(@"in -delegate, returned delegate = %@", delegate);
 	
-	return [[delegate retain] autorelease]; 
+	return [[_delegate retain] autorelease]; 
 }
 
 - (void)setDelegate:(id)aDelegate
 {
 	//NSLog(@"in -setDelegate:, old value of delegate: %@, changed to: %@", delegate, aDelegate);
 	
-	if (delegate != aDelegate) {
-		delegate = aDelegate;
+	if (_delegate != aDelegate) {
+		_delegate = aDelegate;
 	}
 }
 
@@ -732,35 +732,26 @@
 	return NO;
 }
 
-/*	Attempt to send password just once
- */
 - (void)connection:(id <CKConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	if ([challenge previousFailureCount] == 0)
-	{
-		NSURLCredential *credential = [[NSURLCredential alloc] initWithUser:[(CKAbstractConnection *)aConnection username]
-																   password:[(CKAbstractConnection *)aConnection password]
-																persistence:NSURLCredentialPersistenceNone];
-		
-		[[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-		[credential release];
-	}
-	else
-	{
-		[[challenge sender] cancelAuthenticationChallenge:challenge];
-		
-		if ([[self window] isSheet])
-			[[NSApplication sharedApplication] endSheet:[self window] returnCode: connectionBadPasswordUserName];
-		else
-			[[NSApplication sharedApplication] stopModalWithCode: connectionBadPasswordUserName];
-		
-		if ([delegate respondsToSelector:@selector(connectionOpenPanel:didSendBadPasswordToHost:)])
-		{
-			[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConnection host]];
-		}
-		
-		[self closePanel:nil];
-	}
+	// Hopefully we can pass off responsibility to the delegate
+    id delegate = [self delegate];
+    if (delegate && [delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveAuthenticationChallenge:)])
+    {
+        [delegate connectionOpenPanel:self didReceiveAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        // Fallback to the default credentials if possible
+        if ([challenge proposedCredential] && [challenge previousFailureCount] == 0)
+        {
+            [[challenge sender] useCredential:[challenge proposedCredential] forAuthenticationChallenge:challenge];
+        }
+        else
+        {
+            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+        }
+    }
 }
 
 - (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
@@ -780,9 +771,9 @@
 
 - (void)connection:(CKAbstractConnection *)aConn didReceiveError:(NSError *)error
 {
-	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
+	if ([_delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
 	{
-		[delegate connectionOpenPanel:self didReceiveError:error];
+		[_delegate connectionOpenPanel:self didReceiveError:error];
 	}
 	else
 	{
