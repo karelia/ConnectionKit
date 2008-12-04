@@ -37,14 +37,15 @@
 	NSMutableData	*myResponseBuffer;
 	
 	// Authentication
-	NSURLAuthenticationChallenge	*_lastAuthenticationChallenge;	// General
+	NSURLAuthenticationChallenge	*_currentAuthenticationChallenge;	// General
+    NSUInteger                      _authenticationFailureCount;
 	
-	NSString	*_basicAccessAuthorizationHeader;					// HTTP basic
+	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
 	
-	NSString *myDigestRealm;										// HTTP digest-based
-	NSString *myDigestNonce;
-	NSString *myDigestOpaque;
-	NSInteger myDigestNonceCount;
+	NSString *_currentDigestRealm;                                      // HTTP digest-based
+	NSString *_currentDigestOpaque;
+	NSString *_currentDigestNonce;
+	NSUInteger _digestNonceCount;
 	
 	
 	struct __httpconflags {
