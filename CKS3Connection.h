@@ -42,6 +42,11 @@
 	unsigned long long	transferHeaderLength;
 	unsigned int myLastPercent;
 	NSFileHandle *myDownloadHandle;
+    
+@private
+    // Authentication
+    NSURLCredential                 *_credential;
+    //NSURLAuthenticationChallenge    *_currentAuthenticationChallenge;
 }
 
 @end

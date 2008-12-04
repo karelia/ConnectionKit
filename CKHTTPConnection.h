@@ -31,7 +31,7 @@
 
 @class CKHTTPRequest, CKHTTPResponse;
 
-@interface CKHTTPConnection : CKStreamBasedConnection 
+@interface CKHTTPConnection : CKStreamBasedConnection <NSURLAuthenticationChallengeSender>
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;

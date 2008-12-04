@@ -46,7 +46,7 @@ enum {
 NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 
-@interface CKHTTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+@interface CKHTTPConnection (Authentication) 
 @end
 
 
@@ -435,13 +435,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	}
 }
 
-@end
-
-
 #pragma mark -
-
-
-@implementation CKHTTPConnection (Authentication)
+#pragma mark Authentication
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
@@ -460,6 +455,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
         
         // Retry the command, although I can't see how it would change anything!
 		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+        
+        // TODO: It seems we should really cancel the connection and send the delegate a didFail sort of message.
 	}
 }
 

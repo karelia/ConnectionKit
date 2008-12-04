@@ -263,12 +263,7 @@ NSDictionary *sDataAttributes = nil;
 				{
 					KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
 					
-                    if (!port)
-                    {
-						port = [CKAbstractConnection registeredPortForConnectionType:[class name]];
-					}
-                    
-					result = [class connectionToHost:host
+                    result = [class connectionToHost:host
 												port:port
 											username:username
 											password:password
