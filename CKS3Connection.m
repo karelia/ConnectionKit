@@ -40,9 +40,11 @@
 #import "NSFileManager+Connection.h"
 #import "CKConnectionProtocol.h"
 
+
 NSString *S3ErrorDomain = @"S3ErrorDomain";
 NSString *S3StorageClassKey = @"S3StorageClassKey";
 NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
+
 
 @implementation CKS3Connection
 
@@ -107,7 +109,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[incompleteKeyNames release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
-	
+    [_credential release];
+	[_currentAuthenticationChallenge release];
+    
 	[super dealloc];
 }
 
@@ -139,7 +143,14 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
-	NSString *method = [request method];
+	// S3 needs decent credentials to operate
+    NSAssert(_credential, @"S3 requires credentials to operate");
+    NSAssert([_credential user], @"S3 connection has no access key ID");
+    NSAssert([_credential persistence] == NSURLCredentialPersistenceNone, @"S3 passwords cannot be persisted");
+    NSAssert([_credential password], @"S3 connection has no secret key");
+    
+    
+    NSString *method = [request method];
 	NSString *md5 = @""; //[[request content] length] > 0 ? [[[request content] md5Digest] base64Encoding] : @"";
 	NSString *ct = [request headerForKey:@"Content-Type"];
 	NSString *date = [request headerForKey:@"Date"];
@@ -164,8 +175,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	}
 	[auth appendString:[uri encodeLegally]];
 	
-	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[self password]] base64Encoding];
-	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [self username], sha1] forKey:@"Authorization"];
+	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[_credential password]] base64Encoding];
+	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [_credential user], sha1] forKey:@"Authorization"];
 }
 
 - (void)processResponse:(CKHTTPResponse *)response
@@ -182,8 +193,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		
 		if ([code isEqualToString:@"SignatureDoesNotMatch"])
 		{
-			// TODO: Use the new authentication API instead
-			//[_forwarder connectionDidSendBadPassword:self];
+			// TODO: Send a fresh authentication request and try again
 		}
 		else
 		{
@@ -948,4 +958,36 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
+#pragma mark -
+#pragma mark Authentication
+
+- (void)connect
+{
+    // Request authentication before connecting
+    _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+                                                                                 proposedCredential:nil
+                                                                               previousFailureCount:0
+                                                                                    failureResponse:nil
+                                                                                              error:nil
+                                                                                             sender:self];
+    
+    [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge]; // TODO: Why do I need to typecast here?
+}
+
+/*  CKHTTPConnection implements the -cancel and -continueWithCredential methods for us in a perfectly
+ *  decent manner, so don't bother overriding them.
+ */
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge != _currentAuthenticationChallenge)	return;
+	[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+    
+    _credential = [credential retain];
+    
+    // Continue on with connecting
+    [super connect];
+}
+
 @end
+
