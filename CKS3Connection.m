@@ -51,16 +51,16 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:80], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"s3://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKS3Connection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"s3"];
+    [pool release];
 }
 
 + (NSString *)name
 {
 	return @"Amazon S3";
 }
+
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"s3", @"http", nil]; }
 
 #pragma mark init methods
 
@@ -93,10 +93,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[super dealloc];
 }
 
-+ (NSString *)urlScheme
-{
-	return @"s3";
-}
 - (NSString *)standardizePath:(NSString *)unstandardPath
 {
 	if (![unstandardPath hasPrefix:@"/"])

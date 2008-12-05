@@ -196,7 +196,10 @@ static NSImage *sBonjourIcon = nil;
 		[h setConnectionType:@"WebDAV"];
 		[myHTTPCategory addHost:h];
 	}
-	[h setPort:[[CKAbstractConnection registeredPortForConnectionType:[h connectionType]] description]];
+	
+    Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[h connectionType]];
+    [h setPort:[NSString stringWithFormat:@"%i", [connectionClass defaultPort]]];
+     
 	[h release];
 	[[[CKBookmarkStorage sharedBookmarkStorage] outlineView] reloadData];
 }

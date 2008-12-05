@@ -49,6 +49,7 @@ typedef unsigned int   NSUInteger;
 
 #import <Cocoa/Cocoa.h>
 #import <Connection/CKConnectionProtocol.h>
+#import <Connection/CKConnectionRegistry.h>
 #import <Connection/KTLog.h>
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>

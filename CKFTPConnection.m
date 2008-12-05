@@ -138,9 +138,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:21], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"ftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"ftp"];
 	[pool release];
 }
 
@@ -149,6 +147,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 + (NSString *)name
 {
 	return @"FTP";
+}
+
++ (NSArray *)URLSchemes
+{
+	return [NSArray arrayWithObject:@"ftp"];
 }
 
 - (id)initWithURL:(NSURL *)URL
@@ -192,11 +195,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     [_currentAuthenticationCredential release];
 	
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"ftp";
 }
 
 #pragma mark -

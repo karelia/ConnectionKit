@@ -27,23 +27,9 @@
 	return @"Secure HTTP";
 }
 
-+ (id)connectionToHost:(NSString *)host
-                  port:(NSNumber *)port
-              username:(NSString *)username
-              password:(NSString *)password
-                 error:(NSError **)error
++ (NSArray *)URLSchemes
 {
-	CKSecureHTTPConnection *c = [[self alloc] initWithHost:host
-                                                      port:port
-                                                  username:username
-                                                  password:password
-                                                     error:error];
-	return [c autorelease];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"https";
+	return [NSArray arrayWithObject:@"https"];
 }
 
 - (id)initWithURL:(NSURL *)URL

@@ -54,15 +54,19 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:80], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"webdav://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKWebDAVConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"http"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"webdav"];
+    [pool release];
 }
 
 + (NSString *)name
 {
 	return @"WebDAV";
+}
+
++ (NSArray *)URLSchemes
+{
+	return [NSArray arrayWithObjects:@"webdav", @"http", nil];
 }
 
 #pragma mark init methods
@@ -72,11 +76,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"webdav";
 }
 
 #pragma mark -

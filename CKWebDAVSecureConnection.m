@@ -35,10 +35,8 @@
 + (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:443], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKWebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"https"];
+    [pool release];
 }
 
 + (NSInteger)defaultPort { return 443; }
@@ -47,6 +45,8 @@
 {
 	return @"Secure WebDAV";
 }
+
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"https", @"swebdav", nil]; }
 
 #pragma mark init methods
 
@@ -57,11 +57,6 @@
 		[self setSSLOn:YES];
 	}
 	return self;
-}
-
-+ (NSString *)urlScheme
-{
-	return @"swebdav";
 }
 
 @end
