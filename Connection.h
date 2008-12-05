@@ -81,7 +81,7 @@ typedef unsigned int   NSUInteger;
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
 #import <Connection/CKLeopardSourceListTableColumn.h>
-#import <Connection/CKConnectionRegistry.h>
+#import <Connection/CKBookmarkStorage.h>
 #import <Connection/CKHostCategory.h>
 #import <Connection/CKBonjourCategory.h>
 #import <Connection/CKHost.h>

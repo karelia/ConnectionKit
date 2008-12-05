@@ -5,7 +5,7 @@
 //  Copyright 2008 Extendmac, LLC. All rights reserved.
 //
 
-#import "CKConnectionRegistry.h"
+#import "CKBookmarkStorage.h"
 #import "CKLeopardSourceListTableColumn.h"
 
 @implementation CKLeopardSourceListTableColumn
@@ -15,7 +15,7 @@
 	if (row >= 0)
 	{
 		id item = [(NSOutlineView *)[self tableView] itemAtRow:row];
-		if ([[CKConnectionRegistry sharedRegistry] itemIsLeopardSourceGroupHeader:item])
+		if ([[CKBookmarkStorage sharedBookmarkStorage] itemIsLeopardSourceGroupHeader:item])
 		{
 			NSTextFieldCell *groupCell = [[[NSTextFieldCell alloc] init] autorelease];
 			[groupCell setFont:[[NSFontManager sharedFontManager] convertFont:[[self dataCell] font] toSize:11.0]];

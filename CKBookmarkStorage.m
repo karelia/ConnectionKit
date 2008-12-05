@@ -27,14 +27,14 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "CKConnectionRegistry.h"
+#import "CKBookmarkStorage.h"
 #import "CKHostCategory.h"
 #import "CKBonjourCategory.h"
 #import "CKHost.h"
 #import "CKAbstractConnection.h"
 #import "CKHostCell.h"
 
-static CKConnectionRegistry *sharedRegistry = nil;
+static CKBookmarkStorage *sharedRegistry = nil;
 static BOOL sharedRegistryIsInitializing = NO;
 static NSString *sRegistryDatabase = nil;
 
@@ -42,7 +42,7 @@ NSString *CKRegistryNotification = @"CKRegistryNotification";
 NSString *CKRegistryChangedNotification = @"CKRegistryChangedNotification";
 NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
-@interface CKConnectionRegistry (Private)
+@interface CKBookmarkStorage (Private)
 - (void)otherProcessChanged:(NSNotification *)notification;
 - (NSString *)databaseFile;
 - (void)changed:(NSNotification *)notification;
@@ -52,11 +52,11 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 @end
 
-@implementation CKConnectionRegistry
+@implementation CKBookmarkStorage
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
-+ (id)sharedRegistry
++ (id)sharedBookmarkStorage
 {
 	if (sharedRegistryIsInitializing)
 		return nil;
@@ -64,7 +64,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	if (!sharedRegistry)
 	{
 		sharedRegistryIsInitializing = YES;
-		[[CKConnectionRegistry alloc] init];
+		[[CKBookmarkStorage alloc] init];
 		sharedRegistryIsInitializing = NO;
 	}
 	return sharedRegistry;
@@ -94,7 +94,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		myLeopardSourceListGroups = [[NSMutableArray alloc] init];
 		myConnections = [[NSMutableArray alloc] init];
 		myDraggedItems = [[NSMutableArray alloc] init];
-		myDatabaseFile = [[CKConnectionRegistry registryDatabase] copy];
+		myDatabaseFile = [[CKBookmarkStorage registryDatabase] copy];
 		myBonjour = [[CKBonjourCategory alloc] init];
 		myOutlineViews = [[NSMutableArray array] retain];
 		[myConnections addObject:myBonjour];

@@ -81,8 +81,8 @@
 		795AFF190B1157D3006905FA /* CKHostCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFF170B1157D3006905FA /* CKHostCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFF180B1157D3006905FA /* CKHostCell.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
-		795FF1B60B0A821600EA9292 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF1B70B0A821600EA9292 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* CKConnectionRegistry.m */; };
+		795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */; };
 		795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
 		795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -317,8 +317,8 @@
 		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
 		795AFF170B1157D3006905FA /* CKHostCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCell.h; sourceTree = "<group>"; };
 		795AFF180B1157D3006905FA /* CKHostCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCell.m; sourceTree = "<group>"; };
-		795FF1B40B0A821600EA9292 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
-		795FF1B50B0A821600EA9292 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
+		795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKBookmarkStorage.h; sourceTree = "<group>"; };
+		795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKBookmarkStorage.m; sourceTree = "<group>"; };
 		795FF4F10B0C013200EA9292 /* DropletHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DropletHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DropletHelper-Info.plist"; sourceTree = "<group>"; };
 		795FF5010B0C018100EA9292 /* DropletMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletMain.m; sourceTree = "<group>"; };
@@ -581,7 +581,7 @@
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
-				7983E2120B0C22D600F5078E /* Bookmark Registry */,
+				7983E2120B0C22D600F5078E /* Bookmarks */,
 				79CFD8A509F705FF00172CDD /* UI */,
 			);
 			name = Framework;
@@ -807,7 +807,7 @@
 			name = Droplet;
 			sourceTree = "<group>";
 		};
-		7983E2120B0C22D600F5078E /* Bookmark Registry */ = {
+		7983E2120B0C22D600F5078E /* Bookmarks */ = {
 			isa = PBXGroup;
 			children = (
 				D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */,
@@ -816,8 +816,8 @@
 				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
 				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
 				D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */,
-				795FF1B40B0A821600EA9292 /* CKConnectionRegistry.h */,
-				795FF1B50B0A821600EA9292 /* CKConnectionRegistry.m */,
+				795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */,
+				795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */,
 				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
 				79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */,
 				79F54D490AC8BDA1006AD3E2 /* CKHost.h */,
@@ -829,7 +829,7 @@
 				7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */,
 				7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */,
 			);
-			name = "Bookmark Registry";
+			name = Bookmarks;
 			sourceTree = "<group>";
 		};
 		79CFD11A09F7022900172CDD /* Connections */ = {
@@ -1063,7 +1063,7 @@
 				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
 				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
 				79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */,
-				795FF1B60B0A821600EA9292 /* CKConnectionRegistry.h in Headers */,
+				795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */,
 				795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */,
 				795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
@@ -1407,7 +1407,7 @@
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
 				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
-				795FF1B70B0A821600EA9292 /* CKConnectionRegistry.m in Sources */,
+				795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */,
 				795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */,
 				795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,

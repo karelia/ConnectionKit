@@ -317,7 +317,7 @@ static NSImage *sHostIcon = nil;
 	if (!oldUsernameString || [oldUsernameString length] == 0)
 		return;
 	
-	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKBookmarkStorage sharedBookmarkStorage] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:oldUsernameString path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
 		[keychainItem setUsername:username];
@@ -342,7 +342,7 @@ static NSImage *sHostIcon = nil;
 	if (!_username || [_username length] == 0 || !_host || [_host length] == 0)
 		return;
 	
-	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKBookmarkStorage sharedBookmarkStorage] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
@@ -476,7 +476,7 @@ static NSImage *sHostIcon = nil;
 		return nil;
 	}
 	
-	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKBookmarkStorage sharedBookmarkStorage] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username
@@ -788,7 +788,7 @@ static NSImage *sHostIcon = nil;
 - (void)didChange
 {
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKHostChanged object:self];
-	if ([[[CKConnectionRegistry sharedRegistry] allHosts] containsObject:self])
+	if ([[[CKBookmarkStorage sharedBookmarkStorage] allHosts] containsObject:self])
 	{
 		EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																							   withUsername:_username

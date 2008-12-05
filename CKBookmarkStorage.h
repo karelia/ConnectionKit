@@ -42,7 +42,7 @@
 
 @class CKHostCategory, CKBonjourCategory, CKHost;
 
-@interface CKConnectionRegistry : NSObject 
+@interface CKBookmarkStorage : NSObject 
 {
 	NSMutableArray *myLeopardSourceListGroups;
 	NSMutableArray *myConnections;
@@ -68,7 +68,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 + (void)setRegistryDatabase:(NSString *)file;
 + (NSString *)registryDatabase;
 
-+ (id)sharedRegistry; //use this. DO NOT alloc one yourself
++ (id)sharedBookmarkStorage; //use this. DO NOT alloc one yourself
 
 - (void)beginGroupEditing;
 - (void)endGroupEditing;
