@@ -151,27 +151,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return @"FTP";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	CKFTPConnection *c = [[CKFTPConnection alloc] initWithHost:host
-													  port:port
-												  username:username
-												  password:password
-													 error:error];
-	return [c autorelease];
-}
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	if (self = [super initWithURL:URL])
 	{
 		[self setState:CKConnectionNotConnectedState];
 		
@@ -453,7 +435,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (_flags.needsAccount)
 			{
 				NSString *account;
-				account = [_forwarder connection:self needsAccountForUsername:[self username]];
+				account = [_forwarder connection:self needsAccountForUsername:nil]; // TODO: Handle this more gracefully
 				if (account)
 				{
 					[self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];
@@ -468,7 +450,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[super threadedDisconnect]; //This empties the queues, etc.
 			_flags.isConnected = NO;
 			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:[self host]];
+				[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 			}
 			
 			if (_flags.error)
@@ -477,7 +459,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 										  localizedDescription, NSLocalizedDescriptionKey,
 										  command, NSLocalizedFailureReasonErrorKey,
-										  [self host], ConnectionHostKey, nil];
+										  [self URL], ConnectionHostKey, nil];
 				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 				[_forwarder connection:self didReceiveError:error];
 			}
@@ -514,7 +496,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 										  LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
 										  command, NSLocalizedFailureReasonErrorKey,
-										  [self host], ConnectionHostKey, nil];
+										  [[self URL] host], ConnectionHostKey, nil];
 				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 				[_forwarder connection:self didReceiveError:error];
 			}
@@ -624,9 +606,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 										  LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
 										  command, NSLocalizedFailureReasonErrorKey,
-										  _connectionHost, ConnectionHostKey, nil];
+										  [[self URL] host], ConnectionHostKey, nil];
 				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didConnectToHost:_connectionHost error:error];
+				[_forwarder connection:self didConnectToHost:[[self URL] host] error:error];
 			}
 			[self setState:CKConnectionNotConnectedState]; //don't really need.
 			break;
@@ -785,7 +767,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}
@@ -859,7 +841,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -899,7 +881,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -969,7 +951,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1010,7 +992,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1047,7 +1029,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1093,7 +1075,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1193,7 +1175,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1426,7 +1408,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                                   localizedDescription, NSLocalizedDescriptionKey,
                                                   file, NSFilePathErrorKey,
-                                                  [self host], ConnectionHostKey, nil];
+                                                  [[self URL] host], ConnectionHostKey, nil];
                         error = [NSError errorWithDomain:CKConnectionErrorDomain code:ConnectionErrorUploading userInfo:userInfo];			
                         [self threadedCancelTransfer];			
                         break;
@@ -1471,7 +1453,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1535,7 +1517,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey,
+									  [[self URL] host], ConnectionHostKey,
 									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
@@ -1724,7 +1706,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1819,7 +1801,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
@@ -1906,7 +1888,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 											  localizedDescription, NSLocalizedDescriptionKey,
 											  command, NSLocalizedFailureReasonErrorKey,
-											  [self host], ConnectionHostKey, nil];
+											  [[self URL] host], ConnectionHostKey, nil];
 					NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
 					[_forwarder connection:self didReceiveError:err];
 				}
@@ -1922,7 +1904,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *hostString = [NSString stringWithFormat:@"%d.%d.%d.%d", i[0], i[1], i[2], i[3]];
 						
 			NSHost *host = [CKCacheableHost hostWithAddress:hostString];
-			[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
+			[host setValue:[NSArray arrayWithObject:[[self URL] host]] forKey:@"names"]; // KVC hack
 			
 			[self closeDataStreams];
 			[self setState:FTPAwaitingDataConnectionToOpen];
@@ -1960,8 +1942,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				_state = [cmd sentState];
 				[self sendCommand:[cmd command]];
 			}
-			NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
-			[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
+			NSHost *host = [CKCacheableHost hostWithName:[[self URL] host]];
+			[host setValue:[NSArray arrayWithObject:[[self URL] host]] forKey:@"names"]; // KVC hack
 			
 			[self closeDataStreams];
 			[self setState:FTPAwaitingDataConnectionToOpen];
@@ -3373,7 +3355,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [self host], ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:err];
 		}

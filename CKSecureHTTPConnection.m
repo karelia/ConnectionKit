@@ -46,13 +46,9 @@
 	return @"https";
 }
 
-- (id)initWithHost:(NSString *)host
-              port:(NSNumber *)port
-          username:(NSString *)username
-          password:(NSString *)password
-             error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithURL:URL]))
 	{
 		[self setSSLOn:YES];
 	}

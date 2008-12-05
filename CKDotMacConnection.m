@@ -69,20 +69,6 @@
 	return @"MobileMe";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
-{
-	CKDotMacConnection *c = [[self alloc] initWithHost:host
-                                                port:port
-                                            username:username
-                                            password:password
-											   error:error];
-	return [c autorelease];
-}
-
 + (NSString *)urlScheme
 {
 	return @"dotmac";
@@ -134,41 +120,36 @@
 	return result;
 }
 
-- (id)initWithHost:(NSString *)host
-              port:(NSNumber *)port
-          username:(NSString *)user
-          password:(NSString *)pass
-             error:(NSError **)error
+// TODO: Move to the new authentication model
+- (id)initWithURL:(NSURL *)URL
 {
-	NSString *username = nil;
-	NSString *password = nil;
+	if (URL)
+    {
+        NSParameterAssert([[URL host] isEqualToString:@"idisk.mac.com"]);
+    }
+    
+    NSString *user = [URL user];
+	NSString *password = [URL password];
 	
 	if (user && password)
 	{
-		if (self = [super initWithHost:@"idisk.mac.com" port:nil username:user password:pass error:error])
+		
+        if (self = [super initWithURL:URL])
 		{
-			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
+			myCurrentDirectory = [[NSString alloc] initWithFormat:@"/%@/", [URL user]];
 		}
 	}
 	else
 	{
-		if (![self getDotMacAccountName:&username password:&password])
+		if (![self getDotMacAccountName:&user password:&password])
 		{
-			if (error)
-			{
-				NSError *err = [NSError errorWithDomain:WebDAVErrorDomain
-												   code:CKConnectionNoUsernameOrPassword
-											   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Failed to retrieve MobileMe account details", @"No MobileMe account or password")
-																					forKey:NSLocalizedDescriptionKey]];
-				*error = err;
-			}
 			[self release];
 			return nil;
 		}
 		
-		if (self = [super initWithHost:@"idisk.mac.com" port:@"80" username:username password:password error:error])
+		if (self = [super initWithURL:[NSURL URLWithString:@"http://idisk.mac.com"]])
 		{
-			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", username] retain];
+			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
 		}
 	}
 
@@ -500,7 +481,7 @@
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	[super changeToDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
+	[super changeToDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
 }
 
 - (void)davDidChangeToDirectory:(NSString *)dirPath
@@ -546,7 +527,7 @@
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	[super createDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
+	[super createDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
@@ -557,24 +538,24 @@
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	[super setPermissions:permissions
-				  forFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:path]];
+				  forFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:path]];
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	NSString *from = [[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:fromPath];
-	NSString *to = [[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:toPath];
+	NSString *from = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:fromPath];
+	NSString *to = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:toPath];
 	[super rename:from to:to];
 }
 
 - (void)deleteFile:(NSString *)path
 {
-	[super deleteFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:path]];
+	[super deleteFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:path]];
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
-	[super deleteDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
+	[super deleteDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
 }
 
 - (void)uploadFile:(NSString *)localPath
@@ -594,7 +575,7 @@
 						delegate:(id)delegate
 {	
 	return [super uploadFile:localPath
-					  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+					  toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
 		checkRemoteExistence:flag
 					delegate:delegate];
 }
@@ -621,7 +602,7 @@
 							delegate:(id)delegate
 {	
 	return [super uploadFromData:data
-						  toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+						  toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
 			checkRemoteExistence:flag
 						delegate:delegate];
 }
@@ -632,14 +613,14 @@
 								  delegate:(id)delegate
 {
 	return [super resumeUploadFromData:data
-								toFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+								toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
 							fileOffset:offset
 							  delegate:delegate];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	[super downloadFile:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:remotePath]
+	[super downloadFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
 			toDirectory:dirPath
 			  overwrite:flag];
 }
@@ -653,13 +634,13 @@
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[super contentsOfDirectory:[[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:dirPath]];
+	[super contentsOfDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
 }
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"no path specified");
-	NSString *dir = [[NSString stringWithFormat:@"/%@", [self username]] stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]];
+	NSString *dir = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]];
 	
 	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
 	//according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size

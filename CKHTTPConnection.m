@@ -59,27 +59,9 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 + (NSInteger)defaultPort { return 80; }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	CKHTTPConnection *c = [[self alloc] initWithHost:host
-                                                port:port
-                                            username:username
-                                            password:password
-											   error:error];
-	return [c autorelease];
-}
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithURL:URL]))
 	{
 		myResponseBuffer = [[NSMutableData data] retain];
 	}
@@ -313,7 +295,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		
 		//make sure we set the host name and set anything else which is needed
-		[req setHeader:[self host] forKey:@"Host"];
+		[req setHeader:[[self URL] host] forKey:@"Host"];
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		

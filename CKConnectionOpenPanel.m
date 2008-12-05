@@ -438,8 +438,7 @@
 			}
 			pathToAdd = [pathPrefix stringByAppendingPathComponent: pathToAdd];
 			
-			[returnValue addObject: [NSURL URLWithString: pathToAdd
-										   relativeToURL: [NSURL URLWithString: [NSString stringWithFormat: @"%@://%@/", [[self connection] urlScheme], [[self connection] host]]]]];  
+			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[self connection] URL]]];
 		}
 	}
 	

@@ -34,6 +34,7 @@
 #import "RunLoopForwarder.h"
 #import "CKConnectionThreadManager.h"
 #import "NSString+Connection.h"
+#import "NSURL+Connection.h"
 #import "KTLog.h"
 #import "RegexKitLite.h"
 
@@ -172,7 +173,7 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Protocol Class Methods
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port and:(BOOL)flag
++ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port and:(BOOL)flag
 {
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
@@ -215,35 +216,32 @@ NSDictionary *sDataAttributes = nil;
 	}
 	if (flag)
 	{
-		return [CKAbstractConnection urlSchemeForConnectionName:name port:port and:NO];
+		return [CKAbstractConnection URLSchemeForConnectionName:name port:port and:NO];
 	}
 	return nil;
 }
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port
++ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port
 {
-	return [CKAbstractConnection urlSchemeForConnectionName:name port:port and:YES];
+	return [CKAbstractConnection URLSchemeForConnectionName:name port:port and:YES];
 }
 
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error
++ (id <CKConnection>)connectionWithName:(NSString *)name URL:(NSURL *)URL error:(NSError **)error
 {
-	id result = nil;
+	NSString *host = [URL host];
+	NSString *user = [URL user];
+	NSString *password = [URL password];
+	NSNumber *port = [URL port];
+	
+    
+    id result = nil;
 	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
 	NSDictionary *cur;
 	
 	KTLog(CKConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
 	
 	if (!name) {
-		result = [CKAbstractConnection connectionToHost:host
-												 port:port
-											 username:username
-											 password:password
-												error:error];
+		result = [self connectionToHost:host port:port username:user password:password error:error];
 	}
 	else
 	{
@@ -257,19 +255,17 @@ NSDictionary *sDataAttributes = nil;
 			NSString *n = [[class name] lowercaseString];
 			NSString *searchName = [name lowercaseString];
 			
-			if ([n isEqualToString:searchName])
+			if ([n isEqualToString:searchName]) // TODO: If no name was specified, search by URL scheme only
 			{
-				if ([class respondsToSelector:@selector(connectionToHost:port:username:password:error:)])
-				{
-					KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
-					
-                    result = [class connectionToHost:host
-												port:port
-											username:username
-											password:password
-											   error:error];
-					break;
-				}
+				KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
+				
+                if ([[URL scheme] isEqualToString:@"x"])    // Hack until we improve the registry
+                {
+                    URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:[URL host] port:[URL port] user:[URL user] password:[URL password]] autorelease];
+                }
+                
+                result = [[[class alloc] initWithURL:URL] autorelease];
+				break;
 			}
 		}
 	}
@@ -287,6 +283,21 @@ NSDictionary *sDataAttributes = nil;
 	}
 	
 	return result;
+}
+
++ (id <CKConnection>)connectionWithName:(NSString *)name
+                                   host:(NSString *)host
+                                   port:(NSNumber *)port
+                               username:(NSString *)username
+                               password:(NSString *)password
+                                  error:(NSError **)error
+{
+    // The x will be replaced later. It's a mess I know!
+    NSURL *URL = [[NSURL alloc] initWithScheme:@"x" host:host port:port user:username password:password];
+    
+    id <CKConnection> result = [self connectionWithName:name URL:URL error:error];
+    [URL release];
+    return result;
 }
 
 + (id <CKConnection>)connectionToHost:(NSString *)host
@@ -311,11 +322,8 @@ NSDictionary *sDataAttributes = nil;
 				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					return [class connectionToHost:host
-											  port:port
-										  username:username
-										  password:password
-											 error:error];
+                    NSURL *URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:host port:port user:username password:password] autorelease];
+					return [[[class alloc] initWithURL:URL] autorelease];
 				}
 			}
 			else if ([connType isEqualToString:ACURLTypeKey])
@@ -325,11 +333,8 @@ NSDictionary *sDataAttributes = nil;
 				{
 					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
 					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
-					return [class connectionToHost:hostWithOutSpecifier
-											  port:port
-										  username:username
-										  password:password
-											 error:error];
+					NSURL *URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:hostWithOutSpecifier port:port user:username password:password] autorelease];
+					return [[[class alloc] initWithURL:URL] autorelease];
 				}
 			}
 		}
@@ -348,7 +353,9 @@ NSDictionary *sDataAttributes = nil;
 
 + (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error
 {
-	NSString *resourceSpec = [url resourceSpecifier];
+	return [self connectionWithName:nil URL:url error:error];
+    
+    NSString *resourceSpec = [url resourceSpecifier];
 	NSString *host = [url host];
 	NSString *user = [url user];
 	NSString *pass = [url password];
@@ -407,26 +414,29 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Inheritable methods
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [super init])
+	NSParameterAssert(URL); // Not supplying a URL is programmer error
+    
+    // To start a connection we require the protocol and host at the very least. The protocol should
+    // be one supported by the receive. Subclasses may impose other restrictions.
+    if (![URL scheme] || ![URL host] || ![[URL scheme] isEqualToString:[[self class] urlScheme]])
+    {
+        [self release];
+        return nil;
+    }
+    
+    
+    if (self = [super init])
 	{
-		_connectionHost = [host copy];
-		_connectionPort = (port) ? [port intValue] : [[self class] defaultPort];
-        
-		_username = [username copy];
-		_password = [password copy];
+		_URL = [URL retain];
         
 		_edits = [[NSMutableDictionary dictionary] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
 		_forwarder = [[RunLoopForwarder alloc] init];
-		_name = @"Default";
+		_name = [@"Default" retain];
 		[_forwarder setReturnValueDelegate:self];
 	}
 	return self;
@@ -436,9 +446,7 @@ NSDictionary *sDataAttributes = nil;
 {
 	[_name release];
 	[_forwarder release];
-	[_connectionHost release];
-	[_username release];
-	[_password release];
+	[_URL release];
 	[_transcript release];
 	[_properties release];
 	[_cachedDirectoryContents release];
@@ -452,19 +460,9 @@ NSDictionary *sDataAttributes = nil;
 
 - (id)copyWithZone:(NSZone *)zone
 {
-	NSError *err = nil;
-	id <CKConnection>copy = [[[self class] allocWithZone:zone] initWithHost:[self host]
-                                                                       port:[NSNumber numberWithInt:[self port]]
-                                                                   username:[self username]
-                                                                   password:[self password]
-                                                                      error:&err];
-	if (err)
-	{
-		NSLog(@"Failed to copy connection: %@", err);
-		[copy release];
-		return nil;
-	}
-	NSEnumerator *e = [_properties keyEnumerator];
+	id <CKConnection>copy = [[[self class] allocWithZone:zone] initWithURL:[self URL]];
+	
+    NSEnumerator *e = [_properties keyEnumerator];
 	id key;
 	
 	while ((key = [e nextObject]))
@@ -480,24 +478,12 @@ NSDictionary *sDataAttributes = nil;
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
-- (NSString *)host
-{
-	return _connectionHost;
-}
+- (NSURL *)URL { return _URL; }
 
 - (NSInteger)port
 {
-	return _connectionPort;
-}
-
-- (NSString *)username
-{
-	return _username;
-}
-
-- (NSString *)password
-{
-	return _password;
+	NSNumber *port = [[self URL] port];
+    return (port) ? [port intValue] : [[self class] defaultPort];
 }
 
 - (void)setState:(CKConnectionState)state
@@ -631,7 +617,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = YES;
 	if (_flags.didConnect)
 	{
-		[_forwarder connection:self didConnectToHost:[self host] error:nil];
+		[_forwarder connection:self didConnectToHost:[[self URL] host] error:nil];
 	}
 }
 
@@ -650,7 +636,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
+		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 	}
 }
 
@@ -664,7 +650,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
+		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 	}
 }
 

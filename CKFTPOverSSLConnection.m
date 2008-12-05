@@ -25,13 +25,9 @@
 	return @"FTP over SSL";
 }
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [super initWithHost:host port:port username:username password:password]) {
+	if (self = [super initWithURL:URL]) {
 		_ssl = SSLVersionNegotiated;
 	}
 	return self;
