@@ -85,21 +85,9 @@ static NSString *lsform = nil;
 	return @"sftp";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	return [[[CKSFTPConnection alloc] initWithHost:host
-											port:port
-										username:username
-										password:password
-										   error:error] autorelease];
-}
-- (id)initWithHost:(NSString *)host port:(NSNumber *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
-{
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithURL:URL]))
 	{
 		connectToQueue = [[NSMutableArray array] retain];
 		currentDirectory = [[NSMutableString string] retain];
@@ -233,7 +221,7 @@ static NSString *lsform = nil;
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
 		}
 	}
-	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [self host]]];
+	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [[self URL] host]]];
 	
 	switch (sshversion())
 	{
@@ -892,10 +880,10 @@ static NSString *lsform = nil;
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  localizedDescription, NSLocalizedDescriptionKey, 
-								  [self host], ConnectionHostKey, nil];
+								  [[self URL] host], ConnectionHostKey, nil];
 		
 		NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
-		[_forwarder connection:self didConnectToHost:[self host] error:error];
+		[_forwarder connection:self didConnectToHost:[[self URL] host] error:error];
 	}
 }
 
@@ -908,7 +896,7 @@ static NSString *lsform = nil;
 	
 	if (_flags.didConnect)
     {
-		[_forwarder connection:self didConnectToHost:[self host] error:nil];
+		[_forwarder connection:self didConnectToHost:[[self URL] host] error:nil];
     }
 }
 
@@ -936,7 +924,7 @@ static NSString *lsform = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
+		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 	}
 }
 
@@ -1058,13 +1046,13 @@ static NSString *lsform = nil;
 	NSString *passphrase = nil;
 	if (_flags.passphrase)
 	{
-		passphrase = [_forwarder connection:self passphraseForHost:[self host] username:[self username] publicKeyPath:pubKeyPath];
+		passphrase = [_forwarder connection:self passphraseForHost:[[self URL] host] username:[[self URL] user] publicKeyPath:pubKeyPath];
 	}
 	else
 	{
 		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
 		CKSSHPassphrase *passphraseFetcher = [[CKSSHPassphrase alloc] init];
-		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[self username]];
+		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[[self URL] user]];
 		[passphraseFetcher release];
 	}
 	

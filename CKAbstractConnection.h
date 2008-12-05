@@ -132,10 +132,7 @@ typedef struct __flags {
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
 	NSString    *_name;
-	NSString    *_connectionHost;
-	NSInteger   _connectionPort;
-	NSString    *_username;
-	NSString    *_password;
+    NSURL       *_URL;
     
 	CKConnectionState _state;
 	
@@ -172,10 +169,15 @@ typedef struct __flags {
                                password:(NSString *)password
                                   error:(NSError **)error;
 
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
++ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
 
-- (NSString *)username;
-- (NSString *)password;
+/*!
+ @method port
+ @abstract If the connection's URL has a port defined, it will be used. Otherwise,
+ this method falls back to the default port for the connection class.
+ @result The port the connection will use to connect on.
+ */
+- (NSInteger)port;
 
 - (void)setState:(CKConnectionState)state;
 - (CKConnectionState)state;

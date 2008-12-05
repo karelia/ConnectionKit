@@ -64,37 +64,15 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 #pragma mark init methods
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
-{
-	CKS3Connection *c = [[self alloc] initWithHost:host
-                                                port:port
-                                            username:username
-                                            password:password
-											   error:error];
-	return [c autorelease];
-}
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
 	// allow for subdomains of s3
-	if ([host rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
+	if ([[URL host] rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
 	{
-		host = @"s3.amazonaws.com";
+		URL = [[NSURL alloc] initWithScheme:@"http" host:@"s3.amazonaws.com" path:nil];
 	}
 	
-	if (self = [super initWithHost:host
-                              port:port
-                          username:username
-                          password:password
-							 error:error])
+	if (self = [super initWithURL:URL])
 	{
 		incompleteDirectoryContents = [[NSMutableArray array] retain];
 		incompleteKeyNames = [[NSMutableArray array] retain];

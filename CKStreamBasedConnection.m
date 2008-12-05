@@ -85,13 +85,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 @implementation CKStreamBasedConnection
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	if (self = [super initWithURL:URL])
 	{
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
@@ -300,23 +296,23 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (BOOL)openStreamsToPort:(unsigned)port
 {
-	NSHost *host = [CKCacheableHost hostWithName:_connectionHost];
+	NSHost *host = [CKCacheableHost hostWithName:[[self URL] host]];
 	if(!host){
-		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", _connectionHost);
+		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", [[self URL] host]);
 		
         if (_flags.didConnect) {
 			NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
 				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
-					_connectionHost, ConnectionHostKey, nil]];
-			[_forwarder connection:self didConnectToHost:_connectionHost error:error];
+					[[self URL] host], ConnectionHostKey, nil]];
+			[_forwarder connection:self didConnectToHost:[[self URL] host] error:error];
 		}
 		return NO;
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
-		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"]; // KVC hack
+		[host setValue:[NSArray arrayWithObject:[[self URL] host]] forKey:@"names"]; // KVC hack
 	}
 	
 	if ([[host addresses] count] > 1) {
@@ -371,13 +367,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	
 	if(!_receiveStream || !_sendStream){
-		KTLog(CKTransportDomain, KTLogError, @"Cannot create a stream to the host: %@", _connectionHost);
+		KTLog(CKTransportDomain, KTLogError, @"Cannot create a stream to the host: %@", [[self URL] host]);
 		
 		if (_flags.error)
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
-									  _connectionHost, ConnectionHostKey, nil];
+									  [[self URL] host], ConnectionHostKey, nil];
 			NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:error];
 		}
@@ -724,7 +720,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:CKConnectionErrorDomain
 											code:CKConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[self URL] host]], NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
 			}
 			else
 			{
@@ -739,7 +735,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 				_flags.isConnected = NO;
 				if (_flags.didDisconnect)
-					[_forwarder connection:self didDisconnectFromHost:[self host]];
+					[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 				
 				if (_flags.error && !myStreamFlags.reportedError) 
 				{
@@ -853,7 +849,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[self closeStreams];
 			[self setState:CKConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:_connectionHost];
+				[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 			}
 			[self receiveStreamDidClose];
 			break;
@@ -910,7 +906,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:CKConnectionErrorDomain
 											code:CKConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [self host]], NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[self URL] host]], NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
 			}
 			else 
 			{
@@ -966,7 +962,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[self closeStreams];
 			[self setState:CKConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:_connectionHost];
+				[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
 			}
 			[self sendStreamDidClose];
 			break;
@@ -1781,7 +1777,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [self host], ConnectionHostKey, nil]];
+			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 		return;

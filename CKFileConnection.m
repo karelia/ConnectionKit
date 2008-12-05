@@ -89,31 +89,9 @@ checkRemoteExistence:(NSNumber *)check;
 	return @"File";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	CKFileConnection *c = [[CKFileConnection alloc] initWithHost:host
-														port:port
-													username:username
-													password:password
-													   error:error];
-	return [c autorelease];
-}
-
-/*!	Designated Initializer
-*/
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	port = nil;
-	
-	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	if (self = [super initWithURL:URL])
 	{
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
 	}
@@ -122,11 +100,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (id)init
 {
-	return [self initWithHost:LocalizedStringInConnectionKitBundle(@"the File System", @"name of a host to connect to; in this case, the local file system rather than a remote server")
-						 port:@"ignored"
-					 username:@"ignored"
-					 password:@"ignored"
-						error:nil];
+	return [self initWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]];
 }
 
 - (void)dealloc

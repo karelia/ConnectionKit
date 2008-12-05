@@ -63,22 +63,17 @@ enum {
 /*!
  @method initWithHost:port:username:password:error:
  @abstract The designated initializer for connections.
- @discussion Initializes a connection object with the supplied parameters.
- @param host The host address to connect to.
- @param port The port to connect on. Supply nil to use the connection's default port, or if no port is required.
- @param username The username to use when connecting.
- @param password The password to use when connecting.
- @param error If an error occurs, upon return contains an NSError object that describes the problem.
- @result Returns an initialized connection object or nil if there was an error.
+ @discussion Initializes a connection object to the supplied URL. Raises an exception if URL is nil.
+ @param URL The URL to connect to. May not be nil.
+ @result Returns an initialized connection object or nil if the URL was unsuitable.
  */
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error;
+- (id)initWithURL:(NSURL *)URL;
 
-- (NSString *)host;
-- (NSInteger)port;
+/*!
+ @method URL
+ @result Returns the URL supplied to the original -initWithURL: call.
+ */
+- (NSURL *)URL;
 
 // you can set a name on a connection to help with debugging.
 // TODO: Should this really be part of the protocol, or a CKAbstractConnection implementation detail?

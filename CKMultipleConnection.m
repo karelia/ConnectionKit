@@ -34,7 +34,8 @@
 
 - (id)init
 {
-	if (self = [super initWithHost:nil port:nil username:nil password:nil error:nil]) {
+	if (self = [super initWithURL:nil])
+    {
 		_connections = [[NSMutableArray array] retain];
 		_folderCreations = [[NSMutableArray array] retain];
 		_connectedConnections = [[NSMutableArray array] retain];
@@ -43,16 +44,9 @@
 }
 
 /* Just keep the framework happy with this */
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [self init]) {
-		
-	}
-	return self;
+	return [self init];
 }
 
 - (void)dealloc
@@ -74,7 +68,7 @@
 	
 	while (cur = [e nextObject])
 	{
-		[hosts addObject:[cur host]];
+		[hosts addObject:[[cur URL] host]];
 	}
 	
 	if ([hosts count] == 1)
