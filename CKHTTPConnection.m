@@ -57,6 +57,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 #pragma mark -
 
++ (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"http"]; }
+
 + (NSInteger)defaultPort { return 80; }
 
 - (id)initWithURL:(NSURL *)URL
@@ -81,11 +83,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[_currentDigestRealm release];
 	
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"http";
 }
 
 - (void)sendError:(NSString *)error code:(int)code

@@ -51,6 +51,14 @@ enum {
 
 @protocol CKConnection <NSObject, NSCopying>
 
++ (NSString *)name;
+
+/*!
+ @method URLSchemes
+ @result An array of the URL schemes supported by the connection.
+ */
++ (NSArray *)URLSchemes;
+
 /*!
  @method port
  @discussion Return 0 for abstract classes or connections that do not use a port.
@@ -58,7 +66,6 @@ enum {
  */
 + (NSInteger)defaultPort;
 
-+ (NSString *)name;
 
 /*!
  @method initWithHost:port:username:password:error:
@@ -77,8 +84,8 @@ enum {
 
 // you can set a name on a connection to help with debugging.
 // TODO: Should this really be part of the protocol, or a CKAbstractConnection implementation detail?
-- (void)setName:(NSString *)name;
 - (NSString *)name; 
+- (void)setName:(NSString *)name;
 
 /*!
  @method delegate:
@@ -218,9 +225,6 @@ enum {
 
 - (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;
-
-- (NSString *)urlScheme; // by default calls class method
-+ (NSString *)urlScheme; //eg http
 
 - (void)editFile:(NSString *)remoteFile;
 

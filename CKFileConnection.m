@@ -55,10 +55,8 @@ checkRemoteExistence:(NSNumber *)check;
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"file://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKFileConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"file"];
+    [pool release];
 }
 
 #pragma mark -
@@ -89,6 +87,8 @@ checkRemoteExistence:(NSNumber *)check;
 	return @"File";
 }
 
++ (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }
+
 - (id)initWithURL:(NSURL *)URL
 {
 	if (self = [super initWithURL:URL])
@@ -107,11 +107,6 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[myCurrentDirectory release];
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"file";
 }
 
 - (void)connect

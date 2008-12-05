@@ -39,13 +39,6 @@
 #import "RegexKitLite.h"
 
 
-NSString *ACClassKey = @"Class";
-NSString *ACTypesKey = @"Types";
-NSString *ACTypeKey = @"ACTypeKey";
-NSString *ACTypeValueKey = @"ACTypeValueKey";
-NSString *ACPortTypeKey = @"ACPortTypeKey";
-NSString *ACURLTypeKey = @"ACURLTypeKey";
-
 NSString *CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 // Command Dictionary Keys
@@ -75,22 +68,12 @@ NSString *CKOutputStreamDomain = @"Output Stream";
 NSString *CKSSLDomain = @"SSL";
 NSString *CKEditingDomain = @"Editing";
 
-static NSMutableArray *_connectionTypes = nil;
-
 NSDictionary *sSentAttributes = nil;
 NSDictionary *sReceivedAttributes = nil;
 NSDictionary *sDataAttributes = nil;
 
+
 @implementation CKAbstractConnection
-
-#pragma mark -
-#pragma mark Registry
-
-+ (void)registerConnectionClass:(Class)class forTypes:(NSArray *)types
-{
-	NSDictionary *d = [NSDictionary dictionaryWithObjectsAndKeys:NSStringFromClass(class), ACClassKey, types, ACTypesKey, nil];
-	[[self connectionTypes] addObject:d];
-}
 
 + (NSDictionary *)sentAttributes
 {
@@ -113,303 +96,11 @@ NSDictionary *sDataAttributes = nil;
     return sDataAttributes;
 }
 
++ (NSString *)name { return nil; }
+
 + (NSInteger)defaultPort { return 0; }
 
-+ (NSString *)name
-{
-	return @"Abstract Connection";
-}
-
-/*!	Returns an array of connection type names, like FTP, WebDav, etc.
- */
-+ (NSMutableArray *)connectionTypes
-{
-	if (nil == _connectionTypes)
-	{
-		_connectionTypes = [[NSMutableArray array] retain];
-	}
-	return _connectionTypes;
-}
-
-/*!	Returns an array of class names
- */
-+ (NSArray *)registeredConnectionTypes
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	NSMutableArray *names = [NSMutableArray array];
-	
-	while (cur = [e nextObject])
-	{
-		Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-		[names addObject:[class name]];
-	}
-	[names sortUsingSelector:@selector(caseInsensitiveCompare:)];
-	return names;
-}
-
-+ (NSNumber *)registeredPortForConnectionType:(NSString *)type
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-		if ([[class name] isEqualToString:type]) {
-			NSArray *types = [cur objectForKey:ACTypesKey];
-			NSEnumerator *g = [types objectEnumerator];
-			NSDictionary *t;
-			
-			while (t = [g nextObject]) {
-				if ([[t objectForKey:ACTypeKey] isEqualToString:ACPortTypeKey])
-					return [t objectForKey:ACTypeValueKey];
-			}
-		}
-	}
-	return nil;
-}
-
-#pragma mark -
-#pragma mark Protocol Class Methods
-
-+ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port and:(BOOL)flag
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		if (!flag)
-		{
-			if ([[NSClassFromString([cur objectForKey:ACClassKey]) name] isEqualToString:name])
-			{
-				return [NSClassFromString([cur objectForKey:ACClassKey]) urlScheme];
-			}
-		}
-		
-		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
-		NSDictionary *type;
-		
-		while (type = [f nextObject])
-		{
-			NSString *connType = [type objectForKey:ACTypeKey];
-			if ([connType isEqualToString:ACPortTypeKey])
-			{
-				if ([[type objectForKey:ACTypeValueKey] intValue] == port)
-				{
-					if (flag)
-					{
-						if ([[NSClassFromString([cur objectForKey:ACClassKey]) name] isEqualToString:name])
-						{
-							return [NSClassFromString([cur objectForKey:ACClassKey]) urlScheme];
-						}
-					}
-					else
-					{
-						Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-						return [class urlScheme];
-					}
-				}
-			}
-		}
-	}
-	if (flag)
-	{
-		return [CKAbstractConnection URLSchemeForConnectionName:name port:port and:NO];
-	}
-	return nil;
-}
-
-+ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port
-{
-	return [CKAbstractConnection URLSchemeForConnectionName:name port:port and:YES];
-}
-
-+ (id <CKConnection>)connectionWithName:(NSString *)name URL:(NSURL *)URL error:(NSError **)error
-{
-	NSString *host = [URL host];
-	NSString *user = [URL user];
-	NSString *password = [URL password];
-	NSNumber *port = [URL port];
-	
-    
-    id result = nil;
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	KTLog(CKConnectionDomain, KTLogDebug, @"Finding class for %@ port: %@", name, port);
-	
-	if (!name) {
-		result = [self connectionToHost:host port:port username:user password:password error:error];
-	}
-	else
-	{
-		if ([[name lowercaseString] isEqualToString:@".mac"])
-		{
-			name = @"MobileMe";		// shim to allow for clients to continue using .Mac name internally
-		}
-		while (cur = [e nextObject])
-		{
-			Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-			NSString *n = [[class name] lowercaseString];
-			NSString *searchName = [name lowercaseString];
-			
-			if ([n isEqualToString:searchName]) // TODO: If no name was specified, search by URL scheme only
-			{
-				KTLog(CKConnectionDomain, KTLogDebug, @"Matched to class %@", NSStringFromClass(class));
-				
-                if ([[URL scheme] isEqualToString:@"x"])    // Hack until we improve the registry
-                {
-                    URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:[URL host] port:[URL port] user:[URL user] password:[URL password]] autorelease];
-                }
-                
-                result = [[[class alloc] initWithURL:URL] autorelease];
-				break;
-			}
-		}
-	}
-	if (!result && error)
-	{
-		NSError *err = [NSError errorWithDomain:CKConnectionErrorDomain
-										   code:CKConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(
-																																@"No connection available for requested connection type", @"failed to find a connection class"),
-												 NSLocalizedDescriptionKey,
-												 [(*error) localizedDescription],
-												 NSLocalizedRecoverySuggestionErrorKey,	// some additional context
-												 nil]];
-		*error = err;
-	}
-	
-	return result;
-}
-
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error
-{
-    // The x will be replaced later. It's a mess I know!
-    NSURL *URL = [[NSURL alloc] initWithScheme:@"x" host:host port:port user:username password:password];
-    
-    id <CKConnection> result = [self connectionWithName:name URL:URL error:error];
-    [URL release];
-    return result;
-}
-
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password
-                                error:(NSError **)error
-{
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
-		NSDictionary *type;
-		
-		while (type = [f nextObject])
-		{
-			NSString *connType = [type objectForKey:ACTypeKey];
-			if ([connType isEqualToString:ACPortTypeKey])
-			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-                    NSURL *URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:host port:port user:username password:password] autorelease];
-					return [[[class alloc] initWithURL:URL] autorelease];
-				}
-			}
-			else if ([connType isEqualToString:ACURLTypeKey])
-			{
-				NSRange r;
-				if ((r = [host rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
-					NSURL *URL = [[[NSURL alloc] initWithScheme:[class urlScheme] host:hostWithOutSpecifier port:port user:username password:password] autorelease];
-					return [[[class alloc] initWithURL:URL] autorelease];
-				}
-			}
-		}
-	}
-	if (error)
-	{
-		NSError *err = [NSError errorWithDomain:CKConnectionErrorDomain
-										   code:CKConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"No connection available for requested port", @"failed to find a connection class")
-																			forKey:NSLocalizedDescriptionKey]];
-		*error = err;
-	}
-	
-	return nil;
-}
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error
-{
-	return [self connectionWithName:nil URL:url error:error];
-    
-    NSString *resourceSpec = [url resourceSpecifier];
-	NSString *host = [url host];
-	NSString *user = [url user];
-	NSString *pass = [url password];
-	NSNumber *port = [url port];
-	
-	NSEnumerator *e = [[self connectionTypes] objectEnumerator];
-	NSDictionary *cur;
-	
-	while (cur = [e nextObject])
-	{
-		NSEnumerator *f = [[cur objectForKey:ACTypesKey] objectEnumerator];
-		NSDictionary *type;
-		
-		while (type = [f nextObject])
-		{
-			NSString *connType = [type objectForKey:ACTypeKey];
-			if ([connType isEqualToString:ACPortTypeKey])
-			{
-				if ([[type objectForKey:ACTypeValueKey] isEqualToString:[port description]])
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					return [class connectionToHost:host
-											  port:port
-										  username:user
-										  password:pass
-											 error:error];
-				}
-			}
-			else if ([connType isEqualToString:ACURLTypeKey])
-			{
-				NSRange r;
-				if ((r = [resourceSpec rangeOfString:[type objectForKey:ACTypeValueKey]]).location != NSNotFound)
-				{
-					Class class = NSClassFromString([cur objectForKey:ACClassKey]);
-					NSString *hostWithOutSpecifier = [host substringFromIndex:r.location + r.length];
-					return [class connectionToHost:hostWithOutSpecifier
-											  port:port
-										  username:user
-										  password:pass
-											 error:error];
-				}
-			}
-		}
-	}
-	if (error)
-	{
-		NSError *err = [NSError errorWithDomain:CKConnectionErrorDomain
-										   code:CKConnectionNoConnectionsAvailable
-									   userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"No connection available for requested protocol", @"failed to find a connection class")
-																			forKey:NSLocalizedDescriptionKey]];
-		*error = err;
-	}
-	return nil;
-}
++ (NSArray *)URLSchemes { return nil; }
 
 #pragma mark -
 #pragma mark Inheritable methods
@@ -420,7 +111,7 @@ NSDictionary *sDataAttributes = nil;
     
     // To start a connection we require the protocol and host at the very least. The protocol should
     // be one supported by the receive. Subclasses may impose other restrictions.
-    if (![URL scheme] || ![URL host] || ![[URL scheme] isEqualToString:[[self class] urlScheme]])
+    if (![URL scheme] || ![URL host] || ![[[self class] URLSchemes] containsObject:[URL scheme]])
     {
         [self release];
         return nil;
@@ -1034,16 +725,6 @@ NSDictionary *sDataAttributes = nil;
 - (double)downloadSpeed
 {
 	return 0;
-}
-
-- (NSString *)urlScheme
-{
-	return [[self class] urlScheme];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"";
 }
 
 - (void)directoryContents

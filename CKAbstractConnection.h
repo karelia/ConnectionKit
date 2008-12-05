@@ -30,10 +30,11 @@
 
 #import <Foundation/Foundation.h>
 #import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
+#import "CKConnectionRegistry.h"
+
 
 /*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
  Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
- It also functions as a registry for automatic subclass detection.
  */
 
 extern NSString *CKConnectionErrorDomain;
@@ -154,23 +155,6 @@ typedef struct __flags {
 	NSMutableDictionary *_cachedDirectoryContents;
 }
 
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password
-                                error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error;
-
-+ (NSString *)URLSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
-
 /*!
  @method port
  @abstract If the connection's URL has a port defined, it will be used. Otherwise,
@@ -195,12 +179,6 @@ typedef struct __flags {
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;
 - (void)removePropertyForKey:(NSString *)key;
-
-// Subclass registration
-+ (void)registerConnectionClass:(Class)inClass forTypes:(NSArray *)types;
-+ (NSArray *)registeredConnectionTypes;
-+ (NSMutableArray *)connectionTypes;
-+ (NSNumber *)registeredPortForConnectionType:(NSString *)type;
 
 // Transcript support
 - (void)setTranscript:(NSTextStorage *)transcript;

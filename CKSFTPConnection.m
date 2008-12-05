@@ -66,11 +66,9 @@ static NSString *lsform = nil;
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:22], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"sftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"ssh://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKSFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"sftp"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"ssh"];
+    [pool release];
 }
 
 + (NSInteger)defaultPort { return 22; }
@@ -80,9 +78,9 @@ static NSString *lsform = nil;
 	return @"SFTP";
 }
 
-+ (NSString *)urlScheme
++ (NSArray *)URLSchemes
 {
-	return @"sftp";
+	return [NSArray arrayWithObjects:@"sftp", @"ssh", nil];
 }
 
 - (id)initWithURL:(NSURL *)URL

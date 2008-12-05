@@ -58,9 +58,7 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:80], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"http://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKDotMacConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"dotmac"];
 	[pool release];
 }
 
@@ -69,9 +67,9 @@
 	return @"MobileMe";
 }
 
-+ (NSString *)urlScheme
++ (NSArray *)URLSchemes
 {
-	return @"dotmac";
+	return [NSArray arrayWithObjects:@"http", @"dotmac", nil];
 }
 
 #pragma mark init methods

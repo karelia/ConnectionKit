@@ -47,6 +47,11 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	return @"NNTP";
 }
 
++ (NSArray *)URLSchemes
+{
+	return [NSArray arrayWithObjects:@"nntp", @"usenet", @"news"];
+}
+
 - (id)initWithURL:(NSURL *)URL
 {
 	if (self = [super initWithURL:URL]) {
@@ -62,11 +67,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[_currentNewsGroup release];
 	
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"nntp";
 }
 
 - (void)processReceivedData:(NSData *)data

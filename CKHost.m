@@ -495,7 +495,8 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)baseURLString
 {
-	NSString *scheme = [CKAbstractConnection URLSchemeForConnectionName:[self connectionType] port:[[self port] intValue]];
+	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[self connectionType]];
+    NSString *scheme = [[connectionClass URLSchemes] objectAtIndex:0];
 	NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", scheme];
 	if ([self username])
 	{
@@ -514,10 +515,6 @@ static NSImage *sHostIcon = nil;
 		[url appendString:[self host]];
 	
 	NSString *port = _port;
-	if (!port || [port isEqualToString:@""])
-	{
-		port = [[CKAbstractConnection registeredPortForConnectionType:[self connectionType]] description];
-	}
 	
 	if (port)
 	{
@@ -589,27 +586,19 @@ static NSImage *sHostIcon = nil;
 	
 	if (_URL)
 	{
-		connection = [CKAbstractConnection connectionWithURL:_URL error:&error];
+		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithURL:_URL];
 	}
 	
 	if (!connection && _connectionType && ![_connectionType isEqualToString:@""] && ![_connectionType isEqualToString:@"Auto Select"])
 	{
-		connection = [CKAbstractConnection connectionWithName:_connectionType
-                                                         host:_host
-                                                         port:[NSNumber numberWithInt:[[self port] intValue]]
-                                                     username:_username
-                                                     password:[self password]
-                                                        error:&error];
+		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithName:_connectionType
+                                                                                    host:_host
+                                                                                    port:[NSNumber numberWithInt:[[self port] intValue]]
+                                                                                    user:_username
+                                                                                password:[self password]
+                                                                                   error:&error];
 	}
 	
-	if (!connection)
-	{
-		connection = [CKAbstractConnection connectionToHost:_host
-                                                       port:[NSNumber numberWithInt:[[self port] intValue]]
-                                                   username:_username
-                                                   password:[self password]
-                                                      error:&error];
-	}
 	if (!connection && error)
 	{
 		NSLog(@"%@", error);
@@ -629,7 +618,8 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)name
 {
-	NSString *type = [CKAbstractConnection URLSchemeForConnectionName:[self connectionType] port:[[self port] intValue]];
+	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[self connectionType]];
+    NSString *type = [[connectionClass URLSchemes] objectAtIndex:0];
 	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : LocalizedStringInConnectionKitBundle(@"auto", @"connection type")];
 	if ([self username] && ![[self username] isEqualToString:@""])
 	{
