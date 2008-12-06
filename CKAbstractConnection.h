@@ -200,6 +200,12 @@ typedef struct __flags {
 
 @end
 
+
+/*  PrivateSubclassSupport and SubclassSupport are categories of methods that are intended for
+ *  the user of subclasses only. You are strongly discouraged from accessing them from other
+ *  situations. Documentation can be found with the methods in the implementation file.
+ */
+
 @interface CKAbstractConnection (PrivateSubclassSupport)
 - (void)threadedConnect;
 - (void)threadedDisconnect;
@@ -208,19 +214,29 @@ typedef struct __flags {
 - (void)threadedCancelAll;
 @end
 
+
+@interface CKAbstractConnection (SubclassSupport)
+// Authentication
+- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+@end
+
+
 extern NSString *CKConnectionAwaitStateKey;
 extern NSString *CKConnectionSentStateKey;
 extern NSString *CKConnectionCommandKey;
 
+
 @interface NSString (AbstractConnectionExtras)
 - (NSString *)stringByAppendingDirectoryTerminator;
 @end
+
 
 @interface NSInvocation (AbstractConnectionExtras)
 + (NSInvocation *)invocationWithSelector:(SEL)aSelector 
 								  target:(id)aTarget 
 							   arguments:(NSArray *)anArgumentArray;
 @end
+
 
 @interface NSFileManager (AbstractConnectionExtras)
 + (NSString *)_dateStringFromListing:(NSString *)listing;
@@ -229,13 +245,16 @@ extern NSString *CKConnectionCommandKey;
 + (void)parsePermissions:(NSString *)perm withAttributes:(NSMutableDictionary *)attributes;
 @end
 
+
 @interface NSCalendarDate (AbstractConnectionExtras)
 + (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime;
 @end
 
+
 @interface NSHost (IPV4)
 - (NSString *)ipv4Address;
 @end
+
 
 @interface NSArray (AbstractConnectionExtras)
 - (NSArray *)filteredArrayByRemovingHiddenFiles;

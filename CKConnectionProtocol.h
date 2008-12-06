@@ -315,6 +315,10 @@ enum {
 - (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
 @end
 
+
+#pragma mark -
+
+
 @interface NSObject (CKConnectionTransferDelegate)
 - (void)transferDidBegin:(CKTransferRecord *)transfer;
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
@@ -323,11 +327,6 @@ enum {
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
 
-//registration type dictionary keys
-extern NSString *ACTypeKey;
-extern NSString *ACTypeValueKey;
-extern NSString *ACPortTypeKey;
-extern NSString *ACURLTypeKey; /* ftp://, http://, etc */
 
 // Attributes for which there isn't a corresponding NSFileManager key
 extern NSString *cxFilenameKey;

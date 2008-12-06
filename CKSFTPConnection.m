@@ -184,7 +184,7 @@ static NSString *lsform = nil;
                                                                   authenticationMethod:NSURLAuthenticationMethodDefault];
     
     _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                              proposedCredential:nil
+                                                                              proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
                                                                             previousFailureCount:0
                                                                                  failureResponse:nil
                                                                                            error:nil

@@ -3763,7 +3763,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
         
         _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
                                         initWithProtectionSpace:protectionSpace
-                                        proposedCredential:nil
+                                        proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
                                         previousFailureCount:previousFailureCount
                                         failureResponse:nil
                                         error:nil

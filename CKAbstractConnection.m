@@ -919,6 +919,50 @@ NSDictionary *sDataAttributes = nil;
 
 @end
 
+
+#pragma mark -
+
+
+@implementation CKAbstractConnection (SubclassSupport)
+
+/*  Support method for rolling an NSURLAuthenticationChallenge object. Looks for a valid credential
+ *  from the URL, and then falls back to using NSURLCredentialStorage.
+ */
+- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace
+{
+    NSURLCredential *result = nil;
+    
+    NSString *user = [[self URL] user];
+    if (user)
+    {
+        NSString *password = [[self URL] password];
+        if (password)
+        {
+            result = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
+        }
+        else
+        {
+            result = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:protectionSpace] objectForKey:user];
+            if (!result)
+            {
+                result = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
+            }
+        }
+    }
+    else
+    {
+        result = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:protectionSpace];
+    }
+    
+    return result;    
+}
+
+@end
+
+
+#pragma mark -
+
+
 @implementation NSString (AbstractConnectionExtras)
 
 - (NSString *)stringByAppendingDirectoryTerminator
