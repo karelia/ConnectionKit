@@ -219,7 +219,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
             
 			[_currentAuthenticationChallenge release];
 			_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                                         proposedCredential:nil
+                                                                                         proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
                                                                                        previousFailureCount:_authenticationFailureCount
                                                                                             failureResponse:nil
                                                                                                       error:nil
