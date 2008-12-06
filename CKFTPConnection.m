@@ -3755,13 +3755,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
         
         [_lastAuthenticationChallenge release];
         
+        NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+                                                                                      port:[[[self URL] port] intValue]
+                                                                                  protocol:[[self URL] scheme]
+                                                                                     realm:nil
+                                                                      authenticationMethod:NSURLAuthenticationMethodDefault];
+        
         _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
-                                        initWithProtectionSpace:nil
+                                        initWithProtectionSpace:protectionSpace
                                         proposedCredential:nil
                                         previousFailureCount:previousFailureCount
                                         failureResponse:nil
                                         error:nil
                                         sender:self];
+        
+        [protectionSpace release];
         
         // As the delegate to handle the challenge
         [_forwarder connection:self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];

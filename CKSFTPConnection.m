@@ -177,12 +177,20 @@ static NSString *lsform = nil;
     
     
     // Can't connect till we have a password (due to using the SFTP command-line tool)
-    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+    NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+                                                                                  port:[[[self URL] port] intValue]
+                                                                              protocol:[[self URL] scheme]
+                                                                                 realm:nil
+                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
+    
+    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
                                                                               proposedCredential:nil
                                                                             previousFailureCount:0
                                                                                  failureResponse:nil
                                                                                            error:nil
                                                                                           sender:self];
+    
+    [protectionSpace release];
     
     [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    // FIXME: Why does this require typecasting?
 }

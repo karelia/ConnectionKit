@@ -211,13 +211,21 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		if ([authMethod isEqualToString:@"Basic"] || [authMethod isEqualToString:@"Digest"])
 		{
 			// Create authentication challenge object
+            NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+                                                                                          port:[[[self URL] port] intValue]
+                                                                                      protocol:[[self URL] scheme]
+                                                                                         realm:nil
+                                                                          authenticationMethod:([authMethod isEqualToString:@"Digest"] ? NSURLAuthenticationMethodHTTPDigest : NSURLAuthenticationMethodHTTPBasic)];
+            
 			[_currentAuthenticationChallenge release];
-			_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
+			_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
                                                                                          proposedCredential:nil
                                                                                        previousFailureCount:_authenticationFailureCount
                                                                                             failureResponse:nil
                                                                                                       error:nil
                                                                                                      sender:self];
+            
+            [protectionSpace release];
 			
 			[_forwarder connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];	// FIXME: This shouldn't require typecasting
 			
