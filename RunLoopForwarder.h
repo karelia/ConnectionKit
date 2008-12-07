@@ -37,10 +37,11 @@
 @interface RunLoopForwarder : NSObject 
 {
 	NSRecursiveLock *lock;
-	NSThread *createdOnThread;
 	id	myDelegate;		// not retained
 	id  returnValueDelegate; // not retained
 	BOOL useMainThread; //default NO
+@public
+	NSThread *createdOnThread;
 }
 
 - (void) setDelegate:(id)aDelegate;

@@ -31,8 +31,11 @@
 #import "CKAbstractConnection.h"
 #import "CKTransferRecord.h"
 #import "UKKQueue.h"
+
 #import "RunLoopForwarder.h"
 #import "CKConnectionThreadManager.h"
+#import "InterThreadMessaging.h"
+
 #import "NSString+Connection.h"
 #import "NSURL+Connection.h"
 #import "KTLog.h"
@@ -924,6 +927,42 @@ NSDictionary *sDataAttributes = nil;
 
 
 @implementation CKAbstractConnection (SubclassSupport)
+
+/*  Deals with the messy bit of authentication for you. If the delegate implements -connection:didReceiveAuthenticationChallenge:
+ *  then that method is called. Otherwise, we attempt to use the proposedCredential (if there is one)
+ *  before giving up and calling -continueWithoutCredential...
+ *
+ *  You can call this method from any thread, the challenge will always be authenticated using the
+ *  connection's main thread.
+ */
+- (void)didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // If this is not the connection's main thread, forward the message onto it
+    NSThread *connectionThread = _forwarder->createdOnThread;   // A hack for now and I know it! Mike.
+    if ([NSThread currentThread] != connectionThread)
+    {
+        [self performSelector:@selector(didReceiveAuthenticationChallenge:) withObject:challenge inThread:connectionThread];
+        return;
+    }
+    
+    
+    if (_flags.authorizeConnection)
+    {
+        [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:challenge];   // FIXME: Why do I need to typecast?
+    }
+    else
+    {
+        NSURLCredential *credential = [challenge proposedCredential];
+        if (credential && [credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
+        {
+            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+        }
+        else
+        {
+            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+        }
+    }
+}
 
 /*  Support method for rolling an NSURLAuthenticationChallenge object. Looks for a valid credential
  *  from the URL, and then falls back to using NSURLCredentialStorage.

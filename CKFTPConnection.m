@@ -3743,38 +3743,34 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     [self setCurrentAuthenticationCredential:nil];
     
     
-    if (_flags.authorizeConnection) // TODO: Handle the else situation
+    // Create authentication challenge object and store it as the last authentication attempt
+    NSInteger previousFailureCount = 0;
+    if (_lastAuthenticationChallenge)
     {
-        // Create authentication challenge object and store it as the last authentication attempt
-        NSInteger previousFailureCount = 0;
-        if (_lastAuthenticationChallenge)
-        {
-            previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
-        }
-        
-        
-        [_lastAuthenticationChallenge release];
-        
-        NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
-                                                                                      port:[[[self URL] port] intValue]
-                                                                                  protocol:[[self URL] scheme]
-                                                                                     realm:nil
-                                                                      authenticationMethod:NSURLAuthenticationMethodDefault];
-        
-        _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
-                                        initWithProtectionSpace:protectionSpace
-                                        proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
-                                        previousFailureCount:previousFailureCount
-                                        failureResponse:nil
-                                        error:nil
-                                        sender:self];
-        
-        [protectionSpace release];
-        
-        // As the delegate to handle the challenge
-        [_forwarder connection:self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+        previousFailureCount = [_lastAuthenticationChallenge previousFailureCount] + 1;
     }
     
+    
+    [_lastAuthenticationChallenge release];
+    
+    NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+                                                                                  port:[[[self URL] port] intValue]
+                                                                              protocol:[[self URL] scheme]
+                                                                                 realm:nil
+                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
+    
+    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
+                                    initWithProtectionSpace:protectionSpace
+                                    proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+                                    previousFailureCount:previousFailureCount
+                                    failureResponse:nil
+                                    error:nil
+                                    sender:self];
+    
+    [protectionSpace release];
+    
+    // As the delegate to handle the challenge
+    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    
 }
 
 /*  FTP's horrible design requires us to send the username or account name and then wait for a response

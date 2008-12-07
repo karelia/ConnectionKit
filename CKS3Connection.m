@@ -945,7 +945,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
                                                                                               error:nil
                                                                                              sender:self];
     
-    [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge]; // TODO: Why do I need to typecast here?
+    [self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
 }
 
 /*  CKHTTPConnection implements the -cancel and -continueWithCredential methods for us in a perfectly

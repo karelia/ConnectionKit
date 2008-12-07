@@ -132,9 +132,6 @@ typedef struct __flags {
 
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
-	NSString    *_name;
-    NSURL       *_URL;
-    
 	CKConnectionState _state;
 	
 @protected
@@ -153,6 +150,10 @@ typedef struct __flags {
 	NSMutableDictionary *_properties;
 	
 	NSMutableDictionary *_cachedDirectoryContents;
+    
+@private
+    NSString    *_name;
+    NSURL       *_URL;
 }
 
 /*!
@@ -217,6 +218,7 @@ typedef struct __flags {
 
 @interface CKAbstractConnection (SubclassSupport)
 // Authentication
+- (void)didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
 @end
 
