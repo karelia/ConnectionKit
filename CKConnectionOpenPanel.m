@@ -742,9 +742,10 @@
     else
     {
         // Fallback to the default credentials if possible
-        if ([challenge proposedCredential] && [challenge previousFailureCount] == 0)
+        NSURLCredential *credential = [challenge proposedCredential];
+        if (credential && [credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
         {
-            [[challenge sender] useCredential:[challenge proposedCredential] forAuthenticationChallenge:challenge];
+            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
         }
         else
         {

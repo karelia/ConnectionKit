@@ -227,7 +227,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
             
             [protectionSpace release];
 			
-			[_forwarder connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];	// FIXME: This shouldn't require typecasting
+            [self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
 			
 			// Prepare for another failure
             _authenticationFailureCount++;

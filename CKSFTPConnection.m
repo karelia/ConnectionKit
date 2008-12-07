@@ -192,7 +192,7 @@ static NSString *lsform = nil;
     
     [protectionSpace release];
     
-    [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    // FIXME: Why does this require typecasting?
+    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
 }
 
 /*  Support method. Called once the delegate has provided a username to connect with
