@@ -440,10 +440,13 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
     {
 		[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         
-        // Retry the command, although I can't see how it would change anything!
-		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+        if (_flags.error)
+        {
+            [self sendError:@"" code:401];  // TODO: The error should include the response string from the server
+        }
         
-        // TODO: It seems we should really cancel the connection and send the delegate a didFail sort of message.
+        // Move onto the next command
+        [self setState:CKConnectionIdleState];
 	}
 }
 
