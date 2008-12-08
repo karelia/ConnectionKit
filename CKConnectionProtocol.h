@@ -241,9 +241,11 @@ enum {
 // There are 29 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
-- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
+#pragma mark Overall connection
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
 
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
 
 #pragma mark Authentication
 /*!
@@ -258,7 +260,7 @@ enum {
 - (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 
 
-
+#pragma mark Other
 
 - (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
@@ -273,10 +275,9 @@ enum {
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 
-- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
+- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
-- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 

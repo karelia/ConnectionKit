@@ -3802,7 +3802,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    // TODO: Attempt to continue downloading or attempt to login anonymously?
+    // TODO: Attempt to continue downloading, login anonymously, or disconnect with an error?
 }
 
 /*  Start login
