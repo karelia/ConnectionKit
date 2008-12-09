@@ -68,6 +68,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 + (void)initialize
 {
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
+    [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
+triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 }
 
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size
@@ -694,6 +696,41 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)setNameWithProgress:(id)notused
 {
 	; // just for KVO bindings
+}
+
+/*  The same as -nameWithProgress, but also includes the file size in brackets if appropriate
+ */
+- (NSDictionary *)nameWithProgressAndFileSize
+{
+    NSDictionary *result = [self nameWithProgress];
+    
+    // Directories should not display their size info
+    if (_size > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
+    {
+        // Calculate the size of the transfer in a user-friendly manner
+        NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
+        NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [self name], fileSize];
+        
+        NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]
+                                                               forKey:NSFontAttributeName];
+        
+        NSMutableAttributedString *description = [[NSMutableAttributedString alloc] initWithString:unattributedDescription attributes:attributes];
+        [unattributedDescription release];
+        
+        // Make the size info in grey
+        [description addAttribute:NSForegroundColorAttributeName
+                            value:[NSColor grayColor]
+                            range:NSMakeRange([[self name] length] + 1, [fileSize length] + 2)];
+        
+        result = [NSDictionary dictionaryWithObjectsAndKeys:
+                  [result objectForKey:@"progress"], @"progress",
+                  description, @"name",
+                  nil];
+        
+        [description release];
+    }
+    
+    return result;
 }
 
 @end
