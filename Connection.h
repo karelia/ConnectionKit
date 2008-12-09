@@ -54,6 +54,8 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
+#import <Connection/CKFileConnection.h>
+
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
 #import <Connection/InterThreadMessaging.h>
