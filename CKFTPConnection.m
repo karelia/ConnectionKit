@@ -39,6 +39,7 @@
 #import "NSObject+Connection.h"
 #import "CKCacheableHost.h"
 #import "CKConnectionProtocol.h"
+#import "CKURLProtectionSpace.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -3753,7 +3754,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     
     [_lastAuthenticationChallenge release];
     
-    NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[self URL] host]
                                                                                   port:[[[self URL] port] intValue]
                                                                               protocol:[[self URL] scheme]
                                                                                  realm:nil
