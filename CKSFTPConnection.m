@@ -179,7 +179,7 @@ static NSString *lsform = nil;
     // Can't connect till we have a password (due to using the SFTP command-line tool)
     NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
                                                                                   port:[[[self URL] port] intValue]
-                                                                              protocol:[[self URL] scheme]
+                                                                              protocol:@"ssh"
                                                                                  realm:nil
                                                                   authenticationMethod:NSURLAuthenticationMethodDefault];
     
