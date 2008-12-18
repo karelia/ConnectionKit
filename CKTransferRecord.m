@@ -359,7 +359,9 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)addContent:(CKTransferRecord *)record
 {
-	[self willChangeValueForKey:@"contents"];
+	NSParameterAssert(record);
+    
+    [self willChangeValueForKey:@"contents"];
 	[_contents addObject:record];
 	[record setParent:self];
 	[self didChangeValueForKey:@"contents"];
