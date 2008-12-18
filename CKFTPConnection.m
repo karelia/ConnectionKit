@@ -3755,7 +3755,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     [_lastAuthenticationChallenge release];
     
     NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[self URL] host]
-                                                                                  port:[[[self URL] port] intValue]
+                                                                                  port:[self port]
                                                                               protocol:[[self URL] scheme]
                                                                                  realm:nil
                                                                   authenticationMethod:NSURLAuthenticationMethodDefault];
