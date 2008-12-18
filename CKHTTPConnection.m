@@ -212,7 +212,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		{
 			// Create authentication challenge object
             NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
-                                                                                          port:[[[self URL] port] intValue]
+                                                                                          port:[self port]
                                                                                       protocol:[[self URL] scheme]
                                                                                          realm:nil
                                                                           authenticationMethod:([authMethod isEqualToString:@"Digest"] ? NSURLAuthenticationMethodHTTPDigest : NSURLAuthenticationMethodHTTPBasic)];
