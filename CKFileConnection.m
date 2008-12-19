@@ -55,7 +55,7 @@ checkRemoteExistence:(NSNumber *)check;
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"file"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"file"];
     [pool release];
 }
 

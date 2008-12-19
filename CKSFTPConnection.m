@@ -66,8 +66,8 @@ static NSString *lsform = nil;
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"sftp"];
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"ssh"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"sftp"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"ssh"];
     [pool release];
 }
 

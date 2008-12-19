@@ -30,7 +30,7 @@
  @param connectionClass The class implementing the CKConnection protocol to register.
  @param URLScheme Optional. The URL scheme to register the connection for. Call this method agin if you need to register more than one URL scheme.
  */
-- (void)registerClass:(Class <CKConnection>)connectionClass forURLScheme:(NSString *)URLScheme;
+- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
 
 #pragma mark Creating a connection
 
