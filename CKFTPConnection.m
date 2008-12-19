@@ -139,7 +139,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"ftp"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"ftp"];
 	[pool release];
 }
 

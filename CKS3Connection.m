@@ -51,7 +51,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"s3"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"s3"];
     [pool release];
 }
 

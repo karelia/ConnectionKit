@@ -47,9 +47,9 @@
 #pragma mark -
 #pragma mark Class Registration
 
-- (void)registerClass:(Class <CKConnection>)connectionClass forURLScheme:(NSString *)URLScheme;
+- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme
 {
-    [_connectionClassesByName setObject:connectionClass forKey:[connectionClass name]];
+    [_connectionClassesByName setObject:connectionClass forKey:name];
     
     if (URLScheme)
     {

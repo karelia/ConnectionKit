@@ -58,7 +58,8 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forURLScheme:@"dotmac"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"MobileMe" URLScheme:@"dotmac"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@".Mac" URLScheme:@"dotmac"];
 	[pool release];
 }
 
