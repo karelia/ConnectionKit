@@ -45,11 +45,11 @@
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 		
-	[CKHTTPResponse registerCustomResponseClass:@"DAVDirectoryContentsResponse" forRequestClass:@"DAVDirectoryContentsRequest"];
-	[CKHTTPResponse registerCustomResponseClass:@"DAVCreateDirectoryResponse" forRequestClass:@"DAVCreateDirectoryRequest"];
-	[CKHTTPResponse registerCustomResponseClass:@"DAVUploadFileResponse" forRequestClass:@"DAVUploadFileRequest"];
-	[CKHTTPResponse registerCustomResponseClass:@"DAVDeleteResponse" forRequestClass:@"DAVDeleteRequest"];
-	[CKHTTPResponse registerCustomResponseClass:@"DAVFileDownloadResponse" forRequestClass:@"DAVFileDownloadRequest"];
+	[CKHTTPResponse registerCustomResponseClass:@"CKDAVDirectoryContentsResponse" forRequestClass:@"CKDAVDirectoryContentsRequest"];
+	[CKHTTPResponse registerCustomResponseClass:@"CKDAVCreateDirectoryResponse" forRequestClass:@"CKDAVCreateDirectoryRequest"];
+	[CKHTTPResponse registerCustomResponseClass:@"CKDAVUploadFileResponse" forRequestClass:@"CKDAVUploadFileRequest"];
+	[CKHTTPResponse registerCustomResponseClass:@"CKDAVDeleteResponse" forRequestClass:@"CKDAVDeleteRequest"];
+	[CKHTTPResponse registerCustomResponseClass:@"CKDAVFileDownloadResponse" forRequestClass:@"CKDAVFileDownloadRequest"];
 		
 	[pool release];
 }
