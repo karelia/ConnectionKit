@@ -1216,7 +1216,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[d setObject:rec forKey:@"record"];
 	[d setObject:remotePath forKey:@"remote"];
 	[d setObject:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:@"local"];
-	[d setObject:[NSNumber numberWithBool:NO] forKey:@"HasListedFirstDirectory"];
 	[d setObject:[NSNumber numberWithBool:flag] forKey:@"overwrite"];
 	
 	[_recursiveDownloadLock lock];
@@ -1484,14 +1483,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		NSMutableDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
 		CKTransferRecord *root = [rec objectForKey:@"record"];
 		NSString *remote = [rec objectForKey:@"remote"]; 
-//		if (![[rec objectForKey:@"HasListedFirstDirectory"] boolValue] && ![dirPath isEqualToString:remote])
-//		{
-//			//We received a listing for a directory OTHER than what we initially requested. We must be downloading a symbolic link.
-//			//To preseve the initial request, modify our rec so we can determine the relative paths properly
-//			[rec setObject:dirPath forKey:@"remote"];
-//			[root setName:dirPath];
-//			remote = dirPath;
-//		}
 		NSString *local = [rec objectForKey:@"local"]; 
 		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
 		_numberOfDownloadListingsRemaining--;
@@ -1528,16 +1519,17 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		if (_numberOfDownloadListingsRemaining == 0)
 		{
 			[self setProperty:[NSNumber numberWithBool:NO] forKey:@"IsDiscoveringFilesToDownload"];
-			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
-			{
-				//We tried to download an entirely empty folder. We're finished.
-				if (_flags.downloadFinished)
-					[_forwarder connection:self downloadDidFinish:dirPath error:nil];
-				//Ordinarily the children get finished, and in transferDidFinish:, we check to see if the parent is finished too. If it is, it gets notifications (thus, recursing.) Here, we have no children, and therefore no children to get the transferDidFinish: message, so this root will not be marked as "finished" unless we recursively mark its children (and their children, etc.) as finished.
-				[self recursivelySendTransferDidFinishMessage:root];
-			}
 			[_recursiveDownloadLock lock];
 			myStreamFlags.isDownloading = NO;
+
+			//If we were downloading an empty folder, make sure to mark it as complete.
+			NSDictionary *downloadDict = [_recursiveDownloadQueue objectAtIndex:0];
+			CKTransferRecord *rootRecord = [downloadDict objectForKey:@"record"];
+			NSString *remotePath = [downloadDict objectForKey:@"remote"];
+			CKTransferRecord *record = [CKTransferRecord recordForFullPath:remotePath withRoot:rootRecord];
+			if ([[record contents] count] == 0)
+				[record transferDidFinish:record error:nil];
+
 			[_recursiveDownloadQueue removeObjectAtIndex:0];
 			[_recursiveDownloadLock unlock];
 			
