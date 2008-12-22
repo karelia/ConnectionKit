@@ -38,7 +38,7 @@
 	
 	// Authentication
 	NSURLAuthenticationChallenge	*_currentAuthenticationChallenge;	// General
-    NSUInteger                      _authenticationFailureCount;
+    NSInteger						_authenticationFailureCount;
 	
 	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
 	
@@ -78,4 +78,8 @@
 - (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
 - (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
 
+@end
+
+@interface CKHTTPConnection (SubclassSupport)
+- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod;
 @end

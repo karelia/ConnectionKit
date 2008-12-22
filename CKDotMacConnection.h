@@ -33,8 +33,12 @@
 #import "CKWebDAVConnection.h"
 
 @interface CKDotMacConnection : CKWebDAVConnection
-{
-    
-}
+
+/*!
+ @method init
+ @discussion Convenience method. Automatically uses idisk.mac.com and the default authentication credential.
+ @result Returns an initialized CKDotMacConnection object or nil if there was an error.
+ */
+- (id)init;
 
 @end

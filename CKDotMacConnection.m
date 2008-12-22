@@ -46,10 +46,26 @@
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
 
+
+//	Apple's iDisk implementation is designed to be mounted on the desktop such that the /username is the root dir.
+//  e.g. /foo/bar.html would correspond to http://idisk.apple.com/user/foo/bar.html
+//	We override all the main CKConnection methods to translate between these iDisk and WebDAV schemes.
+
+
+@interface CKDotMacConnection (Private)
+- (NSString *)webDAVPathForIDiskPath:(NSString *)iDiskPath;
+- (NSString *)iDiskPathForWebDAVPath:(NSString *)webDAVPath;
+@end
+
+
 @interface CKWebDAVConnection (DotMac)
 - (void)processResponse:(CKDAVResponse *)response;
 - (void)processFileCheckingQueue;
 @end
+
+
+#pragma mark -
+
 
 @implementation CKDotMacConnection
 
@@ -119,40 +135,24 @@
 	return result;
 }
 
-// TODO: Move to the new authentication model
 - (id)initWithURL:(NSURL *)URL
 {
+	// Sanitise input
 	if (URL)
     {
         NSParameterAssert([[URL host] isEqualToString:@"idisk.mac.com"]);
     }
-    
-    NSString *user = [URL user];
-	NSString *password = [URL password];
-	
-	if (user && password)
-	{
-		
-        if (self = [super initWithURL:URL])
-		{
-			myCurrentDirectory = [[NSString alloc] initWithFormat:@"/%@/", [URL user]];
-		}
-	}
 	else
 	{
-		if (![self getDotMacAccountName:&user password:&password])
-		{
-			[self release];
-			return nil;
-		}
-		
-		if (self = [super initWithURL:[NSURL URLWithString:@"http://idisk.mac.com"]])
-		{
-			myCurrentDirectory = [[NSString stringWithFormat:@"/%@/", user] retain];
-		}
+		URL = [NSURL URLWithString:@"http://idisk.mac.com"];
 	}
+	
+    return [super initWithURL:URL];
+}
 
-	return self;
+- (id)init
+{
+	return [self initWithURL:nil];
 }
 
 #pragma mark -
@@ -204,7 +204,7 @@
 			}
 			
 			if (_flags.directoryContents)
-				[_forwarder connection:self didReceiveContents:contents ofDirectory:[[dav path] stringByDeletingFirstPathComponent] error:error];
+				[_forwarder connection:self didReceiveContents:contents ofDirectory:[self iDiskPathForWebDAVPath:[dav path]] error:error];
 			
 			
 			[self setState:CKConnectionIdleState];
@@ -270,7 +270,7 @@
 			}
 			
 			if (_flags.createDirectory)
-				[_forwarder connection:self didCreateDirectory:[[dav directory] stringByDeletingFirstPathComponent] error:error];
+				[_forwarder connection:self didCreateDirectory:[self iDiskPathForWebDAVPath:[dav directory]] error:error];
 			
 			[self setState:CKConnectionIdleState];
 			break;
@@ -325,12 +325,12 @@
 				}
 				default:
 				{
-					NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"MobileMe file deletion error"), [[self currentDeletion] stringByDeletingFirstPathComponent]];
+					NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"MobileMe file deletion error"), [self iDiskPathForWebDAVPath:[self currentDeletion]]];
 					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 											  localizedDescription, NSLocalizedDescriptionKey,
 											  [[dav request] description], @"DAVRequest",
 											  [dav className], @"DAVResponseClass",
-											  [[self currentDeletion] stringByDeletingFirstPathComponent], NSFilePathErrorKey, nil];
+											  [self iDiskPathForWebDAVPath:[self currentDeletion]], NSFilePathErrorKey, nil];
 					error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
 				}
 			}
@@ -338,7 +338,7 @@
 			[self dequeueDeletion];
 			
 			if (_flags.deleteFile)
-				[_forwarder connection:self didDeleteFile:[deletionPath stringByDeletingFirstPathComponent] error:error];
+				[_forwarder connection:self didDeleteFile:[self iDiskPathForWebDAVPath:deletionPath] error:error];
 			
 			[deletionPath release];
 		
@@ -360,7 +360,7 @@
 				}
 				default:
 				{
-					NSString *path = [[self currentDeletion] stringByDeletingFirstPathComponent];
+					NSString *path = [self iDiskPathForWebDAVPath:[self currentDeletion]];
 					NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"MobileMe Directory Deletion Error"), path];
 					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 											  localizedDescription, NSLocalizedDescriptionKey,
@@ -374,7 +374,7 @@
 			[self dequeueDeletion];
 			
 			if (_flags.deleteDirectory)
-				[_forwarder connection:self didDeleteDirectory:[deletionPath stringByDeletingFirstPathComponent] error:error];
+				[_forwarder connection:self didDeleteDirectory:[self iDiskPathForWebDAVPath:deletionPath] error:error];
 			
 			[deletionPath release];
 			
@@ -399,7 +399,7 @@
 			if (_flags.downloadPercent)
 			{
 				[_forwarder connection:self 
-							  download:[[download remotePath] stringByDeletingFirstPathComponent]
+							  download:[self iDiskPathForWebDAVPath:[download remotePath]]
 						  progressedTo:[NSNumber numberWithInt:percent]];
 			}
 			
@@ -413,7 +413,7 @@
 		if (_flags.downloadProgressed)
 		{
 			[_forwarder connection:self
-						  download:[[download remotePath] stringByDeletingFirstPathComponent]
+						  download:[self iDiskPathForWebDAVPath:[download remotePath]]
 			  receivedDataOfLength:length];
 		}
 		if ([download delegateRespondsToTransferTransferredData])
@@ -476,11 +476,37 @@
 }
 
 #pragma mark -
+#pragma mark Support
+
+- (NSString *)webDAVPathForIDiskPath:(NSString *)iDiskPath
+{
+	NSString *currentPath = [super currentDirectory];
+	NSString *result = [[currentPath firstPathComponent] stringByAppendingPathComponent:iDiskPath];
+	return result;
+}
+
+- (NSString *)iDiskPathForWebDAVPath:(NSString *)webDAVPath
+{
+	NSString *result = [webDAVPath stringByDeletingFirstPathComponent];
+	return result;
+}
+
+#pragma mark -
 #pragma mark Protocol Overrides
+
+- (void)threadedConnect
+{
+	// Somewhat of a hack to stop CKWebDAVConnection resetting the path to /
+	NSString *path = [myCurrentDirectory retain];
+	[super threadedConnect];
+	
+	[myCurrentDirectory release];
+	myCurrentDirectory = path;
+}
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	[super changeToDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
+	[super changeToDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
 - (void)davDidChangeToDirectory:(NSString *)dirPath
@@ -489,7 +515,7 @@
 	myCurrentDirectory = [dirPath copy];
 	if (_flags.changeDirectory)
 	{
-		[_forwarder connection:self didChangeToDirectory:[dirPath stringByDeletingFirstPathComponent] error:nil];
+		[_forwarder connection:self didChangeToDirectory:[self iDiskPathForWebDAVPath:dirPath] error:nil];
 	}
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
@@ -498,14 +524,14 @@
 
 - (NSString *)currentDirectory
 {
-	return [[super currentDirectory] stringByDeletingFirstPathComponent];
+	return [self iDiskPathForWebDAVPath:[super currentDirectory]];
 }
 
 - (NSDictionary *)currentDownload
 {
 	CKInternalTransferRecord *returnValue = [[super currentDownload] copy];
 	
-	[returnValue setRemotePath:[[returnValue remotePath] stringByDeletingFirstPathComponent]];
+	[returnValue setRemotePath:[self iDiskPathForWebDAVPath:[returnValue remotePath]]];
 	
 	return [returnValue autorelease];
 }
@@ -514,19 +540,19 @@
 {
 	CKInternalTransferRecord *returnValue = [[super currentUpload] copy];
   
-	[returnValue setRemotePath:[[returnValue remotePath] stringByDeletingFirstPathComponent]];
+	[returnValue setRemotePath:[self iDiskPathForWebDAVPath:[returnValue remotePath]]];
   
 	return [returnValue autorelease];
 }
 
 - (NSString *)rootDirectory
 {
-	return [[super rootDirectory] stringByDeletingFirstPathComponent];
+	return [self iDiskPathForWebDAVPath:[super rootDirectory]];
 }
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	[super createDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
+	[super createDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
@@ -537,24 +563,22 @@
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	[super setPermissions:permissions
-				  forFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:path]];
+				  forFile:[self webDAVPathForIDiskPath:path]];
 }
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath
 {
-	NSString *from = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:fromPath];
-	NSString *to = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:toPath];
-	[super rename:from to:to];
+	[super rename:[self webDAVPathForIDiskPath:fromPath] to:[self webDAVPathForIDiskPath:toPath]];
 }
 
 - (void)deleteFile:(NSString *)path
 {
-	[super deleteFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:path]];
+	[super deleteFile:[self webDAVPathForIDiskPath:path]];
 }
 
 - (void)deleteDirectory:(NSString *)dirPath
 {
-	[super deleteDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
+	[super deleteDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
 - (void)uploadFile:(NSString *)localPath
@@ -574,7 +598,7 @@
 						delegate:(id)delegate
 {	
 	return [super uploadFile:localPath
-					  toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
+					  toFile:[self webDAVPathForIDiskPath:remotePath]
 		checkRemoteExistence:flag
 					delegate:delegate];
 }
@@ -601,7 +625,7 @@
 							delegate:(id)delegate
 {	
 	return [super uploadFromData:data
-						  toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
+						  toFile:[self webDAVPathForIDiskPath:remotePath]
 			checkRemoteExistence:flag
 						delegate:delegate];
 }
@@ -612,14 +636,14 @@
 								  delegate:(id)delegate
 {
 	return [super resumeUploadFromData:data
-								toFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
+								toFile:[self webDAVPathForIDiskPath:remotePath]
 							fileOffset:offset
 							  delegate:delegate];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	[super downloadFile:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:remotePath]
+	[super downloadFile:[self webDAVPathForIDiskPath:remotePath]
 			toDirectory:dirPath
 			  overwrite:flag];
 }
@@ -633,13 +657,13 @@
 
 - (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[super contentsOfDirectory:[[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:dirPath]];
+	[super contentsOfDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
 - (void)checkExistenceOfPath:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"no path specified");
-	NSString *dir = [[NSString stringWithFormat:@"/%@", [[self URL] user]] stringByAppendingPathComponent:[path stringByDeletingLastPathComponent]];
+	NSString *dir = [self webDAVPathForIDiskPath:[path stringByDeletingLastPathComponent]];
 	
 	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
 	//according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
@@ -679,6 +703,53 @@
 	[_fileCheckInFlight autorelease];
 	_fileCheckInFlight = nil;
 	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
+}
+
+#pragma mark authentication
+
+- (void)connect
+{
+	// Request authorization before connecting in order to store current directory
+    [self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
+}
+
+/*	Pull a proposed credential from the user's MobileMe account instead of credential storage
+ */
+- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+{
+	NSURLCredential *result = nil;
+	
+	if ([[self URL] user])
+	{
+		result = [super proposedCredentialForProtectionSpace:protectionSpace];
+	}
+	else
+	{
+		NSString *user = nil;
+		NSString *password = nil;
+		[self getDotMacAccountName:&user password:&password];
+		result = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceForSession] autorelease];
+	}
+	
+	return result;
+}
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	if ([self isConnected])
+	{
+		[super useCredential:credential forAuthenticationChallenge:challenge];
+	}
+	else
+	{
+		// Use username for directory base
+		[myCurrentDirectory release];
+		myCurrentDirectory = [[NSString alloc] initWithFormat:@"/%@/", [credential user]];
+		
+		// This was sort of a fake authentication, so reset failure count
+		_authenticationFailureCount = -1;	// Again, bit of a hack. CKHTTPConnection will do ++
+		[super connect];
+	}
 }
 
 @end

@@ -208,30 +208,14 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		
 		// Ask the delegate to authenticate
-		if ([authMethod isEqualToString:@"Basic"] || [authMethod isEqualToString:@"Digest"])
+		if ([authMethod isEqualToString:@"Basic"])
 		{
-			// Create authentication challenge object
-            NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
-                                                                                          port:[self port]
-                                                                                      protocol:[[self URL] scheme]
-                                                                                         realm:nil
-                                                                          authenticationMethod:([authMethod isEqualToString:@"Digest"] ? NSURLAuthenticationMethodHTTPDigest : NSURLAuthenticationMethodHTTPBasic)];
-            
-			[_currentAuthenticationChallenge release];
-			_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                                         proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
-                                                                                       previousFailureCount:_authenticationFailureCount
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
-            
-            [protectionSpace release];
-			
-            [self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
-			
-			// Prepare for another failure
-            _authenticationFailureCount++;
-			
+			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
+			return;
+		}
+		else if ([authMethod isEqualToString:@"Digest"])
+		{
+			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
 			return;
 		}
 		else
@@ -424,6 +408,31 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 #pragma mark -
 #pragma mark Authentication
+
+- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod
+{
+	// Create authentication challenge object
+	NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+																				  port:[self port]
+																			  protocol:[[self URL] scheme]
+																				 realm:nil
+																  authenticationMethod:authenticationMethod];
+	
+	[_currentAuthenticationChallenge release];
+	_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
+																				 proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+																			   previousFailureCount:_authenticationFailureCount
+																					failureResponse:nil
+																							  error:nil
+																							 sender:self];
+	
+	[protectionSpace release];
+	
+	[self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+	
+	// Prepare for another failure
+	_authenticationFailureCount++;
+}
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {

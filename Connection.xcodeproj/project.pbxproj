@@ -709,13 +709,13 @@
 			name = Other;
 			sourceTree = "<group>";
 		};
-		27FD90C90ED5C0070068D634 /* .Mac */ = {
+		27FD90C90ED5C0070068D634 /* iDisk */ = {
 			isa = PBXGroup;
 			children = (
 				79CFD82B09F7048400172CDD /* CKDotMacConnection.h */,
 				79CFD82C09F7048400172CDD /* CKDotMacConnection.m */,
 			);
-			name = .Mac;
+			name = iDisk;
 			sourceTree = "<group>";
 		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
@@ -851,7 +851,7 @@
 				792CFCA70A806108001A00C6 /* HTTP */,
 				79CFD11D09F7023D00172CDD /* DAV */,
 				27FD90C70ED5BFDB0068D634 /* File System */,
-				27FD90C90ED5C0070068D634 /* .Mac */,
+				27FD90C90ED5C0070068D634 /* iDisk */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
