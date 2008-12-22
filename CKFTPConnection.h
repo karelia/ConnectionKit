@@ -125,3 +125,8 @@ typedef enum {
 
 @end
 
+
+@interface NSObject (CKFTPConnectionDelegate)
+//- (void)connection:(CKFTPConnection *)connection didRequestAccountName:(id <CKFTPAccountRequestListener>)listener;
+@end
+
