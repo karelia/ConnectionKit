@@ -48,13 +48,16 @@ typedef unsigned int   NSUInteger;
 
 
 #import <Cocoa/Cocoa.h>
+
 #import <Connection/CKConnectionProtocol.h>
 #import <Connection/CKConnectionRegistry.h>
-#import <Connection/KTLog.h>
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
 #import <Connection/CKFileConnection.h>
+#import <Connection/CKDotMacConnection.h>
+
+#import <Connection/KTLog.h>
 
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
