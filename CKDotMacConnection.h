@@ -28,11 +28,12 @@
  
 */
 
-#import <Cocoa/Cocoa.h>
+#import <Connection/CKWebDAVConnection.h>
 
-#import "CKWebDAVConnection.h"
 
 @interface CKDotMacConnection : CKWebDAVConnection
+
++ (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
 
 /*!
  @method init
