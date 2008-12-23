@@ -16,6 +16,7 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol.h"
+#import "CKURLProtectionSpace.h"
 
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
@@ -177,7 +178,7 @@ static NSString *lsform = nil;
     
     
     // Can't connect till we have a password (due to using the SFTP command-line tool)
-    NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[self URL] host]
                                                                                   port:[self port]
                                                                               protocol:@"ssh"
                                                                                  realm:nil
