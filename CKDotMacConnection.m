@@ -91,7 +91,7 @@
 
 #pragma mark init methods
 
-- (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
++ (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
 	BOOL result = NO;
 	
@@ -727,7 +727,7 @@
 	{
 		NSString *user = nil;
 		NSString *password = nil;
-		[self getDotMacAccountName:&user password:&password];
+		[[self class] getDotMacAccountName:&user password:&password];
 		result = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceForSession] autorelease];
 	}
 	
