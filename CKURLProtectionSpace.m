@@ -29,4 +29,8 @@
 
 - (NSString *)protocol { return _protocol; }
 
+/*	NSURLProtectionSpace is immutable. Returning self retained ensures the protocol can't change beneath us.
+ */
+- (id)copyWithZone:(NSZone *)zone { return [self retain]; }
+
 @end
