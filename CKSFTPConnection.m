@@ -402,7 +402,8 @@ static NSString *lsform = nil;
 {
 	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
 }
-- (CKTransferRecord *)uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath  checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
+
+- (CKTransferRecord *)uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
 {
 	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
@@ -414,6 +415,7 @@ static NSString *lsform = nil;
 	   checkRemoteExistence:flag
 				   delegate:delegate];
 }
+
 - (CKTransferRecord *)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(unsigned long long)offset remotePath:(NSString *)remotePath checkRemoteExistence:(BOOL)checkRemoteExistenceFlag delegate:(id)delegate
 {
 	if (!localPath)
@@ -457,6 +459,7 @@ static NSString *lsform = nil;
 	[self queueCommand:upload];
 	return record;
 }
+
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
@@ -477,6 +480,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Downloading
+
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
@@ -559,6 +563,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Misc.
+
 - (void)threadedCancelTransfer
 {
 	[self forceDisconnect];
@@ -567,6 +572,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Command Queueing
+
 - (void)sendCommand:(id)command
 {
 	[self _writeSFTPCommandWithString:command];
@@ -858,6 +864,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark SFTPTServer Callbacks
+
 - (void)didConnect
 {
 	if (_connectTimeoutTimer && [_connectTimeoutTimer isValid])
@@ -880,7 +887,15 @@ static NSString *lsform = nil;
 
 - (void)_connectTimeoutTimerFire:(NSTimer *)timer
 {
-	[timer release];
+	NSAssert2(timer == _connectTimeoutTimer,
+			  @"-[%@ %@] called with unexpected timer object",
+			  NSStringFromClass([self class]),
+			  NSStringFromSelector(_cmd));
+	
+	
+	[_connectTimeoutTimer release];
+	_connectTimeoutTimer = nil;
+	
 	
 	if (_flags.didConnect)
 	{
