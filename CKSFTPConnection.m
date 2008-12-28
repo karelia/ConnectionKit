@@ -853,7 +853,15 @@ static NSString *lsform = nil;
 
 - (void)_connectTimeoutTimerFire:(NSTimer *)timer
 {
-	[timer release];
+	NSAssert2(timer == _connectTimeoutTimer,
+			  @"-[%@ %@] called with unexpected timer object",
+			  NSStringFromClass([self class]),
+			  NSStringFromSelector(_cmd));
+	
+	
+	[_connectTimeoutTimer release];
+	_connectTimeoutTimer = nil;
+	
 	
 	if (_flags.didConnect)
 	{
