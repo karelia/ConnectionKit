@@ -1016,7 +1016,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_fileCheckingConnection = [self copy];
 		[_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection setName:@"File Checking Connection"];
-		[_fileCheckingConnection setTranscript:[self propertyForKey:@"FileCheckingTranscript"]];
 		[_fileCheckingConnection connect];		
 	}
 	[_fileCheckLock lock];
@@ -1058,8 +1057,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_recursiveS3RenameConnection = [self copy];
 		[_recursiveS3RenameConnection setName:@"Recursive S3 Renaming"];
 		[_recursiveS3RenameConnection setDelegate:self];
-		[_recursiveS3RenameConnection setTranscript:[self propertyForKey:@"RecursiveS3RenamingTranscript"]];
-		[_recursiveS3RenameConnection connect];
 	}
 	[_recursiveS3RenameLock lock];
 	if (!myStreamFlags.isRecursivelyRenamingForS3 && [_recursiveS3RenamesQueue count] > 0)
@@ -1119,7 +1116,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_recursiveDeletionConnection = [self copy];
 		[_recursiveDeletionConnection setName:@"recursive deletion"];
 		[_recursiveDeletionConnection setDelegate:self];
-		[_recursiveDeletionConnection setTranscript:[self propertyForKey:@"RecursiveDirectoryDeletionTranscript"]];
 		[_recursiveDeletionConnection connect];
 	}
 	
@@ -1182,7 +1178,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		_recursiveDownloadConnection = [self copy];
 		[_recursiveDownloadConnection setName:@"recursive download"];
 		[_recursiveDownloadConnection setDelegate:self];
-		[_recursiveDownloadConnection setTranscript:[self propertyForKey:@"RecursiveDownloadTranscript"]];
 	}
 	if (![_recursiveDownloadConnection isConnected])
 	{

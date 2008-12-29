@@ -416,10 +416,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsUTF8String];
 				
-				if ([self transcript])
+				if (_flags.transcript)
 				{
-					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n\n", header] 
-																			  attributes:[CKAbstractConnection receivedAttributes]] autorelease]];
+					[self appendReceivedStringToTranscript:[NSString stringWithFormat:@"%@\n\n", header]];
 				}
 				
 				unsigned start = headerRange.location + headerRange.length;

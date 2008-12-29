@@ -111,10 +111,9 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)connect
 {
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInConnectionKitBundle(@"Connecting...\n", @"file transcript")
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:LocalizedStringInConnectionKitBundle(@"Connecting...\n", @"file transcript")];
 	}
 	[super connect];
 }
@@ -129,10 +128,9 @@ checkRemoteExistence:(NSNumber *)check;
 	[super threadedConnect];
 	
     myFileManager = [[NSFileManager alloc] init];
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInConnectionKitBundle(@"Connected to File System\n", @"file transcript") 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:LocalizedStringInConnectionKitBundle(@"Connected to File System\n", @"file transcript")];
 	}
 	[self setState:CKConnectionIdleState];
 }
@@ -205,10 +203,9 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kCreateDirectory];
 	unsigned long aPermissions = [perms unsignedLongValue];
 	
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"), aName, aPermissions] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"), aName, aPermissions]];
 	}
 	
 	NSDictionary *fmDictionary = nil;
@@ -292,10 +289,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kRename];
 	
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath]];
 	}
 	
 	NSError *error = nil;	
@@ -332,10 +328,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteFile];
 	
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path]];
 	}
 	
 	NSError *error = nil;	
@@ -424,10 +419,9 @@ checkRemoteExistence:(NSNumber *)check;
 	NSFileManager *fm = myFileManager;
 	BOOL flag = [check boolValue];
 	
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]]];
 	}
 		
 	if (flag)
@@ -554,10 +548,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	BOOL flag = [check boolValue];
 	
-	if ([self transcript])
+	if (_flags.transcript)
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[self appendSentStringToTranscript:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]]];
 	}
 	
 	if (flag)
