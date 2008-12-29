@@ -656,21 +656,36 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				break;
 			}
             
+			_ftpFlags.loggedIn = YES;
+
+						
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
-			[_commandQueue insertObject:[CKConnectionCommand command:@"PWD"
-														awaitState:CKConnectionIdleState
-														 sentState:CKConnectionAwaitingCurrentDirectoryState
-														 dependant:nil
-														  userInfo:nil]
-								atIndex:0];
-			[_commandQueue insertObject:[CKConnectionCommand command:@"SYST"
-														awaitState:CKConnectionIdleState
-														 sentState:FTPAwaitingRemoteSystemTypeState
-														 dependant:nil
-														  userInfo:nil]
-								atIndex:0];
+			
 			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 			// we are starting in.
+			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:@"PWD"
+																				awaitState:CKConnectionIdleState
+																				 sentState:CKConnectionAwaitingCurrentDirectoryState
+																				 dependant:nil
+																				  userInfo:nil];
+			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
+			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
+																				awaitState:CKConnectionIdleState
+																				 sentState:FTPAwaitingRemoteSystemTypeState
+																				 dependant:nil
+																				  userInfo:nil];
+			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
+			
+			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
+			{
+				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+																		 awaitState:CKConnectionIdleState
+																		  sentState:CKConnectionSentFeatureRequestState
+																		  dependant:nil
+																		   userInfo:nil];
+				[self pushCommandOnCommandQueue:featuresCommand];
+			}			
 			
 			[self setState:CKConnectionIdleState];			
 			break;
@@ -715,21 +730,33 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			// Queue up the commands we want to insert in the queue before notifying client we're connected
-			[_commandQueue insertObject:[CKConnectionCommand command:@"PWD"
-														awaitState:CKConnectionIdleState
-														 sentState:CKConnectionAwaitingCurrentDirectoryState
-														 dependant:nil
-														  userInfo:nil]
-								atIndex:0];
-			[_commandQueue insertObject:[CKConnectionCommand command:@"SYST"
-														awaitState:CKConnectionIdleState
-														 sentState:FTPAwaitingRemoteSystemTypeState
-														 dependant:nil
-														  userInfo:nil]
-								atIndex:0];
+			_ftpFlags.loggedIn = YES;
+			
 			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 			// we are starting in.
+			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:@"PWD"
+																				awaitState:CKConnectionIdleState
+																				 sentState:CKConnectionAwaitingCurrentDirectoryState
+																				 dependant:nil
+																				  userInfo:nil];
+			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
+			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
+																				awaitState:CKConnectionIdleState
+																				 sentState:FTPAwaitingRemoteSystemTypeState
+																				 dependant:nil
+																				  userInfo:nil];
+			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
+			
+			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
+			{
+				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+																		 awaitState:CKConnectionIdleState
+																		  sentState:CKConnectionSentFeatureRequestState
+																		  dependant:nil
+																		   userInfo:nil];
+				[self pushCommandOnCommandQueue:featuresCommand];
+			}			
 			
 			[self setState:CKConnectionIdleState];			
 			break;
@@ -1666,7 +1693,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 501: //Syntax error in parameters or arguments.
 		case 502: //Command not implemented
 		{
-			[self authenticateConnection];	
+			if (!_ftpFlags.loggedIn)
+			{
+				[self authenticateConnection];
+			}
+			else
+			{
+				[self setState:CKConnectionIdleState];
+			}
 			break;
 		}
 		case 530: //User not logged in

@@ -71,6 +71,10 @@ NSString *CKOutputStreamDomain = @"Output Stream";
 NSString *CKSSLDomain = @"SSL";
 NSString *CKEditingDomain = @"Editing";
 
+//Exception Names
+NSString *CKFailedToParseDirectoryListingException = @"CKFailedToParseDirectoryListingException";
+
+
 NSDictionary *sSentAttributes = nil;
 NSDictionary *sReceivedAttributes = nil;
 NSDictionary *sDataAttributes = nil;
@@ -1177,9 +1181,9 @@ if (![fn isEqualToString:@"."] && \
 		if ([listing rangeOfString:@"\n"].location == NSNotFound)
 		{
 			//No way to separate lines, error.
-			NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorParsingDirectoryListing userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error") forKey:NSLocalizedDescriptionKey]];
 			KTLog(CKParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");
-			@throw error;
+			NSException *exception = [NSException exceptionWithName:CKFailedToParseDirectoryListingException reason:@"Could not determine line endings." userInfo:nil];
+			@throw exception;
 			return nil;
 		}
 		lineEnding = @"\n";
@@ -1195,7 +1199,7 @@ if (![fn isEqualToString:@"."] && \
 	NSString *dateString = [self _dateStringFromListing:line];
 	if (!dateString)
 		return finalWords;
-	NSString *lastDateWord = dateString;
+	NSUInteger lastDateWordIndex = NSNotFound;
 	NSUInteger currentLocation = [dateString length] - 1;
 	while (currentLocation >= 0)
 	{
@@ -1203,10 +1207,16 @@ if (![fn isEqualToString:@"."] && \
 		if (currentCharacter == ' ')
 		{
 			//Everything after this index is part of the last word.
-			lastDateWord = [dateString substringFromIndex:currentLocation+1];
+			NSString *lastDateWord = [dateString substringFromIndex:currentLocation+1];
+			lastDateWordIndex = [words indexOfObject:lastDateWord];
 			break;
 		}
 		currentLocation--;
+	}
+	if (lastDateWordIndex == NSNotFound)
+	{
+		NSLog(@"Error Parsing Words: Parsed last date word is not in words array.");
+		return nil;
 	}
 	
 	/*
@@ -1214,13 +1224,11 @@ if (![fn isEqualToString:@"."] && \
 	 */
 	NSUInteger currentIndex = 0;
 	NSMutableIndexSet *indexesOfBlankSpacesBeforeDate = [NSMutableIndexSet indexSet];
-	while (currentIndex < [words count])
+	while (currentIndex <= lastDateWordIndex)
 	{
 		NSString *word = [words objectAtIndex:currentIndex];
 		if ([word length] <= 0 || [word characterAtIndex:0] == ' ')
 			[indexesOfBlankSpacesBeforeDate addIndex:currentIndex];
-		if ([lastDateWord containsSubstring:word])
-			break;
 		currentIndex++;
 	}
 	[finalWords removeObjectsAtIndexes:indexesOfBlankSpacesBeforeDate];
@@ -1318,7 +1326,7 @@ if (![fn isEqualToString:@"."] && \
 		
 		if ([words count] < 4)
 			continue;
-		
+
 		NSString *wordZero = [words objectAtIndex:0];
 		NSString *wordOne = [words objectAtIndex:1];
 		NSString *wordTwo = [words objectAtIndex:2];
@@ -1401,8 +1409,8 @@ if (![fn isEqualToString:@"."] && \
 			{
 				//Much of what we do from this point is based on finding the date. This is a serious bug, and should be addressed. Log it out, report an error.
 				NSLog(@"Could not parse date from line %@ of listing %@", line, listing);
-				NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorParsingDirectoryListing userInfo:[NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error") forKey:NSLocalizedDescriptionKey]];
-				@throw error;
+				NSException *exception = [NSException exceptionWithName:CKFailedToParseDirectoryListingException reason:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error") userInfo:nil];
+				@throw exception;
 			}
 
 			NSArray *dateComponents = [dateString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
