@@ -19,7 +19,10 @@
                 user:(NSString *)username
             password:(NSString *)password
 {
-    NSMutableString *buffer = [[NSMutableString alloc] initWithFormat:@"%@://", scheme];
+    NSParameterAssert(scheme);
+	
+	
+	NSMutableString *buffer = [[NSMutableString alloc] initWithFormat:@"%@://", scheme];
     
     if (username && ![username isEqualToString:@""])
     {
@@ -31,7 +34,9 @@
         [buffer appendString:@"@"];    
     }
     
-    [buffer appendString:host];
+    
+	if (host) [buffer appendString:host];
+	
     
     if (port)
     {
