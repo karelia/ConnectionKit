@@ -221,8 +221,6 @@ enum {
 - (id)propertyForKey:(NSString *)key;
 - (void)removePropertyForKey:(NSString *)key;
 
-- (void)setTranscript:(NSTextStorage *)transcript;
-
 - (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;
 
@@ -296,6 +294,10 @@ enum {
 - (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
 
 - (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
+
+#pragma mark Transcript
+- (void)connection:(id <CKConnection>)connection appendStringToTranscript:(NSAttributedString *)transcript;
+
 @end
 
 

@@ -1093,11 +1093,6 @@ static NSString *lsform = nil;
 	// [_forwarder connectionDidSendBadPassword:self];
 }
 
-- (void)addStringToTranscript:(NSString *)stringToAdd
-{
-	[self appendToTranscript:[NSAttributedString attributedStringWithString:stringToAdd attributes:[CKAbstractConnection receivedAttributes]]];
-}
-
 @end
 
 

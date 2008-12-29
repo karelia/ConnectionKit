@@ -293,7 +293,7 @@ char **environ;
 			isIncompleteLine = NO;
 		}
 		
-		[wrapperConnection addStringToTranscript:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)]];
+		[wrapperConnection appendReceivedStringToTranscript:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)]];
 		if (strstr(buf, "sftp>") != NULL)
 		{
 			memset(buf, '\0', strlen(buf));
@@ -315,6 +315,7 @@ char **environ;
 
 #pragma mark -
 #pragma mark Protocol Loop
+
 - (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
 {
 	NSString *sftpBinaryPath = [NSString pathForExecutable:@"sftp"];
@@ -333,7 +334,7 @@ char **environ;
 	[passedInArguments release];
 	
 	connecting = YES;	
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]]];
+	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]]];
 	
 	char teletypewriterName[MAXPATHLEN];
 	struct winsize windowSize = {24, 512, 0, 0};
@@ -371,8 +372,8 @@ char **environ;
 
 	//Associate our new file stream
 	setvbuf(masterFileStream, nil, _IONBF, 0);
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName]];
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"Master Device is %d.\n", master]];
+	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName]];
+	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"Master Device is %d.\n", master]];
 	
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
@@ -416,7 +417,7 @@ char **environ;
 			break;
 		
 		if (serverResponseBuffer[0] != '\0')
-			[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
+			[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
 		
 		if ([self bufferContainsPasswordPrompt:serverResponseBuffer] && !hasValidPassword && connecting)
 		{
@@ -549,18 +550,18 @@ char **environ;
 	master = 0;
 	(void)close(master);
 	
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid]];
+	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
+	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid]];
 	sftppid = 0;
 	[sftpWrapperConnection didDisconnect];
 	if (WIFEXITED(status))
-		[sftpWrapperConnection addStringToTranscript:@"Normal exit\n"];
+		[sftpWrapperConnection appendReceivedStringToTranscript:@"Normal exit\n"];
 	else if (WIFSIGNALED(status))
 	{
-		[sftpWrapperConnection addStringToTranscript:@"WIFSIGNALED:"];
-		[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"signal = %d\n", status]];
+		[sftpWrapperConnection appendReceivedStringToTranscript:@"WIFSIGNALED:"];
+		[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"signal = %d\n", status]];
 	}
 	else if (WIFSTOPPED(status))
-		[sftpWrapperConnection addStringToTranscript:@"WIFSTOPPED\n"];
+		[sftpWrapperConnection appendReceivedStringToTranscript:@"WIFSTOPPED\n"];
 }
 @end

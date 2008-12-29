@@ -124,6 +124,7 @@ typedef struct __flags {
 	unsigned isRecursiveUploading:1;
 	unsigned isRecursiveDeleting:1;
 	unsigned passphrase:1;
+	unsigned transcript:1;
 	
 	unsigned padding:2;
 } connectionFlags;
@@ -138,7 +139,6 @@ typedef struct __flags {
     
 	RunLoopForwarder	*_forwarder;
     
-	NSTextStorage *_transcript;
 	id _delegate;
     
 	connectionFlags _flags;
@@ -181,15 +181,6 @@ typedef struct __flags {
 - (id)propertyForKey:(NSString *)key;
 - (void)removePropertyForKey:(NSString *)key;
 
-// Transcript support
-- (void)setTranscript:(NSTextStorage *)transcript;
-- (NSTextStorage *)transcript;
-- (void)appendToTranscript:(NSAttributedString *)str;
-
-+ (NSDictionary *)sentAttributes;
-+ (NSDictionary *)receivedAttributes;
-+ (NSDictionary *)dataAttributes;
-
 // we cache directory contents so when changing to an existing directory we show the 
 // last cached version and issue a new listing. You should keep a current path in your delegate
 // and ignore a listing if the path returned is not your current one. THis is where a user
@@ -217,9 +208,22 @@ typedef struct __flags {
 
 
 @interface CKAbstractConnection (SubclassSupport)
+
 // Authentication
 - (void)didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+
+// Transcript
++ (NSDictionary *)sentTranscriptStringAttributes;
++ (NSDictionary *)receivedTranscriptStringAttributes;
++ (NSDictionary *)dataTranscriptStringAttributes;
+
+- (void)appendSentStringToTranscript:(NSString *)string;
+- (void)appendReceivedStringToTranscript:(NSString *)string;
+- (void)appendDataStringToTranscript:(NSString *)string;
+
+- (void)appendAttributedStringToTranscript:(NSAttributedString *)string;
+
 @end
 
 

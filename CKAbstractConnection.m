@@ -78,27 +78,6 @@ NSDictionary *sDataAttributes = nil;
 
 @implementation CKAbstractConnection
 
-+ (NSDictionary *)sentAttributes
-{
-    if (!sSentAttributes)
-        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
-    return sSentAttributes;
-}
-
-+ (NSDictionary *)receivedAttributes
-{
-    if (!sReceivedAttributes)
-        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
-    return sReceivedAttributes;
-}
-
-+ (NSDictionary *)dataAttributes
-{
-    if (!sDataAttributes)
-        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
-    return sDataAttributes;
-}
-
 + (NSString *)name { return nil; }
 
 + (NSInteger)defaultPort { return 0; }
@@ -141,7 +120,6 @@ NSDictionary *sDataAttributes = nil;
 	[_name release];
 	[_forwarder release];
 	[_URL release];
-	[_transcript release];
 	[_properties release];
 	[_cachedDirectoryContents release];
 	[_edits release];
@@ -257,6 +235,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.fileCheck						= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:error:)];
 	_flags.authorizeConnection				= [del respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)];
 	_flags.passphrase						= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
+	_flags.transcript						= [del respondsToSelector:@selector(connection:appendStringToTranscript:)];
 }
 
 - (id)delegate
@@ -749,28 +728,6 @@ NSDictionary *sDataAttributes = nil;
 	_flags.inBulk = NO;
 }
 
-- (void)setTranscript:(NSTextStorage *)transcript
-{
-	[transcript retain];
-	[_transcript release];
-	_transcript = transcript;
-}
-
-- (NSTextStorage *)transcript
-{
-	return _transcript;
-}
-
-- (void)appendToTranscript:(NSAttributedString *)str
-{
-	if (_transcript) {
-		[_transcript performSelectorOnMainThread:@selector(appendAttributedString:)
-									  withObject:str
-								   waitUntilDone:NO];
-		//	[_transcript appendAttributedString:str];
-	}
-}
-
 - (NSString *)rootDirectory
 {
 	return nil;
@@ -792,7 +749,6 @@ NSDictionary *sDataAttributes = nil;
 		_editingConnection = [self copy];
 		[_editingConnection setName:@"editing"];
 		[_editingConnection setDelegate:self];
-		[_editingConnection setTranscript:[self transcript]];
 		[_editingConnection connect];
 	}
 	[_editingConnection downloadFile:remotePath toDirectory:[localEditable stringByDeletingLastPathComponent] overwrite:YES];
@@ -920,6 +876,11 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
+- (void)connection:(id <CKConnection>)connection appendStringToTranscript:(NSAttributedString *)transcript;
+{
+	[self appendAttributedStringToTranscript:transcript];
+}
+
 @end
 
 
@@ -927,6 +888,9 @@ NSDictionary *sDataAttributes = nil;
 
 
 @implementation CKAbstractConnection (SubclassSupport)
+
+#pragma mark -
+#pragma mark Authentication
 
 /*  Deals with the messy bit of authentication for you. If the delegate implements -connection:didReceiveAuthenticationChallenge:
  *  then that method is called. Otherwise, we attempt to use the proposedCredential (if there is one)
@@ -994,6 +958,70 @@ NSDictionary *sDataAttributes = nil;
     }
     
     return result;    
+}
+
+#pragma mark -
+#pragma mark Transcript
+
+/*	The string attributes to use for the different types of transcript logging
+ */
+
++ (NSDictionary *)sentTranscriptStringAttributes
+{
+    if (!sSentAttributes)
+        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+    return sSentAttributes;
+}
+
++ (NSDictionary *)receivedTranscriptStringAttributes
+{
+    if (!sReceivedAttributes)
+        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
+    return sReceivedAttributes;
+}
+
++ (NSDictionary *)dataTranscriptStringAttributes
+{
+    if (!sDataAttributes)
+        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
+    return sDataAttributes;
+}
+
+/*	Convenience methods for sending a string to the delegate for appending to the transcript
+ */
+- (void)appendSentStringToTranscript:(NSString *)string;
+{
+	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
+																		   attributes:[[self class] sentTranscriptStringAttributes]];
+	
+	[self appendAttributedStringToTranscript:attributedString];
+	[attributedString release];
+}
+
+- (void)appendReceivedStringToTranscript:(NSString *)string;
+{
+	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
+																		   attributes:[[self class] receivedTranscriptStringAttributes]];
+	
+	[self appendAttributedStringToTranscript:attributedString];
+	[attributedString release];
+}
+
+- (void)appendDataStringToTranscript:(NSString *)string;
+{
+	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
+																		   attributes:[[self class] dataTranscriptStringAttributes]];
+	
+	[self appendAttributedStringToTranscript:attributedString];
+	[attributedString release];
+}
+
+- (void)appendAttributedStringToTranscript:(NSAttributedString *)string
+{
+	if (_flags.transcript)
+	{
+		[_forwarder connection:self appendStringToTranscript:string];
+	}
 }
 
 @end
