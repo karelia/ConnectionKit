@@ -49,6 +49,13 @@ enum {
 	ConnectionErrorGeneric,
 };
 
+typedef enum {
+	CKTranscriptSent,
+	CKTranscriptReceived,
+	CKTranscriptData,
+} CKTranscriptType;
+
+
 @protocol CKConnection <NSObject, NSCopying>
 
 + (NSString *)name;
@@ -296,7 +303,16 @@ enum {
 - (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
 
 #pragma mark Transcript
-- (void)connection:(id <CKConnection>)connection appendStringToTranscript:(NSAttributedString *)transcript;
+/*!
+ @method connection:appendString:toTranscript:
+ @abstract Called when the connection has something to add to the connection transcript.
+ @discussion Delegates should implement this method if they are interested in keeping a transcript. This could be to
+ log the string to the console or add it to a text view.
+ @param connection The connection sending the message
+ @param string The string to add to the transcript
+ @param transcript The nature of the string that is to be transcribed. CKAbstractConnection has class methods to apply formatting to the transcript.
+ */
+- (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end
 

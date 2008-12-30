@@ -89,6 +89,54 @@ NSDictionary *sDataAttributes = nil;
 + (NSArray *)URLSchemes { return nil; }
 
 #pragma mark -
+#pragma mark Transcript
+
+/*	The string attributes to use for the different types of transcript logging
+ */
+
++ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript
+{
+	NSDictionary *attributes = nil;
+	
+	switch (transcript)
+	{
+		case CKTranscriptSent:
+			attributes = [self sentTranscriptStringAttributes];
+			break;
+		case CKTranscriptReceived:
+			attributes = [self receivedTranscriptStringAttributes];
+			break;
+		case CKTranscriptData:
+			attributes = [self dataTranscriptStringAttributes];
+			break;
+	}
+	
+	NSAttributedString *result = [NSAttributedString attributedStringWithString:string attributes:attributes];
+	return result;
+}
+
++ (NSDictionary *)sentTranscriptStringAttributes
+{
+    if (!sSentAttributes)
+        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+    return sSentAttributes;
+}
+
++ (NSDictionary *)receivedTranscriptStringAttributes
+{
+    if (!sReceivedAttributes)
+        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
+    return sReceivedAttributes;
+}
+
++ (NSDictionary *)dataTranscriptStringAttributes
+{
+    if (!sDataAttributes)
+        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
+    return sDataAttributes;
+}
+
+#pragma mark -
 #pragma mark Inheritable methods
 
 - (id)initWithURL:(NSURL *)URL
@@ -880,9 +928,9 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
-- (void)connection:(id <CKConnection>)connection appendStringToTranscript:(NSAttributedString *)transcript;
+- (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 {
-	[self appendAttributedStringToTranscript:transcript];
+	[self appendString:(NSString *)string toTranscript:transcript];
 }
 
 @end
@@ -967,64 +1015,13 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Transcript
 
-/*	The string attributes to use for the different types of transcript logging
+/*	Convenience method for sending a string to the delegate for appending to the transcript
  */
-
-+ (NSDictionary *)sentTranscriptStringAttributes
-{
-    if (!sSentAttributes)
-        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
-    return sSentAttributes;
-}
-
-+ (NSDictionary *)receivedTranscriptStringAttributes
-{
-    if (!sReceivedAttributes)
-        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
-    return sReceivedAttributes;
-}
-
-+ (NSDictionary *)dataTranscriptStringAttributes
-{
-    if (!sDataAttributes)
-        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
-    return sDataAttributes;
-}
-
-/*	Convenience methods for sending a string to the delegate for appending to the transcript
- */
-- (void)appendSentStringToTranscript:(NSString *)string;
-{
-	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
-																		   attributes:[[self class] sentTranscriptStringAttributes]];
-	
-	[self appendAttributedStringToTranscript:attributedString];
-	[attributedString release];
-}
-
-- (void)appendReceivedStringToTranscript:(NSString *)string;
-{
-	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
-																		   attributes:[[self class] receivedTranscriptStringAttributes]];
-	
-	[self appendAttributedStringToTranscript:attributedString];
-	[attributedString release];
-}
-
-- (void)appendDataStringToTranscript:(NSString *)string;
-{
-	NSAttributedString *attributedString = [[NSAttributedString alloc] initWithString:string
-																		   attributes:[[self class] dataTranscriptStringAttributes]];
-	
-	[self appendAttributedStringToTranscript:attributedString];
-	[attributedString release];
-}
-
-- (void)appendAttributedStringToTranscript:(NSAttributedString *)string
+- (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
 	if (_flags.transcript)
 	{
-		[_forwarder connection:self appendStringToTranscript:string];
+		[_forwarder connection:self appendString:string toTranscript:transcript];
 	}
 }
 

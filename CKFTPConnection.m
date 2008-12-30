@@ -266,7 +266,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	if (_flags.transcript)
 	{
-		[self appendSentStringToTranscript:[NSString stringWithFormat:@"%@\n", commandToEcho]];
+		[self appendString:[NSString stringWithFormat:@"%@\n", commandToEcho] toTranscript:CKTranscriptSent];
 	}
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
@@ -360,7 +360,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if (_flags.transcript)
 	{
-		[self appendReceivedStringToTranscript:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer]];
+		[self appendString:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer] toTranscript:CKTranscriptReceived];
 	}
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
@@ -2236,7 +2236,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendSentStringToTranscript:[NSString stringWithFormat:@"Receive Stream Error: %@\n", [_receiveStream streamError]]];
+				[self appendString:[NSString stringWithFormat:@"Receive Stream Error: %@\n", [_receiveStream streamError]] toTranscript:CKTranscriptSent];
 			}
 			
 
@@ -2440,7 +2440,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendSentStringToTranscript:[NSString stringWithFormat:@"Send Stream Error: %@\n", [_receiveStream streamError]]];
+				[self appendString:[NSString stringWithFormat:@"Send Stream Error: %@\n", [_receiveStream streamError]] toTranscript:CKTranscriptSent];
 			}
 			KTLog(CKStreamDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
@@ -2677,7 +2677,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				return;
 			}
 		}
-		[self appendDataStringToTranscript:results];
+		[self appendString:results toTranscript:CKTranscriptData];
 
 		NSArray *contents = [self parseLines:results];
 		
@@ -2780,7 +2780,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (_flags.transcript)
 	{
 		NSString *timeout = [NSString stringWithString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")];
-		[self appendDataStringToTranscript:[NSString stringWithFormat:@"%@\n", timeout]];
+		[self appendString:[NSString stringWithFormat:@"%@\n", timeout] toTranscript:CKTranscriptData];
 	}
 	
 	[timer invalidate];
