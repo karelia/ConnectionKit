@@ -18,7 +18,6 @@ extern NSString *SFTPErrorDomain;
 {
 	int masterProxy;
 	CKSFTPTServer *theSFTPTServer;
-	NSConnection *connectionToTServer;
 	
 	BOOL isConnecting;
 	NSString *rootDirectory;
@@ -27,7 +26,6 @@ extern NSString *SFTPErrorDomain;
 	NSMutableArray *attemptedKeychainPublicKeyAuthentications;
 	NSMutableArray *connectToQueue;
 	NSTimer *_connectTimeoutTimer;
-
 }
 
 - (int)masterProxy;

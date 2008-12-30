@@ -21,7 +21,6 @@
 #include <util.h>
 #include "argcargv.h"
 #include "fdwrite.h"
-#include "typeforchar.h"
 
 extern int	errno;
 char **environ;
@@ -30,18 +29,6 @@ char **environ;
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
-+ (void)connectWithPorts:(NSArray *)ports
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSConnection *connection = [NSConnection connectionWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
-	CKSFTPTServer	*serverObject = [[CKSFTPTServer alloc] init];
-	[(CKSFTPConnection *)[connection rootProxy] setServerObject:serverObject];
-    [serverObject release];
-    
-    [[NSRunLoop currentRunLoop] run];  
-    [pool release];
-}
-
 - (id)init
 {
 	if ((self = [super init]))
@@ -315,7 +302,7 @@ char **environ;
 
 #pragma mark -
 #pragma mark Protocol Loop
-- (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
+- (void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
 {
 	NSString *sftpBinaryPath = [NSString pathForExecutable:@"sftp"];
 	if (!sftpBinaryPath)
@@ -382,6 +369,7 @@ char **environ;
 	BOOL wasChanging = NO;
 	BOOL wasListing = NO;
 	BOOL atSFTPPrompt = NO;
+	int numberOfPromptArrivalsToIgnore = 0;
 	while (1)
 	{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -449,7 +437,11 @@ char **environ;
 			{
 				wasListing = NO;
 			}
-			[sftpWrapperConnection finishedCommand];
+			
+			if (numberOfPromptArrivalsToIgnore > 0)
+				numberOfPromptArrivalsToIgnore--;
+			else
+				[sftpWrapperConnection finishedCommand];
 		}
 		else
 		{
@@ -461,6 +453,8 @@ char **environ;
 			}
 			else if ([self bufferContainsError:serverResponseBuffer])
 			{
+				//When we receive an error, we handle the error for the _lastCommand_ in SFTPConnection.. Thus, when we hit the sftp> prompt after this error, we've already handled that command, and we don't need to notify SFTPConnection about us finishing it.
+				numberOfPromptArrivalsToIgnore++;
 				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
 			else if ([sftpWrapperConnection numberOfTransfers] > 0 || cancelflag)

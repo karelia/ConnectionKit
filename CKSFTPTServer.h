@@ -2,7 +2,7 @@
 @class CKSFTPConnection;
 
 @protocol CKSFTPTServerInterface
-- (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection;
+- (void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection;
 @end
 
 @interface CKSFTPTServer : NSObject <CKSFTPTServerInterface>
