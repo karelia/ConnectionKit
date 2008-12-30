@@ -18,7 +18,6 @@ extern NSString *SFTPErrorDomain;
 {
 	int masterProxy;
 	CKSFTPTServer *theSFTPTServer;
-	NSConnection *connectionToTServer;
 	
 	BOOL isConnecting;
 	NSString *rootDirectory;
@@ -58,5 +57,5 @@ extern NSString *SFTPErrorDomain;
 - (void)didSetRootDirectory;
 - (void)setCurrentDirectory:(NSString *)current;
 - (void)didReceiveDirectoryContents:(NSArray*)items;
-- (void)addStringToTranscript:(NSString *)stringToAdd;
+
 @end

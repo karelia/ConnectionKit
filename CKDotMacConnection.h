@@ -36,10 +36,11 @@
 + (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
 
 /*!
- @method init
- @discussion Convenience method. Automatically uses idisk.mac.com and the default authentication credential.
+ @method initWithUser:
+ @discussion Creates a connection a user's idisk.mac.com account.
+ @param user The iDisk to connect to. Pass in nil to connect to the user's MobileMe account.
  @result Returns an initialized CKDotMacConnection object or nil if there was an error.
  */
-- (id)init;
+- (id)initWithUser:(NSString *)user;
 
 @end

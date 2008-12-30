@@ -156,6 +156,11 @@ typedef struct __flags {
     NSURL       *_URL;
 }
 
++ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
++ (NSDictionary *)sentTranscriptStringAttributes;
++ (NSDictionary *)receivedTranscriptStringAttributes;
++ (NSDictionary *)dataTranscriptStringAttributes;
+
 /*!
  @method port
  @abstract If the connection's URL has a port defined, it will be used. Otherwise,
@@ -169,9 +174,6 @@ typedef struct __flags {
 // convience method to access the state
 #define GET_STATE _state
 - (NSString *)stateName:(int)state;
-
-- (void)setDelegate:(id)delegate;	//we do not retain the delegate
-- (id)delegate;
 
 /* Properties used:
  RecursiveDirectoryDeletionTranscript is used by connections that recursively delete a directory
@@ -214,15 +216,7 @@ typedef struct __flags {
 - (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
 
 // Transcript
-+ (NSDictionary *)sentTranscriptStringAttributes;
-+ (NSDictionary *)receivedTranscriptStringAttributes;
-+ (NSDictionary *)dataTranscriptStringAttributes;
-
-- (void)appendSentStringToTranscript:(NSString *)string;
-- (void)appendReceivedStringToTranscript:(NSString *)string;
-- (void)appendDataStringToTranscript:(NSString *)string;
-
-- (void)appendAttributedStringToTranscript:(NSAttributedString *)string;
+- (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end
 

@@ -30,18 +30,6 @@ char **environ;
 
 #pragma mark -
 #pragma mark Getting Started / Tearing Down
-+ (void)connectWithPorts:(NSArray *)ports
-{
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSConnection *connection = [NSConnection connectionWithReceivePort:[ports objectAtIndex:0] sendPort:[ports objectAtIndex:1]];
-	CKSFTPTServer	*serverObject = [[CKSFTPTServer alloc] init];
-	[(CKSFTPConnection *)[connection rootProxy] setServerObject:serverObject];
-    [serverObject release];
-    
-    [[NSRunLoop currentRunLoop] run];  
-    [pool release];
-}
-
 - (id)init
 {
 	if ((self = [super init]))
@@ -293,7 +281,7 @@ char **environ;
 			isIncompleteLine = NO;
 		}
 		
-		[wrapperConnection appendReceivedStringToTranscript:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)]];
+		[wrapperConnection appendString:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)] toTranscript:CKTranscriptReceived];
 		if (strstr(buf, "sftp>") != NULL)
 		{
 			memset(buf, '\0', strlen(buf));
@@ -334,7 +322,7 @@ char **environ;
 	[passedInArguments release];
 	
 	connecting = YES;	
-	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]]];
+	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]] toTranscript:CKTranscriptReceived];
 	
 	char teletypewriterName[MAXPATHLEN];
 	struct winsize windowSize = {24, 512, 0, 0};
@@ -372,8 +360,8 @@ char **environ;
 
 	//Associate our new file stream
 	setvbuf(masterFileStream, nil, _IONBF, 0);
-	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName]];
-	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"Master Device is %d.\n", master]];
+	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName] toTranscript:CKTranscriptReceived];
+	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"Master Device is %d.\n", master] toTranscript:CKTranscriptReceived];
 	
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
@@ -383,6 +371,7 @@ char **environ;
 	BOOL wasChanging = NO;
 	BOOL wasListing = NO;
 	BOOL atSFTPPrompt = NO;
+	int numberOfPromptArrivalsToIgnore = 0;
 	while (1)
 	{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
@@ -417,7 +406,7 @@ char **environ;
 			break;
 		
 		if (serverResponseBuffer[0] != '\0')
-			[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
+			[sftpWrapperConnection appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
 		
 		if ([self bufferContainsPasswordPrompt:serverResponseBuffer] && !hasValidPassword && connecting)
 		{
@@ -450,7 +439,11 @@ char **environ;
 			{
 				wasListing = NO;
 			}
-			[sftpWrapperConnection finishedCommand];
+			
+			if (numberOfPromptArrivalsToIgnore > 0)
+				numberOfPromptArrivalsToIgnore--;
+			else
+				[sftpWrapperConnection finishedCommand];
 		}
 		else
 		{
@@ -462,6 +455,8 @@ char **environ;
 			}
 			else if ([self bufferContainsError:serverResponseBuffer])
 			{
+				//When we receive an error, we handle the error for the _lastCommand_ in SFTPConnection.. Thus, when we hit the sftp> prompt after this error, we've already handled that command, and we don't need to notify SFTPConnection about us finishing it.
+				numberOfPromptArrivalsToIgnore++;
 				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
 			else if ([sftpWrapperConnection numberOfTransfers] > 0 || cancelflag)
@@ -550,18 +545,18 @@ char **environ;
 	master = 0;
 	(void)close(master);
 	
-	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
-	[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid]];
+	[sftpWrapperConnection appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
+	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid] toTranscript:CKTranscriptReceived];
 	sftppid = 0;
 	[sftpWrapperConnection didDisconnect];
 	if (WIFEXITED(status))
-		[sftpWrapperConnection appendReceivedStringToTranscript:@"Normal exit\n"];
+		[sftpWrapperConnection appendString:@"Normal exit\n" toTranscript:CKTranscriptReceived];
 	else if (WIFSIGNALED(status))
 	{
-		[sftpWrapperConnection appendReceivedStringToTranscript:@"WIFSIGNALED:"];
-		[sftpWrapperConnection appendReceivedStringToTranscript:[NSString stringWithFormat:@"signal = %d\n", status]];
+		[sftpWrapperConnection appendString:@"WIFSIGNALED:" toTranscript:CKTranscriptReceived];
+		[sftpWrapperConnection appendString:[NSString stringWithFormat:@"signal = %d\n", status] toTranscript:CKTranscriptReceived];
 	}
 	else if (WIFSTOPPED(status))
-		[sftpWrapperConnection appendReceivedStringToTranscript:@"WIFSTOPPED\n"];
+		[sftpWrapperConnection appendString:@"WIFSTOPPED\n" toTranscript:CKTranscriptReceived];
 }
 @end
