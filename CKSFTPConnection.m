@@ -88,46 +88,12 @@ static NSString *lsform = nil;
 {
 	if ((self = [super initWithURL:URL]))
 	{
+		theSFTPTServer = [[CKSFTPTServer alloc] init];
 		connectToQueue = [[NSMutableArray array] retain];
 		currentDirectory = [[NSMutableString string] retain];
 		attemptedKeychainPublicKeyAuthentications = [[NSMutableArray array] retain];
 	}
 	return self;
-}
-
-- (void)_establishDistributedObjectsConnection
-{	
-	NSPort *receivePort = [NSPort port];
-	NSPort *sendPort = [NSPort port];
-	// intentional leak, follows TrivialThreads sample code, connectionWithReceivePort:sendPort: does not work
-	if (connectionToTServer)
-	{
-		[connectionToTServer invalidate];
-		[connectionToTServer release];
-		connectionToTServer = nil;
-	}
-	connectionToTServer = [[NSConnection alloc] initWithReceivePort:receivePort sendPort:sendPort];
-	[connectionToTServer setRootObject:self];
-	theSFTPTServer = nil;
-	NSArray *portArray = [NSArray arrayWithObjects:sendPort, receivePort, nil];
-	[NSThread detachNewThreadSelector:@selector(connectWithPorts:) toTarget:[CKSFTPTServer class] withObject:portArray];
-}
-
-- (void)setServerObject:(id)serverObject
-{
-	[serverObject setProtocolForProxy:@protocol(CKSFTPTServerInterface)];
-	theSFTPTServer = [(CKSFTPTServer<CKSFTPTServerInterface>*)serverObject retain];
-	
-	if ([connectToQueue count] > 0)
-	{
-		NSArray *parameters = [connectToQueue objectAtIndex:0];
-		
-		[self _setupConnectTimeOut];
-		
-		isConnecting = YES;
-		[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
-		[connectToQueue removeObjectAtIndex:0];
-	}
 }
 
 - (void)_setupConnectTimeOut
@@ -252,17 +218,25 @@ static NSString *lsform = nil;
 	if (isConnecting || _flags.isConnected)
 		return;
 	
-	if (!theSFTPTServer)
+	[self _setupConnectTimeOut];
+	[self setState:CKConnectionNotConnectedState];
+	isConnecting = YES;
+	[NSThread detachNewThreadSelector:@selector(_threadedSpawnSFTPTeletypeServer:) toTarget:self withObject:parameters];
+}
+- (void)_threadedSpawnSFTPTeletypeServer:(NSArray *)parameters
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	if (theSFTPTServer)
 	{
-		[connectToQueue addObject:parameters];
-		[self performSelectorOnMainThread:@selector(_establishDistributedObjectsConnection) withObject:nil waitUntilDone:NO];
-		return;
+		[theSFTPTServer release];
+		theSFTPTServer = nil;
 	}
 	
-	[self _setupConnectTimeOut];
-	
-	isConnecting = YES;
+	theSFTPTServer = [[CKSFTPTServer alloc] init];	
 	[theSFTPTServer connectToServerWithArguments:parameters forWrapperConnection:self];
+	
+	[pool release];
 }
 
 #pragma mark -
@@ -431,7 +405,7 @@ static NSString *lsform = nil;
 		//Super Über Cheap Way Until I figure out how to do this in a pretty way.
 		NSString *temporaryParentPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ConnectionKitTemporary"];
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:temporaryParentPath attributes:nil];
-		localPath = [temporaryParentPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
+		localPath = [temporaryParentPath stringByAppendingPathComponent:[NSString uuid]];
 		[data writeToFile:localPath atomically:YES];
 	}
 	else
@@ -533,6 +507,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Deletion
+
 - (void)deleteFile:(NSString *)remotePath
 {
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"path is nil!");
@@ -580,26 +555,29 @@ static NSString *lsform = nil;
 
 - (void)_writeSFTPCommand:(void *)cmd
 {
-	if (!theSFTPTServer)
-		return;
-	size_t commandLength = strlen(cmd);
-	if ( commandLength > 0 )
+	@synchronized (self)
 	{
-		// Sandvox, at least, consistently gets -1 back after sending quit
-		// this trap allows execution to continue
-		// THIS MAY BE AN ISSUE FOR OTHER APPS
-		BOOL isQuitCommand = (0 == strcmp(cmd, "quit"));
-		ssize_t bytesWritten = write(masterProxy, cmd, strlen(cmd));
-		if ( bytesWritten != commandLength && !isQuitCommand )
+		if (!theSFTPTServer)
+			return;
+		size_t commandLength = strlen(cmd);
+		if ( commandLength > 0 )
 		{
-			NSLog(@"_writeSFTPCommand: %@ failed writing command", [NSString stringWithUTF8String:cmd]);
-		}
-		
-		commandLength = strlen("\n");
-		bytesWritten = write(masterProxy, "\n", strlen("\n"));
-		if ( bytesWritten != commandLength && !isQuitCommand )
-		{
-			NSLog(@"_writeSFTPCommand %@ failed writing newline", [NSString stringWithUTF8String:cmd]);
+			// Sandvox, at least, consistently gets -1 back after sending quit
+			// this trap allows execution to continue
+			// THIS MAY BE AN ISSUE FOR OTHER APPS
+			BOOL isQuitCommand = (0 == strcmp(cmd, "quit"));
+			ssize_t bytesWritten = write(masterProxy, cmd, strlen(cmd));
+			if ( bytesWritten != commandLength && !isQuitCommand )
+			{
+				NSLog(@"_writeSFTPCommand: %@ failed writing command", [NSString stringWithUTF8String:cmd]);
+			}
+			
+			commandLength = strlen("\n");
+			bytesWritten = write(masterProxy, "\n", strlen("\n"));
+			if ( bytesWritten != commandLength && !isQuitCommand )
+			{
+				NSLog(@"_writeSFTPCommand %@ failed writing newline", [NSString stringWithUTF8String:cmd]);
+			}
 		}
 	}
 }
@@ -622,8 +600,7 @@ static NSString *lsform = nil;
 
 - (void)finishedCommand
 {
-	CKConnectionCommand *finishedCommand = [self lastCommand];
-	[self _handleFinishedCommand:finishedCommand serverErrorResponse:nil];
+	[self _handleFinishedCommand:[self lastCommand] serverErrorResponse:nil];
 }
 
 - (void)receivedErrorInServerResponse:(NSString *)serverResponse
@@ -634,68 +611,55 @@ static NSString *lsform = nil;
 
 - (void)_handleFinishedCommand:(CKConnectionCommand *)command serverErrorResponse:(NSString *)errorResponse
 {
-	CKConnectionState finishedState = GET_STATE;
-		
-	switch (finishedState)
+	@synchronized (self)
 	{
-		case CKConnectionAwaitingCurrentDirectoryState:
-			[self _finishedCommandInConnectionAwaitingCurrentDirectoryState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionChangingDirectoryState:
-			[self _finishedCommandInConnectionChangingDirectoryState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionCreateDirectoryState:
-			[self _finishedCommandInConnectionCreateDirectoryState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionAwaitingRenameState:
-			[self _finishedCommandInConnectionAwaitingRenameState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionSettingPermissionsState:
-			[self _finishedCommandInConnectionSettingPermissionState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionDeleteFileState:
-			[self _finishedCommandInConnectionDeleteFileState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionDeleteDirectoryState:
-			[self _finishedCommandInConnectionDeleteDirectoryState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionUploadingFileState:
-			[self _finishedCommandInConnectionUploadingFileState:[command command] serverErrorResponse:errorResponse];
-			break;
-		case CKConnectionDownloadingFileState:
-			[self _finishedCommandInConnectionDownloadingFileState:[command command] serverErrorResponse:errorResponse];
-			break;
-		default:
-			break;
+		CKConnectionState finishedState = GET_STATE;
+			
+		switch (finishedState)
+		{
+			case CKConnectionAwaitingCurrentDirectoryState:
+				[self _finishedCommandInConnectionAwaitingCurrentDirectoryState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionChangingDirectoryState:
+				[self _finishedCommandInConnectionChangingDirectoryState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionCreateDirectoryState:
+				[self _finishedCommandInConnectionCreateDirectoryState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionAwaitingRenameState:
+				[self _finishedCommandInConnectionAwaitingRenameState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionSettingPermissionsState:
+				[self _finishedCommandInConnectionSettingPermissionState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionDeleteFileState:
+				[self _finishedCommandInConnectionDeleteFileState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionDeleteDirectoryState:
+				[self _finishedCommandInConnectionDeleteDirectoryState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionUploadingFileState:
+				[self _finishedCommandInConnectionUploadingFileState:[command command] serverErrorResponse:errorResponse];
+				break;
+			case CKConnectionDownloadingFileState:
+				[self _finishedCommandInConnectionDownloadingFileState:[command command] serverErrorResponse:errorResponse];
+				break;
+			default:
+				break;
+		}
+		[self setState:CKConnectionIdleState];
 	}
-	[self setState:CKConnectionIdleState];
 }
 
 #pragma mark -
 
 - (void)_finishedCommandInConnectionAwaitingCurrentDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	NSError *error = nil;
-	NSString *path = [self currentDirectory];
-	if (errorResponse)
-	{
-		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Failed to change to directory");
-		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
-			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
-	}
-	
-	//We don't need to parse anything for the current directory, it's set by SFTPTServer.
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:error];
+	//We don't need to do anything beacuse SFTPTServer calls setCurrentDirectory on us.
 }
 
 - (void)_finishedCommandInConnectionChangingDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
 {
-	//Temporarily don't do anything here (handled by PWD)
-	return;
-	
 	//Typical Command string is			cd "/blah/blah/blah"
 	NSRange pathRange = NSMakeRange(4, [commandString length] - 5);
 	NSString *path = ([commandString length] > NSMaxRange(pathRange)) ? [commandString substringWithRange:pathRange] : nil;
@@ -929,12 +893,6 @@ static NSString *lsform = nil;
 
 - (void)didDisconnect
 {
-	if (connectionToTServer)
-	{
-		[connectionToTServer invalidate];
-		[connectionToTServer release];
-		connectionToTServer = nil;
-	}
 	if (theSFTPTServer)
 	{
 		[theSFTPTServer release];
@@ -1060,7 +1018,14 @@ static NSString *lsform = nil;
 	if (item && [item password] && [[item password] length] > 0 && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
 	{
 		[attemptedKeychainPublicKeyAuthentications addObject:pubKeyPath];
-		[self _writeSFTPCommandWithString:[item password]];
+		CKConnectionCommand *command = [CKConnectionCommand command:[item password]
+														 awaitState:CKConnectionIdleState
+														  sentState:CKConnectionSentPasswordState
+														  dependant:nil
+														   userInfo:nil];
+		[self pushCommandOnHistoryQueue:command];
+		_state = [command sentState];
+		[self sendCommand:[command command]];
 		return;
 	}
 	
@@ -1080,7 +1045,14 @@ static NSString *lsform = nil;
 	
 	if (passphrase)
 	{
-		[self _writeSFTPCommandWithString:passphrase];
+		CKConnectionCommand *command = [CKConnectionCommand command:passphrase
+														 awaitState:CKConnectionIdleState
+														  sentState:CKConnectionSentPasswordState
+														  dependant:nil
+														   userInfo:nil];
+		[self pushCommandOnHistoryQueue:command];
+		_state = [command sentState];
+		[self sendCommand:[command command]];		
 		return;
 	}	
 	

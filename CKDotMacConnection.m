@@ -117,11 +117,11 @@
 		{
 			if (passwordLen > 0)
 			{
-				*password = [[[NSString alloc] initWithBytes:buffer length:passwordLen encoding:[NSString defaultCStringEncoding]] autorelease];
+				if (password) *password = [[[NSString alloc] initWithBytes:buffer length:passwordLen encoding:[NSString defaultCStringEncoding]] autorelease];
 			}
 			else
 			{
-				*password = @""; // if we have noErr but also no length, password is empty
+				if (password) *password = @""; // if we have noErr but also no length, password is empty
 			}
 
 			// release buffer allocated by SecKeychainFindGenericPassword
@@ -140,19 +140,45 @@
 	// Sanitise input
 	if (URL)
     {
-        NSParameterAssert([[URL host] isEqualToString:@"idisk.mac.com"]);
+        NSParameterAssert([[URL scheme] isEqualToString:@"http"]);
+		NSParameterAssert([[URL host] isEqualToString:@"idisk.mac.com"]);
     }
 	else
 	{
 		URL = [NSURL URLWithString:@"http://idisk.mac.com"];
 	}
 	
+	// Make sure we have a username to connect
+	NSString *path = [URL path];
+	if (!path || [path isEqualToString:@""] || [path isEqualToString:@"/"])
+	{
+		NSString *user = nil;
+		[[self class] getDotMacAccountName:&user password:NULL];
+		
+		if (user)
+		{
+			URL = [NSURL URLWithString:[NSString stringWithFormat:@"/%@/", user]
+						 relativeToURL:URL];
+		}
+		else
+		{
+			[self release];
+			return nil;
+		}
+	}
+	
     return [super initWithURL:URL];
 }
 
-- (id)init
+- (id)initWithUser:(NSString *)user;
 {
-	return [self initWithURL:nil];
+	NSString *path = (user) ? user : @"";
+	NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:path];
+	
+	self = [self initWithURL:URL];
+	
+	[URL release];
+	return self;
 }
 
 #pragma mark -
@@ -480,8 +506,7 @@
 
 - (NSString *)webDAVPathForIDiskPath:(NSString *)iDiskPath
 {
-	NSString *currentPath = [super currentDirectory];
-	NSString *result = [[currentPath firstPathComponent] stringByAppendingPathComponent:iDiskPath];
+	NSString *result = [[[[self URL] path] firstPathComponent] stringByAppendingPathComponent:iDiskPath];
 	return result;
 }
 
@@ -707,12 +732,6 @@
 
 #pragma mark authentication
 
-- (void)connect
-{
-	// Request authorization before connecting in order to store current directory
-    [self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
-}
-
 /*	Pull a proposed credential from the user's MobileMe account instead of credential storage
  */
 - (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
@@ -736,20 +755,7 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-	if ([self isConnected])
-	{
-		[super useCredential:credential forAuthenticationChallenge:challenge];
-	}
-	else
-	{
-		// Use username for directory base
-		[myCurrentDirectory release];
-		myCurrentDirectory = [[NSString alloc] initWithFormat:@"/%@/", [credential user]];
-		
-		// This was sort of a fake authentication, so reset failure count
-		_authenticationFailureCount = -1;	// Again, bit of a hack. CKHTTPConnection will do ++
-		[super connect];
-	}
+	[super useCredential:credential forAuthenticationChallenge:challenge];
 }
 
 @end

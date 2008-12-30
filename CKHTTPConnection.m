@@ -160,15 +160,15 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 	if (_flags.transcript)
 	{
-		[self appendReceivedStringToTranscript:[NSString stringWithFormat:@"%@\n", [response description]]];
-		[self appendDataStringToTranscript:[NSString stringWithFormat:@"%@\n", [response formattedResponse]]];
+		[self appendString:[NSString stringWithFormat:@"%@\n", [response description]] toTranscript:CKTranscriptReceived];
+		[self appendString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] toTranscript:CKTranscriptData];
 	}
 	
 	if ([response code] == 401)
 	{		
 		if (_flags.transcript)
 		{
-			[self appendSentStringToTranscript:[NSString stringWithFormat:@"Connection needs Authorization\n"]];
+			[self appendString:[NSString stringWithFormat:@"Connection needs Authorization\n"] toTranscript:CKTranscriptSent];
 		}
 		// need to append authorization
 		NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
@@ -219,7 +219,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		{
 			if (_flags.transcript)
 			{
-				[self appendSentStringToTranscript:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"]];
+				[self appendString:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"] toTranscript:CKTranscriptSent];
 			}
 			@throw [NSException exceptionWithName:NSInternalInconsistencyException
 										   reason:@"Failed at Basic and Digest Authentication"
@@ -290,7 +290,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		if (_flags.transcript)
 		{
-			[self appendSentStringToTranscript:[NSString stringWithFormat:@"%@\n", [req description]]];
+			[self appendString:[NSString stringWithFormat:@"%@\n", [req description]] toTranscript:CKTranscriptSent];
 		}
 		
 		[self initiatingNewRequest:req withPacket:packet];
