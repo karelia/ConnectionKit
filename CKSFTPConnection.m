@@ -993,8 +993,16 @@ static NSString *lsform = nil;
 {
 	if (_currentPassword)
     {
-        [self _writeSFTPCommandWithString:_currentPassword];
-        [_currentPassword release]; _currentPassword = nil;
+        CKConnectionCommand *command = [CKConnectionCommand command:_currentPassword
+													     awaitState:CKConnectionIdleState
+													      sentState:CKConnectionSentPasswordState
+													      dependant:nil
+													       userInfo:nil];
+		[self pushCommandOnHistoryQueue:command];
+		_state = [command sentState];
+		[self sendCommand:[command command]];
+
+		[_currentPassword release]; _currentPassword = nil;
     }
     else
 	{
@@ -1005,7 +1013,14 @@ static NSString *lsform = nil;
 - (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo
 {
 	//Authenticity of the host couldn't be established. yes/no scenario
-	[self _writeSFTPCommandWithString:@"yes"];
+	CKConnectionCommand *command = [CKConnectionCommand command:@"yes"
+													 awaitState:CKConnectionIdleState
+													  sentState:CKConnectionIdleState
+													  dependant:nil
+													   userInfo:nil];
+	[self pushCommandOnHistoryQueue:command];
+	_state = [command sentState];
+	[self sendCommand:[command command]];
 }
 - (void)passphraseRequested:(NSString *)buffer
 {
