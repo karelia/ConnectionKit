@@ -172,8 +172,7 @@
 
 - (id)initWithUser:(NSString *)user;
 {
-	NSString *path = (user) ? user : @"";
-	NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:path];
+	NSURL *URL = (user) ? [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:user] : nil;
 	
 	self = [self initWithURL:URL];
 	
