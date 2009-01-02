@@ -944,6 +944,16 @@ static NSImage *symFile = nil;
 	[self setIsLoading: NO];
 }
 
+/*	Forward on to our delegate if supported
+ */
+- (void)connection:(id <CKConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+{
+	if ([[self delegate] respondsToSelector:_cmd])
+	{
+		[[self delegate] connection:aConnection appendString:string toTranscript:transcript];
+	}
+}
+
 #pragma mark ----=NStableView delegate=----
 - (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
 {
