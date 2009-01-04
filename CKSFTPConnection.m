@@ -174,7 +174,7 @@ static NSString *lsform = nil;
 	if (enableCompression)
 		[parameters addObject:@"-C"];
 	
-    if ([self port])
+    if ([[self URL] port])
     {
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
     }
