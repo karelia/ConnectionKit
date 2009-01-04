@@ -1031,6 +1031,17 @@ NSDictionary *sDataAttributes = nil;
 	}
 }
 
+- (void)appendToTranscript:(CKTranscriptType)transcript format:(NSString *)format, ...
+{
+	va_list arguments;
+	va_start(arguments, format);
+	NSString *string = [[NSString alloc] initWithFormat:format arguments:arguments];
+	va_end(arguments);
+	
+	[self appendString:string toTranscript:transcript];
+	[string release];
+}
+
 @end
 
 

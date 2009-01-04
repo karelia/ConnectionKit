@@ -266,7 +266,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:@"%@\n", commandToEcho] toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:@"%@\n", commandToEcho];
 	}
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
@@ -360,7 +360,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer] toTranscript:CKTranscriptReceived];
+		[self appendToTranscript:CKTranscriptReceived format:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer];
 	}
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
@@ -2236,7 +2236,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendString:[NSString stringWithFormat:@"Receive Stream Error: %@\n", [_receiveStream streamError]] toTranscript:CKTranscriptSent];
+				[self appendToTranscript:CKTranscriptSent format:@"Receive Stream Error: %@\n", [_receiveStream streamError]];
 			}
 			
 
@@ -2440,7 +2440,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendString:[NSString stringWithFormat:@"Send Stream Error: %@\n", [_receiveStream streamError]] toTranscript:CKTranscriptSent];
+				[self appendToTranscript:CKTranscriptSent format:@"Send Stream Error: %@\n", [_receiveStream streamError]];
 			}
 			KTLog(CKStreamDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
@@ -2779,8 +2779,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	if (_flags.transcript)
 	{
-		NSString *timeout = [NSString stringWithString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")];
-		[self appendString:[NSString stringWithFormat:@"%@\n", timeout] toTranscript:CKTranscriptData];
+		[self appendToTranscript:CKTranscriptData format:@"%@\n", LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")];
 	}
 	
 	[timer invalidate];

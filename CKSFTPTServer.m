@@ -361,8 +361,8 @@ char **environ;
 
 	//Associate our new file stream
 	setvbuf(masterFileStream, nil, _IONBF, 0);
-	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName] toTranscript:CKTranscriptReceived];
-	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"Master Device is %d.\n", master] toTranscript:CKTranscriptReceived];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Slave terminal device is %s.\n", teletypewriterName];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Master Device is %d.\n", master];
 	
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
@@ -547,7 +547,7 @@ char **environ;
 	(void)close(master);
 	
 	[sftpWrapperConnection appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
-	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid] toTranscript:CKTranscriptReceived];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"\nsftp task with pid %d ended.\n", sftppid];
 	sftppid = 0;
 	[sftpWrapperConnection didDisconnect];
 	if (WIFEXITED(status))
@@ -555,7 +555,7 @@ char **environ;
 	else if (WIFSIGNALED(status))
 	{
 		[sftpWrapperConnection appendString:@"WIFSIGNALED:" toTranscript:CKTranscriptReceived];
-		[sftpWrapperConnection appendString:[NSString stringWithFormat:@"signal = %d\n", status] toTranscript:CKTranscriptReceived];
+		[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"signal = %d\n", status];
 	}
 	else if (WIFSTOPPED(status))
 		[sftpWrapperConnection appendString:@"WIFSTOPPED\n" toTranscript:CKTranscriptReceived];

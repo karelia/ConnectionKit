@@ -219,7 +219,7 @@ typedef struct __flags {
 
 // Transcript
 - (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
-
+- (void)appendToTranscript:(CKTranscriptType)transcript format:(NSString *)format, ...;
 @end
 
 
