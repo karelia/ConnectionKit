@@ -139,10 +139,11 @@ static NSString *lsform = nil;
 
 - (void)connect
 {
-	if (isConnecting)
-		return;
+	if (_isConnecting || [self isConnected]) return;
     
     
+	_isConnecting = YES;
+	
     // Can't connect till we have a password (due to using the SFTP command-line tool)
     NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[self URL] host]
                                                                                   port:[self port]
@@ -215,12 +216,9 @@ static NSString *lsform = nil;
 			break;
     }
 	
-	if (isConnecting || _flags.isConnected)
-		return;
 	
 	[self _setupConnectTimeOut];
 	[self setState:CKConnectionNotConnectedState];
-	isConnecting = YES;
 	[NSThread detachNewThreadSelector:@selector(_threadedSpawnSFTPTeletypeServer:) toTarget:self withObject:parameters];
 }
 - (void)_threadedSpawnSFTPTeletypeServer:(NSArray *)parameters
@@ -882,7 +880,7 @@ static NSString *lsform = nil;
 {
 	rootDirectory = [[NSString alloc] initWithString:currentDirectory];
 	
-	isConnecting = NO;
+	_isConnecting = NO;
 	_flags.isConnected = YES;
 	
 	if (_flags.didConnect)

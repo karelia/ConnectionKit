@@ -111,11 +111,11 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)connect
 {
-	if (_flags.transcript)
+	if (!_isConnecting && ![self isConnected])
 	{
 		[self appendString:LocalizedStringInConnectionKitBundle(@"Connecting...\n", @"file transcript") toTranscript:CKTranscriptSent];
+		[super connect];
 	}
-	[super connect];
 }
 
 - (void)sendCommand:(id)command

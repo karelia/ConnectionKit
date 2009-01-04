@@ -391,6 +391,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)connect
 {
+	if (_isConnecting || [self isConnected]) return;
+	
+	
 	_isForceDisconnecting = NO;
 	
 	int connectionPort = [self port];
