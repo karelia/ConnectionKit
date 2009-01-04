@@ -112,9 +112,14 @@ typedef enum {
  @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
  */
 - (void)connect;
+/*!
+ @method isConnected
+ @result Returns YES once the connection has successfully connected to the server
+ */
 - (BOOL)isConnected;
 - (BOOL)isBusy;
 
+ 
 /*!
  @method disconnect
  @abstract Ends the connection after any other items in the queue have been processed.

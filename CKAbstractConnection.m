@@ -334,22 +334,28 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)connect
 {
-	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+	if (!_isConnecting && ![self isConnected])
+	{
+		_isConnecting = YES;
+		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+	}
 }
 
+/*	Subclasses are expected to implement their own connection code before calling this method to send the callback
+ */
 - (void)threadedConnect
 {
 	_flags.isConnected = YES;
+	_isConnecting = NO;
+	
+	// Inform delegate
 	if (_flags.didConnect)
 	{
 		[_forwarder connection:self didConnectToHost:[[self URL] host] error:nil];
 	}
 }
 
-- (BOOL)isConnected
-{
-	return _flags.isConnected;
-}
+- (BOOL)isConnected { return _flags.isConnected; }
 
 - (void)disconnect
 {

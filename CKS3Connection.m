@@ -936,7 +936,12 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)connect
 {
-    // Request authentication before connecting
+    if (_isConnecting || [self isConnected]) return;
+	
+	
+	_isConnecting = YES;
+	
+	// Request authentication before connecting
     _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
                                                                                  proposedCredential:nil
                                                                                previousFailureCount:0

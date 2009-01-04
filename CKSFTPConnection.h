@@ -19,7 +19,6 @@ extern NSString *SFTPErrorDomain;
 	int masterProxy;
 	CKSFTPTServer *theSFTPTServer;
 	
-	BOOL isConnecting;
 	NSString *rootDirectory;
 	NSMutableString *currentDirectory;
 

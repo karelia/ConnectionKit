@@ -141,7 +141,9 @@ typedef struct __flags {
     
 	id _delegate;
     
+	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
 	connectionFlags _flags;
+	
 	
 	UKKQueue *_editWatcher;
 	NSMutableDictionary *_edits;
