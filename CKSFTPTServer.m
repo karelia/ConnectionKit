@@ -322,7 +322,8 @@ char **environ;
 	[passedInArguments release];
 	
 	connecting = YES;	
-	[sftpWrapperConnection appendString:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]] toTranscript:CKTranscriptReceived];
+	[sftpWrapperConnection appendString:[[commandArguments componentsJoinedByString:@" "] stringByAppendingString:@"\n"]
+						   toTranscript:CKTranscriptReceived];
 	
 	char teletypewriterName[MAXPATHLEN];
 	struct winsize windowSize = {24, 512, 0, 0};
