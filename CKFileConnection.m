@@ -205,8 +205,9 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"), aName, aPermissions]
-			  toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"),
+														 aName,
+														 aPermissions];
 	}
 	
 	NSDictionary *fmDictionary = nil;
@@ -292,7 +293,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath] toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath];;
 	}
 	
 	NSError *error = nil;	
@@ -331,7 +332,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path] toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path];
 	}
 	
 	NSError *error = nil;	
@@ -422,7 +423,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]]  toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]];
 	}
 		
 	if (flag)
@@ -551,7 +552,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]] toTranscript:CKTranscriptSent];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]];
 	}
 	
 	if (flag)

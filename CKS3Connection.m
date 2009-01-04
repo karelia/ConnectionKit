@@ -418,7 +418,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				if (_flags.transcript)
 				{
-					[self appendString:[NSString stringWithFormat:@"%@\n\n", header] toTranscript:CKTranscriptReceived];
+					[self appendToTranscript:CKTranscriptReceived format:@"%@\n\n", header];
 				}
 				
 				unsigned start = headerRange.location + headerRange.length;
