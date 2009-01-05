@@ -265,6 +265,13 @@ typedef enum {
  @param challenge The NSURLAuthenticationChallenge to start authentication for
  */
 - (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+/*!
+ @method connection:didCancelAuthenticationChallenge:
+ @abstract Operates exactly the same as its NSURLConnection counterpart.
+ @param connection The connection sending the message.
+ @param challenge The challenge that was canceled.
+ */
+- (void)connection:(id <CKConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 
