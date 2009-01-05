@@ -127,6 +127,6 @@ typedef enum {
 
 
 @interface NSObject (CKFTPConnectionDelegate)
-//- (void)connection:(CKFTPConnection *)connection didRequestAccountName:(id <CKFTPAccountRequestListener>)listener;
+- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 @end
 

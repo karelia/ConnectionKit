@@ -431,10 +431,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 332: //need account
 		{
-			if (_flags.needsAccount)
+			id delegate = [self delegate];
+			if (delegate && [delegate respondsToSelector:@selector(connection:needsAccountForUsername:)])
 			{
-				NSString *account;
-				account = [_forwarder connection:self needsAccountForUsername:nil]; // TODO: Handle this more gracefully
+				NSString *account = [_forwarder connection:self needsAccountForUsername:nil]; // TODO: Handle this more gracefully
 				if (account)
 				{
 					[self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];

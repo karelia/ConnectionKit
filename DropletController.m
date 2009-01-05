@@ -251,11 +251,6 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	[a runModal];
 }
 
-//- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username
-//{
-//	
-//}
-
 - (CKTransferRecord *)recordWithPath:(NSString *)path
 {
 	NSString *chompedPath = [path substringFromIndex:[[myHost initialPath] length]];

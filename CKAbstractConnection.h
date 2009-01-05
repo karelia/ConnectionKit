@@ -112,7 +112,6 @@ typedef struct __flags {
 	unsigned downloadPercent:1;
 	unsigned downloadProgressed:1;
 	unsigned error:1;
-	unsigned needsAccount:1;
 	unsigned rename:1;
 	unsigned uploadFinished:1;
 	unsigned uploadPercent:1;
