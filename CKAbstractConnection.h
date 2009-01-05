@@ -120,6 +120,7 @@ typedef struct __flags {
 	unsigned inBulk:1;
 	unsigned fileCheck:1;
 	unsigned authorizeConnection:1;
+    unsigned cancelAuthorization:1;
 	unsigned isRecursiveUploading:1;
 	unsigned isRecursiveDeleting:1;
 	unsigned passphrase:1;

@@ -127,7 +127,9 @@ enum {
 
 @end
 
+
 @interface NSObject (CKConnectionOpenPanelDelegate)
+
 /*!
  @method connectionOpenPanel:didReceiveAuthenticationChallenge:
  @abstract Sent when the connection panel must authenticate a challenge in order to browse the connection.
@@ -137,6 +139,18 @@ enum {
  @param challenge The authentication challenge that must be authenticated in order to make the connection.
  */
 - (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+/*!
+ @method connection:didCancelAuthenticationChallenge:
+ @abstract Operates exactly the same as its NSURLConnection counterpart.
+ @param panel The panel sending the message.
+ @param challenge The challenge that was canceled.
+ */
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+
+// Do the same as their CKConnection counterparts
 - (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveError:(NSError *)error;
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 @end
 

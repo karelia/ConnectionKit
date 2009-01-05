@@ -285,6 +285,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.directoryContentsStreamed		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
 	_flags.fileCheck						= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:error:)];
 	_flags.authorizeConnection				= [del respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)];
+    _flags.cancelAuthorization              = [del respondsToSelector:@selector(connection:didCancelAuthenticationChallenge:)];
 	_flags.passphrase						= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
 	_flags.transcript						= [del respondsToSelector:@selector(connection:appendString:toTranscript:)];
 }

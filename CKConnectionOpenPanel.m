@@ -943,9 +943,9 @@ static NSImage *symFile = nil;
  */
 - (void)connection:(id <CKConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 {
-	if ([[self delegate] respondsToSelector:_cmd])
+	if ([[self delegate] respondsToSelector:@selector(connectionOpenPanel:appendString:toTranscript:)])
 	{
-		[[self delegate] connection:aConnection appendString:string toTranscript:transcript];
+		[[self delegate] connectionOpenPanel:self appendString:string toTranscript:transcript];
 	}
 }
 
