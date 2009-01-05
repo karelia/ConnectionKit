@@ -278,7 +278,6 @@ NSDictionary *sDataAttributes = nil;
 	_flags.downloadPercent					= [del respondsToSelector:@selector(connection:download:progressedTo:)];
 	_flags.downloadProgressed				= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
 	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
-	_flags.needsAccount						= [del respondsToSelector:@selector(connection:needsAccountForUsername:)];
 	_flags.rename							= [del respondsToSelector:@selector(connection:didRename:to:error:)];
 	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:error:)];
 	_flags.uploadPercent					= [del respondsToSelector:@selector(connection:upload:progressedTo:)];

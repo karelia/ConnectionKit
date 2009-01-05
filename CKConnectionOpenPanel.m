@@ -796,11 +796,6 @@
 	[self closePanel: nil];
 }
 
-/*- (NSString *)connection:(CKAbstractConnection *)aConn needsAccountForUsername:(NSString *)username
-{
-	//	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
-}*/
-
 - (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	[aConn changeToDirectory:dirPath];
