@@ -354,7 +354,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	if (_parent == nil)
 		return [NSString stringWithFormat:@"/%@", _name];
-	return [NSString stringWithFormat:@"%@/%@", [_parent path], _name];
+	return [[_parent path] stringByAppendingPathComponent:_name];	// Old code was @"%@/%@" but it broke if _parent was just /
 }
 
 - (void)addContent:(CKTransferRecord *)record
