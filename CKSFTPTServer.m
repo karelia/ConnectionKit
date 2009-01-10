@@ -322,7 +322,7 @@ char **environ;
 	[passedInArguments release];
 	
 	connecting = YES;	
-	[sftpWrapperConnection appendString:[[commandArguments componentsJoinedByString:@" "] stringByAppendingString:@"\n"]
+	[sftpWrapperConnection appendString:[commandArguments componentsJoinedByString:@" "]
 						   toTranscript:CKTranscriptReceived];
 	
 	char teletypewriterName[MAXPATHLEN];
@@ -361,8 +361,8 @@ char **environ;
 
 	//Associate our new file stream
 	setvbuf(masterFileStream, nil, _IONBF, 0);
-	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Slave terminal device is %s.\n", teletypewriterName];
-	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Master Device is %d.\n", master];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Slave terminal device is %s.", teletypewriterName];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"Master Device is %d.", master];
 	
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
@@ -547,17 +547,17 @@ char **environ;
 	(void)close(master);
 	
 	[sftpWrapperConnection appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
-	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"\nsftp task with pid %d ended.\n", sftppid];
+	[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"sftp task with pid %d ended.", sftppid];
 	sftppid = 0;
 	[sftpWrapperConnection didDisconnect];
 	if (WIFEXITED(status))
-		[sftpWrapperConnection appendString:@"Normal exit\n" toTranscript:CKTranscriptReceived];
+		[sftpWrapperConnection appendString:@"Normal exit" toTranscript:CKTranscriptReceived];
 	else if (WIFSIGNALED(status))
 	{
 		[sftpWrapperConnection appendString:@"WIFSIGNALED:" toTranscript:CKTranscriptReceived];
-		[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"signal = %d\n", status];
+		[sftpWrapperConnection appendToTranscript:CKTranscriptReceived format:@"signal = %d", status];
 	}
 	else if (WIFSTOPPED(status))
-		[sftpWrapperConnection appendString:@"WIFSTOPPED\n" toTranscript:CKTranscriptReceived];
+		[sftpWrapperConnection appendString:@"WIFSTOPPED" toTranscript:CKTranscriptReceived];
 }
 @end

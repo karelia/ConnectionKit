@@ -266,7 +266,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:@"%@\n", commandToEcho];
+		[self appendString:commandToEcho toTranscript:CKTranscriptSent];
 	}
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
@@ -360,7 +360,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptReceived format:([buffer hasSuffix:@"\n"] ? @"%@" : @"%@\n"), buffer];
+		[self appendString:buffer toTranscript:CKTranscriptReceived];
 	}
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
@@ -2236,7 +2236,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendToTranscript:CKTranscriptSent format:@"Receive Stream Error: %@\n", [_receiveStream streamError]];
+				[self appendToTranscript:CKTranscriptSent format:@"Receive Stream Error: %@", [_receiveStream streamError]];
 			}
 			
 
@@ -2440,7 +2440,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_flags.transcript)
 			{
-				[self appendToTranscript:CKTranscriptSent format:@"Send Stream Error: %@\n", [_receiveStream streamError]];
+				[self appendToTranscript:CKTranscriptSent format:@"Send Stream Error: %@", [_receiveStream streamError]];
 			}
 			KTLog(CKStreamDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
@@ -2779,7 +2779,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptData format:@"%@\n", LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")];
+		[self appendString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")
+			  toTranscript:CKTranscriptData];
 	}
 	
 	[timer invalidate];
