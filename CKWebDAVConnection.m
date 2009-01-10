@@ -392,7 +392,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				if (_flags.transcript)
 				{
-					[self appendToTranscript:CKTranscriptReceived format:@"%@\n\n", header];
+					[self appendToTranscript:CKTranscriptReceived format:@"%@\n", header];
 				}
 				
 				unsigned start = headerRange.location + headerRange.length;

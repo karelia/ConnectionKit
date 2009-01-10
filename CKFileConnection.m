@@ -113,7 +113,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (!_isConnecting && ![self isConnected])
 	{
-		[self appendString:LocalizedStringInConnectionKitBundle(@"Connecting...\n", @"file transcript") toTranscript:CKTranscriptSent];
+		[self appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
 		[super connect];
 	}
 }
@@ -130,7 +130,7 @@ checkRemoteExistence:(NSNumber *)check;
     myFileManager = [[NSFileManager alloc] init];
 	if (_flags.transcript)
 	{
-		[self appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System\n", @"file transcript") toTranscript:CKTranscriptSent];
+		[self appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	}
 	[self setState:CKConnectionIdleState];
 }
@@ -205,7 +205,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"),
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)", @"file transcript"),
 														 aName,
 														 aPermissions];
 	}
@@ -293,7 +293,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath];;
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@", @"file transcript"), fromPath, toPath];;
 	}
 	
 	NSError *error = nil;	
@@ -332,7 +332,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Deleting File %@", @"file transcript"), path];
 	}
 	
 	NSError *error = nil;	
@@ -423,7 +423,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@", @"file transcript"), [upload localPath], [upload remotePath]];
 	}
 		
 	if (flag)
@@ -552,7 +552,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if (_flags.transcript)
 	{
-		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]];
+		[self appendToTranscript:CKTranscriptSent format:LocalizedStringInConnectionKitBundle(@"Writing data to %@", @"file transcript"), [upload remotePath]];
 	}
 	
 	if (flag)

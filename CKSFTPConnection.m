@@ -1025,6 +1025,7 @@ static NSString *lsform = nil;
 	_state = [command sentState];
 	[self sendCommand:[command command]];
 }
+
 - (void)passphraseRequested:(NSString *)buffer
 {
 	//Typical Buffer: Enter passphrase for key '/Users/brian/.ssh/id_rsa': 
