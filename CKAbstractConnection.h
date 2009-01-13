@@ -148,14 +148,12 @@ typedef struct __flags {
 	UKKQueue *_editWatcher;
 	NSMutableDictionary *_edits;
 	CKAbstractConnection *_editingConnection;
-	
-	NSMutableDictionary *_properties;
-	
+		
 	NSMutableDictionary *_cachedDirectoryContents;
     
 @private
-    NSString    *_name;
-    NSURL       *_URL;
+    NSString            *_name;
+    CKConnectionRequest *_request;
 }
 
 + (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
@@ -177,13 +175,6 @@ typedef struct __flags {
 #define GET_STATE _state
 - (NSString *)stateName:(int)state;
 
-/* Properties used:
- RecursiveDirectoryDeletionTranscript is used by connections that recursively delete a directory
- FileCheckingTranscript is used by connections that check for a files existence
- */
-- (void)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (void)removePropertyForKey:(NSString *)key;
 
 // we cache directory contents so when changing to an existing directory we show the 
 // last cached version and issue a new listing. You should keep a current path in your delegate

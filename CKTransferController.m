@@ -386,9 +386,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 		if (!myVerificationConnection && myFlags.verifyTransfers)
 		{
-			myVerificationConnection = [[self connection] copyWithZone:[self zone]];
+			id <CKConnection> connection = [self connection];
+            myVerificationConnection = [[[connection class] alloc] initWithRequest:[connection request]];
+            [myVerificationConnection setDelegate:self];
 			[myVerificationConnection setName:@"verification"];
-			[myVerificationConnection setDelegate:self];
 			[myVerificationConnection connect];
 		}
 		

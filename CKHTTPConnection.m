@@ -61,9 +61,9 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 + (NSInteger)defaultPort { return 80; }
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if ((self = [super initWithURL:URL]))
+	if ((self = [super initWithRequest:request]))
 	{
 		myResponseBuffer = [[NSMutableData data] retain];
 	}
@@ -280,7 +280,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		
 		//make sure we set the host name and set anything else which is needed
-		[req setHeader:[[self URL] host] forKey:@"Host"];
+		[req setHeader:[[[self request] URL] host] forKey:@"Host"];
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		
@@ -407,9 +407,9 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 - (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod
 {
 	// Create authentication challenge object
-	NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[self URL] host]
+	NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
 																				  port:[self port]
-																			  protocol:[[self URL] scheme]
+																			  protocol:[[[self request] URL] scheme]
 																				 realm:nil
 																  authenticationMethod:authenticationMethod];
 	

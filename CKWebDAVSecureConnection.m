@@ -50,9 +50,9 @@
 
 #pragma mark init methods
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (self = [super initWithURL:URL])
+	if (self = [super initWithRequest:request])
 	{
 		[self setSSLOn:YES];
 	}

@@ -84,9 +84,9 @@ static NSString *lsform = nil;
 	return [NSArray arrayWithObjects:@"sftp", @"ssh", nil];
 }
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if ((self = [super initWithURL:URL]))
+	if ((self = [super initWithRequest:request]))
 	{
 		theSFTPTServer = [[CKSFTPTServer alloc] init];
 		connectToQueue = [[NSMutableArray array] retain];
@@ -145,7 +145,7 @@ static NSString *lsform = nil;
 	_isConnecting = YES;
 	
     // Can't connect till we have a password (due to using the SFTP command-line tool)
-    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[self URL] host]
+    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
                                                                                   port:[self port]
                                                                               protocol:@"ssh"
                                                                                  realm:nil
@@ -174,7 +174,7 @@ static NSString *lsform = nil;
 	if (enableCompression)
 		[parameters addObject:@"-C"];
 	
-    if ([[self URL] port])
+    if ([[[self request] URL] port])
     {
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
     }
@@ -185,7 +185,7 @@ static NSString *lsform = nil;
     }
 	else
 	{
-		NSString *publicKeyPath = [self propertyForKey:@"CKSFTPPublicKeyPath"];
+		NSString *publicKeyPath = [[self request] SFTPPublicKeyPath];
 		if (publicKeyPath && [publicKeyPath length] > 0)
 			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=%@", publicKeyPath]];
 		else
@@ -195,7 +195,7 @@ static NSString *lsform = nil;
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
 		}
 	}
-	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [[self URL] host]]];
+	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [[[self request] URL] host]]];
 	
 	switch (sshversion())
 	{
@@ -869,10 +869,10 @@ static NSString *lsform = nil;
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  localizedDescription, NSLocalizedDescriptionKey, 
-								  [[self URL] host], ConnectionHostKey, nil];
+								  [[[self request] URL] host], ConnectionHostKey, nil];
 		
 		NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
-		[_forwarder connection:self didConnectToHost:[[self URL] host] error:error];
+		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:error];
 	}
 }
 
@@ -885,7 +885,7 @@ static NSString *lsform = nil;
 	
 	if (_flags.didConnect)
     {
-		[_forwarder connection:self didConnectToHost:[[self URL] host] error:nil];
+		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:nil];
     }
 }
 
@@ -907,7 +907,7 @@ static NSString *lsform = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 	}
 }
 
@@ -1052,13 +1052,15 @@ static NSString *lsform = nil;
 	NSString *passphrase = nil;
 	if (_flags.passphrase)
 	{
-		passphrase = [_forwarder connection:self passphraseForHost:[[self URL] host] username:[[self URL] user] publicKeyPath:pubKeyPath];
+		passphrase = [_forwarder connection:self
+                          passphraseForHost:[[[self request] URL] host]
+                                   username:[[[self request] URL] user] publicKeyPath:pubKeyPath];
 	}
 	else
 	{
 		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
 		CKSSHPassphrase *passphraseFetcher = [[CKSSHPassphrase alloc] init];
-		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[[self URL] user]];
+		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[[[self request] URL] user]];
 		[passphraseFetcher release];
 	}
 	
@@ -1133,4 +1135,21 @@ static NSString *lsform = nil;
 }
 
 @end
+
+
+@implementation CKConnectionRequest (CKSFTPConnection)
+
+- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
+
+@end
+
+@implementation CKMutableConnectionRequest (CKSFTPConnection)
+
+- (void)setSFTPPublicKeyPath:(NSString *)path
+{
+    [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
+}
+
+@end
+
 

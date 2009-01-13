@@ -586,7 +586,7 @@ static NSImage *sHostIcon = nil;
 	
 	if (_URL)
 	{
-		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithURL:_URL];
+		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:[CKConnectionRequest requestWithURL:_URL]];
 	}
 	
 	if (!connection && _connectionType && ![_connectionType isEqualToString:@""] && ![_connectionType isEqualToString:@"Auto Select"])

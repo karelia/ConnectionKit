@@ -126,6 +126,16 @@ typedef enum {
 @end
 
 
+@interface CKConnectionRequest (CKFTPConnection)
+// nil signifies the usual fallback chain of connection types
+- (NSString *)FTPDataConnectionType;
+@end
+
+@interface CKMutableConnectionRequest (CKFTPConnection)
+- (void)setFTPDataConnectionType:(NSString *)type;
+@end
+
+
 @interface NSObject (CKFTPConnectionDelegate)
 - (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 @end

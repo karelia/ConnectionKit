@@ -85,9 +85,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 @implementation CKStreamBasedConnection
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (self = [super initWithURL:URL])
+	if (self = [super initWithRequest:request])
 	{
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
@@ -296,23 +296,23 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (BOOL)openStreamsToPort:(unsigned)port
 {
-	NSHost *host = [CKCacheableHost hostWithName:[[self URL] host]];
+	NSHost *host = [CKCacheableHost hostWithName:[[[self request] URL] host]];
 	if(!host){
-		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", [[self URL] host]);
+		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", [[[self request] URL] host]);
 		
         if (_flags.didConnect) {
 			NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain 
 												 code:EHOSTUNREACH
 											 userInfo:
 				[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
-					[[self URL] host], ConnectionHostKey, nil]];
-			[_forwarder connection:self didConnectToHost:[[self URL] host] error:error];
+					[[[self request] URL] host], ConnectionHostKey, nil]];
+			[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:error];
 		}
 		return NO;
 	}
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
-		[host setValue:[NSArray arrayWithObject:[[self URL] host]] forKey:@"names"]; // KVC hack
+		[host setValue:[NSArray arrayWithObject:[[[self request] URL] host]] forKey:@"names"]; // KVC hack
 	}
 	
 	if ([[host addresses] count] > 1) {
@@ -367,13 +367,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	
 	if(!_receiveStream || !_sendStream){
-		KTLog(CKTransportDomain, KTLogError, @"Cannot create a stream to the host: %@", [[self URL] host]);
+		KTLog(CKTransportDomain, KTLogError, @"Cannot create a stream to the host: %@", [[[self request] URL] host]);
 		
 		if (_flags.error)
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
-									  [[self URL] host], ConnectionHostKey, nil];
+									  [[[self request] URL] host], ConnectionHostKey, nil];
 			NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
 			[_forwarder connection:self didReceiveError:error];
 		}
@@ -723,7 +723,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:CKConnectionErrorDomain
 											code:CKConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[self URL] host]], NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[[self request] URL] host]], NSLocalizedDescriptionKey, [[[self request] URL] host], ConnectionHostKey, nil]];
 			}
 			else
 			{
@@ -738,7 +738,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 				_flags.isConnected = NO;
 				if (_flags.didDisconnect)
-					[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+					[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 				
 				if (_flags.error && !myStreamFlags.reportedError) 
 				{
@@ -852,7 +852,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[self closeStreams];
 			[self setState:CKConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+				[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 			}
 			[self receiveStreamDidClose];
 			break;
@@ -909,7 +909,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			{
 				error = [NSError errorWithDomain:CKConnectionErrorDomain
 											code:CKConnectionStreamError
-										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[self URL] host]], NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
+										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[[self request] URL] host]], NSLocalizedDescriptionKey, [[[self request] URL] host], ConnectionHostKey, nil]];
 			}
 			else 
 			{
@@ -965,7 +965,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			[self closeStreams];
 			[self setState:CKConnectionNotConnectedState];
 			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+				[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 			}
 			[self sendStreamDidClose];
 			break;
@@ -1192,7 +1192,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.isDownloading = YES;
 		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
 		_numberOfDownloadListingsRemaining++;
-		[self setProperty:[NSNumber numberWithBool:YES] forKey:@"IsDiscoveringFilesToDownload"];
 		[_recursiveDownloadConnection changeToDirectory:[rec objectForKey:@"remote"]];
 		[_recursiveDownloadConnection directoryContents];
 	}
@@ -1521,7 +1520,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		}
 		if (_numberOfDownloadListingsRemaining == 0)
 		{
-			[self setProperty:[NSNumber numberWithBool:NO] forKey:@"IsDiscoveringFilesToDownload"];
 			if ([[root description] isEqualToString:[[CKTransferRecord rootRecordWithPath:remote] description]])
 			{
 				//We tried to download an entirely empty folder. We're finished.
@@ -1775,7 +1773,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		if (_flags.error)
 		{
-			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [[self URL] host], ConnectionHostKey, nil]];
+			NSError *err = [NSError errorWithDomain:SSLErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:@"SSL Error Occurred", NSLocalizedDescriptionKey, [[[self request] URL] host], ConnectionHostKey, nil]];
 			[_forwarder connection:self didReceiveError:err];
 		}
 		return;
