@@ -56,7 +56,6 @@
         if (connection)
         {
             [self setConnection:connection];
-            [connection release];
             
             shouldDisplayOpenButton = YES;
             shouldDisplayOpenCancelButton = YES;
