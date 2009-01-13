@@ -32,6 +32,8 @@
  */
 - (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
 
+- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
+
 #pragma mark Creating a connection
 
 /*!
