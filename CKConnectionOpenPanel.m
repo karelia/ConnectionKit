@@ -33,34 +33,50 @@
 #import "CKConnectionOpenPanel.h"
 #import "CKConnectionProtocol.h"
 
+
+@interface CKConnectionOpenPanel (Private)
+- (void)setConnection:(id <CKConnection>)aConnection;
+@end
+
+
+#pragma mark -
+
+
 @implementation CKConnectionOpenPanel
 
-- (id) initWithConnection: (id <CKConnection>) inConnection
+- (id)initWithRequest:(CKConnectionRequest *)request;
 {
-	NSAssert (inConnection, @"no valid connection");
-	self = [super initWithWindowNibName: @"ConnectionOpenPanel"];
-	
-	if (self)
+	NSParameterAssert(request);
+    NSParameterAssert([request URL]);
+    
+    
+    if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
-		shouldDisplayOpenButton = YES;
-		shouldDisplayOpenCancelButton = YES;
-		[self setTimeout:30];
-		[self setConnection: inConnection];
-		[self setAllowsMultipleSelection: NO];
-		[self setCanChooseFiles: YES];
-		[self setCanChooseDirectories: YES];
-		[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
-																				  value: @"Open"
-																				  table: @"localizable"]];
-		
+		id <CKConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
+        if (connection)
+        {
+            [self setConnection:connection];
+            [connection release];
+            
+            shouldDisplayOpenButton = YES;
+            shouldDisplayOpenCancelButton = YES;
+            [self setTimeout:30];
+            [self setAllowsMultipleSelection: NO];
+            [self setCanChooseFiles: YES];
+            [self setCanChooseDirectories: YES];
+            
+            [self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
+                                                                                      value: @"Open"
+                                                                                      table: @"localizable"]];
+        }
+        else
+        {
+            [self release];
+            self = nil;
+        }
 	}
 	
 	return self;
-}
-
-+ (CKConnectionOpenPanel *) connectionOpenPanel: (id <CKConnection>) inConnection
-{
-	return [[[CKConnectionOpenPanel alloc] initWithConnection: inConnection] autorelease];
 }
 
 - (void) awakeFromNib
@@ -241,7 +257,7 @@
 {
 	//NSLog(@"in -connection, returned connection = %@", connection);
 	
-	return [[connection retain] autorelease]; 
+	return [[_connection retain] autorelease]; 
 }
 
 - (void)setConnection:(id <CKConnection>)aConnection
@@ -252,16 +268,16 @@
 	{
 		//store last directory
 		[lastDirectory autorelease];
-		lastDirectory = [[connection currentDirectory] copy];
+		lastDirectory = [[_connection currentDirectory] copy];
 	}
 	
-	if (connection != aConnection) {
-		[connection setDelegate: nil];
-		[connection forceDisconnect];
-		[connection cleanupConnection];
-		[connection release];
-		connection = [aConnection retain];
-		[connection setDelegate: self];
+	if (_connection != aConnection) {
+		[_connection setDelegate: nil];
+		[_connection forceDisconnect];
+		[_connection cleanupConnection];
+		[_connection release];
+		_connection = [aConnection retain];
+		[_connection setDelegate: self];
 	}
 }
 

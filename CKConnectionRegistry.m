@@ -67,6 +67,21 @@
     return [_connectionClassesByName objectForKey:connectionName];
 }
 
+- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port
+{
+    Class connectionClass = [self connectionClassForName:name];
+    
+    NSURL *URL = [[NSURL alloc] initWithScheme:[[connectionClass URLSchemes] objectAtIndex:0]
+                                          host:host
+                                          port:port
+                                          user:nil
+                                      password:nil];
+    
+    CKConnectionRequest *result = [CKConnectionRequest requestWithURL:URL];
+    [URL release];
+    return result;
+}
+
 #pragma mark -
 #pragma mark Connection Creation
 

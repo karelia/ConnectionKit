@@ -44,7 +44,7 @@ enum {
 
 @interface CKConnectionOpenPanel : NSWindowController 
 {
-	id <CKConnection> connection;
+	id <CKConnection> _connection;
 	BOOL canChooseDirectories;
 	BOOL canChooseFiles;
 	BOOL canCreateDirectories;
@@ -73,8 +73,7 @@ enum {
 	NSString *lastDirectory;
 }
 
-- (id)initWithConnection:(id <CKConnection>) inConnection;
-+ (CKConnectionOpenPanel*)connectionOpenPanel:(id <CKConnection>) inConnection;
+- (id)initWithRequest:(CKConnectionRequest *)request;
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
@@ -82,21 +81,28 @@ enum {
 - (IBAction) createNewFolder: (id) sender;
 
 - (id <CKConnection>)connection;
-- (void)setConnection:(id <CKConnection>)aConnection;
+
 - (BOOL)canChooseDirectories;
 - (void)setCanChooseDirectories:(BOOL)flag;
+
 - (BOOL)canChooseFiles;
 - (void)setCanChooseFiles:(BOOL)flag;
+
 - (BOOL)canCreateDirectories;
 - (void)setCanCreateDirectories:(BOOL)flag;
+
 - (BOOL)shouldDisplayOpenButton;
 - (void)setShouldDisplayOpenButton:(BOOL)flag;
+
 - (BOOL)shouldDisplayOpenCancelButton;
 - (void)setShouldDisplayOpenCancelButton:(BOOL)flag;
+
 - (BOOL)allowsMultipleSelection;
 - (void)setAllowsMultipleSelection:(BOOL)flag;
+
 - (BOOL)isLoading;
 - (void)setIsLoading:(BOOL)flag;
+
 - (NSArray *)URLs;
 - (NSArray *)filenames;
 - (NSString *)prompt;
