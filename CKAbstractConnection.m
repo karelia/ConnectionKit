@@ -139,9 +139,12 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Inheritable methods
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	NSParameterAssert(URL); // Not supplying a URL is programmer error
+	NSParameterAssert(request);
+    
+    NSURL *URL = [request URL];
+    NSParameterAssert(URL); // Not supplying a URL is programmer error
     
     // To start a connection we require the protocol and host at the very least. The protocol should
     // be one supported by the receiver. Subclasses may impose other restrictions.
@@ -154,10 +157,9 @@ NSDictionary *sDataAttributes = nil;
     
     if (self = [super init])
 	{
-		_URL = [URL retain];
+		_request = [request copy];
         
 		_edits = [[NSMutableDictionary dictionary] retain];
-		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_flags.isConnected = NO;
 		_forwarder = [[RunLoopForwarder alloc] init];
@@ -171,8 +173,7 @@ NSDictionary *sDataAttributes = nil;
 {
 	[_name release];
 	[_forwarder release];
-	[_URL release];
-	[_properties release];
+	[_request release];
 	[_cachedDirectoryContents release];
 	[_edits release];
 	[_editWatcher release];
@@ -182,31 +183,16 @@ NSDictionary *sDataAttributes = nil;
 	[super dealloc];
 }
 
-- (id)copyWithZone:(NSZone *)zone
-{
-	id <CKConnection>copy = [[[self class] allocWithZone:zone] initWithURL:[self URL]];
-	
-    NSEnumerator *e = [_properties keyEnumerator];
-	id key;
-	
-	while ((key = [e nextObject]))
-	{
-		[copy setProperty:[_properties objectForKey:key] forKey:key];
-	}
-	
-	return copy;
-}
-
 - (NSString *)description
 {
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
-- (NSURL *)URL { return _URL; }
+- (CKConnectionRequest *)request { return _request; }
 
 - (NSInteger)port
 {
-	NSNumber *port = [[self URL] port];
+	NSNumber *port = [[[self request] URL] port];
     return (port) ? [port intValue] : [[self class] defaultPort];
 }
 
@@ -295,22 +281,6 @@ NSDictionary *sDataAttributes = nil;
 	return _delegate;
 }
 
-- (void)setProperty:(id)property forKey:(NSString *)key
-{
-	[_properties setObject:property forKey:key];
-}
-
-- (id)propertyForKey:(NSString *)key
-{
-	return [_properties objectForKey:key];
-}
-
-- (void)removePropertyForKey:(NSString *)key;
-{
-	[_properties removeObjectForKey:key];
-}
-
-
 - (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents
 {
 	path = [path stringByStandardizingURLComponents];
@@ -351,7 +321,7 @@ NSDictionary *sDataAttributes = nil;
 	// Inform delegate
 	if (_flags.didConnect)
 	{
-		[_forwarder connection:self didConnectToHost:[[self URL] host] error:nil];
+		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:nil];
 	}
 }
 
@@ -367,7 +337,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 	}
 }
 
@@ -381,7 +351,7 @@ NSDictionary *sDataAttributes = nil;
 	_flags.isConnected = NO;
 	if (_flags.didDisconnect)
 	{
-		[_forwarder connection:self didDisconnectFromHost:[[self URL] host]];
+		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
 	}
 }
 
@@ -993,10 +963,10 @@ NSDictionary *sDataAttributes = nil;
 {
     NSURLCredential *result = nil;
     
-    NSString *user = [[self URL] user];
+    NSString *user = [[[self request] URL] user];
     if (user)
     {
-        NSString *password = [[self URL] password];
+        NSString *password = [[[self request] URL] password];
         if (password)
         {
             result = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];

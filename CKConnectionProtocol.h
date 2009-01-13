@@ -27,15 +27,21 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
  */
+
+
 #import <Cocoa/Cocoa.h>
+
+#import "CKConnectionRequest.h"
+
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
+
 @class CKTransferRecord;
 
-// Some shared Error Codes
 
+// Some shared Error Codes
 enum {
 	ConnectionErrorUploading = 49101,
 	ConnectionErrorDownloading,
@@ -56,7 +62,7 @@ typedef enum {
 } CKTranscriptType;
 
 
-@protocol CKConnection <NSObject, NSCopying>
+@protocol CKConnection <NSObject>
 
 + (NSString *)name;
 
@@ -75,19 +81,23 @@ typedef enum {
 
 
 /*!
- @method initWithHost:port:username:password:error:
+ @method initWithRequest:
  @abstract The designated initializer for connections.
- @discussion Initializes a connection object to the supplied URL. Raises an exception if URL is nil.
- @param URL The URL to connect to. May not be nil.
- @result Returns an initialized connection object or nil if the URL was unsuitable.
+ @param request The request to connect with. The request object is deep-copied as part of the
+ initialization process. Changes made to request after this method returns do not affect the request
+ that is used for the loading process.
+ @result Returns an initialized connection object or nil if the request was unsuitable.
  */
-- (id)initWithURL:(NSURL *)URL;
+- (id)initWithRequest:(CKConnectionRequest *)request;
+
 
 /*!
- @method URL
- @result Returns the URL supplied to the original -initWithURL: call.
+ @method request
+ @discussion Please do NOT modify this request in any way!
+ @result Returns the request supplied when creating the connection.
  */
-- (NSURL *)URL;
+- (CKConnectionRequest *)request;
+
 
 // you can set a name on a connection to help with debugging.
 // TODO: Should this really be part of the protocol, or a CKAbstractConnection implementation detail?
@@ -228,10 +238,6 @@ typedef enum {
 
 - (void)directoryContents;
 - (void)contentsOfDirectory:(NSString *)dirPath;
-
-- (void)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (void)removePropertyForKey:(NSString *)key;
 
 - (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;

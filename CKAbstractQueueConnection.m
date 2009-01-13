@@ -52,9 +52,9 @@ NSString *CKQueueDomain = @"Queuing";
 
 @implementation CKAbstractQueueConnection
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (self = [super initWithURL:URL])
+	if (self = [super initWithRequest:request])
 	{
 		_queueLock = [[NSRecursiveLock alloc] init];
 		

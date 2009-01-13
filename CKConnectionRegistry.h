@@ -35,13 +35,15 @@
 #pragma mark Creating a connection
 
 /*!
- @method connectionWithURL:
+ @method connectionWithRequest:delegate:
  @abstract Locates the connection class that corresponds with the URL and then creates one.
- @param URL The URL to create a connection for.
+ @param request The request to create a connection for.
+ @param delegate The initial delegate for the connection.
  @result An initialized connection, or nil if no suitable class could be found.
  */
-- (id <CKConnection>)connectionWithURL:(NSURL *)URL;
+- (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request;
 
+// These 2 methods are for compatibility with legacy code
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port user:(NSString *)username password:(NSString *)password error:(NSError **)error;
 

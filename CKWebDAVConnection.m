@@ -575,7 +575,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	CKHTTPRequest *req = [CKHTTPRequest requestWithMethod:@"MOVE" uri:fromPath];
 	
 	//Set the destination path. Some WebDAV servers require this be a full HTTP url, so if we don't have one as the host already, we'll format it as one.
-	NSString *destinationPath = [[[self URL] host] stringByAppendingURLComponent:toPath];
+	NSString *destinationPath = [[[[self request] URL] host] stringByAppendingURLComponent:toPath];
 	if (![destinationPath hasPrefix:@"http://"] && ![destinationPath hasPrefix:@"https://"])
 		destinationPath = [@"http://" stringByAppendingURLComponent:destinationPath];
 	[req setHeader:destinationPath  forKey:@"Destination"];

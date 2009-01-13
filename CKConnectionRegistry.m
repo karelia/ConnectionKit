@@ -70,14 +70,14 @@
 #pragma mark -
 #pragma mark Connection Creation
 
-- (id <CKConnection>)connectionWithURL:(NSURL *)URL
+- (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request
 {
-    Class class = [self connectionClassForURLScheme:[URL scheme]];
+    Class class = [self connectionClassForURLScheme:[[request URL] scheme]];
     
     id <CKConnection> result = nil;
     if (class)
     {
-        result = [[[class alloc] initWithURL:URL] autorelease];
+        result = [[[class alloc] initWithRequest:request] autorelease];
     }
     
     return result;
@@ -101,7 +101,7 @@
                                               user:username
                                           password:password];
         
-        result = [[[class alloc] initWithURL:URL] autorelease];
+        result = [[[class alloc] initWithRequest:[CKConnectionRequest requestWithURL:URL]] autorelease];
         [URL release];
     }
                       

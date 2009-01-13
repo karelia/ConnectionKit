@@ -135,9 +135,10 @@
 	return result;
 }
 
-- (id)initWithURL:(NSURL *)URL
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
 	// Sanitise input
+    NSURL *URL = [request URL];
 	if (URL)
     {
         NSParameterAssert([[URL scheme] isEqualToString:@"http"]);
@@ -145,7 +146,8 @@
     }
 	else
 	{
-		URL = [NSURL URLWithString:@"http://idisk.mac.com"];
+		
+        URL = [NSURL URLWithString:@"http://idisk.mac.com"];
 	}
 	
 	// Make sure we have a username to connect
@@ -158,25 +160,34 @@
 		if (user)
 		{
 			URL = [NSURL URLWithString:[NSString stringWithFormat:@"/%@/", user]
-						 relativeToURL:URL];
+                         relativeToURL:URL];
 		}
 		else
 		{
-			[self release];
+            [self release];
 			return nil;
 		}
 	}
 	
-    return [super initWithURL:URL];
+    
+    // The URL may have been modified so construct a new request
+    CKMutableConnectionRequest *moddedRequest = [request mutableCopy];
+    [moddedRequest setURL:URL];
+    self = [super initWithRequest:moddedRequest];
+    [moddedRequest release];
+    return self;
 }
 
-- (id)initWithUser:(NSString *)user;
+- (id)initWithUser:(NSString *)user
 {
 	NSURL *URL = (user) ? [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:user] : nil;
+	CKConnectionRequest *request = [[CKConnectionRequest alloc] initWithURL:URL];
+    [URL release];
+    
+	self = [self initWithRequest:request];
 	
-	self = [self initWithURL:URL];
-	
-	[URL release];
+	[request release];
+    
 	return self;
 }
 
@@ -505,7 +516,7 @@
 
 - (NSString *)webDAVPathForIDiskPath:(NSString *)iDiskPath
 {
-	NSString *result = [[[[self URL] path] firstPathComponent] stringByAppendingPathComponent:iDiskPath];
+	NSString *result = [[[[[self request] URL] path] firstPathComponent] stringByAppendingPathComponent:iDiskPath];
 	return result;
 }
 
@@ -737,7 +748,7 @@
 {
 	NSURLCredential *result = nil;
 	
-	if ([[self URL] user])
+	if ([[[self request] URL] user])
 	{
 		result = [super proposedCredentialForProtectionSpace:protectionSpace];
 	}

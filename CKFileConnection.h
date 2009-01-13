@@ -57,7 +57,7 @@ enum { kChangeToDirectory = 7000,
 }
 
 /*!
- @method init
+ @method init:
  @discussion Convenience method as file connections do not require a URL to operate.
  @result Returns an initialized CKFileConnection object or nil if there was an error.
  */

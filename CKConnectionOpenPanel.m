@@ -438,7 +438,7 @@
 			}
 			pathToAdd = [pathPrefix stringByAppendingPathComponent: pathToAdd];
 			
-			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[self connection] URL]]];
+			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[[self connection] request] URL]]];
 		}
 	}
 	

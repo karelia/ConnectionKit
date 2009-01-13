@@ -64,20 +64,33 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 #pragma mark init methods
 
-- (id)initWithURL:(NSURL *)URL
-{
-	// allow for subdomains of s3
-	if ([[URL host] rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
+- (id)initWithRequest:(CKConnectionRequest *)request delegate:(id)delegate
+{     
+    // allow for subdomains of s3
+	if ([[[request URL] host] rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
 	{
-		URL = [[NSURL alloc] initWithScheme:@"http" host:@"s3.amazonaws.com" path:nil];
+		NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"s3.amazonaws.com" path:nil];
+        CKMutableConnectionRequest *newRequest = [request mutableCopy];
+        [newRequest setURL:URL];
+        [URL release];
+        
+        self = [super initWithRequest:newRequest];
+        [newRequest release];
 	}
+    else
+    {
+        self = [super initWithRequest:request];
+    }
 	
-	if (self = [super initWithURL:URL])
+    
+	if (self)
 	{
 		incompleteDirectoryContents = [[NSMutableArray array] retain];
 		incompleteKeyNames = [[NSMutableArray array] retain];
 		myCurrentDirectory = @"/";
 	}
+    
+    
 	return self;
 }
 

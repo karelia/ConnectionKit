@@ -34,7 +34,7 @@
 
 - (id)init
 {
-	if (self = [super initWithURL:nil])
+	if (self = [super initWithRequest:nil])
     {
 		_connections = [[NSMutableArray array] retain];
 		_folderCreations = [[NSMutableArray array] retain];
@@ -68,7 +68,7 @@
 	
 	while (cur = [e nextObject])
 	{
-		[hosts addObject:[[cur URL] host]];
+		[hosts addObject:[[[cur request] URL] host]];
 	}
 	
 	if ([hosts count] == 1)

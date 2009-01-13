@@ -36,6 +36,16 @@ extern NSString *SFTPErrorDomain;
 
 @end
 
+
+@interface CKConnectionRequest (CKSFTPConnection)
+- (NSString *)SFTPPublicKeyPath;
+@end
+
+@interface CKMutableConnectionRequest (CKSFTPConnection)
+- (void)setSFTPPublicKeyPath:(NSString *)path;
+@end
+
+
 @interface CKSFTPConnection (SFTPTServerCallback)
 //
 - (void)setServerObject:(id)serverObject;
@@ -58,3 +68,4 @@ extern NSString *SFTPErrorDomain;
 - (void)didReceiveDirectoryContents:(NSArray*)items;
 
 @end
+
