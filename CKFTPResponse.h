@@ -8,6 +8,7 @@
 
 
 //  Immutable class to represent an FTP response in a similar fashion to NSURLResponse.
+//  CKFTPResponse should be thread-safe as it is immutable.
 
 
 #import <Foundation/Foundation.h>
@@ -16,9 +17,13 @@
 @interface CKFTPResponse : NSObject <NSCopying>
 {
 @private
-    int     _code;
     NSArray *_lines;
+    
+    // These 2 are cached from the strings when creating the object
+    int     _code;
+    BOOL    _isMark;
 }
+
 
 /*!
  @method initWithLines:
