@@ -51,6 +51,7 @@
 
 
 @interface CKSFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+- (void)_sendAuthenticationChallenge;
 @end
 
 
@@ -145,22 +146,7 @@ static NSString *lsform = nil;
 	_isConnecting = YES;
 	
     // Can't connect till we have a password (due to using the SFTP command-line tool)
-    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
-                                                                                  port:[self port]
-                                                                              protocol:@"ssh"
-                                                                                 realm:nil
-                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
-    
-    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                              proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
-                                                                            previousFailureCount:0
-                                                                                 failureResponse:nil
-                                                                                           error:nil
-                                                                                          sender:self];
-    
-    [protectionSpace release];
-    
-    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+    [self _sendAuthenticationChallenge];
 }
 
 /*  Support method. Called once the delegate has provided a username to connect with
@@ -992,10 +978,12 @@ static NSString *lsform = nil;
 }
 
 #pragma mark -
+
 - (void)requestPasswordWithPrompt:(char *)header
 {
 	if (_currentPassword)
     {
+        // Send the password to the server
         CKConnectionCommand *command = [CKConnectionCommand command:_currentPassword
 													     awaitState:CKConnectionIdleState
 													      sentState:CKConnectionSentPasswordState
@@ -1009,7 +997,8 @@ static NSString *lsform = nil;
     }
     else
 	{
-		[self passwordErrorOccurred];
+		// Request a new password from the delegate
+        [self _sendAuthenticationChallenge];
 	}
 }
 
@@ -1095,6 +1084,28 @@ static NSString *lsform = nil;
 
 @implementation CKSFTPConnection (Authentication)
 
+- (void)_sendAuthenticationChallenge
+{
+    NSInteger previousFailureCount = (_lastAuthenticationChallenge) ? [_lastAuthenticationChallenge previousFailureCount] + 1 : 0;
+    
+    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
+                                                                                  port:[self port]
+                                                                              protocol:@"ssh"
+                                                                                 realm:nil
+                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
+    
+    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
+                                                                              proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+                                                                            previousFailureCount:previousFailureCount
+                                                                                 failureResponse:nil
+                                                                                           error:nil
+                                                                                          sender:self];
+    
+    [protectionSpace release];
+    
+    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+}
+
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     if (challenge == _lastAuthenticationChallenge)
@@ -1135,6 +1146,10 @@ static NSString *lsform = nil;
 }
 
 @end
+
+
+#pragma mark -
+#pragma mark CKConnectionRequest
 
 
 @implementation CKConnectionRequest (CKSFTPConnection)
