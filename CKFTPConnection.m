@@ -31,7 +31,6 @@
  */
  
 #import "CKFTPConnection.h"
-#import "CKFTPResponse.h"
 
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
@@ -90,32 +89,32 @@ const double kDelegateNotificationTheshold = 0.5;
 - (void)prepareAndOpenDataStreams;
 
 //Command Handling
-- (void)_receivedResponseInConnectionNotConnectedState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentUsernameState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentAccountState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentPasswordState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionAwaitingCurrentDirectoryState:(CKFTPResponse *)response; 
-- (void)_receivedResponseInConnectionAwaitingDirectoryContentsState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionChangingDirectoryState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionCreateDirectoryState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionDeleteDirectoryState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionRenameFromState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionAwaitingRenameState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionDeleteFileState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionDownloadingFileState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionUploadingFileState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentOffsetState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentFeatureRequestState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentQuitState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSettingPermissionsState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentSizeState:(CKFTPResponse *)response;
-- (void)_receivedResponseInConnectionSentDisconnectState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPSettingPassiveState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPSettingEPSVState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPSettingActiveState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPSettingEPRTState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPAwaitingRemoteSystemTypeState:(CKFTPResponse *)response;
-- (void)_receivedResponseInFTPChangeDirectoryListingStyleState:(CKFTPResponse *)response;
+- (void)_receivedCodeInConnectionNotConnectedState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentUsernameState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentAccountState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentPasswordState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingCurrentDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionChangingDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionCreateDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDeleteDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionRenameFromState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionAwaitingRenameState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDeleteFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionDownloadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionUploadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentOffsetState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentFeatureRequestState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentQuitState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSettingPermissionsState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInConnectionSentDisconnectState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingPassiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingEPSVState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingActiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPSettingEPRTState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPAwaitingRemoteSystemTypeState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
+- (void)_receivedCodeInFTPChangeDirectoryListingStyleState:(int)code command:(NSString *)command buffer:(NSString *)buffer;
 
 @end
 
@@ -307,49 +306,67 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)parseCommand:(NSString *)command
 {
-	CKFTPResponse *response = [[CKFTPResponse alloc] initWithString:command];   // Released at very end of method
-    
-    // FIXME: Deal better with improperly formatted responses
-    NSAssert1(response,
-              @"Improperly formatter FTP response received:\n%@",
-              command);
-    
-	while ([response isMark])
-    {
-        // Can't proceed until enough data for a full response has been loaded
-        [NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
-        NSData *data = [self availableData];
-        
-        if ([data length] > 0)
-        {
-            NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            if (line)
-            {
-                NSArray *lines = [[response lines] arrayByAddingObject:line];
-                [response release];
-                response = [[CKFTPResponse alloc] initWithLines:lines];
-                
-                [line release];
-            }
-        }
-    }
-    
-
-    // Log to transcript
-	if (_flags.transcript)
+	NSScanner *scanner = [NSScanner scannerWithString:command];
+	int code;
+	[scanner scanInt:&code];
+	
+	// we need to consume everything until 'xxx '
+	NSMutableString *buffer = [NSMutableString stringWithFormat:@"%@\n", command];
+	BOOL atEnd = NO;
+	NSRange r;
+	NSString *strCode = [NSString stringWithFormat:@"%d ", code];
+	
+	if (![command hasPrefix:strCode])
 	{
-		[self appendString:[[response lines] componentsJoinedByString:@"\n"]
-              toTranscript:CKTranscriptReceived];
+		if ((r = [_commandBuffer rangeOfString:strCode]).location != NSNotFound) {
+			[buffer appendString:_commandBuffer];
+			//need to drop out of the commandBuffer up to the new line.
+			NSRange newLineRange;
+			NSRange toEnd = NSMakeRange(r.location, [_commandBuffer length] - r.location);
+			
+			if ((newLineRange = [_commandBuffer rangeOfString:@"\r\n" 
+													  options:NSCaseInsensitiveSearch 
+														range:toEnd]).location != NSNotFound
+				|| (newLineRange = [_commandBuffer rangeOfString:@"\n"
+														 options:NSCaseInsensitiveSearch
+														   range:toEnd]).location != NSNotFound)
+				[_commandBuffer deleteCharactersInRange:NSMakeRange(0,newLineRange.location+newLineRange.length)];
+			atEnd = YES;
+		}
+		else
+		{
+			[buffer appendString:_commandBuffer];
+			[_commandBuffer deleteCharactersInRange:NSMakeRange(0, [_commandBuffer length])];
+		}
+		
+		while (atEnd == NO)
+		{
+			[NSThread sleepUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+			NSData *data = [self availableData];
+			
+			if ([data length] > 0)
+			{
+				NSString *line = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+				if (line)
+					[buffer appendString:line];
+				
+				if ([line rangeOfString:strCode].location != NSNotFound)
+					atEnd = YES;
+				
+				[line release];
+			}
+		}
 	}
 	
-    
-    // Debug log
+	if (_flags.transcript)
+	{
+		[self appendString:buffer toTranscript:CKTranscriptReceived];
+	}
+	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
-    
 	int stateToHandle = GET_STATE;
 	//State independent handling	
-    int code = [response code];
 	switch (code)
 	{
 		case 200: //Command okay
@@ -496,94 +513,90 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	switch (stateToHandle)
 	{
 		case CKConnectionNotConnectedState:
-			[self _receivedResponseInConnectionNotConnectedState:response];
+			[self _receivedCodeInConnectionNotConnectedState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentUsernameState:
-			[self _receivedResponseInConnectionSentUsernameState:response];
+			[self _receivedCodeInConnectionSentUsernameState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentAccountState:
-			[self _receivedResponseInConnectionSentAccountState:response];
+			[self _receivedCodeInConnectionSentAccountState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentPasswordState:
-			[self _receivedResponseInConnectionSentPasswordState:response];
+			[self _receivedCodeInConnectionSentPasswordState:code command:command buffer:buffer];
 			break;
 		case CKConnectionAwaitingCurrentDirectoryState:
-			[self _receivedResponseInConnectionAwaitingCurrentDirectoryState:response];
+			[self _receivedCodeInConnectionAwaitingCurrentDirectoryState:code command:command buffer:buffer];
 			break;
 		case CKConnectionAwaitingDirectoryContentsState:
-			[self _receivedResponseInConnectionAwaitingDirectoryContentsState:response];
+			[self _receivedCodeInConnectionAwaitingDirectoryContentsState:code command:command buffer:buffer];
 			break;
 		case CKConnectionChangingDirectoryState:
-			[self _receivedResponseInConnectionChangingDirectoryState:response];
+			[self _receivedCodeInConnectionChangingDirectoryState:code command:command buffer:buffer];
 			break;
 		case CKConnectionCreateDirectoryState:
-			[self _receivedResponseInConnectionCreateDirectoryState:response];
+			[self _receivedCodeInConnectionCreateDirectoryState:code command:command buffer:buffer];
 			break;
 		case CKConnectionDeleteDirectoryState:
-			[self _receivedResponseInConnectionDeleteDirectoryState:response];
+			[self _receivedCodeInConnectionDeleteDirectoryState:code command:command buffer:buffer];
 			break;
 		case CKConnectionRenameFromState:		
-			[self _receivedResponseInConnectionRenameFromState:response];
+			[self _receivedCodeInConnectionRenameFromState:code command:command buffer:buffer];
 			break;
 		case CKConnectionAwaitingRenameState:  
-			[self _receivedResponseInConnectionAwaitingRenameState:response];
+			[self _receivedCodeInConnectionAwaitingRenameState:code command:command buffer:buffer];
 			break;
 		case CKConnectionDeleteFileState:
-			[self _receivedResponseInConnectionDeleteFileState:response];
+			[self _receivedCodeInConnectionDeleteFileState:code command:command buffer:buffer];
 			break;
 		case CKConnectionDownloadingFileState:
-			[self _receivedResponseInConnectionDownloadingFileState:response];
+			[self _receivedCodeInConnectionDownloadingFileState:code command:command buffer:buffer];
 			break;
 		case CKConnectionUploadingFileState:
-			[self _receivedResponseInConnectionUploadingFileState:response];
+			[self _receivedCodeInConnectionUploadingFileState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentOffsetState:
-			[self _receivedResponseInConnectionSentOffsetState:response];
+			[self _receivedCodeInConnectionSentOffsetState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentFeatureRequestState:
-			[self _receivedResponseInConnectionSentFeatureRequestState:response];
+			[self _receivedCodeInConnectionSentFeatureRequestState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentQuitState:		
-			[self _receivedResponseInConnectionSentQuitState:response];
+			[self _receivedCodeInConnectionSentQuitState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSettingPermissionsState:
-			[self _receivedResponseInConnectionSettingPermissionsState:response];
+			[self _receivedCodeInConnectionSettingPermissionsState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentSizeState:		
-			[self _receivedResponseInConnectionSentSizeState:response];
+			[self _receivedCodeInConnectionSentSizeState:code command:command buffer:buffer];
 			break;
 		case CKConnectionSentDisconnectState: 
-			[self _receivedResponseInConnectionSentDisconnectState:response];
+			[self _receivedCodeInConnectionSentDisconnectState:code command:command buffer:buffer];
 			break;
 		case FTPSettingPassiveState:
-			[self _receivedResponseInFTPSettingPassiveState:response];
+			[self _receivedCodeInFTPSettingPassiveState:code command:command buffer:buffer];
 			break;
 		case FTPSettingEPSVState:
-			[self _receivedResponseInFTPSettingEPSVState:response];
+			[self _receivedCodeInFTPSettingEPSVState:code command:command buffer:buffer];
 			break;
 		case FTPSettingActiveState:
-			[self _receivedResponseInFTPSettingActiveState:response];
+			[self _receivedCodeInFTPSettingActiveState:code command:command buffer:buffer];
 			break;
 		case FTPSettingEPRTState:
-			[self _receivedResponseInFTPSettingEPRTState:response];
+			[self _receivedCodeInFTPSettingEPRTState:code command:command buffer:buffer];
 			break;
 		case FTPAwaitingRemoteSystemTypeState:
-			[self _receivedResponseInFTPAwaitingRemoteSystemTypeState:response];
+			[self _receivedCodeInFTPAwaitingRemoteSystemTypeState:code command:command buffer:buffer];
 			break;
 		case FTPChangeDirectoryListingStyle:
-			[self _receivedResponseInFTPChangeDirectoryListingStyleState:response];
+			[self _receivedCodeInFTPChangeDirectoryListingStyleState:code command:command buffer:buffer];
 			break;
 		default:
 			break;		
 	}
-    
-    
-    [response release];
 }
-
-- (void)_receivedResponseInConnectionNotConnectedState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionNotConnectedState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 120: //Service Ready
 		{
@@ -591,9 +604,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 										  LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
-										  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+										  command, NSLocalizedFailureReasonErrorKey,
 										  [[[self request] URL] host], ConnectionHostKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 				[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:error];
 			}
 			[self setState:CKConnectionNotConnectedState]; //don't really need.
@@ -603,7 +616,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_ftpFlags.loggedIn != NO)
 				break;
-			if ([[[response lines] componentsJoinedByString:@"\n"] rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
+			if ([command rangeOfString:@"Microsoft FTP Service"].location != NSNotFound ||
+				[buffer rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
 			{
 				_ftpFlags.isMicrosoft = YES;
 			}
@@ -631,9 +645,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentUsernameState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentUsernameState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 230: //User logged in, proceed
 		{
@@ -686,9 +700,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentAccountState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentAccountState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 230: //User logged in, proceed
 		{
@@ -710,9 +724,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentPasswordState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentPasswordState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch([response code])
+	switch(code)
 	{
 		case 230: //User logged in, proceed
 		{
@@ -757,13 +771,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionAwaitingCurrentDirectoryState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionAwaitingCurrentDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	NSString *path = [self scanBetweenQuotes:[[response lines] objectAtIndex:0]];
+	NSString *path = [self scanBetweenQuotes:command];
 	if (!path || [path length] == 0)
 		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];	
-	switch ([response code])
+	switch (code)
 	{
 		case 257: //Path Created
 		{
@@ -778,15 +792,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 		}
 		default:
 			break;
@@ -795,9 +809,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[_forwarder connection:self didChangeToDirectory:path error:error];
 }
 
-- (void)_receivedResponseInConnectionAwaitingDirectoryContentsState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 425: //Couldn't open data connection
 		{
@@ -839,22 +853,22 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionChangingDirectoryState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionChangingDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	NSString *path = [self scanBetweenQuotes:[[response lines] objectAtIndex:0]];
+	NSString *path = [self scanBetweenQuotes:command];
 	if (!path || [path length] == 0)
 		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 500: //Syntax error, command unrecognized.
@@ -863,14 +877,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey, path, NSFilePathErrorKey, nil];
+									  command, NSLocalizedFailureReasonErrorKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			break;			
 		}		
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		default:
@@ -882,19 +896,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)_receivedResponseInConnectionCreateDirectoryState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionCreateDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 521: //Supported Address Families
@@ -904,19 +918,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
 				NSString *path = nil;
 				NSMutableDictionary *userInfo = [NSMutableDictionary dictionary];
-				if ([[[response lines] objectAtIndex:0] rangeOfString:@"exists"].location != NSNotFound) 
+				if ([command rangeOfString:@"exists"].location != NSNotFound) 
 				{
 					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-					if ([[[response lines] objectAtIndex:0] rangeOfString:@":"].location != NSNotFound)
+					if ([command rangeOfString:@":"].location != NSNotFound)
 					{
-						path = [[[response lines] objectAtIndex:0] substringWithRange:NSMakeRange(4, [[[response lines] objectAtIndex:0] rangeOfString:@":"].location - 4)];
+						path = [command substringWithRange:NSMakeRange(4, [command rangeOfString:@":"].location - 4)];
 						[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
 						[userInfo setObject:path forKey:NSFilePathErrorKey];
 					}
 				}
 				[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-				[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-				error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+				[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+				error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			}
 			break;
 		}
@@ -932,8 +946,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
 			[userInfo setObject:path forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}			
 		default:
@@ -942,7 +956,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	if (_flags.createDirectory)
 	{
-		NSString *path = [self scanBetweenQuotes:[[response lines] objectAtIndex:0]];
+		NSString *path = [self scanBetweenQuotes:command];
 		if (!path || [path length] == 0)
 		{
 			path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
@@ -952,19 +966,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)_receivedResponseInConnectionDeleteDirectoryState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionDeleteDirectoryState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 550: //Requested action not taken, file not found.
@@ -973,8 +987,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete directory", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
 			[userInfo setObject:[self currentDeletion] forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}									
 		default:
@@ -988,10 +1002,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)_receivedResponseInConnectionRenameFromState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionRenameFromState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 350: //Requested action pending further information
 		{
@@ -1003,15 +1017,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		default:
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"No such file", @"No such file"), NSLocalizedDescriptionKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 	}
@@ -1027,22 +1041,22 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionAwaitingRenameState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionAwaitingRenameState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSString *fromPath = [_fileRenames objectAtIndex:0];
 	NSString *toPath = [_fileRenames objectAtIndex:1];
 	
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 450: //Requested file action not taken. File unavailable. //File in Use
@@ -1050,19 +1064,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}			
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  fromPath, @"fromPath", 
 									  toPath, @"toPath", nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}
 		default:
@@ -1076,19 +1090,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];	
 }
 
-- (void)_receivedResponseInConnectionDeleteFileState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionDeleteFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 450: //Requested file action not taken. File unavailable.
@@ -1096,9 +1110,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}			
 		case 550: //Requested action not taken, file not found.
@@ -1107,8 +1121,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), [[self currentDirectory] stringByAppendingPathComponent:[self currentDeletion]]];
 			[userInfo setObject:[self currentDeletion] forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}						
 		default:
@@ -1121,10 +1135,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)_receivedResponseInConnectionDownloadingFileState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionDownloadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 150: //File status okay, about to open data connection.
 		{
@@ -1186,9 +1200,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 425: //Couldn't open data connection
@@ -1231,9 +1245,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}	
 		case 451: //Requested acion aborted, local error in processing
@@ -1241,9 +1255,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentDownload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Action Aborted. Local Error", @"FTP Abort"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 550: //Requested action not taken, file not found.
@@ -1253,8 +1267,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
 			[userInfo setObject:[download remotePath] forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}			
 		default:
@@ -1292,10 +1306,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionUploadingFileState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionUploadingFileState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 110: //Restart marker reply
 		{
@@ -1464,9 +1478,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 425: //Couldn't open data connection
@@ -1509,18 +1523,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 452: //Requested action not taken. Insufficient storage space in system.
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"No Storage Space Available", @"FTP Error"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			[self sendCommand:@"ABOR"];			
 			break;
 		}
@@ -1528,10 +1542,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"You need an Account to Upload Files", @"FTP Error"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey,
 									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		case 550: //Requested action not taken, file not found.
@@ -1542,17 +1556,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[userInfo setObject:[upload remotePath] forKey:NSFilePathErrorKey];
 			[self dequeueUpload];			
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}
 		case 552: //Requested file action aborted, storage allocation exceeded.
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Cannot Upload File. Storage quota on server exceeded", @"FTP upload error"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		default:
@@ -1592,9 +1606,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentOffsetState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentOffsetState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 350: //Requested action pending further information
 		{
@@ -1606,14 +1620,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentFeatureRequestState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentFeatureRequestState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 211: //System status, or system help ready
 		{
-			NSString *buffer = [[response lines] componentsJoinedByString:@"\n"];
-            //parse features
+			//parse features
 			if ([buffer rangeOfString:@"SIZE"].location != NSNotFound)
 				_ftpFlags.hasSize = YES;
 			else
@@ -1701,9 +1714,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentQuitState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentQuitState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 221: //Service closing control connection.
 		{
@@ -1715,19 +1728,19 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSettingPermissionsState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSettingPermissionsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 421:
 		{
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 450: //Requested file action not taken. File unavailable.
@@ -1735,9 +1748,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remotePath = [[self currentUpload] remotePath];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"File in Use", @"FTP file in use"), NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  remotePath, NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}		
 		case 550: //Requested action not taken, file not found.
@@ -1746,8 +1759,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
 			[userInfo setObject:[self currentPermissionChange] forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}				
 		case 553: //Requested action not taken. Illegal file name.
@@ -1755,9 +1768,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"FTP Upload error"), [self currentPermissionChange]];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [self currentPermissionChange], NSFilePathErrorKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;
 		}
 		default:
@@ -1769,36 +1782,36 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)_receivedResponseInConnectionSentSizeState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentSizeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
 	NSError *error = nil;
-	switch ([response code])
+	switch (code)
 	{
 		case 213: //File status
 		{
 			CKInternalTransferRecord *download = [self currentDownload];
-			if ([[[response lines] objectAtIndex:0] rangeOfString:@"("].location != NSNotFound)
+			if ([command rangeOfString:@"("].location != NSNotFound)
 			{
-				NSScanner *sizeScanner = [NSScanner scannerWithString:[[response lines] objectAtIndex:0]];
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
 				NSCharacterSet *bracketSet = [NSCharacterSet characterSetWithCharactersInString:@"()"];
 				[sizeScanner scanUpToCharactersFromSet:bracketSet intoString:nil];
-				if ( [sizeScanner scanLocation] < [[[response lines] objectAtIndex:0] length] )
+				if ( [sizeScanner scanLocation] < [command length] )
 				{
 					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-					sscanf([[[[response lines] objectAtIndex:0] substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+					sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
 						   "%llu", &_transferSize);
 				}
 			}
 			else
 			{
 				// some servers return 213 4937728
-				NSScanner *sizeScanner = [NSScanner scannerWithString:[[response lines] objectAtIndex:0]];
+				NSScanner *sizeScanner = [NSScanner scannerWithString:command];
 				NSCharacterSet *sp = [NSCharacterSet whitespaceCharacterSet];
 				[sizeScanner scanUpToCharactersFromSet:sp intoString:nil];
-				if ( [sizeScanner scanLocation] < [[[response lines] objectAtIndex:0] length] )
+				if ( [sizeScanner scanLocation] < [command length] )
 				{
 					[sizeScanner setScanLocation:[sizeScanner scanLocation] + 1];
-					sscanf([[[[response lines] objectAtIndex:0] substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
+					sscanf([[command substringFromIndex:[sizeScanner scanLocation]] cStringUsingEncoding:NSUTF8StringEncoding],
 						   "%llu", &_transferSize);
 				}
 				else
@@ -1820,9 +1833,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+									  command, NSLocalizedFailureReasonErrorKey,
 									  [[[self request] URL] host], ConnectionHostKey, nil];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];			
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];			
 			break;
 		}			
 		case 550: //Requested action not taken, file not found.
@@ -1832,8 +1845,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"File %@ does not exist on server", @"FTP file download error"), [download remotePath]];
 			[userInfo setObject:[download remotePath] forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-			[userInfo setObject:[[response lines] objectAtIndex:0] forKey:NSLocalizedFailureReasonErrorKey];
-			error = [NSError errorWithDomain:CKFTPErrorDomain code:[response code] userInfo:userInfo];
+			[userInfo setObject:command forKey:NSLocalizedFailureReasonErrorKey];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
 			break;			
 		}			
 		default:
@@ -1870,9 +1883,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInConnectionSentDisconnectState:(CKFTPResponse *)response
+- (void)_receivedCodeInConnectionSentDisconnectState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 221: //Service closing control connection.
 		{
@@ -1884,16 +1897,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPSettingPassiveState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPSettingPassiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 227: //Entering Passive Mode
 		{
 			int i[6];
 			int j;
 			unsigned char n[6];
-			char *buf = (char *)[[[response lines] objectAtIndex:0] UTF8String];
+			char *buf = (char *)[command UTF8String];
 			char *start = strchr(buf,'(');
 			if ( !start )
 				start = strchr(buf,'=');
@@ -1907,7 +1920,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available");
 					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 											  localizedDescription, NSLocalizedDescriptionKey,
-											  [[response lines] objectAtIndex:0], NSLocalizedFailureReasonErrorKey,
+											  command, NSLocalizedFailureReasonErrorKey,
 											  [[[self request] URL] host], ConnectionHostKey, nil];
 					NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
 					[_forwarder connection:self didReceiveError:err];
@@ -1945,15 +1958,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPSettingEPSVState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPSettingEPSVState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 229: //Extended Passive Mode Entered
 		{
 			//get the port number
 			int port = 0;
-			char *cmd = (char *)[[[response lines] objectAtIndex:0] UTF8String];
+			char *cmd = (char *)[command UTF8String];
 			char *start = strchr(cmd,'|');
 			if ( !start || sscanf(start, "|||%d|", &port) != 1)
 			{
@@ -1984,9 +1997,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPSettingActiveState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPSettingActiveState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 500: //Syntax error, command unrecognized.
 		case 501: //Syntax error in parameters or arguments.
@@ -2002,9 +2015,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPSettingEPRTState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPSettingEPRTState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 500: //Syntax error, command unrecognized.
 		case 501: //Syntax error in parameters or arguments.
@@ -2019,13 +2032,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPAwaitingRemoteSystemTypeState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPAwaitingRemoteSystemTypeState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 215: //NAME system type
 		{
-			if ([[[[response lines] objectAtIndex:0] lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
+			if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
 			{
 				_ftpFlags.isMicrosoft = YES;
 				[self setState:FTPChangeDirectoryListingStyle];
@@ -2050,9 +2063,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 }
 
-- (void)_receivedResponseInFTPChangeDirectoryListingStyleState:(CKFTPResponse *)response
+- (void)_receivedCodeInFTPChangeDirectoryListingStyleState:(int)code command:(NSString *)command buffer:(NSString *)buffer
 {
-	switch ([response code])
+	switch (code)
 	{
 		case 500: //Syntax error, command unrecognized.
 		case 501: //Syntax error in parameters or arguments.
