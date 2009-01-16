@@ -30,7 +30,9 @@
 
 #import <Foundation/Foundation.h>
 #import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
+
 #import "CKConnectionRegistry.h"
+#import "CKConnectionClientProtocol.h"
 
 
 /*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
@@ -45,6 +47,8 @@ enum {
 	CKConnectionNoConnectionsAvailable,
 	CKConnectionNoUsernameOrPassword,
 };
+
+
 // Logging Domain Keys
 extern NSString *CKConnectionDomain;
 extern NSString *CKTransportDomain; // used in custom stream classes
@@ -57,6 +61,7 @@ extern NSString *CKInputStreamDomain;
 extern NSString *CKOutputStreamDomain;
 extern NSString *CKSSLDomain;
 extern NSString *CKEditingDomain;
+
 
 typedef enum {
 	CKConnectionNotConnectedState = 0,
@@ -86,64 +91,21 @@ typedef enum {
 	CKConnectionCheckingFileExistenceState // 25
 } CKConnectionState;
 
-typedef struct __flags {
-	unsigned isConnected:1;
-	
-	// There are 21 callbacks & flags.
-	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	
-	unsigned permissions:1;
-	unsigned cancel:1; // deprecated
-	unsigned didCancel:1;
-	unsigned changeDirectory:1;
-	unsigned createDirectory:1;
-	unsigned deleteDirectory:1;
-	unsigned deleteDirectoryInAncestor:1;
-	unsigned deleteFileInAncestor:1;
-	unsigned discoverFilesToDeleteInAncestor:1;
-	unsigned discoverFilesToDeleteInDirectory:1;
-	unsigned deleteFile:1;
-	unsigned didBeginUpload:1;
-	unsigned didConnect:1;
-	unsigned didDisconnect:1;
-	unsigned directoryContents:1;
-	unsigned didBeginDownload:1;
-	unsigned downloadFinished:1;
-	unsigned downloadPercent:1;
-	unsigned downloadProgressed:1;
-	unsigned error:1;
-	unsigned rename:1;
-	unsigned uploadFinished:1;
-	unsigned uploadPercent:1;
-	unsigned uploadProgressed:1;
-	unsigned directoryContentsStreamed:1;
-	unsigned inBulk:1;
-	unsigned fileCheck:1;
-	unsigned authorizeConnection:1;
-    unsigned cancelAuthorization:1;
-	unsigned isRecursiveUploading:1;
-	unsigned isRecursiveDeleting:1;
-	unsigned passphrase:1;
-	unsigned transcript:1;
-	
-	unsigned padding:2;
-} connectionFlags;
 
-@class UKKQueue, RunLoopForwarder;
+@class UKKQueue, CKConnectionClient;
+
 
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
 	CKConnectionState _state;
 	
 @protected
-    
-	RunLoopForwarder	*_forwarder;
-    
-	id _delegate;
-    
-	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
-	connectionFlags _flags;
+        
 	
+	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
+    BOOL    _isConnected;
+    BOOL    _inBulk;
+		
 	
 	UKKQueue *_editWatcher;
 	NSMutableDictionary *_edits;
@@ -154,6 +116,9 @@ typedef struct __flags {
 @private
     NSString            *_name;
     CKConnectionRequest *_request;
+    id                  _delegate;
+    
+    CKConnectionClient  *_client;
 }
 
 + (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
@@ -204,13 +169,9 @@ typedef struct __flags {
 
 @interface CKAbstractConnection (SubclassSupport)
 
-// Authentication
-- (void)didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+// Client
+- (id <CKConnectionClient>)client;
 
-// Transcript
-- (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
-- (void)appendToTranscript:(CKTranscriptType)transcript format:(NSString *)format, ...;
 @end
 
 

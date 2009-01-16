@@ -36,6 +36,8 @@
 		27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
+		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
 		27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C98D5B0F1C1E5B0079A84F /* CKConnectionRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C98D5C0F1C1E5B0079A84F /* CKConnectionRequest.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
@@ -163,8 +165,6 @@
 		79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83409F7048400172CDD /* InterThreadMessaging.m */; };
 		79CFD87609F7048500172CDD /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83509F7048400172CDD /* KTLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD87709F7048500172CDD /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
-		79CFD87809F7048500172CDD /* CKMultipleConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83709F7048400172CDD /* CKMultipleConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79CFD87909F7048500172CDD /* CKMultipleConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83809F7048400172CDD /* CKMultipleConnection.m */; };
 		79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84109F7048400172CDD /* RunLoopForwarder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84209F7048400172CDD /* RunLoopForwarder.m */; };
 		79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84409F7048400172CDD /* CKSFTPConnection.m */; };
@@ -269,6 +269,9 @@
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
+		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
+		27C604820F1FA82800B58822 /* CKConnectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClient.h; sourceTree = "<group>"; };
+		27C604830F1FA82800B58822 /* CKConnectionClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionClient.m; sourceTree = "<group>"; };
 		27C98D5B0F1C1E5B0079A84F /* CKConnectionRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRequest.h; sourceTree = "<group>"; };
 		27C98D5C0F1C1E5B0079A84F /* CKConnectionRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRequest.m; sourceTree = "<group>"; };
 		27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Connection.h"; sourceTree = "<group>"; };
@@ -673,6 +676,9 @@
 				27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */,
 				27C98D5B0F1C1E5B0079A84F /* CKConnectionRequest.h */,
 				27C98D5C0F1C1E5B0079A84F /* CKConnectionRequest.m */,
+				27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */,
+				27C604820F1FA82800B58822 /* CKConnectionClient.h */,
+				27C604830F1FA82800B58822 /* CKConnectionClient.m */,
 			);
 			name = Abstract;
 			sourceTree = "<group>";
@@ -1062,7 +1068,6 @@
 				79CFD85209F7048500172CDD /* CKConnectionOpenPanel.h in Headers */,
 				79CFD87409F7048500172CDD /* InterThreadMessaging.h in Headers */,
 				79CFD87609F7048500172CDD /* KTLog.h in Headers */,
-				79CFD87809F7048500172CDD /* CKMultipleConnection.h in Headers */,
 				79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */,
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
 				79CFE13009F712AF00172CDD /* CKStreamBasedConnection.h in Headers */,
@@ -1121,6 +1126,7 @@
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
 				27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */,
+				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1411,7 +1417,6 @@
 				79CFD87109F7048500172CDD /* CKFTPConnection.m in Sources */,
 				79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */,
 				79CFD87709F7048500172CDD /* KTLog.m in Sources */,
-				79CFD87909F7048500172CDD /* CKMultipleConnection.m in Sources */,
 				79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */,
 				79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */,
 				79CFD88909F7048500172CDD /* CKStreamBasedConnection.m in Sources */,
@@ -1469,6 +1474,7 @@
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
 				27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */,
+				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

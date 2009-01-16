@@ -112,21 +112,20 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					break;
 				}
 			}
-			if (_flags.directoryContents)
-			{
-				if (localizedDescription)
-				{
-					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-											  localizedDescription, NSLocalizedDescriptionKey,
-											  [dav path], NSFilePathErrorKey,
-											  [dav className], @"DAVResponseClass", nil];				
-					error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
-				}
-				NSString *dirPath = [dav path];
-				if ([dirPath hasSuffix:@"/"])
-					dirPath = [dirPath substringToIndex:[dirPath length] - 1];				
-				[_forwarder connection:self didReceiveContents:contents ofDirectory:dirPath error:error];
-			}
+			
+            if (localizedDescription)
+            {
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                          localizedDescription, NSLocalizedDescriptionKey,
+                                          [dav path], NSFilePathErrorKey,
+                                          [dav className], @"DAVResponseClass", nil];				
+                error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
+            }
+            NSString *dirPath = [dav path];
+            if ([dirPath hasSuffix:@"/"])
+                dirPath = [dirPath substringToIndex:[dirPath length] - 1];				
+            [[self client] connectionDidReceiveContents:contents ofDirectory:dirPath error:error];
+            
 			[self setState:CKConnectionIdleState];
 			break;
 		}
@@ -152,7 +151,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				case 405:
 				{		
-					if (!_flags.isRecursiveUploading)
+					if (!_isRecursiveUploading)
 					{
 						localizedDescription = LocalizedStringInConnectionKitBundle(@"The directory already exists", @"WebDAV Create Directory Error");
 						[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
@@ -180,18 +179,17 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					break;
 				}
 			}
-			if (_flags.createDirectory)
-			{
-				if (localizedDescription)
-				{
-					[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-					[userInfo setObject:[dav className] forKey:@"DAVResponseClass"];
-					[userInfo setObject:[[dav request] description] forKey:@"DAVRequest"];
-					[userInfo setObject:[(CKDAVCreateDirectoryRequest *)[dav request] path] forKey:NSFilePathErrorKey];
-					error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
-				}
-				[_forwarder connection:self didCreateDirectory:[dav directory] error:error];
-			}
+			
+            if (localizedDescription)
+            {
+                [userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
+                [userInfo setObject:[dav className] forKey:@"DAVResponseClass"];
+                [userInfo setObject:[[dav request] description] forKey:@"DAVRequest"];
+                [userInfo setObject:[(CKDAVCreateDirectoryRequest *)[dav request] path] forKey:NSFilePathErrorKey];
+                error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
+            }
+            [[self client] connectionDidCreateDirectory:[dav directory] error:error];
+            
 			[self setState:CKConnectionIdleState];
 			break;
 		}
@@ -222,8 +220,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			CKInternalTransferRecord *upload = [[self currentUpload] retain];
 			[self dequeueUpload];
 			
-			if (_flags.uploadFinished)
-				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+			[[self client] uploadDidFinish:[upload remotePath] error:error];
+
 			if ([upload delegateRespondsToTransferDidFinish])
 				[[upload delegate] transferDidFinish:[upload delegate] error:error];
 			
@@ -260,8 +258,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			NSString *deletionPath = [[self currentDeletion] retain];
 			[self dequeueDeletion];
 			
-			if (_flags.deleteFile)
-				[_forwarder connection:self didDeleteFile:deletionPath error:error];
+			[[self client] connectionDidDeleteFile:deletionPath error:error];
 			
 			[deletionPath release];
 			
@@ -296,8 +293,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			NSString *deletionPath = [[self currentDeletion] retain];			
 			[self dequeueDeletion];
 			
-			if (_flags.deleteDirectory)
-				[_forwarder connection:self didDeleteDirectory:deletionPath error:error];
+			[[self client] connectionDidDeleteDirectory:deletionPath error:error];
 			
 			[deletionPath release];
 			
@@ -306,8 +302,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}
 		case CKConnectionAwaitingRenameState:
 		{
-			if (_flags.rename)
-				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:nil];
+			[[self client] connectionDidRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:nil];
 			[_fileRenames removeObjectAtIndex:0];
 			[_fileRenames removeObjectAtIndex:0];
 			[self setState:CKConnectionIdleState];
@@ -327,11 +322,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		bytesTransferred = 0;
 		CKInternalTransferRecord *upload = [self currentUpload];
 		
-		if (_flags.didBeginUpload)
-		{
-			[_forwarder connection:self
-					uploadDidBegin:[upload remotePath]];
-		}
+		[[self client] uploadDidBegin:[upload remotePath]];
+		
 		if ([upload delegateRespondsToTransferDidBegin])
 		{
 			[[upload delegate] transferDidBegin:[upload userInfo]];
@@ -343,11 +335,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		bytesTransferred = 0;
 		CKInternalTransferRecord *download = [self currentDownload];
 		
-		if (_flags.didBeginDownload)
-		{
-			[_forwarder connection:self
-				  downloadDidBegin:[download remotePath]];
-		}
+		[[self client] downloadDidBegin:[download remotePath]];
+		
 		if ([download delegateRespondsToTransferDidBegin])
 		{
 			[[download delegate] transferDidBegin:[download userInfo]];
@@ -390,10 +379,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsUTF8String];
 				
-				if (_flags.transcript)
-				{
-					[self appendToTranscript:CKTranscriptReceived format:@"%@\n", header];
-				}
+				[[self client] appendString:header toTranscript:CKTranscriptReceived];
 				
 				unsigned start = headerRange.location + headerRange.length;
 				unsigned len = [myResponseBuffer length] - start;
@@ -403,20 +389,16 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				bytesTransferred += [fileData length];
 				
-				if (_flags.downloadProgressed)
-				{
-					[_forwarder connection:self download:[download remotePath] receivedDataOfLength:[fileData length]];
-				}
+				[[self client] download:[download remotePath] didReceiveDataOfLength:[fileData length]];
+				
 				if ([download delegateRespondsToTransferTransferredData])
 				{
 					[[download delegate] transfer:[download userInfo] transferredDataOfLength:[fileData length]];
 				}
 				
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				if (_flags.downloadPercent)
-				{
-					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
-				}
+				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
 					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -430,10 +412,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[myResponseBuffer setLength:0]; 
 			bytesTransferred += [data length];
 			
-			if (_flags.downloadProgressed)
-			{
-				[_forwarder connection:self download:[download remotePath] receivedDataOfLength:[data length]];
-			}
+			[[self client] download:[download remotePath] didReceiveDataOfLength:[data length]];
+			
 			if ([download delegateRespondsToTransferTransferredData])
 			{
 				[[download delegate] transfer:[download userInfo] transferredDataOfLength:[data length]];
@@ -442,10 +422,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			int percent = (100 * bytesTransferred) / bytesToTransfer;
 			if (percent != lastPercent)
 			{
-				if (_flags.downloadPercent)
-				{
-					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
-				}
+				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
 					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -467,10 +445,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[download retain];
 			[self dequeueDownload];
 			
-			if (_flags.downloadFinished)
-			{
-				[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
-			}
+			[[self client] downloadDidFinish:[download remotePath] error:nil];
+			
 			if ([download delegateRespondsToTransferDidFinish])
 			{
 				[[download delegate] transferDidFinish:[download userInfo] error:nil];
@@ -507,10 +483,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 {
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [dirPath copy];
-	if (_flags.changeDirectory)
-	{
-		[_forwarder connection:self didChangeToDirectory:dirPath error:nil];
-	}
+	
+	[[self client] connectionDidChangeToDirectory:dirPath error:nil];
+	
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
 	[self setState:CKConnectionIdleState];
@@ -812,7 +787,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
 	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath error:nil];
+		[[self client] connectionDidReceiveContents:cachedContents ofDirectory:dirPath error:nil];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
 		{
 			return;
@@ -864,12 +839,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			int percent = (100 * bytesTransferred) / bytesToTransfer;
 			if (percent != lastPercent)
 			{
-				if (_flags.uploadPercent)
-				{
-					[_forwarder connection:self 
-									upload:[[self currentUpload] remotePath]
-							  progressedTo:[NSNumber numberWithInt:percent]];
-				}
+				[[self client] upload:[[self currentUpload] remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				
 				if ([upload delegateRespondsToTransferProgressedTo])
 				{
 					[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -877,12 +848,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				lastPercent = percent;
 			}
 		}
-		if (_flags.uploadProgressed)
-		{
-			[_forwarder connection:self 
-							upload:[[self currentUpload] remotePath]
-				  sentDataOfLength:length];
-		}
+		
+        [[self client] upload:[[self currentUpload] remotePath] didSendDataOfLength:length];
+		
 		if ([upload delegateRespondsToTransferTransferredData])
 		{
 			[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:length];

@@ -29,10 +29,11 @@
  */
 
 #import "CKAbstractConnection.h"
+#import "CKConnectionClient.h"
+
 #import "CKTransferRecord.h"
 #import "UKKQueue.h"
 
-#import "RunLoopForwarder.h"
 #import "CKConnectionThreadManager.h"
 #import "InterThreadMessaging.h"
 
@@ -159,12 +160,12 @@ NSDictionary *sDataAttributes = nil;
 	{
 		_request = [request copy];
         
+        _client = [[CKConnectionClient alloc] initWithConnection:self];
+        
 		_edits = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
-		_flags.isConnected = NO;
-		_forwarder = [[RunLoopForwarder alloc] init];
+		_isConnected = NO;
 		_name = [@"Default" retain];
-		[_forwarder setReturnValueDelegate:self];
 	}
 	return self;
 }
@@ -172,8 +173,10 @@ NSDictionary *sDataAttributes = nil;
 - (void)dealloc
 {
 	[_name release];
-	[_forwarder release];
 	[_request release];
+    
+    [_client release];
+    
 	[_cachedDirectoryContents release];
 	[_edits release];
 	[_editWatcher release];
@@ -240,40 +243,7 @@ NSDictionary *sDataAttributes = nil;
 - (void)setDelegate:(id)del
 {
 	_delegate = del;
-	[_forwarder setDelegate:del];
-	
-	// There are 21 callbacks & flags.
-	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
-	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
-	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
-	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
-	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
-	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
-	_flags.deleteDirectoryInAncestor		= [del respondsToSelector:@selector(connection:didDeleteDirectory:inAncestorDirectory:error:)];
-	_flags.deleteFileInAncestor				= [del respondsToSelector:@selector(connection:didDeleteFile:inAncestorDirectory:error:)];
-	_flags.discoverFilesToDeleteInAncestor	= [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inAncestorDirectory:)];
-	_flags.discoverFilesToDeleteInDirectory = [del respondsToSelector:@selector(connection:didDiscoverFilesToDelete:inDirectory:)];
-	_flags.deleteFile						= [del respondsToSelector:@selector(connection:didDeleteFile:error:)];
-	_flags.didBeginUpload					= [del respondsToSelector:@selector(connection:uploadDidBegin:)];
-	_flags.didConnect						= [del respondsToSelector:@selector(connection:didConnectToHost:error:)];
-	_flags.didDisconnect					= [del respondsToSelector:@selector(connection:didDisconnectFromHost:)];
-	_flags.directoryContents				= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:error:)];
-	_flags.didBeginDownload					= [del respondsToSelector:@selector(connection:downloadDidBegin:)];
-	_flags.downloadFinished					= [del respondsToSelector:@selector(connection:downloadDidFinish:error:)];
-	_flags.downloadPercent					= [del respondsToSelector:@selector(connection:download:progressedTo:)];
-	_flags.downloadProgressed				= [del respondsToSelector:@selector(connection:download:receivedDataOfLength:)];
-	_flags.error							= [del respondsToSelector:@selector(connection:didReceiveError:)];
-	_flags.rename							= [del respondsToSelector:@selector(connection:didRename:to:error:)];
-	_flags.uploadFinished					= [del respondsToSelector:@selector(connection:uploadDidFinish:error:)];
-	_flags.uploadPercent					= [del respondsToSelector:@selector(connection:upload:progressedTo:)];
-	_flags.uploadProgressed					= [del respondsToSelector:@selector(connection:upload:sentDataOfLength:)];
-	_flags.directoryContentsStreamed		= [del respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:moreComing:)];
-	_flags.fileCheck						= [del respondsToSelector:@selector(connection:checkedExistenceOfPath:pathExists:error:)];
-	_flags.authorizeConnection				= [del respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)];
-    _flags.cancelAuthorization              = [del respondsToSelector:@selector(connection:didCancelAuthenticationChallenge:)];
-	_flags.passphrase						= [del respondsToSelector:@selector(connection:passphraseForHost:username:publicKeyPath:)];
-	_flags.transcript						= [del respondsToSelector:@selector(connection:appendString:toTranscript:)];
+    [_client setDelegate:del];
 }
 
 - (id)delegate
@@ -315,17 +285,14 @@ NSDictionary *sDataAttributes = nil;
  */
 - (void)threadedConnect
 {
-	_flags.isConnected = YES;
+	_isConnected = YES;
 	_isConnecting = NO;
 	
 	// Inform delegate
-	if (_flags.didConnect)
-	{
-		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:nil];
-	}
+    [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
 }
 
-- (BOOL)isConnected { return _flags.isConnected; }
+- (BOOL)isConnected { return _isConnected; }
 
 - (void)disconnect
 {
@@ -334,11 +301,8 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)threadedDisconnect
 {
-	_flags.isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
-	}
+	_isConnected = NO;
+    [[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
 }
 
 - (void)forceDisconnect
@@ -348,15 +312,12 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)threadedForceDisconnect
 {
-	_flags.isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
-	}
+	_isConnected = NO;
+	[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
 }
 
 
-- (void) cleanupConnection
+- (void)cleanupConnection
 {
 	NSLog (@"base class clean up, do we have to clean anything?");
 }
@@ -748,12 +709,12 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)startBulkCommands
 {
-	_flags.inBulk = YES;
+	_inBulk = YES;
 }
 
 - (void)endBulkCommands
 {
-	_flags.inBulk = NO;
+	_inBulk = NO;
 }
 
 - (NSString *)rootDirectory
@@ -822,34 +783,24 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)connection:(id <CKConnection>)con download:(NSString *)path progressedTo:(NSNumber *)percent
 {
-	if (_flags.downloadPercent)
-	{
-		[_forwarder connection:self download:path progressedTo:percent];
-	}
+	[[self client] download:path didProgressToPercent:percent];
 }
 
 - (void)connection:(id <CKConnection>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length
 {
-	if (_flags.downloadProgressed)
-	{
-		[_forwarder connection:self download:path receivedDataOfLength:length];
-	}
+	[[self client] download:path didReceiveDataOfLength:length];
 }
 
 - (void)connection:(id <CKConnection>)con downloadDidBegin:(NSString *)remotePath
 {
-	if (_flags.didBeginUpload)
-	{
-		[_forwarder connection:self downloadDidBegin:remotePath];
-	}
+	[[self client] downloadDidBegin:remotePath];
 }
 
 - (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
-	if (_flags.downloadFinished)
-	{
-		[_forwarder connection:self downloadDidFinish:remotePath error:error];
-	}
+	[[self client] downloadDidFinish:remotePath error:error];
+    
+    
 	KTLog(CKEditingDomain, KTLogDebug, @"Downloaded file %@... watching for changes", remotePath);
 	NSEnumerator *e = [_edits keyEnumerator];
 	NSString *key, *cur;
@@ -874,39 +825,27 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent
 {
-	if (_flags.uploadPercent)
-	{
-		[_forwarder connection:self upload:remotePath progressedTo:percent];
-	}
+	[[self client] upload:remotePath didProgressToPercent:percent];
 }
 
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length
 {
-	if (_flags.uploadProgressed)
-	{
-		[_forwarder connection:self upload:remotePath sentDataOfLength:length];
-	}
+	[[self client] upload:remotePath didSendDataOfLength:length];
 }
 
 - (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath
 {
-	if (_flags.didBeginUpload)
-	{
-		[_forwarder connection:self uploadDidBegin:remotePath];
-	}
+    [[self client] uploadDidBegin:remotePath];
 }
 
 - (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error
 {
-	if (_flags.uploadFinished)
-	{
-		[_forwarder connection:self uploadDidFinish:remotePath error:error];
-	}
+    [[self client] uploadDidFinish:remotePath error:error];
 }
 
 - (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 {
-	[self appendString:(NSString *)string toTranscript:transcript];
+	[[self client] appendString:string toTranscript:transcript];
 }
 
 @end
@@ -918,98 +857,14 @@ NSDictionary *sDataAttributes = nil;
 @implementation CKAbstractConnection (SubclassSupport)
 
 #pragma mark -
-#pragma mark Authentication
+#pragma mark Client
 
-/*  Deals with the messy bit of authentication for you. If the delegate implements -connection:didReceiveAuthenticationChallenge:
- *  then that method is called. Otherwise, we attempt to use the proposedCredential (if there is one)
- *  before giving up and calling -continueWithoutCredential...
- *
- *  You can call this method from any thread, the challenge will always be authenticated using the
- *  connection's main thread.
+/*  CKAbstractConnection subclasses should never communicate with their delegate directly, it's too
+ *  tricky. Instead, send the corresponding message to the client and it will be handled appropriately.
  */
-- (void)didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (id <CKConnectionClient>)client
 {
-    // If this is not the connection's main thread, forward the message onto it
-    NSThread *connectionThread = _forwarder->createdOnThread;   // A hack for now and I know it! Mike.
-    if ([NSThread currentThread] != connectionThread)
-    {
-        [self performSelector:@selector(didReceiveAuthenticationChallenge:) withObject:challenge inThread:connectionThread];
-        return;
-    }
-    
-    
-    if (_flags.authorizeConnection)
-    {
-        [[self delegate] connection:(id <CKConnection>)self didReceiveAuthenticationChallenge:challenge];   // FIXME: Why do I need to typecast?
-    }
-    else
-    {
-        NSURLCredential *credential = [challenge proposedCredential];
-        if (credential && [credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
-        {
-            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-        }
-        else
-        {
-            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
-        }
-    }
-}
-
-/*  Support method for rolling an NSURLAuthenticationChallenge object. Looks for a valid credential
- *  from the URL, and then falls back to using NSURLCredentialStorage.
- */
-- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace
-{
-    NSURLCredential *result = nil;
-    
-    NSString *user = [[[self request] URL] user];
-    if (user)
-    {
-        NSString *password = [[[self request] URL] password];
-        if (password)
-        {
-            result = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
-        }
-        else
-        {
-            result = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:protectionSpace] objectForKey:user];
-            if (!result)
-            {
-                result = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
-            }
-        }
-    }
-    else
-    {
-        result = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:protectionSpace];
-    }
-    
-    return result;    
-}
-
-#pragma mark -
-#pragma mark Transcript
-
-/*	Convenience method for sending a string to the delegate for appending to the transcript
- */
-- (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
-{
-	if (_flags.transcript)
-	{
-		[_forwarder connection:self appendString:string toTranscript:transcript];
-	}
-}
-
-- (void)appendToTranscript:(CKTranscriptType)transcript format:(NSString *)format, ...
-{
-	va_list arguments;
-	va_start(arguments, format);
-	NSString *string = [[NSString alloc] initWithFormat:format arguments:arguments];
-	va_end(arguments);
-	
-	[self appendString:string toTranscript:transcript];
-	[string release];
+    return _client;
 }
 
 @end

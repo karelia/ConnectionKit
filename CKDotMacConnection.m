@@ -211,11 +211,8 @@
 				case 200:
 				case 207: //multi-status
 				{
-					if (_flags.directoryContents)
-					{
-						contents = [dav directoryContents];
-						[self cacheDirectory:[dav path] withContents:contents];
-					}
+					contents = [dav directoryContents];
+					[self cacheDirectory:[dav path] withContents:contents];
 					break;
 				}
 				case 404:
@@ -239,8 +236,7 @@
 				error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];				
 			}
 			
-			if (_flags.directoryContents)
-				[_forwarder connection:self didReceiveContents:contents ofDirectory:[self iDiskPathForWebDAVPath:[dav path]] error:error];
+			[[self client] connectionDidReceiveContents:contents ofDirectory:[self iDiskPathForWebDAVPath:[dav path]] error:error];
 			
 			
 			[self setState:CKConnectionIdleState];
@@ -268,11 +264,8 @@
 				}
 				case 405:
 				{		
-					if (_flags.isRecursiveUploading)
-					{
-						localizedDescription = LocalizedStringInConnectionKitBundle(@"The directory already exists", @"MobileMe Create Directory Error");
-						[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-					}
+					localizedDescription = LocalizedStringInConnectionKitBundle(@"The directory already exists", @"MobileMe Create Directory Error");
+					[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
 					break;
 				}
 				case 409:
@@ -305,8 +298,7 @@
 				error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
 			}
 			
-			if (_flags.createDirectory)
-				[_forwarder connection:self didCreateDirectory:[self iDiskPathForWebDAVPath:[dav directory]] error:error];
+			[[self client] connectionDidCreateDirectory:[self iDiskPathForWebDAVPath:[dav directory]] error:error];
 			
 			[self setState:CKConnectionIdleState];
 			break;
@@ -338,8 +330,7 @@
 			CKInternalTransferRecord *upload = [[self currentUpload] retain];			
 			[self dequeueUpload];
 			
-			if (_flags.uploadFinished)
-				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+            [[self client] uploadDidFinish:[upload remotePath] error:error];
 			
 			[upload release];
 			
@@ -373,8 +364,7 @@
 			NSString *deletionPath = [[self currentDeletion] retain];
 			[self dequeueDeletion];
 			
-			if (_flags.deleteFile)
-				[_forwarder connection:self didDeleteFile:[self iDiskPathForWebDAVPath:deletionPath] error:error];
+			[[self client] connectionDidDeleteFile:[self iDiskPathForWebDAVPath:deletionPath] error:error];
 			
 			[deletionPath release];
 		
@@ -409,8 +399,7 @@
 			NSString *deletionPath = [[self currentDeletion] retain];
 			[self dequeueDeletion];
 			
-			if (_flags.deleteDirectory)
-				[_forwarder connection:self didDeleteDirectory:[self iDiskPathForWebDAVPath:deletionPath] error:error];
+			[[self client] connectionDidDeleteDirectory:[self iDiskPathForWebDAVPath:deletionPath] error:error];
 			
 			[deletionPath release];
 			
@@ -432,12 +421,8 @@
 		{
 			int percent = (bytesTransferred * 100) / bytesToTransfer;
 			
-			if (_flags.downloadPercent)
-			{
-				[_forwarder connection:self 
-							  download:[self iDiskPathForWebDAVPath:[download remotePath]]
-						  progressedTo:[NSNumber numberWithInt:percent]];
-			}
+			[[self client] download:[self iDiskPathForWebDAVPath:[download remotePath]]
+               didProgressToPercent:[NSNumber numberWithInt:percent]];
 			
 			if ([download delegateRespondsToTransferProgressedTo])
 			{
@@ -446,12 +431,8 @@
 		}
 		
 		
-		if (_flags.downloadProgressed)
-		{
-			[_forwarder connection:self
-						  download:[self iDiskPathForWebDAVPath:[download remotePath]]
-			  receivedDataOfLength:length];
-		}
+		[[self client] download:[self iDiskPathForWebDAVPath:[download remotePath]] didReceiveDataOfLength:length];
+		
 		if ([download delegateRespondsToTransferTransferredData])
 		{
 			[[download delegate] transfer:[download userInfo] transferredDataOfLength:length];
@@ -487,23 +468,16 @@
 		if (bytesToTransfer > 0) // intel gives a crash for div by 0
 		{
 			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			if (_flags.uploadPercent)
-			{
-				[_forwarder connection:self 
-								upload:[upload remotePath]
-						  progressedTo:[NSNumber numberWithInt:percent]];
-			}
+			[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+			
 			if ([upload delegateRespondsToTransferProgressedTo])
 			{
 				[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 			}
 		}
-		if (_flags.uploadProgressed)
-		{
-			[_forwarder connection:self 
-							upload:[upload remotePath]
-				  sentDataOfLength:length];
-		}
+		
+        [[self client] upload:[upload remotePath] didSendDataOfLength:length];
+		
 		if ([upload delegateRespondsToTransferTransferredData])
 		{
 			[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:length];
@@ -548,10 +522,9 @@
 {
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [dirPath copy];
-	if (_flags.changeDirectory)
-	{
-		[_forwarder connection:self didChangeToDirectory:[self iDiskPathForWebDAVPath:dirPath] error:nil];
-	}
+	
+    [[self client] connectionDidChangeToDirectory:[self iDiskPathForWebDAVPath:dirPath] error:nil];
+    
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
 	[self setState:CKConnectionIdleState];
@@ -714,26 +687,25 @@
 
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
 {
-	if (_flags.fileCheck) {
-		NSString *name = [_fileCheckInFlight lastPathComponent];
-		NSEnumerator *e = [contents objectEnumerator];
-		NSDictionary *cur;
-		BOOL foundFile = NO;
-		
-		while (cur = [e nextObject]) 
-		{
-			if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
-			{
-				[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:YES error:nil];
-				foundFile = YES;
-				break;
-			}
-		}
-		if (!foundFile)
-		{
-			[_forwarder connection:self checkedExistenceOfPath:_fileCheckInFlight pathExists:NO error:nil];
-		}
-	}
+    NSString *name = [_fileCheckInFlight lastPathComponent];
+    NSEnumerator *e = [contents objectEnumerator];
+    NSDictionary *cur;
+    BOOL foundFile = NO;
+    
+    while (cur = [e nextObject]) 
+    {
+        if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
+        {
+            [[self client] connectionDidCheckExistenceOfPath:_fileCheckInFlight pathExists:YES error:nil];
+            foundFile = YES;
+            break;
+        }
+    }
+    if (!foundFile)
+    {
+        [[self client] connectionDidCheckExistenceOfPath:_fileCheckInFlight pathExists:NO error:nil];
+    }
+	
 	[self dequeueFileCheck];
 	[_fileCheckInFlight autorelease];
 	_fileCheckInFlight = nil;
@@ -744,13 +716,13 @@
 
 /*	Pull a proposed credential from the user's MobileMe account instead of credential storage
  */
-- (NSURLCredential *)proposedCredentialForProtectionSpace:(NSURLProtectionSpace *)protectionSpace;
+- (NSURLCredential *)proposedCredential
 {
 	NSURLCredential *result = nil;
 	
 	if ([[[self request] URL] user])
 	{
-		result = [super proposedCredentialForProtectionSpace:protectionSpace];
+		result = [super proposedCredential];
 	}
 	else
 	{

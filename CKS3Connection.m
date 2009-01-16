@@ -331,11 +331,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				[self cacheDirectory:myCurrentDirectory withContents:contents];
 				
-				if (_flags.directoryContents)
-				{
-					//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
-					[_forwarder connection:self didReceiveContents:contents ofDirectory:[self fixPathToBeFilePath:myCurrentDirectory] error:error];
-				}
+				//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
+				[[self client] connectionDidReceiveContents:contents ofDirectory:[self fixPathToBeFilePath:myCurrentDirectory] error:error];
 			}
 			break;
 		}
@@ -344,8 +341,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			CKInternalTransferRecord *upload = [[self currentUpload] retain];
 			[self dequeueUpload];
 			
-			if (_flags.uploadFinished)
-				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+			[[self client] uploadDidFinish:[upload remotePath] error:error];
+            
 			if ([upload delegateRespondsToTransferDidFinish])
 				[[upload delegate] transferDidFinish:[upload delegate] error:error];
 			
@@ -355,34 +352,25 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		}
 		case CKConnectionDeleteFileState:
 		{
-			if (_flags.deleteFile)
-			{
-				[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
-			}
+			[[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
+			
 			[self dequeueDeletion];
 			break;
 		}
 		case CKConnectionDeleteDirectoryState:
 		{
-			if (_flags.deleteDirectory)
-			{
-				[_forwarder connection:self didDeleteDirectory:[self currentDeletion] error:error];
-			}
+			[[self client] connectionDidDeleteDirectory:[self currentDeletion] error:error];
 			[self dequeueDeletion];
 			break;
 		}
 		case CKConnectionCreateDirectoryState:
 		{
-			if (_flags.createDirectory)
-			{
-				[_forwarder connection:self didCreateDirectory:[self fixPathToBeDirectoryPath:[[response request] uri]] error:error];
-			}
+			[[self client] connectionDidCreateDirectory:[self fixPathToBeDirectoryPath:[[response request] uri]] error:error];
 			break;
 		}
 		case CKConnectionAwaitingRenameState:
 		{
-			if (_flags.rename)
-				[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+			[[self client] connectionDidRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
 			[_fileRenames removeObjectAtIndex:0];
 			[_fileRenames removeObjectAtIndex:0];			
 			break;
@@ -429,10 +417,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsUTF8String];
 				
-				if (_flags.transcript)
-				{
-					[self appendString:header toTranscript:CKTranscriptReceived];
-				}
+				[[self client] appendString:header toTranscript:CKTranscriptReceived];
+				
 				
 				unsigned start = headerRange.location + headerRange.length;
 				unsigned len = [myResponseBuffer length] - start;
@@ -442,16 +428,11 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				bytesTransferred += [fileData length];
 				
-				if (_flags.downloadProgressed)
-				{
-					[_forwarder connection:self download:[record propertyForKey:CKQueueDownloadRemoteFileKey] receivedDataOfLength:[fileData length]];
-				}
+				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[fileData length]];
 				
-				if (_flags.downloadPercent)
-				{
-					int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
-					[_forwarder connection:self download:[record propertyForKey:CKQueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
-				}
+				
+				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
+				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
 			}
 		}
 		else  //add the data at the end of the file
@@ -463,19 +444,16 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			CKInternalTransferRecord *downloadInfo = [self currentDownload];
 			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
 			
-			if (_flags.downloadProgressed)
-			{
-				[_forwarder connection:self download:[record propertyForKey:CKQueueDownloadRemoteFileKey] receivedDataOfLength:[data length]];
-			}
+			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[data length]];
+			
 			if ([downloadInfo delegateRespondsToTransferTransferredData])
 			{
 				[[downloadInfo delegate] transfer:record transferredDataOfLength:[data length]];
 			}
-			if (_flags.downloadPercent)
-			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[_forwarder connection:self download:[record propertyForKey:CKQueueDownloadRemoteFileKey] progressedTo:[NSNumber numberWithInt:percent]];
-			}
+			
+            int percent = (100 * bytesTransferred) / bytesToTransfer;
+			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+			
 			if ([downloadInfo delegateRespondsToTransferProgressedTo])
 			{
 				int percent = (100 * bytesTransferred) / bytesToTransfer;
@@ -495,11 +473,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			CKInternalTransferRecord *downloadInfo = [[self currentDownload] retain];
 			[self dequeueDownload];
 			
-			if (_flags.downloadFinished)
-			{
-				CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
-				[_forwarder connection:self downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
-			}
+			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
+			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
+			
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
 				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
 			
@@ -524,10 +500,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		
 		CKInternalTransferRecord *upload = [self currentUpload];
 		
-		if (_flags.didBeginUpload)
-		{
-			[_forwarder connection:self uploadDidBegin:[upload remotePath]];
-		}
+		[[self client] uploadDidBegin:[upload remotePath]];
+		
 		if ([upload delegateRespondsToTransferDidBegin])
 		{
 			[[upload delegate] transferDidBegin:[upload delegate]];
@@ -540,10 +514,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		
 		CKInternalTransferRecord *download = [self currentDownload];
 		
-		if (_flags.didBeginDownload)
-		{
-			[_forwarder connection:self downloadDidBegin:[download remotePath]];
-		}
+		[[self client] downloadDidBegin:[download remotePath]];
+		
 		if ([download delegateRespondsToTransferDidBegin])
 		{
 			[[download delegate] transferDidBegin:[download delegate]];
@@ -583,12 +555,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			
 			if (percent != myLastPercent)
 			{
-				if (_flags.uploadPercent)
-				{
-					[_forwarder connection:self 
-									upload:[upload remotePath]
-							  progressedTo:[NSNumber numberWithInt:percent]];
-				}
+				[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+                
 				if ([upload delegateRespondsToTransferProgressedTo])
 				{
 					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInt:percent]];
@@ -596,12 +564,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				myLastPercent = percent;
 			}
 		}
-		if (_flags.uploadProgressed)
-		{
-			[_forwarder connection:self 
-							upload:[upload remotePath]
-				  sentDataOfLength:length];
-		}
+		
+        [[self client] upload:[upload remotePath] didSendDataOfLength:length];
+		
 		if ([upload delegateRespondsToTransferTransferredData])
 		{
 			[[upload delegate] transfer:[upload delegate] transferredDataOfLength:length];
@@ -622,10 +587,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	
 	[myCurrentDirectory autorelease];
 	myCurrentDirectory = [dirPath copy];
-	if (_flags.changeDirectory)
-	{
-		[_forwarder connection:self didChangeToDirectory:dirPath error:nil];
-	}
+	
+	[[self client] connectionDidChangeToDirectory:dirPath error:nil];
+	
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
 	[self setState:CKConnectionIdleState];
@@ -848,14 +812,12 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	
 	if (!flag && [[NSFileManager defaultManager] fileExistsAtPath:localPath])
 	{
-		if (_flags.error)
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
-									  remotePath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:S3ErrorDomain code:S3DownloadFileExists userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+                                  remotePath, NSFilePathErrorKey, nil];
+        NSError *error = [NSError errorWithDomain:S3ErrorDomain code:S3DownloadFileExists userInfo:userInfo];
+        [[self client] connectionDidReceiveError:error];
+		
 		return nil;
 	}
 	
@@ -926,7 +888,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
 	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:[self standardizePath:dirPath] error:nil];
+		[[self client] connectionDidReceiveContents:cachedContents ofDirectory:[self standardizePath:dirPath] error:nil];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
 		{
 			return;
@@ -962,7 +924,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
                                                                                               error:nil
                                                                                              sender:self];
     
-    [self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+    [[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
 }
 
 /*  CKHTTPConnection implements the -cancel and -continueWithCredential methods for us in a perfectly

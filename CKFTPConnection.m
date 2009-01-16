@@ -171,7 +171,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		_ftpFlags.canUseEPSV = YES;
 		
 		_ftpFlags.hasSize = YES;
-		_flags.isConnected = NO;
+		_isConnected = NO;
 	}
 	return self;
 }
@@ -264,20 +264,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			commandToEcho = @"PASS ####";
 		}
 	}
-	if (_flags.transcript)
-	{
-		[self appendString:commandToEcho toTranscript:CKTranscriptSent];
-	}
+	
+    [[self client] appendString:commandToEcho toTranscript:CKTranscriptSent];
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
 
 	if ([formattedCommand rangeOfString:@"RETR"].location != NSNotFound)
 	{
 		CKInternalTransferRecord *download = [self currentDownload];
-		if (_flags.didBeginDownload)
-		{
-			[_forwarder connection:self downloadDidBegin:[download remotePath]];
-		}
+		
+        [[self client] downloadDidBegin:[download remotePath]];
+		
 		if ([download delegateRespondsToTransferDidBegin])
 		{
 			[[download delegate] transferDidBegin:[download userInfo]];
@@ -286,10 +283,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if ([formattedCommand rangeOfString:@"STOR"].location != NSNotFound)
 	{
 		CKInternalTransferRecord *upload = [self currentUpload];
-		if (_flags.didBeginUpload)
-		{
-			[_forwarder connection:self uploadDidBegin:[upload remotePath]];
-		}
+		
+        [[self client] uploadDidBegin:[upload remotePath]];
+        
 		if ([upload delegateRespondsToTransferDidBegin])
 		{
 			[[upload delegate] transferDidBegin:[upload userInfo]];
@@ -358,10 +354,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 	}
 	
-	if (_flags.transcript)
-	{
-		[self appendString:buffer toTranscript:CKTranscriptReceived];
-	}
+	[[self client] appendString:buffer toTranscript:CKTranscriptReceived];
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", command);	/// use <<# to help find commands
 	
@@ -414,14 +407,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[_writeHandle closeFile];
 					[self setWriteHandle:nil];
 				}
-				if (_flags.cancel)
-				{
-					[_forwarder connectionDidCancelTransfer:self];
-				}
-				if (_flags.didCancel)
-				{
-					[_forwarder connection:self didCancelTransfer:remotePath];
-				}
+				
+                [[self client] connectionDidCancelTransfer:remotePath];
 			}
 			if (_dataSendStream == nil || _dataReceiveStream == nil)
 			{
@@ -431,37 +418,31 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case 332: //need account
 		{
-			id delegate = [self delegate];
-			if (delegate && [delegate respondsToSelector:@selector(connection:needsAccountForUsername:)])
-			{
-				NSString *account = [_forwarder connection:self needsAccountForUsername:nil]; // TODO: Handle this more gracefully
-				if (account)
-				{
-					[self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];
-					[self setState:CKConnectionSentAccountState];
-				}
-			}
+			NSString *account = [[self client] accountForUsername:nil];
+            if (account)
+            {
+                [self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];
+                [self setState:CKConnectionSentAccountState];
+            }
 			break;
 		}		
 		case 421: //service timed out.
 		{
 			[self closeDataStreams];
 			[super threadedDisconnect]; //This empties the queues, etc.
-			_flags.isConnected = NO;
-			if (_flags.didDisconnect) {
-				[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
-			}
+			_isConnected = NO;
+            
+			[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
+            
 			
-			if (_flags.error)
-			{
-				NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  localizedDescription, NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [[self request] URL], ConnectionHostKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
+            NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"FTP service not available; Remote server has closed connection", @"FTP service timed out");
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      localizedDescription, NSLocalizedDescriptionKey,
+                                      command, NSLocalizedFailureReasonErrorKey,
+                                      [[self request] URL], ConnectionHostKey, nil];
+            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
+            [[self client] connectionDidReceiveError:error];
+			
 			[self setState:CKConnectionNotConnectedState]; 
 			break;
 		}	
@@ -490,15 +471,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}		
 		case 530: //User not logged in
 		{
-			if (_flags.error)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [[[self request] URL] host], ConnectionHostKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
+                                      command, NSLocalizedFailureReasonErrorKey,
+                                      [[[self request] URL] host], ConnectionHostKey, nil];
+            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
+            [[self client] connectionDidReceiveError:error];
+            
 			if (GET_STATE != CKConnectionSentQuitState)
 			{
 				[self sendCommand:@"QUIT"];
@@ -600,15 +579,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 120: //Service Ready
 		{
-			if (_flags.didConnect)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
-										  command, NSLocalizedFailureReasonErrorKey,
-										  [[[self request] URL] host], ConnectionHostKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-				[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:error];
-			}
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      LocalizedStringInConnectionKitBundle(@"FTP Service Unavailable", @"FTP no service"), NSLocalizedDescriptionKey,
+                                      command, NSLocalizedFailureReasonErrorKey,
+                                      [[[self request] URL] host], ConnectionHostKey, nil];
+            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
+            [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:error];
+			
 			[self setState:CKConnectionNotConnectedState]; //don't really need.
 			break;
 		}
@@ -805,8 +782,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		default:
 			break;
 	}
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:error];
+
+    [[self client] connectionDidChangeToDirectory:path error:error];
 }
 
 - (void)_receivedCodeInConnectionAwaitingDirectoryContentsState:(int)code command:(NSString *)command buffer:(NSString *)buffer
@@ -891,8 +868,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:error];
+
+    [[self client] connectionDidChangeToDirectory:path error:error];
+    
 	[self setState:CKConnectionIdleState];
 }
 
@@ -913,7 +891,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}			
 		case 521: //Supported Address Families
 		{
-			if (!_flags.isRecursiveUploading)
+			if (!_isRecursiveUploading)
 			{
 				NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"FTP Create directory error");
 				NSString *path = nil;
@@ -954,15 +932,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	if (_flags.createDirectory)
-	{
-		NSString *path = [self scanBetweenQuotes:command];
-		if (!path || [path length] == 0)
-		{
-			path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-		}
-		[_forwarder connection:self didCreateDirectory:path error:error];
-	}
+	NSString *path = [self scanBetweenQuotes:command];
+    if (!path || [path length] == 0)
+    {
+        path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    }
+    [[self client] connectionDidCreateDirectory:path error:error];
+    
 	[self setState:CKConnectionIdleState];
 }
 
@@ -996,8 +972,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	// Uses same _fileDeletes queue, hope that's safe to do.  (Any chance one could get ahead of another?)
-	if (_flags.deleteDirectory)
-		[_forwarder connection:self didDeleteDirectory:[_fileDeletes objectAtIndex:0] error:error];
+	[[self client] connectionDidDeleteDirectory:[_fileDeletes objectAtIndex:0] error:error];
+    
 	[self dequeueDeletion];
 	[self setState:CKConnectionIdleState];
 }
@@ -1033,8 +1009,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
 	if (error)
 	{
-		if (_flags.rename)
-			[_forwarder connection:self didRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+		[[self client] connectionDidRename:[_fileRenames objectAtIndex:0] to:[_fileRenames objectAtIndex:1] error:error];
+        
 		[_fileRenames removeObjectAtIndex:0];
 		[_fileRenames removeObjectAtIndex:0];							 
 		[self setState:CKConnectionIdleState];				
@@ -1083,8 +1059,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	if (_flags.rename)
-		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+	[[self client] connectionDidRename:fromPath to:toPath error:error];
+    
 	[_fileRenames removeObjectAtIndex:0];
 	[_fileRenames removeObjectAtIndex:0];							 
 	[self setState:CKConnectionIdleState];	
@@ -1129,8 +1105,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	if (_flags.deleteFile) 
-		[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
+
+    [[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
+    
 	[self dequeueDeletion];	
 	[self setState:CKConnectionIdleState];
 }
@@ -1172,19 +1149,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
 				_transferSent += len;
 				
-				if (_flags.downloadProgressed)
-				{
-					[_forwarder connection:self download:[download remotePath] receivedDataOfLength:len];
-				}
+				[[self client] download:[download remotePath] didReceiveDataOfLength:len];
+				
 				if ([download delegateRespondsToTransferTransferredData])
 				{
 					[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
 				}
 				int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
-				if (_flags.downloadPercent)
-				{
-					[_forwarder connection:self download:[download remotePath] progressedTo:[NSNumber numberWithInt:percent]];
-				}
+
+                [[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
 					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -1280,8 +1254,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *download = [[self currentDownload] retain];
 		[self dequeueDownload];
 		
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+		[[self client] downloadDidFinish:[download remotePath] error:error];
+        
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo] error:error];
 		
@@ -1355,10 +1329,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			_transferSent += chunkLength;
 			_transferCursor += chunkLength;
 			
-			if (_flags.uploadProgressed)
-			{
-				[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-			}
+			[[self client] upload:remoteFile didSendDataOfLength:chunkLength];
+			
 			if ([d delegateRespondsToTransferTransferredData])
 			{
 				[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
@@ -1367,10 +1339,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			int percent = (float)_transferSent / ((float)_transferSize * 1.0);
 			if (percent > _transferLastPercent)
 			{
-				if (_flags.uploadPercent)
-				{
-					[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-				}
+				[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+				
 				if ([d delegateRespondsToTransferProgressedTo])
 				{
 					[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -1452,18 +1422,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
 				}
 				
-				if (_flags.uploadProgressed)
-				{
-					[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-				}
+				[[self client] upload:remoteFile didSendDataOfLength:chunkLength];
 				
 				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
 				if (percent > _transferLastPercent)
 				{
-					if (_flags.uploadPercent)
-					{
-						[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-					}
+					[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+					
 					if ([d delegateRespondsToTransferProgressedTo])
 					{
 						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -1580,8 +1545,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *upload = [[self currentUpload] retain];
 		[self dequeueUpload];
 		
-		if (_flags.uploadFinished)
-			[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+		[[self client] uploadDidFinish:[upload remotePath] error:error];
+        
 		if ([upload delegateRespondsToTransferDidFinish])
 			[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 		
@@ -1776,8 +1741,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		default:
 			break;
 	}
-	if (_flags.permissions)
-		[_forwarder connection:self didSetPermissionsForFile:[_filePermissions objectAtIndex:0] error:error];
+
+    [[self client] connectionDidSetPermissionsForFile:[_filePermissions objectAtIndex:0] error:error];
+    
 	[self dequeuePermissionChange];
 	[self setState:CKConnectionIdleState];
 }
@@ -1858,8 +1824,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *download = [[self currentDownload] retain];
 		[self dequeueDownload];
 		
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+		[[self client] downloadDidFinish:[download remotePath] error:error];
+        
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo] error:error];
 		
@@ -1915,16 +1881,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				 sscanf(start, "=%d,%d,%d,%d,%d,%d", &i[0], &i[1], &i[2], &i[3], &i[4], &i[5]) != 6 ) )
 			{
 				_ftpFlags.canUsePASV = NO;
-				if (_flags.error)
-				{
-					NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available");
-					NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-											  localizedDescription, NSLocalizedDescriptionKey,
-											  command, NSLocalizedFailureReasonErrorKey,
-											  [[[self request] URL] host], ConnectionHostKey, nil];
-					NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
-					[_forwarder connection:self didReceiveError:err];
-				}
+				
+                NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"All data connection modes have been exhausted. Check with the server administrator.", @"FTP no data stream types available");
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                          localizedDescription, NSLocalizedDescriptionKey,
+                                          command, NSLocalizedFailureReasonErrorKey,
+                                          [[[self request] URL] host], ConnectionHostKey, nil];
+                NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
+                [[self client] connectionDidReceiveError:err];
+                
 				_state = CKConnectionSentQuitState;
 				[self sendCommand:@"QUIT"];
 			}
@@ -2199,17 +2164,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 								{
 									[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
 								}
-								if (_flags.downloadPercent)
-								{
-									[_forwarder connection:self download:file progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-								}
+								
+                                [[self client] download:file didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+								
 								_transferLastPercent = percent;
 							}
 						}
 						
-						if (_flags.downloadProgressed) {
-							[_forwarder connection:self download:file receivedDataOfLength:len];
-						}
+						[[self client] download:file didReceiveDataOfLength:len];
+						
 						
 						if ([download delegateRespondsToTransferTransferredData])
 						{
@@ -2234,10 +2197,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			if (_flags.transcript)
-			{
-				[self appendToTranscript:CKTranscriptSent format:@"Receive Stream Error: %@", [_receiveStream streamError]];
-			}
+			[[self client] appendFormat:@"Receive Stream Error: %@" toTranscript:CKTranscriptSent, [_receiveStream streamError]];
+			
 			
 
 			KTLog(CKStreamDomain, KTLogError, @"receive error %@", [_receiveStream streamError]);
@@ -2307,8 +2268,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					CKInternalTransferRecord *upload = [[self currentUpload] retain];
 					[self dequeueUpload];
 					
-					if (_flags.uploadFinished)
-						[_forwarder connection:self uploadDidFinish:[upload remotePath] error:[_receiveStream streamError]];
+					[[self client] uploadDidFinish:[upload remotePath] error:[_receiveStream streamError]];
+                    
 					if ([upload delegateRespondsToTransferDidFinish])
 						[[upload delegate] transferDidFinish:[upload userInfo] error:[_receiveStream streamError]];
 					
@@ -2336,8 +2297,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					CKInternalTransferRecord *download = [[self currentDownload] retain];
 					[self dequeueDownload];
 					
-					if (_flags.downloadFinished)
-						[_forwarder connection:self downloadDidFinish:[download remotePath] error:[_receiveStream streamError]];
+					[[self client] downloadDidFinish:[download remotePath] error:[_receiveStream streamError]];
+                    
 					if ([download delegateRespondsToTransferDidFinish])
 						[[download delegate] transferDidFinish:[download userInfo] error:[_receiveStream streamError]];
 					
@@ -2438,10 +2399,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 		case NSStreamEventErrorOccurred:
 		{
-			if (_flags.transcript)
-			{
-				[self appendToTranscript:CKTranscriptSent format:@"Send Stream Error: %@", [_receiveStream streamError]];
-			}
+			[[self client] appendFormat:@"Send Stream Error: %@" toTranscript:CKTranscriptSent, [_receiveStream streamError]];
+			
 			KTLog(CKStreamDomain, KTLogDebug, @"send error %@", [_sendStream streamError]);
 			// we don't want the error to go to the delegate unless we fail on setting the active con
 			/* Some servers when trying to test PASV can crap out and throw an error */
@@ -2526,11 +2485,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self sendCommand:@"DATA_CON"];
 				}
 			}
-			else {
+			else
+            {
 				KTLog(CKStreamDomain, KTLogDebug, @"NSStreamEventErrorOccurred: %@", [_dataReceiveStream streamError]);
-				if (_flags.error) {
-					[_forwarder connection:self didReceiveError:[_dataReceiveStream streamError]];	
-				}
+				[[self client] connectionDidReceiveError:[_dataReceiveStream streamError]];
 			}
 			
 			break;
@@ -2577,18 +2535,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					{
 						[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:chunkLength];
 					}
-						if (_flags.uploadProgressed)
-						{
-							[_forwarder connection:self upload:remoteFile sentDataOfLength:chunkLength];
-						}
+						[[self client] upload:remoteFile didSendDataOfLength:chunkLength];
+                    
 					//}
 					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
 					if (percent > _transferLastPercent)
 					{
-						if (_flags.uploadPercent)
-						{
-							[_forwarder connection:self upload:remoteFile progressedTo:[NSNumber numberWithInt:percent]];	// send message if we have increased %
-						}
+						[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+						
 						if ([upload delegateRespondsToTransferProgressedTo])
 						{
 							[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
@@ -2624,10 +2578,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *download = [[self currentDownload] retain];
 		[self dequeueDownload];
 		
-		if (_flags.downloadFinished)
-		{
-			[_forwarder connection:self downloadDidFinish:[download remotePath] error:nil];
-		}
+		[[self client] downloadDidFinish:[download remotePath] error:nil];
+		
 		if ([download delegateRespondsToTransferDidFinish])
 		{
 			[[download delegate] transferDidFinish:[download userInfo] error:nil];
@@ -2646,10 +2598,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		CKInternalTransferRecord *upload = [[self currentUpload] retain];
 		[self dequeueUpload];
 		
-		if (_flags.uploadFinished) 
-		{
-			[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
-		}
+		[[self client] uploadDidFinish:[upload remotePath] error:nil];
+		
 		if ([upload delegateRespondsToTransferDidFinish])
 		{
 			[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
@@ -2677,7 +2627,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				return;
 			}
 		}
-		[self appendString:results toTranscript:CKTranscriptData];
+		[[self client] appendString:results toTranscript:CKTranscriptData];
 
 		NSArray *contents = [self parseLines:results];
 		
@@ -2685,10 +2635,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		[self cacheDirectory:_currentPath withContents:contents];
 		
-		if (_flags.directoryContents)
-		{
-			[_forwarder connection:self didReceiveContents:contents ofDirectory:_currentPath error:nil];
-		}
+		[[self client] connectionDidReceiveContents:contents ofDirectory:_currentPath error:nil];
+		
 		[results release];
 		[_dataBuffer setLength:0];
 
@@ -2777,11 +2725,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	//do something
 	KTLog(CKTransportDomain, KTLogError, @"Timed out opening data connection");
 
-	if (_flags.transcript)
-	{
-		[self appendString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")
-			  toTranscript:CKTranscriptData];
-	}
+	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")
+                   toTranscript:CKTranscriptData];
 	
 	[timer invalidate];
 	[_openStreamsTimeout release];
@@ -3090,14 +3035,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		if ([[NSFileManager defaultManager] fileExistsAtPath:localPath])
 		{
-			if (_flags.error)
-			{
-				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-										  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
-										  remotePath, NSFilePathErrorKey, nil];
-				NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
-				[_forwarder connection:self didReceiveError:error];
-			}
+            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                      LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+                                      remotePath, NSFilePathErrorKey, nil];
+            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
+            [[self client] connectionDidReceiveError:error];
+			
 			return nil;
 		}
 	}
@@ -3297,7 +3240,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
 	if (cachedContents)
 	{
-		[_forwarder connection:self didReceiveContents:cachedContents ofDirectory:dirPath error:nil];
+		[[self client] connectionDidReceiveContents:cachedContents ofDirectory:dirPath error:nil];
+        
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
 		{
 			return;
@@ -3380,15 +3324,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else
 	{
-		if (_flags.error)
-		{
-			NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available");
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  localizedDescription, NSLocalizedDescriptionKey,
-									  [[[self request] URL] host], ConnectionHostKey, nil];
-			NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:err];
-		}
+        NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Exhausted all connection types to server. Please contact server administrator", @"FTP no data streams available");
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  localizedDescription, NSLocalizedDescriptionKey,
+                                  [[[self request] URL] host], ConnectionHostKey, nil];
+        NSError *err = [NSError errorWithDomain:CKFTPErrorDomain code:FTPErrorNoDataModes userInfo:userInfo];
+        [[self client] connectionDidReceiveError:err];
 	}
 	
 	CKConnectionCommand *command;
@@ -3506,12 +3447,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			_activeSocket = nil;
 		}
 		
-		if (_flags.error) {
-			/*NSError *err = [NSError errorWithDomain:FTPErrorDomain
-											   code:FTPErrorNoDataModes
-										   userInfo:[NSDictionary dictionaryWithObject:@"Failed to create active connection to server" forKey:NSLocalizedDescriptionKey]];
-			[_forwarder connection:self didReceiveError:err];*/
-		}
 		return NO;
 	}
 	return YES;
@@ -3793,7 +3728,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     
     _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc]
                                     initWithProtectionSpace:protectionSpace
-                                    proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+                                    proposedCredential:nil
                                     previousFailureCount:previousFailureCount
                                     failureResponse:nil
                                     error:nil
@@ -3802,7 +3737,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     [protectionSpace release];
     
     // As the delegate to handle the challenge
-    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    
+    [[self client] connectionDidReceiveAuthenticationChallenge:_lastAuthenticationChallenge];    
 }
 
 /*  FTP's horrible design requires us to send the username or account name and then wait for a response
