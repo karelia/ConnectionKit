@@ -35,10 +35,14 @@
 - (NSString *)encodeLegally;
 - (NSString *)encodeLegallyForS3;
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
+
+// Paths
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
 - (NSString *)stringByStandardizingHTTPPath;
+- (NSString *)stringByAppendingDirectoryTerminator;
+
 - (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
 - (NSString *)stringByStandardizingURLComponents;
 - (NSString *)md5Hash;

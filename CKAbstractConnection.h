@@ -180,11 +180,6 @@ extern NSString *CKConnectionSentStateKey;
 extern NSString *CKConnectionCommandKey;
 
 
-@interface NSString (AbstractConnectionExtras)
-- (NSString *)stringByAppendingDirectoryTerminator;
-@end
-
-
 @interface NSInvocation (AbstractConnectionExtras)
 + (NSInvocation *)invocationWithSelector:(SEL)aSelector 
 								  target:(id)aTarget 
@@ -192,25 +187,8 @@ extern NSString *CKConnectionCommandKey;
 @end
 
 
-@interface NSFileManager (AbstractConnectionExtras)
-+ (NSString *)_dateStringFromListing:(NSString *)listing;
-+ (NSArray *)attributedFilesFromListing:(NSString *)line;
-+ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes;
-+ (void)parsePermissions:(NSString *)perm withAttributes:(NSMutableDictionary *)attributes;
-@end
-
-
-@interface NSCalendarDate (AbstractConnectionExtras)
-+ (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime;
-@end
-
-
 @interface NSHost (IPV4)
 - (NSString *)ipv4Address;
 @end
 
-
-@interface NSArray (AbstractConnectionExtras)
-- (NSArray *)filteredArrayByRemovingHiddenFiles;
-@end
 

@@ -33,6 +33,8 @@
 #import "CKConnectionOpenPanel.h"
 #import "CKConnectionProtocol.h"
 
+#import "NSArray+Connection.h"
+
 
 @interface CKConnectionOpenPanel (Private)
 - (void)setConnection:(id <CKConnection>)aConnection;

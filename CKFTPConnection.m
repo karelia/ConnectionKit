@@ -36,7 +36,10 @@
 #import "RunLoopForwarder.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
+
+#import "NSFileManager+Connection.h"
 #import "NSObject+Connection.h"
+
 #import "CKCacheableHost.h"
 #import "CKConnectionProtocol.h"
 #import "CKURLProtectionSpace.h"
