@@ -99,6 +99,18 @@
 	return [result stringByStandardizingPath];
 }
 
+- (NSString *)stringByAppendingDirectoryTerminator
+{
+    if ( ![self hasSuffix:@"/"] )
+    {
+        return [self stringByAppendingString:@"/"];
+    }
+    else
+    {
+        return self;
+    }
+}
+
 - (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent
 {
 	URLComponent = [URLComponent stringByStandardizingURLComponents];

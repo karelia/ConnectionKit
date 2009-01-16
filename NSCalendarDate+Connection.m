@@ -88,4 +88,39 @@
 	return [self descriptionWithCalendarFormat:@"%Y-%m-%dT%H:%M:%SZ" timeZone:[NSTimeZone timeZoneForSecondsFromGMT:0] locale:[[NSUserDefaults standardUserDefaults] dictionaryRepresentation]];
 }
 
++ (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime
+{
+	NSCalendarDate * date;
+	// Has a Year
+	if ([yearOrTime rangeOfString:@":"].location == NSNotFound) 
+	{
+		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %@", month, day, yearOrTime] calendarFormat:@"%b %d %Y"];
+	}
+	// Has A Time
+	else 
+	{
+		NSCalendarDate *now = [NSCalendarDate date];
+		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %d %@", month, day, [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
+		
+		//Is the date in the future?
+		if ([date compare:now] == NSOrderedDescending)
+		{
+			NSTimeInterval timeDifference = [date timeIntervalSinceDate:now];
+			float sixMonthsInSeconds = (3600*24*30.5*6);
+			if (timeDifference > sixMonthsInSeconds) //If it's beyond 6 months in the future, it would not have been without a year. Roll it back.
+			{
+				date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1
+											  month:[date monthOfYear]
+												day:[date dayOfMonth]
+											   hour:[date hourOfDay]
+											 minute:[date minuteOfHour]
+											 second:[date secondOfMinute]
+										   timeZone:[date timeZone]];
+			}			
+		}
+	}
+	
+	return date;
+}
+
 @end

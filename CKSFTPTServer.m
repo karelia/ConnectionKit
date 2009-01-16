@@ -6,7 +6,9 @@
 #import "CKSFTPTServer.h"
 #import "CKSFTPConnection.h"
 #import "CKInternalTransferRecord.h"
+
 #import "NSArray+Connection.h"
+#import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
 
 #include <errno.h>

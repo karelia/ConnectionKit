@@ -31,6 +31,9 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 #import "NSArray+Connection.h"
 #import "NSObject+Connection.h"
 
+#import "CKConnectionProtocol.h"
+
+
 @implementation NSArray (Connection)
 
 #define NSARRAY_MAXIMUM_DESCRIBED 20
@@ -96,6 +99,22 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
     *argv = av;
     
     return( ac );
+}
+
+- (NSArray *)filteredArrayByRemovingHiddenFiles
+{
+	NSMutableArray *files = [NSMutableArray array];
+	NSEnumerator *e = [self objectEnumerator];
+	NSDictionary *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		if (![[[cur objectForKey:cxFilenameKey] lastPathComponent] hasPrefix:@"."])
+		{
+			[files addObject:cur];
+		}
+	}
+	return files;
 }
 
 @end
