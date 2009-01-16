@@ -459,14 +459,12 @@ static NSString *lsform = nil;
 	
 	if (!flag && [[NSFileManager defaultManager] fileExistsAtPath:localPath])
 	{
-		if (_flags.error)
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
-									  remotePath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+                                  remotePath, NSFilePathErrorKey, nil];
+        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
+        [[self client] connectionDidReceiveError:error];
+		
 		return nil;
 	}
 	
@@ -663,8 +661,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:error];	
+	[[self client] connectionDidChangeToDirectory:path error:error];	
 }
 
 - (void)_finishedCommandInConnectionCreateDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
@@ -681,8 +678,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
-	if (_flags.createDirectory)
-		[_forwarder connection:self didCreateDirectory:path error:error];
+	[[self client] connectionDidCreateDirectory:path error:error];
 	
 }
 
@@ -707,8 +703,7 @@ static NSString *lsform = nil;
 	[_fileRenames removeObjectAtIndex:0];
 	[_fileRenames removeObjectAtIndex:0];							 
 	
-	if (_flags.rename)
-		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+	[[self client] connectionDidRename:fromPath to:toPath error:error];
 
 	[fromPath release];
 	[toPath release];
@@ -726,8 +721,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.permissions)
-		[_forwarder connection:self didSetPermissionsForFile:[self currentPermissionChange] error:error];
+	[[self client] connectionDidSetPermissionsForFile:[self currentPermissionChange] error:error];
 	[self dequeuePermissionChange];
 }
 
@@ -743,8 +737,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.deleteFile)
-		[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
+	[[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
 	[self dequeueDeletion];
 }
 
@@ -760,8 +753,8 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.deleteDirectory)
-		[_forwarder connection:self didDeleteDirectory:[self currentDeletion] error:error];
+	[[self client] connectionDidDeleteDirectory:[self currentDeletion] error:error];
+    
 	[self dequeueDeletion];
 }
 
@@ -780,9 +773,9 @@ static NSString *lsform = nil;
 	CKInternalTransferRecord *upload = [[self currentUpload] retain]; 
 	[self dequeueUpload];
 	
-	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-	if ([upload delegateRespondsToTransferDidFinish])
+	[[self client] uploadDidFinish:[upload remotePath] error:error];
+	
+    if ([upload delegateRespondsToTransferDidFinish])
 		[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 
 	[upload release];
@@ -805,12 +798,12 @@ static NSString *lsform = nil;
 	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
 	[self dequeueDownload];
 	
-	if (_flags.downloadFinished)
-		[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+	[[self client] downloadDidFinish:[download remotePath] error:error];
+    
 	if ([download delegateRespondsToTransferDidFinish])
 		[[download delegate] transferDidFinish:[download userInfo] error:error];
-	if (_flags.error)
-		[_forwarder connection:self didReceiveError:error];
+
+    [[self client] connectionDidReceiveError:error];
 	
 	[download release];	
 }
@@ -850,16 +843,13 @@ static NSString *lsform = nil;
 	_connectTimeoutTimer = nil;
 	
 	
-	if (_flags.didConnect)
-	{
-		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-								  localizedDescription, NSLocalizedDescriptionKey, 
-								  [[[self request] URL] host], ConnectionHostKey, nil];
-		
-		NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
-		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:error];
-	}
+    NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              localizedDescription, NSLocalizedDescriptionKey, 
+                              [[[self request] URL] host], ConnectionHostKey, nil];
+    
+    NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
+    [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:error];
 }
 
 - (void)didSetRootDirectory
@@ -867,12 +857,9 @@ static NSString *lsform = nil;
 	rootDirectory = [[NSString alloc] initWithString:currentDirectory];
 	
 	_isConnecting = NO;
-	_flags.isConnected = YES;
+	_isConnected = YES;
 	
-	if (_flags.didConnect)
-    {
-		[_forwarder connection:self didConnectToHost:[[[self request] URL] host] error:nil];
-    }
+	[[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
 }
 
 - (void)setCurrentDirectory:(NSString *)current
@@ -890,17 +877,13 @@ static NSString *lsform = nil;
 		
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];			
 	
-	_flags.isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[[[self request] URL] host]];
-	}
+	_isConnected = NO;
+	[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
 }
 
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
-	if (_flags.directoryContents)
-		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
+	[[self client] connectionDidReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -910,12 +893,10 @@ static NSString *lsform = nil;
 	
 	if ([uploadInfo delegateRespondsToTransferProgressedTo])
 		[[uploadInfo delegate] transfer:record progressedTo:progress];
-	if (_flags.uploadPercent)
-	{
-		NSString *remotePath = [uploadInfo remotePath];
-		[_forwarder connection:self upload:remotePath progressedTo:progress];
-	}
 	
+    NSString *remotePath = [uploadInfo remotePath];
+	[[self client] upload:remotePath didProgressToPercent:progress];
+		
 	
 	if (progressPercentage != 100.0)
 	{
@@ -932,11 +913,9 @@ static NSString *lsform = nil;
 	{
 		[[uploadInfo delegate] transferDidBegin:[uploadInfo userInfo]];
 	}		
-	if (_flags.didBeginUpload)
-	{
-		NSString *remotePath = [uploadInfo remotePath];
-		[_forwarder connection:self uploadDidBegin:remotePath];
-	}
+	
+	NSString *remotePath = [uploadInfo remotePath];
+	[[self client] uploadDidBegin:remotePath];
 }
 
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -960,19 +939,14 @@ static NSString *lsform = nil;
 		}
 	}
 
-	if (_flags.downloadPercent)
-	{
-		NSString *remotePath = [downloadInfo remotePath];
-		[_forwarder connection:self download:remotePath progressedTo:progress];
-	}
+	NSString *remotePath = [downloadInfo remotePath];
+	[[self client] download:remotePath didProgressToPercent:progress];
 }
 - (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo
 {
-	if (_flags.didBeginDownload)
-	{
-		NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
-		[_forwarder connection:self downloadDidBegin:remotePath];
-	}
+	NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
+	[[self client] downloadDidBegin:remotePath];
+	
 	if ([downloadInfo delegateRespondsToTransferDidBegin])
 		[[downloadInfo delegate] transferDidBegin:[downloadInfo userInfo]];
 }
@@ -1038,14 +1012,10 @@ static NSString *lsform = nil;
 	}
 	
 	//We don't have it on keychain, so ask the delegate for it if we can, or ask ourselves if not.	
-	NSString *passphrase = nil;
-	if (_flags.passphrase)
-	{
-		passphrase = [_forwarder connection:self
-                          passphraseForHost:[[[self request] URL] host]
-                                   username:[[[self request] URL] user] publicKeyPath:pubKeyPath];
-	}
-	else
+	NSString *passphrase = [[self client] passphraseForHost:[[[self request] URL] host]
+                                                   username:[[[self request] URL] user] publicKeyPath:pubKeyPath];
+	
+	if (!passphrase)
 	{
 		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
 		CKSSHPassphrase *passphraseFetcher = [[CKSSHPassphrase alloc] init];
@@ -1095,7 +1065,7 @@ static NSString *lsform = nil;
                                                                   authenticationMethod:NSURLAuthenticationMethodDefault];
     
     _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                              proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+                                                                              proposedCredential:nil
                                                                             previousFailureCount:previousFailureCount
                                                                                  failureResponse:nil
                                                                                            error:nil
@@ -1103,7 +1073,7 @@ static NSString *lsform = nil;
     
     [protectionSpace release];
     
-    [self didReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+    [[self client] connectionDidReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
@@ -1119,13 +1089,10 @@ static NSString *lsform = nil;
     // SFTP absolutely requires authentication to continue, so fail with an error
     if (challenge == _lastAuthenticationChallenge)
     {
-        if (_flags.error)
-        {
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"SFTP connections require some form of authentication.", @"SFTP authenticaton error")
-                                                                 forKey:NSLocalizedDescriptionKey];
-            NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKConnectionErrorBadPassword userInfo:userInfo];
-            [_forwarder connection:self didReceiveError:error];
-        }
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"SFTP connections require some form of authentication.", @"SFTP authenticaton error")
+                                                             forKey:NSLocalizedDescriptionKey];
+        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKConnectionErrorBadPassword userInfo:userInfo];
+        [[self client] connectionDidReceiveError:error];
         
         [self disconnect];
     }

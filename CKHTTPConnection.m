@@ -90,10 +90,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	NSError *err = [NSError errorWithDomain:CKHTTPConnectionErrorDomain 
 									   code:code 
 								   userInfo:[NSDictionary dictionaryWithObject:error forKey:NSLocalizedDescriptionKey]];
-	if (_flags.error)
-	{
-		[_forwarder connection:self didReceiveError:err];
-	}
+	[[self client] connectionDidReceiveError:err];
 }
 
 - (void)sendRequest:(CKHTTPRequest *)request
@@ -158,18 +155,14 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
 	
-	if (_flags.transcript)
-	{
-		[self appendToTranscript:CKTranscriptReceived format:@"%@", [response description]];
-		[self appendToTranscript:CKTranscriptData format:@"%@", [response formattedResponse]];
-	}
+	[[self client] appendString:[response description] toTranscript:CKTranscriptReceived];
+	[[self client] appendString:[response formattedResponse] toTranscript:CKTranscriptData];
+	
 	
 	if ([response code] == 401)
 	{		
-		if (_flags.transcript)
-		{
-			[self appendString:@"Connection needs Authorization" toTranscript:CKTranscriptSent];
-		}
+		[[self client] appendString:@"Connection needs Authorization" toTranscript:CKTranscriptSent];
+		
 		// need to append authorization
 		NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
 		NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
@@ -217,10 +210,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		else
 		{
-			if (_flags.transcript)
-			{
-				[self appendString:@"CKHTTPConnection could not authenticate!" toTranscript:CKTranscriptSent];
-			}
+			[[self client] appendString:@"CKHTTPConnection could not authenticate!" toTranscript:CKTranscriptSent];
+			
 			@throw [NSException exceptionWithName:NSInternalInconsistencyException
 										   reason:@"Failed at Basic and Digest Authentication"
 										 userInfo:nil];
@@ -248,10 +239,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[myCurrentRequest autorelease];
 	myCurrentRequest = nil;
 	
-	if (myHTTPFlags.didReceiveResponse)
-	{
-		[(NSObject *)_forwarder connection:self didReceiveResponse:response];
-	}
 	[self setState:CKConnectionIdleState];
 }
 
@@ -288,10 +275,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		NSData *packet = [req serialized];
 		
-		if (_flags.transcript)
-		{
-			[self appendToTranscript:CKTranscriptSent format:@"%@", [req description]];
-		}
+		[[self client] appendString:[req description] toTranscript:CKTranscriptSent];
+		
 		
 		[self initiatingNewRequest:req withPacket:packet];
 		
@@ -341,7 +326,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			if (!_flags.isConnected)
+			if (!_isConnected)
 			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
@@ -372,7 +357,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			if (_flags.isConnected)
+			if (_isConnected)
 			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
@@ -387,18 +372,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
-	if (myHTTPFlags.didSendDataOfLength)
-	{
-		[_forwarder connection:self didSendDataOfLength:length];
-	}
 }
 
 - (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
 {
-	if (myHTTPFlags.didReceiveData)
-	{
-		[_forwarder connection:self didReceiveDataOfLength:length];
-	}
 }
 
 #pragma mark -
@@ -415,7 +392,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 	[_currentAuthenticationChallenge release];
 	_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-																				 proposedCredential:[self proposedCredentialForProtectionSpace:protectionSpace]
+																				 proposedCredential:[self proposedCredential]
 																			   previousFailureCount:_authenticationFailureCount
 																					failureResponse:nil
 																							  error:nil
@@ -423,10 +400,17 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 	[protectionSpace release];
 	
-	[self didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+	[[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
 	
 	// Prepare for another failure
 	_authenticationFailureCount++;
+}
+
+/*  MobileMe overrides this to fetch the user's account
+ */
+- (NSURLCredential *)proposedCredential
+{
+    return nil;
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
@@ -434,7 +418,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
     if (challenge == _currentAuthenticationChallenge)
     {
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-        [self disconnect];
     }
 }
 
@@ -444,10 +427,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
     {
 		[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         
-        if (_flags.error)
-        {
-            [self sendError:@"" code:401];  // TODO: The error should include the response string from the server
-        }
+        [self sendError:@"" code:401];  // TODO: The error should include the response string from the server
         
         // Move onto the next command
         [self setState:CKConnectionIdleState];

@@ -72,14 +72,8 @@
 
 @end
 
-@interface NSObject (CKHTTPConnectionDelegate)
-
-- (void)connection:(CKHTTPConnection *)connection didReceiveDataOfLength:(int)length;
-- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
-- (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
-
-@end
 
 @interface CKHTTPConnection (SubclassSupport)
 - (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod;
+- (NSURLCredential *)proposedCredential;
 @end

@@ -92,12 +92,12 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (void)turnOnRecursiveUpload
 {
-	_flags.isRecursiveUploading = YES;
+	_isRecursiveUploading = YES;
 }
 
 - (void)turnOffRecursiveUpload
 {
-	_flags.isRecursiveUploading = NO;
+	_isRecursiveUploading = NO;
 }
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
@@ -354,7 +354,7 @@ NSString *CKQueueDomain = @"Queuing";
 	}
 	[_queueLock unlock];
 	
-	if (!_flags.inBulk && !isChecking) {
+	if (!_inBulk && !isChecking) {
 		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 	}
 }
