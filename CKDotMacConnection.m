@@ -589,12 +589,6 @@
 	[super deleteDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[super uploadFile: localPath
-             toFile: [myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
-}
-
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
@@ -647,20 +641,6 @@
 								toFile:[self webDAVPathForIDiskPath:remotePath]
 							fileOffset:offset
 							  delegate:delegate];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[super downloadFile:[self webDAVPathForIDiskPath:remotePath]
-			toDirectory:dirPath
-			  overwrite:flag];
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self downloadFile:remotePath
-		   toDirectory:dirPath
-			 overwrite:YES];
 }
 
 - (void)contentsOfDirectory:(NSString *)dirPath

@@ -709,21 +709,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -754,17 +739,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	return rec;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFile:localPath];
-}
-
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	[self uploadFile:localPath toFile:remotePath];
-}
-
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	remotePath = [self fixPathToBeFilePath:remotePath];
@@ -786,22 +760,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	// we don't support checking remote existence
-	[self uploadFromData:data toFile:remotePath];
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFromData:data toFile:remotePath];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
-}
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
 					   toDirectory:(NSString *)dirPath 
 						 overwrite:(BOOL)flag
@@ -841,11 +799,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 											   userInfo:nil];
 	[self queueCommand:cmd];
 	return record;
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }
 
 - (void)s3DirectoryContents:(NSString *)dir

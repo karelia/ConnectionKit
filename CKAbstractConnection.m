@@ -370,21 +370,6 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	SUBCLASS_RESPONSIBLE
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	SUBCLASS_RESPONSIBLE
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{	
-	SUBCLASS_RESPONSIBLE
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -561,16 +546,6 @@ NSDictionary *sDataAttributes = nil;
 	return root;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	SUBCLASS_RESPONSIBLE
-}
-
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	SUBCLASS_RESPONSIBLE
-}
-
 - (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
 								toFile:(NSString *)remotePath 
 							fileOffset:(unsigned long long)offset
@@ -578,16 +553,6 @@ NSDictionary *sDataAttributes = nil;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	SUBCLASS_RESPONSIBLE
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	SUBCLASS_RESPONSIBLE
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data
@@ -599,11 +564,6 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	SUBCLASS_RESPONSIBLE
-}
-
 - (CKTransferRecord *)resumeUploadFromData:(NSData *)data
 									toFile:(NSString *)remotePath 
 								fileOffset:(unsigned long long)offset
@@ -613,11 +573,6 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	SUBCLASS_RESPONSIBLE
-}
-
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
 					   toDirectory:(NSString *)dirPath 
 						 overwrite:(BOOL)flag
@@ -625,11 +580,6 @@ NSDictionary *sDataAttributes = nil;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	SUBCLASS_RESPONSIBLE
 }
 
 - (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
@@ -736,7 +686,7 @@ NSDictionary *sDataAttributes = nil;
 		[_editingConnection setDelegate:self];
 		[_editingConnection connect];
 	}
-	[_editingConnection downloadFile:remotePath toDirectory:[localEditable stringByDeletingLastPathComponent] overwrite:YES];
+	[_editingConnection downloadFile:remotePath toDirectory:[localEditable stringByDeletingLastPathComponent] overwrite:YES delegate:nil];
 }
 
 - (void)setName:(NSString *)name
@@ -761,7 +711,7 @@ NSDictionary *sDataAttributes = nil;
 	if ([nm isEqualToString:UKFileWatcherAttributeChangeNotification]) //UKFileWatcherWriteNotification does not get called because of atomicity of file writing (i believe)
 	{
 		KTLog(CKEditingDomain, KTLogDebug, @"File changed: %@... uploading to server", fpath);
-		[self uploadFile:fpath toFile:[_edits objectForKey:fpath]];
+		[self uploadFile:fpath toFile:[_edits objectForKey:fpath] checkRemoteExistence:NO delegate:nil];
 	}
 }
 
