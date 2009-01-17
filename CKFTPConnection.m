@@ -606,18 +606,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				_ftpFlags.isMicrosoft = NO;
 			}
 			
-			// Some servers do not accept the FEAT command before logging in. They either ignore it or close the connection
-			// after. The user default CKDisableFEATCommandBeforeFTPLogin enables applications to disable sending of the
-			// command until after login.
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				[self authenticateConnection];
-			}
-			else
-			{
-				[self sendCommand:@"FEAT"];
-				[self setState:CKConnectionSentFeatureRequestState];
-			}			
+			
+            [self authenticateConnection];
 			break;
 		}
 		default:
@@ -652,16 +642,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
-			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
-																		 awaitState:CKConnectionIdleState
-																		  sentState:CKConnectionSentFeatureRequestState
-																		  dependant:nil
-																		   userInfo:nil];
-				[self pushCommandOnCommandQueue:featuresCommand];
-			}			
+            // What features does the server support?
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+                                                                     awaitState:CKConnectionIdleState
+                                                                      sentState:CKConnectionSentFeatureRequestState
+                                                                      dependant:nil
+                                                                       userInfo:nil];
+			[self pushCommandOnCommandQueue:featuresCommand];
+						
 			
 			[self setState:CKConnectionIdleState];			
 			break;
@@ -723,16 +711,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
-			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
-																		 awaitState:CKConnectionIdleState
-																		  sentState:CKConnectionSentFeatureRequestState
-																		  dependant:nil
-																		   userInfo:nil];
-				[self pushCommandOnCommandQueue:featuresCommand];
-			}			
+			// What features does the server support?
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+                                                                     awaitState:CKConnectionIdleState
+                                                                      sentState:CKConnectionSentFeatureRequestState
+                                                                      dependant:nil
+                                                                       userInfo:nil];
+            [self pushCommandOnCommandQueue:featuresCommand];
+						
 			
 			[self setState:CKConnectionIdleState];			
 			break;
