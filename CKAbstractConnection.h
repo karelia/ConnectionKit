@@ -164,6 +164,9 @@ typedef enum {
 - (void)threadedForceDisconnect;
 - (void)threadedCancelTransfer;
 - (void)threadedCancelAll;
+
+- (void)startBulkCommands;
+- (void)endBulkCommands;
 @end
 
 

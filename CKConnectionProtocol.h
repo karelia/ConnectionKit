@@ -157,9 +157,6 @@ typedef enum {
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
-- (void)startBulkCommands;
-- (void)endBulkCommands;
-
 - (void)uploadFile:(NSString *)localPath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
