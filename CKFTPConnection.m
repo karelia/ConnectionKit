@@ -631,13 +631,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		case 230: //User logged in, proceed
 		{
-			if (![[_currentAuthenticationCredential user] isEqualToString:@"anonymous"])
-            {
-				break;
-			}
-            
-			_ftpFlags.loggedIn = YES;
+			if (![[_currentAuthenticationCredential user] isEqualToString:@"anonymous"]) break;
 
+            _ftpFlags.loggedIn = YES;
 						
 			// Queue up the commands we want to insert in the queue before notifying client we're connected
 			

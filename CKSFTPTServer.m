@@ -23,7 +23,6 @@
 #include <util.h>
 #include "argcargv.h"
 #include "fdwrite.h"
-#include "typeforchar.h"
 
 extern int	errno;
 char **environ;
