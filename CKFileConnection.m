@@ -386,16 +386,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self deleteDirectory:path];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{	
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
 {
 	NSFileManager *fm = myFileManager;
@@ -515,17 +505,6 @@ checkRemoteExistence:(NSNumber *)check;
 	return rec;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFile:localPath];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
 {
 	BOOL flag = [check boolValue];
@@ -591,11 +570,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFromData:(NSData *)data
 							  toFile:(NSString *)remotePath 
 				checkRemoteExistence:(BOOL)flag
@@ -622,12 +596,6 @@ checkRemoteExistence:(NSNumber *)check;
 											   userInfo:nil];
 	[self queueCommand:cmd];
 	return rec;
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFromData:data toFile:remotePath];
 }
 
 /*!	Copy the file to the given directory
@@ -753,12 +721,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self queueDownload:download];
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag];
 	return record;
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }
 
 - (void)directoryContents

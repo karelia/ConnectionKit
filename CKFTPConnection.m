@@ -2928,25 +2928,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:del];
 }
 
-/*!	Upload file to the current directory
-*/
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath orData:nil offset:0 remotePath:nil checkRemoteExistence:NO delegate:nil];
-}
-
 /*!	Upload file to the given directory
 */
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath orData:nil offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -2963,25 +2946,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				   delegate:delegate];
 }
 
-/*!	Upload file to the current directory
-*/
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
-{
-	[self uploadFile:localPath orData:nil offset:offset remotePath:nil checkRemoteExistence:NO delegate:nil];
-}
-
-/*!	Upload file to the given directory
-*/
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-{
-	[self uploadFile:localPath orData:nil offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFromData:(NSData *)data
 							  toFile:(NSString *)remotePath 
 				checkRemoteExistence:(BOOL)flag
@@ -2996,27 +2960,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				 remotePath:remotePath
 	   checkRemoteExistence:flag
 				   delegate:delegate];
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	[self uploadFile:nil orData:data offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath
-		   toDirectory:dirPath
-			 overwrite:flag
-			  delegate:nil];
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self resumeDownloadFile:remotePath
-				 toDirectory:dirPath
-				  fileOffset:offset
-					delegate:nil];
 }
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
