@@ -7,7 +7,9 @@
 //
 
 #import "CKConnectionProtocol1.h"
-#import "CKWebDAVProtocol.h"
+
+#import "CKFileConnectionProtocol.h"
+#import "CKWebDAVConnectionProtocol.h"
 
 
 @implementation CKConnectionProtocol
@@ -21,7 +23,8 @@ static NSMutableArray *sRegisteredClasses;
         sRegisteredClasses = [[NSMutableArray alloc] init];
         
         // Register the built-in protocols
-        [self registerClass:[CKWebDAVProtocol class]];
+        [self registerClass:[CKFileConnectionProtocol class]];
+        [self registerClass:[CKWebDAVConnectionProtocol class]];
     }
 }
 
@@ -132,7 +135,7 @@ static NSMutableArray *sRegisteredClasses;
     SUBCLASS_RESPONSIBLE;
 }
 
-- (void)setPermissions:(NSString *)posixPermissions ofItemAtPath:(NSString *)path
+- (void)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path
 {
     SUBCLASS_RESPONSIBLE;
 }

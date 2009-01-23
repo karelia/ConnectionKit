@@ -6,8 +6,14 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import <Connection/Connection.h>
+#import <Foundation/Foundation.h>
 
+
+typedef enum {
+	CKTranscriptSent,
+	CKTranscriptReceived,
+	CKTranscriptData,
+} CKTranscriptType;
 
 typedef enum {
     CKConnectionStatusNotOpen,
@@ -17,7 +23,7 @@ typedef enum {
 } CKConnectionStatus;
 
 
-@class CKConnectionProtocol;
+@class CKConnectionRequest, CKConnectionProtocol;
     
 
 @interface CKConnection : NSObject
@@ -50,7 +56,7 @@ typedef enum {
 - (id)listContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 - (id)createDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 - (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
-- (id)setPermissions:(NSString *)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 - (id)deleteItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 
 @end
@@ -93,6 +99,8 @@ typedef enum {
 - (void)connection:(CKConnection *)connection download:(id)identifier didReceiveData:(NSData *)data;
 - (void)connection:(CKConnection *)connection upload:(id)identifier didSendDataOfLength:(NSUInteger)dataLength;
 - (void)connection:(CKConnection *)connection directoryListing:(id)identifier didReceiveContents:(NSArray *)contents;
+
+- (void)connection:(CKConnection *)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end
 

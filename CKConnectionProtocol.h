@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "CKConnection.h"
 
 
 @class CKConnectionRequest;
@@ -78,7 +79,7 @@
 - (void)fetchContentsOfDirectoryAtPath:(NSString *)path;
 - (void)createDirectoryAtPath:(NSString *)path;
 - (void)moveItemAtPath:(NSString *)fromPath toPath:(NSString *)toPath;
-- (void)setPermissions:(NSString *)posixPermissions ofItemAtPath:(NSString *)path;
+- (void)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path;
 - (void)deleteItemAtPath:(NSString *)path;
 
 /*!
@@ -97,16 +98,19 @@
 
 // Calling any of these methods at an inappropriate time will result in an exception
 
-- (void)protocol:(CKConnectionProtocol *)protocol didStartConnectionAtPath:(NSString *)path;
-- (void)protocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
-- (void)protocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)protocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
-- (void)protocolCurrentOperationDidFinish:(CKConnectionProtocol *)protocol;
-- (void)protocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
-- (void)protocol:(CKConnectionProtocol *)protocol didLoadData:(NSData *)data;
-- (void)protocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-- (void)protocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...;
 
 @end
 

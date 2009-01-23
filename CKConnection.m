@@ -174,7 +174,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     return result;
 }
 
-- (id)setPermissions:(NSString *)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
     NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
                                                          selector:@selector(setPermissions:ofItemAtPath:)];
@@ -391,7 +391,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
  *  appropriate.
  */
 
-- (void)protocol:(CKConnectionProtocol *)protocol didStartConnectionAtPath:(NSString *)path
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path
 {
     if (protocol != [self protocol]) return;
     
@@ -401,7 +401,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     [self performSelectorOnMainThread:@selector(protocolDidOpenConnectionAtPath:) withObject:path waitUntilDone:NO];
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
 {
     if (protocol != [self protocol]) return;
     
@@ -458,7 +458,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     return result;
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     if (protocol != [self protocol]) return;
     
@@ -503,7 +503,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     }
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     if (protocol != [self protocol]) return;
     
@@ -513,7 +513,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 #pragma mark Operation
 
-- (void)protocolCurrentOperationDidFinish:(CKConnectionProtocol *)protocol;
+- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
 {
     if (protocol != [self protocol]) return;
     
@@ -521,7 +521,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFinish) withObject:nil waitUntilDone:NO];
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
     if (protocol != [self protocol]) return;
     
@@ -529,7 +529,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFailWithError:) withObject:error waitUntilDone:NO];
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didLoadData:(NSData *)data;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
 {
     if (protocol != [self protocol]) return;
     
@@ -537,7 +537,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     [self performSelectorOnMainThread:@selector(protocolDidDownloadData:) withObject:data waitUntilDone:NO];
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
     if (protocol != [self protocol]) return;
     
@@ -549,12 +549,43 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     [self performSelectorOnMainThread:@selector(invoke) withObject:invocation waitUntilDone:NO];
 }
 
-- (void)protocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 {
     if (protocol != [self protocol]) return;
     
     
     [self performSelectorOnMainThread:@selector(protocolDidFetchContentsOfDirectory:) withObject:contents waitUntilDone:NO];
+}
+
+#pragma mark Transcript
+
+/*	Convenience method for sending a string to the delegate for appending to the transcript
+ */
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+{
+	if (protocol != [self protocol]) return;
+    
+    
+    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(protocolAppendString:toTranscript:)];
+    [invocation setArgument:&string atIndex:2];
+    [invocation setArgument:&transcript atIndex:3];
+    [invocation retainArguments];
+    
+    [self performSelectorOnMainThread:@selector(invoke) withObject:invocation waitUntilDone:NO];
+}
+
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
+{
+	if (protocol != [self protocol]) return;
+    
+    
+    va_list arguments;
+	va_start(arguments, transcript);
+	NSString *string = [[NSString alloc] initWithFormat:formatString arguments:arguments];
+	va_end(arguments);
+	
+	[self connectionProtocol:protocol appendString:string toTranscript:transcript];
+	[string release];
 }
 
 @end
