@@ -39,10 +39,11 @@
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "NSFileManager+Connection.h"
+#import "NSInvocation+ConnectionKit.h"
 #import "RunLoopForwarder.h"
 #import "CKCacheableHost.h"
 #import "CKTransferRecord.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 #import "CKInternalTransferRecord.h"
 #import "NSString+Connection.h"
 
@@ -403,7 +404,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 */
 - (void)disconnect
 {
-	CKConnectionCommand *con = [CKConnectionCommand command:[NSInvocation invocationWithSelector:@selector(threadedDisconnect) target:self arguments:[NSArray array]]
+	CKConnectionCommand *con = [CKConnectionCommand command:[NSInvocation invocationWithTarget:self selector:@selector(threadedDisconnect) arguments:[NSArray array]]
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionSentDisconnectState
 											  dependant:nil
@@ -750,9 +751,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 						[self pushCommandOnCommandQueue:cur];
 					}
 					
-					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
-																	  target:self
-																   arguments:[NSArray array]];
+					NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                                  selector:@selector(openStreamsToPort:)
+																 arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];
@@ -922,9 +923,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 						[self pushCommandOnCommandQueue:cur];
 					}
 					
-					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
-																	  target:self
-																   arguments:[NSArray array]];
+					NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                                  selector:@selector(openStreamsToPort:)
+                                                                 arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];

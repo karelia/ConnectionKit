@@ -9,11 +9,7 @@
 #import "InterThreadMessaging.h"
 #import "KTLog.h"
 #import "CKAbstractConnection.h" //for threading domain
-@interface NSInvocation ( Connection )
-
-+ (NSInvocation *)invocationWithSelector:(SEL)aSelector target:(id)aTarget arguments:(NSArray *)anArgumentArray;
-
-@end
+#import "NSInvocation+ConnectionKit.h"
 
 
 /* There are four types of messages that can be posted between threads: a
@@ -434,9 +430,9 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 - (void)delayPostingMessage:(ConnectionInterThreadMessage *)msg thread:(NSThread *)thread
 {
 	KTLog(CKThreadingDomain, KTLogDebug, @"delaying message: %@ to %@", NSStringFromSelector(msg->data.sel.selector), msg->data.sel.receiver);
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
-													  target:self
-												   arguments:[NSArray array]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
+												 arguments:[NSArray array]];
 	NSNumber *type = [NSNumber numberWithUnsignedInt:msg->type];
 	[inv setArgument:&type atIndex:2];
 	[inv setArgument:&thread atIndex:3];
@@ -583,41 +579,3 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 
 @end
 
-@implementation NSInvocation ( Connection )
-
-+ (NSInvocation *)invocationWithSelector:(SEL)aSelector target:(id)aTarget arguments:(NSArray *)anArgumentArray
-{
-    NSMethodSignature *methodSignature = [aTarget methodSignatureForSelector:aSelector];
-    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:methodSignature];
-    if ( nil != invocation )
-    {
-        [invocation setSelector:aSelector];
-		if (nil != aTarget)
-		{
-			[invocation setTarget:aTarget];
-		}
-        if ( (nil != anArgumentArray) && ([anArgumentArray count] > 0) )
-        {
-            NSEnumerator *e = [anArgumentArray objectEnumerator];
-            id argument;
-            int argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
-            while ( argument = [e nextObject] )
-            {
-                if ( [argument isMemberOfClass:[NSNull class]] )
-                {
-                    [invocation setArgument:nil atIndex:argumentIndex];
-                }
-                else
-                {
-                    [invocation setArgument:&argument atIndex:argumentIndex];
-                }
-                argumentIndex++;
-            }
-            [invocation retainArguments];
-        }
-    }
-	
-    return invocation;
-}
-
-@end

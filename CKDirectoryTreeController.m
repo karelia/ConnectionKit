@@ -34,7 +34,7 @@
 #import "CKDirectoryNode.h"
 #import "NSTabView+Connection.h"
 #import "NSPopUpButton+Connection.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 #import "NSString+Connection.h"
 #import "NSNumber+Connection.h"
 #import "CKTableBasedBrowser.h"

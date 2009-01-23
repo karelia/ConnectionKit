@@ -29,6 +29,8 @@
  */
 
 #import "CKAbstractQueueConnection.h"
+
+#import "NSInvocation+ConnectionKit.h"
 #import "NSObject+Connection.h"
 #import "CKConnectionThreadManager.h"
 #import "CKTransferRecord.h"
@@ -102,9 +104,9 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(turnOnRecursiveUpload)
-													  target:self
-												   arguments:[NSArray array]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(turnOnRecursiveUpload)
+												 arguments:[NSArray array]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionIdleState
@@ -113,9 +115,9 @@ NSString *CKQueueDomain = @"Queuing";
 	[self queueCommand:cmd];
 	CKTransferRecord *rec = [super recursivelyUpload:localPath to:remotePath];
 	
-	inv = [NSInvocation invocationWithSelector:@selector(turnOffRecursiveUpload)
-										target:self
-									 arguments:[NSArray array]];
+	inv = [NSInvocation invocationWithTarget:self
+                                    selector:@selector(turnOffRecursiveUpload)
+                                   arguments:[NSArray array]];
 	cmd = [CKConnectionCommand command:inv
 						  awaitState:CKConnectionIdleState
 						   sentState:CKConnectionIdleState

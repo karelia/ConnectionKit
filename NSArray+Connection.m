@@ -31,7 +31,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 #import "NSArray+Connection.h"
 #import "NSObject+Connection.h"
 
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 
 @implementation NSArray (Connection)

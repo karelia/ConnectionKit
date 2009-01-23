@@ -7,7 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 
 @interface CKConnectionRegistry : NSObject

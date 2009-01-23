@@ -38,10 +38,11 @@
 #import "CKTransferRecord.h"
 
 #import "NSFileManager+Connection.h"
+#import "NSInvocation+ConnectionKit.h"
 #import "NSObject+Connection.h"
 
 #import "CKCacheableHost.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 #import "CKURLProtectionSpace.h"
 
 #import <sys/types.h> 
@@ -606,18 +607,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				_ftpFlags.isMicrosoft = NO;
 			}
 			
-			// Some servers do not accept the FEAT command before logging in. They either ignore it or close the connection
-			// after. The user default CKDisableFEATCommandBeforeFTPLogin enables applications to disable sending of the
-			// command until after login.
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				[self authenticateConnection];
-			}
-			else
-			{
-				[self sendCommand:@"FEAT"];
-				[self setState:CKConnectionSentFeatureRequestState];
-			}			
+			
+            [self authenticateConnection];
 			break;
 		}
 		default:
@@ -652,16 +643,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
-			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
-																		 awaitState:CKConnectionIdleState
-																		  sentState:CKConnectionSentFeatureRequestState
-																		  dependant:nil
-																		   userInfo:nil];
-				[self pushCommandOnCommandQueue:featuresCommand];
-			}			
+            // What features does the server support?
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+                                                                     awaitState:CKConnectionIdleState
+                                                                      sentState:CKConnectionSentFeatureRequestState
+                                                                      dependant:nil
+                                                                       userInfo:nil];
+			[self pushCommandOnCommandQueue:featuresCommand];
+						
 			
 			[self setState:CKConnectionIdleState];			
 			break;
@@ -723,16 +712,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
-			//If we're supposed to log in before sending FEAT, since we're now logged in, send it!
-			if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDisableFEATCommandBeforeFTPLogin"])
-			{
-				CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
-																		 awaitState:CKConnectionIdleState
-																		  sentState:CKConnectionSentFeatureRequestState
-																		  dependant:nil
-																		   userInfo:nil];
-				[self pushCommandOnCommandQueue:featuresCommand];
-			}			
+			// What features does the server support?
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+                                                                     awaitState:CKConnectionIdleState
+                                                                      sentState:CKConnectionSentFeatureRequestState
+                                                                      dependant:nil
+                                                                       userInfo:nil];
+            [self pushCommandOnCommandQueue:featuresCommand];
+						
 			
 			[self setState:CKConnectionIdleState];			
 			break;
@@ -2846,9 +2833,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(threadedSetPermissions:forFile:)
+												 arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
 	CKConnectionCommand *chmod = [CKConnectionCommand command:inv
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionSettingPermissionsState
@@ -2868,9 +2855,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], path, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(threadedSetPermissions:forFile:)
+												 arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], path, nil]];
 	[self queuePermissionChange:path];
 	CKConnectionCommand *chmod = [CKConnectionCommand command:inv
 											   awaitState:CKConnectionIdleState 
@@ -2928,25 +2915,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueCommand:del];
 }
 
-/*!	Upload file to the current directory
-*/
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath orData:nil offset:0 remotePath:nil checkRemoteExistence:NO delegate:nil];
-}
-
 /*!	Upload file to the given directory
 */
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath orData:nil offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -2963,25 +2933,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				   delegate:delegate];
 }
 
-/*!	Upload file to the current directory
-*/
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
-{
-	[self uploadFile:localPath orData:nil offset:offset remotePath:nil checkRemoteExistence:NO delegate:nil];
-}
-
-/*!	Upload file to the given directory
-*/
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-{
-	[self uploadFile:localPath orData:nil offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFromData:(NSData *)data
 							  toFile:(NSString *)remotePath 
 				checkRemoteExistence:(BOOL)flag
@@ -2996,27 +2947,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				 remotePath:remotePath
 	   checkRemoteExistence:flag
 				   delegate:delegate];
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	[self uploadFile:nil orData:data offset:offset remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath
-		   toDirectory:dirPath
-			 overwrite:flag
-			  delegate:nil];
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self resumeDownloadFile:remotePath
-				 toDirectory:dirPath
-				  fileOffset:offset
-					delegate:nil];
 }
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
@@ -3247,9 +3177,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}		
 	}	
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedContentsOfDirectory:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:dirPath]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(threadedContentsOfDirectory:)
+												 arguments:[NSArray arrayWithObject:dirPath]];
 	CKConnectionCommand *ls = [CKConnectionCommand command:inv
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 

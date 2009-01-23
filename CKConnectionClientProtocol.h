@@ -12,7 +12,7 @@
 //  or provide the default implementation.
 
 
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 
 @protocol CKConnectionClient

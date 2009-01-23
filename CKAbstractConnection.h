@@ -29,17 +29,17 @@
  */
 
 #import <Foundation/Foundation.h>
-#import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
+#import "CKConnectionProtocol1.h" // protocols can't be forward-declared without warning in gcc 4.0
 
 #import "CKConnectionRegistry.h"
 #import "CKConnectionClientProtocol.h"
+#import "CKConnectionError.h"
 
 
 /*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
  Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
  */
 
-extern NSString *CKConnectionErrorDomain;
 enum { 
 	CKConnectionErrorParsingDirectoryListing = 6000, 
 	CKConnectionStreamError, 
@@ -181,13 +181,6 @@ typedef enum {
 extern NSString *CKConnectionAwaitStateKey;
 extern NSString *CKConnectionSentStateKey;
 extern NSString *CKConnectionCommandKey;
-
-
-@interface NSInvocation (AbstractConnectionExtras)
-+ (NSInvocation *)invocationWithSelector:(SEL)aSelector 
-								  target:(id)aTarget 
-							   arguments:(NSArray *)anArgumentArray;
-@end
 
 
 @interface NSHost (IPV4)

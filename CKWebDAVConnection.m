@@ -38,11 +38,14 @@
 #import "CKDAVCreateDirectoryResponse.h"
 #import "CKDAVUploadFileResponse.h"
 #import "CKDAVDeleteResponse.h"
-#import "NSData+Connection.h"
+
 #import "CKHTTPFileDownloadRequest.h"
 #import "CKHTTPFileDownloadResponse.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
+
+#import "NSData+Connection.h"
+#import "NSInvocation+ConnectionKit.h"
 #import "NSString+Connection.h"
 
 NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
@@ -493,9 +496,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDidChangeToDirectory:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects: dirPath, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(davDidChangeToDirectory:)
+												 arguments:[NSArray arrayWithObjects: dirPath, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionChangedDirectoryState
@@ -593,22 +596,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[self queueCommand:cmd];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath 
-			  toFile:[[myCurrentDirectory encodeLegally] stringByAppendingPathComponent:[localPath lastPathComponent]]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -643,33 +630,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	return transfer;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFile:localPath];
-}
-
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	[self uploadFile:localPath toFile:remotePath];
-}
-
 - (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
 								toFile:(NSString *)remotePath 
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate
 {
 	return [self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:delegate];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data
@@ -701,17 +667,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	[self queueCommand:cmd];
 	
 	return transfer;
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFromData:data toFile:remotePath];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES delegate:nil];
 }
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
@@ -746,11 +701,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	return transfer;
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
-}
-
 - (CKTransferRecord *)resumeDownloadFile:(NSString *)remotePath
 							 toDirectory:(NSString *)dirPath
 							  fileOffset:(unsigned long long)offset
@@ -769,9 +719,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (void)directoryContents
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
-													  target:self
-												   arguments:[NSArray array]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(davDirectoryContents:)
+												 arguments:[NSArray array]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv 
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState
@@ -794,9 +744,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		}		
 	}		
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(davDirectoryContents:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:dirPath]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(davDirectoryContents:)
+												 arguments:[NSArray arrayWithObject:dirPath]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv 
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState

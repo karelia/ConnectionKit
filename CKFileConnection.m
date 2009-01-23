@@ -36,7 +36,8 @@
 #import "CKTransferRecord.h"
 #import "CKAbstractQueueConnection.h"
 #import "NSFileManager+Connection.h"
-#import "CKConnectionProtocol.h"
+#import "NSInvocation+ConnectionKit.h"
+#import "CKConnectionProtocol1.h"
 
 NSString *CKFileConnectionErrorDomain = @"FileConnectionErrorDomain";
 
@@ -166,9 +167,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(aDirectory && ![aDirectory isEqualToString:@""], @"no directory specified");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcChangeToDirectory:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:aDirectory, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcChangeToDirectory:)
+												 arguments:[NSArray arrayWithObjects:aDirectory, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionChangedDirectoryState
@@ -226,9 +227,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCreateDirectory:permissions:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:dirPath, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcCreateDirectory:permissions:)
+												 arguments:[NSArray arrayWithObjects:dirPath, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionCreateDirectoryState
@@ -262,9 +263,9 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcSetPermissions:forFile:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcSetPermissions:forFile:)
+												 arguments:[NSArray arrayWithObjects:[NSNumber numberWithUnsignedLong:permissions], path, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionSettingPermissionsState
@@ -298,9 +299,9 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
     NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcRename:to:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:fromPath, toPath, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcRename:to:)
+												 arguments:[NSArray arrayWithObjects:fromPath, toPath, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingRenameState
@@ -336,9 +337,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteFile:)
-													  target:self 
-												   arguments:[NSArray arrayWithObject:path]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self 
+                                                  selector:@selector(fcDeleteFile:)
+												 arguments:[NSArray arrayWithObject:path]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDeleteFileState
@@ -370,9 +371,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDeleteDirectory:)
-													  target:self 
-												   arguments:[NSArray arrayWithObject:dirPath]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self 
+                                                  selector:@selector(fcDeleteDirectory:)
+												 arguments:[NSArray arrayWithObject:dirPath]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDeleteDirectoryState
@@ -384,16 +385,6 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)recursivelyDeleteDirectory:(NSString *)path
 {
 	[self deleteDirectory:path];
-}
-
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{	
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -502,9 +493,9 @@ checkRemoteExistence:(NSNumber *)check;
 																		  remote:remotePath
 																		delegate:(delegate) ? delegate : rec
 																		userInfo:rec];
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcUpload:checkRemoteExistence:)
+												 arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionUploadingFileState
@@ -513,17 +504,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self queueUpload:upload];
 	[self queueCommand:cmd];
 	return rec;
-}
-
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFile:localPath];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
 - (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
@@ -591,11 +571,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFromData:(NSData *)data
 							  toFile:(NSString *)remotePath 
 				checkRemoteExistence:(BOOL)flag
@@ -612,9 +587,9 @@ checkRemoteExistence:(NSNumber *)check;
 																		  remote:remotePath
 																		delegate:delegate ? delegate : rec
 																		userInfo:rec];
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadData:checkRemoteExistence:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcUploadData:checkRemoteExistence:)
+												 arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionUploadingFileState
@@ -622,12 +597,6 @@ checkRemoteExistence:(NSNumber *)check;
 											   userInfo:nil];
 	[self queueCommand:cmd];
 	return rec;
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFromData:data toFile:remotePath];
 }
 
 /*!	Copy the file to the given directory
@@ -727,9 +696,9 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDownloadFile:toDirectory:overwrite:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects:remotePath, dirPath, [NSNumber numberWithBool:flag], nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcDownloadFile:toDirectory:overwrite:)
+                                                 arguments:[NSArray arrayWithObjects:remotePath, dirPath, [NSNumber numberWithBool:flag], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDownloadingFileState
@@ -755,17 +724,11 @@ checkRemoteExistence:(NSNumber *)check;
 	return record;
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
-}
-
 - (void)directoryContents
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcDirectoryContents)
-													  target:self
-												   arguments:[NSArray array]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcDirectoryContents)
+												 arguments:[NSArray array]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState
@@ -816,9 +779,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcContentsOfDirectory:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:dirPath]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcContentsOfDirectory:)
+												 arguments:[NSArray arrayWithObject:dirPath]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState
@@ -842,8 +805,8 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSAssert(path && ![path isEqualToString:@""], @"path not specified");
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCheckExistenceOfPath:)
-                                                    target:self
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(fcCheckExistenceOfPath:)
                                                  arguments:[NSArray arrayWithObject:path]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
@@ -886,9 +849,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	CKTransferRecord *root = [CKTransferRecord rootRecordWithPath:remotePath];
 	NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:root, @"record", remotePath, @"remote", localPath, @"local", [NSNumber numberWithBool:flag], @"overwrite", nil];
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedRecursivelyDownload:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:ui]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(threadedRecursivelyDownload:)
+                                                 arguments:[NSArray arrayWithObject:ui]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDownloadingFileState

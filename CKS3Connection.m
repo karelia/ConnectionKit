@@ -38,7 +38,8 @@
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"
 #import "NSFileManager+Connection.h"
-#import "CKConnectionProtocol.h"
+#import "NSInvocation+ConnectionKit.h"
+#import "CKConnectionProtocol1.h"
 
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
@@ -597,9 +598,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DidChangeToDirectory:)
-													  target:self
-												   arguments:[NSArray arrayWithObjects: dirPath, nil]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(s3DidChangeToDirectory:)
+												 arguments:[NSArray arrayWithObjects: dirPath, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionChangedDirectoryState
@@ -709,21 +710,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[myCurrentDirectory stringByAppendingPathComponent:[localPath lastPathComponent]]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-
 - (CKTransferRecord *)uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
@@ -754,17 +740,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	return rec;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFile:localPath];
-}
-
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	[self uploadFile:localPath toFile:remotePath];
-}
-
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	remotePath = [self fixPathToBeFilePath:remotePath];
@@ -786,22 +761,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	// we don't support checking remote existence
-	[self uploadFromData:data toFile:remotePath];
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// we don't support upload resumption
-	[self uploadFromData:data toFile:remotePath];
-}
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
-}
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
 					   toDirectory:(NSString *)dirPath 
 						 overwrite:(BOOL)flag
@@ -843,11 +802,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	return record;
 }
 
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
-}
-
 - (void)s3DirectoryContents:(NSString *)dir
 {
 	NSString *theDir = dir != nil ? dir : myCurrentDirectory;
@@ -870,9 +824,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 - (void)directoryContents
 {
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
-													  target:self
-												   arguments:[NSArray array]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(s3DirectoryContents:)
+												 arguments:[NSArray array]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv 
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState
@@ -895,9 +849,9 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		}		
 	}		
 	
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:[self fixPathToBeDirectoryPath:dirPath]]];
+	NSInvocation *inv = [NSInvocation invocationWithTarget:self
+                                                  selector:@selector(s3DirectoryContents:)
+                                                 arguments:[NSArray arrayWithObject:[self fixPathToBeDirectoryPath:dirPath]]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv 
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionAwaitingDirectoryContentsState
