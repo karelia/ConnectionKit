@@ -157,9 +157,7 @@ typedef enum {
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
-- (void)uploadFile:(NSString *)localPath;
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
+
 /* 
 	New method that allows you to set a custom delegate for the upload.
 	You must implement the ConnectionTransferDelegate informal protocol.
@@ -176,17 +174,11 @@ typedef enum {
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)flag;
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-
 - (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
 								toFile:(NSString *)remotePath 
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate;
 
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath;
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
 
 /* 
 	New method that allows you to set a custom delegate for the upload.
@@ -198,15 +190,10 @@ typedef enum {
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate;
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-
 - (CKTransferRecord *)resumeUploadFromData:(NSData *)data
 									toFile:(NSString *)remotePath 
 								fileOffset:(unsigned long long)offset
 								  delegate:(id)delegate;
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag;
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset;
 
 /* 
 	New method that allows you to set a custom delegate for the download.
@@ -226,6 +213,7 @@ typedef enum {
 - (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag;
+
 
 - (void)checkExistenceOfPath:(NSString *)path;
 
@@ -249,7 +237,7 @@ typedef enum {
 #pragma mark -
 
 
-@interface NSObject (CKConnectionDelegate)
+@interface NSObject (CKConnectionDelegate1)
 
 // There are 29 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated

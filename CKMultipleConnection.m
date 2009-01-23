@@ -28,7 +28,7 @@
  */
 
 #import "CKMultipleConnection.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 @implementation CKMultipleConnection
 
@@ -336,11 +336,6 @@
 	[_connections makeObjectsPerformSelector:@selector(endBulkCommands)];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
-}
-
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO];
@@ -393,13 +388,6 @@
 	while (cur = [e nextObject]) {
 		[cur uploadFromData:data toFile:remotePath checkRemoteExistence:flag];
 	}
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:@"Not supported in MultipleConnection"
-								 userInfo:nil];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag

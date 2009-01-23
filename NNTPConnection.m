@@ -327,17 +327,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	}
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	if (_flags.error) {
-		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
-										   code:500
-									   userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"New server does not implement %@", NSStringFromSelector(_cmd)]
-																			forKey:NSLocalizedDescriptionKey]];
-		[_forwarder connection:self didReceiveError:err];
-	}
-}
-
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	if (_flags.error) {
@@ -372,17 +361,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	if (_flags.error) {
-		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
-										   code:500
-									   userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"New server does not implement %@", NSStringFromSelector(_cmd)]
-																			forKey:NSLocalizedDescriptionKey]];
-		[_forwarder connection:self didReceiveError:err];
-	}
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain

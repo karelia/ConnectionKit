@@ -37,7 +37,7 @@
 #import "CKDAVUploadFileResponse.h"
 #import "NSData+Connection.h"
 
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 @implementation CKDAVResponse
 

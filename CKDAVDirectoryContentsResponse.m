@@ -30,7 +30,7 @@
 
 #import "CKDAVDirectoryContentsResponse.h"
 #import "CKDAVDirectoryContentsRequest.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 #import "NSCalendarDate+Connection.h"
 #import "NSString+Connection.h"
 

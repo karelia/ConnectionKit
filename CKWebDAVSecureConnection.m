@@ -28,7 +28,7 @@
  */
 
 #import "CKWebDAVSecureConnection.h"
-#import "CKConnectionProtocol.h"
+#import "CKConnectionProtocol1.h"
 
 @implementation CKWebDAVSecureConnection
 
