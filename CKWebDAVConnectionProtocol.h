@@ -21,7 +21,7 @@ typedef enum {
 } CKWebDAVProtocolStatus;
 
 
-@interface CKWebDAVProtocol : CKConnectionProtocol <NSURLAuthenticationChallengeSender>
+@interface CKWebDAVConnectionProtocol : CKConnectionProtocol <NSURLAuthenticationChallengeSender>
 {
 @private
     CKWebDAVProtocolStatus  _status;

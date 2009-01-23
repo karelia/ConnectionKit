@@ -6,12 +6,12 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKWebDAVProtocol.h"
+#import "CKWebDAVConnectionProtocol.h"
 
 #import "NSURLAuthentication+ConnectionKit.h"
 
 
-@interface CKWebDAVProtocol (Private)
+@interface CKWebDAVConnectionProtocol (Private)
 - (void)startHTTPRequest:(CFHTTPMessageRef)request;
 
 - (void)finishOperation;
@@ -19,7 +19,7 @@
 @end
 
 
-@implementation CKWebDAVProtocol
+@implementation CKWebDAVConnectionProtocol
 
 + (BOOL)canInitWithConnectionRequest:(CKConnectionRequest *)request;
 {
@@ -45,7 +45,7 @@
 {
     // WebDAV is built atop HTTP requests, not a connection stream. So, pretend we've connected
     // We could adjust this in the future by sending an exploratory request like Transmit does
-    [[self client] protocol:self didStartConnectionAtPath:[[[self request] URL] path]];
+    [[self client] connectionProtocol:self didOpenConnectionAtPath:[[[self request] URL] path]];
 }
 
 - (void)stopConnection
@@ -185,13 +185,13 @@
 - (void)finishOperation
 {
     [self _cleanUpIVarsAfterOperation];
-    [[self client] protocolCurrentOperationDidFinish:self];
+    [[self client] connectionProtocolDidFinishCurrentOperation:self];
 }
 
 - (void)failOperationWithError:(NSError *)error
 {
     [self _cleanUpIVarsAfterOperation];
-    [[self client] protocol:self currentOperationDidFailWithError:error];
+    [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
 }
 
 #pragma mark -
@@ -271,7 +271,7 @@
                 
                 if (_authenticationChallenge)
                 {
-                    [[self client] protocol:self didReceiveAuthenticationChallenge:_authenticationChallenge];
+                    [[self client] connectionProtocol:self didReceiveAuthenticationChallenge:_authenticationChallenge];
                 }
                 else
                 {
@@ -461,7 +461,7 @@
         if (buffer && numBytes)
         {
             NSData *data = [[NSData alloc] initWithBytes:buffer length:numBytes];
-            [[self client] protocol:self didLoadData:data];
+            [[self client] connectionProtocol:self didDownloadData:data];
             [data release];
         }
         else
@@ -494,14 +494,14 @@
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] protocol:self currentOperationDidFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+    [[self client] connectionProtocol:self currentOperationDidFailWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                                       code:NSURLErrorUserAuthenticationRequired
                                                                                   userInfo:nil]];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] protocol:self currentOperationDidFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+    [[self client] connectionProtocol:self currentOperationDidFailWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                                       code:NSURLErrorUserCancelledAuthentication
                                                                                   userInfo:nil]];
 }

@@ -31,6 +31,7 @@
 
 #import <Cocoa/Cocoa.h>
 
+#import "CKConnection.h"
 #import "CKConnectionRequest.h"
 
 
@@ -54,12 +55,6 @@ enum {
 	ConnectionErrorListingDirectory,
 	ConnectionErrorGeneric,
 };
-
-typedef enum {
-	CKTranscriptSent,
-	CKTranscriptReceived,
-	CKTranscriptData,
-} CKTranscriptType;
 
 
 @protocol CKConnection <NSObject>
