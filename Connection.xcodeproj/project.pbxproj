@@ -28,7 +28,7 @@
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
-		278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */; };
+		278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		278B966B0F27FC18002F3C54 /* CKWebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */; };
 		278B96700F27FCD2002F3C54 /* CKConnectionRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B96710F27FCD2002F3C54 /* CKConnectionRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */; };
@@ -58,7 +58,7 @@
 		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
-		3C231A5A0A66ECB100951F9E /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84909F7048500172CDD /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3C231A5A0A66ECB100951F9E /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84909F7048500172CDD /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (); }; };
 		3C231A5B0A66ECB200951F9E /* CKDotMacConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82B09F7048400172CDD /* CKDotMacConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C231A5C0A66ECB400951F9E /* CKWebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* CKWebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* CKFTPConnection.h */; };

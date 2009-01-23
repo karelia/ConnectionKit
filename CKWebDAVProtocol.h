@@ -23,6 +23,7 @@ typedef enum {
 
 @interface CKWebDAVProtocol : CKConnectionProtocol <NSURLAuthenticationChallengeSender>
 {
+@private
     CKWebDAVProtocolStatus  _status;
     
     // These ivars pertain to the current in-progress operation.
@@ -34,10 +35,5 @@ typedef enum {
     CFHTTPAuthenticationRef         _authenticationRef;
     NSURLAuthenticationChallenge    *_authenticationChallenge;
 }
-
-- (void)startHTTPRequest:(CFHTTPMessageRef)request;
-
-- (void)finishOperation;
-- (void)failOperationWithError:(NSError *)error;
 
 @end

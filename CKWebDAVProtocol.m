@@ -12,7 +12,10 @@
 
 
 @interface CKWebDAVProtocol (Private)
-- (void)processResponse:(CFHTTPMessageRef)response;
+- (void)startHTTPRequest:(CFHTTPMessageRef)request;
+
+- (void)finishOperation;
+- (void)failOperationWithError:(NSError *)error;
 @end
 
 
@@ -214,265 +217,258 @@
 
 - (void)stream:(NSStream *)theStream handleEvent:(NSStreamEvent)streamEvent
 {
-    switch (streamEvent)
+    // Report an error in the stream as the operation failing.
+    if (streamEvent == NSStreamEventErrorOccurred)
     {
-        case NSStreamEventHasBytesAvailable:
+        [self failOperationWithError:[theStream streamError]];
+    }
+    
+    
+    // Handle receiving data only from this point onward
+    if (streamEvent != NSStreamEventHasBytesAvailable) return;
+    
+    
+    
+    
+    // Create and handle the HTTP response if we haven't had one yet
+    BOOL continueLoading = YES;
+    if (!_hasProcessedHTTPResponse)
+    {
+        CFHTTPMessageRef response = (CFHTTPMessageRef)CFReadStreamCopyProperty(_HTTPStream, kCFStreamPropertyHTTPResponseHeader);
+        continueLoading = NO;   // Operations have to explicitly continue downloading
+        
+        
+        // Is the response complete? If not, carry on
+        if (CFHTTPMessageIsHeaderComplete(response))
         {
-            // Create and handle response if we haven't had one yet
-            if (!_hasProcessedHTTPResponse)
-            {
-                CFHTTPMessageRef response = (CFHTTPMessageRef)CFReadStreamCopyProperty(_HTTPStream, kCFStreamPropertyHTTPResponseHeader);
-                
-                // Is the response complete? If not, carry on
-                if (CFHTTPMessageIsHeaderComplete(response))
-                {
-                    _hasProcessedHTTPResponse = YES;
-                    
-                    CFIndex statusCode = CFHTTPMessageGetResponseStatusCode(response);
-                    if (statusCode == 401 || statusCode == 407)
-                    {
-                        // Cancel the stream
-                        //[(NSStream *)_HTTPStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
-                        CFReadStreamClose(_HTTPStream); // According to the docs this should remove it from any run loops
-                        
-                        
-                        // If the request failed authentication, ask the client for some
-                        _authenticationRef = CFHTTPAuthenticationCreateFromResponse(NULL, response);
-                        NSAssert(_authenticationRef, @"Connection failed authentication, but contains no valid authentication information");
-                        
-                        
-                        NSInteger failureCount = (_authenticationChallenge) ? [_authenticationChallenge previousFailureCount] + 1 : 0;
-                        
-                        [_authenticationChallenge release];
-                        NSError *error = nil;
-                        _authenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithHTTPAuthenticationRef:_authenticationRef
-                                                                                                    proposedCredential:nil
-                                                                                                  previousFailureCount:failureCount
-                                                                                                                sender:self
-                                                                                                                 error:&error];
-                        
-                        if (_authenticationChallenge)
-                        {
-                            [[self client] protocol:self didReceiveAuthenticationChallenge:_authenticationChallenge];
-                        }
-                        else
-                        {
-                            // This error could be more verbose!
-                            if (!error) error = [NSError errorWithHTTPResponse:response];
-                            [self failOperationWithError:error];
-                        }
-                        
-                        return;
-                        break;
-                    }
-                    else
-                    {
-                        [self processResponse:response];
-                    }
-                }
-                
-                CFRelease(response);
-            }
+            _hasProcessedHTTPResponse = YES;
             
             
-            // Report data to the delegate
-            if (_status == CKWebDAVProtocolStatusDownload)
+            
+            // Authentication errors are dealt with by requesting authentication and retrying the request
+            CFIndex statusCode = CFHTTPMessageGetResponseStatusCode(response);
+            if (statusCode == 401 || statusCode == 407)
             {
-                CFIndex numBytes;
-                const UInt8 *buffer = CFReadStreamGetBuffer(_HTTPStream, 0, &numBytes);
-                if (buffer && numBytes)
+                // Cancel the stream
+                //[(NSStream *)_HTTPStream removeFromRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
+                CFReadStreamClose(_HTTPStream); // According to the docs this should remove it from any run loops
+                
+                
+                // If the request failed authentication, ask the client for some
+                _authenticationRef = CFHTTPAuthenticationCreateFromResponse(NULL, response);
+                NSAssert(_authenticationRef, @"Connection failed authentication, but contains no valid authentication information");
+                
+                
+                NSInteger failureCount = (_authenticationChallenge) ? [_authenticationChallenge previousFailureCount] + 1 : 0;
+                
+                [_authenticationChallenge release];
+                NSError *error = nil;
+                _authenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithHTTPAuthenticationRef:_authenticationRef
+                                                                                            proposedCredential:nil
+                                                                                          previousFailureCount:failureCount
+                                                                                                        sender:self
+                                                                                                         error:&error];
+                
+                if (_authenticationChallenge)
                 {
-                    NSData *data = [[NSData alloc] initWithBytes:buffer length:numBytes];
-                    [[self client] protocol:self didLoadData:data];
-                    [data release];
+                    [[self client] protocol:self didReceiveAuthenticationChallenge:_authenticationChallenge];
                 }
                 else
                 {
-                    // We're finished reading.
-                    CFReadStreamClose(_HTTPStream);
-                    [self finishOperation];
+                    // This error could be more verbose!
+                    if (!error) error = [NSError errorWithHTTPResponse:response];
+                    [self failOperationWithError:error];
+                }
+            }
+            
+            
+            
+            // How we handle the response is operation-specific
+            else
+            {
+                // It's quite likely there's an error. Make handling it easy
+                BOOL    result = NO;
+                NSString *localizedErrorDescription = nil;
+                int errorCode = CKConnectionErrorUnknown;
+                NSMutableDictionary *errorUserInfo = [NSMutableDictionary dictionary];
+                
+                
+                
+                
+                
+                // Handle the response
+                KTLog(CKProtocolDomain, KTLogDebug, @"%@", response);
+                switch (_status)
+                {
+                    case CKWebDAVProtocolStatusListingDirectory:
+                    {
+                        /*
+                         NSError *error = nil;
+                         NSString *localizedDescription = nil;
+                         NSArray *contents = [NSArray array];
+                         switch ([dav code])
+                         {
+                         case 200:
+                         case 207: //multi-status
+                         {
+                         contents = [dav directoryContents];
+                         [self cacheDirectory:[dav path] withContents:contents];
+                         break;
+                         }
+                         case 404:
+                         {		
+                         localizedDescription = [NSString stringWithFormat: @"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
+                         break;
+                         }
+                         default: 
+                         {
+                         localizedDescription = LocalizedStringInConnectionKitBundle(@"Unknown Error Occurred", @"WebDAV Error");
+                         break;
+                         }
+                         }
+                         
+                         if (localizedDescription)
+                         {
+                         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                         localizedDescription, NSLocalizedDescriptionKey,
+                         [dav path], NSFilePathErrorKey,
+                         [dav className], @"DAVResponseClass", nil];				
+                         error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
+                         }
+                         NSString *dirPath = [dav path];
+                         if ([dirPath hasSuffix:@"/"])
+                         dirPath = [dirPath substringToIndex:[dirPath length] - 1];				
+                         [[self client] connectionDidReceiveContents:contents ofDirectory:dirPath error:error];
+                         
+                         [self setState:CKConnectionIdleState];*/
+                        break;
+                    }
+                    case CKWebDAVProtocolStatusCreatingDirectory:
+                    {
+                        switch (statusCode)
+                        {
+                            case 201: 
+                            case 405:   // The directory already exists. Considering this effectively a success for now
+                                result = YES;
+                                break;
+                                
+                            case 403:
+                                errorCode = CKConnectionErrorNoPermissionsToReadFile;
+                                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
+                                //we fake the directory exists as this is usually the case if it is the root directory
+                                [errorUserInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
+                                break;
+                                
+                            case 409:
+                                errorCode = CKConnectionErrorFileDoesNotExist;
+                                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
+                                break;
+                                
+                            case 415:
+                                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @"WebDAV Create Directory Error");
+                                break;
+                                
+                            case 507:
+                                errorCode = CKConnectionErrorInsufficientStorage;
+                                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
+                                break;
+                        }
+                        
+                        break;
+                    }
+                    case CKWebDAVProtocolStatusUploading:
+                    {
+                        switch (statusCode)
+                        {
+                            case 201:
+                                result = YES;
+                                break;
+                                
+                            case 409:
+                                errorCode = CKConnectionErrorFileDoesNotExist;
+                                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error");
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                        
+                        break;
+                    }
+                    case CKWebDAVProtocolStatusDeletingItem:
+                    {
+                        switch (statusCode)
+                        {
+                            case 200:
+                            case 201:
+                            case 204:
+                                result = YES;
+                                break;
+                                
+                            default:
+                                localizedErrorDescription = [NSString stringWithFormat:@"%@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"WebDAV File Deletion Error")]; 
+                                break;
+                        }
+                        
+                        break;
+                    }
+                    case CKWebDAVProtocolStatusMovingItem:
+                    {
+                        
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                
+                
+                // Stop loading if possible and report to the client
+                if (!continueLoading)
+                {
+                    CFReadStreamClose(_HTTPStream); // The stream handling code will release ivars etc. later
+                    
+                    if (result)
+                    {
+                        [self finishOperation];
+                    }
+                    else
+                    {
+                        NSError *underlyingError = [[NSError alloc] initWithHTTPResponse:response];
+                        [errorUserInfo setObject:underlyingError forKey:NSUnderlyingErrorKey];
+                        
+                        if (!localizedErrorDescription) localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"Unknown connection error");
+                        [errorUserInfo setObject:localizedErrorDescription forKey:NSLocalizedDescriptionKey];
+                        
+                        NSError *error = [[NSError alloc] initWithDomain:CKConnectionErrorDomain code:errorCode userInfo:errorUserInfo];
+                        [underlyingError release];
+                        
+                        [self failOperationWithError:error];
+                        [error release];
+                    }
                 }
             }
         }
-            break;
-            
-            
-        case NSStreamEventErrorOccurred:
-            // TODO: report stream error
-            break;
-    }
-}
-
-
-/*  Processes the response to send the right delegate messages.
- */
-- (void)processResponse:(CFHTTPMessageRef)response
-{
-	CFIndex statusCode = CFHTTPMessageGetResponseStatusCode(response);
-    BOOL    continueLoading = NO;   // Its only for successful downloads and directory listings that we're interested
-    
-    
-    // It's quite likely there's an error. Make handling it easy
-    BOOL    result = NO;
-    NSString *localizedErrorDescription = nil;
-    int errorCode = CKConnectionErrorUnknown;
-    NSMutableDictionary *errorUserInfo = [NSMutableDictionary dictionary];
-    
-    
-    
-    
-    
-    // Handle the response
-    KTLog(CKProtocolDomain, KTLogDebug, @"%@", response);
-	switch (_status)
-	{
-		case CKWebDAVProtocolStatusListingDirectory:
-		{
-			/*
-            NSError *error = nil;
-			NSString *localizedDescription = nil;
-			NSArray *contents = [NSArray array];
-			switch ([dav code])
-			{
-				case 200:
-				case 207: //multi-status
-				{
-					contents = [dav directoryContents];
-					[self cacheDirectory:[dav path] withContents:contents];
-					break;
-				}
-				case 404:
-				{		
-					localizedDescription = [NSString stringWithFormat: @"%@: %@", LocalizedStringInConnectionKitBundle(@"There is no WebDAV access to the directory", @"No WebDAV access to the specified path"), [dav path]];
-					break;
-				}
-				default: 
-				{
-					localizedDescription = LocalizedStringInConnectionKitBundle(@"Unknown Error Occurred", @"WebDAV Error");
-					break;
-				}
-			}
-			
-            if (localizedDescription)
-            {
-                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                                          localizedDescription, NSLocalizedDescriptionKey,
-                                          [dav path], NSFilePathErrorKey,
-                                          [dav className], @"DAVResponseClass", nil];				
-                error = [NSError errorWithDomain:WebDAVErrorDomain code:[dav code] userInfo:userInfo];
-            }
-            NSString *dirPath = [dav path];
-            if ([dirPath hasSuffix:@"/"])
-                dirPath = [dirPath substringToIndex:[dirPath length] - 1];				
-            [[self client] connectionDidReceiveContents:contents ofDirectory:dirPath error:error];
-            
-			[self setState:CKConnectionIdleState];*/
-			break;
-		}
-		case CKWebDAVProtocolStatusCreatingDirectory:
-		{
-			switch (statusCode)
-			{
-				case 201: 
-                case 405:   // The directory already exists. Considering this effectively a success for now
-				    result = YES;
-					break;
-									
-				case 403:
-					errorCode = CKConnectionErrorNoPermissionsToReadFile;
-                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
-                    //we fake the directory exists as this is usually the case if it is the root directory
-					[errorUserInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-					break;
-				
-                case 409:
-					errorCode = CKConnectionErrorFileDoesNotExist;
-                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
-					break;
-				
-				case 415:
-					localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The body of the request is not supported", @"WebDAV Create Directory Error");
-					break;
-				
-				case 507:
-					errorCode = CKConnectionErrorInsufficientStorage;
-                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
-					break;
-				
-				default: 
-					localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"WebDAV Create Directory Error");
-					break;
-			}
-			
-            break;
-		}
-		case CKWebDAVProtocolStatusUploading:
-		{
-			switch (statusCode)
-			{
-				case 201:
-                    result = YES;
-                    break;
-                    
-                case 409:
-					errorCode = CKConnectionErrorFileDoesNotExist;
-                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error");
-					break;
-				
-				default:
-					break;
-			}
-                        
-			break;
-		}
-		case CKWebDAVProtocolStatusDeletingItem:
-		{
-			switch (statusCode)
-			{
-				case 200:
-				case 201:
-				case 204:
-					result = YES;
-					break;
-				
-				default:
-					localizedErrorDescription = [NSString stringWithFormat:@"%@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"WebDAV File Deletion Error")]; 
-					break;
-			}
-			
-            break;
-		}
-		case CKWebDAVProtocolStatusMovingItem:
-		{
-			
-			break;
-		}
-		default:
-            break;
-	}
-    
-    
-    // Stop loading if possible
-    if (!continueLoading)
-    {
-        CFReadStreamClose(_HTTPStream); // The stream handling code will release ivars etc. later
         
-        if (result)
+        CFRelease(response);
+    }
+    
+    
+    // Report data to the delegate
+    if (continueLoading)
+    {
+        CFIndex numBytes;
+        const UInt8 *buffer = CFReadStreamGetBuffer(_HTTPStream, 0, &numBytes);
+        if (buffer && numBytes)
         {
-            [self finishOperation];
+            NSData *data = [[NSData alloc] initWithBytes:buffer length:numBytes];
+            [[self client] protocol:self didLoadData:data];
+            [data release];
         }
         else
         {
-            NSError *underlyingError = [[NSError alloc] initWithHTTPResponse:response];
-            
-            [errorUserInfo setObject:underlyingError forKey:NSUnderlyingErrorKey];
-            [errorUserInfo setObject:localizedErrorDescription forKey:NSLocalizedDescriptionKey];
-            
-            NSError *error = [[NSError alloc] initWithDomain:CKConnectionErrorDomain code:errorCode userInfo:errorUserInfo];
-            [underlyingError release];
-            
-            [self failOperationWithError:error];
-            [error release];
+            // We're finished reading.
+            CFReadStreamClose(_HTTPStream);
+            [self finishOperation];
         }
     }
 }
