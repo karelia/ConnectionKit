@@ -55,3 +55,26 @@ extern const NSTimeInterval CKConnectionRequestDefaultTimeoutInterval;  // 60 se
 - (void)setProperty:(id)value forKey:(NSString *)key;
 - (void)removePropertyForKey:(NSString *)key;
 @end
+
+
+#pragma mark -
+
+
+@interface CKConnectionRequest (CKFTPConnectionRequest)
+// nil signifies the usual fallback chain of connection types
+- (NSString *)FTPDataConnectionType;
+@end
+
+@interface CKMutableConnectionRequest (CKFTPConnectionRequest)
+- (void)setFTPDataConnectionType:(NSString *)type;
+@end
+
+
+@interface CKConnectionRequest (CKSFTPConnectionRequest)
+- (NSString *)SFTPPublicKeyPath;
+@end
+
+@interface CKMutableConnectionRequest (CKSFTPConnectionRequest)
+- (void)setSFTPPublicKeyPath:(NSString *)path;
+@end
+

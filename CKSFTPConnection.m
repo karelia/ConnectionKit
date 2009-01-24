@@ -16,7 +16,9 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol1.h"
+
 #import "CKConnectionAuthentication+Internal.h"
+#import "CKSFTPConnectionProtocol.h"
 
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
@@ -1086,26 +1088,6 @@ static NSString *lsform = nil;
         // Start login with the supplied username
         [self connectWithUsername:[credential user]];
     }
-}
-
-@end
-
-
-#pragma mark -
-#pragma mark CKConnectionRequest
-
-
-@implementation CKConnectionRequest (CKSFTPConnection)
-
-- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
-
-@end
-
-@implementation CKMutableConnectionRequest (CKSFTPConnection)
-
-- (void)setSFTPPublicKeyPath:(NSString *)path
-{
-    [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
 }
 
 @end
