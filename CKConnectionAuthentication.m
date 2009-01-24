@@ -1,12 +1,13 @@
 //
-//  NSURLAuthentication+ConnectionKit.m
-//  Marvel
+//  CKConnectionAuthentication.m
+//  Connection
 //
-//  Created by Mike on 20/01/2009.
+//  Created by Mike on 24/01/2009.
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "NSURLAuthentication+ConnectionKit.h"
+#import "CKConnectionAuthentication.h"
+#import "CKConnectionAuthentication+Internal.h"
 
 
 @interface NSError (NSURLAuthentication)
@@ -134,10 +135,64 @@
     {
         domain = @"CFStreamErrorDomainCustom";
     }
-        
+    
     return [self initWithDomain:domain code:streamError.error userInfo:nil];
 }
 
 @end
 
 
+@implementation CKURLProtectionSpace
+
+- (id)initWithHost:(NSString *)host port:(int)port protocol:(NSString *)protocol realm:(NSString *)realm authenticationMethod:(NSString *)authenticationMethod;
+{
+    if (self = [super initWithHost:host port:port protocol:protocol realm:realm authenticationMethod:authenticationMethod])
+    {
+        _protocol = [protocol copy];
+    }
+    
+    return self;
+}
+
+- (void)dealloc
+{
+    [_protocol release];
+    [super dealloc];
+}
+
+- (NSString *)protocol { return _protocol; }
+
+/*	NSURLProtectionSpace is immutable. Returning self retained ensures the protocol can't change beneath us.
+ */
+- (id)copyWithZone:(NSZone *)zone { return [self retain]; }
+
+@end
+
+
+@implementation CKAuthenticationChallengeSender
+
+- (id)initWithAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge
+{
+    [super init];
+    _authenticationChallenge = originalChallenge;
+    return self;
+}
+
+- (NSURLAuthenticationChallenge *)authenticationChallenge { return _authenticationChallenge; }
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    
+}
+
+@end

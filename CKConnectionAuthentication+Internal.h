@@ -1,12 +1,13 @@
 //
-//  CKAuthenticationChallengeSender.h
-//  Marvel
+//  CKConnectionAuthentication+Internal.h
+//  Connection
 //
-//  Created by Mike on 20/01/2009.
+//  Created by Mike on 24/01/2009.
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import <Cocoa/Cocoa.h>
+
+#import "CKConnectionAuthentication.h"
 
 
 /*  Simple object that forwards an authentication response from the main thread to the original
@@ -21,4 +22,12 @@
 - (id)initWithAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
 - (NSURLAuthenticationChallenge *)authenticationChallenge;
 
+@end
+
+
+
+@interface CKURLProtectionSpace : NSURLProtectionSpace
+{
+    NSString    *_protocol;
+}
 @end

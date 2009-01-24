@@ -7,32 +7,22 @@
 //
 
 #import "CKConnection.h"
+#import "CKConnection+Private.h"
 
-#import "CKAuthenticationChallengeSender.h"
+//#import "CKConnectionAuthentication+Internal.h"
 #import "CKConnectionError.h"
 #import "CKConnectionProtocol1.h"
-#import "CKConnectionOperation.h"
 #import "CKConnectionThreadManager.h"
 
 #import "NSInvocation+ConnectionKit.h"
-#import "NSURLAuthentication+ConnectionKit.h"
 
 
 NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 
-@interface CKConnection (Private)
-- (CKConnectionProtocol *)protocol;
-@end
-
-
 @interface CKConnection (QueueInternal)
 - (void)enqueueOperation:(CKConnectionOperation *)operation;
 - (void)dequeueOperation;
-@end
-
-
-@interface CKConnection (WorkerThread) <CKConnectionProtocolClient>
 @end
 
 
@@ -62,7 +52,10 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
         _queue = [[NSMutableArray alloc] init];
         
         // Start connection
-        _protocol = [[protocolClass alloc] initWithRequest:[self connectionRequest] client:self];
+        _client = [[CKConnectionProtocolClient alloc] initWithConnection:self];
+        _protocol = [[protocolClass alloc] initWithRequest:[self connectionRequest] client:_client];
+        [(CKConnectionProtocolClient *)_client setConnectionProtocol:_protocol];
+        
         _status = CKConnectionStatusOpening;
         [[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:_protocol] startConnection];
     }
@@ -88,10 +81,6 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     
     [super dealloc];
 }
-
-#pragma mark Delegate
-
-- (id)delegate { return _delegate; }
 
 #pragma mark Accessors
 
@@ -201,6 +190,27 @@ withIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
+@implementation CKConnection (Private)
+
+- (id)delegate { return _delegate; }
+
+- (CKConnectionStatus)status { return _status; }
+
+- (CKConnectionOperation *)currentOperation { return _currentOperation; }
+
+- (void)setCurrentOperation:(CKConnectionOperation *)operation
+{
+    [operation retain];
+    [_currentOperation release];
+    _currentOperation = operation;
+}
+
+@end
+
+
+#pragma mark -
+
+
 @implementation CKConnection (Queue)
 
 /*  Adds the operation to the queue or starts it immediately if nothing else is in progress
@@ -271,8 +281,6 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (CKConnectionOperation *)currentOperation { return _currentOperation; }
-
 - (void)currentOperationDidStop
 {
     [_currentOperation release];
@@ -285,7 +293,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
-@implementation CKConnection (ProtocolClientMainThread)
+@implementation CKConnection (ProtocolClient)
 
 /*  These methods are invoked in response to a message to the protocol client. They happen on the
  *  main thread and are responsible for:
@@ -293,7 +301,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
  *      B) dispatching the next operation
  */
 
-- (void)protocolDidOpenConnectionAtPath:(NSString *)path
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path
 {
     _status = CKConnectionStatusOpen;
     
@@ -308,7 +316,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)protocolDidFailWithError:(NSError *)error
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -322,7 +330,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 
 #pragma mark Authorization
 
-- (void)protocolDidReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -334,14 +342,14 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)protocolDidCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     
 }
 
 #pragma mark Operations
 
-- (void)protocolCurrentOperationDidFinish
+- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -356,7 +364,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
     [self dequeueOperation];
 }
 
-- (void)protocolCurrentOperationDidFailWithError:(NSError *)error
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
@@ -374,7 +382,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
     [self dequeueOperation];
 }
 
-- (void)protocolDidDownloadData:(NSData *)data
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
@@ -384,7 +392,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)protocolDidUploadDataOfLength:(NSUInteger)length
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
@@ -394,280 +402,24 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)protocolDidFetchContentsOfDirectory:(NSArray *)contents
-{
-    
-}
-
-@end
-
-
-#pragma mark -
-
-
-@implementation CKConnection (WorkerThread)
-
-/*  Sending a message directly from the worker thread to the delegate is a bad idea as it is
- *  possible the connection may have been cancelled by the time the message is delivered. Instead,
- *  deliver messages to ourself on the main thread and then forward them on to the delegate if
- *  appropriate.
- */
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path
-{
-    if (protocol != [self protocol]) return;
-    
-    NSAssert(_status == CKConnectionStatusOpening, @"The connection is not ready to be opened");  // This should never be called twice
-    
-    
-    [self performSelectorOnMainThread:@selector(protocolDidOpenConnectionAtPath:) withObject:path waitUntilDone:NO];
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
-{
-    if (protocol != [self protocol]) return;
-    
-    
-    [self performSelectorOnMainThread:@selector(protocolDidFailWithError:) withObject:error waitUntilDone:NO];
-}
-
-#pragma mark Authorization
-
-/*  Support method for filling an NSURLAuthenticationChallenge object. If no credential was supplied,
- *  looks for one from the connection's URL, and then falls back to using NSURLCredentialStorage.
- */
-- (NSURLAuthenticationChallenge *)_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    NSURLAuthenticationChallenge *result = challenge;
-    
-    NSURLCredential *credential = [challenge proposedCredential];
-    if (!credential)
-    {
-        NSURL *connectionURL = [[self connectionRequest] URL];
-        
-        NSString *user = [connectionURL user];
-        if (user)
-        {
-            NSString *password = [connectionURL password];
-            if (password)
-            {
-                credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
-            }
-            else
-            {
-                credential = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:[challenge protectionSpace]] objectForKey:user];
-                if (!result)
-                {
-                    credential = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
-                }
-            }
-        }
-        else
-        {
-            credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:[challenge protectionSpace]];
-        }
-        
-        
-        // Create a new request with the credential
-        if (credential)
-        {
-            result = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge
-                                                                        proposedCredential:credential];
-            [result autorelease];
-        }
-    }
-    
-    return result;
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (protocol != [self protocol]) return;
-    
-    
-    NSAssert(_status > CKConnectionStatusNotOpen, @"The connection has not started yet");  // Should only happen while running
-    
-    
-    // Fill in missing credentials if possible
-    NSURLAuthenticationChallenge *fullChallenge = challenge;
-    if (![challenge proposedCredential])
-    {
-        fullChallenge = [self _fullAuthenticationChallengeForChallenge:challenge];
-    }
-    
-    
-    // Does the delegate support this? If not, handle it ourselves
-    id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
-    {
-        // Set up a proxy -sender object to forward the request to the main thread
-        CKAuthenticationChallengeSender *sender = [[CKAuthenticationChallengeSender alloc] initWithAuthenticationChallenge:challenge];
-        NSURLAuthenticationChallenge *delegateChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:fullChallenge sender:sender];
-        [sender release];
-        
-        [self performSelectorOnMainThread:@selector(protocolDidReceiveAuthenticationChallenge:)
-                               withObject:delegateChallenge
-                            waitUntilDone:NO];
-        
-        [delegateChallenge release];
-    }
-    else
-    {
-        NSURLCredential *credential = [fullChallenge proposedCredential];
-        if ([credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
-        {
-            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-        }
-        else
-        {
-            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
-        }
-    }
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    [self performSelectorOnMainThread:@selector(protocolDidCancelAuthenticationChallenge:) withObject:challenge waitUntilDone:NO];
-}
-
-#pragma mark Operation
-
-- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
-{
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    // For recursive directory creation that has successfully created a parent directory, proceed to
-    // the next child directory
-    CKConnectionOperation *operation = [self currentOperation];
-    CKConnectionOperation *mainOperation = [operation mainOperation];
-    BOOL reportSuccess = YES;
-    
-    if ([operation operationType] == CKConnectionOperationCreateDirectory &&
-        [operation isRecursive] &&
-        mainOperation)
-    {
-        NSString *finalPath = [mainOperation path];
-        NSString *path = [operation path];
-        if (![finalPath isEqualToString:path])
-        {
-            NSString *nextPath = [path stringByAppendingPathComponent:[[finalPath pathComponents] objectAtIndex:[[path pathComponents] count]]];
-            
-            _currentOperation = [[CKConnectionOperation alloc] initCreateDirectoryOperationWithIdentifier:[operation identifier]
-                                                                                                     path:nextPath
-                                                                                                recursive:NO
-                                                                                            mainOperation:mainOperation];
-            
-            // tidy up
-            [operation release];
-            reportSuccess = NO;
-            
-            // Try the next operation
-            [[self protocol] createDirectoryAtPath:nextPath];
-        }
-    }
-    
-    if (reportSuccess)
-    {
-        [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFinish) withObject:nil waitUntilDone:NO];
-    }
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
-{
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    // For recursive directory creation, try to create the parent directory rather than fail if possible.
-    BOOL reportError = YES;
-    
-    CKConnectionOperation *operation = [self currentOperation];
-    if ([operation operationType] == CKConnectionOperationCreateDirectory &&
-        [operation isRecursive] &&
-        [[error domain] isEqualToString:CKConnectionErrorDomain] &&
-        [error code] == CKConnectionErrorFileDoesNotExist)
-    {
-        NSString *path = [[operation path] stringByDeletingLastPathComponent];
-        if (![path isEqualToString:@"/"])
-        {
-            _currentOperation = [[CKConnectionOperation alloc]
-                                 initCreateDirectoryOperationWithIdentifier:[operation identifier]
-                                 path:path
-                                 recursive:YES
-                                 mainOperation:([operation mainOperation] ? [operation mainOperation] : operation)];
-            
-            // tidy up
-            [operation release];
-            reportError = NO;
-            
-            // Try the new operation
-            [[self protocol] createDirectoryAtPath:path];
-        }
-    }
-    
-    if (reportError)
-    {
-        [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFailWithError:) withObject:error waitUntilDone:NO];
-    }
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
-{
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    [self performSelectorOnMainThread:@selector(protocolDidDownloadData:) withObject:data waitUntilDone:NO];
-}
-
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-{
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(protocolDidUploadDataOfLength:)];
-    [invocation setArgument:&length atIndex:2];
-    [invocation retainArguments];
-    
-    [self performSelectorOnMainThread:@selector(invoke) withObject:invocation waitUntilDone:NO];
-}
-
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    
-    [self performSelectorOnMainThread:@selector(protocolDidFetchContentsOfDirectory:) withObject:contents waitUntilDone:NO];
 }
 
-#pragma mark Transcript
-
-/*	Convenience method for sending a string to the delegate for appending to the transcript
- */
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
-	NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(protocolAppendString:toTranscript:)];
-    [invocation setArgument:&string atIndex:2];
-    [invocation setArgument:&transcript atIndex:3];
-    [invocation retainArguments];
-    
-    [self performSelectorOnMainThread:@selector(invoke) withObject:invocation waitUntilDone:NO];
+    id delegate = [self delegate];
+    if (delegate && [delegate respondsToSelector:@selector(connection:appendString:toTranscript:)])
+    {
+        [delegate connection:self appendString:string toTranscript:transcript];
+    }
 }
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
-{
-	va_list arguments;
-	va_start(arguments, transcript);
-	NSString *string = [[NSString alloc] initWithFormat:formatString arguments:arguments];
-	va_end(arguments);
-	
-	[self connectionProtocol:protocol appendString:string toTranscript:transcript];
-	[string release];
+{   // This method should never actually be called!
 }
 
 @end
+
+

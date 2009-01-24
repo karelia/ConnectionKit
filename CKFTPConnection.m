@@ -41,9 +41,9 @@
 #import "NSInvocation+ConnectionKit.h"
 #import "NSObject+Connection.h"
 
+#import "CKConnectionAuthentication+Internal.h"
 #import "CKCacheableHost.h"
 #import "CKConnectionProtocol1.h"
-#import "CKURLProtectionSpace.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 

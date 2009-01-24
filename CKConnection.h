@@ -15,15 +15,9 @@ typedef enum {
 	CKTranscriptData,
 } CKTranscriptType;
 
-typedef enum {
-    CKConnectionStatusNotOpen,
-    CKConnectionStatusOpening,
-    CKConnectionStatusOpen,
-    CKConnectionStatusClosed,
-} CKConnectionStatus;
-
 
 @class CKConnectionRequest, CKConnectionProtocol;
+@protocol CKConnectionProtocolClient;
     
 
 @interface CKConnection : NSObject
@@ -34,8 +28,9 @@ typedef enum {
     NSString            *_name;
     
     // Protocol
-    CKConnectionProtocol    *_protocol;
-    CKConnectionStatus       _status;
+    CKConnectionProtocol            *_protocol;
+    id <CKConnectionProtocolClient> _client;
+    int                             _status;
     
     // Operation queue
     id              _currentOperation;
