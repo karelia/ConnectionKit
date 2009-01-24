@@ -28,12 +28,11 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 @interface CKConnection (QueueInternal)
 - (void)enqueueOperation:(CKConnectionOperation *)operation;
-- (id)enqueueOperationWithInvocation:(NSInvocation *)invocation identifier:(id <NSObject>)identifier;
 - (void)dequeueOperation;
 @end
 
 
-@interface CKConnection (ProtocolClientWorkerThread) <CKConnectionProtocolClient>
+@interface CKConnection (WorkerThread) <CKConnectionProtocolClient>
 @end
 
 
@@ -78,10 +77,10 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)dealloc
 {
-    NSAssert(!_currentOperationIdentifier, @"Deallocing connection mid-operation");
-    NSAssert([_queue count] == 0, @"Dealling connection with items still on the queue");
+    NSAssert(!_currentOperation, @"Deallocating connection mid-operation");
+    NSAssert([_queue count] == 0, @"Deallocating connection with items still on the queue");
     [_queue release];
-    [_currentOperationIdentifier release];
+    [_currentOperation release];
     
     [_request release];
     [_protocol release];
@@ -121,79 +120,79 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(downloadContentsOfFileAtPath:)];
-    [invocation setArgument:&path atIndex:2];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDownloadOperationWithIdentifier:identifier
+                                                                                                     path:path];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    
-    return result;
+    return [operation identifier];
 }
 
 - (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(uploadData:toPath:)];
-    [invocation setArgument:&data atIndex:2];
-    [invocation setArgument:&path atIndex:3];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initUploadOperationWithIdentifier:identifier
+                                                                                                   path:path
+                                                                                                   data:data];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    return result;
+    return [operation identifier];
 }
 
 - (id)listContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(fetchContentsOfDirectoryAtPath:)];
-    [invocation setArgument:&path atIndex:2];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDirectoryListingOperationWithIdentifier:identifier
+                                                                                                             path:path];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    
-    return result;
+    return [operation identifier];
 }
 
-- (id)createDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)createDirectoryAtPath:(NSString *)path
+withIntermediateDirectories:(BOOL)createIntermediates
+                 identifier:(id <NSObject>)identifier;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(createDirectoryAtPath:)];
-    [invocation setArgument:&path atIndex:2];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initCreateDirectoryOperationWithIdentifier:identifier
+                                                                                                            path:path
+                                                                                                       recursive:createIntermediates
+                                                                                                   mainOperation:nil];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    
-    return result;
+    return [operation identifier];
 }
 
 - (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(moveItemAtPath:toPath:)];
-    [invocation setArgument:&sourcePath atIndex:2];
-    [invocation setArgument:&destinationPath atIndex:3];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initMoveOperationWithIdentifier:identifier
+                                                                                                 path:sourcePath
+                                                                                      destinationPath:destinationPath];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    return result;
+    return [operation identifier];
 }
 
 - (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(setPermissions:ofItemAtPath:)];
-    [invocation setArgument:&posixPermissions atIndex:2];
-    [invocation setArgument:&path atIndex:3];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initSetPermissionsOperationWithIdentifier:identifier
+                                                                                                           path:path
+                                                                                                    permissions:posixPermissions];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    return result;
+    return [operation identifier];
 }
 
 - (id)deleteItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithTarget:[self protocol]
-                                                         selector:@selector(deleteItemAtPath:)];
-    [invocation setArgument:&path atIndex:2];
+    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDeleteOperationWithIdentifier:identifier
+                                                                                                   path:path];
+    [self enqueueOperation:operation];
+    [operation release];
     
-    id result = [self enqueueOperationWithInvocation:invocation identifier:identifier];
-    
-    return result;
+    return [operation identifier];
 }
 
 @end
@@ -208,57 +207,76 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
  */
 - (void)enqueueOperation:(CKConnectionOperation *)operation
 {
-    [_queue insertObject:operation atIndex:0];
+    [_queue addObject:operation];
     [self dequeueOperation];
-}
-
-/*  Convenience method to enqueue an operation for the specified invocaton
- */
-- (id)enqueueOperationWithInvocation:(NSInvocation *)invocation identifier:(id <NSObject>)identifier
-{
-    id result = (identifier) ? identifier : [[[NSObject alloc] init] autorelease];
-    
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initWithIdentifier:result
-                                                                              invocation:invocation];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return result;
 }
 
 /*  Starts the next operation if the connection is ready
  */
 - (void)dequeueOperation
 {
-    if (!_currentOperationIdentifier && _status == CKConnectionStatusOpen)
+    if (!_currentOperation && _status == CKConnectionStatusOpen)
     {
         // Remove from the queue
-        CKConnectionOperation *operation = [[_queue lastObject] retain];
-        if (operation)
+        if ([_queue count] > 0)
         {
-            [_queue removeLastObject];
-            _currentOperationIdentifier = [[operation identifier] retain];
-        
+            _currentOperation = [[_queue objectAtIndex:0] retain];
+            [_queue removeObjectAtIndex:0];
+            
             // Inform delegate
             id delegate = [self delegate];
             if (delegate && [delegate respondsToSelector:@selector(connection:operationDidBegin:)])
             {
-                [delegate connection:self operationDidBegin:_currentOperationIdentifier];
+                [delegate connection:self operationDidBegin:[_currentOperation identifier]];
             }
             
-            // invoke method on the worker thread
-            [[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[operation invocation]] invoke];
-            [operation release];
+            
+            // Start protocol's operation implementation on worker thread
+            CKConnectionProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
+            switch ([_currentOperation operationType])
+            {
+                case CKConnectionOperationUpload:
+                    [workerThreadProxy uploadData:[_currentOperation data] toPath:[_currentOperation path]];
+                    break;
+                    
+                case CKConnectionOperationDownload:
+                    [workerThreadProxy downloadContentsOfFileAtPath:[_currentOperation path]];
+                    break;
+                    
+                case CKConnectionOperationDirectoryListing:
+                    [workerThreadProxy fetchContentsOfDirectoryAtPath:[_currentOperation path]];
+                    break;
+                    
+                case CKConnectionOperationCreateDirectory:
+                    [workerThreadProxy createDirectoryAtPath:[_currentOperation path]];
+                    break;
+                    
+                case CKConnectionOperationMove:
+                    [workerThreadProxy moveItemAtPath:[_currentOperation path] toPath:[_currentOperation destinationPath]];
+                    break;
+                    
+                case CKConnectionOperationSetPermissions:
+                    [workerThreadProxy setPermissions:[_currentOperation permissions] ofItemAtPath:[_currentOperation path]];
+                    break;
+                    
+                case CKConnectionOperationDelete:
+                    [workerThreadProxy deleteItemAtPath:[_currentOperation path]];
+                    break;
+                    
+                default:
+                    [NSException raise:NSInternalInconsistencyException format:@"Dequeueing unrecognised connection type"];
+                    break;
+            }
         }
     }
 }
 
-- (id )currentOperationIdentifier { return _currentOperationIdentifier; }
+- (CKConnectionOperation *)currentOperation { return _currentOperation; }
 
 - (void)currentOperationDidStop
 {
-    [_currentOperationIdentifier release];
-    _currentOperationIdentifier = nil;
+    [_currentOperation release];
+    _currentOperation = nil;
 }
 
 @end
@@ -329,7 +347,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     id delegate = [self delegate];
     if (delegate && [delegate respondsToSelector:@selector(connection:operationDidFinish:)])
     {
-        [delegate connection:self operationDidFinish:[self currentOperationIdentifier]];
+        [delegate connection:self operationDidFinish:[[self currentOperation] identifier]];
     }
     
     
@@ -344,7 +362,11 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     id delegate = [self delegate];
     if (delegate && [delegate respondsToSelector:@selector(connection:operation:didFailWithError:)])
     {
-        [delegate connection:self operation:[self currentOperationIdentifier] didFailWithError:error];
+        // When performing a recursive operation, it could fail mid-way. If so, we MUST report the
+        // error usuing the original operation identifier.
+        CKConnectionOperation *operation = [self currentOperation];
+        id <NSObject> operationID = ([operation mainOperation]) ? [[operation mainOperation] identifier] : [operation identifier];
+        [delegate connection:self operation:operationID didFailWithError:error];
     }
     
     
@@ -358,7 +380,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     id delegate = [self delegate];
     if (delegate && [delegate respondsToSelector:@selector(connection:download:didReceiveData:)])
     {
-        [delegate connection:self download:[self currentOperationIdentifier] didReceiveData:data];
+        [delegate connection:self download:[[self currentOperation] identifier] didReceiveData:data];
     }
 }
 
@@ -368,7 +390,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     id delegate = [self delegate];
     if (delegate && [delegate respondsToSelector:@selector(connection:upload:didSendDataOfLength:)])
     {
-        [delegate connection:self upload:[self currentOperationIdentifier] didSendDataOfLength:length];
+        [delegate connection:self upload:[[self currentOperation] identifier] didSendDataOfLength:length];
     }
 }
 
@@ -383,7 +405,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 #pragma mark -
 
 
-@implementation CKConnection (ProtocolClientWorkerThread)
+@implementation CKConnection (WorkerThread)
 
 /*  Sending a message directly from the worker thread to the delegate is a bad idea as it is
  *  possible the connection may have been cancelled by the time the message is delivered. Instead,
@@ -505,7 +527,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     [self performSelectorOnMainThread:@selector(protocolDidCancelAuthenticationChallenge:) withObject:challenge waitUntilDone:NO];
@@ -515,23 +537,86 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
-    [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFinish) withObject:nil waitUntilDone:NO];
+    // For recursive directory creation that has successfully created a parent directory, proceed to
+    // the next child directory
+    CKConnectionOperation *operation = [self currentOperation];
+    CKConnectionOperation *mainOperation = [operation mainOperation];
+    BOOL reportSuccess = YES;
+    
+    if ([operation operationType] == CKConnectionOperationCreateDirectory &&
+        [operation isRecursive] &&
+        mainOperation)
+    {
+        NSString *finalPath = [mainOperation path];
+        NSString *path = [operation path];
+        if (![finalPath isEqualToString:path])
+        {
+            NSString *nextPath = [path stringByAppendingPathComponent:[[finalPath pathComponents] objectAtIndex:[[path pathComponents] count]]];
+            
+            _currentOperation = [[CKConnectionOperation alloc] initCreateDirectoryOperationWithIdentifier:[operation identifier]
+                                                                                                     path:nextPath
+                                                                                                recursive:NO
+                                                                                            mainOperation:mainOperation];
+            
+            // tidy up
+            [operation release];
+            reportSuccess = NO;
+            
+            // Try the next operation
+            [[self protocol] createDirectoryAtPath:nextPath];
+        }
+    }
+    
+    if (reportSuccess)
+    {
+        [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFinish) withObject:nil waitUntilDone:NO];
+    }
 }
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
-    [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFailWithError:) withObject:error waitUntilDone:NO];
+    // For recursive directory creation, try to create the parent directory rather than fail if possible.
+    BOOL reportError = YES;
+    
+    CKConnectionOperation *operation = [self currentOperation];
+    if ([operation operationType] == CKConnectionOperationCreateDirectory &&
+        [operation isRecursive] &&
+        [[error domain] isEqualToString:CKConnectionErrorDomain] &&
+        [error code] == CKConnectionErrorFileDoesNotExist)
+    {
+        NSString *path = [[operation path] stringByDeletingLastPathComponent];
+        if (![path isEqualToString:@"/"])
+        {
+            _currentOperation = [[CKConnectionOperation alloc]
+                                 initCreateDirectoryOperationWithIdentifier:[operation identifier]
+                                 path:path
+                                 recursive:YES
+                                 mainOperation:([operation mainOperation] ? [operation mainOperation] : operation)];
+            
+            // tidy up
+            [operation release];
+            reportError = NO;
+            
+            // Try the new operation
+            [[self protocol] createDirectoryAtPath:path];
+        }
+    }
+    
+    if (reportError)
+    {
+        [self performSelectorOnMainThread:@selector(protocolCurrentOperationDidFailWithError:) withObject:error waitUntilDone:NO];
+    }
 }
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     [self performSelectorOnMainThread:@selector(protocolDidDownloadData:) withObject:data waitUntilDone:NO];
@@ -539,7 +624,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(protocolDidUploadDataOfLength:)];
@@ -551,7 +636,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 {
-    if (protocol != [self protocol]) return;
+    NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     [self performSelectorOnMainThread:@selector(protocolDidFetchContentsOfDirectory:) withObject:contents waitUntilDone:NO];
@@ -563,7 +648,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
  */
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
-	if (protocol != [self protocol]) return;
+	NSAssert2(protocol == [self protocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     NSInvocation *invocation = [NSInvocation invocationWithTarget:self selector:@selector(protocolAppendString:toTranscript:)];
@@ -576,10 +661,7 @@ NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
 {
-	if (protocol != [self protocol]) return;
-    
-    
-    va_list arguments;
+	va_list arguments;
 	va_start(arguments, transcript);
 	NSString *string = [[NSString alloc] initWithFormat:formatString arguments:arguments];
 	va_end(arguments);
