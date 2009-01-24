@@ -8,7 +8,10 @@
 
 #import "CKWebDAVConnectionProtocol.h"
 
-#import "NSURLAuthentication+ConnectionKit.h"
+#import "CKConnectionAuthentication.h"
+#import "CKConnectionError.h"
+
+#import "CKAbstractConnection.h"    // For KTLog. Remove dependency when possible
 
 
 @interface CKWebDAVConnectionProtocol (Private)

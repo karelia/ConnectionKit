@@ -26,28 +26,26 @@
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
-		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
-		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */; };
 		278B96700F27FCD2002F3C54 /* CKConnectionRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B96710F27FCD2002F3C54 /* CKConnectionRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */; };
-		278B967C0F27FCDE002F3C54 /* CKAuthenticationChallengeSender.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96720F27FCDC002F3C54 /* CKAuthenticationChallengeSender.h */; };
-		278B967D0F27FCDE002F3C54 /* CKAuthenticationChallengeSender.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96730F27FCDC002F3C54 /* CKAuthenticationChallengeSender.m */; };
 		278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96740F27FCDC002F3C54 /* CKConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96750F27FCDC002F3C54 /* CKConnection.m */; };
-		278B96800F27FCDE002F3C54 /* CKConnectionOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96760F27FCDD002F3C54 /* CKConnectionOperation.h */; };
 		278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */; };
 		278B96820F27FCDE002F3C54 /* CKConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96780F27FCDD002F3C54 /* CKConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B96830F27FCDE002F3C54 /* CKConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96790F27FCDD002F3C54 /* CKConnectionProtocol.m */; };
-		278B96840F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B967A0F27FCDD002F3C54 /* NSURLAuthentication+ConnectionKit.h */; };
-		278B96850F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B967B0F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.m */; };
 		278B96C30F28019D002F3C54 /* NSInvocation+ConnectionKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */; };
 		278B96C40F28019D002F3C54 /* NSInvocation+ConnectionKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96C20F28019D002F3C54 /* NSInvocation+ConnectionKit.m */; };
 		278B978F0F28F136002F3C54 /* CKConnectionError.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B978E0F28F136002F3C54 /* CKConnectionError.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B97FC0F2922A3002F3C54 /* CKConnectionError.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B97FB0F2922A3002F3C54 /* CKConnectionError.m */; };
 		278B98740F29EC12002F3C54 /* CKFileConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B98720F29EC12002F3C54 /* CKFileConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		278B98750F29EC12002F3C54 /* CKFileConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */; };
+		278B99A60F2B66C4002F3C54 /* CKConnection+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */; };
+		278B99A70F2B66C4002F3C54 /* CKConnection+Private.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */; };
+		278B99C80F2B76AC002F3C54 /* CKConnectionAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */; };
+		278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */; };
+		278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -281,28 +279,26 @@
 		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
-		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
-		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnectionProtocol.h; sourceTree = "<group>"; };
 		278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnectionProtocol.m; sourceTree = "<group>"; };
 		278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRequest.h; sourceTree = "<group>"; };
 		278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRequest.m; sourceTree = "<group>"; };
-		278B96720F27FCDC002F3C54 /* CKAuthenticationChallengeSender.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKAuthenticationChallengeSender.h; sourceTree = "<group>"; };
-		278B96730F27FCDC002F3C54 /* CKAuthenticationChallengeSender.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAuthenticationChallengeSender.m; sourceTree = "<group>"; };
 		278B96740F27FCDC002F3C54 /* CKConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnection.h; sourceTree = "<group>"; };
 		278B96750F27FCDC002F3C54 /* CKConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnection.m; sourceTree = "<group>"; };
-		278B96760F27FCDD002F3C54 /* CKConnectionOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionOperation.h; sourceTree = "<group>"; };
 		278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOperation.m; sourceTree = "<group>"; };
 		278B96780F27FCDD002F3C54 /* CKConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionProtocol.h; sourceTree = "<group>"; };
 		278B96790F27FCDD002F3C54 /* CKConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionProtocol.m; sourceTree = "<group>"; };
-		278B967A0F27FCDD002F3C54 /* NSURLAuthentication+ConnectionKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLAuthentication+ConnectionKit.h"; sourceTree = "<group>"; };
-		278B967B0F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLAuthentication+ConnectionKit.m"; sourceTree = "<group>"; };
 		278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+ConnectionKit.h"; sourceTree = "<group>"; };
 		278B96C20F28019D002F3C54 /* NSInvocation+ConnectionKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+ConnectionKit.m"; sourceTree = "<group>"; };
 		278B978E0F28F136002F3C54 /* CKConnectionError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionError.h; sourceTree = "<group>"; };
 		278B97FB0F2922A3002F3C54 /* CKConnectionError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionError.m; sourceTree = "<group>"; };
 		278B98720F29EC12002F3C54 /* CKFileConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileConnectionProtocol.h; sourceTree = "<group>"; };
 		278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileConnectionProtocol.m; sourceTree = "<group>"; };
+		278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKConnection+Private.h"; sourceTree = "<group>"; };
+		278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKConnection+Private.m"; sourceTree = "<group>"; };
+		278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionAuthentication.h; sourceTree = "<group>"; };
+		278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionAuthentication.m; sourceTree = "<group>"; };
+		278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKConnectionAuthentication+Internal.h"; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
 		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
@@ -696,6 +692,7 @@
 		278B965C0F27FB28002F3C54 /* Connections 2.0 */ = {
 			isa = PBXGroup;
 			children = (
+				278B99990F2B5FC5002F3C54 /* Utilities */,
 				278B965D0F27FB3E002F3C54 /* CKConnection */,
 				278B965E0F27FB82002F3C54 /* Protocols */,
 			);
@@ -705,18 +702,13 @@
 		278B965D0F27FB3E002F3C54 /* CKConnection */ = {
 			isa = PBXGroup;
 			children = (
-				278B96720F27FCDC002F3C54 /* CKAuthenticationChallengeSender.h */,
-				278B96730F27FCDC002F3C54 /* CKAuthenticationChallengeSender.m */,
 				278B96740F27FCDC002F3C54 /* CKConnection.h */,
 				278B96750F27FCDC002F3C54 /* CKConnection.m */,
-				278B96760F27FCDD002F3C54 /* CKConnectionOperation.h */,
 				278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */,
-				278B967A0F27FCDD002F3C54 /* NSURLAuthentication+ConnectionKit.h */,
-				278B967B0F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.m */,
 				278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */,
 				278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */,
-				278B978E0F28F136002F3C54 /* CKConnectionError.h */,
-				278B97FB0F2922A3002F3C54 /* CKConnectionError.m */,
+				278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */,
+				278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */,
 			);
 			name = CKConnection;
 			sourceTree = "<group>";
@@ -732,6 +724,18 @@
 				278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */,
 			);
 			name = Protocols;
+			sourceTree = "<group>";
+		};
+		278B99990F2B5FC5002F3C54 /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				278B978E0F28F136002F3C54 /* CKConnectionError.h */,
+				278B97FB0F2922A3002F3C54 /* CKConnectionError.m */,
+				278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */,
+				278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */,
+				278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */,
+			);
+			name = Utilities;
 			sourceTree = "<group>";
 		};
 		27FD90C10ED5BF640068D634 /* Abstract */ = {
@@ -1029,8 +1033,6 @@
 				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 				27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */,
 				27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */,
-				278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */,
-				278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */,
 				278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */,
 				278B96C20F28019D002F3C54 /* NSInvocation+ConnectionKit.m */,
 			);
@@ -1195,18 +1197,17 @@
 				27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
-				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
 				278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */,
 				278B96700F27FCD2002F3C54 /* CKConnectionRequest.h in Headers */,
-				278B967C0F27FCDE002F3C54 /* CKAuthenticationChallengeSender.h in Headers */,
 				278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */,
-				278B96800F27FCDE002F3C54 /* CKConnectionOperation.h in Headers */,
 				278B96820F27FCDE002F3C54 /* CKConnectionProtocol.h in Headers */,
-				278B96840F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.h in Headers */,
 				278B96C30F28019D002F3C54 /* NSInvocation+ConnectionKit.h in Headers */,
 				278B978F0F28F136002F3C54 /* CKConnectionError.h in Headers */,
 				278B98740F29EC12002F3C54 /* CKFileConnectionProtocol.h in Headers */,
+				278B99A60F2B66C4002F3C54 /* CKConnection+Private.h in Headers */,
+				278B99C80F2B76AC002F3C54 /* CKConnectionAuthentication.h in Headers */,
+				278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1551,18 +1552,17 @@
 				27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
-				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
 				278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */,
 				278B96710F27FCD2002F3C54 /* CKConnectionRequest.m in Sources */,
-				278B967D0F27FCDE002F3C54 /* CKAuthenticationChallengeSender.m in Sources */,
 				278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */,
 				278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */,
 				278B96830F27FCDE002F3C54 /* CKConnectionProtocol.m in Sources */,
-				278B96850F27FCDE002F3C54 /* NSURLAuthentication+ConnectionKit.m in Sources */,
 				278B96C40F28019D002F3C54 /* NSInvocation+ConnectionKit.m in Sources */,
 				278B97FC0F2922A3002F3C54 /* CKConnectionError.m in Sources */,
 				278B98750F29EC12002F3C54 /* CKFileConnectionProtocol.m in Sources */,
+				278B99A70F2B66C4002F3C54 /* CKConnection+Private.m in Sources */,
+				278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

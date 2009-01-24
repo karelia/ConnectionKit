@@ -16,7 +16,7 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol1.h"
-#import "CKURLProtectionSpace.h"
+#import "CKConnectionAuthentication+Internal.h"
 
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"

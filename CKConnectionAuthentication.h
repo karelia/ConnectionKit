@@ -1,13 +1,12 @@
 //
-//  NSURLAuthentication+ConnectionKit.h
-//  Marvel
+//  CKConnectionAuthentication.h
+//  Connection
 //
-//  Created by Mike on 20/01/2009.
+//  Created by Mike on 24/01/2009.
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
-#import <Connection/Connection.h>
 
 
 @interface NSURLAuthenticationChallenge (ConnectionKit)
