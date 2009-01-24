@@ -32,6 +32,8 @@
  
 #import "CKFTPConnection.h"
 
+#import "CKCacheableHost.h"
+#import "CKConnectionProtocol1.h"
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
 #import "CKInternalTransferRecord.h"
@@ -42,8 +44,7 @@
 #import "NSObject+Connection.h"
 
 #import "CKConnectionAuthentication+Internal.h"
-#import "CKCacheableHost.h"
-#import "CKConnectionProtocol1.h"
+#import "CKFTPConnectionProtocol.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -3717,24 +3718,3 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 }
 
 @end
-
-
-#pragma mark -
-
-
-@implementation CKConnectionRequest (CKFTPConnection)
-
-- (NSString *)FTPDataConnectionType { return [self propertyForKey:@"CKFTPDataConnectionType"]; }
-
-@end
-
-@implementation CKMutableConnectionRequest (CKFTPConnection)
-
-- (void)setFTPDataConnectionType:(NSString *)type
-{
-    [self setProperty:type forKey:@"CKFTPDataConnectionType"];
-}
-
-@end
-
-
