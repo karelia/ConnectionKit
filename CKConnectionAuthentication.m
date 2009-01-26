@@ -142,6 +142,61 @@
 @end
 
 
+#pragma mark -
+
+
+@implementation NSURLCredentialStorage (ConnectionKit)
+
+- (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
+{
+	BOOL result = NO;
+	
+	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
+	if (accountName)
+	{
+		SecKeychainItemRef item = nil;
+		OSStatus theStatus = noErr;
+		char *buffer;
+		UInt32 passwordLen;
+		
+		char *utf8 = (char *)[accountName UTF8String];
+		theStatus = SecKeychainFindGenericPassword(NULL,
+												   6,
+												   "iTools",
+												   strlen(utf8),
+												   utf8,
+												   &passwordLen,
+												   (void *)&buffer,
+												   &item);
+		
+		if (noErr == theStatus)
+		{
+			if (passwordLen > 0)
+			{
+				if (password) *password = [[[NSString alloc] initWithBytes:buffer length:passwordLen encoding:[NSString defaultCStringEncoding]] autorelease];
+			}
+			else
+			{
+				if (password) *password = @""; // if we have noErr but also no length, password is empty
+			}
+			
+			// release buffer allocated by SecKeychainFindGenericPassword
+			theStatus = SecKeychainItemFreeContent(NULL, buffer);
+			
+			*account = accountName;
+			result = YES;
+		}
+	}
+	
+	return result;
+}
+
+@end
+
+
+#pragma mark -
+
+
 @implementation CKURLProtectionSpace
 
 - (id)initWithHost:(NSString *)host port:(int)port protocol:(NSString *)protocol realm:(NSString *)realm authenticationMethod:(NSString *)authenticationMethod;
@@ -167,6 +222,9 @@
 - (id)copyWithZone:(NSZone *)zone { return [self retain]; }
 
 @end
+
+
+#pragma mark -
 
 
 @implementation CKAuthenticationChallengeSender

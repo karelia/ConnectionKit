@@ -55,7 +55,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
 #import <Connection/CKFileConnection.h>
-#import <Connection/CKDotMacConnection.h>
 
 #import <Connection/KTLog.h>
 
@@ -76,13 +75,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKDirectoryNode.h>
 #import <Connection/CKTableBasedBrowser.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPFileDownloadRequest.h>
-#import <Connection/CKHTTPPutRequest.h>
-#import <Connection/CKHTTPResponse.h>
-#import <Connection/CKHTTPFileDownloadResponse.h>
-
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
 #import <Connection/CKLeopardSourceListTableColumn.h>
@@ -97,4 +89,7 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKConnectionRequest.h>
 #import <Connection/CKConnection.h>
 #import <Connection/CKConnectionProtocol.h>
+
+#import <Connection/CKConnectionError.h>
+#import <Connection/CKConnectionAuthentication.h>
 
