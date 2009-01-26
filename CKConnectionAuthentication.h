@@ -21,3 +21,8 @@
                               error:(NSError **)error;
 
 @end
+
+
+@interface NSURLCredentialStorage (ConnectionKit)
+- (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
+@end
