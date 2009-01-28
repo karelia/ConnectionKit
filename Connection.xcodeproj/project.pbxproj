@@ -107,7 +107,6 @@
 		795FF5020B0C018100EA9292 /* DropletMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF5010B0C018100EA9292 /* DropletMain.m */; };
 		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
 		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
-		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782780B4745DD008DBA01 /* NSArray+Connection.m */; };
 		797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782810B474765008DBA01 /* NSDictionary+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -158,7 +157,6 @@
 		79CFD85109F7048500172CDD /* CKAbstractQueueConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */; };
 		79CFD85209F7048500172CDD /* CKConnectionOpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD81109F7048400172CDD /* CKConnectionOpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD85309F7048500172CDD /* CKConnectionOpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */; };
-		79CFD86F09F7048500172CDD /* CKFileConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82E09F7048400172CDD /* CKFileConnection.m */; };
 		79CFD87109F7048500172CDD /* CKFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83009F7048400172CDD /* CKFTPConnection.m */; };
 		79CFD87409F7048500172CDD /* InterThreadMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83309F7048400172CDD /* InterThreadMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83409F7048400172CDD /* InterThreadMessaging.m */; };
@@ -183,7 +181,6 @@
 		79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
-		79FB6A4D09F71867006E7D11 /* CKFileConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82D09F7048400172CDD /* CKFileConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
@@ -404,8 +401,6 @@
 		79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAbstractQueueConnection.m; sourceTree = "<group>"; };
 		79CFD81109F7048400172CDD /* CKConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionOpenPanel.h; sourceTree = "<group>"; };
 		79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOpenPanel.m; sourceTree = "<group>"; };
-		79CFD82D09F7048400172CDD /* CKFileConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileConnection.h; sourceTree = "<group>"; };
-		79CFD82E09F7048400172CDD /* CKFileConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileConnection.m; sourceTree = "<group>"; };
 		79CFD82F09F7048400172CDD /* CKFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPConnection.h; sourceTree = "<group>"; };
 		79CFD83009F7048400172CDD /* CKFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPConnection.m; sourceTree = "<group>"; };
 		79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPOverSSLConnection.h; sourceTree = "<group>"; };
@@ -547,7 +542,6 @@
 				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
 				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
 				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
-				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */,
 				794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */,
@@ -714,15 +708,6 @@
 			name = FTP;
 			sourceTree = "<group>";
 		};
-		27FD90C70ED5BFDB0068D634 /* File System */ = {
-			isa = PBXGroup;
-			children = (
-				79CFD82D09F7048400172CDD /* CKFileConnection.h */,
-				79CFD82E09F7048400172CDD /* CKFileConnection.m */,
-			);
-			name = "File System";
-			sourceTree = "<group>";
-		};
 		27FD90C80ED5BFFD0068D634 /* Other */ = {
 			isa = PBXGroup;
 			children = (
@@ -842,7 +827,6 @@
 				27FD90C10ED5BF640068D634 /* Abstract */,
 				27FD90C60ED5BFC00068D634 /* FTP */,
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
-				27FD90C70ED5BFDB0068D634 /* File System */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
 			);
@@ -1018,7 +1002,6 @@
 				79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */,
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
 				79CFE13009F712AF00172CDD /* CKStreamBasedConnection.h in Headers */,
-				79FB6A4D09F71867006E7D11 /* CKFileConnection.h in Headers */,
 				794DC3270A5A0EDC007157BE /* CKConnectionThreadManager.h in Headers */,
 				3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */,
 				3C231A5E0A66ECBB00951F9E /* CKSFTPConnection.h in Headers */,
@@ -1349,7 +1332,6 @@
 				79CFD84E09F7048500172CDD /* CKAbstractConnection.m in Sources */,
 				79CFD85109F7048500172CDD /* CKAbstractQueueConnection.m in Sources */,
 				79CFD85309F7048500172CDD /* CKConnectionOpenPanel.m in Sources */,
-				79CFD86F09F7048500172CDD /* CKFileConnection.m in Sources */,
 				79CFD87109F7048500172CDD /* CKFTPConnection.m in Sources */,
 				79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */,
 				79CFD87709F7048500172CDD /* KTLog.m in Sources */,
