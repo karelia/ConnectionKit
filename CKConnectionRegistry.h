@@ -84,7 +84,7 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 - (NSArray *)connections;
 
-- (NSMenu *)menu;
+- (NSMenu *)menuWithBookmarkItemTarget:(id)target action:(SEL)actionSelector;
 
 - (NSArray *)allHosts;
 - (NSArray *)allCategories;
