@@ -315,28 +315,20 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)willChangeValueForKey:(NSString *)key
 {
-	//We override this because we need to call the same on the record's parents to update any bindings on them as well.
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
 	[super willChangeValueForKey:key];
 	
-	CKTransferRecord *parent = [self parent];
-	while (parent)
-	{
-		[parent willChangeValueForKey:key];
-		parent = [parent parent];
-	}
+	if ([self parent])
+		[[self parent] willChangeValueForKey:key];
 }
 
 - (void)didChangeValueForKey:(NSString *)key
 {
-	//We override this because we need to call the same on the record's parents to update any bindings on them as well.
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
 	[super didChangeValueForKey:key];
 	
-	CKTransferRecord *parent = [self parent];
-	while (parent)
-	{
-		[parent didChangeValueForKey:key];
-		parent = [parent parent];
-	}
+	if ([self parent])
+		[[self parent] didChangeValueForKey:key];
 }
 
 - (CKTransferRecord *)root
