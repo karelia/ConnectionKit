@@ -171,24 +171,37 @@
 	
     
     // The URL may have been modified so construct a new request
-    CKMutableConnectionRequest *moddedRequest = [request mutableCopy];
-    [moddedRequest setURL:URL];
+    CKMutableConnectionRequest *moddedRequest = nil;
+    if (request)
+    {
+        moddedRequest = [request mutableCopy];
+        [moddedRequest setURL:URL];
+    }
+    else
+    {
+        moddedRequest = [[CKMutableConnectionRequest alloc] initWithURL:URL];
+    }
+    
     self = [super initWithRequest:moddedRequest];
+    
     [moddedRequest release];
     return self;
 }
 
 - (id)initWithUser:(NSString *)user
 {
-	NSURL *URL = (user) ? [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:user] : nil;
-	CKConnectionRequest *request = [[CKConnectionRequest alloc] initWithURL:URL];
-    [URL release];
+	CKConnectionRequest *request = nil;
+    if (user)
+    {
+        NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:user];
+        request = [[CKConnectionRequest alloc] initWithURL:URL];
+        [URL release];
+    }
     
 	self = [self initWithRequest:request];
 	
 	[request release];
-    
-	return self;
+    return self;
 }
 
 #pragma mark -
