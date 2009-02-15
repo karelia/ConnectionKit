@@ -614,7 +614,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 #pragma mark NSOutlineView Management
 - (NSOutlineView *)outlineView
 {
-	return [myOutlineViews objectAtIndex:0];
+	if ([myOutlineViews count] > 0)
+		return [myOutlineViews objectAtIndex:0];
+	return nil;
 }
 
 #pragma mark Filtering
