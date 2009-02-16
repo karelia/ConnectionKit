@@ -146,8 +146,6 @@
 		79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09C6B0C85E35100E7F1CC /* CKDirectoryNode.m */; };
 		79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */; };
 		79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */; };
-		79B9CE580B1BC32100FBFDB3 /* CKTransferController.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CE560B1BC32100FBFDB3 /* CKTransferController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79B9CE590B1BC32100FBFDB3 /* CKTransferController.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */; };
 		79CA054C0B852038005BED50 /* CKCacheableHost.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CA054A0B852037005BED50 /* CKCacheableHost.h */; };
 		79CA054D0B852038005BED50 /* CKCacheableHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CA054B0B852037005BED50 /* CKCacheableHost.m */; };
 		79CFD84D09F7048500172CDD /* CKAbstractConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80C09F7048400172CDD /* CKAbstractConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1017,7 +1015,6 @@
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				795AFF190B1157D3006905FA /* CKHostCell.h in Headers */,
 				79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */,
-				79B9CE580B1BC32100FBFDB3 /* CKTransferController.h in Headers */,
 				CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */,
 				797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */,
 				797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */,
@@ -1353,7 +1350,6 @@
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */,
 				79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */,
-				79B9CE590B1BC32100FBFDB3 /* CKTransferController.m in Sources */,
 				CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */,
 				7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */,
 				797782840B474765008DBA01 /* NSDictionary+Connection.m in Sources */,

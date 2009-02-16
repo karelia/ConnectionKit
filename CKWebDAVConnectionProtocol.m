@@ -372,7 +372,7 @@
                                 break;
                                 
                             case 507:
-                                errorCode = CKConnectionErrorInsufficientStorage;
+                                errorCode = CKConnectionErrorDataLengthExceedsMaximum;
                                 localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
                                 break;
                         }

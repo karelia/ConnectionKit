@@ -46,7 +46,11 @@ enum
     CKConnectionErrorFileDoesNotExist =                 NSURLErrorFileDoesNotExist,         // -1100    // e.g. Trying to download a file that does not exist, or uploading into a directory that does not exist
     CKConnectionErrorFileIsDirectory =                  NSURLErrorFileIsDirectory,
     CKConnectionErrorNoPermissionsToReadFile =          NSURLErrorNoPermissionsToReadFile,              // I'm thinking this should be a more general "No permission" as it applies to stuff like creating a directory
-    CKConnectionErrorInsufficientStorage =              -1104,                                          // There's no space left on the server
+#if MAC_OS_X_VERSION_10_5 <= MAC_OS_X_VERSION_MAX_ALLOWED                                               // There's no space left on the server
+    CKConnectionErrorDataLengthExceedsMaximum =         NSURLErrorDataLengthExceedsMaximum,             
+#else
+    CKConnectionErrorDataLengthExceedsMaximum =         -1103,
+#endif
     
     // Secure connection errors
     CKConnectionErrorSecureConnectionFailed =           NSURLErrorSecureConnectionFailed,   // -1200
