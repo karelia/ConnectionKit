@@ -54,7 +54,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
-#import <Connection/CKFileConnection.h>
 
 #import <Connection/KTLog.h>
 
@@ -68,7 +67,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/NSTabView+Connection.h>
 #import <Connection/NSNumber+Connection.h>
 
-#import <Connection/CKTransferController.h>
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
 #import <Connection/CKDirectoryTreeController.h>
