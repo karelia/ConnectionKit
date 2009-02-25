@@ -324,6 +324,8 @@
 			
 			if (_flags.uploadFinished)
 				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+			if ([upload delegateRespondsToTransferDidFinish])
+				[[upload delegate] transferDidFinish:[upload delegate] error:error];
 			
 			[upload release];
 			
