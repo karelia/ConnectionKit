@@ -472,7 +472,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 }
 #pragma mark Menu
 
-- (void)recursivelyCreate:(CKHostCategory *)cat withMenu:(NSMenu *)menu
+- (void)recursivelyAddCategory:(CKHostCategory *)cat toMenu:(NSMenu *)menu withBookmarkItemTarget:(id)target action:(SEL)actionSelector
 {
 	NSEnumerator *e = [[cat hosts] objectEnumerator];
 	id cur;
@@ -484,9 +484,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		if ([cur isKindOfClass:[CKHost class]])
 		{
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
-											  action:@selector(connectFromBookmarkMenuItem:)
+											  action:actionSelector
 									   keyEquivalent:@""];
-			[item setTarget:[[self outlineView] delegate]];
+			[item setTarget:target];
 			[item setRepresentedObject:cur];
 			NSImage *icon = [[cur icon] copy];
 			[icon setScalesWhenResized:YES];
@@ -512,12 +512,12 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 			[menu addItem:item];
 			[item release];
 			[subMenu release];
-			[self recursivelyCreate:cur withMenu:subMenu];
+			[self recursivelyAddCategory:cur toMenu:subMenu withBookmarkItemTarget:target action:actionSelector];
 		}
 	}
 }
 
-- (NSMenu *)menu
+- (NSMenu *)menuWithBookmarkItemTarget:(id)target action:(SEL)actionSelector
 {
 	NSMenu *menu = [[NSMenu alloc] initWithTitle:@"connections"];
 	
@@ -534,9 +534,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		if ([cur isKindOfClass:[CKHost class]])
 		{
 			item = [[NSMenuItem alloc] initWithTitle:[cur annotation] ? [cur annotation] : [cur name]
-											  action:@selector(connectFromBookmarkMenuItem:)
+											  action:actionSelector
 									   keyEquivalent:@""];
-			[item setTarget:[[self outlineView] delegate]];
+			[item setTarget:target];
 			[item setRepresentedObject:cur];
 			[item setImage:icon];
 			[menu addItem:item];
@@ -553,7 +553,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 			[item setImage:icon];
 			[menu addItem:item];
 			[item release];
-			[self recursivelyCreate:cur withMenu:subMenu];
+			[self recursivelyAddCategory:cur toMenu:subMenu withBookmarkItemTarget:target action:actionSelector];
 		}
 		[icon release];
 	}
@@ -614,7 +614,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 #pragma mark NSOutlineView Management
 - (NSOutlineView *)outlineView
 {
-	return [myOutlineViews objectAtIndex:0];
+	if ([myOutlineViews count] > 0)
+		return [myOutlineViews objectAtIndex:0];
+	return nil;
 }
 
 #pragma mark Filtering

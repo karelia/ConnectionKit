@@ -3675,16 +3675,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)sendPassword
 {
     NSString *password = [[[self currentAuthenticationCredential] password] copy];
+    NSAssert(password, @"Somehow a password-less credential has entered the FTP system");
     
     // Dispose of the credentials once the password has been sent
     [self setCurrentAuthenticationCredential:nil];
        
-    if (password)   // Should we do anything special if this fails?
-    {
-        [self sendCommand:[NSString stringWithFormat:@"PASS %@", password]];
-        [self setState:CKConnectionSentPasswordState];
-        [password release];
-    }
+    [self sendCommand:[NSString stringWithFormat:@"PASS %@", password]];
+    [self setState:CKConnectionSentPasswordState];
+    [password release];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
@@ -3709,9 +3707,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
         // Store the credentials ready for the password request
         [self setCurrentAuthenticationCredential:credential];
         
-        // Send the username
-        [self setState:CKConnectionSentUsernameState];
-        [self sendCommand:[NSString stringWithFormat:@"USER %@", [credential user]]];
+        if ([credential password])
+        {
+            // Send the username
+            [self setState:CKConnectionSentUsernameState];
+            [self sendCommand:[NSString stringWithFormat:@"USER %@", [credential user]]];
+        }
+        else
+        {
+            // TODO: Fail with error
+        }
     }
 }
 
