@@ -345,6 +345,9 @@
 			
             [[self client] uploadDidFinish:[upload remotePath] error:error];
 			
+			if ([upload delegateRespondsToTransferDidFinish])
+				[[upload delegate] transferDidFinish:[upload delegate] error:error];
+			
 			[upload release];
 			
 			[self setState:CKConnectionIdleState];
