@@ -344,9 +344,14 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (NSString *)path
 {
-	if (_parent == nil)
-		return [NSString stringWithFormat:@"/%@", _name];
-	return [[_parent path] stringByAppendingPathComponent:_name];	// Old code was @"%@/%@" but it broke if _parent was just /
+	if ([self parent])
+    {
+        return [[_parent path] stringByAppendingPathComponent:[self name]];	// Old code was @"%@/%@" but it broke if _parent was just /
+    }
+    else
+    {
+		return [self name];
+	}
 }
 
 - (void)addContent:(CKTransferRecord *)record
@@ -491,21 +496,23 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *cur;
+	CKTransferRecord *result;
 	
-	cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-	path = [path stringByDeletingFirstPathComponent];
-	CKTransferRecord *thisNode, *subNode = cur;
+    NSArray *pathComponents = [path pathComponents];
+	result = [CKTransferRecord recordWithName:[[path pathComponents] objectAtIndex:0]  // -firstPathComponent ignores the root dir for absolute paths
+                                      size:0];
+    
+	CKTransferRecord *thisNode, *subNode = result;
 	
-	while ((![path isEqualToString:@"/"]))
-	{
-		thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-		path = [path stringByDeletingFirstPathComponent];
+    int i;
+    for (i = 1; i < [pathComponents count]; i++)
+    {
+        thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
 		[subNode addContent:thisNode];
 		subNode = thisNode;
 	}
 	
-	return cur;
+	return result;
 }
 
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
