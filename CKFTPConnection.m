@@ -1334,7 +1334,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			_transferLastPercent = percent;			
 			break;
 		}
-		case 150: //File status okay, about to open data connection.
+            
+        case 125:   // Windows NT servers seem to use 125 unlike the rest of the world...
+		case 150:   // File status okay, about to open data connection.
 		{
 			CKInternalTransferRecord *d = [self currentUpload];
 			NSString *file = [d localPath];	// actual path to file, or destination name if from data
