@@ -3738,7 +3738,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)setFTPDataConnectionType:(NSString *)type
 {
-    [self setProperty:type forKey:@"CKFTPDataConnectionType"];
+    if (type)
+    {
+        [self setProperty:type forKey:@"CKFTPDataConnectionType"];
+    }
+    else
+    {
+        [self removePropertyForKey:@"CKFTPDataConnectionType"];
+    }
 }
 
 @end
