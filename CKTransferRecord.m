@@ -496,22 +496,23 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *result;
-	
-    NSArray *pathComponents = [path pathComponents];
-	result = [CKTransferRecord recordWithName:[[path pathComponents] objectAtIndex:0]  // -firstPathComponent ignores the root dir for absolute paths
-                                      size:0];
+	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
     
-	CKTransferRecord *thisNode, *subNode = result;
-	
-    int i;
-    for (i = 1; i < [pathComponents count]; i++)
+	NSArray *pathComponents = [path pathComponents];
+	if ([pathComponents count] > 0)
     {
-        thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
-		[subNode addContent:thisNode];
-		subNode = thisNode;
+        [result setName:[[path pathComponents] objectAtIndex:0]];  // -firstPathComponent ignores the root dir for absolute paths
+        CKTransferRecord *thisNode, *subNode = result;
+        
+        int i;
+        for (i = 1; i < [pathComponents count]; i++)
+        {
+            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
+            [subNode addContent:thisNode];
+            subNode = thisNode;
+        }
 	}
-	
+    
 	return result;
 }
 
