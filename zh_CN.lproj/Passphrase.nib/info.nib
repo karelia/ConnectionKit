@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
 	<key>IBFramework Version</key>
-	<string>672</string>
+	<string>446.1</string>
+	<key>IBLastKnownRelativeProjectPath</key>
+	<string>../Connection.xcodeproj</string>
 	<key>IBOldestOS</key>
-	<integer>5</integer>
-	<key>IBOpenObjects</key>
-	<array/>
+	<integer>4</integer>
 	<key>IBSystem Version</key>
-	<string>9F33</string>
+	<string>8S165</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>
