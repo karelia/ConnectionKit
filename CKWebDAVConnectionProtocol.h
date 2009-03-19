@@ -8,6 +8,8 @@
 
 #import "CKConnectionProtocol.h"
 
+#import "CKHTTPConnection.h"
+
 
 typedef enum {
     CKWebDAVProtocolStatusIdle,
@@ -21,19 +23,14 @@ typedef enum {
 } CKWebDAVProtocolStatus;
 
 
-@interface CKWebDAVConnectionProtocol : CKConnectionProtocol <NSURLAuthenticationChallengeSender>
+@interface CKWebDAVConnectionProtocol : CKConnectionProtocol <CKHTTPConnectionDelegate>
 {
 @private
     CKWebDAVProtocolStatus  _status;
     
     // These ivars pertain to the current in-progress operation.
     // They are reset after the op finishes
-    CFHTTPMessageRef                _HTTPRequest;
-    CFReadStreamRef                 _HTTPStream;
-    BOOL                            _hasProcessedHTTPResponse;
-    
-    CFHTTPAuthenticationRef         _authenticationRef;
-    NSURLAuthenticationChallenge    *_authenticationChallenge;
+    CKHTTPConnection    *_HTTPConnection;
 }
 
 @end

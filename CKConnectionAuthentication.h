@@ -14,12 +14,6 @@
 - (id)initWithAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
                    proposedCredential:(NSURLCredential *)credential;
 
-- (id)initWithHTTPAuthenticationRef:(CFHTTPAuthenticationRef)authenticationRef
-                 proposedCredential:(NSURLCredential *)credential
-               previousFailureCount:(NSInteger)failureCount
-                             sender:(id <NSURLAuthenticationChallengeSender>)sender
-                              error:(NSError **)error;
-
 @end
 
 

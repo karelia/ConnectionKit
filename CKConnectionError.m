@@ -26,4 +26,9 @@
                        userInfo:nil];
 }
 
+- (id)initWithHTTPURLResponse:(NSHTTPURLResponse *)response
+{
+    return [self initWithDomain:@"HTTP" code:[response statusCode] userInfo:nil];
+}
+
 @end
