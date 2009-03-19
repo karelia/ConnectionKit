@@ -81,6 +81,6 @@ enum
 - (id)initWithHTTPResponse:(CFHTTPMessageRef)response;
 
 //+ (NSError *)errorWithHTTPURLResponse:(NSHTTPURLResponse *)response;
-//- (id)initWithHTTPURLResponse:(NSHTTPURLResponse *)response;
+- (id)initWithHTTPURLResponse:(NSHTTPURLResponse *)response;
 @end
 

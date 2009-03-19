@@ -46,6 +46,8 @@
 		278B99C80F2B76AC002F3C54 /* CKConnectionAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */; };
 		278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */; };
+		278F9A3B0F702FE4003B7645 /* CKHTTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278F9A390F702FE4003B7645 /* CKHTTPConnection.h */; };
+		278F9A3C0F702FE4003B7645 /* CKHTTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 278F9A3A0F702FE4003B7645 /* CKHTTPConnection.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -269,6 +271,8 @@
 		278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionAuthentication.h; sourceTree = "<group>"; };
 		278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionAuthentication.m; sourceTree = "<group>"; };
 		278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKConnectionAuthentication+Internal.h"; sourceTree = "<group>"; };
+		278F9A390F702FE4003B7645 /* CKHTTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPConnection.h; sourceTree = "<group>"; };
+		278F9A3A0F702FE4003B7645 /* CKHTTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPConnection.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
 		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
@@ -658,6 +662,8 @@
 				27F05A6A0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m */,
 				27F05A6D0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h */,
 				27F05A6E0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m */,
+				278F9A390F702FE4003B7645 /* CKHTTPConnection.h */,
+				278F9A3A0F702FE4003B7645 /* CKHTTPConnection.m */,
 			);
 			name = Protocols;
 			sourceTree = "<group>";
@@ -1053,6 +1059,7 @@
 				278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */,
 				27F05A6B0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h in Headers */,
 				27F05A6F0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h in Headers */,
+				278F9A3B0F702FE4003B7645 /* CKHTTPConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1389,6 +1396,7 @@
 				278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */,
 				27F05A6C0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m in Sources */,
 				27F05A700F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m in Sources */,
+				278F9A3C0F702FE4003B7645 /* CKHTTPConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
