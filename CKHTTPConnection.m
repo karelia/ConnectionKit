@@ -244,7 +244,7 @@
     NSParameterAssert(challenge == [self currentAuthenticationChallenge]);
     [self _finishCurrentAuthenticationChallenge];
     
-    // Retry the request, this time with authentication
+    // Retry the request, this time with authentication // TODO: What if this function fails?
     CFHTTPAuthenticationRef HTTPAuthentication = [(CKHTTPAuthenticationChallenge *)challenge CFHTTPAuthentication];
     CFHTTPMessageApplyCredentials([self HTTPRequest],
                                   HTTPAuthentication,
@@ -360,9 +360,9 @@
 {
     _headerFields = (NSDictionary *)CFHTTPMessageCopyAllHeaderFields(message);
     
-    NSString *MIMEType = nil;
+    NSString *MIMEType = [_headerFields objectForKey:@"Content-Type"];
     NSInteger contentLength = [[_headerFields objectForKey:@"Content-Length"] intValue];
-    NSString *encoding = nil;
+    NSString *encoding = [_headerFields objectForKey:@"Content-Encoding"];
     
     if (self = [super initWithURL:URL MIMEType:MIMEType expectedContentLength:contentLength textEncodingName:encoding])
     {
