@@ -34,8 +34,9 @@
 /*  Any caching instructions will be ignored
  */
 - (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKHTTPConnectionDelegate>)delegate;
-
 - (void)cancel;
+
+- (NSUInteger)lengthOfDataSent;
 
 @end
 

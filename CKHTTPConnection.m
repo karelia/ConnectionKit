@@ -11,6 +11,10 @@
 #import "CKConnectionAuthentication.h"
 
 
+// There is no public API for creating an NSHTTPURLResponse. The only way to create one then, is to
+// have a private subclass that others treat like a standard NSHTTPURLResponse object. Framework
+// code can instantiate a CKHTTPURLResponse object directly. Alternatively, there is a public
+// convenience method +[NSHTTPURLResponse responseWithURL:HTTPMessage:]
 @interface CKHTTPURLResponse : NSHTTPURLResponse
 {
     @private
@@ -50,6 +54,7 @@
 @interface CKHTTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
 - (CKHTTPAuthenticationChallenge *)currentAuthenticationChallenge;
 @end
+
 
 #pragma mark -
 
@@ -99,6 +104,15 @@
 - (NSInputStream *)stream { return (NSInputStream *)[self HTTPStream]; }
 
 - (id <CKHTTPConnectionDelegate>)delegate { return _delegate; }
+
+/*  CFNetwork provides no callback API for upload progress, so clients must request it themselves.
+ */
+- (NSUInteger)lengthOfDataSent
+{
+    return [[[self stream]
+             propertyForKey:(NSString *)kCFStreamPropertyHTTPRequestBytesWrittenCount]
+            unsignedIntValue];
+}
 
 #pragma mark Status handling
 
