@@ -10,6 +10,9 @@
 #import "CKConnectionError.h"
 
 
+NSString *const CKConnectionErrorURLResponseErrorKey = @"URLResponse";
+
+
 @implementation NSError (ConnectionKit)
 
 + (NSError *)errorWithHTTPResponse:(CFHTTPMessageRef)response
