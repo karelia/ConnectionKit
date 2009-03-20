@@ -17,7 +17,7 @@
 #import "NSInvocation+ConnectionKit.h"
 
 
-NSString * const CKConnectionErrorDomain = @"ConnectionErrorDomain";
+NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 
 @interface CKConnection (QueueInternal)

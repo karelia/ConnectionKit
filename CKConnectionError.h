@@ -11,7 +11,14 @@
 #import <Foundation/Foundation.h>
 
 
-extern NSString * const CKConnectionErrorDomain;
+// Predefined domain for all CKConnection errors
+extern NSString *const CKConnectionErrorDomain;
+
+/*!
+ @const CKConnectionErrorURLResponseErrorKey
+ @abstract The NSError userInfo dictionary key used to store and retrieve the NSURLResponse that was interpreted as an error.
+ */
+extern NSString *const CKConnectionErrorURLResponseErrorKey;
 
 
 /*!

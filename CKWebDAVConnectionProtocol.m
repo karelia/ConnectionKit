@@ -342,14 +342,12 @@
     NSError *error = nil;
     if (!result)
     {
-        NSError *underlyingError = [[NSError alloc] initWithHTTPURLResponse:response];
-        [errorUserInfo setObject:underlyingError forKey:NSUnderlyingErrorKey];
+        [errorUserInfo setObject:response forKey:CKConnectionErrorURLResponseErrorKey];
         
         if (!localizedErrorDescription) localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"Unknown connection error");
         [errorUserInfo setObject:localizedErrorDescription forKey:NSLocalizedDescriptionKey];
         
         error = [NSError errorWithDomain:CKConnectionErrorDomain code:errorCode userInfo:errorUserInfo];
-        [underlyingError release];
     }
     
     [self currentOperationDidFinish:result error:error];
@@ -362,7 +360,8 @@
 
 - (void)HTTPConnectionDidFinishLoading:(CKHTTPConnection *)connection
 {
-    // FIXME: Implement properly
+    // If we reach this point, an operation requiring full data to be downloaded has finished
+    [self currentOperationDidFinish:YES error:nil];
 }
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error
