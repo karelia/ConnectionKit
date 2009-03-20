@@ -207,7 +207,7 @@
 
 - (CKHTTPAuthenticationChallenge *)currentAuthenticationChallenge { return _authenticationChallenge; }
 
-- (void)finishCurrentAuthenticationChallenge
+- (void)_finishCurrentAuthenticationChallenge
 {
     [_authenticationChallenge autorelease]; // we still want to work with the challenge for a moment
     _authenticationChallenge = nil;
@@ -216,7 +216,7 @@
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSParameterAssert(challenge == [self currentAuthenticationChallenge]);
-    [self finishCurrentAuthenticationChallenge];
+    [self _finishCurrentAuthenticationChallenge];
     
     // Retry the request, this time with authentication
     CFHTTPAuthenticationRef HTTPAuthentication = [(CKHTTPAuthenticationChallenge *)challenge CFHTTPAuthentication];
@@ -231,17 +231,20 @@
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSParameterAssert(challenge == [self currentAuthenticationChallenge]);
-    [self finishCurrentAuthenticationChallenge];
+    [self _finishCurrentAuthenticationChallenge];
     
-    // FIME: Implement
+    // Just return the authentication response to the delegate
+    [[self delegate] HTTPConnection:self didReceiveResponse:(NSHTTPURLResponse *)[challenge failureResponse]];
+    [[self delegate] HTTPConnectionDidFinishLoading:self];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSParameterAssert(challenge == [self currentAuthenticationChallenge]);
-    [self finishCurrentAuthenticationChallenge];
+    [self _finishCurrentAuthenticationChallenge];
     
-    // FIME: Implement
+    // Treat like a -cancel message
+    [self cancel];
 }
 
 @end
