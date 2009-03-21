@@ -54,6 +54,21 @@
     [_HTTPConnection cancel];
 }
 
+- (void)downloadContentsOfFileAtPath:(NSString *)remotePath
+{
+    _status = CKWebDAVProtocolStatusDownload;
+    
+    
+    // Downloads are just simple GET requests
+    NSURL *URL = [[NSURL alloc] initWithString:remotePath relativeToURL:[[self request] URL]];
+    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
+    [URL release];
+    
+    
+    // Start the request
+    [self startHTTPRequest:request];
+    [request release];
+}
 
 - (void)uploadData:(NSData *)data toPath:(NSString *)path
 {
@@ -98,7 +113,7 @@
     
     // Send the request
     [self startHTTPRequest:request];
-    CFRelease(request);
+    [request release];
 }
 
 - (void)createDirectoryAtPath:(NSString *)path
@@ -181,8 +196,7 @@
 #pragma mark -
 #pragma mark HTTP Connection
 
-/*  Creates and schedules a read stream for the request. Both the request and stream are stored as
- *  ivars so they can be managed as they progress.
+/*  Creates and schedules an HTTP connection for the request.
  */
 - (void)startHTTPRequest:(NSURLRequest *)request
 {
@@ -213,7 +227,6 @@
     
     
     // Handle the response
-    KTLog(CKProtocolDomain, KTLogDebug, @"%@", response);
     switch (_status)
     {
         case CKWebDAVProtocolStatusListingDirectory:
@@ -292,6 +305,19 @@
             
             break;
         }
+            
+        case CKWebDAVProtocolStatusDownload:
+        {
+            switch ([response statusCode])
+            {
+                case 200:
+                    result = YES;
+                    return; // Download requests must handle the full body of the response
+                    break;
+            }
+            break;
+        }
+            
         case CKWebDAVProtocolStatusUploading:
         {
             switch ([response statusCode])
@@ -366,7 +392,9 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error
 {
-    // FIME: Implement properly
+    // If the HTTP connection failed, the file operation almost certainly did
+    // TODO: Should we be coercing the error to CKConnectionErrorDomain?
+    [self currentOperationDidFinish:NO error:error];
 }
 
 @end
