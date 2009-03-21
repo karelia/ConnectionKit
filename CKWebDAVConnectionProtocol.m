@@ -180,8 +180,9 @@
 {
     _status = CKWebDAVProtocolStatusIdle;
     
-    [_HTTPConnection cancel];   // Definitely don't want to hear from it any more!
-    [_HTTPConnection release];  _HTTPConnection = nil;
+    [_HTTPConnection cancel];       // definitely don't want to hear from it any more!
+    [_HTTPConnection autorelease];  // autorelease otherwise the connection can be deallocated in
+    _HTTPConnection = nil;          // the middle of sending a delegate method
     
     if (didFinish)
     {
@@ -337,6 +338,7 @@
             
             break;
         }
+            
         case CKWebDAVProtocolStatusDeletingItem:
         {
             switch ([response statusCode])

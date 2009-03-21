@@ -149,6 +149,52 @@
     
     
     
+    // Handle the response as soon as it's available
+    if (!_haveReceivedResponse)
+    {
+        CFHTTPMessageRef response = (CFHTTPMessageRef)[theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPResponseHeader];
+        if (response && CFHTTPMessageIsHeaderComplete(response))
+        {
+            // Construct a NSURLResponse object from the HTTP message
+            NSURL *URL = [theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPFinalURL];
+            NSHTTPURLResponse *URLResponse = [NSHTTPURLResponse responseWithURL:URL HTTPMessage:response];
+            
+            
+            // If the response was an authentication failure, try to request fresh credentials.
+            if ([URLResponse statusCode] == 401 || [URLResponse statusCode] == 407)
+            {
+                // Cancel any further loading and ask the delegate for authentication
+                [self _cancelStream];
+                
+                NSAssert(![self currentAuthenticationChallenge],
+                         @"Authentication challenge received while another is in progress");
+                
+                _authenticationChallenge = [[CKHTTPAuthenticationChallenge alloc] initWithResponse:response
+                                                                                proposedCredential:nil
+                                                                              previousFailureCount:_authenticationAttempts
+                                                                                   failureResponse:URLResponse
+                                                                                            sender:self];
+                
+                if ([self currentAuthenticationChallenge])
+                {
+                    _authenticationAttempts++;
+                    [[self delegate] HTTPConnection:self didReceiveAuthenticationChallenge:[self currentAuthenticationChallenge]];
+                    
+                    return; // Stops the delegate being sent a response received message
+                }
+            }
+            
+            
+            // By reaching this point, the response was not a valid request for authentication,
+            // so go ahead and report it
+            _haveReceivedResponse = YES;
+            [[self delegate] HTTPConnection:self didReceiveResponse:URLResponse];
+        }
+    }
+    
+    
+    
+    // Next course of action depends on what happened to the stream
     switch (streamEvent)
     {
             
@@ -165,63 +211,16 @@
         
         case NSStreamEventHasBytesAvailable:
         {
-            // Handle the response as soon as it's available
-            if (!_haveReceivedResponse)
+            NSMutableData *data = [[NSMutableData alloc] initWithCapacity:1024];    // Report any data loaded to the delegate
+            while ([theStream hasBytesAvailable])
             {
-                CFHTTPMessageRef response = (CFHTTPMessageRef)[theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPResponseHeader];
-                if (CFHTTPMessageIsHeaderComplete(response))
-                {
-                    // Construct a NSURLResponse object from the HTTP message
-                    NSURL *URL = [theStream propertyForKey:(NSString *)kCFStreamPropertyHTTPFinalURL];
-                    NSHTTPURLResponse *URLResponse = [NSHTTPURLResponse responseWithURL:URL HTTPMessage:response];
-                    
-                    
-                    // If the response was an authentication failure, try to request fresh credentials.
-                    if ([URLResponse statusCode] == 401 || [URLResponse statusCode] == 407)
-                    {
-                        // Cancel any further loading and ask the delegate for authentication
-                        [self _cancelStream];
-                        
-                        NSAssert(![self currentAuthenticationChallenge],
-                                 @"Authentication challenge received while another is in progress");
-                        
-                        _authenticationChallenge = [[CKHTTPAuthenticationChallenge alloc] initWithResponse:response
-                                                                                        proposedCredential:nil
-                                                                                      previousFailureCount:_authenticationAttempts
-                                                                                           failureResponse:URLResponse
-                                                                                                    sender:self];
-                        
-                        if ([self currentAuthenticationChallenge])
-                        {
-                            _authenticationAttempts++;
-                            [[self delegate] HTTPConnection:self didReceiveAuthenticationChallenge:[self currentAuthenticationChallenge]];
-                            
-                            return; // Stops the delegate being sent a response recevied message
-                        }
-                    }
-                    
-                    
-                    // By reaching this point, the response was not a valid request for authentication,
-                    // so go ahead and report it
-                    _haveReceivedResponse = YES;
-                    [[self delegate] HTTPConnection:self didReceiveResponse:URLResponse];
-                }
+                uint8_t buf[1024];
+                NSUInteger len = [theStream read:buf maxLength:1024];
+                [data appendBytes:(const void *)buf length:len];
             }
             
-            
-            // Report any data loaded to the delegate
-            if ([theStream hasBytesAvailable])
-            {
-                NSMutableData *data = [[NSMutableData alloc] initWithCapacity:1024];
-                while ([theStream hasBytesAvailable])
-                {
-                    uint8_t buf[1024];
-                    NSUInteger len = [theStream read:buf maxLength:1024];
-                    [data appendBytes:(const void *)buf length:len];
-                }
-                
-                [[self delegate] HTTPConnection:self didReceiveData:data];
-            }
+            [[self delegate] HTTPConnection:self didReceiveData:data];
+            break;
         }
     }
 }
