@@ -581,7 +581,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
 		
-		KTLog(CKOutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
+		/*
+		 If this is uncommented, it'll cause massive CPU load when we're doing transfers.
+		 From Greg: "if you enable this, you computer will heat your house this winter"
+			KTLog(CKOutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
+		 */
+		
 		uint8_t *bytes = (uint8_t *)[chunk bytes];
 		[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 		[self recalcUploadSpeedWithBytesSent:chunkLength];
@@ -676,7 +681,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
-				KTLog(CKInputStreamDomain, KTLogDebug, @"%d >> %@", len, [data shortDescription]);
+				/*
+				 If this is uncommented, it'll cause massive CPU load when we're doing transfers.
+				 From Greg: "if you enable this, you computer will heat your house this winter"
+				 KTLog(CKInputStreamDomain, KTLogDebug, @"%d >> %@", len, [data shortDescription]);
+				 */
+				
 				[self stream:_receiveStream readBytesOfLength:len];
 				[self recalcDownloadSpeedWithBytesSent:len];
 				if (myStreamFlags.wantsSSL && myStreamFlags.isNegotiatingSSL)
