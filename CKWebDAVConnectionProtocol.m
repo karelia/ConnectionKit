@@ -181,6 +181,7 @@
     _status = CKWebDAVProtocolStatusIdle;
     
     [_HTTPConnection cancel];       // definitely don't want to hear from it any more!
+    
     [_HTTPConnection autorelease];  // autorelease otherwise the connection can be deallocated in
     _HTTPConnection = nil;          // the middle of sending a delegate method
     
@@ -350,7 +351,7 @@
                     break;
                     
                 default:
-                    localizedErrorDescription = [NSString stringWithFormat:@"%@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"WebDAV File Deletion Error")]; 
+                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"WebDAV File Deletion Error"); 
                     break;
             }
             
@@ -358,7 +359,16 @@
         }
         case CKWebDAVProtocolStatusMovingItem:
         {
-            
+            switch ([response statusCode])
+            {
+                case 201:
+                    result = YES;
+                    break;
+                    
+                default:
+                    localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The file could not be moved", @"WebDAV move error");
+                    break;
+            }
             break;
         }
         default:
