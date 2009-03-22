@@ -200,9 +200,9 @@ NSDictionary *sDataAttributes = nil;
 	
 	if (!name) {
 		return [CKAbstractConnection connectionToHost:host
-											   port:port
-										   username:username
-										   password:password];
+												 port:port
+											 username:username
+											 password:password];
 	}
 	
 	while (cur = [e nextObject])
