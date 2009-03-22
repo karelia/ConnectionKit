@@ -36,6 +36,7 @@
 	BOOL _isUpload;
 	NSString *_name;
 	unsigned long long _size;
+	unsigned long long _sizeWithChildren;
 	unsigned long long _transferred;
 	unsigned long long _intermediateTransferred;
 	NSTimeInterval _lastTransferTime;
@@ -125,4 +126,5 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 - (void)setUpload:(BOOL)flag;
 - (void)setSize:(unsigned long long)size;
 - (BOOL)isLeaf;
+- (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta;
 @end
