@@ -63,8 +63,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CKTransferRecord *)parent { return _parent; }
 
-- (void)setParent:(CKTransferRecord *)parent { _parent = parent; }
-
 + (void)initialize
 {
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
@@ -109,6 +107,11 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (unsigned long long)size
 {
+	//Have we already calculated our size with children?
+	if (_sizeWithChildren != 0)
+		return _sizeWithChildren;
+	
+	//Calculate our size including our children
 	unsigned long long size = _size;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
@@ -124,14 +127,29 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
 		}
 	}
+	_sizeWithChildren = size;
+	
 	return size;
 }
 
 - (void)setSize:(unsigned long long)size
 {
 	[self willChangeValueForKey:@"progress"];
+	if (_size != 0)
+	{
+		//We're updating our size. We need to update our parents' sizes too.
+		unsigned long long sizeDelta = size - _size;
+		[self _sizeWithChildrenChangedBy:sizeDelta];
+	}
 	_size = size;
 	[self didChangeValueForKey:@"progress"];
+}
+
+- (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta
+{
+	_sizeWithChildren += sizeDelta;
+	if ([self parent])
+		[[self parent] _sizeWithChildrenChangedBy:sizeDelta];
 }
 
 - (unsigned long long)transferred
@@ -277,23 +295,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (BOOL)hasError
 {
-	BOOL ret = (_error != nil);
-	if (!ret)
-	{
-		// check children for errors
-		NSEnumerator *e = [[self contents] objectEnumerator];
-		CKTransferRecord *cur;
-		
-		while ((cur = [e nextObject]))
-		{
-			if ([cur hasError])
-			{
-				ret = YES;
-				break;
-			}
-		}
-	}
-	return ret;
+	return (_error != nil);
 }
 
 - (void)setError:(NSError *)error
@@ -306,6 +308,17 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		[self didChangeValueForKey:@"progress"];
 		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
+	
+	//Set the error on all parents, too.
+	if ([self parent])
+		[[self parent] setError:error];
+}
+
+- (void)setParent:(CKTransferRecord *)parent
+{
+	_parent = parent;
+	if (_parent)
+		[_parent _sizeWithChildrenChangedBy:_size];
 }
 
 - (BOOL)isDirectory
