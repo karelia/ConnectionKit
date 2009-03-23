@@ -14,7 +14,10 @@
 
 @interface CKTelnetConnection : NSObject
 {
-
+    NSInputStream  *_readStream;
+    NSOutputStream   *_writeStream;
+    
+    id <CKTelnetConnectionDelegate> _delegate;  // weak ref
 }
 
 // The URL should follow RFC 4248
@@ -31,6 +34,7 @@
 @end
 
 
+// Telnet is such a simple protocol that any any delegate would want to implement all methods
 @protocol CKTelnetConnectionDelegate
 - (void)connection:(CKTelnetConnection *)connection didReceiveLine:(NSString *)line;
 - (void)connection:(CKTelnetConnection *)connection didFailWithError:(NSError *)error;
