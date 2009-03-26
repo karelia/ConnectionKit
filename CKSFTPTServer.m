@@ -297,7 +297,11 @@ char **environ;
 			return;
 		}
 		else
-			[directoryListingBufferString appendString:[NSString stringWithUTF8String:buf]];
+		{
+			NSString *bufferAppension = [NSString stringWithUTF8String:buf];
+			if (bufferAppension)
+				[directoryListingBufferString appendString:bufferAppension];
+		}
 		memset(buf, '\0', strlen((char *)buf));
     }   
 }

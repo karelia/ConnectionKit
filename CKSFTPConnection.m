@@ -547,7 +547,7 @@ static NSString *lsform = nil;
 
 - (void)_writeSFTPCommandWithString:(NSString *)commandString
 {
-	if (!commandString)
+	if (!commandString || ![commandString isKindOfClass:[NSString class]])
 		return;
 	if ([commandString isEqualToString:@"CONNECT"])
 		return;
