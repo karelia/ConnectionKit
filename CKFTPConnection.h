@@ -79,6 +79,7 @@ typedef enum {
 	NSFileHandle		*_readHandle;
 	NSData				*_readData;
 	NSString			*_currentPath;
+	NSString			*_topQueuedChangeDirectoryPath;
 	NSString			*_rootPath;
 	
 	NSDate				*_lastNotified;

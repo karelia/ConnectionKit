@@ -121,16 +121,18 @@ static NSImage *sHostIcon = nil;
 
 - (BOOL)isEqual:(id)anObject
 {
-	if ([anObject isKindOfClass:[CKHost class]])
-	{
-		CKHost *other = (CKHost *)anObject;
-		return ([[self host] isEqualToString:[other host]] &&
-				[[self port] isEqualToString:[other port]] &&
-				[[self username] isEqualToString:[other username]] &&
-				[[self connectionType] isEqualToString:[other connectionType]] &&
-				[[self initialPath] isEqualToString:[other initialPath]]);
-	}
-	return NO;
+	if (![anObject isKindOfClass:[CKHost class]])
+		return NO;
+	
+	CKHost *other = (CKHost *)anObject;
+	BOOL sameHost = (![self host] && ![other host]) || ([[self host] isEqualToString:[other host]]);
+	//Don't use isEqualToString: At some point, we encoded CKHosts with NSNumbers as ports, and so to preserve compatibility, we fall back to isEqual.
+	BOOL samePort = (![self port] && ![other port]) || ([[self port] isEqual:[other port]]); 
+	BOOL sameUsername = (![self username] && ![other username]) || ([[self username] isEqualToString:[other username]]);
+	BOOL sameConnectionType = (![self connectionType] && ![other connectionType]) || ([[self connectionType] isEqualToString:[other connectionType]]);
+	BOOL sameInitialPath = (![self initialPath] && ![other initialPath]) || ([[self initialPath] isEqualToString:[other initialPath]]);
+	
+	return (sameHost && samePort && sameUsername && sameConnectionType && sameInitialPath);
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
