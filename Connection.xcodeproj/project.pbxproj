@@ -28,6 +28,8 @@
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
+		27929DF80F7BB8870035AFCC /* CKFTPCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 27929DF60F7BB8870035AFCC /* CKFTPCommand.h */; };
+		27929DF90F7BB8870035AFCC /* CKFTPCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 27929DF70F7BB8870035AFCC /* CKFTPCommand.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -265,6 +267,8 @@
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
+		27929DF60F7BB8870035AFCC /* CKFTPCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPCommand.h; sourceTree = "<group>"; };
+		27929DF70F7BB8870035AFCC /* CKFTPCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPCommand.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
 		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
@@ -691,6 +695,8 @@
 		27FD90C60ED5BFC00068D634 /* FTP */ = {
 			isa = PBXGroup;
 			children = (
+				27929DF60F7BB8870035AFCC /* CKFTPCommand.h */,
+				27929DF70F7BB8870035AFCC /* CKFTPCommand.m */,
 				79CFD82F09F7048400172CDD /* CKFTPConnection.h */,
 				79CFD83009F7048400172CDD /* CKFTPConnection.m */,
 				79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */,
@@ -1120,6 +1126,7 @@
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
 				27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
+				27929DF80F7BB8870035AFCC /* CKFTPCommand.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1467,6 +1474,7 @@
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
 				27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
+				27929DF90F7BB8870035AFCC /* CKFTPCommand.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
