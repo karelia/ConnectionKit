@@ -89,8 +89,16 @@
 
 - (NSData *)serializedCommand
 {
-    NSString *resultString = [[self serializedTelnetString] stringByAppendingString:@"\r\n"];
-    NSData *result = [resultString dataUsingEncoding:NSASCIIStringEncoding];
+    NSMutableString *string = [[self serializedTelnetString] mutableCopy];
+    /*[string replaceOccurrencesOfString:@"\r"    // escape carriage returns for Telnet. RFC 854.
+                            withString:@"\r[NULL]"    // not functional yet
+                               options:0
+                                 range:NSMakeRange(0, [string length])];*/
+    [string appendString:@"\r\n"];
+    
+    NSData *result = [string dataUsingEncoding:NSASCIIStringEncoding];
+    [string release];
+    
     return result;
 }
 
