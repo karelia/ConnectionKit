@@ -31,6 +31,7 @@
  */
  
 #import "CKFTPConnection.h"
+#import "CKFTPCommand.h"
 
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
@@ -85,8 +86,8 @@ const double kDelegateNotificationTheshold = 0.5;
 
 - (BOOL)isAboveNotificationTimeThreshold:(NSDate *)date;
 
-- (NSString *)setupEPRTConnection; //returns the command after creating a socket
-- (NSString *)setupActiveConnection; //return the cmmand after creating a socket
+- (CKFTPCommand *)setupEPRTConnection; //returns the command after creating a socket
+- (CKFTPCommand *)setupActiveConnection; //return the cmmand after creating a socket
 
 - (void)setDataInputStreamAndOpen:(NSInputStream *)iStream outputStream:(NSOutputStream *)oStream socket:(CFSocketNativeHandle)socket;
 - (void)prepareAndOpenDataStreams;
@@ -219,13 +220,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
 	
+    // There's a possibility it's an invocation instead; so deal with that
 	if ([command isKindOfClass:[NSInvocation class]])
 	{
 		[command invoke];
 		return;
 	}
 	
-	if ([command isEqualToString:@"DATA_CON"])
+    
+    // Data connection is a bit special and added to the queue as a plain string
+	if ([command isKindOfClass:[NSString class]] && [command isEqualToString:@"DATA_CON"])
 	{
 		CKConnectionCommand *cmd = [self nextAvailableDataConnectionType];
 		[self pushCommandOnHistoryQueue:cmd];
@@ -234,33 +238,33 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[self closeDataConnection];
 	}
 	
-	if ([command isEqualToString:@"EPRT"]) 
+    
+    // Everything else
+	if ([[command commandCode] isEqualToString:@"EPRT"]) 
 	{
 		_ftpFlags.isActiveDataConn = YES;
 		command = [self setupEPRTConnection];
 	} 
-	else if ([command isEqualToString:@"PORT"]) 
+	else if ([[command commandCode] isEqualToString:@"PORT"]) 
 	{
 		_ftpFlags.isActiveDataConn = YES;
 		command = [self setupActiveConnection];
 	} 
-	else if ([command isEqualToString:@"EPSV"])
+	else if ([[command commandCode] isEqualToString:@"EPSV"])
 	{
 		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([command isEqualToString:@"PASV"])
+	else if ([[command commandCode] isEqualToString:@"PASV"])
 	{
 		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([command isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
+	else if ([[command serializedTelnetString] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
 	{
 		command = @"LIST";
 	}
 
-	NSString *formattedCommand = [NSString stringWithFormat:@"%@\r\n", command];
-
-	NSString *commandToEcho = command;
-	if ([command rangeOfString:@"PASS"].location != NSNotFound)
+	NSString *commandToEcho = [command serializedTelnetString];
+	if ([[command commandCode] isEqualToString:@"PASS"])
 	{
 		if (![defaults boolForKey:@"AllowPasswordToBeLogged"])
 		{
@@ -272,7 +276,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
 
-	if ([formattedCommand rangeOfString:@"RETR"].location != NSNotFound)
+	if ([[command commandCode] isEqualToString:@"RETR"])
 	{
 		CKInternalTransferRecord *download = [self currentDownload];
 		
@@ -283,7 +287,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[[download delegate] transferDidBegin:[download userInfo]];
 		}
 	}
-	if ([formattedCommand rangeOfString:@"STOR"].location != NSNotFound)
+	if ([[command commandCode] isEqualToString:@"STOR"])
 	{
 		CKInternalTransferRecord *upload = [self currentUpload];
 		
@@ -295,7 +299,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 	}
 	
-	[self sendData:[formattedCommand dataUsingEncoding:NSUTF8StringEncoding]];
+	[self sendData:[command serializedCommand]];
 }
 
 /*!	The main communication between the foreground thread and the background thread.  Called by EITHER thread.
@@ -424,7 +428,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *account = [[self client] accountForUsername:nil];
             if (account)
             {
-                [self sendCommand:[NSString stringWithFormat:@"ACCT %@", account]];
+                [self sendCommand:[CKFTPCommand commandWithCode:@"ACCT" argumentField:account]];
                 [self setState:CKConnectionSentAccountState];
             }
 			break;
@@ -483,7 +487,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
             
 			if (GET_STATE != CKConnectionSentQuitState)
 			{
-				[self sendCommand:@"QUIT"];
+				[self sendCommand:[CKFTPCommand commandWithCode:@"QUIT"]];
 				[self setState:CKConnectionSentQuitState];
 			}
 			break;
@@ -629,13 +633,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 			// we are starting in.
-			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:@"PWD"
+			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
 																				awaitState:CKConnectionIdleState
 																				 sentState:CKConnectionAwaitingCurrentDirectoryState
 																				 dependant:nil
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
-			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
+			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SYST"]
 																				awaitState:CKConnectionIdleState
 																				 sentState:FTPAwaitingRemoteSystemTypeState
 																				 dependant:nil
@@ -643,7 +647,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
             // What features does the server support?
-            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"FEAT"]
                                                                      awaitState:CKConnectionIdleState
                                                                       sentState:CKConnectionSentFeatureRequestState
                                                                       dependant:nil
@@ -698,13 +702,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			
 			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 			// we are starting in.
-			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:@"PWD"
+			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
 																				awaitState:CKConnectionIdleState
 																				 sentState:CKConnectionAwaitingCurrentDirectoryState
 																				 dependant:nil
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
-			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
+			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SYST"]
 																				awaitState:CKConnectionIdleState
 																				 sentState:FTPAwaitingRemoteSystemTypeState
 																				 dependant:nil
@@ -712,7 +716,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
 			
 			// What features does the server support?
-            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:@"FEAT"
+            CKConnectionCommand *featuresCommand = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"FEAT"]
                                                                      awaitState:CKConnectionIdleState
                                                                       sentState:CKConnectionSentFeatureRequestState
                                                                       dependant:nil
@@ -738,7 +742,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	NSString *path = [self scanBetweenQuotes:command];
 	if (!path || [path length] == 0)
-		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];	
+		path = [[[self lastCommand] command] argumentField];	
 	switch (code)
 	{
 		case 257: //Path Created
@@ -820,7 +824,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSError *error = nil;
 	NSString *path = [self scanBetweenQuotes:command];
 	if (!path || [path length] == 0)
-		path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];		
+		path = [[[self lastCommand] command] argumentField];		
 	switch (code)
 	{
 		case 421:
@@ -905,7 +909,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			//peer if the dir exists for confirmation until then we will make the assumption that it exists.
 			//if ([command rangeOfString:@"exists"].location != NSNotFound) {
 			[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-			NSString *path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+			NSString *path = [[[self lastCommand] command] argumentField];
 			[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
 			[userInfo setObject:path forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
@@ -920,7 +924,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSString *path = [self scanBetweenQuotes:command];
     if (!path || [path length] == 0)
     {
-        path = [[[[self lastCommand] command] substringFromIndex:4] stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        path = [[[self lastCommand] command] argumentField];
     }
     [[self client] connectionDidCreateDirectory:path error:error];
     
@@ -1487,7 +1491,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 									  command, NSLocalizedFailureReasonErrorKey,
 									  [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-			[self sendCommand:@"ABOR"];			
+			[self sendCommand:[CKFTPCommand commandWithCode:@"ABOR"]];			
 			break;
 		}
 		case 532: //Need account for storing files.
@@ -1878,7 +1882,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                 [[self client] connectionDidReceiveError:err];
                 
 				_state = CKConnectionSentQuitState;
-				[self sendCommand:@"QUIT"];
+				[self sendCommand:[CKFTPCommand commandWithCode:@"QUIT"]];
 			}
 			for (j=0; j<6; j++)
 			{
@@ -1994,7 +1998,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			{
 				_ftpFlags.isMicrosoft = YES;
 				[self setState:FTPChangeDirectoryListingStyle];
-				[self sendCommand:@"SITE DIRSTYLE"];
+				[self sendCommand:[CKFTPCommand commandWithCode:@"SITE" argumentField:@"DIRSTYLE"]];
 				break;
 			}
 			else
@@ -2042,12 +2046,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)threadedDisconnect
 {
 	_state = CKConnectionSentDisconnectState;
-	[self sendCommand:@"QUIT"];
+	[self sendCommand:[CKFTPCommand commandWithCode:@"QUIT"]];
 }
 
 - (void)threadedCancelTransfer
 {
-	[self sendCommand:@"ABOR"];
+	[self sendCommand:[CKFTPCommand commandWithCode:@"ABOR"]];
 	_isForceDisconnecting = YES;
 	[self closeDataConnection];
 	[super threadedCancelTransfer];
@@ -2762,12 +2766,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
-	CKConnectionCommand *pwd = [CKConnectionCommand command:@"PWD"
+	CKConnectionCommand *pwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionAwaitingCurrentDirectoryState
 											  dependant:nil
 											   userInfo:nil];
-	CKConnectionCommand *cwd = [CKConnectionCommand command:[NSString stringWithFormat:@"CWD %@", dirPath]
+	CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField:dirPath]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionChangingDirectoryState
 											  dependant:pwd
@@ -2790,7 +2794,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
 	
-	CKConnectionCommand *cmd = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", dirPath]
+	CKConnectionCommand *cmd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"MKD" argumentField:dirPath]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionCreateDirectoryState
 											  dependant:nil
@@ -2801,7 +2805,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)threadedSetPermissions:(NSNumber *)perms forFile:(NSString *)path
 {
 	unsigned long permissions = [perms unsignedLongValue];
-	NSString *cmd = [NSString stringWithFormat:@"SITE CHMOD %lo %@", permissions, path];
+    
+    NSString *arguments = [NSString stringWithFormat:@"CHMOD %lo %@", permissions, path];
+	CKFTPCommand *cmd = [[CKFTPCommand alloc] initWithCommandCode:@"SITE" argumentField:arguments];
+    
 	CKConnectionCommand *com = [CKConnectionCommand command:cmd
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionSettingPermissionsState
@@ -2809,6 +2816,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   userInfo:nil];
 	[self pushCommandOnHistoryQueue:com];
 	[self sendCommand:cmd];
+    [cmd release];
+    
 	// Not all servers return SITE in the FEAT request.
 	/*if (_ftpFlags.hasSITE)
 	{
@@ -2842,7 +2851,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												sentState:CKConnectionSettingPermissionsState
 												dependant:nil
 												 userInfo:nil];
-	CKConnectionCommand *mkdir = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", dirPath]
+	CKConnectionCommand *mkdir = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"MKD" argumentField:dirPath]
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionCreateDirectoryState
 												dependant:chmod
@@ -2873,7 +2882,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
 	[self queueDeletion:dirPath];
-	CKConnectionCommand *rm = [CKConnectionCommand command:[NSString stringWithFormat:@"RMD %@", dirPath]
+	CKConnectionCommand *rm = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RMD" argumentField:dirPath]
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionDeleteDirectoryState
 											 dependant:nil
@@ -2889,12 +2898,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self queueRename:fromPath];
 	[self queueRename:toPath];
 
-	CKConnectionCommand *to = [CKConnectionCommand command:[NSString stringWithFormat:@"RNTO %@", toPath]
+	CKConnectionCommand *to = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RNTO" argumentField:toPath]
 											awaitState:CKConnectionRenameToState 
 											 sentState:CKConnectionAwaitingRenameState
 											 dependant:nil
 											  userInfo:toPath];
-	CKConnectionCommand *from = [CKConnectionCommand command:[NSString stringWithFormat:@"RNFR %@", fromPath]
+	CKConnectionCommand *from = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RNFR" argumentField:fromPath]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionRenameFromState
 											   dependant:to
@@ -2908,7 +2917,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
 	
 	[self queueDeletion:path];
-	CKConnectionCommand *del = [CKConnectionCommand command:[NSString stringWithFormat:@"DELE %@", path]
+	CKConnectionCommand *del = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"DELE" argumentField: path]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionDeleteFileState
 											  dependant:nil
@@ -2997,7 +3006,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	[self queueDownload:download];
 	
-	CKConnectionCommand *retr = [CKConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
+	CKConnectionCommand *retr = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RETR" argumentField: remotePath]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionDownloadingFileState
 											   dependant:nil
@@ -3005,14 +3014,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
 	[dataCmd addDependantCommand: retr];
 	
-	CKConnectionCommand *size = [CKConnectionCommand command:[NSString stringWithFormat:@"SIZE %@", remotePath]
+	CKConnectionCommand *size = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SIZE" argumentField: remotePath]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionSentSizeState
 											   dependant:dataCmd
 												userInfo:nil];
 	
 	if (!_ftpFlags.setBinaryTransferMode) {
-		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
+		CKConnectionCommand *bin = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"TYPE" argumentField:@"I"]
 											 awaitState:CKConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
@@ -3065,13 +3074,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	[self queueDownload:download];
 	
-	CKConnectionCommand *retr = [CKConnectionCommand command:[NSString stringWithFormat:@"RETR %@", remotePath]
+	CKConnectionCommand *retr = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RETR" argumentField: remotePath]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionDownloadingFileState
 											   dependant:nil
 												userInfo:download];
 	
-	CKConnectionCommand *rest = [CKConnectionCommand command:[NSString stringWithFormat:@"REST %@", off]
+	CKConnectionCommand *rest = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"REST" argumentField:[off description]]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionSentOffsetState
 											   dependant:retr
@@ -3080,14 +3089,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
 	[dataCmd addDependantCommand:rest];
 	
-	CKConnectionCommand *size = [CKConnectionCommand command:[NSString stringWithFormat:@"SIZE %@", remotePath]
+	CKConnectionCommand *size = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SIZE" argumentField: remotePath]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionSentSizeState
 											   dependant:dataCmd
 												userInfo:nil];
 	
 	if (!_ftpFlags.setBinaryTransferMode) {
-		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
+		CKConnectionCommand *bin = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"TYPE" argumentField:@"I"]
 												 awaitState:CKConnectionIdleState
 												  sentState:FTPModeChangeState
 												  dependant:nil
@@ -3108,7 +3117,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)directoryContents
 {
-	CKConnectionCommand *ls = [CKConnectionCommand command:@"LIST -a" 
+	CKConnectionCommand *ls = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"LIST" argumentField:@"-a"] 
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
@@ -3124,30 +3133,30 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSString *currentDir = [[[self currentDirectory] copy] autorelease];
 	
-	CKConnectionCommand *pwd2 = [CKConnectionCommand command:@"PWD"
+	CKConnectionCommand *pwd2 = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionAwaitingCurrentDirectoryState
 											   dependant:nil
 												userInfo:nil];
-	CKConnectionCommand *cwd2 = [CKConnectionCommand command:[NSString stringWithFormat:@"CWD %@", currentDir]
+	CKConnectionCommand *cwd2 = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField: currentDir]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionChangingDirectoryState
 											   dependant:pwd2
 												userInfo:nil];
 	
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	CKConnectionCommand *ls = [CKConnectionCommand command:@"LIST -a" 
+	CKConnectionCommand *ls = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"LIST" argumentField:@"-a"]
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 
 											 dependant:dataCmd 
 											  userInfo:nil];
 	
-	CKConnectionCommand *pwd = [CKConnectionCommand command:@"PWD"
+	CKConnectionCommand *pwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionAwaitingCurrentDirectoryState
 											  dependant:nil
 											   userInfo:nil];
-	CKConnectionCommand *cwd = [CKConnectionCommand command:[NSString stringWithFormat:@"CWD %@", dirPath]
+	CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField: dirPath]
 											 awaitState:CKConnectionIdleState 
 											  sentState:CKConnectionChangingDirectoryState
 											  dependant:pwd
@@ -3265,7 +3274,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKConnectionCommand *command;
 	if (connectionTypeString)
 	{
-		command = [CKConnectionCommand command:connectionTypeString
+		command = [CKConnectionCommand command:[CKFTPCommand commandWithCode:connectionTypeString]
 								  awaitState:CKConnectionIdleState
 								   sentState:sendState
 								   dependant:nil
@@ -3273,7 +3282,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else
 	{
-		command = [CKConnectionCommand command:@"QUIT"
+		command = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"QUIT"]
 								  awaitState:CKConnectionIdleState	
 								   sentState:CKConnectionSentQuitState
 								   dependant:nil
@@ -3382,7 +3391,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return YES;
 }
 
-- (NSString *)setupEPRTConnection
+- (CKFTPCommand *)setupEPRTConnection
 {
 	if (![self setupActiveConnectionWithPort:0])
 	{
@@ -3398,12 +3407,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	struct sockaddr_in active_addr;
 	CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
 	if (addrData) CFRelease(addrData);
-
+    
 	unsigned port = ntohs(active_addr.sin_port); //Do I need to convert from network byte order? YES
-	return [NSString stringWithFormat:@"EPRT |1|%@|%u|", [[NSHost currentHost] ipv4Address], port];
+	
+    return [CKFTPCommand commandWithCode:@"EPRT" argumentField:[NSString stringWithFormat:
+                                                                @"|1|%@|%u|",
+                                                                [[NSHost currentHost] ipv4Address],
+                                                                port]];
 }
 
-- (NSString *)setupActiveConnection
+- (CKFTPCommand *)setupActiveConnection
 {
 	if (_lastActivePort == 0)
 	{
@@ -3421,7 +3434,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	div_t portDiv = div(_lastActivePort, 256);
 	NSString *ip = [[[[NSHost currentHost] ipv4Address] componentsSeparatedByString:@"."] componentsJoinedByString:@","];
-	return [NSString stringWithFormat:@"PORT %@,%d,%d", ip, portDiv.quot, portDiv.rem];
+	return [CKFTPCommand commandWithCode:@"PORT" argumentField:[NSString stringWithFormat:
+                                                                @"%@,%d,%d",
+                                                                ip,
+                                                                portDiv.quot,
+                                                                portDiv.rem]];
 }
 
 - (NSArray *)parseLines:(NSString *)line
@@ -3467,14 +3484,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	KTLog(CKQueueDomain, KTLogDebug, @"Queueing Upload: localPath = %@ data = %d bytes offset = %lld remotePath = %@", localPath, [data length], offset, remotePath);
 	
-	CKConnectionCommand *store = [CKConnectionCommand command:[NSString stringWithFormat:@"STOR %@", remotePath]
+	CKConnectionCommand *store = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"STOR" argumentField: remotePath]
 											   awaitState:CKConnectionIdleState
 												sentState:CKConnectionUploadingFileState
 												dependant:nil
 												 userInfo:nil];
 	CKConnectionCommand *rest = nil;
 	if (offset != 0) {
-		rest = [CKConnectionCommand command:[NSString stringWithFormat:@"REST %qu", offset]
+		rest = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"REST" argumentField:[NSString stringWithFormat:@"%qu", offset]]
 							   awaitState:CKConnectionIdleState
 								sentState:CKConnectionSentOffsetState
 								dependant:store
@@ -3513,7 +3530,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self startBulkCommands];
 	
 	if (!_ftpFlags.setBinaryTransferMode) {
-		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
+		CKConnectionCommand *bin = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"TYPE" argumentField:@"I"]
 											 awaitState:CKConnectionIdleState
 											  sentState:FTPModeChangeState
 											  dependant:nil
@@ -3557,7 +3574,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)sendNoOp:(NSTimer *)timer
 {
-	[self sendCommand:@"NOOP"];
+	[self sendCommand:[CKFTPCommand commandWithCode:@"NOOP"]];
 }
 
 #pragma mark -
@@ -3682,7 +3699,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     // Dispose of the credentials once the password has been sent
     [self setCurrentAuthenticationCredential:nil];
        
-    [self sendCommand:[NSString stringWithFormat:@"PASS %@", password]];
+    [self sendCommand:[CKFTPCommand commandWithCode:@"PASS" argumentField:password]];
     [self setState:CKConnectionSentPasswordState];
     [password release];
 }
@@ -3713,7 +3730,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
         {
             // Send the username
             [self setState:CKConnectionSentUsernameState];
-            [self sendCommand:[NSString stringWithFormat:@"USER %@", [credential user]]];
+            [self sendCommand:[CKFTPCommand commandWithCode:@"USER" argumentField:[credential user]]];
         }
         else
         {
