@@ -2781,7 +2781,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													  sentState:CKConnectionAwaitingCurrentDirectoryState
 													  dependant:nil
 													   userInfo:nil];
-		CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD %@" argumentField:[dirPath lastPathComponent]]
+		CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField:[dirPath lastPathComponent]]
 													 awaitState:CKConnectionIdleState 
 													  sentState:CKConnectionChangingDirectoryState
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
@@ -2808,7 +2808,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 														  sentState:CKConnectionAwaitingCurrentDirectoryState
 														  dependant:nil
 														   userInfo:nil];
-			CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD %@" argumentField:thisCWDChunkPath]
+			CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField:thisCWDChunkPath]
 														 awaitState:CKConnectionIdleState 
 														  sentState:CKConnectionChangingDirectoryState
                                                          dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
@@ -2831,7 +2831,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													  sentState:CKConnectionAwaitingCurrentDirectoryState
 													  dependant:nil
 													   userInfo:nil];
-		CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD %@" argumentField:thisCWDChunkPath]
+		CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField:thisCWDChunkPath]
 													 awaitState:CKConnectionIdleState 
 													  sentState:CKConnectionChangingDirectoryState
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
