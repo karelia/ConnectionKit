@@ -29,6 +29,9 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
  
 #import <Foundation/Foundation.h>
 #import "CKStreamBasedConnection.h"
+#import "CKFTPCommand.h"
+#import "CKFTPReply.h"
+
 
 typedef enum {
 	FTPTransferModeStream = 0,
@@ -58,12 +61,13 @@ typedef enum {
 	FTPNoOpState
 } FTPState;
 
+
 @interface CKFTPConnection : CKStreamBasedConnection
 {
 @private
 	NSMutableData		*_buffer;
 	
-	NSMutableString		*_commandBuffer;
+	CKStreamedFTPReply	*_currentReply;
 	NSMutableData		*_dataBuffer;
 	
 	NSTimer				*_openStreamsTimeout;
