@@ -333,8 +333,6 @@
 
 #pragma mark accessors
 
-- (NSData *)data { return [[_data copy] autorelease]; }
-
 - (BOOL)isComplete { return (_data == nil); }
 
 - (BOOL)hasReplyCode

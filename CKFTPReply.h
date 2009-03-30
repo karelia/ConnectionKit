@@ -82,7 +82,6 @@ typedef enum {
 // Converts any instances of <CR><NUL> into <CR>
 + (NSData *)dataByUnescapingTelnetCarriageReturnsInData:(NSData *)data;
 
-- (NSData *)data;   // the data received so far
 - (BOOL)isComplete;
 - (BOOL)hasReplyCode;   // whether enough data has been received to know the reply code
 
