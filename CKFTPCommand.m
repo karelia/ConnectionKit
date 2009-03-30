@@ -89,7 +89,7 @@
 
 - (NSData *)serializedCommand
 {
-    NSMutableString *string = [[self serializedTelnetString] mutableCopy];
+    NSMutableString *string = [[self description] mutableCopy];
     /*[string replaceOccurrencesOfString:@"\r"    // escape carriage returns for Telnet. RFC 854.
                             withString:@"\r[NULL]"    // not functional yet
                                options:0
@@ -102,7 +102,7 @@
     return result;
 }
 
-- (NSString *)serializedTelnetString
+- (NSString *)description
 {
     NSString *result = [[self commandCode] uppercaseString];
     NSString *parameter = [self argumentField];
@@ -111,12 +111,6 @@
         result = [result stringByAppendingFormat:@" %@", parameter];
     }
     
-    return result;
-}
-
-- (NSString *)description
-{
-    NSString *result = [[super description] stringByAppendingString:[self serializedTelnetString]];
     return result;
 }
 

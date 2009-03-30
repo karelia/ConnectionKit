@@ -33,8 +33,15 @@
 - (NSString *)commandCode;
 - (NSString *)argumentField;
 
+/*!
+ @method serializedCommand
+ @abstract Serialises the command in a fashion suitable for sending to an FTP server.
+ @result The serialized command.
+ @discussion Includes the <CR><LF> sequence used to indicate the end of the command.
+ */
 - (NSData *)serializedCommand;
-- (NSString *)serializedTelnetString;
+
+- (NSString *)description;  // Puts the command code and argument field together
 
 @end
 

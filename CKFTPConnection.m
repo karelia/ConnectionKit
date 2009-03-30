@@ -262,12 +262,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([[command serializedTelnetString] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
+	else if ([[command description] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
 	{
 		command = @"LIST";
 	}
 
-	NSString *commandToEcho = [command serializedTelnetString];
+	NSString *commandToEcho = [command description];
 	if ([[command commandCode] isEqualToString:@"PASS"])
 	{
 		if (![defaults boolForKey:@"AllowPasswordToBeLogged"])
