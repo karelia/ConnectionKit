@@ -692,7 +692,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)_receivedReplyInConnectionAwaitingCurrentDirectoryState:(CKFTPReply *)reply
 {
 	NSError *error = nil;
-	NSString *path = [self scanBetweenQuotes:[reply description]];
+	NSString *path = [reply quotedString];
 	if (!path || [path length] == 0)
 		path = [[[self lastCommand] command] argumentField];	
 	switch ([reply replyCode])
@@ -774,7 +774,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)_receivedReplyInConnectionChangingDirectoryState:(CKFTPReply *)reply
 {
 	NSError *error = nil;
-	NSString *path = [self scanBetweenQuotes:[reply description]];
+	NSString *path = [reply quotedString];
 	if (!path || [path length] == 0)
 		path = [[[self lastCommand] command] argumentField];		
 	switch ([reply replyCode])
@@ -873,7 +873,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	NSString *path = [self scanBetweenQuotes:[reply description]];
+	NSString *path = [reply quotedString];
     if (!path || [path length] == 0)
     {
         path = [[[self lastCommand] command] argumentField];
@@ -3503,23 +3503,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return [NSFileManager attributedFilesFromListing:line];
 }
  
-/*!	Deal with quoted string. Quotes are doubled.... 257 "/he said ""yo"" to me" created
-*/
-- (NSString *)scanBetweenQuotes:(NSString *)aString
-{
-	NSRange r1 = [aString rangeOfString:@"\""];
-	NSRange r2 = [aString rangeOfString:@"\"" options:NSBackwardsSearch];
-	
-	if (NSNotFound == r1.location || NSNotFound == r2.location || r1.location == r2.location)
-	{
-		return nil;		// can't find quotes
-	}
-	NSString *betweenQuotes = [aString substringWithRange:NSMakeRange(r1.location + 1, r2.location - (r1.location +1))];
-	NSMutableString *result = [NSMutableString stringWithString:betweenQuotes];
-	[result replaceOccurrencesOfString:@"\"\"" withString:@"\"" options:NSLiteralSearch range:NSMakeRange(0, [result length])];
-	return result;
-}
-
 /*!	Support upload method, handles all the gory details
 */
 

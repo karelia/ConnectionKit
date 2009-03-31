@@ -13,6 +13,11 @@
 
 #pragma mark init
 
++ (CKFTPReply *)replyWithCode:(NSUInteger)code text:(NSString *)text
+{
+    return [[[self alloc] initWithReplyCode:code text:text] autorelease];
+}
+
 - (id)initWithReplyCode:(NSUInteger)code textLines:(NSArray *)lines
 {
     NSParameterAssert(code < 1000);
@@ -32,7 +37,7 @@
     return [self initWithReplyCode:code textLines:[NSArray arrayWithObject:text]];
 }
 
-#pragma mark accessors
+#pragma mark reply code
 
 - (NSUInteger)replyCode { return _replyCode; }
 
@@ -61,7 +66,66 @@
     return result;
 }
 
+#pragma mark reply text
+
 - (NSArray *)textLines { return _textLines; }
+
+
+- (NSString *)quotedString
+{
+    static NSString *quoteCharacter = @"\"";
+    static NSString *pairOfQuoteCharacters = @"\"\"";
+    
+    
+    NSString *text = [[self textLines] objectAtIndex:0];
+    NSScanner *scanner = [[NSScanner alloc] initWithString:text];
+    [scanner setCharactersToBeSkipped:nil];
+    
+    NSString *result = nil;
+    
+    
+    // Find the start of the quote
+    [scanner scanUpToString:quoteCharacter intoString:NULL];
+    if (![scanner isAtEnd])
+    {
+        [scanner setScanLocation:([scanner scanLocation] + 1)];
+        if (![scanner isAtEnd])
+        {
+            // Find the first quote. The efficiency of parsing is fairly heavily weighted towards
+            // strings without a pair of quotes, as they are exception rather than the norm.
+            if (![scanner scanUpToString:quoteCharacter intoString:&result])
+            {
+                result = @"";   // accounts for an empty quote
+            }
+            
+            
+            // The quote might actually be a pair, such as in this reply:
+            // 257 "/he said ""yo"" to me" created
+            while ([scanner scanString:pairOfQuoteCharacters intoString:NULL])
+            {
+                result = [result stringByAppendingString:quoteCharacter];
+            
+                // Find the next quote
+                NSString *nextString;
+                if ([scanner scanUpToString:quoteCharacter intoString:&nextString])
+                {
+                    result = [result stringByAppendingString:nextString];
+                }
+            }
+            
+            
+            // If we ever reach the end of the text, there was no closing quote, so it's invalid
+            if ([scanner isAtEnd]) result = nil;
+        }
+    }
+    
+    [scanner release];
+    
+    
+    return result;
+}
+
+#pragma mark serialization
 
 - (NSArray *)serializedTelnetLines
 {

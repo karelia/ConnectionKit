@@ -38,6 +38,8 @@ typedef enum {
     NSArray     *_textLines;
 }
 
++ (CKFTPReply *)replyWithCode:(NSUInteger)code text:(NSString *)text;
+
 - (id)initWithReplyCode:(NSUInteger)code textLines:(NSArray *)lines;
 - (id)initWithReplyCode:(NSUInteger)code text:(NSString *)text;
 
@@ -47,6 +49,15 @@ typedef enum {
 - (CKFTPReplyFunctionGroup)functionalGrouping;  // replyCode is invalid.
 
 - (NSArray *)textLines;
+/*!
+ @method quotedString
+ @abstract Searches the receiver's -textLines for any text contained in double quotes and returns
+ that quoted text.
+ @result nil if no complete quote was found.
+ @discussion Pairs of double quotes are properly escaped back to a single double quote. If the
+ quote is not properly closed, this method returns nil.
+ */
+- (NSString *)quotedString;
 
 - (NSArray *)serializedTelnetLines;
 - (NSString *)description;  // overriden to nicely print -serializedTelnetLines
