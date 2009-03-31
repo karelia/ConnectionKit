@@ -553,7 +553,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (_ftpFlags.loggedIn != NO)
 				break;
-			if ([[reply description] rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
+			if ([[[reply textLines] objectAtIndex:0] rangeOfString:@"Microsoft FTP Service"].location != NSNotFound)
 			{
 				_ftpFlags.isMicrosoft = YES;
 			}
