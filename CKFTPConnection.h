@@ -125,8 +125,6 @@ typedef enum {
     NSURLCredential                 *_currentAuthenticationCredential;
 }
 
-// TESTING
-- (NSString *)scanBetweenQuotes:(NSString *)aString;
 
 @end
 
