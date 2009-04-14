@@ -6,7 +6,9 @@
 #import "CKSFTPTServer.h"
 #import "CKSFTPConnection.h"
 #import "CKInternalTransferRecord.h"
+
 #import "NSArray+Connection.h"
+#import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
 
 #include <errno.h>
@@ -280,7 +282,7 @@ char **environ;
 			isIncompleteLine = NO;
 		}
 		
-		[wrapperConnection addStringToTranscript:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)]];
+		[[wrapperConnection client] appendString:[NSString stringWithBytesOfUnknownEncoding:buf length:strlen(buf)] toTranscript:CKTranscriptReceived];
 		if (strstr(buf, "sftp>") != NULL)
 		{
 			memset(buf, '\0', strlen(buf));
@@ -306,7 +308,8 @@ char **environ;
 
 #pragma mark -
 #pragma mark Protocol Loop
-- (void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
+
+- (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
 {
 	NSString *sftpBinaryPath = [NSString pathForExecutable:@"sftp"];
 	if (!sftpBinaryPath)
@@ -324,7 +327,8 @@ char **environ;
 	[passedInArguments release];
 	
 	connecting = YES;	
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"sftp launch path is %s.\n", executableArguments[0]]];
+	[[sftpWrapperConnection client] appendString:[commandArguments componentsJoinedByString:@" "]
+                                toTranscript:CKTranscriptReceived];
 	
 	char teletypewriterName[MAXPATHLEN];
 	struct winsize windowSize = {24, 512, 0, 0};
@@ -362,8 +366,8 @@ char **environ;
 
 	//Associate our new file stream
 	setvbuf(masterFileStream, nil, _IONBF, 0);
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"Slave terminal device is %s.\n", teletypewriterName]];
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"Master Device is %d.\n", master]];
+	[[sftpWrapperConnection client] appendFormat:@"Slave terminal device is %s." toTranscript:CKTranscriptReceived, teletypewriterName];
+	[[sftpWrapperConnection client] appendFormat:@"Master Device is %d." toTranscript:CKTranscriptReceived, master];
 	
 	fd_set readMask;
 	char serverResponseBuffer[MAXPATHLEN *2];
@@ -408,7 +412,7 @@ char **environ;
 			break;
 		
 		if (serverResponseBuffer[0] != '\0')
-			[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
+			[[sftpWrapperConnection client] appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
 		
 		if ([self bufferContainsPasswordPrompt:serverResponseBuffer] && !hasValidPassword && connecting)
 		{
@@ -547,18 +551,18 @@ char **environ;
 	master = 0;
 	(void)close(master);
 	
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithUTF8String:serverResponseBuffer]];
-	[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"\nsftp task with pid %d ended.\n", sftppid]];
+	[[sftpWrapperConnection client] appendString:[NSString stringWithUTF8String:serverResponseBuffer] toTranscript:CKTranscriptReceived];
+	[[sftpWrapperConnection client] appendFormat:@"sftp task with pid %d ended." toTranscript:CKTranscriptReceived, sftppid];
 	sftppid = 0;
 	[sftpWrapperConnection didDisconnect];
 	if (WIFEXITED(status))
-		[sftpWrapperConnection addStringToTranscript:@"Normal exit\n"];
+		[[sftpWrapperConnection client] appendString:@"Normal exit" toTranscript:CKTranscriptReceived];
 	else if (WIFSIGNALED(status))
 	{
-		[sftpWrapperConnection addStringToTranscript:@"WIFSIGNALED:"];
-		[sftpWrapperConnection addStringToTranscript:[NSString stringWithFormat:@"signal = %d\n", status]];
+		[[sftpWrapperConnection client] appendString:@"WIFSIGNALED:" toTranscript:CKTranscriptReceived];
+		[[sftpWrapperConnection client] appendFormat:@"signal = %d" toTranscript:CKTranscriptReceived, status];
 	}
 	else if (WIFSTOPPED(status))
-		[sftpWrapperConnection addStringToTranscript:@"WIFSTOPPED\n"];
+		[[sftpWrapperConnection client] appendString:@"WIFSTOPPED" toTranscript:CKTranscriptReceived];
 }
 @end

@@ -48,15 +48,21 @@ typedef unsigned int   NSUInteger;
 
 
 #import <Cocoa/Cocoa.h>
+
 #import <Connection/CKConnectionProtocol.h>
-#import <Connection/KTLog.h>
+#import <Connection/CKConnectionRegistry.h>
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
+#import <Connection/CKFTPConnection.h>
+#import <Connection/CKFileConnection.h>
+#import <Connection/CKDotMacConnection.h>
+
+#import <Connection/KTLog.h>
+
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
 #import <Connection/InterThreadMessaging.h>
-#import <Connection/CKMultipleConnection.h>
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>
 #import <Connection/NSString+Connection.h>
@@ -81,7 +87,7 @@ typedef unsigned int   NSUInteger;
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
 #import <Connection/CKLeopardSourceListTableColumn.h>
-#import <Connection/CKConnectionRegistry.h>
+#import <Connection/CKBookmarkStorage.h>
 #import <Connection/CKHostCategory.h>
 #import <Connection/CKBonjourCategory.h>
 #import <Connection/CKHost.h>

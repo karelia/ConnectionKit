@@ -44,7 +44,7 @@ enum {
 
 @interface CKConnectionOpenPanel : NSWindowController 
 {
-	id <CKConnection> connection;
+	id <CKConnection> _connection;
 	BOOL canChooseDirectories;
 	BOOL canChooseFiles;
 	BOOL canCreateDirectories;
@@ -62,7 +62,7 @@ enum {
 	IBOutlet NSTableView *tableView;
     IBOutlet NSButton *openButton;
     IBOutlet NSButton *openCancelButton;
-	id delegate;
+	id _delegate;
 	SEL delegateSelector;
 	BOOL isSelectionValid;
 	NSTimeInterval timeout;
@@ -73,8 +73,7 @@ enum {
 	NSString *lastDirectory;
 }
 
-- (id)initWithConnection:(id <CKConnection>) inConnection;
-+ (CKConnectionOpenPanel*)connectionOpenPanel:(id <CKConnection>) inConnection;
+- (id)initWithRequest:(CKConnectionRequest *)request;
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
@@ -82,21 +81,28 @@ enum {
 - (IBAction) createNewFolder: (id) sender;
 
 - (id <CKConnection>)connection;
-- (void)setConnection:(id <CKConnection>)aConnection;
+
 - (BOOL)canChooseDirectories;
 - (void)setCanChooseDirectories:(BOOL)flag;
+
 - (BOOL)canChooseFiles;
 - (void)setCanChooseFiles:(BOOL)flag;
+
 - (BOOL)canCreateDirectories;
 - (void)setCanCreateDirectories:(BOOL)flag;
+
 - (BOOL)shouldDisplayOpenButton;
 - (void)setShouldDisplayOpenButton:(BOOL)flag;
+
 - (BOOL)shouldDisplayOpenCancelButton;
 - (void)setShouldDisplayOpenCancelButton:(BOOL)flag;
+
 - (BOOL)allowsMultipleSelection;
 - (void)setAllowsMultipleSelection:(BOOL)flag;
+
 - (BOOL)isLoading;
 - (void)setIsLoading:(BOOL)flag;
+
 - (NSArray *)URLs;
 - (NSArray *)filenames;
 - (NSString *)prompt;
@@ -127,8 +133,30 @@ enum {
 
 @end
 
+
 @interface NSObject (CKConnectionOpenPanelDelegate)
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didSendBadPasswordToHost:(NSString *)host;
+
+/*!
+ @method connectionOpenPanel:didReceiveAuthenticationChallenge:
+ @abstract Sent when the connection panel must authenticate a challenge in order to browse the connection.
+ @discussion Operates just like the CKConnection delegate method -connection:didReceiveAuthenticationChallenge:
+ See that for full documentation.
+ @param panel The connection panel object sending the message.
+ @param challenge The authentication challenge that must be authenticated in order to make the connection.
+ */
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+/*!
+ @method connection:didCancelAuthenticationChallenge:
+ @abstract Operates exactly the same as its NSURLConnection counterpart.
+ @param panel The panel sending the message.
+ @param challenge The challenge that was canceled.
+ */
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+
+// Do the same as their CKConnection counterparts
 - (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveError:(NSError *)error;
+- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 @end
 

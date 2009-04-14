@@ -55,10 +55,8 @@ checkRemoteExistence:(NSNumber *)check;
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:0], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"file://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKFileConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"file"];
+    [pool release];
 }
 
 #pragma mark -
@@ -84,59 +82,25 @@ checkRemoteExistence:(NSNumber *)check;
 	return [c autorelease];
 }
 
-- (id)init
-{
-	[self initWithHost:LocalizedStringInConnectionKitBundle(@"the File System", @"name of a host to connect to; in this case, the local file system rather than a remote server") port:@"ignored" username:@"ignored" password:@"ignored" error:nil];
-	return self;
-}
-
 + (NSString *)name
 {
 	return @"File";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-{
-	CKFileConnection *c = [[CKFileConnection alloc] initWithHost:host
-														port:port
-													username:username
-													password:password
-													   error:nil];
-	return [c autorelease];
-}
++ (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	CKFileConnection *c = [[CKFileConnection alloc] initWithHost:host
-														port:port
-													username:username
-													password:password
-													   error:error];
-	return [c autorelease];
-}
-
-/*!	Designated Initilizer
-*/
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	port = nil;
-	
-	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	if (self = [super initWithRequest:request])
 	{
 		myCurrentDirectory = [[NSString alloc] initWithString:NSHomeDirectory()];
 	}
 	return self;
+}
+
+- (id)init
+{
+	return [self initWithRequest:[CKConnectionRequest requestWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]]];
 }
 
 - (void)dealloc
@@ -145,19 +109,13 @@ checkRemoteExistence:(NSNumber *)check;
 	[super dealloc];
 }
 
-+ (NSString *)urlScheme
-{
-	return @"file";
-}
-
 - (void)connect
 {
-	if ([self transcript])
+	if (!_isConnecting && ![self isConnected])
 	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInConnectionKitBundle(@"Connecting...\n", @"file transcript")
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
+		[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
+		[super connect];
 	}
-	[super connect];
 }
 
 - (void)sendCommand:(id)command
@@ -168,30 +126,16 @@ checkRemoteExistence:(NSNumber *)check;
 - (void)threadedConnect
 {
 	[super threadedConnect];
-	if (_flags.didAuthenticate)
-	{
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
-	}
-	myFileManager = [[NSFileManager alloc] init];
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:LocalizedStringInConnectionKitBundle(@"Connected to File System\n", @"file transcript") 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+	
+    myFileManager = [[NSFileManager alloc] init];
+	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	[self setState:CKConnectionIdleState];
 }
 
 - (void)threadedAbort
 {
-	if (_flags.cancel)
-	{
-		[_forwarder connectionDidCancelTransfer:self];
-	}
-	if (_flags.didCancel)
-	{
-		NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
-		[_forwarder connection:self didCancelTransfer:remotePath];
-	}
+    NSString *remotePath = [self currentUpload] ? [[self currentUpload] remotePath] : [[self currentDownload] remotePath];
+    [[self client] connectionDidCancelTransfer:remotePath];
 	[self processInvocations];
 }
 
@@ -208,10 +152,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kChangeToDirectory];
 		
-	BOOL success = [myFileManager changeCurrentDirectoryPath:aDirectory];
-	if (success && _flags.changeDirectory)
+	if ([myFileManager changeCurrentDirectoryPath:aDirectory])
 	{
-		[_forwarder connection:self didChangeToDirectory:aDirectory error:nil];
+		[[self client] connectionDidChangeToDirectory:aDirectory error:nil];
 	}
 	
 	[myCurrentDirectory autorelease];
@@ -249,11 +192,11 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kCreateDirectory];
 	unsigned long aPermissions = [perms unsignedLongValue];
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)\n", @"file transcript"), aName, aPermissions] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)", @"file transcript")
+                   toTranscript:CKTranscriptSent,
+                                aName,
+								aPermissions];
+	
 	
 	NSDictionary *fmDictionary = nil;
 	if (0 != aPermissions)
@@ -274,9 +217,8 @@ checkRemoteExistence:(NSNumber *)check;
 		error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:[self currentOperation] userInfo:ui];
 	}
 	
-	if (_flags.createDirectory)
-		[_forwarder connection:self didCreateDirectory:aName error:error];
-
+    [[self client] connectionDidCreateDirectory:aName error:error];
+    
 	[self setState:CKConnectionIdleState];
 }
 
@@ -311,8 +253,7 @@ checkRemoteExistence:(NSNumber *)check;
 		error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];		
 	}
 	
-	if (_flags.permissions)
-		[_forwarder connection:self didSetPermissionsForFile:path error:error];
+    [[self client] connectionDidSetPermissionsForFile:path error:error];
 
 	[attribs release];
 	[self setState:CKConnectionIdleState];
@@ -336,11 +277,8 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kRename];
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@\n", @"file transcript"), fromPath, toPath] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@", @"file transcript")
+                   toTranscript:CKTranscriptSent, fromPath, toPath];
 	
 	NSError *error = nil;	
 	if (![myFileManager movePath:fromPath toPath:toPath handler:self])
@@ -350,8 +288,7 @@ checkRemoteExistence:(NSNumber *)check;
 		error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
 	}
 	
-	if (_flags.rename)
-		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+    [[self client] connectionDidRename:fromPath to:toPath error:error];
 
 	[self setState:CKConnectionIdleState];
 }
@@ -376,11 +313,9 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteFile];
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@\n", @"file transcript"), path] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@", @"file transcript")
+                   toTranscript:CKTranscriptSent, path];
+	
 	
 	NSError *error = nil;	
 	if (![myFileManager removeFileAtPath:path handler:self])
@@ -392,8 +327,7 @@ checkRemoteExistence:(NSNumber *)check;
 		error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];		
 	}
 	
-	if (_flags.deleteFile)
-		[_forwarder connection:self didDeleteFile:path error:error];
+    [[self client] connectionDidDeleteFile:path error:error];
 	
 	[self setState:CKConnectionIdleState];
 }
@@ -427,8 +361,7 @@ checkRemoteExistence:(NSNumber *)check;
 		error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:kDeleteFile userInfo:userInfo];
 	}
 	
-	if (_flags.deleteDirectory)
-		[_forwarder connection:self didDeleteDirectory:dirPath error:error];
+    [[self client] connectionDidDeleteDirectory:dirPath error:error];
 
 	[self setState:CKConnectionIdleState];
 }
@@ -453,26 +386,13 @@ checkRemoteExistence:(NSNumber *)check;
 	[self deleteDirectory:path];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{	
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (void)fcUpload:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
 {
 	NSFileManager *fm = myFileManager;
 	BOOL flag = [check boolValue];
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@\n", @"file transcript"), [upload localPath], [upload remotePath]] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@", @"file transcript")
+                   toTranscript:CKTranscriptSent, [upload localPath], [upload remotePath]];
 		
 	if (flag)
 	{
@@ -485,9 +405,10 @@ checkRemoteExistence:(NSNumber *)check;
 			[upload retain];
 			[self dequeueUpload];
 			// send finished
-			if ( _flags.uploadFinished)
-				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-			if ([upload delegateRespondsToTransferDidFinish])
+
+			[[self client] uploadDidFinish:[upload remotePath] error:error];
+			
+            if ([upload delegateRespondsToTransferDidFinish])
 				[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 			[upload release];
 			[self setState:CKConnectionIdleState];			
@@ -499,8 +420,8 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	if ([upload delegateRespondsToTransferDidBegin])
 		[[upload delegate] transferDidBegin:[upload userInfo]];
-	if (_flags.didBeginUpload)
-		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
+
+    [[self client] uploadDidBegin:[upload remotePath]];
 	
 	FILE *from = fopen([[upload localPath] fileSystemRepresentation], "r"); // Must use -fileSystemRepresentation to handle non-ASCII paths
 	FILE *to = fopen([[upload remotePath] fileSystemRepresentation], "a");
@@ -529,24 +450,25 @@ checkRemoteExistence:(NSNumber *)check;
 		
 	//need to send the amount of bytes transferred.
 	
-	if (_flags.uploadProgressed)
-		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+
+    [[self client] upload:[upload remotePath] didSendDataOfLength:size];
+    
 	if ([upload delegateRespondsToTransferTransferredData])
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
 	
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
 		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
-	if (_flags.uploadPercent) 
-		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
+
+    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:100]];
 	
 	
 	[upload retain];
 	[self dequeueUpload];
 	
 	// send finished
-	if ( _flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:nil];
+	[[self client] uploadDidFinish:[upload remotePath] error:nil];
+    
 	if ([upload delegateRespondsToTransferDidFinish])
 		[[upload delegate] transferDidFinish:[upload userInfo] error:nil];
 	
@@ -583,26 +505,12 @@ checkRemoteExistence:(NSNumber *)check;
 	return rec;
 }
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFile:localPath];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
 - (void)fcUploadData:(CKInternalTransferRecord *)upload checkRemoteExistence:(NSNumber *)check
 {
 	BOOL flag = [check boolValue];
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@\n", @"file transcript"), [upload remotePath]] 
-																  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-	}
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@", @"file transcript")
+                   toTranscript:CKTranscriptSent, [upload remotePath]];
 	
 	if (flag)
 	{
@@ -614,9 +522,9 @@ checkRemoteExistence:(NSNumber *)check;
 			NSError *error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:kFileExists userInfo:userInfo];
 			
 			// send finished
-			if (_flags.uploadFinished)
-				[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-			if ([upload delegateRespondsToTransferDidFinish])
+            [[self client] uploadDidFinish:[upload remotePath] error:error];
+			
+            if ([upload delegateRespondsToTransferDidFinish])
 				[[upload delegate] transferDidFinish:[upload userInfo] error:error];			
 			return;
 		}
@@ -628,19 +536,21 @@ checkRemoteExistence:(NSNumber *)check;
 
 	if ([upload delegateRespondsToTransferDidBegin])
 		[[upload delegate] transferDidBegin:[upload userInfo]];
-	if (_flags.didBeginUpload)
-		[_forwarder connection:self uploadDidBegin:[upload remotePath]];
+
+    [[self client] uploadDidBegin:[upload remotePath]];
+    
 	//need to send the amount of bytes transferred.
 	unsigned long long size = [[[myFileManager fileAttributesAtPath:[upload remotePath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
-	if (_flags.uploadProgressed)
-		[_forwarder connection:self upload:[upload remotePath] sentDataOfLength:size];
+
+    [[self client] upload:[upload remotePath] didSendDataOfLength:size];
+    
 	if ([upload delegateRespondsToTransferTransferredData])
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
 		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
-	if (_flags.uploadPercent) 
-		[_forwarder connection:self upload:[upload remotePath] progressedTo:[NSNumber numberWithInt:100]];
+
+    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:100]];
 	
 	NSError *error = nil;
 	if (!success)
@@ -652,17 +562,12 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	
 	// send finished
-	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
+	[[self client] uploadDidFinish:[upload remotePath] error:error];
+    
 	if ([upload delegateRespondsToTransferDidFinish])
 		[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 
 	[self setState:CKConnectionIdleState];
-}
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFromData:data toFile:remotePath checkRemoteExistence:flag delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data
@@ -693,12 +598,6 @@ checkRemoteExistence:(NSNumber *)check;
 	return rec;
 }
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self uploadFromData:data toFile:remotePath];
-}
-
 /*!	Copy the file to the given directory
 */
 - (void)fcDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(NSNumber *)aFlag
@@ -709,8 +608,9 @@ checkRemoteExistence:(NSNumber *)check;
 	CKInternalTransferRecord *download = [self currentDownload];
 	
 	NSString *name = [remotePath lastPathComponent];
-	if (_flags.didBeginDownload)
-		[_forwarder connection:self downloadDidBegin: remotePath];
+
+    [[self client] downloadDidBegin:remotePath];
+    
 	if ([download delegateRespondsToTransferDidBegin])
 		[[download delegate] transferDidBegin:[download userInfo]];
 	
@@ -749,21 +649,19 @@ checkRemoteExistence:(NSNumber *)check;
 			[myFileManager removeFileAtPath: tempPath handler: nil];
 
 		//need to send the amount of bytes transferred.
-		if (_flags.downloadProgressed)
-		{
-			NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
-			[_forwarder connection:self download:remotePath receivedDataOfLength:[fh seekToEndOfFile]];
-		} 
+		NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
+        [[self client] download:remotePath didReceiveDataOfLength:[fh seekToEndOfFile]];
 		
-		if (_flags.downloadPercent)
-			[_forwarder connection:self download:remotePath progressedTo:[NSNumber numberWithInt:100]];
+		[[self client] download:remotePath didProgressToPercent:[NSNumber numberWithInt:100]];
+        
 		if ([download delegateRespondsToTransferProgressedTo])
 			[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:100]];
 		
 		[download retain];
 		[self dequeueDownload];
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:remotePath error:nil];
+
+        [[self client] downloadDidFinish:remotePath error:nil];
+        
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo] error:nil];
 		[download release];
@@ -784,8 +682,9 @@ checkRemoteExistence:(NSNumber *)check;
 		
 		[download retain];
 		[self dequeueDownload];
-		if (_flags.downloadFinished)
-			[_forwarder connection:self downloadDidFinish:remotePath error:error];
+
+        [[self client] downloadDidFinish:remotePath error:error];
+        
 		if ([download delegateRespondsToTransferDidFinish])
 			[[download delegate] transferDidFinish:[download userInfo] error:error];
 		[download release];		
@@ -822,12 +721,6 @@ checkRemoteExistence:(NSNumber *)check;
 	[self queueDownload:download];
 	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag];
 	return record;
-}
-
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset
-{
-	// Noop, there's no such thing as a partial transfer on a file system since it's instantaneous.
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:YES];
 }
 
 - (void)directoryContents
@@ -870,10 +763,9 @@ checkRemoteExistence:(NSNumber *)check;
 		
 		[packaged addObject:attribs];
 	}
-	if (_flags.directoryContents)
-	{
-		[_forwarder connection:self didReceiveContents:packaged ofDirectory:dirPath error:nil];
-	}
+	
+	[[self client] connectionDidReceiveContents:packaged ofDirectory:dirPath error:nil];
+    
 	[self setState:CKConnectionIdleState];
 }
 
@@ -905,10 +797,7 @@ checkRemoteExistence:(NSNumber *)check;
 	BOOL fileExists = [myFileManager fileExistsAtPath: path];
   
 
-	if (_flags.fileCheck)
-	{
-		[_forwarder connection:self checkedExistenceOfPath:path pathExists:fileExists error:nil];
-	}
+	[[self client] connectionDidCheckExistenceOfPath:path pathExists:fileExists error:nil];
 }
 
 - (void)checkExistenceOfPath:(NSString *)path
@@ -979,17 +868,15 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	NSString *path = [errorInfo objectForKey:@"Path"];
 	NSString *toPath = [errorInfo objectForKey:@"ToPath"];
-	NSString *error = [errorInfo objectForKey:@"Error"];
+	NSString *errorString = [errorInfo objectForKey:@"Error"];
 
-	if (_flags.error)
-	{
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-								  error, NSLocalizedDescriptionKey,
-								  path, NSFilePathErrorKey,
-								  toPath, @"ToPath", nil]; // "ToPath" might be nil ... that's OK, it's at the end of the list
-		NSError *error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
-		[_forwarder connection:self didReceiveError:error];
-	}
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              errorString, NSLocalizedDescriptionKey,
+                              path, NSFilePathErrorKey,
+                              toPath, @"ToPath", nil]; // "ToPath" might be nil ... that's OK, it's at the end of the list
+    NSError *error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:[self currentOperation] userInfo:userInfo];
+    [[self client] connectionDidReceiveError:error];
+    
 	return NO;
 }
 

@@ -254,12 +254,12 @@ static NSMutableDictionary *responseMap = nil;
 + (id)responseWithRequest:(CKHTTPRequest *)request data:(NSData *)data
 {
 	//see if we map a certain request to a specific response
-	NSString *classString = [responseMap objectForKey:NSStringFromClass([request class])];
+	NSString *clsStr = [responseMap objectForKey:NSStringFromClass([request class])];
 	
-	if (classString)
+	if (clsStr)
 	{
-		//	NSLog(@"Matched Request: %@ to %@", [request className], classString);
-		return [[[NSClassFromString(classString) alloc] initWithRequest:request data:data] autorelease];
+		//	NSLog(@"Matched Request: %@ to %@", [request className], clsStr);
+		return [[[NSClassFromString(clsStr) alloc] initWithRequest:request data:data] autorelease];
 	}
 	return [[[CKHTTPResponse alloc] initWithRequest:request data:data] autorelease];
 }

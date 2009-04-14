@@ -20,37 +20,21 @@
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 443; }
+
 + (NSString *)name
 {
 	return @"Secure HTTP";
 }
 
-+ (id)connectionToHost:(NSString *)host
-                  port:(NSNumber *)port
-              username:(NSString *)username
-              password:(NSString *)password
-                 error:(NSError **)error
++ (NSArray *)URLSchemes
 {
-	CKSecureHTTPConnection *c = [[self alloc] initWithHost:host
-                                                      port:port
-	username:username
-	password:password
-	error:error];
-	return [c autorelease];
+	return [NSArray arrayWithObject:@"https"];
 }
 
-+ (NSString *)urlScheme
+- (id)initWithURL:(NSURL *)URL
 {
-	return @"https";
-}
-
-- (id)initWithHost:(NSString *)host
-              port:(NSNumber *)port
-          username:(NSString *)username
-          password:(NSString *)password
-             error:(NSError **)error
-{
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithURL:URL]))
 	{
 		[self setSSLOn:YES];
 	}

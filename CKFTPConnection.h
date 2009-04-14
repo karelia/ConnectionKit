@@ -29,6 +29,9 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
  
 #import <Foundation/Foundation.h>
 #import "CKStreamBasedConnection.h"
+#import "CKFTPCommand.h"
+#import "CKFTPReply.h"
+
 
 typedef enum {
 	FTPTransferModeStream = 0,
@@ -58,11 +61,13 @@ typedef enum {
 	FTPNoOpState
 } FTPState;
 
+
 @interface CKFTPConnection : CKStreamBasedConnection
-{	
+{
+@private
 	NSMutableData		*_buffer;
 	
-	NSMutableString		*_commandBuffer;
+	CKStreamedFTPReply	*_currentReply;
 	NSMutableData		*_dataBuffer;
 	
 	NSTimer				*_openStreamsTimeout;
@@ -110,15 +115,31 @@ typedef enum {
 		unsigned isMicrosoft: 1;
 		unsigned setBinaryTransferMode: 1;
 		unsigned received226: 1;
-		unsigned sentAuthenticated: 1;
 		unsigned unused: 11;
 	} _ftpFlags;
 	
 	NSTimer *_noopTimer;
+    
+    // Authentication
+    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
+    NSURLCredential                 *_currentAuthenticationCredential;
 }
 
-// TESTING
-- (NSString *)scanBetweenQuotes:(NSString *)aString;
 
+@end
+
+
+@interface CKConnectionRequest (CKFTPConnection)
+// nil signifies the usual fallback chain of connection types
+- (NSString *)FTPDataConnectionType;
+@end
+
+@interface CKMutableConnectionRequest (CKFTPConnection)
+- (void)setFTPDataConnectionType:(NSString *)type;
+@end
+
+
+@interface NSObject (CKFTPConnectionDelegate)
+- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;   // FTP ACCT command
 @end
 

@@ -40,28 +40,21 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[pool release];
 }
 
++ (NSInteger)defaultPort { return 119; }
+
 + (NSString *)name
 {
 	return @"NNTP";
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
++ (NSArray *)URLSchemes
 {
-	return [[[NNTPConnection alloc] initWithHost:host
-											port:port
-										username:username
-										password:password] autorelease];
+	return [NSArray arrayWithObjects:@"nntp", @"usenet", @"news"];
 }
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [super initWithHost:host port:port username:username password:password]) {
+	if (self = [super initWithURL:URL]) {
 		_inputBuffer = [[NSMutableString alloc] init];
 		_newsflags.isSlave = NO;
 	}
@@ -74,11 +67,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	[_currentNewsGroup release];
 	
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"nntp";
 }
 
 - (void)processReceivedData:(NSData *)data
@@ -339,17 +327,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	}
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	if (_flags.error) {
-		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
-										   code:500
-									   userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"New server does not implement %@", NSStringFromSelector(_cmd)]
-																			forKey:NSLocalizedDescriptionKey]];
-		[_forwarder connection:self didReceiveError:err];
-	}
-}
-
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	if (_flags.error) {
@@ -384,17 +361,6 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 }
 
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	if (_flags.error) {
-		NSError *err = [NSError errorWithDomain:NNTPErrorDomain
-										   code:500
-									   userInfo:[NSDictionary dictionaryWithObject:[NSString stringWithFormat:@"New server does not implement %@", NSStringFromSelector(_cmd)]
-																			forKey:NSLocalizedDescriptionKey]];
-		[_forwarder connection:self didReceiveError:err];
-	}
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
 {
 	if (_flags.error) {
 		NSError *err = [NSError errorWithDomain:NNTPErrorDomain

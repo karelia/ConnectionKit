@@ -28,13 +28,19 @@
  
 */
 
-#import <Cocoa/Cocoa.h>
+#import <Connection/CKWebDAVConnection.h>
 
-#import "CKWebDAVConnection.h"
 
 @interface CKDotMacConnection : CKWebDAVConnection
-{
-    
-}
+
++ (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
+
+/*!
+ @method initWithUser:
+ @discussion Creates a connection a user's idisk.mac.com account.
+ @param user The iDisk to connect to. Pass in nil to connect to the user's MobileMe account.
+ @result Returns an initialized CKDotMacConnection object or nil if there was an error.
+ */
+- (id)initWithUser:(NSString *)user;
 
 @end

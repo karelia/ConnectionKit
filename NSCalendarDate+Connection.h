@@ -45,4 +45,6 @@
 
 - (NSString *)zuluFormat;
 
++ (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime;
+
 @end

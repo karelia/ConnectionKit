@@ -14,24 +14,37 @@ extern NSString *SFTPErrorDomain;
 
 @class CKInternalTransferRecord;
 
-@interface CKSFTPConnection : CKStreamBasedConnection
+@interface CKSFTPConnection : CKAbstractQueueConnection
 {
 	int masterProxy;
 	CKSFTPTServer *theSFTPTServer;
 	
-	BOOL isConnecting;
 	NSString *rootDirectory;
 	NSMutableString *currentDirectory;
 
 	NSMutableArray *attemptedKeychainPublicKeyAuthentications;
 	NSMutableArray *connectToQueue;
 	NSTimer *_connectTimeoutTimer;
+
+@private
+    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
+    NSString                        *_currentPassword;
 }
 
 - (int)masterProxy;
 - (void)setMasterProxy:(int)proxy;
 
 @end
+
+
+@interface CKConnectionRequest (CKSFTPConnection)
+- (NSString *)SFTPPublicKeyPath;
+@end
+
+@interface CKMutableConnectionRequest (CKSFTPConnection)
+- (void)setSFTPPublicKeyPath:(NSString *)path;
+@end
+
 
 @interface CKSFTPConnection (SFTPTServerCallback)
 //
@@ -53,5 +66,6 @@ extern NSString *SFTPErrorDomain;
 - (void)didSetRootDirectory;
 - (void)setCurrentDirectory:(NSString *)current;
 - (void)didReceiveDirectoryContents:(NSArray*)items;
-- (void)addStringToTranscript:(NSString *)stringToAdd;
+
 @end
+

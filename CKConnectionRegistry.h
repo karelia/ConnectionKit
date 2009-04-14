@@ -1,103 +1,52 @@
-/*
- Copyright (c) 2006, Greg Hulands <ghulands@mac.com>
- All rights reserved.
- 
- Redistribution and use in source and binary forms, with or without modification, 
- are permitted provided that the following conditions are met:
- 
- Redistributions of source code must retain the above copyright notice, this list 
- of conditions and the following disclaimer.
- 
- Redistributions in binary form must reproduce the above copyright notice, this 
- list of conditions and the following disclaimer in the documentation and/or other 
- materials provided with the distribution.
- 
- Neither the name of Greg Hulands nor the names of its contributors may be used to 
- endorse or promote products derived from this software without specific prior 
- written permission.
- 
- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY 
- EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES 
- OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
- INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
- TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR 
- BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY 
- WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */
+//
+//  CKConnectionRegistry.h
+//  Connection
+//
+//  Created by Mike on 05/12/2008.
+//  Copyright 2008 Karelia Software. All rights reserved.
+//
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
+#import "CKConnectionProtocol.h"
 
-/*
- 
-		This class is used across applications to have a standard registry of known connections for 
-		a user. This allows them to add/modify/delete connections they have and have them reflect in
-		all applications that use the connection framework.
- 
-		The registry also is an NSOutlineView compliant data source so you can set the registry to handle
-		the population of the view.
-  
- */
 
-@class CKHostCategory, CKBonjourCategory, CKHost;
-
-@interface CKConnectionRegistry : NSObject 
+@interface CKConnectionRegistry : NSObject
 {
-	NSMutableArray *myLeopardSourceListGroups;
-	NSMutableArray *myConnections;
-	NSMutableArray *myDraggedItems;
-	NSString *myDatabaseFile;
-	CKBonjourCategory *myBonjour;
-	NSDistributedNotificationCenter *myCenter;
-	NSLock *myLock;
-	
-	NSMutableArray *myOutlineViews;
-	NSString *myFilter;
-	NSArray *myFilteredHosts;
-	
-	BOOL myIsGroupEditing;
-	BOOL myUsesLeopardStyleSourceList;
-	
-	int databaseWriteFailCount;
+    @private
+    NSMutableDictionary *_connectionClassesByName;
+    NSMutableDictionary *_connectionClassesByURLScheme;
 }
-extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
-// you can set a custom database if you don't want to use the default shared registry.
-// I don't recommend it, but there are situations where this is needed.
-+ (void)setRegistryDatabase:(NSString *)file;
-+ (NSString *)registryDatabase;
++ (CKConnectionRegistry *)sharedConnectionRegistry;
 
-+ (id)sharedRegistry; //use this. DO NOT alloc one yourself
+#pragma mark Connection class registration
+- (Class <CKConnection>)connectionClassForURLScheme:(NSString *)URLScheme;
+- (Class <CKConnection>)connectionClassForName:(NSString *)connectionName;
 
-- (void)beginGroupEditing;
-- (void)endGroupEditing;
+/*!
+ @method registerClass:forURLScheme:
+ @abstract Registers a connection class.
+ @discussion The connection's name is automatically registered for you.
+ @param connectionClass The class implementing the CKConnection protocol to register.
+ @param URLScheme Optional. The URL scheme to register the connection for. Call this method agin if you need to register more than one URL scheme.
+ */
+- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
 
-- (void)addCategory:(CKHostCategory *)category;
-- (void)removeCategory:(CKHostCategory *)category;
+- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
 
-- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index;
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index;
+#pragma mark Creating a connection
 
-- (void)addHost:(CKHost *)connection;
-- (void)removeHost:(CKHost *)connection;
+/*!
+ @method connectionWithRequest:delegate:
+ @abstract Locates the connection class that corresponds with the URL and then creates one.
+ @param request The request to create a connection for.
+ @param delegate The initial delegate for the connection.
+ @result An initialized connection, or nil if no suitable class could be found.
+ */
+- (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request;
 
-- (NSArray *)connections;
-
-- (NSMenu *)menuWithBookmarkItemTarget:(id)target action:(SEL)actionSelector;
-
-- (NSArray *)allHosts;
-- (NSArray *)allCategories;
-
-- (NSArray *)hostsMatching:(NSString *)query;
-
-- (void)setFilterString:(NSString *)filter;
-- (void)handleFilterableOutlineView:(NSOutlineView *)view;
-
-- (void)setUsesLeopardStyleSourceList:(BOOL)flag;
-- (BOOL)itemIsLeopardSourceGroupHeader:(id)item;
-- (NSOutlineView *)outlineView;
+// These 2 methods are for compatibility with legacy code
+- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
+- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port user:(NSString *)username password:(NSString *)password error:(NSError **)error;
 
 @end
-
-extern NSString *CKRegistryChangedNotification;

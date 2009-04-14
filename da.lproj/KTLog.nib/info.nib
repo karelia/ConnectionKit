@@ -9,7 +9,7 @@
 	<key>IBOldestOS</key>
 	<integer>4</integer>
 	<key>IBSystem Version</key>
-	<string>9C7010</string>
+	<string>9G55</string>
 	<key>targetFramework</key>
 	<string>IBCocoaFramework</string>
 </dict>

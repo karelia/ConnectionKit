@@ -113,6 +113,7 @@ extern NSString *CKQueueDomain;
 		unsigned isCheckingQueue: 1;
 		unsigned usued: 29;
 	} myQueueFlags;
+    BOOL                _isRecursiveUploading;
 }
 
 - (void)checkQueue;

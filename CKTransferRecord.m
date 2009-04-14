@@ -66,6 +66,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 + (void)initialize
 {
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
+    [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
+triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 }
 
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size
@@ -355,14 +357,21 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (NSString *)path
 {
-	if (_parent == nil)
-		return [NSString stringWithFormat:@"/%@", _name];
-	return [NSString stringWithFormat:@"%@/%@", [_parent path], _name];
+	if ([self parent])
+    {
+        return [[_parent path] stringByAppendingPathComponent:[self name]];	// Old code was @"%@/%@" but it broke if _parent was just /
+    }
+    else
+    {
+		return [self name];
+	}
 }
 
 - (void)addContent:(CKTransferRecord *)record
 {
-	[self willChangeValueForKey:@"contents"];
+	NSParameterAssert(record);
+    
+    [self willChangeValueForKey:@"contents"];
 	[_contents addObject:record];
 	[record setParent:self];
 	[self didChangeValueForKey:@"contents"];
@@ -500,21 +509,24 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *cur;
-	
-	cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-	path = [path stringByDeletingFirstPathComponent];
-	CKTransferRecord *thisNode, *subNode = cur;
-	
-	while ((![path isEqualToString:@"/"]))
-	{
-		thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-		path = [path stringByDeletingFirstPathComponent];
-		[subNode addContent:thisNode];
-		subNode = thisNode;
+	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
+    
+	NSArray *pathComponents = [path pathComponents];
+	if ([pathComponents count] > 0)
+    {
+        [result setName:[[path pathComponents] objectAtIndex:0]];  // -firstPathComponent ignores the root dir for absolute paths
+        CKTransferRecord *thisNode, *subNode = result;
+        
+        int i;
+        for (i = 1; i < [pathComponents count]; i++)
+        {
+            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
+            [subNode addContent:thisNode];
+            subNode = thisNode;
+        }
 	}
-	
-	return cur;
+    
+	return result;
 }
 
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
@@ -699,6 +711,41 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 - (void)setNameWithProgress:(id)notused
 {
 	; // just for KVO bindings
+}
+
+/*  The same as -nameWithProgress, but also includes the file size in brackets if appropriate
+ */
+- (NSDictionary *)nameWithProgressAndFileSize
+{
+    NSDictionary *result = [self nameWithProgress];
+    
+    // Directories should not display their size info
+    if (_size > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
+    {
+        // Calculate the size of the transfer in a user-friendly manner
+        NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
+        NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [self name], fileSize];
+        
+        NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]
+                                                               forKey:NSFontAttributeName];
+        
+        NSMutableAttributedString *description = [[NSMutableAttributedString alloc] initWithString:unattributedDescription attributes:attributes];
+        [unattributedDescription release];
+        
+        // Make the size info in grey
+        [description addAttribute:NSForegroundColorAttributeName
+                            value:[NSColor grayColor]
+                            range:NSMakeRange([[self name] length] + 1, [fileSize length] + 2)];
+        
+        result = [NSDictionary dictionaryWithObjectsAndKeys:
+                  [result objectForKey:@"progress"], @"progress",
+                  description, @"name",
+                  nil];
+        
+        [description release];
+    }
+    
+    return result;
 }
 
 @end

@@ -386,9 +386,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 
 		if (!myVerificationConnection && myFlags.verifyTransfers)
 		{
-			myVerificationConnection = [[self connection] copyWithZone:[self zone]];
+			id <CKConnection> connection = [self connection];
+            myVerificationConnection = [[[connection class] alloc] initWithRequest:[connection request]];
+            [myVerificationConnection setDelegate:self];
 			[myVerificationConnection setName:@"verification"];
-			[myVerificationConnection setDelegate:self];
 			[myVerificationConnection connect];
 		}
 		
@@ -942,31 +943,12 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Connection Delegate Methods
 
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
+- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-	if (con == [self connection])
-	{
-		KTLog(ControllerDomain, KTLogDebug, @"Bad Password for main connection");
-		[oProgress setIndeterminate:NO];
-		[oProgress setDoubleValue:0.0];
-		[oProgress displayIfNeeded];
-		
-		NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
-											 code:CKPasswordError
-										 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:
-											 LocalizedStringInConnectionKitBundle(@"Bad Password.", @"Transfer Controller"), NSLocalizedDescriptionKey, nil]];
-		[self setFatalError:error];
-		myReturnStatus = CKFatalErrorStatus;
-		[self setStatusMessage:LocalizedStringInConnectionKitBundle(@"Password was not accepted.", @"")];
-		
-		myConnectionStatus = CKDisconnectedStatus;	// so that we know connection didn't happen
-		[self forceDisconnectAll];
-		if (myFlags.delegateDidFinish)
-		{
-			[myForwarder transferControllerDidFinish:self returnCode:myReturnStatus];
-		}
-		[self postABogusEvent];
-	}
+	// For now, we're considering authentication to be the delegate's responsibility. Continuing without credentials
+    // should generally end up causing the connection to fail.
+    // If anyone needs it, we can probably provide a CKTransferController delegate method to request authentication.
+    [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host

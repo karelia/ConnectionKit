@@ -31,17 +31,22 @@
 
 @class CKHTTPRequest, CKHTTPResponse;
 
-@interface CKHTTPConnection : CKStreamBasedConnection 
+@interface CKHTTPConnection : CKStreamBasedConnection <NSURLAuthenticationChallengeSender>
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
-	NSString		*myBasicAuthorization;
 	
+	// Authentication
+	NSURLAuthenticationChallenge	*_currentAuthenticationChallenge;	// General
+    NSInteger						_authenticationFailureCount;
 	
-	NSString *myDigestRealm;
-	NSString *myDigestNonce;
-	NSString *myDigestOpaque;
-	NSInteger myDigestNonceCount;
+	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
+	
+	NSString *_currentDigestRealm;                                      // HTTP digest-based
+	NSString *_currentDigestOpaque;
+	NSString *_currentDigestNonce;
+	NSUInteger _digestNonceCount;
+	
 	
 	struct __httpconflags {
 		unsigned didFailWithError:1;
@@ -67,10 +72,8 @@
 
 @end
 
-@interface NSObject (CKHTTPConnectionDelegate)
 
-- (void)connection:(CKHTTPConnection *)connection didReceiveDataOfLength:(int)length;
-- (void)connection:(CKHTTPConnection *)connection didReceiveResponse:(CKHTTPResponse *)response;
-- (void)connection:(CKHTTPConnection *)connection didSendDataOfLength:(int)length;
-
+@interface CKHTTPConnection (SubclassSupport)
+- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod;
+- (NSURLCredential *)proposedCredential;
 @end

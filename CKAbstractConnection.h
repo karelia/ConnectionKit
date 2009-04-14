@@ -31,9 +31,12 @@
 #import <Foundation/Foundation.h>
 #import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
 
+#import "CKConnectionRegistry.h"
+#import "CKConnectionClientProtocol.h"
+
+
 /*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
  Connection instances do not need to inherit from this superclass, they can just implement the protocol instead.
- It also functions as a registry for automatic subclass detection.
  */
 
 extern NSString *CKConnectionErrorDomain;
@@ -44,6 +47,8 @@ enum {
 	CKConnectionNoConnectionsAvailable,
 	CKConnectionNoUsernameOrPassword,
 };
+
+
 // Logging Domain Keys
 extern NSString *CKConnectionDomain;
 extern NSString *CKTransportDomain; // used in custom stream classes
@@ -56,6 +61,7 @@ extern NSString *CKInputStreamDomain;
 extern NSString *CKOutputStreamDomain;
 extern NSString *CKSSLDomain;
 extern NSString *CKEditingDomain;
+
 
 typedef enum {
 	CKConnectionNotConnectedState = 0,
@@ -85,96 +91,48 @@ typedef enum {
 	CKConnectionCheckingFileExistenceState // 25
 } CKConnectionState;
 
-typedef struct __flags {
-	unsigned isConnected:1;
-	
-	// There are 21 callbacks & flags.
-	// Need to keep NSObject Category, __flags list, setDelegate: updated
-	
-	unsigned permissions:1;
-	unsigned badPassword:1;
-	unsigned cancel:1; // deprecated
-	unsigned didCancel:1;
-	unsigned changeDirectory:1;
-	unsigned createDirectory:1;
-	unsigned deleteDirectory:1;
-	unsigned deleteDirectoryInAncestor:1;
-	unsigned deleteFileInAncestor:1;
-	unsigned discoverFilesToDeleteInAncestor:1;
-	unsigned discoverFilesToDeleteInDirectory:1;
-	unsigned deleteFile:1;
-	unsigned didBeginUpload:1;
-	unsigned didConnect:1;
-	unsigned didDisconnect:1;
-	unsigned directoryContents:1;
-	unsigned didBeginDownload:1;
-	unsigned downloadFinished:1;
-	unsigned downloadPercent:1;
-	unsigned downloadProgressed:1;
-	unsigned error:1;
-	unsigned needsAccount:1;
-	unsigned rename:1;
-	unsigned uploadFinished:1;
-	unsigned uploadPercent:1;
-	unsigned uploadProgressed:1;
-	unsigned directoryContentsStreamed:1;
-	unsigned inBulk:1;
-	unsigned fileCheck:1;
-	unsigned authorizeConnection:1;
-	unsigned isRecursiveUploading:1;
-	unsigned isRecursiveDeleting:1;
-	unsigned didAuthenticate:1;
-	unsigned passphrase:1;
-	
-	unsigned padding:2;
-} connectionFlags;
 
-@class UKKQueue, RunLoopForwarder;
+@class UKKQueue, CKConnectionClient;
+
 
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
-	NSString    *_name;
-	NSString    *_connectionHost;
-	NSInteger   _connectionPort;
-	NSString    *_username;
-	NSString    *_password;
-    
 	CKConnectionState _state;
 	
 @protected
-    
-	RunLoopForwarder	*_forwarder;
-    
-	NSTextStorage *_transcript;
-	id _delegate;
-    
-	connectionFlags _flags;
+        
+	
+	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
+    BOOL    _isConnected;
+    BOOL    _inBulk;
+		
 	
 	UKKQueue *_editWatcher;
 	NSMutableDictionary *_edits;
 	CKAbstractConnection *_editingConnection;
-	
-	NSMutableDictionary *_properties;
-	
+		
 	NSMutableDictionary *_cachedDirectoryContents;
+    
+@private
+    NSString            *_name;
+    CKConnectionRequest *_request;
+    id                  _delegate;
+    
+    CKConnectionClient  *_client;
 }
 
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error;
++ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
++ (NSDictionary *)sentTranscriptStringAttributes;
++ (NSDictionary *)receivedTranscriptStringAttributes;
++ (NSDictionary *)dataTranscriptStringAttributes;
 
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
-
-+ (NSString *)urlSchemeForConnectionName:(NSString *)name port:(NSInteger)port;
-
-- (NSString *)username;
-- (NSString *)password;
-- (void)setUsername:(NSString *)username;
-- (void)setPassword:(NSString *)password;
-
+/*!
+ @method port
+ @abstract If the connection's URL has a port defined, it will be used. Otherwise,
+ this method falls back to the default port for the connection class.
+ @result The port the connection will use to connect on.
+ */
+- (NSInteger)port;
 
 - (void)setState:(CKConnectionState)state;
 - (CKConnectionState)state;
@@ -182,31 +140,6 @@ typedef struct __flags {
 #define GET_STATE _state
 - (NSString *)stateName:(int)state;
 
-- (void)setDelegate:(id)delegate;	//we do not retain the delegate
-- (id)delegate;
-
-/* Properties used:
- RecursiveDirectoryDeletionTranscript is used by connections that recursively delete a directory
- FileCheckingTranscript is used by connections that check for a files existence
- */
-- (void)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (void)removePropertyForKey:(NSString *)key;
-
-// Subclass registration
-+ (void)registerConnectionClass:(Class)inClass forTypes:(NSArray *)types;
-+ (NSArray *)registeredConnectionTypes;
-+ (NSMutableArray *)connectionTypes;
-+ (NSNumber *)registeredPortForConnectionType:(NSString *)type;
-
-// Transcript support
-- (void)setTranscript:(NSTextStorage *)transcript;
-- (NSTextStorage *)transcript;
-- (void)appendToTranscript:(NSAttributedString *)str;
-
-+ (NSDictionary *)sentAttributes;
-+ (NSDictionary *)receivedAttributes;
-+ (NSDictionary *)dataAttributes;
 
 // we cache directory contents so when changing to an existing directory we show the 
 // last cached version and issue a new listing. You should keep a current path in your delegate
@@ -219,21 +152,36 @@ typedef struct __flags {
 
 @end
 
+
+/*  PrivateSubclassSupport and SubclassSupport are categories of methods that are intended for
+ *  the user of subclasses only. You are strongly discouraged from accessing them from other
+ *  situations. Documentation can be found with the methods in the implementation file.
+ */
+
 @interface CKAbstractConnection (PrivateSubclassSupport)
 - (void)threadedConnect;
 - (void)threadedDisconnect;
 - (void)threadedForceDisconnect;
 - (void)threadedCancelTransfer;
 - (void)threadedCancelAll;
+
+- (void)startBulkCommands;
+- (void)endBulkCommands;
 @end
+
+
+@interface CKAbstractConnection (SubclassSupport)
+
+// Client
+- (id <CKConnectionClient>)client;
+
+@end
+
 
 extern NSString *CKConnectionAwaitStateKey;
 extern NSString *CKConnectionSentStateKey;
 extern NSString *CKConnectionCommandKey;
 
-@interface NSString (AbstractConnectionExtras)
-- (NSString *)stringByAppendingDirectoryTerminator;
-@end
 
 @interface NSInvocation (AbstractConnectionExtras)
 + (NSInvocation *)invocationWithSelector:(SEL)aSelector 
@@ -241,22 +189,9 @@ extern NSString *CKConnectionCommandKey;
 							   arguments:(NSArray *)anArgumentArray;
 @end
 
-@interface NSFileManager (AbstractConnectionExtras)
-+ (NSString *)_dateStringFromListing:(NSString *)listing;
-+ (NSArray *)attributedFilesFromListing:(NSString *)line;
-+ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes;
-+ (void)parsePermissions:(NSString *)perm withAttributes:(NSMutableDictionary *)attributes;
-@end
-
-@interface NSCalendarDate (AbstractConnectionExtras)
-+ (NSCalendarDate *)getDateFromMonth:(NSString *)month day:(NSString *)day yearOrTime:(NSString *)yearOrTime;
-@end
 
 @interface NSHost (IPV4)
 - (NSString *)ipv4Address;
 @end
 
-@interface NSArray (AbstractConnectionExtras)
-- (NSArray *)filteredArrayByRemovingHiddenFiles;
-@end
 
