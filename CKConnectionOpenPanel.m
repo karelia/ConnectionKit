@@ -33,34 +33,51 @@
 #import "CKConnectionOpenPanel.h"
 #import "CKConnectionProtocol.h"
 
+#import "NSArray+Connection.h"
+
+
+@interface CKConnectionOpenPanel (Private)
+- (void)setConnection:(id <CKConnection>)aConnection;
+@end
+
+
+#pragma mark -
+
+
 @implementation CKConnectionOpenPanel
 
-- (id) initWithConnection: (id <CKConnection>) inConnection
+- (id)initWithRequest:(CKConnectionRequest *)request;
 {
-	NSAssert (inConnection, @"no valid connection");
-	self = [super initWithWindowNibName: @"ConnectionOpenPanel"];
-	
-	if (self)
+	NSParameterAssert(request);
+    NSParameterAssert([request URL]);
+    
+    
+    if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
-		shouldDisplayOpenButton = YES;
-		shouldDisplayOpenCancelButton = YES;
-		[self setTimeout:30];
-		[self setConnection: inConnection];
-		[self setAllowsMultipleSelection: NO];
-		[self setCanChooseFiles: YES];
-		[self setCanChooseDirectories: YES];
-		[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
-																				  value: @"Open"
-																				  table: @"localizable"]];
-		
+		id <CKConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
+        if (connection)
+        {
+            [self setConnection:connection];
+            
+            shouldDisplayOpenButton = YES;
+            shouldDisplayOpenCancelButton = YES;
+            [self setTimeout:30];
+            [self setAllowsMultipleSelection: NO];
+            [self setCanChooseFiles: YES];
+            [self setCanChooseDirectories: YES];
+            
+            [self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
+                                                                                      value: @"Open"
+                                                                                      table: @"localizable"]];
+        }
+        else
+        {
+            [self release];
+            self = nil;
+        }
 	}
 	
 	return self;
-}
-
-+ (CKConnectionOpenPanel *) connectionOpenPanel: (id <CKConnection>) inConnection
-{
-	return [[[CKConnectionOpenPanel alloc] initWithConnection: inConnection] autorelease];
 }
 
 - (void) awakeFromNib
@@ -241,7 +258,7 @@
 {
 	//NSLog(@"in -connection, returned connection = %@", connection);
 	
-	return [[connection retain] autorelease]; 
+	return [[_connection retain] autorelease]; 
 }
 
 - (void)setConnection:(id <CKConnection>)aConnection
@@ -252,16 +269,16 @@
 	{
 		//store last directory
 		[lastDirectory autorelease];
-		lastDirectory = [[connection currentDirectory] copy];
+		lastDirectory = [[_connection currentDirectory] copy];
 	}
 	
-	if (connection != aConnection) {
-		[connection setDelegate: nil];
-		[connection forceDisconnect];
-		[connection cleanupConnection];
-		[connection release];
-		connection = [aConnection retain];
-		[connection setDelegate: self];
+	if (_connection != aConnection) {
+		[_connection setDelegate: nil];
+		[_connection forceDisconnect];
+		[_connection cleanupConnection];
+		[_connection release];
+		_connection = [aConnection retain];
+		[_connection setDelegate: self];
 	}
 }
 
@@ -438,8 +455,7 @@
 			}
 			pathToAdd = [pathPrefix stringByAppendingPathComponent: pathToAdd];
 			
-			[returnValue addObject: [NSURL URLWithString: pathToAdd
-										   relativeToURL: [NSURL URLWithString: [NSString stringWithFormat: @"%@://%@/", [[self connection] urlScheme], [[self connection] host]]]]];  
+			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[[self connection] request] URL]]];
 		}
 	}
 	
@@ -569,15 +585,15 @@
 {
 	//NSLog(@"in -delegate, returned delegate = %@", delegate);
 	
-	return [[delegate retain] autorelease]; 
+	return [[_delegate retain] autorelease]; 
 }
 
 - (void)setDelegate:(id)aDelegate
 {
 	//NSLog(@"in -setDelegate:, old value of delegate: %@, changed to: %@", delegate, aDelegate);
 	
-	if (delegate != aDelegate) {
-		delegate = aDelegate;
+	if (_delegate != aDelegate) {
+		_delegate = aDelegate;
 	}
 }
 
@@ -731,8 +747,31 @@
 		return YES;
 	return NO;
 }
-	
-- (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host
+
+- (void)connection:(id <CKConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	// Hopefully we can pass off responsibility to the delegate
+    id delegate = [self delegate];
+    if (delegate && [delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveAuthenticationChallenge:)])
+    {
+        [delegate connectionOpenPanel:self didReceiveAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        // Fallback to the default credentials if possible
+        NSURLCredential *credential = [challenge proposedCredential];
+        if (credential && [credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
+        {
+            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
+        }
+        else
+        {
+            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
+        }
+    }
+}
+
+- (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
 {
 	[timer invalidate];
 	timer = nil;
@@ -749,9 +788,9 @@
 
 - (void)connection:(CKAbstractConnection *)aConn didReceiveError:(NSError *)error
 {
-	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
+	if ([_delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
 	{
-		[delegate connectionOpenPanel:self didReceiveError:error];
+		[_delegate connectionOpenPanel:self didReceiveError:error];
 	}
 	else
 	{
@@ -774,34 +813,14 @@
 	[self closePanel: nil];
 }
 
-- (void)connectionDidSendBadPassword:(CKAbstractConnection *)aConn
-{
-	if ([[self window] isSheet])
-		[[NSApplication sharedApplication] endSheet:[self window] returnCode: connectionBadPasswordUserName];
-	else
-		[[NSApplication sharedApplication] stopModalWithCode: connectionBadPasswordUserName];
-
-	if ([delegate respondsToSelector:@selector(connectionOpenPanel:didSendBadPasswordToHost:)])
-	{
-		[delegate connectionOpenPanel:self didSendBadPasswordToHost:[aConn host]];
-	}
-	
-	[self closePanel:nil];
-}
-
-/*- (NSString *)connection:(CKAbstractConnection *)aConn needsAccountForUsername:(NSString *)username
-{
-	//	[status setStringValue:[NSString stringWithFormat:@"Need Account for %@ not implemented", username]];
-}*/
-
-- (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath
+- (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	[aConn changeToDirectory:dirPath];
 	createdDirectory = [[dirPath lastPathComponent] retain]; 
 	[aConn directoryContents];
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didSetPermissionsForFile:(NSString *)path
+- (void)connection:(CKAbstractConnection *)aConn didSetPermissionsForFile:(NSString *)path error:(NSError *)error
 {
 	
 }
@@ -809,7 +828,7 @@
 static NSImage *folder = nil;
 static NSImage *symFolder = nil;
 static NSImage *symFile = nil;
-- (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
+- (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	contents = [contents filteredArrayByRemovingHiddenFiles];
 	//set the parent directory (in reverse order)
@@ -935,6 +954,16 @@ static NSImage *symFile = nil;
 	}
 	
 	[self setIsLoading: NO];
+}
+
+/*	Forward on to our delegate if supported
+ */
+- (void)connection:(id <CKConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+{
+	if ([[self delegate] respondsToSelector:@selector(connectionOpenPanel:appendString:toTranscript:)])
+	{
+		[[self delegate] connectionOpenPanel:self appendString:string toTranscript:transcript];
+	}
 }
 
 #pragma mark ----=NStableView delegate=----

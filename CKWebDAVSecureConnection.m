@@ -35,58 +35,28 @@
 + (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:443], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"https://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKWebDAVSecureConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"https"];
+    [pool release];
 }
+
++ (NSInteger)defaultPort { return 443; }
 
 + (NSString *)name
 {
 	return @"Secure WebDAV";
 }
 
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"https", @"swebdav", nil]; }
+
 #pragma mark init methods
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	CKWebDAVSecureConnection *c = [[self alloc] initWithHost:host
-													  port:port
-												  username:username
-												  password:password
-													 error:error];
-	return [c autorelease];
-}
-
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
-{
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:443];
-	}
-	
-	if (self = [super initWithHost:host
-							  port:port
-						  username:username
-						  password:password
-							 error:error])
+	if (self = [super initWithRequest:request])
 	{
 		[self setSSLOn:YES];
 	}
 	return self;
-}
-
-+ (NSString *)urlScheme
-{
-	return @"swebdav";
 }
 
 @end

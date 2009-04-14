@@ -45,44 +45,29 @@ enum {
 
 NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
+
+@interface CKHTTPConnection (Authentication) 
+@end
+
+
+#pragma mark -
+
+
 @implementation CKHTTPConnection
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
-{
-	CKHTTPConnection *c = [[self alloc] initWithHost:host
-                                                port:port
-                                            username:username
-                                            password:password
-											   error:error];
-	return [c autorelease];
-}
+#pragma mark -
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
++ (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"http"]; }
+
++ (NSInteger)defaultPort { return 80; }
+
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (!port)
-	{
-		port = [NSNumber numberWithInt:80];
-	}
-	
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithRequest:request]))
 	{
 		myResponseBuffer = [[NSMutableData data] retain];
-		if (username && password)
-		{
-			myDigestNonceCount = 0;
-			NSData *authData = [[NSString stringWithFormat:@"%@:%@", username, password] dataUsingEncoding:NSUTF8StringEncoding];
-			//We use Basic by default
-			myBasicAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
-		}
 	}
+	
 	return self;
 }
 
@@ -90,18 +75,14 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
 	[myCurrentRequest release];
 	[myResponseBuffer release];
-	[myBasicAuthorization release];
+	[_basicAccessAuthorizationHeader release];
+	[_currentAuthenticationChallenge release];
 	
-	[myDigestNonce release];
-	[myDigestOpaque release];
-	[myDigestRealm release];
+	[_currentDigestNonce release];
+	[_currentDigestOpaque release];
+	[_currentDigestRealm release];
 	
 	[super dealloc];
-}
-
-+ (NSString *)urlScheme
-{
-	return @"http";
 }
 
 - (void)sendError:(NSString *)error code:(int)code
@@ -109,10 +90,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	NSError *err = [NSError errorWithDomain:CKHTTPConnectionErrorDomain 
 									   code:code 
 								   userInfo:[NSDictionary dictionaryWithObject:error forKey:NSLocalizedDescriptionKey]];
-	if (_flags.error)
-	{
-		[_forwarder connection:self didReceiveError:err];
-	}
+	[[self client] connectionDidReceiveError:err];
 }
 
 - (void)sendRequest:(CKHTTPRequest *)request
@@ -140,11 +118,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 - (void)threadedConnect
 {
 	//Reset Digest Authentication
-	myDigestNonceCount = 0;
-	[myDigestNonce release];
-	[myDigestOpaque release];
-	[myDigestRealm release];
-	myHTTPFlags.didFailAttemptedDigestAuthentication = NO;
+	_digestNonceCount = 0;
+	[_currentDigestNonce release];  _currentDigestNonce = nil;
+	[_currentDigestOpaque release]; _currentDigestOpaque = nil;
+	[_currentDigestRealm release];  _currentDigestRealm = nil;
 	
 	[super threadedConnect];
 	[self setState:CKConnectionIdleState];
@@ -178,97 +155,78 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
 	
-	if ([self transcript])
-	{
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response description]] 
-																  attributes:[CKAbstractConnection receivedAttributes]] autorelease]];
-		[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [response formattedResponse]] 
-																  attributes:[CKAbstractConnection dataAttributes]] autorelease]];
-	}
+	[[self client] appendString:[response description] toTranscript:CKTranscriptReceived];
+	[[self client] appendString:[response formattedResponse] toTranscript:CKTranscriptData];
+	
 	
 	if ([response code] == 401)
-	{
-		BOOL prefersDigest = ([[self propertyForKey:@"CKPrefersHTTPDigestAuthorization"] boolValue]);
-		//Send bad password if we don't prefer digest, or if we do and we failed at it.
-		if (myBasicAuthorization != nil && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
+	{		
+		[[self client] appendString:@"Connection needs Authorization" toTranscript:CKTranscriptSent];
+		
+		// need to append authorization
+		NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
+		NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+		
+		//Auth Method
+		NSRange rangeOfFirstWhitespace = [auth rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
+		NSString *authMethod = (rangeOfFirstWhitespace.location != NSNotFound) ? [auth substringToIndex:rangeOfFirstWhitespace.location] : nil;
+		
+		
+		// Throw away any old authentication info
+		[_basicAccessAuthorizationHeader release];
+		_basicAccessAuthorizationHeader = nil;
+			
+		
+		// Store info needed for digest-based authentication if it's available
+		if ([authMethod isEqualToString:@"Digest"])
 		{
-			// the user or password supplied is bad
-			if (_flags.badPassword)
-			{
-				[_forwarder connectionDidSendBadPassword:self];
-				if (_flags.didDisconnect)
-					[_forwarder connection:self didDisconnectFromHost:[self host]];
-			}
+			//Realm
+			NSString *realmMatchingString = [auth stringByMatching:@"realm=\"[^\"]+\""]; //This is	realm="blahblahblah"
+			[_currentDigestRealm autorelease];
+			_currentDigestRealm = [[[realmMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
+			
+			//Nonce
+			NSString *nonceMatchingString = [auth stringByMatching:@"nonce=\"[^\"]+\""]; //This is	nonce="blahblahblah"
+			[_currentDigestNonce autorelease];
+			_currentDigestNonce = [[[nonceMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
+			
+			//Opaque
+			NSString *opaqueMatchingString = [auth stringByMatching:@"opaque=\"[^\"]+\""]; //This is	opaque="blahblahblah"
+			[_currentDigestOpaque autorelease];
+			_currentDigestOpaque = [[[opaqueMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];				
+		}
+		
+		
+		// Ask the delegate to authenticate
+		if ([authMethod isEqualToString:@"Basic"])
+		{
+			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
+			return;
+		}
+		else if ([authMethod isEqualToString:@"Digest"])
+		{
+			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
+			return;
 		}
 		else
-		{			
-			if ([self transcript])
-			{
-				[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"Connection needs Authorization\n"] 
-																		  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-			}
-			// need to append authorization
-			NSCharacterSet *ws = [NSCharacterSet whitespaceCharacterSet];
-			NSString *auth = [[response headerForKey:@"WWW-Authenticate"] stringByTrimmingCharactersInSet:ws];
+		{
+			[[self client] appendString:@"CKHTTPConnection could not authenticate!" toTranscript:CKTranscriptSent];
 			
-			//Auth Method
-			NSRange rangeOfFirstWhitespace = [auth rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
-			NSString *authMethod = (rangeOfFirstWhitespace.location != NSNotFound) ? [auth substringToIndex:rangeOfFirstWhitespace.location] : nil;
-			
-			//If we already tried, mark it.
-			myHTTPFlags.didFailAttemptedDigestAuthentication = (prefersDigest && myDigestNonce && myDigestRealm && myDigestOpaque);
-			
-			if ([authMethod isEqualToString:@"Basic"] || myHTTPFlags.didFailAttemptedDigestAuthentication)
-			{
-				NSData *authData = [[NSString stringWithFormat:@"%@:%@", [self username], [self password]] dataUsingEncoding:NSUTF8StringEncoding];
-				[myBasicAuthorization autorelease];
-				myBasicAuthorization = [[NSString stringWithFormat:@"Basic %@", [authData base64Encoding]] retain];
-
-				//resend the request with auth
-				[self sendCommand:myCurrentRequest];
-				return;
-			}
-			else if ([authMethod isEqualToString:@"Digest"] && prefersDigest)
-			{
-				//Realm
-				NSString *realmMatchingString = [auth stringByMatching:@"realm=\"[^\"]+\""]; //This is	realm="blahblahblah"
-				[myDigestRealm autorelease];
-				myDigestRealm = [[[realmMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
-				
-				//Nonce
-				NSString *nonceMatchingString = [auth stringByMatching:@"nonce=\"[^\"]+\""]; //This is	nonce="blahblahblah"
-				[myDigestNonce autorelease];
-				myDigestNonce = [[[nonceMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];
-				
-				//Opaque
-				NSString *opaqueMatchingString = [auth stringByMatching:@"opaque=\"[^\"]+\""]; //This is	opaque="blahblahblah"
-				[myDigestOpaque autorelease];
-				myDigestOpaque = [[[opaqueMatchingString stringByMatching:@"\"[^\"]+"] substringFromIndex:1] retain];				
-				
-				//resend the request with auth
-				[self sendCommand:myCurrentRequest];
-				return;				
-			}
-			else
-			{
-				if ([self transcript])
-				{
-					[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"CKHTTPConnection could not authenticate!\n"] 
-																			  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-				}
-				@throw [NSException exceptionWithName:NSInternalInconsistencyException
-											   reason:@"Failed at Basic and Digest Authentication"
-											 userInfo:nil];
-			}
+			@throw [NSException exceptionWithName:NSInternalInconsistencyException
+										   reason:@"Failed at Basic and Digest Authentication"
+										 userInfo:nil];
 		}
 	}
+    else
+    {
+        // We're currently authenticated, so reset the failure counter
+        _authenticationFailureCount = 0;
+    }
 	
 	[myCurrentRequest release];
 	myCurrentRequest = nil;
 	
 	[self processResponse:response];
-	if ([response code] == 401)
-		[self setState:CKConnectionNotConnectedState];
 }
 
 - (BOOL)processBufferWithNewData:(NSData *)data
@@ -281,10 +239,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[myCurrentRequest autorelease];
 	myCurrentRequest = nil;
 	
-	if (myHTTPFlags.didReceiveResponse)
-	{
-		[(NSObject *)_forwarder connection:self didReceiveResponse:response];
-	}
 	[self setState:CKConnectionIdleState];
 }
 
@@ -313,7 +267,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		
 		//make sure we set the host name and set anything else which is needed
-		[req setHeader:[self host] forKey:@"Host"];
+		[req setHeader:[[[self request] URL] host] forKey:@"Host"];
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		
@@ -321,11 +275,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		
 		NSData *packet = [req serialized];
 		
-		if ([self transcript])
-		{
-			[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", [req description]] 
-																	  attributes:[CKAbstractConnection sentAttributes]] autorelease]];
-		}
+		[[self client] appendString:[req description] toTranscript:CKTranscriptSent];
+		
 		
 		[self initiatingNewRequest:req withPacket:packet];
 		
@@ -347,46 +298,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 - (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
-	NSString *authorization = nil;
-	BOOL prefersDigest = ([[self propertyForKey:@"CKPrefersHTTPDigestAuthorization"] boolValue]);
-	
-	if (myBasicAuthorization && (!prefersDigest || (prefersDigest && myHTTPFlags.didFailAttemptedDigestAuthentication)))
-		authorization = myBasicAuthorization;
-	else if ((myDigestRealm || myDigestOpaque || myDigestNonce) && prefersDigest)
+	if (_basicAccessAuthorizationHeader)
 	{
-		if (!myDigestNonce)
-			myDigestNonce = @"";
-		if (!myDigestOpaque)
-			myDigestOpaque = @"";
-		if (!myDigestRealm)
-			myDigestRealm = @"";
-		
-		//See http://en.wikipedia.org/wiki/Digest_access_authentication for the naming conventions used here.
-		NSString *HA1 = [[NSString stringWithFormat:@"%@:%@:%@", [self username], myDigestRealm, [self password]] md5Hash];
-		NSString *HA2 = [[NSString stringWithFormat:@"%@:%@", [request method], [request uri]] md5Hash];
-		
-		myDigestNonceCount++;
-		NSString *nonceCounterString = [NSString stringWithFormat:@"%08x", myDigestNonceCount];
-		//As far as I understand, the cnonce is a client-specified value. See http://greenbytes.de/tech/webdav/rfc2617.html#rfc.iref.c.7
-		NSString *cnonceString = @"0a4f113b";
-		NSString *qopString = @"auth";		
-		//HA1:nonce:nc:cnonce:qop:HA2
-		NSString *response = [[NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@", HA1, myDigestNonce, nonceCounterString, cnonceString, qopString, HA2] md5Hash];
-		
-		NSMutableString *tempAuth = [NSMutableString string];
-		[tempAuth appendFormat:@"Digest username=\"%@\"", [self username]];
-		[tempAuth appendFormat:@", realm=\"%@\"", myDigestRealm];
-		[tempAuth appendFormat:@", nonce=\"%@\"", myDigestNonce];
-		[tempAuth appendFormat:@", uri=\"%@\"", [request uri]];
-		[tempAuth appendFormat:@", qop=\"%@\"", qopString];
-		[tempAuth appendFormat:@", nc=\"%@\"", nonceCounterString];
-		[tempAuth appendFormat:@", cnonce=\"%@\"", cnonceString];
-		[tempAuth appendFormat:@", response=\"%@\"", response];
-		[tempAuth appendFormat:@", opaque=\"%@\"", myDigestOpaque];
-		authorization = [NSString stringWithString:tempAuth];
+		[request setHeader:_basicAccessAuthorizationHeader forKey:@"Authorization"];
 	}
-	if (authorization)
-		[request setHeader:authorization forKey:@"Authorization"];
 }
 
 #pragma mark -
@@ -411,7 +326,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			if (!_flags.isConnected)
+			if (!_isConnected)
 			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
@@ -442,7 +357,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		}
 		case NSStreamEventOpenCompleted:
 		{
-			if (_flags.isConnected)
+			if (_isConnected)
 			{
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
@@ -457,18 +372,131 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 
 - (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
 {
-	if (myHTTPFlags.didSendDataOfLength)
-	{
-		[_forwarder connection:self didSendDataOfLength:length];
-	}
 }
 
 - (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
 {
-	if (myHTTPFlags.didReceiveData)
-	{
-		[_forwarder connection:self didReceiveDataOfLength:length];
+}
+
+#pragma mark -
+#pragma mark Authentication
+
+- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod
+{
+	// Create authentication challenge object
+	NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
+																				  port:[self port]
+																			  protocol:[[[self request] URL] scheme]
+																				 realm:nil
+																  authenticationMethod:authenticationMethod];
+	
+	[_currentAuthenticationChallenge release];
+	_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
+																				 proposedCredential:[self proposedCredential]
+																			   previousFailureCount:_authenticationFailureCount
+																					failureResponse:nil
+																							  error:nil
+																							 sender:self];
+	
+	[protectionSpace release];
+	
+	[[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+	
+	// Prepare for another failure
+	_authenticationFailureCount++;
+}
+
+/*  MobileMe overrides this to fetch the user's account
+ */
+- (NSURLCredential *)proposedCredential
+{
+    return nil;
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _currentAuthenticationChallenge)
+    {
+        [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+    }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	if (challenge == _currentAuthenticationChallenge)
+    {
+		[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+        
+        [self sendError:@"" code:401];  // TODO: The error should include the response string from the server
+        
+        // Move onto the next command
+        [self setState:CKConnectionIdleState];
 	}
 }
 
+/*  Retry the request, this time with authentication information.
+ */
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge != _currentAuthenticationChallenge)	return;
+	[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+    
+	
+	
+	// Use digest-based authentication if supported
+	if (_currentDigestRealm || _currentDigestOpaque || _currentDigestNonce)
+	{
+		NSString *digestNonce = (_currentDigestNonce) ? _currentDigestNonce : @"";
+        NSString *digestOpaque = (_currentDigestOpaque) ? _currentDigestOpaque : @"";
+        NSString *digestRealm = (_currentDigestRealm) ? _currentDigestRealm : @"";
+		
+		//See http://en.wikipedia.org/wiki/Digest_access_authentication for the naming conventions used here.
+		NSString *HA1 = [[NSString stringWithFormat:@"%@:%@:%@", [credential user], digestRealm, [credential password]] md5Hash];
+		NSString *HA2 = [[NSString stringWithFormat:@"%@:%@", [myCurrentRequest method], [myCurrentRequest uri]] md5Hash];
+		
+		_digestNonceCount++;
+		NSString *nonceCounterString = [NSString stringWithFormat:@"%08x", _digestNonceCount];
+		//As far as I understand, the cnonce is a client-specified value. See http://greenbytes.de/tech/webdav/rfc2617.html#rfc.iref.c.7
+		NSString *cnonceString = @"0a4f113b";
+		NSString *qopString = @"auth";		
+		//HA1:nonce:nc:cnonce:qop:HA2
+		NSString *response = [[NSString stringWithFormat:@"%@:%@:%@:%@:%@:%@", HA1, digestNonce, nonceCounterString, cnonceString, qopString, HA2] md5Hash];
+		
+		NSMutableString *tempAuth = [[NSMutableString alloc] init];
+		[tempAuth appendFormat:@"Digest username=\"%@\"", [credential user]];
+		[tempAuth appendFormat:@", realm=\"%@\"", digestRealm];
+		[tempAuth appendFormat:@", nonce=\"%@\"", digestNonce];
+		[tempAuth appendFormat:@", uri=\"%@\"", [myCurrentRequest uri]];
+		[tempAuth appendFormat:@", qop=\"%@\"", qopString];
+		[tempAuth appendFormat:@", nc=\"%@\"", nonceCounterString];
+		[tempAuth appendFormat:@", cnonce=\"%@\"", cnonceString];
+		[tempAuth appendFormat:@", response=\"%@\"", response];
+		[tempAuth appendFormat:@", opaque=\"%@\"", digestOpaque];
+		
+		NSString *authorization = [tempAuth copy];
+		[tempAuth release];
+		
+		[myCurrentRequest setHeader:authorization forKey:@"Authorization"];
+		[authorization release];
+	}
+	
+	// Basic HTTP authentication
+	else
+    {
+        // Store the new credential
+		NSString *authString = [[NSString alloc] initWithFormat:@"%@:%@", [credential user], [credential password]];
+		NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
+		[authString release];
+		
+		NSAssert(!_basicAccessAuthorizationHeader, @"_basicAccessAuthorizationHeader is not nil. It should be reset to nil straight after failing authentication");
+		_basicAccessAuthorizationHeader = [[NSString alloc] initWithFormat:@"Basic %@", [authData base64Encoding]];
+    }
+	
+	
+	// Resend the request with authentication.
+	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+}
+
+
 @end
+

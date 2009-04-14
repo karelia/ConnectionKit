@@ -27,15 +27,21 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
  */
+
+
 #import <Cocoa/Cocoa.h>
+
+#import "CKConnectionRequest.h"
+
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
+
 @class CKTransferRecord;
 
-// Some shared Error Codes
 
+// Some shared Error Codes
 enum {
 	ConnectionErrorUploading = 49101,
 	ConnectionErrorDownloading,
@@ -49,64 +55,90 @@ enum {
 	ConnectionErrorGeneric,
 };
 
-@protocol CKConnection <NSObject, NSCopying>
+typedef enum {
+	CKTranscriptSent,
+	CKTranscriptReceived,
+	CKTranscriptData,
+} CKTranscriptType;
+
+
+@protocol CKConnection <NSObject>
 
 + (NSString *)name;
 
-+ (id <CKConnection>)connectionToHost:(NSString *)host
-                                 port:(NSNumber *)port
-                             username:(NSString *)username
-                             password:(NSString *)password
-                                error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithURL:(NSURL *)url error:(NSError **)error;
-
-+ (id <CKConnection>)connectionWithName:(NSString *)name
-                                   host:(NSString *)host
-                                   port:(NSNumber *)port
-                               username:(NSString *)username
-                               password:(NSString *)password
-                                  error:(NSError **)error;
+/*!
+ @method URLSchemes
+ @result An array of the URL schemes supported by the connection.
+ */
++ (NSArray *)URLSchemes;
 
 /*!
- @method initWithHost:port:username:password:error:
- @abstract The designated initializer for connections.
- @discussion Initializes a connection object with the supplied parameters.
- @param host The host address to connect to.
- @param port The port to connect on. Supply nil to use the connection's default port, or if no port is required.
- @param username The username to use when connecting.
- @param password The password to use when connecting.
- @param error If an error occurs, upon return contains an NSError object that describes the problem.
- @result Returns an initialized connection object or nil if there was an error.
+ @method port
+ @discussion Return 0 for abstract classes or connections that do not use a port.
+ @result The default port for connections of the receiver's class.
  */
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error;
++ (NSInteger)defaultPort;
 
-- (NSString *)host;
-- (NSInteger)port;
-- (NSString *)username;
-- (NSString *)password;
 
-- (void)setUsername:(NSString *)username;
-- (void)setPassword:(NSString *)password;
+/*!
+ @method initWithRequest:
+ @abstract The designated initializer for connections.
+ @param request The request to connect with. The request object is deep-copied as part of the
+ initialization process. Changes made to request after this method returns do not affect the request
+ that is used for the loading process.
+ @result Returns an initialized connection object or nil if the request was unsuitable.
+ */
+- (id)initWithRequest:(CKConnectionRequest *)request;
 
-// you can set a name on a connection to help with debugging
-- (void)setName:(NSString *)name;
+
+/*!
+ @method request
+ @discussion Please do NOT modify this request in any way!
+ @result Returns the request supplied when creating the connection.
+ */
+- (CKConnectionRequest *)request;
+
+
+// you can set a name on a connection to help with debugging.
+// TODO: Should this really be part of the protocol, or a CKAbstractConnection implementation detail?
 - (NSString *)name; 
+- (void)setName:(NSString *)name;
 
-- (void)setDelegate:(id)delegate;   // we do not retain the delegate
+/*!
+ @method delegate:
+ @result Returns the receiver's delegate.
+ */
 - (id)delegate;
+/*!
+ @method setDelegate:
+ @abstract Sets the receiver's delegate.
+ @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
+ */
+- (void)setDelegate:(id)delegate;
 
+
+/*!
+ @method connect
+ @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
+ */
 - (void)connect;
+/*!
+ @method isConnected
+ @result Returns YES once the connection has successfully connected to the server
+ */
 - (BOOL)isConnected;
 - (BOOL)isBusy;
 
-/* disconnect queues a disconnection where as forceDisconnect '
-   will terminate at the next available opportunity. */
+ 
+/*!
+ @method disconnect
+ @abstract Ends the connection after any other items in the queue have been processed.
+ */
 - (void)disconnect;
+/*!
+ @method forceDisconnect
+ @abstract Ends the connection at the next available opportunity.
+ */
 - (void)forceDisconnect;
 - (void)cleanupConnection;
 
@@ -125,12 +157,7 @@ enum {
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
-- (void)startBulkCommands;
-- (void)endBulkCommands;
 
-- (void)uploadFile:(NSString *)localPath;
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath;
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
 /* 
 	New method that allows you to set a custom delegate for the upload.
 	You must implement the ConnectionTransferDelegate informal protocol.
@@ -147,17 +174,11 @@ enum {
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)flag;
 
-- (void)resumeUploadFile:(NSString *)localPath fileOffset:(unsigned long long)offset;
-- (void)resumeUploadFile:(NSString *)localPath toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-
 - (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
 								toFile:(NSString *)remotePath 
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate;
 
-
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath;
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag;
 
 /* 
 	New method that allows you to set a custom delegate for the upload.
@@ -169,15 +190,10 @@ enum {
 				checkRemoteExistence:(BOOL)flag
 							delegate:(id)delegate;
 
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset;
-
 - (CKTransferRecord *)resumeUploadFromData:(NSData *)data
 									toFile:(NSString *)remotePath 
 								fileOffset:(unsigned long long)offset
 								  delegate:(id)delegate;
-
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag;
-- (void)resumeDownloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath fileOffset:(unsigned long long)offset;
 
 /* 
 	New method that allows you to set a custom delegate for the download.
@@ -198,6 +214,7 @@ enum {
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag;
 
+
 - (void)checkExistenceOfPath:(NSString *)path;
 
 - (unsigned)numberOfTransfers;
@@ -207,17 +224,8 @@ enum {
 - (void)directoryContents;
 - (void)contentsOfDirectory:(NSString *)dirPath;
 
-- (void)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (void)removePropertyForKey:(NSString *)key;
-
-- (void)setTranscript:(NSTextStorage *)transcript;
-
 - (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;
-
-- (NSString *)urlScheme; // by default calls class method
-+ (NSString *)urlScheme; //eg http
 
 - (void)editFile:(NSString *)remoteFile;
 
@@ -226,20 +234,40 @@ enum {
 @end
 
 
+#pragma mark -
+
 
 @interface NSObject (CKConnectionDelegate)
 
-// There are 21 callbacks & flags.
+// There are 29 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
-- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
-- (BOOL)connection:(id <CKConnection>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
+#pragma mark Overall connection
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
-- (void)connection:(id <CKConnection>)con didAuthenticateToHost:(NSString *)host error:(NSError *)error; // this is a successful login
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con;
+- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
 
-//SFTP Passphrase Support
-- (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
+
+#pragma mark Authentication
+/*!
+ @method connection:didReceiveAuthenticationChallenge:
+ @abstract Operates just like the NSURLConnection delegate method -connection:didReceiveAuthenticationChallenge:
+ @param connection The connection for which authentication is needed
+ @param challenge The NSURLAuthenticationChallenge to start authentication for
+ */
+- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+/*!
+ @method connection:didCancelAuthenticationChallenge:
+ @abstract Operates exactly the same as its NSURLConnection counterpart.
+ @param connection The connection sending the message.
+ @param challenge The challenge that was canceled.
+ */
+- (void)connection:(id <CKConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+- (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
+
+
+#pragma mark Other
 
 - (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
@@ -254,10 +282,9 @@ enum {
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 
-- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
+- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
-- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
@@ -268,7 +295,6 @@ enum {
 - (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error;
 
 
-- (NSString *)connection:(id <CKConnection>)con needsAccountForUsername:(NSString *)username;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath;
@@ -277,7 +303,24 @@ enum {
 - (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
 
 - (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
+
+#pragma mark Transcript
+/*!
+ @method connection:appendString:toTranscript:
+ @abstract Called when the connection has something to add to the connection transcript.
+ @discussion Delegates should implement this method if they are interested in keeping a transcript. This could be to
+ log the string to the console or add it to a text view.
+ @param connection The connection sending the message
+ @param string The string to add to the transcript
+ @param transcript The nature of the string that is to be transcribed. CKAbstractConnection has class methods to apply formatting to the transcript.
+ */
+- (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+
 @end
+
+
+#pragma mark -
+
 
 @interface NSObject (CKConnectionTransferDelegate)
 - (void)transferDidBegin:(CKTransferRecord *)transfer;
@@ -287,11 +330,6 @@ enum {
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
 
-//registration type dictionary keys
-extern NSString *ACTypeKey;
-extern NSString *ACTypeValueKey;
-extern NSString *ACPortTypeKey;
-extern NSString *ACURLTypeKey; /* ftp://, http://, etc */
 
 // Attributes for which there isn't a corresponding NSFileManager key
 extern NSString *cxFilenameKey;

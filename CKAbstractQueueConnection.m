@@ -52,13 +52,9 @@ NSString *CKQueueDomain = @"Queuing";
 
 @implementation CKAbstractQueueConnection
 
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (self = [super initWithHost:host port:port username:username password:password error:error])
+	if (self = [super initWithRequest:request])
 	{
 		_queueLock = [[NSRecursiveLock alloc] init];
 		
@@ -96,12 +92,12 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (void)turnOnRecursiveUpload
 {
-	_flags.isRecursiveUploading = YES;
+	_isRecursiveUploading = YES;
 }
 
 - (void)turnOffRecursiveUpload
 {
-	_flags.isRecursiveUploading = NO;
+	_isRecursiveUploading = NO;
 }
 
 - (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
@@ -358,7 +354,7 @@ NSString *CKQueueDomain = @"Queuing";
 	}
 	[_queueLock unlock];
 	
-	if (!_flags.inBulk && !isChecking) {
+	if (!_inBulk && !isChecking) {
 		[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] checkQueue];
 	}
 }

@@ -34,7 +34,8 @@
 
 - (id)init
 {
-	if (self = [super initWithHost:@"na" port:@"na" username:@"na" password:@"na" error:nil]) {
+	if (self = [super initWithRequest:nil])
+    {
 		_connections = [[NSMutableArray array] retain];
 		_folderCreations = [[NSMutableArray array] retain];
 		_connectedConnections = [[NSMutableArray array] retain];
@@ -43,16 +44,9 @@
 }
 
 /* Just keep the framework happy with this */
-- (id)initWithHost:(NSString *)host
-			  port:(NSNumber *)port
-		  username:(NSString *)username
-		  password:(NSString *)password
-			 error:(NSError **)error
+- (id)initWithURL:(NSURL *)URL
 {
-	if (self = [self init]) {
-		
-	}
-	return self;
+	return [self init];
 }
 
 - (void)dealloc
@@ -74,7 +68,7 @@
 	
 	while (cur = [e nextObject])
 	{
-		[hosts addObject:[cur host]];
+		[hosts addObject:[[[cur request] URL] host]];
 	}
 	
 	if ([hosts count] == 1)
@@ -342,11 +336,6 @@
 	[_connections makeObjectsPerformSelector:@selector(endBulkCommands)];
 }
 
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath toFile:[localPath lastPathComponent]];
-}
-
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
 	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO];
@@ -399,13 +388,6 @@
 	while (cur = [e nextObject]) {
 		[cur uploadFromData:data toFile:remotePath checkRemoteExistence:flag];
 	}
-}
-
-- (void)resumeUploadFromData:(NSData *)data toFile:(NSString *)remotePath fileOffset:(unsigned long long)offset
-{
-	@throw [NSException exceptionWithName:NSInternalInconsistencyException
-								   reason:@"Not supported in MultipleConnection"
-								 userInfo:nil];
 }
 
 - (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
@@ -652,15 +634,6 @@
 - (void)connectionDidCancelTransfer:(id <CKConnection>)con
 {
 	// we don't pass this on at the moment
-}
-
-- (void)connectionDidSendBadPassword:(id <CKConnection>)con
-{
-	if (_flags.badPassword)
-	{
-		NSLog(@"Bad Password for actual connection: %@@%@", [con username], [con host]);
-		[_delegate connectionDidSendBadPassword:self];
-	}
 }
 
 @end

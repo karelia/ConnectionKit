@@ -16,6 +16,7 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol.h"
+#import "CKURLProtectionSpace.h"
 
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
@@ -48,6 +49,15 @@
 - (void)passwordErrorOccurred;
 @end
 
+
+@interface CKSFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+- (void)_sendAuthenticationChallenge;
+@end
+
+
+#pragma mark -
+
+
 @implementation CKSFTPConnection
 
 NSString *SFTPErrorDomain = @"SFTPErrorDomain";
@@ -58,38 +68,26 @@ static NSString *lsform = nil;
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:22], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
-	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"sftp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"ssh://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
-	[CKAbstractConnection registerConnectionClass:[CKSFTPConnection class] forTypes:[NSArray arrayWithObjects:port, url, url2, nil]];
-	[pool release];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"sftp"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"ssh"];
+    [pool release];
 }
+
++ (NSInteger)defaultPort { return 22; }
 
 + (NSString *)name
 {
 	return @"SFTP";
 }
 
-+ (NSString *)urlScheme
++ (NSArray *)URLSchemes
 {
-	return @"sftp";
+	return [NSArray arrayWithObjects:@"sftp", @"ssh", nil];
 }
 
-+ (id)connectionToHost:(NSString *)host
-				  port:(NSNumber *)port
-			  username:(NSString *)username
-			  password:(NSString *)password
-				 error:(NSError **)error
+- (id)initWithRequest:(CKConnectionRequest *)request
 {
-	return [[[CKSFTPConnection alloc] initWithHost:host
-											port:port
-										username:username
-										password:password
-										   error:error] autorelease];
-}
-- (id)initWithHost:(NSString *)host port:(NSNumber *)port username:(NSString *)username password:(NSString *)password error:(NSError **)error
-{
-	if ((self = [super initWithHost:host port:port username:username password:password error:error]))
+	if ((self = [super initWithRequest:request]))
 	{
 		theSFTPTServer = [[CKSFTPTServer alloc] init];
 		connectToQueue = [[NSMutableArray array] retain];
@@ -121,6 +119,8 @@ static NSString *lsform = nil;
 	[currentDirectory release];
 	[rootDirectory release];
 	[attemptedKeychainPublicKeyAuthentications release];
+    [_lastAuthenticationChallenge release];
+    [_currentPassword release];
 	
 	[super dealloc];
 }
@@ -137,37 +137,51 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Connecting
+
 - (void)connect
 {
-	if (isConnecting)
-		return;
-		
-	if (![self username])
-	{
-		//Can't do anything here, throw an error.
-		return;
-	}
-	NSMutableArray *parameters = [NSMutableArray array];
+	if (_isConnecting || [self isConnected]) return;
+    
+    
+	_isConnecting = YES;
+	
+    // Can't connect till we have a password (due to using the SFTP command-line tool)
+    [self _sendAuthenticationChallenge];
+}
+
+/*  Support method. Called once the delegate has provided a username to connect with
+ */
+- (void)connectWithUsername:(NSString *)username
+{
+    NSAssert(username, @"Can't create an SFTP connection without a username");
+    
+    NSMutableArray *parameters = [NSMutableArray array];
 	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
 		[parameters addObject:@"-C"];
-	if ([self port])
+	
+    if ([[[self request] URL] port])
+    {
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
-	if ([self password] && [[self password] length] > 0)
+    }
+    
+	if (_currentPassword && [_currentPassword length] > 0)
+    {
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
+    }
 	else
 	{
-		NSString *publicKeyPath = [self propertyForKey:@"CKSFTPPublicKeyPath"];
+		NSString *publicKeyPath = [[self request] SFTPPublicKeyPath];
 		if (publicKeyPath && [publicKeyPath length] > 0)
 			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=%@", publicKeyPath]];
 		else
 		{
-			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", [self username]]];
+			[parameters addObject:[NSString stringWithFormat:@"-o IdentityFile=~/.ssh/%@", username]];
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_rsa"];
 			[parameters addObject:@"-o IdentityFile=~/.ssh/id_dsa"];
 		}
 	}
-	[parameters addObject:[NSString stringWithFormat:@"%@@%@", [self username], [self host]]];
+	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [[[self request] URL] host]]];
 	
 	switch (sshversion())
 	{
@@ -188,12 +202,9 @@ static NSString *lsform = nil;
 			break;
     }
 	
-	if (isConnecting || _flags.isConnected)
-		return;
 	
 	[self _setupConnectTimeOut];
 	[self setState:CKConnectionNotConnectedState];
-	isConnecting = YES;
 	[NSThread detachNewThreadSelector:@selector(_threadedSpawnSFTPTeletypeServer:) toTarget:self withObject:parameters];
 }
 - (void)_threadedSpawnSFTPTeletypeServer:(NSArray *)parameters
@@ -335,21 +346,8 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Uploading
-- (void)uploadFile:(NSString *)localPath
-{
-	[self uploadFile:localPath orData:nil offset:0 remotePath:nil checkRemoteExistence:NO delegate:nil];
-}
 
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
-}
-
-- (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag
-{
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:flag delegate:nil];
-}
-- (CKTransferRecord *)uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath  checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
+- (CKTransferRecord *)uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
 {
 	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
@@ -361,6 +359,7 @@ static NSString *lsform = nil;
 	   checkRemoteExistence:flag
 				   delegate:delegate];
 }
+
 - (CKTransferRecord *)uploadFile:(NSString *)localPath orData:(NSData *)data offset:(unsigned long long)offset remotePath:(NSString *)remotePath checkRemoteExistence:(BOOL)checkRemoteExistenceFlag delegate:(id)delegate
 {
 	if (!localPath)
@@ -376,7 +375,12 @@ static NSString *lsform = nil;
 		//Super Über Cheap Way Until I figure out how to do this in a pretty way.
 		NSString *temporaryParentPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ConnectionKitTemporary"];
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:temporaryParentPath attributes:nil];
-		localPath = [temporaryParentPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
+		
+		static unsigned filenameCounter = 0;	// TODO: Make this counter threadsafe
+		filenameCounter++;
+		NSString *fileName = [NSString stringWithFormat:@"%u-%@", filenameCounter, [remotePath lastPathComponent]];
+		
+		localPath = [temporaryParentPath stringByAppendingPathComponent:fileName];
 		[data writeToFile:localPath atomically:YES];
 	}
 	else
@@ -404,10 +408,6 @@ static NSString *lsform = nil;
 	[self queueCommand:upload];
 	return record;
 }
-- (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
-{
-	[self uploadFile:nil orData:data offset:0 remotePath:remotePath checkRemoteExistence:NO delegate:nil];
-}
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
 {
@@ -424,10 +424,6 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Downloading
-- (void)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag
-{
-	[self downloadFile:remotePath toDirectory:dirPath overwrite:flag delegate:nil];
-}
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath toDirectory:(NSString *)dirPath overwrite:(BOOL)flag delegate:(id)delegate
 {
@@ -439,14 +435,12 @@ static NSString *lsform = nil;
 	
 	if (!flag && [[NSFileManager defaultManager] fileExistsAtPath:localPath])
 	{
-		if (_flags.error)
-		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
-									  remotePath, NSFilePathErrorKey, nil];
-			NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
-			[_forwarder connection:self didReceiveError:error];
-		}
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
+                                  remotePath, NSFilePathErrorKey, nil];
+        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
+        [[self client] connectionDidReceiveError:error];
+		
 		return nil;
 	}
 	
@@ -476,6 +470,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Deletion
+
 - (void)deleteFile:(NSString *)remotePath
 {
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"path is nil!");
@@ -506,6 +501,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Misc.
+
 - (void)threadedCancelTransfer
 {
 	[self forceDisconnect];
@@ -514,6 +510,7 @@ static NSString *lsform = nil;
 
 #pragma mark -
 #pragma mark Command Queueing
+
 - (void)sendCommand:(id)command
 {
 	[self _writeSFTPCommandWithString:command];
@@ -640,8 +637,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
-	if (_flags.changeDirectory)
-		[_forwarder connection:self didChangeToDirectory:path error:error];	
+	[[self client] connectionDidChangeToDirectory:path error:error];	
 }
 
 - (void)_finishedCommandInConnectionCreateDirectoryState:(NSString *)commandString serverErrorResponse:(NSString *)errorResponse
@@ -658,8 +654,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
-	if (_flags.createDirectory)
-		[_forwarder connection:self didCreateDirectory:path error:error];
+	[[self client] connectionDidCreateDirectory:path error:error];
 	
 }
 
@@ -684,8 +679,7 @@ static NSString *lsform = nil;
 	[_fileRenames removeObjectAtIndex:0];
 	[_fileRenames removeObjectAtIndex:0];							 
 	
-	if (_flags.rename)
-		[_forwarder connection:self didRename:fromPath to:toPath error:error];
+	[[self client] connectionDidRename:fromPath to:toPath error:error];
 
 	[fromPath release];
 	[toPath release];
@@ -703,8 +697,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.permissions)
-		[_forwarder connection:self didSetPermissionsForFile:[self currentPermissionChange] error:error];
+	[[self client] connectionDidSetPermissionsForFile:[self currentPermissionChange] error:error];
 	[self dequeuePermissionChange];
 }
 
@@ -720,8 +713,7 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.deleteFile)
-		[_forwarder connection:self didDeleteFile:[self currentDeletion] error:error];
+	[[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
 	[self dequeueDeletion];
 }
 
@@ -737,8 +729,8 @@ static NSString *lsform = nil;
 		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
-	if (_flags.deleteDirectory)
-		[_forwarder connection:self didDeleteDirectory:[self currentDeletion] error:error];
+	[[self client] connectionDidDeleteDirectory:[self currentDeletion] error:error];
+    
 	[self dequeueDeletion];
 }
 
@@ -757,9 +749,9 @@ static NSString *lsform = nil;
 	CKInternalTransferRecord *upload = [[self currentUpload] retain]; 
 	[self dequeueUpload];
 	
-	if (_flags.uploadFinished)
-		[_forwarder connection:self uploadDidFinish:[upload remotePath] error:error];
-	if ([upload delegateRespondsToTransferDidFinish])
+	[[self client] uploadDidFinish:[upload remotePath] error:error];
+	
+    if ([upload delegateRespondsToTransferDidFinish])
 		[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 
 	[upload release];
@@ -782,18 +774,19 @@ static NSString *lsform = nil;
 	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
 	[self dequeueDownload];
 	
-	if (_flags.downloadFinished)
-		[_forwarder connection:self downloadDidFinish:[download remotePath] error:error];
+	[[self client] downloadDidFinish:[download remotePath] error:error];
+    
 	if ([download delegateRespondsToTransferDidFinish])
 		[[download delegate] transferDidFinish:[download userInfo] error:error];
-	if (_flags.error)
-		[_forwarder connection:self didReceiveError:error];
+
+    [[self client] connectionDidReceiveError:error];
 	
 	[download release];	
 }
 
 #pragma mark -
 #pragma mark SFTPTServer Callbacks
+
 - (void)didConnect
 {
 	if (_connectTimeoutTimer && [_connectTimeoutTimer isValid])
@@ -826,29 +819,23 @@ static NSString *lsform = nil;
 	_connectTimeoutTimer = nil;
 	
 	
-	if (_flags.didConnect)
-	{
-		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
-		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-								  localizedDescription, NSLocalizedDescriptionKey, 
-								  [self host], ConnectionHostKey, nil];
-		
-		NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
-		[_forwarder connection:self didConnectToHost:[self host] error:error];
-	}
+    NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Timed Out waiting for remote host.", @"time out");
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                              localizedDescription, NSLocalizedDescriptionKey, 
+                              [[[self request] URL] host], ConnectionHostKey, nil];
+    
+    NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
+    [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:error];
 }
 
 - (void)didSetRootDirectory
 {
 	rootDirectory = [[NSString alloc] initWithString:currentDirectory];
 	
-	isConnecting = NO;
-	_flags.isConnected = YES;
+	_isConnecting = NO;
+	_isConnected = YES;
 	
-	if (_flags.didConnect)
-		[_forwarder connection:self didConnectToHost:[self host] error:nil];
-	if (_flags.didAuthenticate)
-		[_forwarder connection:self didAuthenticateToHost:[self host] error:nil];
+	[[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
 }
 
 - (void)setCurrentDirectory:(NSString *)current
@@ -866,17 +853,13 @@ static NSString *lsform = nil;
 		
 	[attemptedKeychainPublicKeyAuthentications removeAllObjects];			
 	
-	_flags.isConnected = NO;
-	if (_flags.didDisconnect)
-	{
-		[_forwarder connection:self didDisconnectFromHost:[self host]];
-	}
+	_isConnected = NO;
+	[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
 }
 
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
-	if (_flags.directoryContents)
-		[_forwarder connection:self didReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
+	[[self client] connectionDidReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -886,12 +869,10 @@ static NSString *lsform = nil;
 	
 	if ([uploadInfo delegateRespondsToTransferProgressedTo])
 		[[uploadInfo delegate] transfer:record progressedTo:progress];
-	if (_flags.uploadPercent)
-	{
-		NSString *remotePath = [uploadInfo remotePath];
-		[_forwarder connection:self upload:remotePath progressedTo:progress];
-	}
 	
+    NSString *remotePath = [uploadInfo remotePath];
+	[[self client] upload:remotePath didProgressToPercent:progress];
+		
 	
 	if (progressPercentage != 100.0)
 	{
@@ -908,11 +889,9 @@ static NSString *lsform = nil;
 	{
 		[[uploadInfo delegate] transferDidBegin:[uploadInfo userInfo]];
 	}		
-	if (_flags.didBeginUpload)
-	{
-		NSString *remotePath = [uploadInfo remotePath];
-		[_forwarder connection:self uploadDidBegin:remotePath];
-	}
+	
+	NSString *remotePath = [uploadInfo remotePath];
+	[[self client] uploadDidBegin:remotePath];
 }
 
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred
@@ -936,39 +915,41 @@ static NSString *lsform = nil;
 		}
 	}
 
-	if (_flags.downloadPercent)
-	{
-		NSString *remotePath = [downloadInfo remotePath];
-		[_forwarder connection:self download:remotePath progressedTo:progress];
-	}
+	NSString *remotePath = [downloadInfo remotePath];
+	[[self client] download:remotePath didProgressToPercent:progress];
 }
 - (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo
 {
-	if (_flags.didBeginDownload)
-	{
-		NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
-		[_forwarder connection:self downloadDidBegin:remotePath];
-	}
+	NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
+	[[self client] downloadDidBegin:remotePath];
+	
 	if ([downloadInfo delegateRespondsToTransferDidBegin])
 		[[downloadInfo delegate] transferDidBegin:[downloadInfo userInfo]];
 }
 
 #pragma mark -
+
 - (void)requestPasswordWithPrompt:(char *)header
 {
-	if (![self password])
+	if (_currentPassword)
+    {
+        // Send the password to the server
+        CKConnectionCommand *command = [CKConnectionCommand command:_currentPassword
+													     awaitState:CKConnectionIdleState
+													      sentState:CKConnectionSentPasswordState
+													      dependant:nil
+													       userInfo:nil];
+		[self pushCommandOnHistoryQueue:command];
+		_state = [command sentState];
+		[self sendCommand:[command command]];
+
+		[_currentPassword release]; _currentPassword = nil;
+    }
+    else
 	{
-		[self passwordErrorOccurred];
-		return;
+		// Request a new password from the delegate
+        [self _sendAuthenticationChallenge];
 	}
-	CKConnectionCommand *command = [CKConnectionCommand command:[self password]
-													 awaitState:CKConnectionIdleState
-													  sentState:CKConnectionSentPasswordState
-													  dependant:nil
-													   userInfo:nil];
-	[self pushCommandOnHistoryQueue:command];
-	_state = [command sentState];
-	[self sendCommand:[command command]];
 }
 
 - (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo
@@ -983,6 +964,7 @@ static NSString *lsform = nil;
 	_state = [command sentState];
 	[self sendCommand:[command command]];
 }
+
 - (void)passphraseRequested:(NSString *)buffer
 {
 	//Typical Buffer: Enter passphrase for key '/Users/brian/.ssh/id_rsa': 
@@ -1006,16 +988,14 @@ static NSString *lsform = nil;
 	}
 	
 	//We don't have it on keychain, so ask the delegate for it if we can, or ask ourselves if not.	
-	NSString *passphrase = nil;
-	if (_flags.passphrase)
-	{
-		passphrase = [_forwarder connection:self passphraseForHost:[self host] username:[self username] publicKeyPath:pubKeyPath];
-	}
-	else
+	NSString *passphrase = [[self client] passphraseForHost:[[[self request] URL] host]
+                                                   username:[[[self request] URL] user] publicKeyPath:pubKeyPath];
+	
+	if (!passphrase)
 	{
 		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
 		CKSSHPassphrase *passphraseFetcher = [[CKSSHPassphrase alloc] init];
-		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[self username]];
+		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[[[self request] URL] user]];
 		[passphraseFetcher release];
 	}
 	
@@ -1037,18 +1017,97 @@ static NSString *lsform = nil;
 
 - (void)passwordErrorOccurred
 {
-	if (_flags.badPassword)
-	{
-		[_forwarder connectionDidSendBadPassword:self];
-	}
-}
-
-- (void)addStringToTranscript:(NSString *)stringToAdd
-{
-	@synchronized (self)
-	{
-		[self appendToTranscript:[NSAttributedString attributedStringWithString:stringToAdd attributes:[CKAbstractConnection receivedAttributes]]];
-	}
+	// TODO: Use the new authentication APIs instead
+	// [_forwarder connectionDidSendBadPassword:self];
 }
 
 @end
+
+
+#pragma mark -
+#pragma mark Authentication
+
+
+@implementation CKSFTPConnection (Authentication)
+
+- (void)_sendAuthenticationChallenge
+{
+    NSInteger previousFailureCount = (_lastAuthenticationChallenge) ? [_lastAuthenticationChallenge previousFailureCount] + 1 : 0;
+    
+    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
+                                                                                  port:[self port]
+                                                                              protocol:@"ssh"
+                                                                                 realm:nil
+                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
+    
+    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
+                                                                              proposedCredential:nil
+                                                                            previousFailureCount:previousFailureCount
+                                                                                 failureResponse:nil
+                                                                                           error:nil
+                                                                                          sender:self];
+    
+    [protectionSpace release];
+    
+    [[self client] connectionDidReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        [self disconnect];
+    }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    // SFTP absolutely requires authentication to continue, so fail with an error
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"SFTP connections require some form of authentication.", @"SFTP authenticaton error")
+                                                             forKey:NSLocalizedDescriptionKey];
+        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKConnectionErrorBadPassword userInfo:userInfo];
+        [[self client] connectionDidReceiveError:error];
+        
+        [self disconnect];
+    }
+}
+
+/*  Start login
+ */
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge == _lastAuthenticationChallenge)
+    {
+        // Store the password ready for after we've connected
+        _currentPassword = [[credential password] copy];
+        
+        // Start login with the supplied username
+        [self connectWithUsername:[credential user]];
+    }
+}
+
+@end
+
+
+#pragma mark -
+#pragma mark CKConnectionRequest
+
+
+@implementation CKConnectionRequest (CKSFTPConnection)
+
+- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
+
+@end
+
+@implementation CKMutableConnectionRequest (CKSFTPConnection)
+
+- (void)setSFTPPublicKeyPath:(NSString *)path
+{
+    [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
+}
+
+@end
+
+
