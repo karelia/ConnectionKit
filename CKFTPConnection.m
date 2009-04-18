@@ -2814,7 +2814,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	// Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [dirPath stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:mkdir];
 	
 	[self queueCommand:mkdir];
@@ -2876,7 +2876,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [dirPath stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:mkdir];
 	
 	[self queuePermissionChange:dirPath];
@@ -2900,7 +2900,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [path stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:chmod];
 	
 	[self queueCommand:chmod];
@@ -2919,7 +2919,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [dirPath stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:rm];
 	
 	[self queueCommand:rm];
@@ -2959,7 +2959,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [path stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:del];
 	
 	[self queueCommand:del];
@@ -3078,7 +3078,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [remotePath stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:retr];	
 	
 	[self queueCommand:retr];
@@ -3589,7 +3589,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [remotePath stringByDeletingLastPathComponent];
-	if (![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && [parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:store];
 	
 	[self queueCommand:store];
