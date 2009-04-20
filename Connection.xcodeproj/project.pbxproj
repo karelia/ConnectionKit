@@ -50,7 +50,7 @@
 		3C231A5B0A66ECB200951F9E /* CKDotMacConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82B09F7048400172CDD /* CKDotMacConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3C231A5C0A66ECB400951F9E /* CKWebDAVSecureConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84B09F7048500172CDD /* CKWebDAVSecureConnection.h */; };
 		3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* CKFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3C231A5E0A66ECBB00951F9E /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* CKSFTPConnection.h */; };
+		3C231A5E0A66ECBB00951F9E /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999680CA8376B00A22156 /* gear_disabled.tiff */; };
 		7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999690CA8376B00A22156 /* gear_normal.tiff */; };
 		7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7909996A0CA8376B00A22156 /* gear_pressed.tiff */; };
