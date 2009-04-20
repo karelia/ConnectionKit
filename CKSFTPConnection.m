@@ -7,6 +7,7 @@
 //
 
 #import "CKSFTPConnection.h"
+#import "CKSFTPTServer.h"
 
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
@@ -156,15 +157,26 @@ static NSString *lsform = nil;
     NSAssert(username, @"Can't create an SFTP connection without a username");
     
     NSMutableArray *parameters = [NSMutableArray array];
-	BOOL enableCompression = NO; //We do support this on the backend, but we have no UI for it yet.
+	BOOL enableCompression = NO; // We do support this on the backend, but we have no UI for it yet.
 	if (enableCompression)
 		[parameters addObject:@"-C"];
 	
+    // Port
     if ([[[self request] URL] port])
     {
 		[parameters addObject:[NSString stringWithFormat:@"-o Port=%i", [self port]]];
     }
     
+    // Logging Level
+    NSUInteger loggingLevel = [[self request] SFTPLoggingLevel];
+    if (loggingLevel > 0)
+    {
+        [parameters addObject:[@"-" stringByPaddingToLength:(loggingLevel + 1)
+                                                 withString:@"v"
+                                            startingAtIndex:0]];
+    }
+    
+    // Authentication
 	if (_currentPassword && [_currentPassword length] > 0)
     {
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
@@ -1099,6 +1111,11 @@ static NSString *lsform = nil;
 
 - (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
 
+- (NSUInteger)SFTPLoggingLevel;
+{
+    return [[self propertyForKey:@"CKSFTPLoggingLevel"] unsignedIntValue];
+}
+
 @end
 
 @implementation CKMutableConnectionRequest (CKSFTPConnection)
@@ -1106,6 +1123,11 @@ static NSString *lsform = nil;
 - (void)setSFTPPublicKeyPath:(NSString *)path
 {
     [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
+}
+
+- (void)setSFTPLoggingLevel:(NSUInteger)level;
+{
+    [self setProperty:[NSNumber numberWithUnsignedInt:level] forKey:@"CKSFTPLoggingLevel"];
 }
 
 @end
