@@ -1014,10 +1014,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_fileCheckingConnection) 
 	{
-		_fileCheckingConnection = [self copy];
-		[_fileCheckingConnection setDelegate:self];
+		_fileCheckingConnection = [[[self class] alloc] initWithRequest:[self request]];
+        [_fileCheckingConnection setDelegate:self];
 		[_fileCheckingConnection setName:@"File Checking Connection"];
-		[_fileCheckingConnection connect];		
+		[_fileCheckingConnection connect];
 	}
 	[_fileCheckLock lock];
 	if (!_fileCheckInFlight && [self numberOfFileChecks] > 0)
