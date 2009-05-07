@@ -30,6 +30,7 @@ WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH 
 #import <Foundation/Foundation.h>
 #import "CKStreamBasedConnection.h"
 
+
 typedef enum {
 	FTPTransferModeStream = 0,
 	FTPTransferModeBlock,
@@ -57,6 +58,7 @@ typedef enum {
 	FTPChangeDirectoryListingStyle,
 	FTPNoOpState
 } FTPState;
+
 
 @interface CKFTPConnection : CKStreamBasedConnection
 {

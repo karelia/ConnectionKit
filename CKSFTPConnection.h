@@ -7,12 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CKSFTPTServer.h"
 #import "CKStreamBasedConnection.h"
 
 extern NSString *SFTPErrorDomain;
 
-@class CKInternalTransferRecord;
+@class CKSFTPTServer, CKInternalTransferRecord;
 
 @interface CKSFTPConnection : CKAbstractQueueConnection
 {
@@ -39,10 +38,12 @@ extern NSString *SFTPErrorDomain;
 
 @interface CKConnectionRequest (CKSFTPConnection)
 - (NSString *)SFTPPublicKeyPath;
+- (NSUInteger)SFTPLoggingLevel;
 @end
 
 @interface CKMutableConnectionRequest (CKSFTPConnection)
 - (void)setSFTPPublicKeyPath:(NSString *)path;
+- (void)setSFTPLoggingLevel:(NSUInteger)level;
 @end
 
 

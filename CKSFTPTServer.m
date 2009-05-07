@@ -76,6 +76,15 @@ char **environ;
 {
 	if (!buf)
 		return NO;
+    
+    // Debug strings can't contain a prompt
+    NSString *buffer = [[NSString alloc] initWithUTF8String:buf];
+    if ([buffer hasPrefix:@"debug"])
+    {
+        [buffer release];
+        return NO;
+    }
+    [buffer release];
 	
 	while (*prompts)
 	{
@@ -297,7 +306,11 @@ char **environ;
 			return;
 		}
 		else
-			[directoryListingBufferString appendString:[NSString stringWithUTF8String:buf]];
+		{
+			NSString *bufferAppension = [NSString stringWithUTF8String:buf];
+			if (bufferAppension)
+				[directoryListingBufferString appendString:bufferAppension];
+		}
 		memset(buf, '\0', strlen((char *)buf));
     }   
 }
