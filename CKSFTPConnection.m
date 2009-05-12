@@ -88,7 +88,13 @@ static NSString *lsform = nil;
 
 - (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if ((self = [super initWithRequest:request]))
+	if ([[[request URL] host] length] == 0) // SFTP needs a hostname to connect to
+    {
+        [self release];
+        return nil;
+    }
+    
+    if ((self = [super initWithRequest:request]))
 	{
 		theSFTPTServer = [[CKSFTPTServer alloc] init];
 		connectToQueue = [[NSMutableArray array] retain];

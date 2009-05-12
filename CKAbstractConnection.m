@@ -143,9 +143,8 @@ NSDictionary *sDataAttributes = nil;
     NSURL *URL = [request URL];
     NSParameterAssert(URL); // Not supplying a URL is programmer error
     
-    // To start a connection we require the protocol and host at the very least. The protocol should
-    // be one supported by the receiver. Subclasses may impose other restrictions.
-    if (![URL scheme] || ![URL host] || ![[[self class] URLSchemes] containsObject:[URL scheme]])
+    // To start a connection we require the protocol to be one supported by the receiver. Subclasses may impose other restrictions.
+    if (![URL scheme] || ![[[self class] URLSchemes] containsObject:[URL scheme]])
     {
         [self release];
         return nil;
