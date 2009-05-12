@@ -87,7 +87,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (id)initWithRequest:(CKConnectionRequest *)request
 {
-	if (self = [super initWithRequest:request])
+	if ([[[request URL] host] length] == 0) // our subclasses need a hostname to connect to
+    {
+        [self release];
+        return nil;
+    }
+    
+    if (self = [super initWithRequest:request])
 	{
 		_sendBufferLock = [[NSLock alloc] init];
 		_sendBuffer = [[NSMutableData data] retain];
