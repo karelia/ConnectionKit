@@ -365,7 +365,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
             
             NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
             CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
-            if ([response code] == 400) return YES;
+            if ([response code] == 401) return YES;
             
             
             NSDictionary *headers = [response headers];
