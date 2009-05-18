@@ -301,7 +301,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
  *      B) dispatching the next operation
  */
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
     _status = CKConnectionStatusOpen;
     
@@ -310,9 +310,9 @@ withIntermediateDirectories:(BOOL)createIntermediates
     
     // Inform the delegate
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:didOpenAtPath:)])
+    if (delegate && [delegate respondsToSelector:@selector(connection:didOpenWithCurrentDirectoryPath:)])
     {
-        [delegate connection:self didOpenAtPath:path];
+        [delegate connection:self didOpenWithCurrentDirectoryPath:path];
     }
 }
 

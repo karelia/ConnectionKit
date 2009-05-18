@@ -62,12 +62,12 @@
  *  appropriate.
  */
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
 	NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     NSAssert([[self connection] status] == CKConnectionStatusOpening, @"The connection is not ready to be opened");  // This should never be called twice
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didOpenConnectionAtPath:path];
+    [[self connectionThreadProxy] connectionProtocol:protocol didOpenConnectionWithCurrentDirectoryPath:path];
 }
 
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;

@@ -46,7 +46,7 @@
 {
     // WebDAV is built atop HTTP requests, not a connection stream. So, pretend we've connected
     // We could adjust this in the future by sending an exploratory request like Transmit does
-    [[self client] connectionProtocol:self didOpenConnectionAtPath:[[[self request] URL] path]];
+    [[self client] connectionProtocol:self didOpenConnectionWithCurrentDirectoryPath:[[[self request] URL] path]];
 }
 
 - (void)stopConnection
