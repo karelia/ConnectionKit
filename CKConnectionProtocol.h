@@ -98,7 +98,7 @@
 
 // Calling any of these methods at an inappropriate time will result in an exception
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionAtPath:(NSString *)path;
+- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path;
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
