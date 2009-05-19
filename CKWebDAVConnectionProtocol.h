@@ -12,6 +12,8 @@
 
 
 typedef enum {
+    CKWebDAVProtocolStatusNotOpen,
+    CKWebDAVProtocolStatusOpening,
     CKWebDAVProtocolStatusIdle,
     CKWebDAVProtocolStatusDownload,
     CKWebDAVProtocolStatusUploading,

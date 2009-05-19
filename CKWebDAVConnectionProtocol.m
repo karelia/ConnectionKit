@@ -44,9 +44,14 @@
 
 - (void)startConnection
 {
-    // WebDAV is built atop HTTP requests, not a connection stream. So, pretend we've connected
-    // We could adjust this in the future by sending an exploratory request like Transmit does
-    [[self client] connectionProtocol:self didOpenConnectionWithCurrentDirectoryPath:[[[self request] URL] path]];
+    _status = CKWebDAVProtocolStatusOpening;
+    
+    // The server needs to respond to an OPTIONS request confirming it supports WebDAV
+    NSURL *URL = [[self request] URL];
+    NSURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"OPTIONS"];
+    
+    [self startHTTPRequest:request];
+    [request release];
 }
 
 - (void)stopConnection
@@ -178,6 +183,7 @@
 
 - (void)currentOperationDidFinish:(BOOL)didFinish error:(NSError *)error
 {
+    CKWebDAVProtocolStatus oldStatus = _status;
     _status = CKWebDAVProtocolStatusIdle;
     
     [_HTTPConnection cancel];       // definitely don't want to hear from it any more!
@@ -185,13 +191,28 @@
     [_HTTPConnection autorelease];  // autorelease otherwise the connection can be deallocated in
     _HTTPConnection = nil;          // the middle of sending a delegate method
     
-    if (didFinish)
+    
+    if (oldStatus == CKWebDAVProtocolStatusOpening)
     {
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        if (didFinish)
+        {
+            [[self client] connectionProtocol:self didOpenConnectionWithCurrentDirectoryPath:nil];
+        }
+        else
+        {
+            [[self client] connectionProtocol:self didFailWithError:error];
+        }
     }
     else
     {
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        if (didFinish)
+        {
+            [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        }
+        else
+        {
+            [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        }
     }
 }
 
@@ -219,7 +240,7 @@
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveResponse:(NSHTTPURLResponse *)response;
 {
     // It's quite likely there's an error. Make handling it easy
-    BOOL    result = NO;
+    BOOL result = NO;
     NSString *localizedErrorDescription = nil;
     int errorCode = CKConnectionErrorUnknown;
     NSMutableDictionary *errorUserInfo = [NSMutableDictionary dictionary];
@@ -231,6 +252,22 @@
     // Handle the response
     switch (_status)
     {
+        case CKWebDAVProtocolStatusOpening:
+        {
+            NSDictionary *headers = [response allHeaderFields];
+            if ([headers objectForKey:@"DAV"] || [headers objectForKey:@"Dav"])
+            {
+                result = YES;
+            }
+            else
+            {
+                errorCode = CKConnectionErrorBadServerResponse;
+                localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The requested resource does not support WebDAV", "Error starting WebDAV connection");
+            }
+            
+            break;
+        }
+        
         case CKWebDAVProtocolStatusListingDirectory:
         {
             /*

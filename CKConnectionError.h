@@ -44,7 +44,7 @@ enum
     CKConnectionErrorResourceUnavailable =              NSURLErrorResourceUnavailable,                  // Do we need this one?
     CKConnectionErrorNotConnectedToInternet =           NSURLErrorNotConnectedToInternet,
     CKConnectionErrorRedirectToNonExistentLocation =    NSURLErrorRedirectToNonExistentLocation,
-    CKConnectionErrorBadServerResponse =                NSURLErrorBadServerResponse,                    // Do we need this one?
+    CKConnectionErrorBadServerResponse =                NSURLErrorBadServerResponse,                    // Do we need this one? Using it at the moment to signify a server isn't WebDAV-compliant. What happens if you try to do an HTTP GET from a non-HTTP server?
     CKConnectionErrorUserCancelledAuthentication =      NSURLErrorUserCancelledAuthentication,
     CKConnectionErrorUserAuthenticationRequired =       NSURLErrorUserAuthenticationRequired,
     CKConnectionErrorZeroByteResource =                 NSURLErrorZeroByteResource,                     // Do we need this one?
