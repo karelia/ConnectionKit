@@ -32,7 +32,7 @@
  */
 - (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
 
-- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
+- (NSURLRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
 
 #pragma mark Creating a connection
 
@@ -43,7 +43,7 @@
  @param delegate The initial delegate for the connection.
  @result An initialized connection, or nil if no suitable class could be found.
  */
-- (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request;
+- (id <CKConnection>)connectionWithRequest:(NSURLRequest *)request;
 
 // These 2 methods are for compatibility with legacy code
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;

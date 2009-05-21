@@ -8,29 +8,7 @@
 
 #import "CKSFTPConnectionProtocol.h"
 
-#import "CKConnectionRequest.h"
-
 
 @implementation CKSFTPConnectionProtocol
-
-@end
-
-
-#pragma mark -
-#pragma mark CKConnectionRequest
-
-
-@implementation CKConnectionRequest (CKSFTPConnectionRequest)
-
-- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
-
-@end
-
-@implementation CKMutableConnectionRequest (CKSFTPConnectionRequest)
-
-- (void)setSFTPPublicKeyPath:(NSString *)path
-{
-    [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
-}
 
 @end

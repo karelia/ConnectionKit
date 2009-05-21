@@ -16,6 +16,7 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol1.h"
+#import "CKConnectionRequest.h"
 
 #import "CKConnectionAuthentication+Internal.h"
 #import "CKSFTPConnectionProtocol.h"
@@ -87,7 +88,7 @@ static NSString *lsform = nil;
 	return [NSArray arrayWithObjects:@"sftp", @"ssh", nil];
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if ((self = [super initWithRequest:request]))
 	{

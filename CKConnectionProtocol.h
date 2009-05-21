@@ -10,14 +10,14 @@
 #import "CKConnection.h"
 
 
-@class CKConnectionRequest;
+@class NSURLRequest;
 @protocol CKConnectionProtocolClient;
 
 
 @interface CKConnectionProtocol : NSObject
 {
 @private
-    CKConnectionRequest             *_request;
+    NSURLRequest             *_request;
     id <CKConnectionProtocolClient> _client;
 }
 
@@ -31,17 +31,17 @@
  */
 + (BOOL)registerClass:(Class)protocolClass;
 
-+ (Class)classForRequest:(CKConnectionRequest *)request;
++ (Class)classForRequest:(NSURLRequest *)request;
 
 // Return YES if the request is valid for your subclass to handle
-+ (BOOL)canInitWithConnectionRequest:(CKConnectionRequest *)request;
++ (BOOL)canInitWithRequest:(NSURLRequest *)request;
 
 
 #pragma mark Protocol basics
 // You shouldn't generally need to override these methods. They just create a protocol object and
 // hang on to its properties
-- (id)initWithRequest:(CKConnectionRequest *)request client:(id <CKConnectionProtocolClient>)client;
-- (CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client;
+- (NSURLRequest *)request;
 - (id <CKConnectionProtocolClient>)client;
 
 

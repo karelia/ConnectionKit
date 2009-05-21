@@ -40,13 +40,13 @@ static NSMutableArray *sRegisteredClasses;
 
 /*  Classes are consulted in reverse order of registration
  */
-+ (Class)classForRequest:(CKConnectionRequest *)request
++ (Class)classForRequest:(NSURLRequest *)request
 {
     NSEnumerator *classesEnumerator = [sRegisteredClasses reverseObjectEnumerator];
     Class aClass;
     while (aClass = [classesEnumerator nextObject])
     {
-        if ([aClass canInitWithConnectionRequest:request])
+        if ([aClass canInitWithRequest:request])
         {
             return aClass;
         }
@@ -57,7 +57,7 @@ static NSMutableArray *sRegisteredClasses;
 
 #define SUBCLASS_RESPONSIBLE @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"%@ must implement %@", [self className], NSStringFromSelector(_cmd)] userInfo:nil];
 
-+ (BOOL)canInitWithConnectionRequest:(CKConnectionRequest *)request;
++ (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
     SUBCLASS_RESPONSIBLE;
     return NO;
@@ -66,7 +66,7 @@ static NSMutableArray *sRegisteredClasses;
 #pragma mark -
 #pragma mark Init & Dealloc
 
-- (id)initWithRequest:(CKConnectionRequest *)request client:(id <CKConnectionProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client
 {
     NSParameterAssert(request);
     NSParameterAssert(client);
@@ -90,7 +90,7 @@ static NSMutableArray *sRegisteredClasses;
 #pragma mark -
 #pragma mark Accessors
 
-- (CKConnectionRequest *)request { return _request; }
+- (NSURLRequest *)request { return _request; }
 
 - (id <CKConnectionProtocolClient>)client { return _client; }
 

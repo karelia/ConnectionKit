@@ -115,7 +115,7 @@ typedef enum {
     
 @private
     NSString            *_name;
-    CKConnectionRequest *_request;
+    NSURLRequest *_request;
     id                  _delegate;
     
     CKConnectionClient  *_client;

@@ -89,7 +89,7 @@
     NSURLCredential *credential = [challenge proposedCredential];
     if (!credential)
     {
-        NSURL *connectionURL = [[[self connection] connectionRequest] URL];
+        NSURL *connectionURL = [[[self connection] request] URL];
         
         NSString *user = [connectionURL user];
         if (user)

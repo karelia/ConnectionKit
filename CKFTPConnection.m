@@ -34,6 +34,7 @@
 
 #import "CKCacheableHost.h"
 #import "CKConnectionProtocol1.h"
+#import "CKConnectionRequest.h"
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
 #import "CKInternalTransferRecord.h"
@@ -160,7 +161,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return [NSArray arrayWithObject:@"ftp"];
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{

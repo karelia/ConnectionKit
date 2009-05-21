@@ -22,7 +22,7 @@
 
 @implementation CKWebDAVConnectionProtocol
 
-+ (BOOL)canInitWithConnectionRequest:(CKConnectionRequest *)request;
++ (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
     NSURL *URL = [request URL];
     

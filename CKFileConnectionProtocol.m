@@ -14,7 +14,7 @@
 
 @implementation CKFileConnectionProtocol
 
-+ (BOOL)canInitWithConnectionRequest:(CKConnectionRequest *)request;
++ (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
     NSURL *URL = [request URL];
     
@@ -31,7 +31,7 @@
     return NO;
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request client:(id <CKConnectionProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client
 {
     self = [super initWithRequest:request client:client];
     if (self)

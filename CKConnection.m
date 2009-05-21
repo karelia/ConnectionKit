@@ -33,14 +33,14 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 #pragma mark Init & Dealloc
 
-+ (CKConnection *)connectionWithConnectionRequest:(CKConnectionRequest *)request delegate:(id)delegate
++ (CKConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id)delegate
 {
-    return [[[self alloc] initWithConnectionRequest:request delegate:delegate] autorelease];
+    return [[[self alloc] initWithRequest:request delegate:delegate] autorelease];
 }
 
 /*  Should return nil if no protocol can be found
  */
-- (id)initWithConnectionRequest:(CKConnectionRequest *)request delegate:(id)delegate
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate
 {
     [super init];
     
@@ -53,7 +53,7 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
         
         // Start connection
         _client = [[CKConnectionProtocolClient alloc] initWithConnection:self];
-        _protocol = [[protocolClass alloc] initWithRequest:[self connectionRequest] client:_client];
+        _protocol = [[protocolClass alloc] initWithRequest:[self request] client:_client];
         [(CKConnectionProtocolClient *)_client setConnectionProtocol:_protocol];
         
         _status = CKConnectionStatusOpening;
@@ -84,7 +84,7 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 #pragma mark Accessors
 
-- (CKConnectionRequest *)connectionRequest { return _request; }
+- (NSURLRequest *)request { return _request; }
 
 - (NSString *)name { return _name; }
 
