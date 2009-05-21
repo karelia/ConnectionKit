@@ -16,14 +16,14 @@ typedef enum {
 } CKTranscriptType;
 
 
-@class CKConnectionRequest, CKConnectionProtocol;
+@class NSURLRequest, CKConnectionProtocol;
 @protocol CKConnectionProtocolClient;
     
 
 @interface CKConnection : NSObject
 {
 @private
-    CKConnectionRequest *_request;
+    NSURLRequest *_request;
     id                  _delegate;
     NSString            *_name;
     
@@ -38,10 +38,10 @@ typedef enum {
     
 }
 
-+ (CKConnection *)connectionWithConnectionRequest:(CKConnectionRequest *)request delegate:(id)delegate;
-- (id)initWithConnectionRequest:(CKConnectionRequest *)request delegate:(id)delegate;
++ (CKConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id)delegate;
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate;
 
-- (CKConnectionRequest *)connectionRequest;
+- (NSURLRequest *)request;
 
 - (void)cancel; // ceases delegate messages and forces the connection to stop as soon as possible
 

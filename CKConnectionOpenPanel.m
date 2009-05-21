@@ -46,7 +46,7 @@
 
 @implementation CKConnectionOpenPanel
 
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 {
 	NSParameterAssert(request);
     NSParameterAssert([request URL]);

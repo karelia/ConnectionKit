@@ -54,7 +54,7 @@ NSString *CKQueueDomain = @"Queuing";
 
 @implementation CKAbstractQueueConnection
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{

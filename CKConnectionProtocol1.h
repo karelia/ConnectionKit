@@ -32,7 +32,6 @@
 #import <Cocoa/Cocoa.h>
 
 #import "CKConnection.h"
-#import "CKConnectionRequest.h"
 
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
@@ -83,7 +82,7 @@ enum {
  that is used for the loading process.
  @result Returns an initialized connection object or nil if the request was unsuitable.
  */
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 
 
 /*!
@@ -91,7 +90,7 @@ enum {
  @discussion Please do NOT modify this request in any way!
  @result Returns the request supplied when creating the connection.
  */
-- (CKConnectionRequest *)request;
+- (NSURLRequest *)request;
 
 
 // you can set a name on a connection to help with debugging.
