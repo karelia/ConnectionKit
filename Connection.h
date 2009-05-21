@@ -84,7 +84,6 @@ typedef unsigned int   NSUInteger;
 
 
 // Version 2.0 API
-#import <Connection/CKConnectionRequest.h>
 #import <Connection/CKConnection.h>
 #import <Connection/CKConnectionProtocol.h>
 

@@ -30,8 +30,6 @@
 		27709ACE0F7413E00037DF12 /* CKTelnetConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27709ACC0F7413E00037DF12 /* CKTelnetConnection.m */; };
 		278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */; };
-		278B96700F27FCD2002F3C54 /* CKConnectionRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		278B96710F27FCD2002F3C54 /* CKConnectionRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */; };
 		278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96740F27FCDC002F3C54 /* CKConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96750F27FCDC002F3C54 /* CKConnection.m */; };
 		278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */; };
@@ -257,8 +255,6 @@
 		27709ACC0F7413E00037DF12 /* CKTelnetConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTelnetConnection.m; sourceTree = "<group>"; };
 		278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnectionProtocol.h; sourceTree = "<group>"; };
 		278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnectionProtocol.m; sourceTree = "<group>"; };
-		278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRequest.h; sourceTree = "<group>"; };
-		278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRequest.m; sourceTree = "<group>"; };
 		278B96740F27FCDC002F3C54 /* CKConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnection.h; sourceTree = "<group>"; };
 		278B96750F27FCDC002F3C54 /* CKConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnection.m; sourceTree = "<group>"; };
 		278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOperation.m; sourceTree = "<group>"; };
@@ -665,8 +661,6 @@
 				278B96740F27FCDC002F3C54 /* CKConnection.h */,
 				278B96750F27FCDC002F3C54 /* CKConnection.m */,
 				278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */,
-				278B966E0F27FCD2002F3C54 /* CKConnectionRequest.h */,
-				278B966F0F27FCD2002F3C54 /* CKConnectionRequest.m */,
 				278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */,
 				278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */,
 			);
@@ -1070,7 +1064,6 @@
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
 				278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */,
-				278B96700F27FCD2002F3C54 /* CKConnectionRequest.h in Headers */,
 				278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */,
 				278B96820F27FCDE002F3C54 /* CKConnectionProtocol.h in Headers */,
 				278B96C30F28019D002F3C54 /* NSInvocation+ConnectionKit.h in Headers */,
@@ -1408,7 +1401,6 @@
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
 				278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */,
-				278B96710F27FCD2002F3C54 /* CKConnectionRequest.m in Sources */,
 				278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */,
 				278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */,
 				278B96830F27FCDE002F3C54 /* CKConnectionProtocol.m in Sources */,

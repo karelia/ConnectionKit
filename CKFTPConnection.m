@@ -34,7 +34,6 @@
 
 #import "CKCacheableHost.h"
 #import "CKConnectionProtocol1.h"
-#import "CKConnectionRequest.h"
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
 #import "CKInternalTransferRecord.h"
