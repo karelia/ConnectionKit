@@ -12,3 +12,25 @@
 @implementation CKFTPConnectionProtocol
 
 @end
+
+
+#pragma mark -
+
+
+@implementation NSURLRequest (CKFTPURLRequest)
+
+- (NSString *)FTPDataConnectionType
+{
+    return [NSURLProtocol propertyForKey:@"CKFTPDataConnectionType" inRequest:self];
+}
+
+@end
+
+@implementation NSMutableURLRequest (CKMutableFTPURLRequest)
+
+- (void)setFTPDataConnectionType:(NSString *)type
+{
+    [NSURLProtocol setProperty:type forKey:@"CKFTPDataConnectionType" inRequest:self];
+}
+
+@end

@@ -16,7 +16,6 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol1.h"
-#import "CKConnectionRequest.h"
 
 #import "CKConnectionAuthentication+Internal.h"
 #import "CKSFTPConnectionProtocol.h"

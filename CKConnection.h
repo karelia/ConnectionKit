@@ -62,6 +62,9 @@ typedef enum {
 @end
 
 
+#pragma mark -
+
+
 @interface NSObject (CKConnectionDelegate)
 
 /*!
@@ -104,3 +107,22 @@ typedef enum {
 
 @end
 
+
+#pragma mark -
+
+
+@interface NSURLRequest (CKFTPURLRequest)
+- (NSString *)FTPDataConnectionType;    // nil signifies the usual fallback chain of connection types
+@end
+
+@interface NSURLRequest (CKSFTPURLRequest)
+- (NSString *)SFTPPublicKeyPath;
+@end
+
+@interface NSMutableURLRequest (CKMutableFTPURLRequest)
+- (void)setFTPDataConnectionType:(NSString *)type;
+@end
+
+@interface NSMutableURLRequest (CKMutableSFTPURLRequest)
+- (void)setSFTPPublicKeyPath:(NSString *)path;
+@end
