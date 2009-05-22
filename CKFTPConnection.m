@@ -3704,6 +3704,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
  */
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
+    NSParameterAssert(credential);
+    NSParameterAssert([[credential user] length] > 0);
+    
     if (challenge == _lastAuthenticationChallenge)
     {
         // Store the credentials ready for the password request
