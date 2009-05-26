@@ -90,7 +90,7 @@
     CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
                                                             (CFStringRef)[path pathExtension],
                                                             NULL);
-    NSString *MIMEType = [(NSString *)UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType) autorelease];	
+    NSString *MIMEType = [NSMakeCollectable(UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType)) autorelease];	
     if (!MIMEType || [MIMEType length] == 0)
     {
         // if this list grows, consider using a dictionary of corrected UTI to MIME mappings instead
@@ -114,6 +114,25 @@
     
     // Include data
     [request setHTTPBody:data];
+    
+    
+    // Send the request
+    [self startHTTPRequest:request];
+    [request release];
+}
+
+- (void)fetchContentsOfDirectoryAtPath:(NSString *)path
+{
+    _status = CKWebDAVProtocolStatusListingDirectory;
+    
+    
+    // Send a PROPFIND request
+    NSString *directoryPath = [path stringByAppendingString:@"/"];
+    NSURL *URL = [[NSURL alloc] initWithString:directoryPath relativeToURL:[[self request] URL]];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"PROPFIND"];
+    [URL release];
+    
+    [request setValue:@"1" forHTTPHeaderField:@"Depth"];
     
     
     // Send the request
@@ -309,6 +328,7 @@
              [[self client] connectionDidReceiveContents:contents ofDirectory:dirPath error:error];
              
              [self setState:CKConnectionIdleState];*/
+            result = NO;
             break;
         }
         case CKWebDAVProtocolStatusCreatingDirectory:

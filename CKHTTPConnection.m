@@ -15,6 +15,8 @@
 // have a private subclass that others treat like a standard NSHTTPURLResponse object. Framework
 // code can instantiate a CKHTTPURLResponse object directly. Alternatively, there is a public
 // convenience method +[NSHTTPURLResponse responseWithURL:HTTPMessage:]
+
+
 @interface CKHTTPURLResponse : NSHTTPURLResponse
 {
     @private
@@ -28,7 +30,7 @@
 
 @interface CKHTTPAuthenticationChallenge : NSURLAuthenticationChallenge
 {
-    CFHTTPAuthenticationRef _HTTPAuthentication;
+    __strong CFHTTPAuthenticationRef _HTTPAuthentication;
 }
 
 - (id)initWithResponse:(CFHTTPMessageRef)response
@@ -77,8 +79,8 @@
         _delegate = delegate;
         
         // Kick off the connection
-        _HTTPRequest = [request CFHTTPMessage];
-        CFRetain(_HTTPRequest);
+        _HTTPRequest = [request HTTPMessage];
+        [(NSObject *)_HTTPRequest retain];  // no-op under GC
         
         [self start];
     }
@@ -105,7 +107,7 @@
 
 - (id <CKHTTPConnectionDelegate>)delegate { return _delegate; }
 
-/*  CFNetwork provides no callback API for upload progress, so clients must request it themselves.
+/*  CFHTTPStream provides no callback API for upload progress, so clients must request it themselves.
  */
 - (NSUInteger)lengthOfDataSent
 {
@@ -120,7 +122,7 @@
 {
     NSAssert(!_HTTPStream, @"Connection already started");
     
-    _HTTPStream = (NSInputStream *)CFReadStreamCreateForHTTPRequest(NULL, [self HTTPRequest]);
+    _HTTPStream = NSMakeCollectable(CFReadStreamCreateForHTTPRequest(NULL, [self HTTPRequest]));
     [_HTTPStream setDelegate:self];
     [_HTTPStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     [_HTTPStream open];
@@ -278,21 +280,21 @@
 #pragma mark -
 
 
-@implementation NSURLRequest (CKHTTPConnectionAdditions)
+@implementation NSURLRequest (CKHTTPURLRequest)
 
 + (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod
 {
-    // The callers need not know that the returned object is actually mutable
+    // Caller need not know that the returned object is actually mutable
     return [NSMutableURLRequest requestWithURL:URL HTTPMethod:HTTPMethod];
 }
 
-- (CFHTTPMessageRef)CFHTTPMessage
+- (CFHTTPMessageRef)HTTPMessage
 {
     CFHTTPMessageRef result = CFHTTPMessageCreateRequest(NULL,
                                                          (CFStringRef)[self HTTPMethod],
                                                          (CFURLRef)[self URL],
                                                          kCFHTTPVersion1_1);
-    [(NSObject *)result autorelease];
+    [NSMakeCollectable(result) autorelease];    // handles both ref-counted & GC scenarios
     
     NSDictionary *HTTPHeaderFields = [self allHTTPHeaderFields];
     NSEnumerator *HTTPHeaderFieldsEnumerator = [HTTPHeaderFields keyEnumerator];
@@ -316,7 +318,7 @@
 @end
 
 
-@implementation NSMutableURLRequest (CKHTTPConnectionAdditions)
+@implementation NSMutableURLRequest (CKMutableHTTPURLRequest)
 
 + (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod
 {
@@ -357,7 +359,7 @@
 
 - (id)initWithURL:(NSURL *)URL HTTPMessage:(CFHTTPMessageRef)message
 {
-    _headerFields = (NSDictionary *)CFHTTPMessageCopyAllHeaderFields(message);
+    _headerFields = NSMakeCollectable(CFHTTPMessageCopyAllHeaderFields(message));
     
     NSString *MIMEType = [_headerFields objectForKey:@"Content-Type"];
     NSInteger contentLength = [[_headerFields objectForKey:@"Content-Length"] intValue];
@@ -406,6 +408,7 @@
         [self release];
         return nil;
     }
+    CFMakeCollectable(_HTTPAuthentication);
     
     
     // NSURLAuthenticationChallenge only handles user and password
@@ -423,9 +426,10 @@
     
     
     // Fail if we can't retrieve decent protection space info
-    NSArray *authenticationDomains = (NSArray *)CFHTTPAuthenticationCopyDomains([self CFHTTPAuthentication]);
-    NSURL *URL = [authenticationDomains lastObject];
-    [authenticationDomains release];
+    CFArrayRef authenticationDomains = CFHTTPAuthenticationCopyDomains([self CFHTTPAuthentication]);
+    NSURL *URL = [(NSArray *)authenticationDomains lastObject];
+    CFRelease(authenticationDomains);
+    
     if (!URL || ![URL host])
     {
         [self release];
@@ -434,13 +438,13 @@
     
     
     // Fail for an unsupported authentication method
-    CFStringRef CFAuthenticationMethod = CFHTTPAuthenticationCopyMethod([self CFHTTPAuthentication]);
+    CFStringRef authMethod = CFHTTPAuthenticationCopyMethod([self CFHTTPAuthentication]);
     NSString *authenticationMethod;
-    if ([(NSString *)CFAuthenticationMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic])
+    if ([(NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic])
     {
         authenticationMethod = NSURLAuthenticationMethodHTTPBasic;
     }
-    else if ([(NSString *)CFAuthenticationMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest])
+    else if ([(NSString *)authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest])
     {
         authenticationMethod = NSURLAuthenticationMethodHTTPDigest;
     }
@@ -449,7 +453,7 @@
         [self release]; // unsupport authentication scheme
         return nil;
     }
-    CFRelease(CFAuthenticationMethod);
+    CFRelease(authMethod);
     
     
     // Initialise
