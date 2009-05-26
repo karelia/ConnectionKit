@@ -474,7 +474,7 @@ char **environ;
 				numberOfPromptArrivalsToIgnore++;
 				[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
 			}
-			else if ([sftpWrapperConnection numberOfTransfers] > 0 || cancelflag)
+			else if (([sftpWrapperConnection numberOfTransfers] > 0 && connected) || cancelflag)
 			{
 				if ([sftpWrapperConnection numberOfUploads] > 0)
 				{
