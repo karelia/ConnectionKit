@@ -79,8 +79,8 @@
         _delegate = delegate;
         
         // Kick off the connection
-        _HTTPRequest = [request HTTPMessage];
-        [(NSObject *)_HTTPRequest retain];  // no-op under GC
+        _HTTPRequest = [request createHTTPMessage];
+        CFMakeCollectable(_HTTPRequest);
         
         [self start];
     }
@@ -288,13 +288,12 @@
     return [NSMutableURLRequest requestWithURL:URL HTTPMethod:HTTPMethod];
 }
 
-- (CFHTTPMessageRef)HTTPMessage
+- (CFHTTPMessageRef)createHTTPMessage
 {
     CFHTTPMessageRef result = CFHTTPMessageCreateRequest(NULL,
                                                          (CFStringRef)[self HTTPMethod],
                                                          (CFURLRef)[self URL],
                                                          kCFHTTPVersion1_1);
-    [NSMakeCollectable(result) autorelease];    // handles both ref-counted & GC scenarios
     
     NSDictionary *HTTPHeaderFields = [self allHTTPHeaderFields];
     NSEnumerator *HTTPHeaderFieldsEnumerator = [HTTPHeaderFields keyEnumerator];
@@ -312,7 +311,7 @@
         CFHTTPMessageSetBody(result, (CFDataRef)body);
     }
     
-    return result;
+    return result;  // NOT autoreleased/collectable
 }
 
 @end
@@ -450,7 +449,7 @@
     }
     else
     {
-        [self release]; // unsupport authentication scheme
+        [self release]; // unsupported authentication scheme
         return nil;
     }
     CFRelease(authMethod);

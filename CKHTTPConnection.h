@@ -57,7 +57,7 @@
 
 @interface NSURLRequest (CKHTTPURLRequest)
 + (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod;
-- (CFHTTPMessageRef)HTTPMessage;    // message is autoreleased or marked for garbage collection
+- (CFHTTPMessageRef)createHTTPMessage;    // Ownership follows CoreFoundation's Create Rule.
 @end
 
 
