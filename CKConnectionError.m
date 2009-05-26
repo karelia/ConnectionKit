@@ -22,8 +22,6 @@ NSString *const CKConnectionErrorURLResponseErrorKey = @"URLResponse";
 
 - (id)initWithHTTPResponse:(CFHTTPMessageRef)response
 {
-    
-    
     return [self initWithDomain:@"HTTP"
                            code:CFHTTPMessageGetResponseStatusCode(response)
                        userInfo:nil];

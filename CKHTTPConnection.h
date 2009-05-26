@@ -22,7 +22,7 @@
     @private
     id <CKHTTPConnectionDelegate>   _delegate;       // weak ref
     
-    CFHTTPMessageRef                _HTTPRequest;
+    __strong CFHTTPMessageRef       _HTTPRequest;
     NSInputStream                   *_HTTPStream;
     BOOL                            _haveReceivedResponse;
     CKHTTPAuthenticationChallenge   *_authenticationChallenge;
@@ -55,13 +55,13 @@
 @end
 
 
-@interface NSURLRequest (CKHTTPConnectionAdditions)
+@interface NSURLRequest (CKHTTPURLRequest)
 + (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod;
-- (CFHTTPMessageRef)CFHTTPMessage;
+- (CFHTTPMessageRef)HTTPMessage;    // message is autoreleased or marked for garbage collection
 @end
 
 
-@interface NSMutableURLRequest (CKHTTPConnectionAdditions)
+@interface NSMutableURLRequest (CKMutableHTTPURLRequest)
 // Pass nil method for the default
 - (id)initWithURL:(NSURL *)URL HTTPMethod:(NSString *)method;
 @end
