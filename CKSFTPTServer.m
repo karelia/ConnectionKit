@@ -77,6 +77,7 @@ char **environ;
 	if (!buf)
 		return NO;
     
+    /*
     // Debug strings can't contain a prompt
     NSString *buffer = [[NSString alloc] initWithUTF8String:buf];
     if ([buffer hasPrefix:@"debug"])
@@ -85,7 +86,8 @@ char **environ;
         return NO;
     }
     [buffer release];
-	
+	*/
+    
 	while (*prompts)
 	{
 		if (strstr(buf, *prompts) != NULL)
