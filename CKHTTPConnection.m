@@ -8,8 +8,6 @@
 
 #import "CKHTTPConnection.h"
 
-#import "CKConnectionAuthentication.h"
-
 
 // There is no public API for creating an NSHTTPURLResponse. The only way to create one then, is to
 // have a private subclass that others treat like a standard NSHTTPURLResponse object. Framework
@@ -228,6 +226,9 @@
 }
 
 @end
+
+
+#pragma mark -
 
 
 @implementation CKHTTPConnection (Authentication)
