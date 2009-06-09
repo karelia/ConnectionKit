@@ -1594,6 +1594,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 500: //Syntax error, command unrecognized.
 		case 501: //Syntax error in parameters or arguments.
 		case 502: //Command not implemented
+        case 550: //Operation not permitted
 		{
 			if (!_ftpFlags.loggedIn)
 			{
