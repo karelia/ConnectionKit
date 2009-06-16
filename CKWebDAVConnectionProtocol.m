@@ -15,7 +15,7 @@
 
 
 @interface CKWebDAVConnectionProtocol ()
-- (void)startHTTPRequest:(NSURLRequest *)request;
+- (void)startHTTPRequest:(NSURLRequest *)request;   
 - (void)currentOperationDidFinish:(BOOL)didFinish error:(NSError *)error;
 @end
 
@@ -48,7 +48,8 @@
     
     // The server needs to respond to an OPTIONS request confirming it supports WebDAV
     NSURL *URL = [[self request] URL];
-    NSURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"OPTIONS"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    [request setHTTPMethod:@"OPTIONS"];
     
     [self startHTTPRequest:request];
     [request release];
@@ -82,7 +83,8 @@
     
     // Send a PUT request with the data
     NSURL *URL = [[NSURL alloc] initWithString:path relativeToURL:[[self request] URL]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"PUT"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    [request setHTTPMethod:@"PUT"];
     [URL release];
     
     
@@ -129,10 +131,12 @@
     // Send a PROPFIND request
     NSString *directoryPath = [path stringByAppendingString:@"/"];
     NSURL *URL = [[NSURL alloc] initWithString:directoryPath relativeToURL:[[self request] URL]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"PROPFIND"];
+    
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    [request setHTTPMethod:@"PROPFIND"];
+    [request setValue:@"1" forHTTPHeaderField:@"Depth"];
     [URL release];
     
-    [request setValue:@"1" forHTTPHeaderField:@"Depth"];
     
     
     // Send the request
@@ -147,7 +151,8 @@
     
     // Send a MKCOL request
     NSURL *URL = [[NSURL alloc] initWithString:path relativeToURL:[[self request] URL]];
-    NSURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"MKCOL"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    [request setHTTPMethod:@"MKCOL"];
     [URL release];
     
     
@@ -163,7 +168,8 @@
     
     // Send a MOVE request
     NSURL *fromURL = [[NSURL alloc] initWithString:fromPath relativeToURL:[[self request] URL]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:fromURL HTTPMethod:@"MOVE"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:fromURL];
+    [request setHTTPMethod:@"MOVE"];
     [fromURL release];
     
     
@@ -185,7 +191,8 @@
     
     // Send a DELETE request
     NSURL *URL = [[NSURL alloc] initWithString:path relativeToURL:[[self request] URL]];
-    NSURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL HTTPMethod:@"DELETE"];
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
+    [request setHTTPMethod:@"DELETE"];
     [URL release];
     
     
@@ -237,6 +244,13 @@
 
 #pragma mark -
 #pragma mark HTTP Connection
+
+/*  Convenience method for 
++ (NSMutableURLRequest *)URLRequestWithURL:(NSURL *)URL HTTPMethod:(NSString *)httpMethod;
+{
+    
+}
+*/
 
 /*  Creates and schedules an HTTP connection for the request.
  */

@@ -56,14 +56,7 @@
 
 
 @interface NSURLRequest (CKHTTPURLRequest)
-+ (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod;
 - (CFHTTPMessageRef)makeHTTPMessage;
-@end
-
-
-@interface NSMutableURLRequest (CKMutableHTTPURLRequest)
-// Pass nil method for the default
-- (id)initWithURL:(NSURL *)URL HTTPMethod:(NSString *)method;
 @end
 
 
