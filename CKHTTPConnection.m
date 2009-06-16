@@ -283,12 +283,6 @@
 
 @implementation NSURLRequest (CKHTTPURLRequest)
 
-+ (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod
-{
-    // Caller need not know that the returned object is actually mutable
-    return [NSMutableURLRequest requestWithURL:URL HTTPMethod:HTTPMethod];
-}
-
 - (CFHTTPMessageRef)makeHTTPMessage
 {
     CFHTTPMessageRef result = CFHTTPMessageCreateRequest(NULL,
@@ -314,30 +308,6 @@
     }
     
     return result;  // NOT autoreleased/collectable
-}
-
-@end
-
-
-@implementation NSMutableURLRequest (CKMutableHTTPURLRequest)
-
-+ (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod
-{
-    // A better implementation than the superclass's as callers are expecting a mutable object in return
-    return [[[self alloc] initWithURL:URL HTTPMethod:HTTPMethod] autorelease];
-}
-
-- (id)initWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod
-{
-    if (self = [self initWithURL:URL])
-    {
-        if (HTTPMethod)
-        {
-            [self setHTTPMethod:HTTPMethod];
-        }
-    }
-    
-    return self;
 }
 
 @end
