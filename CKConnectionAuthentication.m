@@ -101,7 +101,8 @@
 			
 			// release buffer allocated by SecKeychainFindGenericPassword
 			theStatus = SecKeychainItemFreeContent(NULL, buffer);
-			
+			NSAssert(!theStatus, @"Could not free keychain content");
+            
 			*account = accountName;
 			result = YES;
 		}
@@ -159,7 +160,9 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    
+    // FIXME: Call this on the right thread!
+    [[_authenticationChallenge sender] useCredential:credential
+                          forAuthenticationChallenge:_authenticationChallenge];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge

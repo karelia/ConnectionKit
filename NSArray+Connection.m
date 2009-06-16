@@ -92,7 +92,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
             NSLog( @"realloc: %s", strerror( errno ));
             exit( 2 );
         }
-        actotal += 10; // clang complains "Value stored to 'actotal' is never read"
+        //actotal += 10; // clang complains "Value stored to 'actotal' is never read"
     }
     
     av[ i ] = NULL;

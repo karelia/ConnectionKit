@@ -47,6 +47,7 @@
 			checkRemoteExistence:(BOOL)flag
 						delegate:(id)delegate;
 - (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo;
+- (void)downloadTransferDidBegin:(CKInternalTransferRecord *)downloadInfo;
 //
 - (void)passwordErrorOccurred;
 @end
@@ -556,7 +557,7 @@ static NSString *lsform = nil;
 	if ([commandString hasPrefix:@"put"])
 		[self uploadDidBegin:[self currentUpload]];
 	else if ([commandString hasPrefix:@"get"])
-		[self downloadDidBegin:[self currentDownload]];
+		[self downloadTransferDidBegin:[self currentDownload]];
 	char *command = (char *)[commandString UTF8String];
 	[self _writeSFTPCommand:command];
 }
@@ -920,7 +921,7 @@ static NSString *lsform = nil;
 	NSString *remotePath = [downloadInfo remotePath];
 	[[self client] download:remotePath didProgressToPercent:progress];
 }
-- (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo
+- (void)downloadTransferDidBegin:(CKInternalTransferRecord *)downloadInfo
 {
 	NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];
 	[[self client] downloadDidBegin:remotePath];

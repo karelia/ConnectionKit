@@ -259,7 +259,7 @@ static NSString *KTLevelMap[] = {
 		 message:(NSString *)log
 {
 	NSDate *now = [NSDate date];
-	NSString *filename = [NSString stringWithCString:file];
+	NSString *filename = [NSString stringWithUTF8String:file];
 	NSNumber *lineNumber = [NSNumber numberWithInt:line];
 	NSNumber *thisLevel = [NSNumber numberWithInt:level];
 

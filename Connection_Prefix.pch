@@ -1,4 +1,5 @@
 // For Mac OS X < 10.5.
+/*  CK 2.0 targets Leopard+ so no need for this
 #ifndef NSINTEGER_DEFINED
 #define NSINTEGER_DEFINED
 #ifdef __LP64__ || NS_BUILD_32_LIKE_64
@@ -15,6 +16,6 @@ typedef unsigned int   NSUInteger;
 #define NSUIntegerMax  UINT_MAX
 #endif
 #endif // NSINTEGER_DEFINED
-
+*/
 
 #import "KTLog.h"

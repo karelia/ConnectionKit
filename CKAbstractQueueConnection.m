@@ -203,7 +203,7 @@ NSString *CKQueueDomain = @"Queuing";
 #pragma mark -
 #pragma mark Queue Support
 
-- (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
+- (void)setState:(CKConnectionState)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
 {
 	KTLog(CKStateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
 	

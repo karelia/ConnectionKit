@@ -116,7 +116,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	else if (myProgress >= 0 && myProgress < 100)
 	{
-		NSAffineTransform *flip;
+		NSAffineTransform *flip = nil;
 		if ([controlView isFlipped]) 
 		{
 			[[NSGraphicsContext currentContext] saveGraphicsState];

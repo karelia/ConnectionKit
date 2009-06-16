@@ -481,10 +481,12 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 
 - (NSString *)kind
 {	
-	NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-																	   (CFStringRef)[myName pathExtension],
-																	   NULL) autorelease];
-	NSString *desc = [(NSString *)UTTypeCopyDescription((CFStringRef)UTI) autorelease];	
+	CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                            (CFStringRef)[myName pathExtension],
+                                                            NULL);
+	NSString *desc = [NSMakeCollectable(UTTypeCopyDescription((CFStringRef)UTI)) autorelease];
+	CFRelease(UTI);
+    
 	if (!desc && [self isDirectory]) return LocalizedStringInConnectionKitBundle(@"Folder", @"directory kind");
 	if (!desc) return LocalizedStringInConnectionKitBundle(@"Document", @"unknown UTI name");
 	if ([desc isEqualToString:@"text"]) return LocalizedStringInConnectionKitBundle(@"Plain text document", @"mimic Finder naming conventions");
