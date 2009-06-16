@@ -160,9 +160,7 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    // FIXME: Call this on the right thread!
-    [[_authenticationChallenge sender] useCredential:credential
-                          forAuthenticationChallenge:_authenticationChallenge];
+    
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
