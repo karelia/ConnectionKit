@@ -394,6 +394,25 @@ checkRemoteExistence:(NSNumber *)check;
 	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@", @"file transcript")
                    toTranscript:CKTranscriptSent, [upload localPath], [upload remotePath]];
 		
+    if (![fm fileExistsAtPath:[upload localPath]])
+    {
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  LocalizedStringInConnectionKitBundle(@"File does  not exist", @"FileConnection error"), NSLocalizedDescriptionKey, 
+                                  [upload localPath], NSFilePathErrorKey, nil];
+        NSError *error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:-1 userInfo:userInfo];
+        [upload retain];
+        [self dequeueUpload];
+        // send finished
+        
+        [[self client] uploadDidFinish:[upload remotePath] error:error];
+        
+        if ([upload delegateRespondsToTransferDidFinish])
+            [[upload delegate] transferDidFinish:[upload userInfo] error:error];
+        [upload release];
+        [self setState:CKConnectionIdleState];			
+        return;
+    }
+    
 	if (flag)
 	{
 		if ([fm fileExistsAtPath:[upload remotePath]])
