@@ -57,7 +57,7 @@
 
 @interface NSURLRequest (CKHTTPURLRequest)
 + (id)requestWithURL:(NSURL *)URL HTTPMethod:(NSString *)HTTPMethod;
-- (CFHTTPMessageRef)createHTTPMessage;    // Ownership follows CoreFoundation's Create Rule.
+- (CFHTTPMessageRef)makeHTTPMessage;
 @end
 
 

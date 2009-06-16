@@ -37,17 +37,21 @@
 
 - (NSString *)encodeLegally
 {
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef)self, (CFStringRef)@"%+#", 
-																			NULL, CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-	return [result autorelease];
+	NSString *result = [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                                                  (CFStringRef)self,
+                                                                                  (CFStringRef)@"%+#", 
+                                                                                  NULL,
+                                                                                  kCFStringEncodingUTF8)) autorelease];
+    return result;
 }
 - (NSString *)encodeLegallyForS3
 {
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef)self, NULL, (CFStringRef)@"+",
-																			CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-	return [result autorelease];
+	NSString *result = [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                                                  (CFStringRef)self,
+                                                                                  NULL,
+                                                                                  (CFStringRef)@"+",
+                                                                                  kCFStringEncodingUTF8)) autorelease];
+	return result;
 }	
 
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding
@@ -218,10 +222,9 @@
 + (id)uuid
 {
 	CFUUIDRef uuid = CFUUIDCreate(kCFAllocatorDefault);
-	CFStringRef uuidStr = CFUUIDCreateString(kCFAllocatorDefault, uuid);
+	NSString *result = [NSMakeCollectable(CFUUIDCreateString(kCFAllocatorDefault, uuid)) autorelease];
 	CFRelease(uuid);
-	[(NSString *)uuidStr autorelease];
-	return (NSString *)uuidStr;
+	return result;
 }
 
 /*The following are from Fugu (for SFTP usage)
@@ -413,7 +416,7 @@
         }
     }
 	
-    return(( NSString * )convertedString );
+    return [NSMakeCollectable(convertedString) autorelease];
 }
 
 + ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes
@@ -443,12 +446,11 @@
         convertedString = ( CFStringRef )[ NSString stringWithBytesOfUnknownExternalEncoding: bytes
 																					  length: len ];
     }
-    
-    if ( convertedString != NULL ) {
-        [ ( NSString * )convertedString autorelease ];
+    else {
+        [NSMakeCollectable(convertedString) autorelease];
     }
 	
-    return(( NSString * )convertedString );
+    return((NSString *)convertedString);
 }
 @end
 

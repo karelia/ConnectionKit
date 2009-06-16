@@ -34,26 +34,6 @@
 
 @implementation NSData (Connection)
 
-- (NSString *)base64Encoding
-{
-	BIO * mem = BIO_new(BIO_s_mem());
-	BIO * b64 = BIO_new(BIO_f_base64());
-    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
-    mem = BIO_push(b64, mem);
-	
-	BIO_write(mem, [self bytes], [self length]);
-    BIO_flush(mem);
-	
-	char * base64Pointer;
-    long base64Length = BIO_get_mem_data(mem, &base64Pointer);
-	
-	NSString * base64String = [NSString stringWithCString:base64Pointer
-												   length:base64Length];
-	
-	BIO_free_all(mem);
-    return base64String;
-}
-
 - (NSString *)descriptionAsUTF8String
 {
 	return [[[NSString alloc] initWithData:self encoding:NSUTF8StringEncoding] autorelease];

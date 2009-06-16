@@ -91,7 +91,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	const char *username = [usernameString UTF8String];
 	
 	UInt32 passwordLength = 0;
-	char *password = nil;
+	unichar *password = nil;
 	
 	SecKeychainItemRef item = nil;
 	OSStatus returnStatus = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(username), username, &passwordLength, (void **)&password, &item);
@@ -103,7 +103,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithCharacters:password length:passwordLength];
 	SecKeychainItemFreeContent(NULL, password);
 
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
@@ -127,7 +127,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	}
 	
 	UInt32 passwordLength = 0;
-	char *password = nil;
+	unichar *password = nil;
 	
 	SecKeychainItemRef item = nil;
 	//0 is kSecAuthenticationTypeAny
@@ -148,7 +148,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithCharacters:password length:passwordLength];
 	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];
