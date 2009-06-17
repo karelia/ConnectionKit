@@ -9,8 +9,8 @@
 #import "CKConnection+Private.h"
 
 #import "CKConnectionError.h"
-#import "RunLoopForwarder.h"
 #import "CKConnectionAuthentication+Internal.h"
+#import "CKThreadProxy.h"
 
 
 @implementation CKConnectionProtocolClient
@@ -23,9 +23,7 @@
     
     _connection = connection;   // weak ref
     
-    _threadProxy = [[RunLoopForwarder alloc] init]; // TODO: replace RunLoopForwarder with an NSProxy derived class
-    [_threadProxy setDelegate:connection];
-    [_threadProxy setUseMainThread:YES];
+    _threadProxy = [[CKThreadProxy CK_proxyWithTarget:connection thread:[NSThread currentThread]] retain];
     
     return self;
 }
@@ -52,7 +50,7 @@
     _protocol = protocol;   // weak ref
 }
 
-- (CKConnection *)connectionThreadProxy { return (CKConnection *)_threadProxy; }
+- (CKConnection *)connectionThreadProxy { return _threadProxy; }
     
 #pragma mark Overall connection
 
@@ -142,17 +140,11 @@
     
     // Does the delegate support this? If not, handle it ourselves
     id delegate = [[self connection] delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
+    if ([delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
     {
         // Set up a proxy -sender object to forward the request to the main thread
-        CKAuthenticationChallengeSender *sender = [[CKAuthenticationChallengeSender alloc] initWithAuthenticationChallenge:challenge];
-        NSURLAuthenticationChallenge *delegateChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:fullChallenge sender:sender];
-        [sender release];
-        
         [[self connectionThreadProxy] connectionProtocol:protocol
-                       didReceiveAuthenticationChallenge:delegateChallenge];
-        
-        [delegateChallenge release];
+                       didReceiveAuthenticationChallenge:fullChallenge];
     }
     else
     {

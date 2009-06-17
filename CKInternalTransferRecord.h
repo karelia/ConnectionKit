@@ -28,7 +28,6 @@
  */
 #import <Foundation/Foundation.h>
 
-@class RunLoopForwarder;
 
 @interface CKInternalTransferRecord : NSObject <NSCopying>
 {
@@ -36,7 +35,7 @@
 	NSString	*myRemotePath;
 	NSData		*myData;
 	unsigned long long myOffset;
-	RunLoopForwarder *myForwarder;
+	id          myForwarder;
 	id			myDelegate;   // retained; see .m for why
 	id			myUserInfo;
 	NSMutableDictionary *myProperties;

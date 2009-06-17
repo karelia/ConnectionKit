@@ -40,7 +40,6 @@
 #import "NSObject+Connection.h"
 #import "NSFileManager+Connection.h"
 #import "NSInvocation+ConnectionKit.h"
-#import "RunLoopForwarder.h"
 #import "CKCacheableHost.h"
 #import "CKTransferRecord.h"
 #import "CKConnectionProtocol1.h"
@@ -253,11 +252,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Threading Support
-
-- (void)runloopForwarder:(RunLoopForwarder *)rlw returnedValue:(void *)value 
-{
-	//by default we do nothing, subclasses are implementation specific based on their current state
-}
 
 - (void)scheduleStreamsOnRunLoop
 {

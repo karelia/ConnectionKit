@@ -10,21 +10,6 @@
 #import "CKConnectionAuthentication.h"
 
 
-/*  Simple object that forwards an authentication response from the main thread to the original
- *  protocol object's worker thread.
- */
-
-@interface CKAuthenticationChallengeSender : NSObject <NSURLAuthenticationChallengeSender>
-{
-    NSURLAuthenticationChallenge    *_authenticationChallenge;
-}
-
-- (id)initWithAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
-- (NSURLAuthenticationChallenge *)authenticationChallenge;
-
-@end
-
-
 
 @interface CKURLProtectionSpace : NSURLProtectionSpace
 {
