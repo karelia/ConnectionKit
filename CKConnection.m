@@ -33,14 +33,14 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 #pragma mark Init & Dealloc
 
-+ (CKConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id)delegate
++ (CKConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKConnectionDelegate>)delegate
 {
     return [[[self alloc] initWithRequest:request delegate:delegate] autorelease];
 }
 
 /*  Should return nil if no protocol can be found
  */
-- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKConnectionDelegate>)delegate
 {
     [super init];
     
