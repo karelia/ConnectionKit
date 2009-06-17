@@ -183,21 +183,21 @@ static NSImage *sBonjourIcon = nil;
 	
 	if ([[sender type] isEqualToString:@"_ftp._tcp."])
 	{
-		[h setConnectionType:@"FTP"];
+		[h setConnectionProtocol:CKFTPProtocol];
 		[myFTPCategory addHost:h];
 	}
 	else if (([[sender type] isEqualToString:@"_sftp-ssh._tcp."]))
 	{
-		[h setConnectionType:@"SFTP"];
+		[h setConnectionProtocol:CKSFTPProtocol];
 		[mySFTPCategory addHost:h];
 	}
 	else if (([[sender type] isEqualToString:@"_http._tcp."]))
 	{
-		[h setConnectionType:@"WebDAV"];
+		[h setConnectionProtocol:CKWebDAVProtocol];
 		[myHTTPCategory addHost:h];
 	}
 	
-    Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[h connectionType]];
+    Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForProtocol:[h connectionProtocol]];
     [h setPort:[NSString stringWithFormat:@"%i", [connectionClass defaultPort]]];
      
 	[h release];

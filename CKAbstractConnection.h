@@ -91,7 +91,6 @@ typedef enum {
 	CKConnectionCheckingFileExistenceState // 25
 } CKConnectionState;
 
-
 @class UKKQueue, CKConnectionClient;
 
 
@@ -112,6 +111,8 @@ typedef enum {
 	CKAbstractConnection *_editingConnection;
 		
 	NSMutableDictionary *_cachedDirectoryContents;
+	
+	NSMutableDictionary *_properties;
     
 @private
     NSString            *_name;

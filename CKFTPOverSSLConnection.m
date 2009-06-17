@@ -20,9 +20,9 @@
 	[pool release];
 }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"FTP over SSL";
+	return CKFTPOverSSLProtocol;
 }
 
 - (id)initWithURL:(NSURL *)URL

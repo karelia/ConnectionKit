@@ -69,16 +69,21 @@ static NSString *lsform = nil;
 + (void)load    // registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"sftp"];
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"ssh"];
+	
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];
+
     [pool release];
 }
 
 + (NSInteger)defaultPort { return 22; }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"SFTP";
+	return CKSFTPProtocol;
 }
 
 + (NSArray *)URLSchemes
@@ -854,6 +859,7 @@ static NSString *lsform = nil;
 	_isConnected = YES;
 	
 	[[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
+	[[self client] connectionDidOpenAtPath:[NSString stringWithString:rootDirectory] error:nil];
 }
 
 - (void)setCurrentDirectory:(NSString *)current

@@ -74,14 +74,19 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"MobileMe" URLScheme:@"dotmac"];
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@".Mac" URLScheme:@"dotmac"];
-	[pool release];
+	
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];
+	
+    [pool release];
 }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"MobileMe";
+	return CKMobileMeProtocol;
 }
 
 + (NSArray *)URLSchemes

@@ -56,7 +56,6 @@
 		unsigned needsReconnection: 1;
 		unsigned isInReconnection: 1;
 		unsigned finishedReconnection: 1;
-		unsigned didFailAttemptedDigestAuthentication: 1;
 		unsigned unused: 27;
 	} myHTTPFlags;
 }

@@ -201,7 +201,7 @@ NSString *CKQueueDomain = @"Queuing";
 #pragma mark -
 #pragma mark Queue Support
 
-- (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
+- (void)setState:(CKConnectionState)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
 {
 	KTLog(CKStateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
 	
@@ -239,7 +239,7 @@ NSString *CKQueueDomain = @"Queuing";
 			CKConnectionCommand *command = [[self currentCommand] retain];
 			if (command && GET_STATE == [command awaitState])
 			{
-				KTLog(CKStateMachineDomain, KTLogDebug, @"Dispatching Command: %@", [command command]);
+				KTLog(CKStateMachineDomain, KTLogDebug, @"Dispatching Command: %@", command);
 				_state = [command sentState];	// don't use setter; we don't want to recurse
 				[self pushCommandOnHistoryQueue:command];
 				[self dequeueCommand];
@@ -257,7 +257,7 @@ NSString *CKQueueDomain = @"Queuing";
 			}
 			else
 			{
-				KTLog(CKStateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], [command command], [self stateName:[command awaitState]]);
+				KTLog(CKStateMachineDomain, KTLogDebug, @"State %@ not ready for command at top of queue: %@, needs %@", [self stateName:GET_STATE], command, [self stateName:[command awaitState]]);
 				nextTry = NO;		// don't try.  
 			}
 			[command release];
@@ -646,6 +646,8 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (NSString *)description
 {
+	if ([_command isKindOfClass:[NSInvocation class]])
+		return [NSString stringWithFormat:@"Invocation with selector: %@", NSStringFromSelector([_command selector])];
 	return [NSString stringWithFormat:@"%@", _command];
 }
 

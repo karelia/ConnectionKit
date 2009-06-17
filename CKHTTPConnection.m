@@ -124,6 +124,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[_currentDigestRealm release];  _currentDigestRealm = nil;
 	
 	[super threadedConnect];
+	[[self client] connectionDidOpenAtPath:@"/" error:nil];
 	[self setState:CKConnectionIdleState];
 }
 
@@ -331,6 +332,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
 			}
+			
+			if ([self state] == CKConnectionNotConnectedState)
+				[self setState:CKConnectionIdleState];
+			
 			[super handleReceiveStreamEvent:theEvent];
 			break;
 		}
@@ -362,6 +367,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 				myHTTPFlags.isInReconnection = NO;
 				myHTTPFlags.finishedReconnection = YES;
 			}
+			
+			if ([self state] == CKConnectionNotConnectedState)
+				[self setState:CKConnectionIdleState];
+			
 			[super handleSendStreamEvent:theEvent];
 			break;
 		}
@@ -440,8 +449,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
     if (challenge != _currentAuthenticationChallenge)	return;
 	[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-    
-	
 	
 	// Use digest-based authentication if supported
 	if (_currentDigestRealm || _currentDigestOpaque || _currentDigestNonce)

@@ -52,13 +52,6 @@ checkRemoteExistence:(NSNumber *)check;
 
 @implementation CKFileConnection
 
-+ (void)load	// registration of this class
-{
-	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"file"];
-    [pool release];
-}
-
 #pragma mark -
 #pragma mark Accessors
 
@@ -82,9 +75,9 @@ checkRemoteExistence:(NSNumber *)check;
 	return [c autorelease];
 }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"File";
+	return CKFileProtocol;
 }
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }

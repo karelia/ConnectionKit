@@ -28,8 +28,8 @@
  */
 
 #import <Cocoa/Cocoa.h>
+#import "CKConnectionProtocol.h"
 
-@protocol CKConnection;
 @class CKHostCategory;
 
 @interface CKHost : NSObject <NSCoding, NSCopying>
@@ -39,7 +39,7 @@
 	NSString *_port;
 	NSString *_username;
 	NSString *_password;
-	NSString *_connectionType;
+	CKProtocol _connectionProtocol;
 	NSString *_initialPath;
 	NSURL *_URL;
 	NSString *_description;
@@ -68,8 +68,8 @@
 - (NSString *)password;
 - (void)setPassword:(NSString *)password;
 
-- (NSString *)connectionType;
-- (void)setConnectionType:(NSString *)type;
+- (CKProtocol)connectionProtocol;
+- (void)setConnectionProtocol:(CKProtocol)protocol;
 
 - (NSString *)initialPath;
 - (void)setInitialPath:(NSString *)path;

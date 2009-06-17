@@ -48,7 +48,7 @@ static NSImage *sHostIcon = nil;
 - (NSString *)host { return _host; }
 - (NSString *)port { return _port; }
 - (NSString *)username { return _username; }
-- (NSString *)connectionType { return _connectionType; }
+- (CKProtocol)connectionProtocol { return _connectionProtocol; }
 - (NSString *)initialPath { return _initialPath; }
 - (id) userInfo { return _userInfo; }
 - (CKHostCategory *)category { return _category; }
@@ -74,7 +74,7 @@ static NSImage *sHostIcon = nil;
 	if ((self = [super init]))
 	{
 		_UUID = [[NSString uuid] retain];
-		_connectionType = @"FTP";
+		_connectionProtocol = CKFTPProtocol;
 		_host = @"";
 		_username = @"";
 		_initialPath = @"";
@@ -93,7 +93,6 @@ static NSImage *sHostIcon = nil;
 	[_port release];
 	[_username release];
 	[_password release];
-	[_connectionType release];
 	[_URL release];
 	[_description release];
 	[_initialPath release];
@@ -110,7 +109,7 @@ static NSImage *sHostIcon = nil;
 	[copy setHost:[self host]];
 	[copy setPort:[self port]];
 	[copy setUsername:[self username]];
-	[copy setConnectionType:[self connectionType]];
+	[copy setConnectionProtocol:[self connectionProtocol]];
 	[copy setInitialPath:[self initialPath]];
 	[copy setAnnotation:[self annotation]];
 	[copy setIcon:[self icon]];
@@ -129,10 +128,10 @@ static NSImage *sHostIcon = nil;
 	//Don't use isEqualToString: At some point, we encoded CKHosts with NSNumbers as ports, and so to preserve compatibility, we fall back to isEqual.
 	BOOL samePort = (![self port] && ![other port]) || ([[self port] isEqual:[other port]]); 
 	BOOL sameUsername = (![self username] && ![other username]) || ([[self username] isEqualToString:[other username]]);
-	BOOL sameConnectionType = (![self connectionType] && ![other connectionType]) || ([[self connectionType] isEqualToString:[other connectionType]]);
+	BOOL sameConnectionProtocol = ([self connectionProtocol] == [other connectionProtocol]);
 	BOOL sameInitialPath = (![self initialPath] && ![other initialPath]) || ([[self initialPath] isEqualToString:[other initialPath]]);
 	
-	return (sameHost && samePort && sameUsername && sameConnectionType && sameInitialPath);
+	return (sameHost && samePort && sameUsername && sameConnectionProtocol && sameInitialPath);
 }
 
 - (id)initWithDictionary:(NSDictionary *)dictionary
@@ -149,7 +148,7 @@ static NSImage *sHostIcon = nil;
 		_host = [[dictionary objectForKey:@"host"] copy];
 		_port = [[dictionary objectForKey:@"port"] copy];
 		_username = [[dictionary objectForKey:@"username"] copy];
-		_connectionType = [[dictionary objectForKey:@"type"] copy];
+		_connectionProtocol = [[dictionary objectForKey:@"protocol"] intValue];
 		_description = [[dictionary objectForKey:@"description"] copy];
 		_initialPath = [[dictionary objectForKey:@"initialPath"] copy];
 		if (!_initialPath)
@@ -176,38 +175,22 @@ static NSImage *sHostIcon = nil;
 	[plist setObject:@"host" forKey:@"class"];
 	[plist setObject:[NSNumber numberWithInt:[CKHost version]] forKey:@"version"];
 	[plist setObject:_UUID forKey:@"uuid"];
+	[plist setObject:[NSNumber numberWithInt:_connectionProtocol] forKey:@"protocol"];
+
 	if (_host)
-	{
 		[plist setObject:_host forKey:@"host"];
-	}
 	if (_port)
-	{
 		[plist setObject:_port forKey:@"port"];
-	}
 	if (_username)
-	{
 		[plist setObject:_username forKey:@"username"];
-	}
-	if (_connectionType)
-	{
-		[plist setObject:_connectionType forKey:@"type"];
-	}
 	if (_description)
-	{
 		[plist setObject:_description forKey:@"description"];
-	}
 	if (_initialPath)
-	{
 		[plist setObject:_initialPath forKey:@"initialPath"];
-	}
 	if (_icon)
-	{
 		[plist setObject:[_icon TIFFRepresentation] forKey:@"icon"];
-	}
 	if (_properties)
-	{
 		[plist setObject:_properties forKey:@"properties"];
-	}
 	
 	return plist;
 }
@@ -226,7 +209,7 @@ static NSImage *sHostIcon = nil;
 		_host = [[coder decodeObjectForKey:@"host"] copy];
 		_port = [[coder decodeObjectForKey:@"port"] copy];
 		_username = [[coder decodeObjectForKey:@"username"] copy];
-		_connectionType = [[coder decodeObjectForKey:@"type"] copy];
+		_connectionProtocol = [[coder decodeObjectForKey:@"protocol"] intValue];
 		_description = [[coder decodeObjectForKey:@"description"] copy];
 		_initialPath = [[coder decodeObjectForKey:@"initialPath"] copy];
 		if (!_initialPath)
@@ -251,7 +234,7 @@ static NSImage *sHostIcon = nil;
 	[coder encodeObject:_host forKey:@"host"];
 	[coder encodeObject:_port forKey:@"port"];
 	[coder encodeObject:_username forKey:@"username"];
-	[coder encodeObject:_connectionType forKey:@"type"];
+	[coder encodeObject:[NSNumber numberWithInt:_connectionProtocol] forKey:@"protocol"];
 	[coder encodeObject:_description forKey:@"description"];
 	[coder encodeObject:_initialPath forKey:@"initialPath"];
 	if (_icon)
@@ -365,16 +348,15 @@ static NSImage *sHostIcon = nil;
 	}
 }
 
-- (void)setConnectionType:(NSString *)type
+- (void)setConnectionProtocol:(CKProtocol)protocol
 {
-	if (type != _connectionType)
-	{
-		[self willChangeValueForKey:@"type"];
-		[_connectionType autorelease];
-		_connectionType = [type copy];
-		[self didChangeValueForKey:@"type"];
-		[self didChange];
-	}
+	if (protocol == _connectionProtocol)
+		return;
+
+	[self willChangeValueForKey:@"protocol"];
+	_connectionProtocol = protocol;
+	[self didChangeValueForKey:@"protocol"];
+	[self didChange];
 }
 
 - (void)setInitialPath:(NSString *)path
@@ -399,7 +381,7 @@ static NSImage *sHostIcon = nil;
 	[self setPassword:[url password]];
 	[self setInitialPath:[url path]];
 	[self setPort:[NSString stringWithFormat:@"%@",[url port]]];
-	[self setConnectionType:[url scheme]];
+	[self setConnectionProtocol:[[[CKConnectionRegistry sharedConnectionRegistry] connectionClassForURLScheme:[url scheme]] protocol]];
 	
 	[self willChangeValueForKey:@"URL"];
 	[_URL autorelease];
@@ -497,7 +479,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)baseURLString
 {
-	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[self connectionType]];
+	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForProtocol:[self connectionProtocol]];
     NSString *scheme = [[connectionClass URLSchemes] objectAtIndex:0];
 	NSMutableString *url = [NSMutableString stringWithFormat:@"%@://", scheme];
 	if ([self username])
@@ -591,14 +573,14 @@ static NSImage *sHostIcon = nil;
 		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:[CKConnectionRequest requestWithURL:_URL]];
 	}
 	
-	if (!connection && _connectionType && ![_connectionType isEqualToString:@""] && ![_connectionType isEqualToString:@"Auto Select"])
+	if (!connection)
 	{
-		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithName:_connectionType
-                                                                                    host:_host
-                                                                                    port:[NSNumber numberWithInt:[[self port] intValue]]
-                                                                                    user:_username
-                                                                                password:[self password]
-                                                                                   error:&error];
+		connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionForProtocol:_connectionProtocol
+																					   host:_host
+																					   port:[NSNumber numberWithInt:[[self port] intValue]]
+																					   user:_username
+																				   password:[self password]
+																					  error:&error];
 	}
 	
 	if (!connection && error)
@@ -620,7 +602,7 @@ static NSImage *sHostIcon = nil;
 
 - (NSString *)name
 {
-	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForName:[self connectionType]];
+	Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForProtocol:[self connectionProtocol]];
     NSString *type = [[connectionClass URLSchemes] objectAtIndex:0];
 	NSMutableString *str = [NSMutableString stringWithFormat:@"%@://", type ? type : LocalizedStringInConnectionKitBundle(@"auto", @"connection type")];
 	if ([self username] && ![[self username] isEqualToString:@""])

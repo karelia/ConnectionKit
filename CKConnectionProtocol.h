@@ -30,7 +30,6 @@
 
 
 #import <Cocoa/Cocoa.h>
-
 #import "CKConnectionRequest.h"
 
 
@@ -61,10 +60,25 @@ typedef enum {
 	CKTranscriptData,
 } CKTranscriptType;
 
+typedef enum
+{
+	CKFTPProtocol = 0,
+	CKSFTPProtocol,
+	CKWebDAVProtocol,
+	CKMobileMeProtocol,
+	CKAmazonS3Protocol,
+	CKFileProtocol,
+	
+	//Incomplete protocols
+	CKFTPOverSSLProtocol,
+	CKSecureWebDAVProtocol,
+	CKNNTPProtocol,
+} CKProtocol;
+
 
 @protocol CKConnection <NSObject>
 
-+ (NSString *)name;
++ (CKProtocol)protocol;
 
 /*!
  @method URLSchemes
@@ -116,6 +130,29 @@ typedef enum {
  */
 - (void)setDelegate:(id)delegate;
 
+/*!
+ @method setProperty:forKey:
+ @abstract Adds a given key-value pair to the receiver.
+ @param property The value for key.
+ @param key The key for value. Note that when using key-value coding, the key must be a string (see Key-Value Coding Fundamentals).
+ @discussion Raises an NSInvalidArgumentException if key or property is nil. If you need to represent a nil value in the receiver, use NSNull. If key already exists in the receiver, the receiver’s previous value object for that key is sent a release message and object takes its place.
+ */
+- (void)setProperty:(id)property forKey:(id)key;
+
+/*!
+ @method propertyForKey:
+ @abstract Returns the value associated with a given key.
+ @param propertyKey The key for which to return the corresponding value.
+ @return The value associated with aKey, or nil if no value is associated with aKey.
+ */
+- (id)propertyForKey:(id)propertyKey;
+
+/*!
+ @method removePropertyForKey:
+ @abstract Removes the key-value pair associated with key.
+ @param key The key whose key-value pair should be removed.
+ */
+- (void)removePropertyForKey:(id)key;
 
 /*!
  @method connect
@@ -244,6 +281,14 @@ typedef enum {
 
 #pragma mark Overall connection
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+/*!
+	@method connection:didOpenAtPath:error:
+	@abstract Indicates the connection has successfully opened at the given path.
+	@param con The connection which opened.
+	@param dirPath The directory the connection opened in. On HTTP-based connections, this is nil.
+	@param error An error if the connection failed to open. Nil if the connection opened successfully.
+ */
+- (void)connection:(id <CKConnection>)con didOpenAtPath:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
 
 - (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;

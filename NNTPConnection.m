@@ -42,9 +42,9 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 
 + (NSInteger)defaultPort { return 119; }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"NNTP";
+	return CKNNTPProtocol;
 }
 
 + (NSArray *)URLSchemes

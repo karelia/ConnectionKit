@@ -12,6 +12,7 @@
 #import "CKFTPConnection.h"
 #import "InterThreadMessaging.h"
 #import "RunLoopForwarder.h"
+#import "NSURL+Connection.h"
 
 
 @interface CKConnectionClient (Private)
@@ -58,6 +59,7 @@
 	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
 	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
 	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
+	_flags.openAtPath						= [del respondsToSelector:@selector(connection:didOpenAtPath:error:)];
 	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
 	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
 	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
@@ -128,7 +130,6 @@
     NSURLAuthenticationChallenge *fullChallenge = [self _fullAuthenticationChallengeForChallenge:originalChallenge];
     
     
-    
     // Does the delegate support this? If not, handle it ourselves
     if (_flags.authorizeConnection)
     {
@@ -168,7 +169,7 @@
         NSString *user = [connectionURL user];
         if (user)
         {
-            NSString *password = [connectionURL password];
+            NSString *password = [connectionURL decodedPassword];
             if (password)
             {
                 credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
@@ -309,6 +310,12 @@
 
 #pragma mark -
 #pragma mark Other
+
+- (void)connectionDidOpenAtPath:(NSString *)dirPath error:(NSError *)error
+{
+	if (_flags.openAtPath)
+		[_forwarder connection:[self connection] didOpenAtPath:dirPath error:error];
+}
 
 - (void)connectionDidCreateDirectory:(NSString *)dirPath error:(NSError *)error
 {

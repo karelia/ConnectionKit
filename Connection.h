@@ -64,12 +64,14 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
 #import <Connection/InterThreadMessaging.h>
+
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>
 #import <Connection/NSString+Connection.h>
 #import <Connection/NSPopUpButton+Connection.h>
 #import <Connection/NSTabView+Connection.h>
 #import <Connection/NSNumber+Connection.h>
+#import <Connection/NSURL+Connection.h>
 
 #import <Connection/CKTransferController.h>
 #import <Connection/CKTransferRecord.h>

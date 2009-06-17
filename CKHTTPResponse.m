@@ -59,51 +59,54 @@ static NSMutableDictionary *responseMap = nil;
 	NSString *packet = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(0,headerRange.location)] encoding:NSUTF8StringEncoding] autorelease];
 	NSArray *lines = [packet componentsSeparatedByString:@"\r\n"];
 	// we put in a try/catch to handle any unexpected/missing data
-	@try {
-		if ([lines count] > 1) // need the response line and at least a couple of blank lines
+	@try
+	{
+		if ([lines count] <= 1)// need the response line and at least a couple of blank 
+			return headers;
+		
+		NSArray *response = [[lines objectAtIndex:0] componentsSeparatedByString:@" "];
+		if ([response count] <= 0)
+			return headers;
+		
+		if (![[[response objectAtIndex:0] uppercaseString] hasPrefix:@"HTTP/"])
+			return headers;
+
+		[headers setObject:response forKey:@"Server-Response"];
+
+		// now enumerate over the headers which will be if the line is empty
+		int i, lineCount = [lines count];
+		for (i = 1; i < lineCount; i++)
 		{
-			NSArray *response = [[lines objectAtIndex:0] componentsSeparatedByString:@" "];
-			// HTTP/1.1 CODE NAME
-			if ([[[response objectAtIndex:0] uppercaseString] isEqualToString:@"HTTP/1.1"])
+			NSString *line = [lines objectAtIndex:i];
+			if ([line isEqualToString:@""])
 			{
-				[headers setObject:response forKey:@"Server-Response"];
+				//we hit the end of the headers
+				i++;
+				break;
+			}
+			NSRange colon = [line rangeOfString:@":"];
+			if (colon.location != NSNotFound)
+			{
+				NSString *key = [line substringToIndex:colon.location];
+				NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
+				BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
 				
-				// now enumerate over the headers which will be if the line is empty
-				int i, lineCount = [lines count];
-				for (i = 1; i < lineCount; i++)
+				if (hasMultiValues)
 				{
-					NSString *line = [lines objectAtIndex:i];
-					if ([line isEqualToString:@""])
+					NSArray *vals = [val componentsSeparatedByString:@";"];
+					NSMutableArray *mutableVals = [NSMutableArray array];
+					NSEnumerator *e = [vals objectEnumerator];
+					NSString *cur;
+					
+					while (cur = [e nextObject])
 					{
-						//we hit the end of the headers
-						i++;
-						break;
+						[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
 					}
-					NSRange colon = [line rangeOfString:@":"];
-					if (colon.location != NSNotFound)
-					{
-						NSString *key = [line substringToIndex:colon.location];
-						NSString *val = [line substringFromIndex:colon.location + colon.length + 1];
-						BOOL hasMultiValues = [val rangeOfString:@";"].location != NSNotFound;
-						
-						if (hasMultiValues)
-						{
-							NSArray *vals = [val componentsSeparatedByString:@";"];
-							NSMutableArray *mutableVals = [NSMutableArray array];
-							NSEnumerator *e = [vals objectEnumerator];
-							NSString *cur;
-							
-							while (cur = [e nextObject])
-							{
-								[mutableVals addObject:[cur stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
-							}
-							[headers setObject:mutableVals forKey:key];
-						}
-						else
-						{
-							[headers setObject:val forKey:key];
-						}
-					}
+					[headers setObject:mutableVals forKey:key];
+				}
+				else
+				{
+					[headers setObject:val forKey:key];
 				}
 			}
 		}

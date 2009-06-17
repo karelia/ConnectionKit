@@ -79,7 +79,7 @@ NSDictionary *sDataAttributes = nil;
 
 @implementation CKAbstractConnection
 
-+ (NSString *)name { return nil; }
++ (CKProtocol)protocol { return 0; }
 
 + (NSInteger)defaultPort { return 0; }
 
@@ -158,6 +158,7 @@ NSDictionary *sDataAttributes = nil;
         _client = [[CKConnectionClient alloc] initWithConnection:self];
         
 		_edits = [[NSMutableDictionary dictionary] retain];
+		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_isConnected = NO;
 		_name = [@"Default" retain];
@@ -169,10 +170,11 @@ NSDictionary *sDataAttributes = nil;
 {
 	[_name release];
 	[_request release];
-    
     [_client release];
     
 	[_cachedDirectoryContents release];
+	[_properties release];
+	
 	[_edits release];
 	[_editWatcher release];
 	[_editingConnection forceDisconnect];
@@ -244,6 +246,21 @@ NSDictionary *sDataAttributes = nil;
 - (id)delegate
 {
 	return _delegate;
+}
+
+- (void)setProperty:(id)property forKey:(id)key
+{
+	[_properties setObject:property forKey:key];
+}
+
+- (id)propertyForKey:(id)propertyKey
+{
+	return [_properties objectForKey:propertyKey];
+}
+
+- (void)removePropertyForKey:(id)key
+{
+	[_properties removeObjectForKey:key];
 }
 
 - (void)cacheDirectory:(NSString *)path withContents:(NSArray *)contents
@@ -680,7 +697,7 @@ NSDictionary *sDataAttributes = nil;
 	[_edits setObject:remotePath forKey:localEditable];
 	if (!_editingConnection)
 	{
-		_editingConnection = [self copy];
+		_editingConnection = [[[self class] alloc] initWithRequest:[self request]];
 		[_editingConnection setName:@"editing"];
 		[_editingConnection setDelegate:self];
 		[_editingConnection connect];

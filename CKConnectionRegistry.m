@@ -30,7 +30,7 @@
 {
     if (self = [super init])
     {
-        _connectionClassesByName = [[NSMutableDictionary alloc] init];
+        _connectionClassesByProtocol = [[NSMutableDictionary alloc] init];
         _connectionClassesByURLScheme = [[NSMutableDictionary alloc] init];
     }
     return self;
@@ -39,7 +39,7 @@
 - (void)dealloc
 {
     [_connectionClassesByURLScheme release];
-    [_connectionClassesByName release];
+    [_connectionClassesByProtocol release];
     
     [super dealloc];
 }
@@ -47,14 +47,12 @@
 #pragma mark -
 #pragma mark Class Registration
 
-- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme
+- (void)registerClass:(Class <CKConnection>)connectionClass forProtocol:(CKProtocol)protocol URLScheme:(NSString *)URLScheme
 {
-    [_connectionClassesByName setObject:connectionClass forKey:name];
+    [_connectionClassesByProtocol setObject:connectionClass forKey:[NSNumber numberWithInt:protocol]];
     
     if (URLScheme)
-    {
         [_connectionClassesByURLScheme setObject:connectionClass forKey:URLScheme];
-    }
 }
 
 - (Class <CKConnection>)connectionClassForURLScheme:(NSString *)URLScheme
@@ -62,14 +60,14 @@
     return [_connectionClassesByURLScheme objectForKey:URLScheme];
 }
 
-- (Class <CKConnection>)connectionClassForName:(NSString *)connectionName
+- (Class <CKConnection>)connectionClassForProtocol:(CKProtocol)protocol
 {
-    return [_connectionClassesByName objectForKey:connectionName];
+    return [_connectionClassesByProtocol objectForKey:[NSNumber numberWithInt:protocol]];
 }
 
-- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port
+- (CKConnectionRequest *)connectionRequestForProtocol:(CKProtocol)protocol host:(NSString *)host port:(NSNumber *)port
 {
-    Class connectionClass = [self connectionClassForName:name];
+    Class connectionClass = [self connectionClassForProtocol:protocol];
     
     NSURL *URL = [[NSURL alloc] initWithScheme:[[connectionClass URLSchemes] objectAtIndex:0]
                                           host:host
@@ -98,14 +96,19 @@
     return result;
 }
 
-- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port
+- (id <CKConnection>)connectionForProtocol:(CKProtocol)protocol host:(NSString *)host port:(NSNumber *)port
 {
-    return [self connectionWithName:name host:host port:port user:nil password:nil error:NULL];
+	return [self connectionForProtocol:protocol host:host port:port user:nil password:nil error:nil];
 }
 
-- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port user:(NSString *)username password:(NSString *)password error:(NSError **)error
+- (id <CKConnection>)connectionForProtocol:(CKProtocol)protocol
+									  host:(NSString *)host
+									  port:(NSNumber *)port
+									  user:(NSString *)username
+								  password:(NSString *)password
+									 error:(NSError **)error
 {
-    Class class = [self connectionClassForName:name];
+    Class class = [self connectionClassForProtocol:protocol];
     
     id <CKConnection> result = nil;
     if (class)

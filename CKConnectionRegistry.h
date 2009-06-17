@@ -13,7 +13,7 @@
 @interface CKConnectionRegistry : NSObject
 {
     @private
-    NSMutableDictionary *_connectionClassesByName;
+    NSMutableDictionary *_connectionClassesByProtocol;
     NSMutableDictionary *_connectionClassesByURLScheme;
 }
 
@@ -21,18 +21,19 @@
 
 #pragma mark Connection class registration
 - (Class <CKConnection>)connectionClassForURLScheme:(NSString *)URLScheme;
-- (Class <CKConnection>)connectionClassForName:(NSString *)connectionName;
+- (Class <CKConnection>)connectionClassForProtocol:(CKProtocol)protocol;
 
 /*!
- @method registerClass:forURLScheme:
+ @method registerClass:forProtocol:URLScheme:
  @abstract Registers a connection class.
- @discussion The connection's name is automatically registered for you.
+ @discussion The connection's protocol is automatically registered for you.
  @param connectionClass The class implementing the CKConnection protocol to register.
+ @param protocol The protocol to register the connection for.
  @param URLScheme Optional. The URL scheme to register the connection for. Call this method agin if you need to register more than one URL scheme.
  */
-- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
+- (void)registerClass:(Class <CKConnection>)connectionClass forProtocol:(CKProtocol)protocol URLScheme:(NSString *)URLScheme;
 
-- (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
+- (CKConnectionRequest *)connectionRequestForProtocol:(CKProtocol)protocol host:(NSString *)host port:(NSNumber *)port;
 
 #pragma mark Creating a connection
 
@@ -46,7 +47,12 @@
 - (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request;
 
 // These 2 methods are for compatibility with legacy code
-- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
-- (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port user:(NSString *)username password:(NSString *)password error:(NSError **)error;
+- (id <CKConnection>)connectionForProtocol:(CKProtocol)protocol host:(NSString *)host port:(NSNumber *)port;
+- (id <CKConnection>)connectionForProtocol:(CKProtocol)protocol
+									  host:(NSString *)host
+									  port:(NSNumber *)port
+									  user:(NSString *)username
+								  password:(NSString *)password
+									 error:(NSError **)error;
 
 @end
