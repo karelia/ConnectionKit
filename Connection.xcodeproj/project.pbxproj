@@ -249,6 +249,7 @@
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		2740ED080FE94CD90081C416 /* CKThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKThreadProxy.h; sourceTree = "<group>"; };
 		2740ED090FE94CD90081C416 /* CKThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKThreadProxy.m; sourceTree = "<group>"; };
+		2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Connection architecture overview.graffle"; sourceTree = "<group>"; };
 		278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnectionProtocol.h; sourceTree = "<group>"; };
 		278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnectionProtocol.m; sourceTree = "<group>"; };
 		278B96740F27FCDC002F3C54 /* CKConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnection.h; sourceTree = "<group>"; };
@@ -640,6 +641,7 @@
 		278B965D0F27FB3E002F3C54 /* CKConnection */ = {
 			isa = PBXGroup;
 			children = (
+				2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */,
 				278B96740F27FCDC002F3C54 /* CKConnection.h */,
 				278B96750F27FCDC002F3C54 /* CKConnection.m */,
 				278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */,
