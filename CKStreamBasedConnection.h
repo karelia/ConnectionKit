@@ -72,7 +72,7 @@
 	//Peer connection support for recursive S3 renaming
 	NSMutableArray					*_recursiveS3RenamesQueue;
 	NSMutableArray					*_recursivelyRenamedDirectoriesToDelete;
-	id <CKConnection>	_recursiveS3RenameConnection;
+	id <CKConnection>				_recursiveS3RenameConnection;
 	unsigned						_numberOfS3RenameListingsRemaining;
 	unsigned						_numberOfS3RenamesRemaining;
 	unsigned						_numberOfS3RenameDirectoryDeletionsRemaining;

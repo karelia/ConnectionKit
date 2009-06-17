@@ -729,7 +729,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
     {
         if ([item isKindOfClass:[CKHost class]])
         {
-            return [item connectionType];
+			Class connectionClass = [[CKConnectionRegistry sharedConnectionRegistry] connectionClassForProtocol:[item connectionProtocol]];
+			NSString *URLScheme = [[[connectionClass URLSchemes] objectAtIndex:0] uppercaseString];
+			return URLScheme;
         }
     }
     else if ([item isKindOfClass:[CKHost class]] || [item isKindOfClass:[CKHostCategory class]])

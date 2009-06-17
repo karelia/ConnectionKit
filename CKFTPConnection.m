@@ -148,15 +148,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"ftp"];
+
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];
+	
 	[pool release];
 }
 
 + (NSInteger)defaultPort { return 21; }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"FTP";
+	return CKFTPProtocol;
 }
 
 + (NSArray *)URLSchemes
@@ -695,14 +701,18 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSString *path = [reply quotedString];
 	if (!path || [path length] == 0)
 		path = [[[self lastCommand] command] argumentField];	
+	
+	BOOL connectionJustOpened = NO;
 	switch ([reply replyCode])
 	{
 		case 257: //Path Created
 		{
 			[self setCurrentPath:path];			
 			if (_rootPath == nil) 
+			{
+				connectionJustOpened = YES;
 				_rootPath = [path copy];
-			
+			}
 			break;
 		}
 		case 421:
@@ -723,8 +733,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		default:
 			break;
 	}
-
-    [[self client] connectionDidChangeToDirectory:path error:error];
+	
+	if (connectionJustOpened)
+		[[self client] connectionDidOpenAtPath:path error:error];
+	else
+		[[self client] connectionDidChangeToDirectory:path error:error];
 }
 
 - (void)_receivedReplyInConnectionAwaitingDirectoryContentsState:(CKFTPReply *)reply
@@ -3024,16 +3037,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			return nil;
 		}
 	}
-	
+		
+	[self startBulkCommands];
+		
 	/*
 	 TYPE I
 	 SIZE file
 	 PASV/EPSV/ERPT/PORT
 	 RETR file
 	 TYPE A
-	 */
+	 */	
 	
-	[self startBulkCommands];
 	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
@@ -3054,15 +3068,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                                     userInfo:download];
     
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
-	[dataCmd addDependantCommand: retr];
+	[dataCmd addDependantCommand:retr];
 	
-	CKConnectionCommand *size = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SIZE" argumentField: remotePath]
+	CKConnectionCommand *size = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"SIZE" argumentField: [remotePath lastPathComponent]]
 											  awaitState:CKConnectionIdleState 
 											   sentState:CKConnectionSentSizeState
 											   dependant:dataCmd
 												userInfo:nil];
 	
-	if (!_ftpFlags.setBinaryTransferMode) {
+	if (!_ftpFlags.setBinaryTransferMode)
+	{
 		CKConnectionCommand *bin = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"TYPE" argumentField:@"I"]
 											 awaitState:CKConnectionIdleState
 											  sentState:FTPModeChangeState
@@ -3072,16 +3087,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		_ftpFlags.setBinaryTransferMode = YES;
 	}
 	
+	//Move to the parent path. This prevents issues with path being too long in the command.
+	NSString *parentDirectory = [remotePath stringByDeletingLastPathComponent];
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+		[self _changeToDirectory:parentDirectory forDependentCommand:retr];		
 	
 	if (_ftpFlags.hasSize)
 		[self queueCommand:size];
 	[self queueCommand:dataCmd];
-	
-	//Move to the parent path. This prevents issues with path being too long in the command.
-	NSString *parentDirectory = [remotePath stringByDeletingLastPathComponent];
-	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
-		[self _changeToDirectory:parentDirectory forDependentCommand:retr];	
-	
+		
 	[self queueCommand:retr];
 	[self endBulkCommands];
 	

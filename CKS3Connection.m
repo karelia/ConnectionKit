@@ -51,13 +51,19 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"s3"];
+	
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];	
+	
     [pool release];
 }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"Amazon S3";
+	return CKAmazonS3Protocol;
 }
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"s3", @"http", nil]; }
@@ -350,6 +356,20 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			
 			break;
 		}
+		case CKConnectionDownloadingFileState:
+		{
+			CKInternalTransferRecord *downloadInfo = [[self currentDownload] retain];
+			[self dequeueDownload];
+			
+			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
+			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
+			
+			if ([downloadInfo delegateRespondsToTransferDidFinish])
+				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
+			
+			[downloadInfo release];
+			break;
+		}
 		case CKConnectionDeleteFileState:
 		{
 			[[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
@@ -380,8 +400,10 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[self setState:CKConnectionRenameToState];
 			return;
 		}
-		default: break;
+		default:
+			break;
 	}
+	
 	[self setState:CKConnectionIdleState];
 }
 
@@ -470,19 +492,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
 			
-			CKInternalTransferRecord *downloadInfo = [[self currentDownload] retain];
-			[self dequeueDownload];
-			
-			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
-			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
-			
-			if ([downloadInfo delegateRespondsToTransferDidFinish])
-				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
-			
-			[myCurrentRequest release];
-			myCurrentRequest = nil;
-			[downloadInfo release];
-			[self setState:CKConnectionIdleState];
+			return YES;
 		}
 		return NO;
 	}

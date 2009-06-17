@@ -1,42 +1,83 @@
-{
-    IBClasses =     (
-                {
-            ACTIONS =             {
-                cancelPassword = id;
-                cancelUpload = id;
-                connectPassword = id;
-                toggleFiles = id;
-            };
-            CLASS = DropletController;
-            LANGUAGE = ObjC;
-            OUTLETS =             {
-                oCancel = NSButton;
-                oFiles = NSOutlineView;
-                oPassword = NSTextField;
-                oPasswordPanel = NSPanel;
-                oPasswordText = NSTextField;
-                oProgressBar = NSProgressIndicator;
-                oStatus = NSTextField;
-                oToggleFiles = NSButton;
-                oWindow = NSPanel;
-            };
-            SUPERCLASS = NSObject;
-        },
-                {
-            CLASS = DropletOutlineView;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSOutlineView;
-        },
-                {
-            CLASS = DropletPanel;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSPanel;
-        },
-                {
-            CLASS = FirstResponder;
-            LANGUAGE = ObjC;
-            SUPERCLASS = NSObject;
-        }
-    );
-    IBVersion = 1;
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IBClasses</key>
+	<array>
+		<dict>
+			<key>CLASS</key>
+			<string>NSObject</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>DropletPanel</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSPanel</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>DropletOutlineView</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSOutlineView</string>
+		</dict>
+		<dict>
+			<key>CLASS</key>
+			<string>FirstResponder</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+		<dict>
+			<key>ACTIONS</key>
+			<dict>
+				<key>cancelPassword</key>
+				<string>id</string>
+				<key>cancelUpload</key>
+				<string>id</string>
+				<key>connectPassword</key>
+				<string>id</string>
+				<key>toggleFiles</key>
+				<string>id</string>
+			</dict>
+			<key>CLASS</key>
+			<string>DropletController</string>
+			<key>LANGUAGE</key>
+			<string>ObjC</string>
+			<key>OUTLETS</key>
+			<dict>
+				<key>myConnection</key>
+				<string>id</string>
+				<key>oCancel</key>
+				<string>NSButton</string>
+				<key>oFiles</key>
+				<string>NSOutlineView</string>
+				<key>oPassword</key>
+				<string>NSTextField</string>
+				<key>oPasswordPanel</key>
+				<string>NSPanel</string>
+				<key>oPasswordText</key>
+				<string>NSTextField</string>
+				<key>oProgressBar</key>
+				<string>NSProgressIndicator</string>
+				<key>oStatus</key>
+				<string>NSTextField</string>
+				<key>oToggleFiles</key>
+				<string>NSButton</string>
+				<key>oWindow</key>
+				<string>NSPanel</string>
+			</dict>
+			<key>SUPERCLASS</key>
+			<string>NSObject</string>
+		</dict>
+	</array>
+	<key>IBVersion</key>
+	<string>1</string>
+</dict>
+</plist>

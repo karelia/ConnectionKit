@@ -35,15 +35,21 @@
 + (void)load
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"https"];
+
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];	
+	
     [pool release];
 }
 
 + (NSInteger)defaultPort { return 443; }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"Secure WebDAV";
+	return CKSecureWebDAVProtocol;
 }
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"https", @"swebdav", nil]; }

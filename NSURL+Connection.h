@@ -15,4 +15,6 @@
                 port:(NSNumber *)port
                 user:(NSString *)username
             password:(NSString *)password;
+
+- (NSString *)decodedPassword;
 @end

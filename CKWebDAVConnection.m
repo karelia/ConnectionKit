@@ -54,14 +54,19 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"http"];
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"webdav"];
+	
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];
+	
     [pool release];
 }
 
-+ (NSString *)name
++ (CKProtocol)protocol
 {
-	return @"WebDAV";
+	return CKWebDAVProtocol;
 }
 
 + (NSArray *)URLSchemes
@@ -230,6 +235,20 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[self setState:CKConnectionIdleState];
 			break;
 		}
+		case CKConnectionDownloadingFileState:
+		{
+			CKInternalTransferRecord *downloadInfo = [[self currentDownload] retain];
+			[self dequeueDownload];
+			
+			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
+			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
+
+			if ([downloadInfo delegateRespondsToTransferDidFinish])
+				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
+			
+			[downloadInfo release];
+			break;
+		}
 		case CKConnectionDeleteFileState:
 		{
 			CKDAVDeleteResponse *dav = (CKDAVDeleteResponse *)response;
@@ -308,8 +327,11 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[self setState:CKConnectionIdleState];
 			break;
 		}
-		default: break;
+		default: 
+			break;
 	}
+	
+	[self setState:CKConnectionIdleState];	
 }
 
 - (void)initiatingNewRequest:(CKHTTPRequest *)req withPacket:(NSData *)packet
@@ -346,7 +368,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 - (BOOL)processBufferWithNewData:(NSData *)data
 {
-	if (GET_STATE == CKConnectionDownloadingFileState)
+	//If we don't have any authorization, we cannot possibly be downloading. If the initial command we send to the WebDAV server is a download, our state will be downloading, but we will not have authorized. We must allow authorization!
+	BOOL hasAuthorized = (_basicAccessAuthorizationHeader || (_currentDigestRealm && _currentDigestOpaque && _currentDigestNonce));
+	
+	if (hasAuthorized && GET_STATE == CKConnectionDownloadingFileState)
 	{
 		CKInternalTransferRecord *download = [self currentDownload];
 		if (bytesToTransfer == 0)
@@ -458,23 +483,9 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[myDownloadHandle closeFile];
 			[myDownloadHandle release];
 			myDownloadHandle = nil;
-			
-			[download retain];
-			[self dequeueDownload];
-			
-			[[self client] downloadDidFinish:[download remotePath] error:nil];
-			
-			if ([download delegateRespondsToTransferDidFinish])
-			{
-				[[download delegate] transferDidFinish:[download userInfo] error:nil];
-			}
-			[download release];
-			
-			[myCurrentRequest release];
-			myCurrentRequest = nil;
-			
-			[self setState:CKConnectionIdleState];
+			return YES;
 		}
+		
 		return NO;
 	}
 	return YES;

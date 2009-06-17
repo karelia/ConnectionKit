@@ -65,7 +65,8 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	myHost = [[NSKeyedUnarchiver unarchiveObjectWithFile:configurationFile] retain];
 	if (![myHost password])
 	{
-		NSString *str = [NSString stringWithFormat:[oPasswordText stringValue], [myHost host], [myHost connectionType]];
+		NSString *URLScheme = [[[[[CKConnectionRegistry sharedConnectionRegistry] connectionClassForProtocol:[myHost connectionProtocol]] URLSchemes] objectAtIndex:0] uppercaseString];
+		NSString *str = [NSString stringWithFormat:[oPasswordText stringValue], [myHost host], URLScheme];
 		[oPasswordText setStringValue:str];
 		[oPasswordPanel center];
 		[NSApp activateIgnoringOtherApps:YES];

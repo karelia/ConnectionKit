@@ -37,11 +37,14 @@
 
 - (NSString *)encodeLegally
 {
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef)self, (CFStringRef)@"%+#", 
-																			NULL, CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
+	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(NULL, 
+																			(CFStringRef)self,
+																			(CFStringRef)@"%+#", 
+																			NULL,
+																			kCFStringEncodingUTF8);
 	return [result autorelease];
 }
+
 - (NSString *)encodeLegallyForS3
 {
 	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(

@@ -21,7 +21,6 @@
 {
     NSParameterAssert(scheme);
 	
-	
 	NSMutableString *buffer = [[NSMutableString alloc] initWithFormat:@"%@://", scheme];
     
     if (username && ![username isEqualToString:@""])
@@ -29,23 +28,38 @@
         [buffer appendString:[username encodeLegally]];
         if (password && ![password isEqualToString:@""])
         {
-            [buffer appendFormat:@":%@", [password encodeLegally]];
+			//We need all non-legal URL characters escaped, so we can't use the NSString -encodeLegally category method here.
+			NSString *escapedPassword = (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL,
+																							(CFStringRef)password,
+																							NULL,
+																							(CFStringRef)@"@", //Technically @ is a legal URL character, but because we're constructing a url with a username, the @ is NOT legal as part of a password. It must be escaped.
+																							kCFStringEncodingUTF8);
+			[buffer appendFormat:@":%@", escapedPassword];
+			[escapedPassword release];
         }
         [buffer appendString:@"@"];    
     }
+	
     
-    
-	if (host) [buffer appendString:host];
+	if (host)
+		[buffer appendString:host];
 	
     
     if (port)
-    {
         [buffer appendFormat:@":%i", [port intValue]];
-    }
-    
+	    
     self = [self initWithString:buffer];
     [buffer release];
     return self;
+}
+
+- (NSString *)decodedPassword
+{
+	NSString *decodedPassword = (NSString *)CFURLCreateStringByReplacingPercentEscapesUsingEncoding(NULL,
+																									(CFStringRef)[self password], 
+																									CFSTR(""), 
+																									kCFStringEncodingUTF8);
+	return [decodedPassword autorelease];
 }
 
 @end

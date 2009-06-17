@@ -21,6 +21,7 @@ typedef struct __flags {
 	unsigned permissions:1;
 	unsigned cancel:1; // deprecated
 	unsigned didCancel:1;
+	unsigned openAtPath:1;
 	unsigned changeDirectory:1;
 	unsigned createDirectory:1;
 	unsigned deleteDirectory:1;

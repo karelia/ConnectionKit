@@ -1061,7 +1061,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_recursiveS3RenameConnection)
 	{
-		_recursiveS3RenameConnection = [self copy];
+		_recursiveS3RenameConnection = [[[self class] alloc] initWithRequest:[self request]];
 		[_recursiveS3RenameConnection setName:@"Recursive S3 Renaming"];
 		[_recursiveS3RenameConnection setDelegate:self];
 	}
@@ -1120,7 +1120,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_recursiveDeletionConnection)
 	{
-		_recursiveDeletionConnection = [self copy];
+		_recursiveDeletionConnection = [[[self class] alloc] initWithRequest:[self request]];
 		[_recursiveDeletionConnection setName:@"recursive deletion"];
 		[_recursiveDeletionConnection setDelegate:self];
 		[_recursiveDeletionConnection connect];
@@ -1182,7 +1182,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (!_recursiveDownloadConnection)
 	{
-		_recursiveDownloadConnection = [self copy];
+		_recursiveDownloadConnection = [[[self class] alloc] initWithRequest:[self request]];
 		[_recursiveDownloadConnection setName:@"recursive download"];
 		[_recursiveDownloadConnection setDelegate:self];
 	}
@@ -1226,6 +1226,111 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 #pragma mark -
 #pragma mark Peer Connection Delegate Methods
+- (void)connection:(id <CKConnection>)conn didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	//Forward to our delegate 
+	[[self client] connectionDidReceiveAuthenticationChallenge:challenge];
+}
+
+- (void)connection:(id <CKConnection>)conn appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+{
+	//Forward to our delegate.
+	[[self client] appendString:string toTranscript:transcript];
+}
+
+- (void)connection:(id <CKConnection>)conn didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+	//We failed to do whatever recursive operation we were asked to do. Appropriately error!
+	if (conn == _recursiveDeletionConnection)
+	{
+		[_recursiveDeletionLock lock];
+		NSString *directoryPath = [_recursiveDeletionsQueue objectAtIndex:0];
+		if (_numberOfDeletionListingsRemaining > 0)
+			_numberOfDeletionListingsRemaining--;
+		if (_numberOfDirDeletionsRemaining > 0)
+			_numberOfDirDeletionsRemaining--;
+		[_recursiveDeletionLock unlock];
+		
+		NSString *localizedDescription = [NSString stringWithFormat:@"%@: %@", LocalizedStringInConnectionKitBundle(@"Failed to delete file", @"couldn't delete the file"), directoryPath];
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey, 
+								  directoryPath, NSFilePathErrorKey, nil];
+		NSError *error = [NSError errorWithDomain:CKStreamDomain 
+											 code:0 //Code has no meaning in this context
+										 userInfo:userInfo];
+		[[self client] connectionDidDeleteDirectory:directoryPath error:error];
+	}
+	else if (conn == _recursiveDownloadConnection)
+	{
+		[_recursiveDownloadLock lock];
+		NSDictionary *record = [_recursiveDownloadQueue objectAtIndex:0];
+		if (_numberOfDownloadListingsRemaining > 0)
+			_numberOfDownloadListingsRemaining--;
+		[_recursiveDownloadLock unlock];
+		
+		NSString *directoryPath = [record objectForKey:@"remote"];
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to download file.", @"Failed to download file.");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+								  localizedDescription, NSLocalizedDescriptionKey, 
+								  directoryPath, NSFilePathErrorKey, nil];
+		NSError *error = [NSError errorWithDomain:CKStreamDomain 
+											 code:0 //code doesn't mean anything in this context.
+										 userInfo:userInfo];
+		[[self client] downloadDidFinish:directoryPath error:error];
+	}
+	else if (conn == _recursiveS3RenameConnection)
+	{
+		[_recursiveS3RenameLock lock];
+		
+		NSDictionary *renameDictionary = [_recursiveS3RenamesQueue objectAtIndex:0];
+		
+		if (_numberOfS3RenameListingsRemaining > 0)
+			_numberOfS3RenameListingsRemaining--;
+		if (_numberOfS3RenamesRemaining > 0)
+			_numberOfS3RenamesRemaining--;
+		
+		[_recursiveS3RenameLock unlock];
+		
+		NSString *fromDirectoryPath = [renameDictionary objectForKey:@"FromDirectoryPath"];
+		NSString *toDirectoryPath = [renameDictionary objectForKey:@"ToDirectoryPath"];
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, fromDirectoryPath, @"fromPath", toDirectoryPath, @"toPath", nil];
+		NSError *error = [NSError errorWithDomain:CKStreamDomain 
+											 code:0 //Code has no meaning in this context.
+										 userInfo:userInfo];
+		[[self client] connectionDidRename:fromDirectoryPath to:toDirectoryPath error:error];
+	}
+	else if (conn == _fileCheckingConnection)
+	{
+		[_fileCheckLock lock];
+		
+		NSString *path = [NSString stringWithString:[self currentFileCheck]];
+		
+		if ([self numberOfFileChecks] > 0)
+			[self dequeueFileCheck];
+		
+		[_fileCheckLock unlock];
+		
+		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to check existence of file", @"Failed to check existence of file");
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+		NSError *error = [NSError errorWithDomain:CKStreamDomain 
+											 code:0 //Code has no meaning in this context.
+										 userInfo:userInfo];
+		
+		[[self client] connectionDidCheckExistenceOfPath:path pathExists:NO error:error];
+	}
+}
+
+
+- (NSString *)connection:(id <CKConnection>)con
+	   passphraseForHost:(NSString *)host 
+				username:(NSString *)username
+		   publicKeyPath:(NSString *)pubKeyPath
+{
+	//TODO:
+	//If a peer connection is asking for a passphrase, that means we, as the model connection, were asked for it as well. Can't we just access that result and use it?
+	return [[self client] passphraseForHost:host username:username publicKeyPath:pubKeyPath];
+}
 
 - (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error
 {
