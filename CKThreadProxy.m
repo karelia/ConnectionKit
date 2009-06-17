@@ -11,7 +11,7 @@
 #import "CKConnectionProtocol.h"
 
 
-@interface CKAuthenticationChallengeSenderThreadProxy : NSObject <NSURLAuthenticationChallengeSender>
+@interface CKAuthenticationChallengeSenderThreadProxy : NSProxy <NSURLAuthenticationChallengeSender>
 {
   @public   // bit dodgy, but reasonable as this is a private class
     id                              _target;
@@ -68,8 +68,7 @@
     didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     //  Set up a special thread proxy to handle the delegate's response to the challenge.
-CKAuthenticationChallengeSenderThreadProxy *senderProxy =
-        [[CKAuthenticationChallengeSenderThreadProxy alloc] init];
+CKAuthenticationChallengeSenderThreadProxy *senderProxy = [CKAuthenticationChallengeSenderThreadProxy alloc];
     
     senderProxy->_target = [[challenge sender] retain];
     senderProxy->_thread = [[NSThread currentThread] retain];
