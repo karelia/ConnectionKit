@@ -10,8 +10,8 @@
 
 #import "CKAbstractConnection.h"
 #import "CKFTPConnection.h"
+#import "CKThreadProxy.h"
 #import "InterThreadMessaging.h"
-#import "RunLoopForwarder.h"
 
 
 @interface CKConnectionClient (Private)
@@ -30,9 +30,7 @@
     
     _connection = connection;   // Weak ref
     
-    _forwarder = [[RunLoopForwarder alloc] init];
-    [_forwarder setUseMainThread:YES];
-    [_forwarder setReturnValueDelegate:self];
+    _forwarder = [[CKThreadProxy CK_proxyWithTarget:self thread:nil] retain];
     
     return self;
 }
@@ -137,7 +135,7 @@
         _originalAuthenticationChallenge = [originalChallenge retain];
         _authenticationThread = [[NSThread currentThread] retain];
         
-        [_forwarder connection:[self connection] didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+        [_forwarder connection:(NSURLConnection *)[self connection] didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
     }
     else
     {
@@ -208,7 +206,7 @@
 {
     if (_flags.cancelAuthorization)
     {
-        [_forwarder connection:[self connection] didCancelAuthenticationChallenge:challenge];
+        [_forwarder connection:(NSURLConnection *)[self connection] didCancelAuthenticationChallenge:challenge];
     }
 }
 
@@ -292,7 +290,7 @@
 {
 	if (_flags.transcript)
 	{
-		[_forwarder connection:[self connection] appendString:string toTranscript:transcript];
+		[_forwarder connection:(CKConnection *)[self connection] appendString:string toTranscript:transcript];
 	}
 }
 

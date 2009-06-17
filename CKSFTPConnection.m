@@ -9,7 +9,6 @@
 #import "CKSFTPConnection.h"
 
 #import "CKConnectionThreadManager.h"
-#import "RunLoopForwarder.h"
 #import "CKSSHPassphrase.h"
 #import "CKTransferRecord.h"
 #import "CKInternalTransferRecord.h"

@@ -28,8 +28,10 @@
  */
 
 #import "CKInternalTransferRecord.h"
-#import "RunLoopForwarder.h"
+
+#import "CKThreadProxy.h"
 #import "NSObject+Connection.h"
+
 
 @implementation CKInternalTransferRecord
 
@@ -65,9 +67,7 @@
 		/* Why retain this delegate?  If an app only uses the original upload/download methods that don't take a delegate, then internally the delegate will be created which is a CKTR. If the internal transfer record doesn't retain it then you can see that when the transfer starts up, the delegate will be a dangling pointer and will crash. Because the internal transfer record is a private class, convention doesn't have to apply.
 		*/
 
-		myForwarder = [[RunLoopForwarder alloc] init];
-		[myForwarder setUseMainThread:YES];
-		[myForwarder setDelegate:myDelegate];
+		myForwarder = [[CKThreadProxy CK_proxyWithTarget:myDelegate thread:nil] retain];
 		myUserInfo = [ui retain];
 		
 		myFlags.didBegin = [myDelegate respondsToSelector:@selector(transferDidBegin:)];

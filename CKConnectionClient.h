@@ -54,15 +54,13 @@ typedef struct __flags {
 } CKConnectionDelegateFlags;
 
 
-@class RunLoopForwarder;
-
 
 @interface CKConnectionClient : NSObject <CKConnectionClient, NSURLAuthenticationChallengeSender>
 {
 @private
     CKAbstractConnection        *_connection;    // Weak ref
     CKConnectionDelegateFlags   _flags;
-    RunLoopForwarder            *_forwarder;
+    id                          _forwarder;
     
     // Authentication
     NSURLAuthenticationChallenge    *_currentAuthenticationChallenge;

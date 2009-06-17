@@ -61,7 +61,6 @@ typedef enum {
 	CKDonePhase
 } CKTransferPhase;
 
-@class RunLoopForwarder;
 
 @interface CKTransferController : NSWindowController 
 {

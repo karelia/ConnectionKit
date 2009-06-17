@@ -9,6 +9,7 @@
     LICENSES:   MIT License
 
 	REVISIONS:
+		2009-06-17	Mike Abdullah	Switched to use CKThreadProxy so as to simplify ConnectionKit codebase. This is NOT intended to be merged back to UK codebase
 		2006-03-13	UK	Clarified license, streamlined UKFileWatcher stuff,
 						Changed notifications to be useful and turned off by
 						default some deprecated stuff.
@@ -21,9 +22,10 @@
 // -----------------------------------------------------------------------------
 
 #import "UKKQueue.h"
-#import "UKMainThreadProxy.h"
 #import <unistd.h>
 #import <fcntl.h>
+
+#import "CKThreadProxy.h"
 
 
 // -----------------------------------------------------------------------------
@@ -440,7 +442,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
 {
 	id	oldProxy = delegateProxy;
 	delegate = newDelegate;
-	delegateProxy = [delegate copyMainThreadProxy];
+	delegateProxy = [[CKThreadProxy CK_proxyWithTarget:delegate thread:nil] retain];
 	[oldProxy release];
 }
 

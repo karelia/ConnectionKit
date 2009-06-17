@@ -34,8 +34,6 @@ typedef enum {
 @end
 
 
-@class RunLoopForwarder;
-
 
 //  CKConnectionProtocolClient manages the threaded interaction with a CKConnectionProtocol
 //  subclass. It generally just forwards the methods onto the host CKConnection object on the main
@@ -50,7 +48,7 @@ typedef enum {
     CKConnection            *_connection;   // Weak ref
     CKConnectionProtocol    *_protocol;     // Weak ref
     
-    RunLoopForwarder    *_threadProxy;
+    id  _threadProxy;
 }
 
 - (id)initWithConnection:(CKConnection *)connection;

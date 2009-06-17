@@ -31,7 +31,6 @@
 #import <Foundation/Foundation.h>
 #import <Security/Security.h>
 
-@class RunLoopForwarder;
 @protocol InputStream, OutputStream;
 
 typedef enum {

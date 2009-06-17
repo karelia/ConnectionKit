@@ -334,7 +334,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 {
     // Inform the delegate
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
+    if ([delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
     {
         [delegate performSelector:@selector(connection:didReceiveAuthenticationChallenge:)
                        withObject:self
