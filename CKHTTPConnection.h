@@ -39,13 +39,8 @@
 	// Authentication
 	NSURLAuthenticationChallenge	*_currentAuthenticationChallenge;	// General
     NSInteger						_authenticationFailureCount;
-	
-	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
-	
-	NSString *_currentDigestRealm;                                      // HTTP digest-based
-	NSString *_currentDigestOpaque;
-	NSString *_currentDigestNonce;
-	NSUInteger _digestNonceCount;
+	CFHTTPAuthenticationRef         _currentAuth;
+    NSString                        *_basicAccessAuthorizationHeader;
 	
 	
 	struct __httpconflags {
