@@ -60,8 +60,6 @@ extern NSString *CKStreamDomain;
 extern NSString *CKInputStreamDomain;
 extern NSString *CKOutputStreamDomain;
 extern NSString *CKSSLDomain;
-extern NSString *CKEditingDomain;
-
 
 typedef enum {
 	CKConnectionNotConnectedState = 0,
@@ -104,11 +102,6 @@ typedef enum {
 	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
     BOOL    _isConnected;
     BOOL    _inBulk;
-		
-	
-	UKKQueue *_editWatcher;
-	NSMutableDictionary *_edits;
-	CKAbstractConnection *_editingConnection;
 		
 	NSMutableDictionary *_cachedDirectoryContents;
 	
