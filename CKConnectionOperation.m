@@ -6,7 +6,7 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKConnection+Private.h"
+#import "CKFileTransferConnection+Private.h"
 
 
 @implementation CKConnectionOperation

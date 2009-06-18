@@ -28,21 +28,21 @@
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 2740ED080FE94CD90081C416 /* CKThreadProxy.h */; };
 		2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2740ED090FE94CD90081C416 /* CKThreadProxy.m */; };
-		278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */; };
-		278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96740F27FCDC002F3C54 /* CKConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96750F27FCDC002F3C54 /* CKConnection.m */; };
+		278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		278B966B0F27FC18002F3C54 /* CKWebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */; };
+		278B967E0F27FCDE002F3C54 /* CKFileTransferConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96740F27FCDC002F3C54 /* CKFileTransferConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		278B967F0F27FCDE002F3C54 /* CKFileTransferConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96750F27FCDC002F3C54 /* CKFileTransferConnection.m */; };
 		278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */; };
-		278B96820F27FCDE002F3C54 /* CKConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96780F27FCDD002F3C54 /* CKConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		278B96830F27FCDE002F3C54 /* CKConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96790F27FCDD002F3C54 /* CKConnectionProtocol.m */; };
+		278B96820F27FCDE002F3C54 /* CKFileTransferProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96780F27FCDD002F3C54 /* CKFileTransferProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		278B96830F27FCDE002F3C54 /* CKFileTransferProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96790F27FCDD002F3C54 /* CKFileTransferProtocol.m */; };
 		278B96C30F28019D002F3C54 /* NSInvocation+ConnectionKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */; };
 		278B96C40F28019D002F3C54 /* NSInvocation+ConnectionKit.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96C20F28019D002F3C54 /* NSInvocation+ConnectionKit.m */; };
 		278B978F0F28F136002F3C54 /* CKConnectionError.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B978E0F28F136002F3C54 /* CKConnectionError.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B97FC0F2922A3002F3C54 /* CKConnectionError.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B97FB0F2922A3002F3C54 /* CKConnectionError.m */; };
-		278B98740F29EC12002F3C54 /* CKFileConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B98720F29EC12002F3C54 /* CKFileConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		278B98750F29EC12002F3C54 /* CKFileConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */; };
-		278B99A60F2B66C4002F3C54 /* CKConnection+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */; };
-		278B99A70F2B66C4002F3C54 /* CKConnection+Private.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */; };
+		278B98740F29EC12002F3C54 /* CKFileSystemProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B98720F29EC12002F3C54 /* CKFileSystemProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		278B98750F29EC12002F3C54 /* CKFileSystemProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B98730F29EC12002F3C54 /* CKFileSystemProtocol.m */; };
+		278B99A60F2B66C4002F3C54 /* CKFileTransferConnection+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99A40F2B66C4002F3C54 /* CKFileTransferConnection+Private.h */; };
+		278B99A70F2B66C4002F3C54 /* CKFileTransferConnection+Private.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99A50F2B66C4002F3C54 /* CKFileTransferConnection+Private.m */; };
 		278B99C80F2B76AC002F3C54 /* CKConnectionAuthentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */; };
 		278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */; };
@@ -58,10 +58,10 @@
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
-		27F05A6B0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A690F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		27F05A6C0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6A0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m */; };
-		27F05A6F0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A6D0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		27F05A700F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6E0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m */; };
+		27F05A6B0F2BA0B200DB5FBA /* CKFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		27F05A6C0F2BA0B200DB5FBA /* CKFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */; };
+		27F05A6F0F2BA0D800DB5FBA /* CKSFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		27F05A700F2BA0D800DB5FBA /* CKSFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6E0F2BA0D800DB5FBA /* CKSFTPProtocol.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* CKFTPConnection.h */; };
@@ -250,21 +250,21 @@
 		2740ED080FE94CD90081C416 /* CKThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKThreadProxy.h; sourceTree = "<group>"; };
 		2740ED090FE94CD90081C416 /* CKThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKThreadProxy.m; sourceTree = "<group>"; };
 		2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Connection architecture overview.graffle"; sourceTree = "<group>"; };
-		278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnectionProtocol.h; sourceTree = "<group>"; };
-		278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnectionProtocol.m; sourceTree = "<group>"; };
-		278B96740F27FCDC002F3C54 /* CKConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnection.h; sourceTree = "<group>"; };
-		278B96750F27FCDC002F3C54 /* CKConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnection.m; sourceTree = "<group>"; };
+		278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVProtocol.h; sourceTree = "<group>"; };
+		278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVProtocol.m; sourceTree = "<group>"; };
+		278B96740F27FCDC002F3C54 /* CKFileTransferConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileTransferConnection.h; sourceTree = "<group>"; };
+		278B96750F27FCDC002F3C54 /* CKFileTransferConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileTransferConnection.m; sourceTree = "<group>"; };
 		278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOperation.m; sourceTree = "<group>"; };
-		278B96780F27FCDD002F3C54 /* CKConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionProtocol.h; sourceTree = "<group>"; };
-		278B96790F27FCDD002F3C54 /* CKConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionProtocol.m; sourceTree = "<group>"; };
+		278B96780F27FCDD002F3C54 /* CKFileTransferProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileTransferProtocol.h; sourceTree = "<group>"; };
+		278B96790F27FCDD002F3C54 /* CKFileTransferProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileTransferProtocol.m; sourceTree = "<group>"; };
 		278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+ConnectionKit.h"; sourceTree = "<group>"; };
 		278B96C20F28019D002F3C54 /* NSInvocation+ConnectionKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+ConnectionKit.m"; sourceTree = "<group>"; };
 		278B978E0F28F136002F3C54 /* CKConnectionError.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionError.h; sourceTree = "<group>"; };
 		278B97FB0F2922A3002F3C54 /* CKConnectionError.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionError.m; sourceTree = "<group>"; };
-		278B98720F29EC12002F3C54 /* CKFileConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileConnectionProtocol.h; sourceTree = "<group>"; };
-		278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileConnectionProtocol.m; sourceTree = "<group>"; };
-		278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKConnection+Private.h"; sourceTree = "<group>"; };
-		278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKConnection+Private.m"; sourceTree = "<group>"; };
+		278B98720F29EC12002F3C54 /* CKFileSystemProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileSystemProtocol.h; sourceTree = "<group>"; };
+		278B98730F29EC12002F3C54 /* CKFileSystemProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileSystemProtocol.m; sourceTree = "<group>"; };
+		278B99A40F2B66C4002F3C54 /* CKFileTransferConnection+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKFileTransferConnection+Private.h"; sourceTree = "<group>"; };
+		278B99A50F2B66C4002F3C54 /* CKFileTransferConnection+Private.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKFileTransferConnection+Private.m"; sourceTree = "<group>"; };
 		278B99C60F2B76AC002F3C54 /* CKConnectionAuthentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionAuthentication.h; sourceTree = "<group>"; };
 		278B99C70F2B76AC002F3C54 /* CKConnectionAuthentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionAuthentication.m; sourceTree = "<group>"; };
 		278B99D20F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKConnectionAuthentication+Internal.h"; sourceTree = "<group>"; };
@@ -275,10 +275,10 @@
 		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
 		27C604820F1FA82800B58822 /* CKConnectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClient.h; sourceTree = "<group>"; };
 		27C604830F1FA82800B58822 /* CKConnectionClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionClient.m; sourceTree = "<group>"; };
-		27F05A690F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPConnectionProtocol.h; sourceTree = "<group>"; };
-		27F05A6A0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPConnectionProtocol.m; sourceTree = "<group>"; };
-		27F05A6D0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnectionProtocol.h; sourceTree = "<group>"; };
-		27F05A6E0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnectionProtocol.m; sourceTree = "<group>"; };
+		27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPProtocol.h; sourceTree = "<group>"; };
+		27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPProtocol.m; sourceTree = "<group>"; };
+		27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPProtocol.h; sourceTree = "<group>"; };
+		27F05A6E0F2BA0D800DB5FBA /* CKSFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPProtocol.m; sourceTree = "<group>"; };
 		27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Connection.h"; sourceTree = "<group>"; };
 		27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Connection.m"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -642,11 +642,11 @@
 			isa = PBXGroup;
 			children = (
 				2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */,
-				278B96740F27FCDC002F3C54 /* CKConnection.h */,
-				278B96750F27FCDC002F3C54 /* CKConnection.m */,
+				278B96740F27FCDC002F3C54 /* CKFileTransferConnection.h */,
+				278B96750F27FCDC002F3C54 /* CKFileTransferConnection.m */,
 				278B96770F27FCDD002F3C54 /* CKConnectionOperation.m */,
-				278B99A40F2B66C4002F3C54 /* CKConnection+Private.h */,
-				278B99A50F2B66C4002F3C54 /* CKConnection+Private.m */,
+				278B99A40F2B66C4002F3C54 /* CKFileTransferConnection+Private.h */,
+				278B99A50F2B66C4002F3C54 /* CKFileTransferConnection+Private.m */,
 			);
 			name = CKConnection;
 			sourceTree = "<group>";
@@ -654,16 +654,16 @@
 		278B965E0F27FB82002F3C54 /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
-				278B96780F27FCDD002F3C54 /* CKConnectionProtocol.h */,
-				278B96790F27FCDD002F3C54 /* CKConnectionProtocol.m */,
-				278B96680F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h */,
-				278B96690F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m */,
-				278B98720F29EC12002F3C54 /* CKFileConnectionProtocol.h */,
-				278B98730F29EC12002F3C54 /* CKFileConnectionProtocol.m */,
-				27F05A690F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h */,
-				27F05A6A0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m */,
-				27F05A6D0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h */,
-				27F05A6E0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m */,
+				278B96780F27FCDD002F3C54 /* CKFileTransferProtocol.h */,
+				278B96790F27FCDD002F3C54 /* CKFileTransferProtocol.m */,
+				278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */,
+				278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */,
+				278B98720F29EC12002F3C54 /* CKFileSystemProtocol.h */,
+				278B98730F29EC12002F3C54 /* CKFileSystemProtocol.m */,
+				27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */,
+				27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */,
+				27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */,
+				27F05A6E0F2BA0D800DB5FBA /* CKSFTPProtocol.m */,
 			);
 			name = Protocols;
 			sourceTree = "<group>";
@@ -1043,17 +1043,17 @@
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
-				278B966A0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.h in Headers */,
-				278B967E0F27FCDE002F3C54 /* CKConnection.h in Headers */,
-				278B96820F27FCDE002F3C54 /* CKConnectionProtocol.h in Headers */,
+				278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */,
+				278B967E0F27FCDE002F3C54 /* CKFileTransferConnection.h in Headers */,
+				278B96820F27FCDE002F3C54 /* CKFileTransferProtocol.h in Headers */,
 				278B96C30F28019D002F3C54 /* NSInvocation+ConnectionKit.h in Headers */,
 				278B978F0F28F136002F3C54 /* CKConnectionError.h in Headers */,
-				278B98740F29EC12002F3C54 /* CKFileConnectionProtocol.h in Headers */,
-				278B99A60F2B66C4002F3C54 /* CKConnection+Private.h in Headers */,
+				278B98740F29EC12002F3C54 /* CKFileSystemProtocol.h in Headers */,
+				278B99A60F2B66C4002F3C54 /* CKFileTransferConnection+Private.h in Headers */,
 				278B99C80F2B76AC002F3C54 /* CKConnectionAuthentication.h in Headers */,
 				278B99D30F2B77D3002F3C54 /* CKConnectionAuthentication+Internal.h in Headers */,
-				27F05A6B0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.h in Headers */,
-				27F05A6F0F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.h in Headers */,
+				27F05A6B0F2BA0B200DB5FBA /* CKFTPProtocol.h in Headers */,
+				27F05A6F0F2BA0D800DB5FBA /* CKSFTPProtocol.h in Headers */,
 				278F9A3B0F702FE4003B7645 /* CKHTTPConnection.h in Headers */,
 				2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */,
 			);
@@ -1378,17 +1378,17 @@
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
-				278B966B0F27FC18002F3C54 /* CKWebDAVConnectionProtocol.m in Sources */,
-				278B967F0F27FCDE002F3C54 /* CKConnection.m in Sources */,
+				278B966B0F27FC18002F3C54 /* CKWebDAVProtocol.m in Sources */,
+				278B967F0F27FCDE002F3C54 /* CKFileTransferConnection.m in Sources */,
 				278B96810F27FCDE002F3C54 /* CKConnectionOperation.m in Sources */,
-				278B96830F27FCDE002F3C54 /* CKConnectionProtocol.m in Sources */,
+				278B96830F27FCDE002F3C54 /* CKFileTransferProtocol.m in Sources */,
 				278B96C40F28019D002F3C54 /* NSInvocation+ConnectionKit.m in Sources */,
 				278B97FC0F2922A3002F3C54 /* CKConnectionError.m in Sources */,
-				278B98750F29EC12002F3C54 /* CKFileConnectionProtocol.m in Sources */,
-				278B99A70F2B66C4002F3C54 /* CKConnection+Private.m in Sources */,
+				278B98750F29EC12002F3C54 /* CKFileSystemProtocol.m in Sources */,
+				278B99A70F2B66C4002F3C54 /* CKFileTransferConnection+Private.m in Sources */,
 				278B99C90F2B76AC002F3C54 /* CKConnectionAuthentication.m in Sources */,
-				27F05A6C0F2BA0B200DB5FBA /* CKFTPConnectionProtocol.m in Sources */,
-				27F05A700F2BA0D800DB5FBA /* CKSFTPConnectionProtocol.m in Sources */,
+				27F05A6C0F2BA0B200DB5FBA /* CKFTPProtocol.m in Sources */,
+				27F05A700F2BA0D800DB5FBA /* CKSFTPProtocol.m in Sources */,
 				278F9A3C0F702FE4003B7645 /* CKHTTPConnection.m in Sources */,
 				2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */,
 			);

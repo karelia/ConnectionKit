@@ -6,18 +6,18 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKConnection+Private.h"
+#import "CKFileTransferConnection+Private.h"
 
 #import "CKConnectionError.h"
 #import "CKConnectionAuthentication+Internal.h"
 #import "CKThreadProxy.h"
 
 
-@implementation CKConnectionProtocolClient
+@implementation CKFileTransferProtocolClient
 
 #pragma mark Init & Dealloc
 
-- (id)initWithConnection:(CKConnection *)connection
+- (id)initWithConnection:(CKFileTransferConnection *)connection
 {
     [super init];
     
@@ -36,11 +36,11 @@
 
 #pragma mark Accessors
 
-- (CKConnection *)connection { return _connection; }
+- (CKFileTransferConnection *)connection { return _connection; }
 
-- (CKConnectionProtocol *)connectionProtocol { return _protocol; }
+- (CKFileTransferProtocol *)connectionProtocol { return _protocol; }
 
-- (void)setConnectionProtocol:(CKConnectionProtocol *)protocol
+- (void)setConnectionProtocol:(CKFileTransferProtocol *)protocol
 {
     // This method should only be called the once, while setting up the stack
     NSParameterAssert(protocol);
@@ -50,7 +50,7 @@
     _protocol = protocol;   // weak ref
 }
 
-- (CKConnection *)connectionThreadProxy { return _threadProxy; }
+- (CKFileTransferConnection *)connectionThreadProxy { return _threadProxy; }
     
 #pragma mark Overall connection
 
@@ -60,19 +60,19 @@
  *  appropriate.
  */
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
-	NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     NSAssert([[self connection] status] == CKConnectionStatusOpening, @"The connection is not ready to be opened");  // This should never be called twice
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didOpenConnectionWithCurrentDirectoryPath:path];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didOpenConnectionWithCurrentDirectoryPath:path];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
 {
-	NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didFailWithError:error];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didFailWithError:error];
 }
 
 #pragma mark Authorization
@@ -124,9 +124,9 @@
     return result;
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-	NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     NSAssert([[self connection] status] > CKConnectionStatusNotOpen, @"The connection has not started yet");  // Should only happen while running
     
     
@@ -143,7 +143,7 @@
     if ([delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
     {
         // Set up a proxy -sender object to forward the request to the main thread
-        [[self connectionThreadProxy] connectionProtocol:protocol
+        [[self connectionThreadProxy] fileTransferProtocol:protocol
                        didReceiveAuthenticationChallenge:fullChallenge];
     }
     else
@@ -160,18 +160,18 @@
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didCancelAuthenticationChallenge:challenge];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didCancelAuthenticationChallenge:challenge];
 }
 
 #pragma mark Operation
 
-- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
+- (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     // For recursive directory creation that has successfully created a parent directory, proceed to
@@ -204,13 +204,13 @@
     
     if (reportSuccess)
     {
-        [[self connectionThreadProxy] connectionProtocolDidFinishCurrentOperation:protocol];
+        [[self connectionThreadProxy] fileTransferProtocolDidFinishCurrentOperation:protocol];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     // For recursive directory creation, try to create the parent directory rather than fail if possible.
@@ -241,50 +241,50 @@
     
     if (reportError)
     {
-        [[self connectionThreadProxy] connectionProtocol:protocol currentOperationDidFailWithError:error];
+        [[self connectionThreadProxy] fileTransferProtocol:protocol currentOperationDidFailWithError:error];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didDownloadData:data];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didDownloadData:data];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didUploadDataOfLength:length];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didUploadDataOfLength:length];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 {
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol didLoadContentsOfDirectory:contents];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didLoadContentsOfDirectory:contents];
 }
 
 #pragma mark Transcript
 
 /*	Convenience method for sending a string to the delegate for appending to the transcript
  */
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
-	NSAssert2(protocol == [self connectionProtocol], @"-[CKConnectionProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] connectionProtocol:protocol appendString:string toTranscript:transcript];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol appendString:string toTranscript:transcript];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
 {
 	va_list arguments;
 	va_start(arguments, transcript);
 	NSString *string = [[NSString alloc] initWithFormat:formatString arguments:arguments];
 	va_end(arguments);
 	
-	[self connectionProtocol:protocol appendString:string toTranscript:transcript];
+	[self fileTransferProtocol:protocol appendString:string toTranscript:transcript];
 	[string release];
 }
 

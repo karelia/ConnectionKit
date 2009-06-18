@@ -1,5 +1,5 @@
 //
-//  CKConnectionProtocol.m
+//  CKFileTransferProtocol.m
 //  Marvel
 //
 //  Created by Mike on 18/01/2009.
@@ -8,11 +8,11 @@
 
 #import "CKConnectionProtocol1.h"
 
-#import "CKFileConnectionProtocol.h"
-#import "CKWebDAVConnectionProtocol.h"
+#import "CKFileSystemProtocol.h"
+#import "CKWebDAVProtocol.h"
 
 
-@implementation CKConnectionProtocol
+@implementation CKFileTransferProtocol
 
 static NSMutableArray *sRegisteredClasses;
 
@@ -23,14 +23,14 @@ static NSMutableArray *sRegisteredClasses;
         sRegisteredClasses = [[NSMutableArray alloc] init];
         
         // Register the built-in protocols
-        [self registerClass:[CKFileConnectionProtocol class]];
-        [self registerClass:[CKWebDAVConnectionProtocol class]];
+        [self registerClass:[CKFileSystemProtocol class]];
+        [self registerClass:[CKWebDAVProtocol class]];
     }
 }
 
 + (BOOL)registerClass:(Class)protocolClass
 {
-    BOOL result = [protocolClass isSubclassOfClass:[CKConnectionProtocol class]];
+    BOOL result = [protocolClass isSubclassOfClass:[CKFileTransferProtocol class]];
     if (result && [sRegisteredClasses indexOfObjectIdenticalTo:protocolClass] == NSNotFound)
     {
         [sRegisteredClasses addObject:protocolClass];
@@ -66,7 +66,7 @@ static NSMutableArray *sRegisteredClasses;
 #pragma mark -
 #pragma mark Init & Dealloc
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client
 {
     NSParameterAssert(request);
     NSParameterAssert(client);
@@ -92,7 +92,7 @@ static NSMutableArray *sRegisteredClasses;
 
 - (NSURLRequest *)request { return _request; }
 
-- (id <CKConnectionProtocolClient>)client { return _client; }
+- (id <CKFileTransferProtocolClient>)client { return _client; }
 
 #pragma mark -
 #pragma mark Overall Connection

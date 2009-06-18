@@ -6,13 +6,13 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileConnectionProtocol.h"
+#import "CKFileSystemProtocol.h"
 
 #import "CKConnectionError.h"
 #import "CKConnectionProtocol1.h"
 
 
-@implementation CKFileConnectionProtocol
+@implementation CKFileSystemProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
@@ -31,7 +31,7 @@
     return NO;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client
 {
     self = [super initWithRequest:request client:client];
     if (self)
@@ -49,7 +49,7 @@
 
 - (void)uploadData:(NSData *)data toPath:(NSString *)path
 {
-    [[self client] connectionProtocol:self
+    [[self client] fileTransferProtocol:self
                          appendFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@", @"file transcript")
                          toTranscript:CKTranscriptSent, path];
 	
@@ -60,8 +60,8 @@
     if (result)
     {
         //need to send the amount of bytes transferred.
-        [[self client] connectionProtocol:self didUploadDataOfLength:[data length]];
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocol:self didUploadDataOfLength:[data length]];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
     {
@@ -69,7 +69,7 @@
                                   LocalizedStringInConnectionKitBundle(@"Failed to upload data", @"FileConnection copy data error"), NSLocalizedDescriptionKey,
                                   path, NSFilePathErrorKey,nil];
         NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
 
@@ -78,8 +78,8 @@
     NSData *data = [_fileManager contentsAtPath:path];
     if (data)
     {
-        [[self client] connectionProtocol:self didDownloadData:data];
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocol:self didDownloadData:data];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
     {
@@ -87,7 +87,7 @@
 								  LocalizedStringInConnectionKitBundle(@"Unable to download data", @"File connection download failure"), NSLocalizedDescriptionKey,
 								  path, NSFilePathErrorKey, nil];
 		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
-		[[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+		[[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
     }
 }
 
@@ -117,8 +117,8 @@
 		[packaged addObject:attribs];
 	}
 	
-	[[self client] connectionProtocol:self didLoadContentsOfDirectory:packaged];
-    [[self client] connectionProtocolDidFinishCurrentOperation:self];
+	[[self client] fileTransferProtocol:self didLoadContentsOfDirectory:packaged];
+    [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
 }
 
 - (void)createDirectoryAtPath:(NSString *)path
@@ -133,7 +133,7 @@
     
     if (result)
     {
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
 	{
@@ -143,26 +143,26 @@
                             nil];		
 		
         NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:ui];
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
 
 - (void)moveItemAtPath:(NSString *)fromPath toPath:(NSString *)toPath
 {
-    [[self client] connectionProtocol:self
+    [[self client] fileTransferProtocol:self
                          appendFormat:LocalizedStringInConnectionKitBundle(@"Renaming %@ to %@", @"file transcript")
                          toTranscript:CKTranscriptSent, fromPath, toPath];
 	
 	if ([_fileManager movePath:fromPath toPath:toPath handler:self])
     {
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
 	{
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
 
@@ -173,7 +173,7 @@
 	
 	if ([_fileManager changeFileAttributes:attribs atPath:path])
     {
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
 	{
@@ -181,19 +181,19 @@
 								  LocalizedStringInConnectionKitBundle(@"Could not change file permissions", @"FileConnection set permissions error"), NSLocalizedDescriptionKey,
 								  path, NSFilePathErrorKey, nil];
 		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
 
 - (void)deleteItemAtPath:(NSString *)path
 {
-    [[self client] connectionProtocol:self
+    [[self client] fileTransferProtocol:self
                          appendFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@", @"file transcript")
                          toTranscript:CKTranscriptSent, path];
 	
 	if ([_fileManager removeFileAtPath:path handler:self])
     {
-        [[self client] connectionProtocolDidFinishCurrentOperation:self];
+        [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
     }
     else
 	{
@@ -202,7 +202,7 @@
 								  localizedDescription, NSLocalizedDescriptionKey, 
 								  path, NSFilePathErrorKey, nil];
 		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];		
-        [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+        [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
 

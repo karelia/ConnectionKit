@@ -6,8 +6,7 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKConnection.h"
-#import "CKConnection+Private.h"
+#import "CKFileTransferConnection+Private.h"
 
 //#import "CKConnectionAuthentication+Internal.h"
 #import "CKConnectionError.h"
@@ -20,7 +19,7 @@
 NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 
-@interface CKConnection (QueueInternal)
+@interface CKFileTransferConnection (QueueInternal)
 - (void)enqueueOperation:(CKConnectionOperation *)operation;
 - (void)dequeueOperation;
 @end
@@ -29,22 +28,22 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 #pragma mark -
 
 
-@implementation CKConnection
+@implementation CKFileTransferConnection
 
 #pragma mark Init & Dealloc
 
-+ (CKConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKConnectionDelegate>)delegate
++ (CKFileTransferConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferConnectionDelegate>)delegate
 {
     return [[[self alloc] initWithRequest:request delegate:delegate] autorelease];
 }
 
 /*  Should return nil if no protocol can be found
  */
-- (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKConnectionDelegate>)delegate
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferConnectionDelegate>)delegate
 {
     [super init];
     
-    Class protocolClass = [CKConnectionProtocol classForRequest:request];
+    Class protocolClass = [CKFileTransferProtocol classForRequest:request];
     if (protocolClass)
     {
         _request = [request copy];
@@ -52,9 +51,9 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
         _queue = [[NSMutableArray alloc] init];
         
         // Start connection
-        _client = [[CKConnectionProtocolClient alloc] initWithConnection:self];
+        _client = [[CKFileTransferProtocolClient alloc] initWithConnection:self];
         _protocol = [[protocolClass alloc] initWithRequest:[self request] client:_client];
-        [(CKConnectionProtocolClient *)_client setConnectionProtocol:_protocol];
+        [(CKFileTransferProtocolClient *)_client setConnectionProtocol:_protocol];
         
         _status = CKConnectionStatusOpening;
         [[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:_protocol] startConnection];
@@ -95,7 +94,7 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     _name = name;
 }
 
-- (CKConnectionProtocol *)protocol
+- (CKFileTransferProtocol *)protocol
 {
     return _protocol;   // _protocol is an id to provide less of a hint to external code
 }
@@ -190,7 +189,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
-@implementation CKConnection (Private)
+@implementation CKFileTransferConnection (Private)
 
 - (id)delegate { return _delegate; }
 
@@ -211,7 +210,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
-@implementation CKConnection (Queue)
+@implementation CKFileTransferConnection (Queue)
 
 /*  Adds the operation to the queue or starts it immediately if nothing else is in progress
  */
@@ -235,14 +234,14 @@ withIntermediateDirectories:(BOOL)createIntermediates
             
             // Inform delegate
             id delegate = [self delegate];
-            if (delegate && [delegate respondsToSelector:@selector(connection:operationDidBegin:)])
+            if ([delegate respondsToSelector:@selector(fileTransferConnection:operationDidBegin:)])
             {
-                [delegate connection:self operationDidBegin:[_currentOperation identifier]];
+                [delegate fileTransferConnection:self operationDidBegin:[_currentOperation identifier]];
             }
             
             
             // Start protocol's operation implementation on worker thread
-            CKConnectionProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
+            CKFileTransferProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
             switch ([_currentOperation operationType])
             {
                 case CKConnectionOperationUpload:
@@ -293,7 +292,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
-@implementation CKConnection (ProtocolClient)
+@implementation CKFileTransferConnection (ProtocolClient)
 
 /*  These methods are invoked in response to a message to the protocol client. They happen on the
  *  main thread and are responsible for:
@@ -301,7 +300,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
  *      B) dispatching the next operation
  */
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
     _status = CKConnectionStatusOpen;
     
@@ -310,13 +309,13 @@ withIntermediateDirectories:(BOOL)createIntermediates
     
     // Inform the delegate
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:didOpenWithCurrentDirectoryPath:)])
+    if ([delegate respondsToSelector:@selector(fileTransferConnection:didOpenWithCurrentDirectoryPath:)])
     {
-        [delegate connection:self didOpenWithCurrentDirectoryPath:path];
+        [delegate fileTransferConnection:self didOpenWithCurrentDirectoryPath:path];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -330,7 +329,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
 
 #pragma mark Authorization
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -342,21 +341,18 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     
 }
 
 #pragma mark Operations
 
-- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
+- (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
 {
     // Inform the delegate
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:operationDidFinish:)])
-    {
-        [delegate connection:self operationDidFinish:[[self currentOperation] identifier]];
-    }
+    [delegate fileTransferConnection:self operationDidFinish:[[self currentOperation] identifier]];
     
     
     // Move onto the next operation
@@ -364,59 +360,54 @@ withIntermediateDirectories:(BOOL)createIntermediates
     [self dequeueOperation];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
-    id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:operation:didFailWithError:)])
-    {
-        // When performing a recursive operation, it could fail mid-way. If so, we MUST report the
-        // error usuing the original operation identifier.
-        CKConnectionOperation *operation = [self currentOperation];
-        id <NSObject> operationID = ([operation mainOperation]) ? [[operation mainOperation] identifier] : [operation identifier];
-        [delegate connection:self operation:operationID didFailWithError:error];
-    }
+    // When performing a recursive operation, it could fail mid-way. If so, we must report the error usuing the ORIGINAL operation identifier.
+    CKConnectionOperation *operation = [self currentOperation];
+    id <NSObject> operationID = ([operation mainOperation]) ? [[operation mainOperation] identifier] : [operation identifier];
+    [[self delegate] fileTransferConnection:self operation:operationID didFailWithError:error];
     
     
     [self currentOperationDidStop];
     [self dequeueOperation];
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:download:didReceiveData:)])
+    if ([delegate respondsToSelector:@selector(fileTransferConnection:download:didReceiveData:)])
     {
-        [delegate connection:self download:[[self currentOperation] identifier] didReceiveData:data];
+        [delegate fileTransferConnection:self download:[[self currentOperation] identifier] didReceiveData:data];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:upload:didSendDataOfLength:)])
+    if ([delegate respondsToSelector:@selector(fileTransferConnection:upload:didSendDataOfLength:)])
     {
-        [delegate connection:self upload:[[self currentOperation] identifier] didSendDataOfLength:length];
+        [delegate fileTransferConnection:self upload:[[self currentOperation] identifier] didSendDataOfLength:length];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 {
     
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
     id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connection:appendString:toTranscript:)])
+    if ([delegate respondsToSelector:@selector(fileTransferConnection:appendString:toTranscript:)])
     {
-        [delegate connection:self appendString:string toTranscript:transcript];
+        [delegate fileTransferConnection:self appendString:string toTranscript:transcript];
     }
 }
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
 {   // This method should never actually be called!
 }
 

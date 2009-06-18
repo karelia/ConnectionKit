@@ -31,7 +31,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "CKConnection.h"
+#import "CKFileTransferConnection.h"
 
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
