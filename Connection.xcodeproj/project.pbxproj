@@ -24,7 +24,7 @@
 
 /* Begin PBXBuildFile section */
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
-		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		09D6603A09FD37CD0000BA00 /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 2740ED080FE94CD90081C416 /* CKThreadProxy.h */; };
 		2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2740ED090FE94CD90081C416 /* CKThreadProxy.m */; };
@@ -119,7 +119,7 @@
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
 		7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E0940B0C1A8500F5078E /* DropletOutlineView.m */; };
-		7983E2310B0C244700F5078E /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		7983E2310B0C244700F5078E /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
 		7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
 		7983E6DE0B0C4E0000F5078E /* DropletLauncher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E6730B0C41E300F5078E /* DropletLauncher.m */; };
@@ -390,7 +390,7 @@
 		79B9CE570B1BC32100FBFDB3 /* CKTransferController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferController.m; sourceTree = "<group>"; };
 		79CA054A0B852037005BED50 /* CKCacheableHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCacheableHost.h; sourceTree = "<group>"; };
 		79CA054B0B852037005BED50 /* CKCacheableHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCacheableHost.m; sourceTree = "<group>"; };
-		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		79CFD12609F702BE00172CDD /* ConnectionKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConnectionKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79CFD80C09F7048400172CDD /* CKAbstractConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKAbstractConnection.h; sourceTree = "<group>"; };
 		79CFD80D09F7048400172CDD /* CKAbstractConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAbstractConnection.m; sourceTree = "<group>"; };
 		79CFD80E09F7048400172CDD /* CKConnectionProtocol1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionProtocol1.h; sourceTree = "<group>"; };
@@ -509,7 +509,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */,
+				09D6603A09FD37CD0000BA00 /* ConnectionKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -518,7 +518,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */,
-				7983E2310B0C244700F5078E /* Connection.framework in Frameworks */,
+				7983E2310B0C244700F5078E /* ConnectionKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -610,7 +610,7 @@
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD12609F702BE00172CDD /* Connection.framework */,
+				79CFD12609F702BE00172CDD /* ConnectionKit.framework */,
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
 				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
 				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
@@ -1134,7 +1134,7 @@
 			);
 			name = Framework;
 			productName = Framework;
-			productReference = 79CFD12609F702BE00172CDD /* Connection.framework */;
+			productReference = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 /* End PBXNativeTarget section */
@@ -1893,7 +1893,7 @@
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = Connection;
+				PRODUCT_NAME = ConnectionKit;
 				ZERO_LINK = NO;
 			};
 			name = Debug;
