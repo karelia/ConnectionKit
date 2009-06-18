@@ -478,17 +478,17 @@ NSDictionary *sDataAttributes = nil;
 							   toFile:remote
 				 checkRemoteExistence:NO
 							 delegate:nil];
-			if (![[root path] isEqualToString:@"/"])
-			{
-				[self _mergeRecord:record into:root];
-			}
-			else
+			if ([[root path] isEqualToString:@"/"])
 			{
 				CKTransferRecord *parent = [self recursiveRecordWithPath:[[record name] stringByDeletingLastPathComponent] root:root];
 				root = parent;
 				[root setName:[[root name] lastPathComponent]];		
 				[record setName:[[record name] lastPathComponent]];		
 				[root addContent:record];
+			}
+			else
+			{
+				[self _mergeRecord:record into:root];
 			}
 		}
 	}
@@ -538,15 +538,15 @@ NSDictionary *sDataAttributes = nil;
 						   toFile:remote
 			 checkRemoteExistence:NO
 						 delegate:nil];
-		if (![[root path] isEqualToString:@"/"])
-		{
-			[self _mergeRecord:record into:root];
-		}
-		else
+		if ([[root path] isEqualToString:@"/"])
 		{
 			root = record;
 			[root setUpload:YES];
 			[root setName:[[root name] lastPathComponent]];		
+		}
+		else
+		{
+			[self _mergeRecord:record into:root];
 		}
 	}
 	else
