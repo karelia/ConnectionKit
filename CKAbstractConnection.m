@@ -32,7 +32,6 @@
 #import "CKConnectionClient.h"
 
 #import "CKTransferRecord.h"
-#import "UKKQueue.h"
 
 #import "CKConnectionThreadManager.h"
 #import "InterThreadMessaging.h"
@@ -155,7 +154,6 @@ NSDictionary *sDataAttributes = nil;
         
         _client = [[CKConnectionClient alloc] initWithConnection:self];
         
-		_edits = [[NSMutableDictionary dictionary] retain];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_cachedDirectoryContents = [[NSMutableDictionary dictionary] retain];
 		_isConnected = NO;

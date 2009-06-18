@@ -264,8 +264,6 @@ typedef enum
 - (double)uploadSpeed; // bytes per second
 - (double)downloadSpeed;
 
-- (void)editFile:(NSString *)remoteFile;
-
 - (void)cancelTransfer;
 
 @end
