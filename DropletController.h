@@ -1,7 +1,7 @@
 /* DropletController */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/Connection.h>
+#import <ConnectionKit/Connection.h>
 
 @interface DropletController : NSObject
 {

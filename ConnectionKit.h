@@ -49,43 +49,43 @@ typedef unsigned int   NSUInteger;
 
 #import <Cocoa/Cocoa.h>
 
-#import <Connection/CKConnectionProtocol1.h>
-#import <Connection/CKConnectionRegistry.h>
-#import <Connection/CKAbstractConnection.h>
-#import <Connection/CKAbstractQueueConnection.h>
-#import <Connection/CKStreamBasedConnection.h>
+#import <ConnectionKit/CKConnectionProtocol1.h>
+#import <ConnectionKit/CKConnectionRegistry.h>
+#import <ConnectionKit/CKAbstractConnection.h>
+#import <ConnectionKit/CKAbstractQueueConnection.h>
+#import <ConnectionKit/CKStreamBasedConnection.h>
 
-#import <Connection/KTLog.h>
+#import <ConnectionKit/KTLog.h>
 
-#import <Connection/CKConnectionOpenPanel.h>
-#import <Connection/InterThreadMessaging.h>
-#import <Connection/NSData+Connection.h>
-#import <Connection/NSObject+Connection.h>
-#import <Connection/NSString+Connection.h>
-#import <Connection/NSPopUpButton+Connection.h>
-#import <Connection/NSTabView+Connection.h>
-#import <Connection/NSNumber+Connection.h>
+#import <ConnectionKit/CKConnectionOpenPanel.h>
+#import <ConnectionKit/InterThreadMessaging.h>
+#import <ConnectionKit/NSData+Connection.h>
+#import <ConnectionKit/NSObject+Connection.h>
+#import <ConnectionKit/NSString+Connection.h>
+#import <ConnectionKit/NSPopUpButton+Connection.h>
+#import <ConnectionKit/NSTabView+Connection.h>
+#import <ConnectionKit/NSNumber+Connection.h>
 
-#import <Connection/CKTransferRecord.h>
-#import <Connection/CKTransferProgressCell.h>
-#import <Connection/CKDirectoryTreeController.h>
-#import <Connection/CKDirectoryNode.h>
-#import <Connection/CKTableBasedBrowser.h>
+#import <ConnectionKit/CKTransferRecord.h>
+#import <ConnectionKit/CKTransferProgressCell.h>
+#import <ConnectionKit/CKDirectoryTreeController.h>
+#import <ConnectionKit/CKDirectoryNode.h>
+#import <ConnectionKit/CKTableBasedBrowser.h>
 
-#import <Connection/EMKeychainProxy.h>
-#import <Connection/EMKeychainItem.h>
-#import <Connection/CKLeopardSourceListTableColumn.h>
-#import <Connection/CKBookmarkStorage.h>
-#import <Connection/CKHostCategory.h>
-#import <Connection/CKBonjourCategory.h>
-#import <Connection/CKHost.h>
-#import <Connection/CKHostCell.h>
+#import <ConnectionKit/EMKeychainProxy.h>
+#import <ConnectionKit/EMKeychainItem.h>
+#import <ConnectionKit/CKLeopardSourceListTableColumn.h>
+#import <ConnectionKit/CKBookmarkStorage.h>
+#import <ConnectionKit/CKHostCategory.h>
+#import <ConnectionKit/CKBonjourCategory.h>
+#import <ConnectionKit/CKHost.h>
+#import <ConnectionKit/CKHostCell.h>
 
 
 // Version 2.0 API
-#import <Connection/CKFileTransferConnection.h>
-#import <Connection/CKFileTransferProtocol.h>
+#import <ConnectionKit/CKFileTransferConnection.h>
+#import <ConnectionKit/CKFileTransferProtocol.h>
 
-#import <Connection/CKConnectionError.h>
-#import <Connection/CKConnectionAuthentication.h>
+#import <ConnectionKit/CKConnectionError.h>
+#import <ConnectionKit/CKConnectionAuthentication.h>
 
