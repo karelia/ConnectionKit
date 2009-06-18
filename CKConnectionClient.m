@@ -290,7 +290,7 @@
 {
 	if (_flags.transcript)
 	{
-		[_forwarder connection:(CKConnection *)[self connection] appendString:string toTranscript:transcript];
+		[_forwarder connection:(id <CKConnection>)[self connection] appendString:string toTranscript:transcript];
 	}
 }
 

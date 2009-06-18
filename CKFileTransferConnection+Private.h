@@ -6,8 +6,8 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKConnection.h"
-#import "CKConnectionProtocol.h"
+#import "CKFileTransferConnection.h"
+#import "CKFileTransferProtocol.h"
 
 
 typedef enum {
@@ -21,7 +21,7 @@ typedef enum {
 @class CKConnectionOperation;
 
 
-@interface CKConnection (Private)
+@interface CKFileTransferConnection (Private)
 - (id)delegate;
 - (CKConnectionStatus)status;
 
@@ -30,12 +30,12 @@ typedef enum {
 @end
 
 
-@interface CKConnection (ProtocolClient) <CKConnectionProtocolClient>
+@interface CKFileTransferConnection (ProtocolClient) <CKFileTransferProtocolClient>
 @end
 
 
 
-//  CKConnectionProtocolClient manages the threaded interaction with a CKConnectionProtocol
+//  CKFileTransferProtocolClient manages the threaded interaction with a CKFileTransferProtocol
 //  subclass. It generally just forwards the methods onto the host CKConnection object on the main
 //  thread.
 //
@@ -43,19 +43,19 @@ typedef enum {
 //  
 //  Connection -> Protocol -> Client
 //             ------------->
-@interface CKConnectionProtocolClient : NSObject <CKConnectionProtocolClient>
+@interface CKFileTransferProtocolClient : NSObject <CKFileTransferProtocolClient>
 {
-    CKConnection            *_connection;   // Weak ref
-    CKConnectionProtocol    *_protocol;     // Weak ref
+    CKFileTransferConnection            *_connection;   // Weak ref
+    CKFileTransferProtocol    *_protocol;     // Weak ref
     
     id  _threadProxy;
 }
 
-- (id)initWithConnection:(CKConnection *)connection;
-- (CKConnection *)connection;
+- (id)initWithConnection:(CKFileTransferConnection *)connection;
+- (CKFileTransferConnection *)connection;
 
-- (CKConnectionProtocol *)connectionProtocol;
-- (void)setConnectionProtocol:(CKConnectionProtocol *)protocol; // Single-use method
+- (CKFileTransferProtocol *)connectionProtocol;
+- (void)setConnectionProtocol:(CKFileTransferProtocol *)protocol; // Single-use method
                      
 @end
 

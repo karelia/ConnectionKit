@@ -1,5 +1,5 @@
 //
-//  CKConnectionProtocol.h
+//  CKFileTransferProtocol.h
 //  Marvel
 //
 //  Created by Mike on 18/01/2009.
@@ -7,26 +7,26 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "CKConnection.h"
+#import "CKFileTransferConnection.h"
 
 
 @class NSURLRequest;
-@protocol CKConnectionProtocolClient;
+@protocol CKFileTransferProtocolClient;
 
 
-@interface CKConnectionProtocol : NSObject
+@interface CKFileTransferProtocol : NSObject
 {
 @private
     NSURLRequest             *_request;
-    id <CKConnectionProtocolClient> _client;
+    id <CKFileTransferProtocolClient> _client;
 }
 
 #pragma mark Protocol registration
 /*!
  @method registerClass:
- @param protocolClass The subclass of CKConnectionProtocol to register
+ @param protocolClass The subclass of CKFileTransferProtocol to register
  @result YES if the registration is successful, NO otherwise. The only failure condition is if
- protocolClass is not a subclass of CKConnectionProtocol.
+ protocolClass is not a subclass of CKFileTransferProtocol.
  @discussion This method is only safe to use on the main thread.
  */
 + (BOOL)registerClass:(Class)protocolClass;
@@ -40,9 +40,9 @@
 #pragma mark Protocol basics
 // You shouldn't generally need to override these methods. They just create a protocol object and
 // hang on to its properties
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKConnectionProtocolClient>)client;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client;
 - (NSURLRequest *)request;
-- (id <CKConnectionProtocolClient>)client;
+- (id <CKFileTransferProtocolClient>)client;
 
 
 #pragma mark Overall Connection
@@ -94,23 +94,25 @@
 @end
 
 
-@protocol CKConnectionProtocolClient <NSObject>
+@protocol CKFileTransferProtocolClient <NSObject>
 
 // Calling any of these methods at an inappropriate time will result in an exception
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didFailWithError:(NSError *)error;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
-- (void)connectionProtocolDidFinishCurrentOperation:(CKConnectionProtocol *)protocol;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didDownloadData:(NSData *)data;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
 
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
-- (void)connectionProtocol:(CKConnectionProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+                appendFormat:(NSString *)formatString
+                toTranscript:(CKTranscriptType)transcript, ...;
 
 @end
 

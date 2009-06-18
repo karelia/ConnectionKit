@@ -6,7 +6,7 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKWebDAVConnectionProtocol.h"
+#import "CKWebDAVProtocol.h"
 
 #import "CKConnectionAuthentication.h"
 #import "CKConnectionError.h"
@@ -14,13 +14,13 @@
 #import "CKAbstractConnection.h"    // For KTLog. Remove dependency when possible
 
 
-@interface CKWebDAVConnectionProtocol ()
+@interface CKWebDAVProtocol ()
 - (void)startHTTPRequest:(NSURLRequest *)request;   
 - (void)currentOperationDidFinish:(BOOL)didFinish error:(NSError *)error;
 @end
 
 
-@implementation CKWebDAVConnectionProtocol
+@implementation CKWebDAVProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
@@ -222,22 +222,22 @@
     {
         if (didFinish)
         {
-            [[self client] connectionProtocol:self didOpenConnectionWithCurrentDirectoryPath:nil];
+            [[self client] fileTransferProtocol:self didOpenConnectionWithCurrentDirectoryPath:nil];
         }
         else
         {
-            [[self client] connectionProtocol:self didFailWithError:error];
+            [[self client] fileTransferProtocol:self didFailWithError:error];
         }
     }
     else
     {
         if (didFinish)
         {
-            [[self client] connectionProtocolDidFinishCurrentOperation:self];
+            [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
         }
         else
         {
-            [[self client] connectionProtocol:self currentOperationDidFailWithError:error];
+            [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
         }
     }
 }
@@ -262,12 +262,12 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] connectionProtocol:self didReceiveAuthenticationChallenge:challenge];
+    [[self client] fileTransferProtocol:self didReceiveAuthenticationChallenge:challenge];
 }
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] connectionProtocol:self didCancelAuthenticationChallenge:challenge];
+    [[self client] fileTransferProtocol:self didCancelAuthenticationChallenge:challenge];
 }
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveResponse:(NSHTTPURLResponse *)response;
@@ -464,7 +464,7 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveData:(NSData *)data
 {
-    [[self client] connectionProtocol:self didDownloadData:data];
+    [[self client] fileTransferProtocol:self didDownloadData:data];
 }
 
 - (void)HTTPConnectionDidFinishLoading:(CKHTTPConnection *)connection

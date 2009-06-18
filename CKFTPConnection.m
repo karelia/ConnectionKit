@@ -43,7 +43,7 @@
 #import "NSObject+Connection.h"
 
 #import "CKConnectionAuthentication+Internal.h"
-#import "CKFTPConnectionProtocol.h"
+//#import "CKFTPConnectionProtocol.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 

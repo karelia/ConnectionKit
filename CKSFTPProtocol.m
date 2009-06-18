@@ -6,10 +6,10 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKSFTPConnectionProtocol.h"
+#import "CKSFTPProtocol.h"
 
 
-@implementation CKSFTPConnectionProtocol
+@implementation CKSFTPProtocol
 
 @end
 
