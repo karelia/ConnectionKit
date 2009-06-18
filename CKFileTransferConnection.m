@@ -6,9 +6,9 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
+#import <ConnectionKit/ConnectionKit.h>
 #import "CKFileTransferConnection+Private.h"
 
-//#import "CKConnectionAuthentication+Internal.h"
 #import "CKConnectionError.h"
 #import "CKConnectionProtocol1.h"
 #import "CKConnectionThreadManager.h"
@@ -32,14 +32,14 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 #pragma mark Init & Dealloc
 
-+ (CKFileTransferConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferConnectionDelegate>)delegate
++ (CKFileTransferConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferDelegate>)delegate
 {
     return [[[self alloc] initWithRequest:request delegate:delegate] autorelease];
 }
 
 /*  Should return nil if no protocol can be found
  */
-- (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferConnectionDelegate>)delegate
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferDelegate>)delegate
 {
     [super init];
     
