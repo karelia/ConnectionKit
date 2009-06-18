@@ -33,7 +33,7 @@
 */
 
 #import <Foundation/Foundation.h>
-#import <Connection/CKAbstractQueueConnection.h>
+#import <ConnectionKit/CKAbstractQueueConnection.h>
 #import <Security/SecureTransport.h>
 #import <Security/Security.h>
 

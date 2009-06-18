@@ -162,7 +162,7 @@
 		79CFD87709F7048500172CDD /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
 		79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84409F7048400172CDD /* CKSFTPConnection.m */; };
 		79CFD88909F7048500172CDD /* CKStreamBasedConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */; };
-		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		79CFD89509F704F400172CDD /* ConnectionKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* ConnectionKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD8C809F7069100172CDD /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */; };
 		79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8CA09F706C700172CDD /* KTLog.nib */; };
 		79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD90009F7077900172CDD /* NSData+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -416,7 +416,7 @@
 		79CFD84409F7048400172CDD /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		79CFD84709F7048500172CDD /* CKStreamBasedConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKStreamBasedConnection.h; sourceTree = "<group>"; };
 		79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKStreamBasedConnection.m; sourceTree = "<group>"; };
-		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
+		79CFD89409F704F400172CDD /* ConnectionKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ConnectionKit.h; sourceTree = "<group>"; };
 		79CFD8C709F7069100172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79CFD8C909F706B000172CDD /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		79CFD8CB09F706C700172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -550,7 +550,7 @@
 		080E96DDFE201D6D7F000001 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD89409F704F400172CDD /* Connection.h */,
+				79CFD89409F704F400172CDD /* ConnectionKit.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				278B965C0F27FB28002F3C54 /* Connections 2.0 */,
 				79CFD11A09F7022900172CDD /* Connections 1.0 */,
@@ -994,7 +994,7 @@
 			files = (
 				79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */,
 				792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */,
-				79CFD89509F704F400172CDD /* Connection.h in Headers */,
+				79CFD89509F704F400172CDD /* ConnectionKit.h in Headers */,
 				79CFD84D09F7048500172CDD /* CKAbstractConnection.h in Headers */,
 				79CFD84F09F7048500172CDD /* CKConnectionProtocol1.h in Headers */,
 				79CFD85009F7048500172CDD /* CKAbstractQueueConnection.h in Headers */,
@@ -1142,7 +1142,7 @@
 /* Begin PBXProject section */
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
-			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */;
+			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ConnectionKit" */;
 			compatibilityVersion = "Xcode 2.4";
 			hasScannedForEncodings = 1;
 			knownRegions = (
@@ -1774,7 +1774,7 @@
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = Connection;
+				PRODUCT_NAME = ConnectionKit;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1933,7 +1933,7 @@
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = Connection;
+				PRODUCT_NAME = ConnectionKit;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -2017,7 +2017,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */ = {
+		C01FCF4E08A954540054247B /* Build configuration list for PBXProject "ConnectionKit" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				C01FCF4F08A954540054247B /* Debug */,

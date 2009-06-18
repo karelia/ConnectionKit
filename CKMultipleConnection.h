@@ -28,7 +28,7 @@
  */
 
 #import <Cocoa/Cocoa.h>
-#import <Connection/CKAbstractQueueConnection.h>
+#import <ConnectionKit/CKAbstractQueueConnection.h>
 
 /* 
 	A mutliple connection is where you can have different types of connections

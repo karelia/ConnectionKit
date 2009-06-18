@@ -7,7 +7,7 @@
 //
 
 #import <SenTestingKit/SenTestingKit.h>
-#import <Connection/Connection.h>
+#import <ConnectionKit/Connection.h>
 
 @interface AbstractConnectionTest : SenTestCase {
   id <CKConnection> connection;

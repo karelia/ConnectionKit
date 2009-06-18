@@ -1,5 +1,5 @@
 //
-//  CKConnection.h
+//  CKFileTransferConnection.h
 //  Marvel
 //
 //  Created by Mike on 18/01/2009.
