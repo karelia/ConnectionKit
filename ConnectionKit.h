@@ -84,6 +84,7 @@ typedef unsigned int   NSUInteger;
 
 // Version 2.0 API
 #import <ConnectionKit/CKFileTransferConnection.h>
+#import <ConnectionKit/CKFileTransferDelegate.h>
 #import <ConnectionKit/CKFileTransferProtocol.h>
 
 #import <ConnectionKit/CKConnectionError.h>
