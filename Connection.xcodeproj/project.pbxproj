@@ -85,9 +85,6 @@
 		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
 		795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */; };
 		795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */; };
-		795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */ = {isa = PBXBuildFile; fileRef = 795AFEF00B115511006905FA /* UKKQueue Readme.txt */; };
-		795AFEFA0B115511006905FA /* UKKQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF10B115511006905FA /* UKKQueue.h */; };
-		795AFEFB0B115511006905FA /* UKKQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF20B115511006905FA /* UKKQueue.m */; };
 		795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
 		795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
 		795AFF190B1157D3006905FA /* CKHostCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFF170B1157D3006905FA /* CKHostCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -331,9 +328,6 @@
 		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
 		795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFNSubscribeFileWatcher.h; sourceTree = "<group>"; };
 		795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFNSubscribeFileWatcher.m; sourceTree = "<group>"; };
-		795AFEF00B115511006905FA /* UKKQueue Readme.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "UKKQueue Readme.txt"; sourceTree = "<group>"; };
-		795AFEF10B115511006905FA /* UKKQueue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKKQueue.h; sourceTree = "<group>"; };
-		795AFEF20B115511006905FA /* UKKQueue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKKQueue.m; sourceTree = "<group>"; };
 		795AFEF30B115511006905FA /* UKMainThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKMainThreadProxy.h; sourceTree = "<group>"; };
 		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
 		795AFF170B1157D3006905FA /* CKHostCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCell.h; sourceTree = "<group>"; };
@@ -809,9 +803,6 @@
 				795AFEED0B115511006905FA /* UKFileWatcher.m */,
 				795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */,
 				795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */,
-				795AFEF00B115511006905FA /* UKKQueue Readme.txt */,
-				795AFEF10B115511006905FA /* UKKQueue.h */,
-				795AFEF20B115511006905FA /* UKKQueue.m */,
 				795AFEF30B115511006905FA /* UKMainThreadProxy.h */,
 				795AFEF40B115511006905FA /* UKMainThreadProxy.m */,
 			);
@@ -1099,7 +1090,6 @@
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
 				795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */,
-				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				795AFF190B1157D3006905FA /* CKHostCell.h in Headers */,
 				79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */,
@@ -1275,7 +1265,6 @@
 				798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */,
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
-				795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */,
 				79906BAF0B1175A800FE9681 /* host.png in Resources */,
 				79906BB00B1175A800FE9681 /* bonjour.png in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
@@ -1447,7 +1436,6 @@
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
 				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
 				795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */,
-				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */,
 				79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */,
