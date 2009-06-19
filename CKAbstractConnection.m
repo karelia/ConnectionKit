@@ -73,6 +73,13 @@ NSDictionary *sSentAttributes = nil;
 NSDictionary *sReceivedAttributes = nil;
 NSDictionary *sDataAttributes = nil;
 
+@interface CKAbstractConnection (Private)
+- (CKTransferRecord *)_recursivelyUploadDirectoryAtLocalPath:(NSString *)localPath
+										   toRemoteDirectory:(NSString *)remoteDirectoryPath
+												parentRecord:(CKTransferRecord *)parentRecord
+										   ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag;
+@end
+
 
 @implementation CKAbstractConnection
 
@@ -428,7 +435,6 @@ NSDictionary *sDataAttributes = nil;
 }
 
 #pragma mark Uploading
-
 - (CKTransferRecord *)uploadLocalItem:(NSString *)localPath
 					toRemoteDirectory:(NSString *)remoteDirectoryPath
 					ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag
@@ -458,12 +464,57 @@ NSDictionary *sDataAttributes = nil;
 	}
 	
 	//We're uploading a directory
-	CKTransferRecord *rootTransferRecord = [CKTransferRecord uploadRecordForConnection:self
-																	   sourceLocalPath:localPath
-																 destinationRemotePath:destinationRemotePath
-																				  size:0];
+	return [self _recursivelyUploadDirectoryAtLocalPath:localPath
+							   toRemoteDirectory:destinationRemotePath
+									parentRecord:nil //there is no parent, as this first call is the root record!
+							   ignoreHiddenItems:ignoreHiddenItemsFlag];
+}
+
+- (CKTransferRecord *)_recursivelyUploadDirectoryAtLocalPath:(NSString *)localPath
+										   toRemoteDirectory:(NSString *)remoteDirectoryPath
+												parentRecord:(CKTransferRecord *)parentRecord
+										   ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag
+{
+	NSParameterAssert(localPath);
+	NSParameterAssert(remoteDirectoryPath);
 	
-	return rootTransferRecord;
+	[self createDirectory:remoteDirectoryPath];
+	//Make a record for this directory, and add it as a child of the parent
+	CKTransferRecord *thisDirectoryRecord = [CKTransferRecord uploadRecordForConnection:self
+																		sourceLocalPath:localPath
+																  destinationRemotePath:remoteDirectoryPath
+																				   size:0];
+	if (parentRecord)
+		[parentRecord addChild:thisDirectoryRecord];
+	
+	NSEnumerator *directoryContentsEnumerator = [[[NSFileManager defaultManager] directoryContentsAtPath:localPath] objectEnumerator];
+	NSString *thisFilename;
+	while ((thisFilename = [directoryContentsEnumerator nextObject]))
+	{
+		NSString *thisLocalPath = [localPath stringByAppendingPathComponent:thisFilename];
+		NSString *thisRemotePath = [remoteDirectoryPath stringByAppendingPathComponent:thisFilename];
+		
+		BOOL thisItemIsADirectory = NO;
+		[[NSFileManager defaultManager] fileExistsAtPath:thisLocalPath isDirectory:&thisItemIsADirectory];
+		
+		if (thisItemIsADirectory)
+		{
+			[self _recursivelyUploadDirectoryAtLocalPath:thisLocalPath
+									   toRemoteDirectory:thisRemotePath
+											parentRecord:thisDirectoryRecord
+									   ignoreHiddenItems:ignoreHiddenItemsFlag];
+			continue;
+		}
+		
+		//We're uploading a file
+		CKTransferRecord *thisItemUploadRecord = [self _uploadFile:thisLocalPath
+															toFile:thisRemotePath
+											  checkRemoteExistence:NO
+														  delegate:nil];
+		[thisDirectoryRecord addChild:thisItemUploadRecord];
+	}
+
+	return thisDirectoryRecord;
 }
 
 - (CKTransferRecord *)_uploadFile:(NSString *)localPath 

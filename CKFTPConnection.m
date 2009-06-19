@@ -3574,8 +3574,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 														   sourceLocalPath:localPath
 													 destinationRemotePath:remotePath
 																	  size:uploadSize];
-	[record setObject:localPath forKey:CKQueueUploadLocalFileKey];
-	[record setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
 	CKInternalTransferRecord *dict = [CKInternalTransferRecord recordWithLocal:localPath
 																		  data:data

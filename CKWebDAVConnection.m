@@ -640,8 +640,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																		  remote:remotePath
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
-	[transfer setObject:localPath forKey:CKQueueUploadLocalFileKey];
-	[transfer setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
 	CKDAVUploadFileRequest *req = [CKDAVUploadFileRequest uploadWithFile:localPath filename:remotePath];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
@@ -683,7 +681,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																		  remote:remotePath
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
-	[transfer setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
 	CKDAVUploadFileRequest *req = [CKDAVUploadFileRequest uploadWithData:data filename:remotePath];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req

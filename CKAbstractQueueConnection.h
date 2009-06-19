@@ -180,8 +180,6 @@ extern NSString *CKQueueDomain;
 //Upload/Download Queue Keys
 extern NSString *CKQueueDownloadDestinationFileKey;
 extern NSString *CKQueueDownloadRemoteFileKey;
-extern NSString *CKQueueUploadLocalFileKey;
 extern NSString *CKQueueUploadLocalDataKey;
-extern NSString *CKQueueUploadRemoteFileKey;
 extern NSString *CKQueueUploadOffsetKey;
 extern NSString *CKQueueDownloadTransferPercentReceived;
