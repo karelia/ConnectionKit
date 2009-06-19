@@ -465,9 +465,9 @@ NSDictionary *sDataAttributes = nil;
 	
 	//We're uploading a directory
 	return [self _recursivelyUploadDirectoryAtLocalPath:localPath
-							   toRemoteDirectory:destinationRemotePath
-									parentRecord:nil //there is no parent, as this first call is the root record!
-							   ignoreHiddenItems:ignoreHiddenItemsFlag];
+									  toRemoteDirectory:destinationRemotePath
+										   parentRecord:nil //there is no parent, as this first call is the root record!
+									  ignoreHiddenItems:ignoreHiddenItemsFlag];
 }
 
 - (CKTransferRecord *)_recursivelyUploadDirectoryAtLocalPath:(NSString *)localPath
@@ -477,6 +477,9 @@ NSDictionary *sDataAttributes = nil;
 {
 	NSParameterAssert(localPath);
 	NSParameterAssert(remoteDirectoryPath);
+	
+	/* Encapsulate the method with its own autorelease pool to quickly deallocate all autoreleased memory */
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	
 	[self createDirectory:remoteDirectoryPath];
 	//Make a record for this directory, and add it as a child of the parent
@@ -513,8 +516,14 @@ NSDictionary *sDataAttributes = nil;
 														  delegate:nil];
 		[thisDirectoryRecord addChild:thisItemUploadRecord];
 	}
+	
+	//Since thisDirectoryRecord was autoreleased, we must retain it to avoid having it released.
+	[thisDirectoryRecord retain];
+	
+	//Drain the pool and release it.
+	[pool release];
 
-	return thisDirectoryRecord;
+	return [thisDirectoryRecord autorelease];
 }
 
 - (CKTransferRecord *)_uploadFile:(NSString *)localPath 
