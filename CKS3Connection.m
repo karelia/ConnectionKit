@@ -719,12 +719,12 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	[self queueCommand:cmd];
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
-	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
 																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForS3]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
@@ -789,7 +789,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		return nil;
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:fixedRemotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:fixedRemotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0

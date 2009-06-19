@@ -32,7 +32,6 @@
 #import <Cocoa/Cocoa.h>
 #import "CKConnectionRequest.h"
 
-
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
@@ -205,6 +204,24 @@ typedef enum
 - (CKTransferRecord *)uploadLocalItem:(NSString *)localPath
 					toRemoteDirectory:(NSString *)remoteDirectoryPath
 					ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag;
+
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
+						   toFile:(NSString *)remotePath 
+			 checkRemoteExistence:(BOOL)flag 
+						 delegate:(id)delegate;
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate;
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate;
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate;
 /* 
 	New method that allows you to set a custom delegate for the download.
 	You must implement the CKConnectionTransferDelegate informal protocol.

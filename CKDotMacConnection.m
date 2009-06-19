@@ -612,15 +612,15 @@
 
 - (void)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath
 {
-	[self uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
+	[self _uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {	
-	return [super uploadFile:localPath
+	return [super _uploadFile:localPath
 					  toFile:[self webDAVPathForIDiskPath:remotePath]
 		checkRemoteExistence:flag
 					delegate:delegate];
@@ -631,7 +631,7 @@
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate
 {
-	return [self uploadFile:localPath
+	return [self _uploadFile:localPath
 					 toFile:remotePath
 	   checkRemoteExistence:NO
 				   delegate:delegate];

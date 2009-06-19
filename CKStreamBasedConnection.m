@@ -1153,7 +1153,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (void)recursivelySendTransferDidFinishMessage:(CKTransferRecord *)record
 {
 	[record transferDidFinish:record error:nil];
-	NSEnumerator *contentsEnumerator = [[record contents] objectEnumerator];
+	NSEnumerator *contentsEnumerator = [[record children] objectEnumerator];
 	CKTransferRecord *child;
 	while ((child = [contentsEnumerator nextObject]))
 	{
@@ -1206,7 +1206,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag
 {
-	CKTransferRecord *rec = [CKTransferRecord rootRecordWithPath:remotePath];
+	CKTransferRecord *rec = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
 	
 	NSMutableDictionary *d = [NSMutableDictionary dictionary];
 	
@@ -1579,7 +1579,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	{
 		[_recursiveDownloadLock lock];
 		NSMutableDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
-		CKTransferRecord *root = [rec objectForKey:@"record"];
+		//TEMPDISABLECKTransferRecord *root = [rec objectForKey:@"record"];
 		NSString *remote = [rec objectForKey:@"remote"]; 
 		NSString *local = [rec objectForKey:@"local"]; 
 		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
@@ -1611,7 +1611,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 												  overwrite:overwrite
 												   delegate:nil];
 				[down setSize:[[cur objectForKey:NSFileSize] unsignedLongLongValue]];
-				[CKTransferRecord mergeTextPathRecord:down withRoot:root];
+				//TEMPDISABLE[CKTransferRecord mergeTextPathRecord:down withRoot:root];
 			}
 		}
 		if (_numberOfDownloadListingsRemaining == 0)
@@ -1621,10 +1621,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 			//If we were downloading an empty folder, make sure to mark it as complete.
 			NSDictionary *downloadDict = [_recursiveDownloadQueue objectAtIndex:0];
-			CKTransferRecord *rootRecord = [downloadDict objectForKey:@"record"];
-			NSString *remotePath = [downloadDict objectForKey:@"remote"];
-			CKTransferRecord *record = [CKTransferRecord recordForFullPath:remotePath withRoot:rootRecord];
-			if ([[record contents] count] == 0)
+			CKTransferRecord *record = [downloadDict objectForKey:@"record"];
+			if ([[record children] count] == 0)
 				[record transferDidFinish:record error:nil];
 
 			[_recursiveDownloadQueue removeObjectAtIndex:0];

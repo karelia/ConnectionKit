@@ -2981,7 +2981,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 /*!	Upload file to the given directory
 */
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
@@ -3048,7 +3048,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 TYPE A
 	 */	
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0
@@ -3123,7 +3123,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 */
 
 	[self startBulkCommands];
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:offset
@@ -3563,9 +3563,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		uploadSize = [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath
-														   size:uploadSize];
-	[record setUpload:YES];
+	CKTransferRecord *record = [CKTransferRecord uploadRecordForRemotePath:remotePath size:uploadSize];
 	[record setObject:localPath forKey:CKQueueUploadLocalFileKey];
 	[record setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	

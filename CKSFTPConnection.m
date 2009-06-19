@@ -370,7 +370,7 @@ static NSString *lsform = nil;
 #pragma mark -
 #pragma mark Uploading
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath  toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag  delegate:(id)delegate
 {
 	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
@@ -412,7 +412,7 @@ static NSString *lsform = nil;
 		uploadSize = [[attributes objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:uploadSize];
+	CKTransferRecord *record = [CKTransferRecord uploadRecordForRemotePath:remotePath size:uploadSize];
 	[record setUpload:YES];
 	[record setObject:localPath forKey:CKQueueUploadLocalFileKey];
 	[record setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
@@ -467,7 +467,7 @@ static NSString *lsform = nil;
 		return nil;
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
 	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
 	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
