@@ -630,14 +630,16 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
-	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForConnection:self 
+															 sourceLocalPath:localPath
+													   destinationRemotePath:remotePath
+																		size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
 																		  remote:remotePath
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
-	[transfer setUpload:YES];
 	[transfer setObject:localPath forKey:CKQueueUploadLocalFileKey];
 	[transfer setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
@@ -671,14 +673,16 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
-	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[data length]];
+	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForConnection:self
+															 sourceLocalPath:@""
+													   destinationRemotePath:remotePath
+																		size:[data length]];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
 																		  offset:0
 																		  remote:remotePath
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
-	[transfer setUpload:YES];
 	[transfer setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
 	CKDAVUploadFileRequest *req = [CKDAVUploadFileRequest uploadWithData:data filename:remotePath];
@@ -703,7 +707,10 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
 	NSString *localPath = [dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]];
-	CKTransferRecord *transfer = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
+	CKTransferRecord *transfer = [CKTransferRecord downloadRecordForConnection:self
+															  sourceRemotePath:remotePath
+														  destinationLocalPath:localPath
+																		  size:0];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
@@ -712,7 +719,6 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																		userInfo:transfer];
 	[transfer setObject:remotePath forKey:CKQueueDownloadRemoteFileKey];
 	[transfer setObject:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[transfer setUpload:NO];
 	
 	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:r

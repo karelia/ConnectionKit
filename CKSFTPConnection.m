@@ -1,3 +1,4 @@
+#if 0
 //
 //  SFTPConnection.m
 //  CocoaSFTP
@@ -1145,3 +1146,4 @@ static NSString *lsform = nil;
 @end
 
 
+#endif

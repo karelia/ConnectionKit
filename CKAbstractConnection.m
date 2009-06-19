@@ -458,7 +458,10 @@ NSDictionary *sDataAttributes = nil;
 	}
 	
 	//We're uploading a directory
-	CKTransferRecord *rootTransferRecord = [CKTransferRecord uploadRecordForRemotePath:destinationRemotePath size:0];
+	CKTransferRecord *rootTransferRecord = [CKTransferRecord uploadRecordForConnection:self
+																	   sourceLocalPath:localPath
+																 destinationRemotePath:destinationRemotePath
+																				  size:0];
 	
 	return rootTransferRecord;
 }
