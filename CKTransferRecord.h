@@ -36,6 +36,7 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 @interface CKTransferRecord : NSObject
 {
 	BOOL _isUpload;
+	NSString *_localPath;
 	NSString *_remotePath;
 	unsigned long long _sizeInBytes;
 	unsigned long long _sizeInBytesWithChildren;
@@ -56,38 +57,41 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 }
 
 /**
-	@method uploadRecordForRemotePath:size:
+	@method uploadRecordForConnection:sourceLocalPath:destinationRemotePath:size:
 	@abstract The designed initializer for upload records.
-	@param remotePath The destination remotePath of the transfer.
-	@param size The size, in bytes, of the transfer.
 	@result A transfer-record representing the transfer.
  */
-+ (CKTransferRecord *)uploadRecordForRemotePath:(NSString *)remotePath size:(unsigned long long)size;
++ (CKTransferRecord *)uploadRecordForConnection:(id <CKConnection>)connection
+									  sourceLocalPath:(NSString *)sourceLocalPath 
+								destinationRemotePath:(NSString *)destinationRemotePath
+												 size:(unsigned long long)size;
 
 /**
-	@method downloadRecordForRemotePath:size:
+	@method downloadRecordForConnection:sourceRemotePath:destinationLocalPath:size:
 	@abstract The designed initializer for download records.
-	@param remotePath The source remotePath of the transfer.
-	@param size The size, in bytes, of the transfer.
 	@result A transfer-record representing the transfer.
  */
-+ (CKTransferRecord *)downloadRecordForRemotePath:(NSString *)remotePath size:(unsigned long long)size;
++ (CKTransferRecord *)downloadRecordForConnection:(id <CKConnection>)connection
+										 sourceRemotePath:(NSString *)sourceRemotePath
+									 destinationLocalPath:(NSString *)destinationLocalPath
+													 size:(unsigned long long)size;
 
 - (CKTransferRecord *)root;
 - (void)setParent:(CKTransferRecord *)parent;
 - (CKTransferRecord *)parent;
 
-- (void)setUpload:(BOOL)flag;
-- (BOOL)isUpload;
+- (NSString *)name;
+- (void)setLocalPath:(NSString *)newLocalPath;
+- (NSString *)localPath;
+- (void)setRemotePath:(NSString *)newRemotePath;
+- (NSString *)remotePath;
 
+- (BOOL)isUpload;
 - (BOOL)isDirectory;
 
 - (void)setConnection:(id <CKConnection>)connection;
 - (id <CKConnection>)connection;
 - (void)cancel:(id)sender;
-
-- (NSString *)remotePath;
-- (void)setRemotePath:(NSString *)newRemotePath;
 
 - (void)addChild:(CKTransferRecord *)record;
 - (NSArray *)children;

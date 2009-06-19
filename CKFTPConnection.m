@@ -3048,7 +3048,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 TYPE A
 	 */	
 	
-	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
+															sourceRemotePath:remotePath
+														destinationLocalPath:localPath
+																		size:0];
+								
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0
@@ -3123,7 +3127,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 */
 
 	[self startBulkCommands];
-	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
+															sourceRemotePath:remotePath
+														destinationLocalPath:localPath
+																		size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:offset
@@ -3563,7 +3570,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		uploadSize = [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord uploadRecordForRemotePath:remotePath size:uploadSize];
+	CKTransferRecord *record = [CKTransferRecord uploadRecordForConnection:self 
+														   sourceLocalPath:localPath
+													 destinationRemotePath:remotePath
+																	  size:uploadSize];
 	[record setObject:localPath forKey:CKQueueUploadLocalFileKey];
 	[record setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	

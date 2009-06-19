@@ -1,3 +1,4 @@
+#if 0
 /*
  Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
@@ -907,3 +908,4 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 @end
 
+#endif

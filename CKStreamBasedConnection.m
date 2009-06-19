@@ -1206,7 +1206,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag
 {
-	CKTransferRecord *rec = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
+	CKTransferRecord *rec = [CKTransferRecord downloadRecordForConnection:self
+														 sourceRemotePath:remotePath
+													 destinationLocalPath:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
+																	 size:0];
 	
 	NSMutableDictionary *d = [NSMutableDictionary dictionary];
 	

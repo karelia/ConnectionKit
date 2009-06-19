@@ -7,7 +7,7 @@ NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTrans
 NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
 
 @interface CKTransferRecord (PrivateMethods)
-- (id)_initWithRemotePath:(NSString *)remotePath size:(unsigned long long)size isUpload:(BOOL)flag;
+- (id)_initWithConnection:(id <CKConnection>)connection localPath:(NSString *)localPath remotePath:(NSString *)remotePath size:(unsigned long long)size;
 - (void)_appendToDescription:(NSMutableString *)str indentation:(unsigned)indent;
 - (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta;
 @end
@@ -50,7 +50,6 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)dealloc
 {
-	[_remotePath release];
 	[_children makeObjectsPerformSelector:@selector(setParent:) withObject:nil];
 	[_children release];
 	[_properties release];
@@ -60,21 +59,29 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 #pragma mark -
 #pragma mark Creation
-+ (CKTransferRecord *)uploadRecordForRemotePath:(NSString *)remotePath size:(unsigned long long)size
+
++ (CKTransferRecord *)uploadRecordForConnection:(id <CKConnection>)connection
+									  sourceLocalPath:(NSString *)sourceLocalPath 
+								destinationRemotePath:(NSString *)destinationRemotePath
+												 size:(unsigned long long)size
 {
-	return [[[CKTransferRecord alloc] _initWithRemotePath:remotePath size:size isUpload:YES] autorelease];
+	return [[[CKTransferRecord alloc] _initWithConnection:connection localPath:sourceLocalPath remotePath:destinationRemotePath size:size] autorelease];
 }
 
-+ (CKTransferRecord *)downloadRecordForRemotePath:(NSString *)remotePath size:(unsigned long long)size
++ (CKTransferRecord *)downloadRecordForConnection:(id <CKConnection>)connection
+										 sourceRemotePath:(NSString *)sourceRemotePath
+									 destinationLocalPath:(NSString *)destinationLocalPath
+													 size:(unsigned long long)size
 {
-	return [[[CKTransferRecord alloc] _initWithRemotePath:remotePath size:size isUpload:NO] autorelease];
+	return [[[CKTransferRecord alloc] _initWithConnection:connection localPath:destinationLocalPath remotePath:sourceRemotePath size:size] autorelease];
 }		
 
-- (id)_initWithRemotePath:(NSString *)remotePath size:(unsigned long long)size isUpload:(BOOL)flag
+- (id)_initWithConnection:(id <CKConnection>)connection localPath:(NSString *)localPath remotePath:(NSString *)remotePath size:(unsigned long long)size
 {
 	if ((self = [super init])) 
 	{
-		_isUpload = flag;
+		_connection = connection;
+		_localPath = [localPath copy];
 		_remotePath = [remotePath copy];
 		_sizeInBytes = size;
 		_children = [[NSMutableArray array] retain];
@@ -88,6 +95,48 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 #pragma mark -
 #pragma mark Core
+- (NSString *)name
+{
+	//There is no reason _localPath or _remotePath should either, EVER, be nil, but if they are, fall back on one another.
+	if (_localPath)
+		return [_localPath lastPathComponent];
+	if (_remotePath)
+		return [_remotePath lastPathComponent];
+	return nil;
+}
+
+- (void)setLocalPath:(NSString *)newLocalPath
+{
+	if (_localPath == newLocalPath)
+		return;
+	
+	[self willChangeValueForKey:@"localPath"];
+	[_localPath release];
+	_localPath = [newLocalPath copy];
+	[self didChangeValueForKey:@"localPath"];
+}
+
+- (NSString *)localPath
+{
+	return [NSString stringWithString:_localPath];
+}
+
+- (void)setRemotePath:(NSString *)newRemotePath
+{
+	if (_remotePath == newRemotePath)
+		return;
+	
+	[self willChangeValueForKey:@"remotePath"];
+	[_remotePath release];
+	_remotePath = [newRemotePath copy];
+	[self didChangeValueForKey:@"remotePath"];
+}
+
+- (NSString *)remotePath
+{
+	return [NSString stringWithString:_remotePath];
+}
+
 - (CKTransferRecord *)root
 {
 	if (_parent)
@@ -111,14 +160,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 
 #pragma mark -
-- (void)setUpload:(BOOL)flag
-{
-	_isUpload = flag;
-}
-
 - (BOOL)isUpload
 { 
-	return _isUpload;
+	//Placeholder implemenation for CKUploadTransferRecord and CKDownloadTransferRecord
+	return NO;
 }
 
 - (BOOL)isDirectory
@@ -144,24 +189,6 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 }
 
 #pragma mark -
-- (void)setRemotePath:(NSString *)newRemotePath
-{
-	if (_remotePath == newRemotePath)
-		return;
-	
-	[self willChangeValueForKey:@"remotePath"];
-	[_remotePath release];
-	_remotePath = [newRemotePath copy];
-	[self didChangeValueForKey:@"remotePath"];
-}
-
-- (NSString *)remotePath
-{
-	return [[_remotePath copy] autorelease];
-}
-
-#pragma mark -
-
 - (void)addChild:(CKTransferRecord *)record
 {
 	NSParameterAssert(record);
@@ -431,8 +458,9 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	for (i = 0; i < indent; i++)
 	{
 		[str appendString:@"\t"];
-	}	
-	[str appendFormat:@"\t%@", [_remotePath lastPathComponent]];
+	}
+	
+	[str appendFormat:@"\t%@", [self name]];
 	if ([self isDirectory])
 	{
 		[str appendString:@"/"];
@@ -529,7 +557,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	{
 		progress = [NSNumber numberWithInt:[self progress]];
 	}
-	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [_remotePath lastPathComponent], @"name", nil];
+	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
 }
 
 - (void)setNameWithProgress:(id)notused
@@ -548,7 +576,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
     {
         // Calculate the size of the transfer in a user-friendly manner
         NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
-        NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [_remotePath lastPathComponent], fileSize];
+        NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [self name], fileSize];
         
         NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]
                                                                forKey:NSFontAttributeName];
@@ -559,7 +587,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
         // Make the size info in grey
         [description addAttribute:NSForegroundColorAttributeName
                             value:[NSColor grayColor]
-                            range:NSMakeRange([[_remotePath lastPathComponent] length] + 1, [fileSize length] + 2)];
+                            range:NSMakeRange([[self name] length] + 1, [fileSize length] + 2)];
         
         result = [NSDictionary dictionaryWithObjectsAndKeys:
                   [result objectForKey:@"progress"], @"progress",
