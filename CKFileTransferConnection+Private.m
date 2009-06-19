@@ -160,13 +160,6 @@
     }
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
-    
-    [[self connectionThreadProxy] fileTransferProtocol:protocol didCancelAuthenticationChallenge:challenge];
-}
-
 #pragma mark Operation
 
 - (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
