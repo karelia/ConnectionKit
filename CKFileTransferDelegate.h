@@ -44,12 +44,10 @@
  @discussion At this point, the connection has verified the server is of a suitable type. Authentication will probably have been applied if needed, but this is not guaranteed (it is up to the server), and you may well be asked to authenticate again. Note that ConnectionKit only supports operations with absolute paths, so if your application needs to support the concept of a working directory, make sure to resolve paths relative to the one supplied here.
  */
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
-didOpenWithCurrentDirectoryPath:(NSString *)path;
+    didOpenWithCurrentDirectoryPath:(NSString *)path;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
-didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)fileTransferConnection:(CKFileTransferConnection *)connection
-didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+    didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
              operationDidBegin:(id)identifier;

@@ -267,7 +267,7 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] fileTransferProtocol:self didCancelAuthenticationChallenge:challenge];
+    // Ignore for now
 }
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveResponse:(NSHTTPURLResponse *)response;

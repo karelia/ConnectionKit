@@ -333,17 +333,10 @@ withIntermediateDirectories:(BOOL)createIntermediates
 {
     // Inform the delegate
     id delegate = [self delegate];
-    if ([delegate respondsToSelector:@selector(connection:didReceiveAuthenticationChallenge:)])
+    if ([delegate respondsToSelector:@selector(fileTransferConnection:didReceiveAuthenticationChallenge:)])
     {
-        [delegate performSelector:@selector(connection:didReceiveAuthenticationChallenge:)
-                       withObject:self
-                       withObject:challenge];
+        [delegate fileTransferConnection:self didReceiveAuthenticationChallenge:challenge];
     }
-}
-
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    
 }
 
 #pragma mark Operations
