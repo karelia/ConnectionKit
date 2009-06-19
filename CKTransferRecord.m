@@ -37,32 +37,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 @implementation CKTransferRecord
 
-- (BOOL)isUpload { return _isUpload; }
-
-- (void)setUpload:(BOOL)flag { _isUpload = flag; }
-
-- (NSString *)name { return _name; }
-
-- (void)setName:(NSString *)name
-{
-	if (_name != name)
-	{
-		[self willChangeValueForKey:@"name"];
-		name = [name copy];
-		[_name release];
-		_name = name;
-		[self didChangeValueForKey:@"name"];
-	}
-}
-
-- (NSError *)error { return _error; }
-
-- (id <CKConnection>)connection { return _connection; }
-
-- (void)setConnection:(id <CKConnection>)connection { _connection = connection; }
-
-- (CKTransferRecord *)parent { return _parent; }
-
+#pragma mark -
+#pragma mark NSObject Overrides
 + (void)initialize
 {
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
@@ -70,23 +46,29 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 }
 
-+ (id)recordWithName:(NSString *)name size:(unsigned long long)size
+- (void)willChangeValueForKey:(NSString *)key
 {
-	return [[[CKTransferRecord alloc] initWithName:name size:size] autorelease];
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
+	[super willChangeValueForKey:key];
+	
+	if ([self parent])
+		[[self parent] willChangeValueForKey:key];
 }
 
-- (id)initWithName:(NSString *)name size:(unsigned long long)size
+- (void)didChangeValueForKey:(NSString *)key
 {
-	if ((self = [super init])) 
-	{
-		_name = [name copy];
-		_size = size;
-		_contents = [[NSMutableArray array] retain];
-		_properties = [[NSMutableDictionary dictionary] retain];
-		_error = nil;
-		_progress = 0;
-	}
-	return self;
+	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
+	[super didChangeValueForKey:key];
+	
+	if ([self parent])
+		[[self parent] didChangeValueForKey:key];
+}
+
+- (NSString *)description
+{
+	NSMutableString *str = [NSMutableString stringWithString:@"\n"];
+	[self appendToDescription:str indentation:0];
+	return str;
 }
 
 - (void)dealloc
@@ -99,22 +81,156 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	[super dealloc];
 }
 
+#pragma mark -
+#pragma mark Creation
++ (id)recordWithName:(NSString *)name size:(unsigned long long)size
+{
+	return [[[CKTransferRecord alloc] initWithName:name size:size] autorelease];
+}
+
+- (id)initWithName:(NSString *)name size:(unsigned long long)size
+{
+	if ((self = [super init])) 
+	{
+		_name = [name copy];
+		_sizeInBytes = size;
+		_contents = [[NSMutableArray array] retain];
+		_properties = [[NSMutableDictionary dictionary] retain];
+		_error = nil;
+		_progress = 0;
+	}
+	return self;
+}
+
+
+#pragma mark -
+#pragma mark Core
+- (BOOL)isUpload
+{ 
+	return _isUpload;
+}
+
+- (NSString *)name
+{
+	return _name;
+}
+
+- (id <CKConnection>)connection
+{
+	return _connection;
+}
+
+- (CKTransferRecord *)parent
+{
+	return _parent;
+}
+
 - (void)cancel:(id)sender
 {
 	if ([self connection])
-	{
 		[[self connection] cancelTransfer];
+}
+
+- (BOOL)isDirectory
+{
+	return [_contents count] > 0;
+}
+
+- (CKTransferRecord *)root
+{
+	if (_parent)
+	{
+		return [_parent root];
+	}
+	return self;
+}
+
+- (NSString *)path
+{
+	if ([self parent])
+    {
+        return [[_parent path] stringByAppendingPathComponent:[self name]];	// Old code was @"%@/%@" but it broke if _parent was just /
+    }
+    else
+    {
+		return [self name];
 	}
 }
 
+- (void)addChild:(CKTransferRecord *)record
+{
+	NSParameterAssert(record);
+    
+    [self willChangeValueForKey:@"contents"];
+	[_contents addObject:record];
+	[record setParent:self];
+	[self didChangeValueForKey:@"contents"];
+}
+
+- (NSArray *)contents
+{
+	return [[_contents copy] autorelease];
+}
+
+- (void)setProperty:(id)property forKey:(NSString *)key
+{
+	/// Terrence added this NSLog since the exception doesn't log the key
+	if ( nil == property )
+	{
+		NSLog(@"attempted to set nil property for key %@", key);
+	}
+	
+	[_properties setObject:property forKey:key];
+}
+
+- (id)propertyForKey:(NSString *)key
+{
+	return [_properties objectForKey:key];
+}
+
+// keep NSDictionary accessor compatible so we can move over internal use of this class
+- (void)setObject:(id)object forKey:(id)key
+{
+	[self setProperty:object forKey:key];
+}
+
+- (id)objectForKey:(id)key
+{
+	return [self propertyForKey:key];
+}
+
+- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
+{
+	NSInteger i;
+	for (i = 0; i < indent; i++)
+	{
+		[str appendString:@"\t"];
+	}	
+	[str appendFormat:@"\t%@", _name];
+	if ([self isDirectory])
+	{
+		[str appendString:@"/"];
+	}
+	[str appendFormat:@"\t(%lld of %lld bytes - %@%%)\n", [self transferred], [self size], [self progress]];
+	
+	NSEnumerator *e = [[self contents] objectEnumerator];
+	CKTransferRecord *cur;
+	
+	while ((cur = [e nextObject]))
+	{
+		[cur appendToDescription:str indentation:indent+1];
+	}
+}
+
+#pragma mark Size
 - (unsigned long long)size
 {
 	//Have we already calculated our size with children?
-	if (_sizeWithChildren != 0)
-		return _sizeWithChildren;
+	if (_sizeInBytesWithChildren != 0)
+		return _sizeInBytesWithChildren;
 	
 	//Calculate our size including our children
-	unsigned long long size = _size;
+	unsigned long long size = _sizeInBytes;
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
 	
@@ -129,31 +245,19 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
 		}
 	}
-	_sizeWithChildren = size;
+	_sizeInBytesWithChildren = size;
 	
 	return size;
 }
 
-- (void)setSize:(unsigned long long)size
-{
-	[self willChangeValueForKey:@"progress"];
-	if (_size != 0)
-	{
-		//We're updating our size. We need to update our parents' sizes too.
-		unsigned long long sizeDelta = size - _size;
-		[self _sizeWithChildrenChangedBy:sizeDelta];
-	}
-	_size = size;
-	[self didChangeValueForKey:@"progress"];
-}
-
 - (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta
 {
-	_sizeWithChildren += sizeDelta;
+	_sizeInBytesWithChildren += sizeDelta;
 	if ([self parent])
 		[[self parent] _sizeWithChildrenChangedBy:sizeDelta];
 }
 
+#pragma mark Progress
 - (unsigned long long)transferred
 {
 	if ([self isDirectory]) 
@@ -170,9 +274,9 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	}
 	if (_progress == -1) //if we have an error return it as if we transferred the lot of it
 	{
-		return _size;
+		return _sizeInBytes;
 	}
-	return _transferred;
+	return _numberOfBytesTransferred;
 }
 
 - (float)speed
@@ -268,6 +372,12 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	return _progress;
 }
 
+#pragma mark Errors
+- (NSError *)error
+{
+	return _error;
+}
+
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
 {
 	if ([self isLeaf])
@@ -320,124 +430,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	_parent = parent;
 	if (_parent)
-		[_parent _sizeWithChildrenChangedBy:_size];
-}
-
-- (BOOL)isDirectory
-{
-	return [_contents count] > 0;
-}
-
-- (void)willChangeValueForKey:(NSString *)key
-{
-	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
-	[super willChangeValueForKey:key];
-	
-	if ([self parent])
-		[[self parent] willChangeValueForKey:key];
-}
-
-- (void)didChangeValueForKey:(NSString *)key
-{
-	//We override this because we need to call the same on the record's parents to update any bindings on them as well. This traverses all the way up the parental hierarchy.
-	[super didChangeValueForKey:key];
-	
-	if ([self parent])
-		[[self parent] didChangeValueForKey:key];
-}
-
-- (CKTransferRecord *)root
-{
-	if (_parent)
-	{
-		return [_parent root];
-	}
-	return self;
-}
-
-- (NSString *)path
-{
-	if ([self parent])
-    {
-        return [[_parent path] stringByAppendingPathComponent:[self name]];	// Old code was @"%@/%@" but it broke if _parent was just /
-    }
-    else
-    {
-		return [self name];
-	}
-}
-
-- (void)addContent:(CKTransferRecord *)record
-{
-	NSParameterAssert(record);
-    
-    [self willChangeValueForKey:@"contents"];
-	[_contents addObject:record];
-	[record setParent:self];
-	[self didChangeValueForKey:@"contents"];
-}
-
-- (NSArray *)contents
-{
-	return [[_contents copy] autorelease];
-}
-
-- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
-{
-	NSInteger i;
-	for (i = 0; i < indent; i++)
-	{
-		[str appendString:@"\t"];
-	}	
-	[str appendFormat:@"\t%@", _name];
-	if ([self isDirectory])
-	{
-		[str appendString:@"/"];
-	}
-	[str appendFormat:@"\t(%lld of %lld bytes - %@%%)\n", [self transferred], [self size], [self progress]];
-
-	NSEnumerator *e = [[self contents] objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		[cur appendToDescription:str indentation:indent+1];
-	}
-}
-
-- (NSString *)description
-{
-	NSMutableString *str = [NSMutableString stringWithString:@"\n"];
-	[self appendToDescription:str indentation:0];
-	return str;
-}
-
-- (void)setProperty:(id)property forKey:(NSString *)key
-{
-	/// Terrence added this NSLog since the exception doesn't log the key
-	if ( nil == property )
-	{
-		NSLog(@"attempted to set nil property for key %@", key);
-	}
-	
-	[_properties setObject:property forKey:key];
-}
-
-- (id)propertyForKey:(NSString *)key
-{
-	return [_properties objectForKey:key];
-}
-
-// keep NSDictionary accessor compatible so we can move over internal use of this class
-
-- (void)setObject:(id)object forKey:(id)key
-{
-	[self setProperty:object forKey:key];
-}
-
-- (id)objectForKey:(id)key
-{
-	return [self propertyForKey:key];
+		[_parent _sizeWithChildrenChangedBy:_sizeInBytes];
 }
 
 #pragma mark -
@@ -445,8 +438,8 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	_transferred = 0;
-	_intermediateTransferred = 0;
+	_numberOfBytesTransferred = 0;
+	_numberOfBytesInLastTransferChunk = 0;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:0];
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification object:self];
@@ -454,24 +447,24 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
-	_transferred += length;
-	_intermediateTransferred += length;
+	_numberOfBytesTransferred += length;
+	_numberOfBytesInLastTransferChunk += length;
 	
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval difference = now - _lastTransferTime;
 	
-	if (difference > 2.0 || _transferred == _size)
+	if (difference > 2.0 || _numberOfBytesTransferred == _sizeInBytes)
 	{
 		[self willChangeValueForKey:@"speed"];
-		if (_transferred == _size)
+		if (_numberOfBytesTransferred == _sizeInBytes)
 		{
 			[self setSpeed:0.0];
 		}
 		else
 		{
-			[self setSpeed:((double)_intermediateTransferred) / difference];
+			[self setSpeed:((double)_numberOfBytesInLastTransferChunk) / difference];
 		}
-		_intermediateTransferred = 0;
+		_numberOfBytesInLastTransferChunk = 0;
 		_lastTransferTime = now;
 		[self didChangeValueForKey:@"speed"];
 	}
@@ -491,8 +484,8 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
 	[self setError:error];
-	_intermediateTransferred = (_size - _transferred);
-	_transferred = _size;
+	_numberOfBytesInLastTransferChunk = (_sizeInBytes - _numberOfBytesTransferred);
+	_numberOfBytesTransferred = _sizeInBytes;
 	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
 
@@ -505,191 +498,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 }
 
 #pragma mark -
-#pragma mark Recursive File Transfer Methods
+#pragma mark CKTransferController Support
 
-+ (CKTransferRecord *)rootRecordWithPath:(NSString *)path
-{
-	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
-    
-	NSArray *pathComponents = [path pathComponents];
-	if ([pathComponents count] > 0)
-    {
-        [result setName:[[path pathComponents] objectAtIndex:0]];  // -firstPathComponent ignores the root dir for absolute paths
-        CKTransferRecord *thisNode, *subNode = result;
-        
-        int i;
-        for (i = 1; i < [pathComponents count]; i++)
-        {
-            thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
-            [subNode addContent:thisNode];
-            subNode = thisNode;
-        }
-	}
-    
-	return result;
-}
-
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path
-{
-	if ([[record name] isEqualToString:[path firstPathComponent]]) 
-	{
-		NSEnumerator *e = [[record contents] objectEnumerator];
-		CKTransferRecord *cur;
-		CKTransferRecord *child;
-		
-		NSString *newPath = [path stringByDeletingFirstPathComponent2];
-		if ([newPath isEqualToString:@""]) return record; //we have our match
-		
-		while ((cur = [e nextObject])) 
-		{
-			child = [CKTransferRecord recursiveRecord:cur forFullPath:newPath];
-			if (child)
-			{
-				return child;
-			}
-		}
-	}
-	return nil;
-}
-
-+ (CKTransferRecord *)recordForFullPath:(NSString *)path withRoot:(CKTransferRecord *)root
-{
-	return [self recursiveRecord:root forPath:path];
-}	
-
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path
-{
-	BOOL recordIsRootRecord = [[record name] isEqualToString:@"/"];
-	if ((recordIsRootRecord && [path hasPrefix:@"/"]) || [[record name] isEqualToString:[path firstPathComponent]]) 
-	{
-		NSEnumerator *e = [[record contents] objectEnumerator];
-		CKTransferRecord *cur;
-		CKTransferRecord *child;
-		
-		NSString *newPath = (recordIsRootRecord) ? path : [path stringByDeletingFirstPathComponent2];
-		if ([newPath isEqualToString:@""]) return record; // matched
-		
-		while ((cur = [e nextObject])) 
-		{
-			child = [CKTransferRecord recursiveRecord:cur forPath:newPath];
-			if (child)
-			{
-				return child;
-			}
-		}
-	}
-	return nil;
-}
-
-+ (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root
-{
-	if ([path isEqualToString:@""])
-		return root;
-	NSEnumerator *e = [[root contents] objectEnumerator];
-	CKTransferRecord *cur;
-	CKTransferRecord *child;
-	
-	while (cur = [e nextObject]) 
-	{
-		child = [self recursiveRecord:cur forPath:path];
-		if (child)
-		{
-			return child;
-		}
-	}
-	return nil;
-}
-
-+ (CKTransferRecord *)addFileRecord:(NSString *)file size:(unsigned long long)size withRoot:(CKTransferRecord *)root rootPath:(NSString *)rootPath
-{
-	NSString *chompedStoragePath = [file substringFromIndex:[rootPath length]];
-	NSString *path = [chompedStoragePath stringByDeletingLastPathComponent];
-	NSString *filename = [file lastPathComponent];
-	
-	NSEnumerator *pathCompEnum = [[path componentsSeparatedByString:@"/"] objectEnumerator];
-	NSString *builtupPath = [NSString stringWithString:@""];
-	NSString *cur;
-	CKTransferRecord *rec = nil, *lastRec = root;
-	
-	while ((cur = [pathCompEnum nextObject]))
-	{
-		builtupPath = [builtupPath stringByAppendingPathComponent:cur];
-		rec = [CKTransferRecord recordForPath:builtupPath withRoot:root];
-		if (!rec) 
-		{ 
-			//create a new record for the path
-			rec = [CKTransferRecord recordWithName:[builtupPath lastPathComponent] size:0];
-			if (lastRec == nil) 
-			{
-				//we are at the root
-				[root addContent:rec];
-			} else 
-			{
-				[lastRec addContent:rec];
-			}
-		}
-		lastRec = rec;
-	}
-	//last rec will be the directory to add the file name to
-	rec = [CKTransferRecord recordWithName:filename size:size];
-	[lastRec addContent:rec];
-	return rec;
-}
-
-+ (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root
-{
-	CKTransferRecord *parent = [CKTransferRecord recordForPath:[[record name] stringByDeletingLastPathComponent]
-													  withRoot:root];
-	[record setName:[[record name] lastPathComponent]];
-	[parent addContent:record];
-}
-
-+ (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
-{
-	NSString *first = [path firstPathComponent];
-	
-	if ([[root name] isEqualToString:first])
-	{
-		CKTransferRecord *child = nil;
-		NSEnumerator *e = [[root contents] objectEnumerator];
-		CKTransferRecord *cur;
-		path = [path stringByDeletingFirstPathComponent];
-		
-		if ([path isEqualToString:@"/"])
-			return root;
-		
-		while ((cur = [e nextObject]))
-		{
-			child = [self recursiveMergeRecordWithPath:path root:cur];
-			if (child)
-				return child;
-		}
-		
-		// if we get here we need to create the record		
-		CKTransferRecord *tmp = root;
-		while (![path isEqualToString:@"/"])
-		{
-			cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-			[tmp addContent:cur];
-			tmp = cur;
-			path = [path stringByDeletingFirstPathComponent];
-		}
-		return cur;
-	}
-	return nil;
-}
-
-+ (void)mergeTextPathRecord:(CKTransferRecord *)rec withRoot:(CKTransferRecord *)root
-{
-	CKTransferRecord *parent = [CKTransferRecord recursiveMergeRecordWithPath:[[rec name] stringByDeletingLastPathComponent]
-																		 root:root];
-	[parent addContent:rec];
-	[rec setName:[[rec name] lastPathComponent]];
-}
 
 #pragma mark -
-#pragma mark NSTreeController support
-
+#pragma mark NSTreeController Support
 - (BOOL)isLeaf
 {
 	return [_contents count] == 0;
@@ -721,7 +534,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
     NSDictionary *result = [self nameWithProgress];
     
     // Directories should not display their size info
-    if (_size > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
+    if (_sizeInBytes > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
     {
         // Calculate the size of the transfer in a user-friendly manner
         NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
@@ -747,6 +560,41 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
     }
     
     return result;
+}
+
+#pragma mark -
+#pragma mark Setters
+- (void)setUpload:(BOOL)flag
+{
+	_isUpload = flag;
+}
+- (void)setName:(NSString *)name
+{
+	if (_name == name)
+		return;
+	
+	[self willChangeValueForKey:@"name"];
+	[_name release];
+	_name = [name copy];
+	[self didChangeValueForKey:@"name"];
+}
+
+- (void)setConnection:(id <CKConnection>)connection
+{
+	_connection = connection;
+}
+
+- (void)setSize:(unsigned long long)size
+{
+	[self willChangeValueForKey:@"progress"];
+	if (_sizeInBytes != 0)
+	{
+		//We're updating our size. We need to update our parents' sizes too.
+		unsigned long long sizeDelta = size - _sizeInBytes;
+		[self _sizeWithChildrenChangedBy:sizeDelta];
+	}
+	_sizeInBytes = size;
+	[self didChangeValueForKey:@"progress"];
 }
 
 @end

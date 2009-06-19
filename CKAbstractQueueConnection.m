@@ -100,30 +100,30 @@ NSString *CKQueueDomain = @"Queuing";
 	_isRecursiveUploading = NO;
 }
 
-- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
-{
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(turnOnRecursiveUpload)
-													  target:self
-												   arguments:[NSArray array]];
-	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
-											 awaitState:CKConnectionIdleState
-											  sentState:CKConnectionIdleState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
-	CKTransferRecord *rec = [super recursivelyUpload:localPath to:remotePath];
-	
-	inv = [NSInvocation invocationWithSelector:@selector(turnOffRecursiveUpload)
-										target:self
-									 arguments:[NSArray array]];
-	cmd = [CKConnectionCommand command:inv
-						  awaitState:CKConnectionIdleState
-						   sentState:CKConnectionIdleState
-						   dependant:nil
-							userInfo:nil];
-	[self queueCommand:cmd];
-	return rec;
-}
+//- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath
+//{
+//	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(turnOnRecursiveUpload)
+//													  target:self
+//												   arguments:[NSArray array]];
+//	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
+//											 awaitState:CKConnectionIdleState
+//											  sentState:CKConnectionIdleState
+//											  dependant:nil
+//											   userInfo:nil];
+//	[self queueCommand:cmd];
+//	CKTransferRecord *rec = [super recursivelyUpload:localPath to:remotePath];
+//	
+//	inv = [NSInvocation invocationWithSelector:@selector(turnOffRecursiveUpload)
+//										target:self
+//									 arguments:[NSArray array]];
+//	cmd = [CKConnectionCommand command:inv
+//						  awaitState:CKConnectionIdleState
+//						   sentState:CKConnectionIdleState
+//						   dependant:nil
+//							userInfo:nil];
+//	[self queueCommand:cmd];
+//	return rec;
+//}
 
 - (void)threadedDisconnect
 {

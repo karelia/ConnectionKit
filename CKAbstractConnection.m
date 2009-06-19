@@ -199,7 +199,8 @@ NSDictionary *sDataAttributes = nil;
 
 - (NSString *)stateName:(int)state
 {
-	switch (state) {
+	switch (state)
+	{
 		case CKConnectionNotConnectedState: return @"ConnectionNotConnectedState";
 		case CKConnectionIdleState: return @"ConnectionIdleState";
 		case CKConnectionSentUsernameState: return @"ConnectionSentUsernameState";
@@ -436,7 +437,29 @@ NSDictionary *sDataAttributes = nil;
 }
 
 #pragma mark Uploading
-- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath root:(CKTransferRecord *)root rootPath:(NSString *)rootPath ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
+
+- (CKTransferRecord *)uploadLocalItem:(NSString *)localPath
+					toRemoteDirectory:(NSString *)remoteDirectoryPath
+					ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag
+{
+	NSParameterAssert(localPath);
+	NSParameterAssert(remoteDirectoryPath);
+	NSAssert([remoteDirectoryPath hasPrefix:@"/"], @"remoteDirectoryPath must be an absolute path!");
+	
+	//Expand any tilde's in the localPath
+	localPath = [localPath stringByExpandingTildeInPath];
+	//Resolve localPath, if it's a symbolic link.
+	localPath = [localPath stringByResolvingSymlinksInPath];
+	
+	
+}
+
+/*
+- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath
+									 to:(NSString *)remotePath
+								   root:(CKTransferRecord *)root
+							   rootPath:(NSString *)rootPath
+					  ignoreHiddenFiles:(BOOL)ignoreHiddenFilesFlag
 {
 	NSFileManager *fm = [NSFileManager defaultManager];
 	CKTransferRecord *record;
@@ -581,7 +604,7 @@ NSDictionary *sDataAttributes = nil;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
-}
+} */
 
 #pragma mark Downloading
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
@@ -645,7 +668,6 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)threadedCancelTransfer
 {
-	
 }
 
 - (void)cancelAll
@@ -655,7 +677,6 @@ NSDictionary *sDataAttributes = nil;
 
 - (void)threadedCancelAll
 {
-	
 }
 
 @end

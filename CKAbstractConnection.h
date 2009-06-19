@@ -95,23 +95,17 @@ typedef enum {
 @interface CKAbstractConnection : NSObject <CKConnection> 
 {
 	CKConnectionState _state;
-	
 @protected
-        
-	
 	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
     BOOL    _isConnected;
     BOOL    _inBulk;
-		
 	NSMutableDictionary *_cachedDirectoryContents;
-	
 	NSMutableDictionary *_properties;
     
 @private
     NSString            *_name;
     CKConnectionRequest *_request;
     id                  _delegate;
-    
     CKConnectionClient  *_client;
 }
 
@@ -187,5 +181,3 @@ extern NSString *CKConnectionCommandKey;
 @interface NSHost (IPV4)
 - (NSString *)ipv4Address;
 @end
-
-

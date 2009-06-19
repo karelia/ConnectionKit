@@ -39,7 +39,6 @@
 
 @class CKTransferRecord;
 
-
 // Some shared Error Codes
 enum {
 	ConnectionErrorUploading = 49101,
@@ -194,44 +193,18 @@ typedef enum
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
-
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate;
-/* 
-	returns CKTransferRecord as a heirarchy of what will be upload, remote and local files 
-	can be found in the records node properties
-*/
-- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath;
-- (CKTransferRecord *)recursivelyUpload:(NSString *)localPath to:(NSString *)remotePath ignoreHiddenFiles:(BOOL)flag;
-
-- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
-								toFile:(NSString *)remotePath 
-							fileOffset:(unsigned long long)offset
-							  delegate:(id)delegate;
-
-
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate;
-
-- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
-									toFile:(NSString *)remotePath 
-								fileOffset:(unsigned long long)offset
-								  delegate:(id)delegate;
-
+/**
+	@method uploadLocalItem:toRemoteDirectory:ignoreHiddenItems:
+	@abstract The designated method for uploading a given item to the remote host.
+	@param localPath The path the item to upload. May be a file, directory, or symbolic link. May not be nil.
+	@param remoteDirectoryPath The remote-path to the directory to upload into. Must be an absolute path. May not be nil.
+	@param ignoreHiddenItemsFlag If YES, items which are prefixed with a "." will not be uploaded, recursively or not.
+	@discussion If localPath contains a tilde, it is expanded. If the item at localPath is a symbolic link, the link is resolved, and the target is uploaded with the target's filename.
+	@result A transfer record to represent the transfer.
+ */
+- (CKTransferRecord *)uploadLocalItem:(NSString *)localPath
+					toRemoteDirectory:(NSString *)remoteDirectoryPath
+					ignoreHiddenItems:(BOOL)ignoreHiddenItemsFlag;
 /* 
 	New method that allows you to set a custom delegate for the download.
 	You must implement the CKConnectionTransferDelegate informal protocol.
@@ -316,14 +289,11 @@ typedef enum
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
 
-
-// recursivelyDeleteDirectory
-//     These methods may change soon -- Seth
+//Recursive Deletion Delegate Methods
 - (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
 - (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inDirectory:(NSString *)dirPath;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
-
 
 - (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
@@ -331,12 +301,10 @@ typedef enum
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
-
 - (void)connection:(id <CKConnection>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length; 
 - (void)connection:(id <CKConnection>)con downloadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error;
-
 
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
