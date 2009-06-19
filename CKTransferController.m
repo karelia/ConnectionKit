@@ -1,3 +1,4 @@
+#if 0
 /*
  Copyright (c) 2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
@@ -117,10 +118,10 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 {
 	KTLog(ControllerDomain, KTLogDebug, @"Queuing upload of file: %@ to %@", localPath, remotePath);
 	CKTransferRecord *root = [self rootRecordWithPath:[remotePath stringByDeletingLastPathComponent]];
-	CKTransferRecord *upload = [[self connection] uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
+	CKTransferRecord *upload = [[self connection] _uploadFile:localPath toFile:remotePath checkRemoteExistence:NO delegate:nil];
 	
 	[upload setName:[remotePath lastPathComponent]];
-	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addContent:upload];
+	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addChild:upload];
 	[myPathsToVerify addObject:remotePath];
 }
 
@@ -131,7 +132,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	CKTransferRecord *upload = [[self connection] uploadFromData:data toFile:remotePath checkRemoteExistence:NO delegate:nil];
 	
 	[upload setName:[remotePath lastPathComponent]];
-	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addContent:upload];
+	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addChild:upload];
 	[myPathsToVerify addObject:remotePath];
 }
 
@@ -154,7 +155,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 	CKTransferRecord *upload = [[self connection] recursivelyUpload:localPath to:remotePath];
 	
 	[upload setName:[remotePath lastPathComponent]];
-	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addContent:upload];
+	[[self recordWithPath:[remotePath stringByDeletingLastPathComponent] root:root] addChild:upload];
 	[myPathsToVerify addObject:remotePath];
 }
 
@@ -728,7 +729,7 @@ static NSSize closedSize = { 452, 152 };
 	
 	if ([[root name] isEqualToString:first])
 	{
-		NSEnumerator *e = [[root contents] objectEnumerator];
+		NSEnumerator *e = [[root children] objectEnumerator];
 		CKTransferRecord *cur;
 		path = [path stringByDeletingFirstPathComponent];
 		
@@ -744,7 +745,7 @@ static NSSize closedSize = { 452, 152 };
 		
 		// if we get here it doesn't exist so create it
 		cur = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
-		[root addContent:cur];
+		[root addChild:cur];
 		[self recursiveRootRecordWithPath:path root:cur];
 		return root;
 	}
@@ -774,7 +775,7 @@ static NSSize closedSize = { 452, 152 };
 		{
 			thisNode = [CKTransferRecord recordWithName:[path firstPathComponent] size:0];
 			path = [path stringByDeletingFirstPathComponent];
-			[subNode addContent:thisNode];
+			[subNode addChild:thisNode];
 			subNode = thisNode;
 		}
 		[self willChangeValueForKey:@"transfers"];
@@ -816,7 +817,7 @@ static NSSize closedSize = { 452, 152 };
 	if ([[root name] isEqualToString:first])
 	{
 		CKTransferRecord *child = nil;
-		NSEnumerator *e = [[root contents] objectEnumerator];
+		NSEnumerator *e = [[root children] objectEnumerator];
 		CKTransferRecord *cur;
 		path = [path stringByDeletingFirstPathComponent];
 		
@@ -883,7 +884,7 @@ static NSSize closedSize = { 452, 152 };
 	{
 		return [myRootedTransfers count];
 	}
-	return [[item contents] count];
+	return [[item children] count];
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
@@ -892,7 +893,7 @@ static NSSize closedSize = { 452, 152 };
 	{
 		return [myRootedTransfers objectAtIndex:index];
 	}
-	return [[item contents] objectAtIndex:index];
+	return [[item children] objectAtIndex:index];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
@@ -1101,7 +1102,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath
 {
 	CKTransferRecord *folder = [self recordWithPath:dirPath];
-	NSEnumerator *e = [[folder contents] objectEnumerator];
+	NSEnumerator *e = [[folder children] objectEnumerator];
 	CKTransferRecord *cur;
 	
 	while ((cur = [e nextObject]))
@@ -1188,3 +1189,4 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 
 @end
 
+#endif

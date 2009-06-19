@@ -1,3 +1,4 @@
+#if 0
 /*
  Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
@@ -469,7 +470,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
 						  toFile:(NSString *)remotePath 
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
@@ -478,7 +479,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	NSDictionary *attribs = [myFileManager fileAttributesAtPath:localPath traverseLink:YES];
-	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
@@ -571,7 +572,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
-	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath
 														size:[data length]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
@@ -704,7 +705,7 @@ checkRemoteExistence:(NSNumber *)check;
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
-	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
 	CKTransferRecord *download = [CKInternalTransferRecord recordWithLocal:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
 																	  data:nil
 																	offset:0
@@ -874,3 +875,4 @@ checkRemoteExistence:(NSNumber *)check;
 }
 
 @end
+#endif

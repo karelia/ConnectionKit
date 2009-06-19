@@ -1,3 +1,4 @@
+#if 0
 #import "DropletController.h"
 
 @interface DropletController (Private)
@@ -96,8 +97,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	
 	while ((cur = [e nextObject]))
 	{
-		CKTransferRecord *root = [myConnection recursivelyUpload:cur to:[myHost initialPath]];
-		CKTransferRecord *record = [CKTransferRecord recursiveRecord:root forFullPath:[[myHost initialPath] stringByAppendingPathComponent:[cur lastPathComponent]]];
+		CKTransferRecord *record = [myConnection uploadLocalItem:cur toRemoteDirectory:[myHost initialPath] ignoreHiddenItems:NO];
 		[myTransfers addObject:record];
 	}
 	[oFiles reloadData];
@@ -336,7 +336,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	{
 		return [myTransfers count];
 	}
-	return [[item contents] count];
+	return [[item children] count];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
@@ -351,7 +351,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	{
 		return [myTransfers objectAtIndex:index];
 	}
-	return [[item contents] objectAtIndex:index];
+	return [[item children] objectAtIndex:index];
 }
 
 - (id)outlineView:(NSOutlineView *)outlineView objectValueForTableColumn:(NSTableColumn *)tableColumn byItem:(id)item
@@ -368,3 +368,4 @@ static NSSize sFilesCollapsedSize = {375, 105};
 }
 
 @end
+#endif

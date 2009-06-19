@@ -427,15 +427,6 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
-{
-	SUBCLASS_RESPONSIBLE
-	return nil;
-}
-
 #pragma mark Uploading
 
 - (CKTransferRecord *)uploadLocalItem:(NSString *)localPath
@@ -451,7 +442,61 @@ NSDictionary *sDataAttributes = nil;
 	//Resolve localPath, if it's a symbolic link.
 	localPath = [localPath stringByResolvingSymlinksInPath];
 	
+	//Ensure we actually have something to upload
+	BOOL isDirectory = NO;
+	if (![[NSFileManager defaultManager] fileExistsAtPath:localPath isDirectory:&isDirectory])
+		return nil;
+
+	NSString *destinationRemotePath = [remoteDirectoryPath stringByAppendingPathComponent:[localPath lastPathComponent]];
+	if (!isDirectory)
+	{
+		//We're uploading a file.
+		return [self _uploadFile:localPath
+						 toFile:destinationRemotePath
+		   checkRemoteExistence:NO
+					   delegate:nil];
+	}
 	
+	//We're uploading a directory
+	CKTransferRecord *rootTransferRecord = [CKTransferRecord uploadRecordForRemotePath:destinationRemotePath size:0];
+	
+	return rootTransferRecord;
+}
+
+- (CKTransferRecord *)_uploadFile:(NSString *)localPath 
+						   toFile:(NSString *)remotePath 
+			 checkRemoteExistence:(BOOL)flag 
+						 delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
+- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
+								toFile:(NSString *)remotePath 
+							fileOffset:(unsigned long long)offset
+							  delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
+}
+
+- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
+									toFile:(NSString *)remotePath 
+								fileOffset:(unsigned long long)offset
+								  delegate:(id)delegate
+{
+	SUBCLASS_RESPONSIBLE
+	return nil;
 }
 
 /*
@@ -578,33 +623,7 @@ NSDictionary *sDataAttributes = nil;
 	[self endBulkCommands];
 	return root;
 }
-
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
-{
-	SUBCLASS_RESPONSIBLE
-	return nil;
-}
-
-- (CKTransferRecord *)resumeUploadFile:(NSString *)localPath 
-								toFile:(NSString *)remotePath 
-							fileOffset:(unsigned long long)offset
-							  delegate:(id)delegate
-{
-	SUBCLASS_RESPONSIBLE
-	return nil;
-}
-
-- (CKTransferRecord *)resumeUploadFromData:(NSData *)data
-									toFile:(NSString *)remotePath 
-								fileOffset:(unsigned long long)offset
-								  delegate:(id)delegate
-{
-	SUBCLASS_RESPONSIBLE
-	return nil;
-} */
+*/
 
 #pragma mark Downloading
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
