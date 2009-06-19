@@ -58,7 +58,7 @@
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
-		27D1E90C0FEB04FF00DC6A84 /* CKFileTransferDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D1E90B0FEB04FF00DC6A84 /* CKFileTransferDelegate.h */; };
+		27D1E90C0FEB04FF00DC6A84 /* CKFileTransferDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D1E90B0FEB04FF00DC6A84 /* CKFileTransferDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27F05A6B0F2BA0B200DB5FBA /* CKFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		27F05A6C0F2BA0B200DB5FBA /* CKFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */; };
 		27F05A6F0F2BA0D800DB5FBA /* CKSFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
