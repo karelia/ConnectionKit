@@ -415,8 +415,6 @@ static NSString *lsform = nil;
 	
 	CKTransferRecord *record = [CKTransferRecord uploadRecordForRemotePath:remotePath size:uploadSize];
 	[record setUpload:YES];
-	[record setObject:localPath forKey:CKQueueUploadLocalFileKey];
-	[record setObject:remotePath forKey:CKQueueUploadRemoteFileKey];
 	
 	id internalTransferRecordDelegate = (delegate) ? delegate : record;
 		

@@ -36,9 +36,7 @@
 //Download Queue Keys
 NSString *CKQueueDownloadDestinationFileKey = @"QueueDownloadDestinationFileKey";
 NSString *CKQueueDownloadRemoteFileKey = @"QueueDownloadRemoteFileKey";
-NSString *CKQueueUploadLocalFileKey = @"QueueUploadLocalFileKey";
 NSString *CKQueueUploadLocalDataKey = @"QueueUploadLocalDataKey";
-NSString *CKQueueUploadRemoteFileKey = @"QueueUploadRemoteFileKey";
 NSString *CKQueueUploadOffsetKey = @"QueueUploadOffsetKey";
 NSString *CKQueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentReceived";
 
