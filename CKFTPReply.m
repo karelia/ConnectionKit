@@ -61,7 +61,7 @@
 
 - (CKFTPReplyFunctionGroup)functionalGrouping
 {
-    // The second digit or -replyCode
+    // The second digit of -replyCode
     CKFTPReplyFunctionGroup result = ([self replyCode] - (100 * [self replyType])) / 10;
     return result;
 }
