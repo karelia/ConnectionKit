@@ -29,6 +29,7 @@
 
 
 // For Mac OS X < 10.5.
+/*
 #ifndef NSINTEGER_DEFINED
 #define NSINTEGER_DEFINED
 #ifdef __LP64__ || NS_BUILD_32_LIKE_64
@@ -45,10 +46,21 @@ typedef unsigned int   NSUInteger;
 #define NSUIntegerMax  UINT_MAX
 #endif
 #endif // NSINTEGER_DEFINED
+ */
 
 
 #import <Cocoa/Cocoa.h>
 
+
+#import <ConnectionKit/CKFileTransferConnection.h>
+#import <ConnectionKit/CKFileTransferDelegate.h>
+#import <ConnectionKit/CKFileTransferProtocol.h>
+
+#import <ConnectionKit/CKConnectionError.h>
+#import <ConnectionKit/CKConnectionAuthentication.h>
+
+
+// Legacy
 #import <ConnectionKit/CKConnectionProtocol1.h>
 #import <ConnectionKit/CKConnectionRegistry.h>
 #import <ConnectionKit/CKAbstractConnection.h>
@@ -80,13 +92,4 @@ typedef unsigned int   NSUInteger;
 #import <ConnectionKit/CKBonjourCategory.h>
 #import <ConnectionKit/CKHost.h>
 #import <ConnectionKit/CKHostCell.h>
-
-
-// Version 2.0 API
-#import <ConnectionKit/CKFileTransferConnection.h>
-#import <ConnectionKit/CKFileTransferDelegate.h>
-#import <ConnectionKit/CKFileTransferProtocol.h>
-
-#import <ConnectionKit/CKConnectionError.h>
-#import <ConnectionKit/CKConnectionAuthentication.h>
 
