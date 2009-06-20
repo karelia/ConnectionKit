@@ -3059,10 +3059,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																			remote:remotePath
 																		  delegate:delegate ? delegate : record
 																		  userInfo:record];
-	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
-	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
-
 	[self queueDownload:download];
 	
 	CKConnectionCommand *retr = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RETR" argumentField:[remotePath lastPathComponent]]
@@ -3137,10 +3133,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																			remote:remotePath
 																		  delegate:delegate ? delegate : record
 																		  userInfo:record];
-	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
-	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
-
 	[self queueDownload:download];
 	
 	CKConnectionCommand *retr = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"RETR" argumentField: remotePath]

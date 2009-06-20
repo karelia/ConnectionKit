@@ -475,7 +475,6 @@ static NSString *lsform = nil;
 															sourceRemotePath:remotePath
 														destinationLocalPath:localPath
 																		size:0];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
 	
 	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath
 																							data:nil
