@@ -118,14 +118,18 @@ NSDictionary *sDataAttributes = nil;
 + (NSDictionary *)sentTranscriptStringAttributes
 {
     if (!sSentAttributes)
-        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
+        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+						   [NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, 
+						   [NSColor redColor], NSForegroundColorAttributeName, nil];
     return sSentAttributes;
 }
 
 + (NSDictionary *)receivedTranscriptStringAttributes
 {
     if (!sReceivedAttributes)
-        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
+        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+							   [NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, 
+							   [NSColor blackColor], NSForegroundColorAttributeName, nil];
     return sReceivedAttributes;
 }
 
