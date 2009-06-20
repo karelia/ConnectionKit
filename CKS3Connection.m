@@ -1,4 +1,3 @@
-#if 0
 /*
  Copyright (c) 2004-2006, Greg Hulands <ghulands@mac.com>
  All rights reserved.
@@ -30,6 +29,7 @@
 
 #import "CKS3Connection.h"
 #import "CKHTTPRequest.h"
+#import "CKConnectionThreadManager.h"
 #import "NSData+Connection.h"
 #import "NSString+Connection.h"
 #import "NSCalendarDate+Connection.h"
@@ -44,7 +44,7 @@
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
 NSString *S3StorageClassKey = @"S3StorageClassKey";
-NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
+NSString *S3PathSeparator = @":";
 
 
 @implementation CKS3Connection
@@ -363,7 +363,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[self dequeueDownload];
 			
 			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
-			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
+			[[self client] downloadDidFinish:[record remotePath] error:nil];
 			
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
 				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
@@ -426,15 +426,15 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				CKTransferRecord *record = (CKTransferRecord *)[[self currentDownload] userInfo];
 				NSFileManager *fm = [NSFileManager defaultManager];
 				BOOL isDir;
-				if ([fm fileExistsAtPath:[record propertyForKey:CKQueueDownloadDestinationFileKey] isDirectory:&isDir] && !isDir)
+				if ([fm fileExistsAtPath:[record localPath] isDirectory:&isDir] && !isDir)
 				{
-					[fm removeFileAtPath:[record propertyForKey:CKQueueDownloadDestinationFileKey] handler:nil];
+					[fm removeFileAtPath:[record localPath] handler:nil];
 				}
-				[fm createFileAtPath:[record propertyForKey:CKQueueDownloadDestinationFileKey]
+				[fm createFileAtPath:[record localPath]
 							contents:nil
 						  attributes:nil];
 				[myDownloadHandle release];
-				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[record propertyForKey:CKQueueDownloadDestinationFileKey]] retain];
+				myDownloadHandle = [[NSFileHandle fileHandleForWritingAtPath:[record localPath]] retain];
 				
 				// file data starts after the header
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
@@ -451,11 +451,11 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				
 				bytesTransferred += [fileData length];
 				
-				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[fileData length]];
+				[[self client] download:[record remotePath] didReceiveDataOfLength:[fileData length]];
 				
 				
 				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
-				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				[[self client] download:[record remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
 			}
 		}
 		else  //add the data at the end of the file
@@ -467,7 +467,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			CKInternalTransferRecord *downloadInfo = [self currentDownload];
 			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
 			
-			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[data length]];
+			[[self client] download:[record remotePath] didReceiveDataOfLength:[data length]];
 			
 			if ([downloadInfo delegateRespondsToTransferTransferredData])
 			{
@@ -475,7 +475,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			}
 			
             int percent = (100 * bytesTransferred) / bytesToTransfer;
-			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+			[[self client] download:[record remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
 			
 			if ([downloadInfo delegateRespondsToTransferProgressedTo])
 			{
@@ -725,7 +725,10 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			checkRemoteExistence:(BOOL)flag 
 						delegate:(id)delegate
 {
-	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForConnection:self
+														sourceLocalPath:localPath
+												  destinationRemotePath:remotePath
+																   size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
 																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForS3]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
@@ -742,8 +745,6 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 																		  remote:remotePath
 																		delegate:(delegate) ? delegate : rec
 																		userInfo:nil];
-	[rec setUpload:YES];
-	
 	[self queueUpload:upload];
 	[self queueCommand:cmd];
 	
@@ -790,16 +791,16 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 		return nil;
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:fixedRemotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
+															sourceRemotePath:fixedRemotePath
+														destinationLocalPath:localPath
+																		size:0];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0
 																			remote:fixedRemotePath
 																		  delegate:(delegate) ? delegate : record
 																		  userInfo:record];
-	[record setProperty:fixedRemotePath forKey:CKQueueDownloadRemoteFileKey];
-	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
 	[self queueDownload:download];
 	
 	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:fixedRemotePath to:dirPath];
@@ -872,8 +873,12 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 #pragma mark -
 #pragma mark Authentication
-
 - (void)connect
+{
+	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+}
+
+- (void)threadedConnect
 {
     if (_isConnecting || [self isConnected]) return;
 	
@@ -907,5 +912,3 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 }
 
 @end
-
-#endif
