@@ -1,4 +1,3 @@
-#if 0
 //
 //  SFTPConnection.m
 //  CocoaSFTP
@@ -152,6 +151,11 @@ static NSString *lsform = nil;
 #pragma mark Connecting
 
 - (void)connect
+{
+	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
+}
+
+- (void)threadedConnect
 {
 	if (_isConnecting || [self isConnected]) return;
     
@@ -413,9 +417,10 @@ static NSString *lsform = nil;
 		uploadSize = [[attributes objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord uploadRecordForRemotePath:remotePath size:uploadSize];
-	[record setUpload:YES];
-	
+	CKTransferRecord *record = [CKTransferRecord uploadRecordForConnection:self
+														   sourceLocalPath:localPath
+													 destinationRemotePath:remotePath
+																	  size:uploadSize];
 	id internalTransferRecordDelegate = (delegate) ? delegate : record;
 		
 	CKInternalTransferRecord *internalRecord = [CKInternalTransferRecord recordWithLocal:localPath data:data offset:offset remote:remotePath delegate:internalTransferRecordDelegate userInfo:record];
@@ -466,9 +471,10 @@ static NSString *lsform = nil;
 		return nil;
 	}
 	
-	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
-	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
-	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
+															sourceRemotePath:remotePath
+														destinationLocalPath:localPath
+																		size:0];
 	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
 	
 	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath
@@ -1142,6 +1148,3 @@ static NSString *lsform = nil;
 }
 
 @end
-
-
-#endif
