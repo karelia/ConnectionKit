@@ -16,5 +16,6 @@
                 user:(NSString *)username
             password:(NSString *)password;
 
-- (NSString *)decodedPassword;
+- (NSString *)originalUnescapedPassword;
+
 @end

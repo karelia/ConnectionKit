@@ -35,6 +35,21 @@
 
 @implementation NSString (Connection)
 
+/**
+	@method encodeLegallyForURL
+	@abstract Encodes the receiver into a string appropriate for usage within a URL.
+	@discussion This includes escaping all invalid characters for a URL, in addition to the '@' character, as it's used as a separator between the username/password and host, and the ':' character, as it's used to separate the username and password
+ */
+- (NSString *)encodeLegallyForURL
+{
+	NSString *result = (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, 
+																		   (CFStringRef)self, 
+																		   NULL, 
+																		   (CFStringRef)@":/%#;@", //Escape these as per [NSURL URLWithString]
+																		   kCFStringEncodingUTF8);
+	return [result autorelease];
+}
+
 - (NSString *)encodeLegally
 {
 	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(NULL, 
