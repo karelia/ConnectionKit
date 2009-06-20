@@ -111,9 +111,44 @@ extern NSString *CKQueueDomain;
 	
 	struct __aqc_flags {
 		unsigned isCheckingQueue: 1;
-		unsigned usued: 29;
+		unsigned isDeleting: 1;
+		unsigned isDownloading: 1;
+		unsigned isRecursivelyRenamingForS3: 1;
+		unsigned usued: 26;
 	} myQueueFlags;
     BOOL                _isRecursiveUploading;
+	
+	//Recursive Deletion
+	NSMutableArray *_recursiveDeletionsQueue;
+	id previousDelegate;
+	NSString *previousWorkingDirectory;
+	id <CKConnection> _recursiveDeletionConnection;
+	unsigned _numberOfDeletionListingsRemaining;
+	unsigned _numberOfDirDeletionsRemaining;
+	NSMutableArray *_emptyDirectoriesToDelete;
+	NSMutableArray *_filesToDelete;
+	NSLock *_recursiveDeletionLock;	
+	
+	// Peer connection support for recursive download
+	id <CKConnection> _recursiveDownloadConnection;
+	unsigned _numberOfDownloadListingsRemaining;
+	NSMutableArray *_recursiveDownloadQueue;
+	NSLock *_recursiveDownloadLock;
+	
+	//Peer connection support for recursive S3 renaming
+	NSMutableArray *_recursiveS3RenamesQueue;
+	NSMutableArray *_recursivelyRenamedDirectoriesToDelete;
+	id <CKConnection> _recursiveS3RenameConnection;
+	unsigned _numberOfS3RenameListingsRemaining;
+	unsigned _numberOfS3RenamesRemaining;
+	unsigned _numberOfS3RenameDirectoryDeletionsRemaining;
+	NSLock *_recursiveS3RenameLock;		
+	
+	// This is a peer connection that is used to check if files exist
+	id <CKConnection> _fileCheckingConnection;
+	NSLock *_fileCheckLock;
+	NSString *_fileCheckInFlight;
+		
 }
 
 - (void)checkQueue;
