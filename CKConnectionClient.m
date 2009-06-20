@@ -169,7 +169,7 @@
         NSString *user = [connectionURL user];
         if (user)
         {
-            NSString *password = [connectionURL decodedPassword];
+            NSString *password = [connectionURL originalUnescapedPassword];
             if (password)
             {
                 credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
