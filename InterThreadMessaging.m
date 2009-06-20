@@ -80,7 +80,6 @@ static pthread_mutex_t pGate = { 0 };
 @interface ConnectionInterThreadManager : NSObject
 + (void) threadDied:(NSNotification *)notification;
 + (void) handlePortMessage:(NSPortMessage *)msg;
-
 @end
 
 static void
