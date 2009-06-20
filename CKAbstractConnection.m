@@ -40,7 +40,6 @@
 #import "NSURL+Connection.h"
 #import "KTLog.h"
 
-
 NSString *CKConnectionErrorDomain = @"ConnectionErrorDomain";
 
 // Command Dictionary Keys
@@ -133,7 +132,9 @@ NSDictionary *sDataAttributes = nil;
 + (NSDictionary *)dataTranscriptStringAttributes
 {
     if (!sDataAttributes)
-        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
+        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+						   [NSFont fontWithName:@"Courier" size:11], NSFontAttributeName,
+						   [NSColor blueColor], NSForegroundColorAttributeName, nil];
     return sDataAttributes;
 }
 
@@ -156,7 +157,7 @@ NSDictionary *sDataAttributes = nil;
     
     
     if (self = [super init])
-	{
+	{		
 		_request = [request copy];
         
         _client = [[CKConnectionClient alloc] initWithConnection:self];
@@ -322,7 +323,7 @@ NSDictionary *sDataAttributes = nil;
 {
 	_isConnected = YES;
 	_isConnecting = NO;
-	
+
 	// Inform delegate
     [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
 }
