@@ -241,7 +241,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[self dequeueDownload];
 			
 			CKTransferRecord *record = (CKTransferRecord *)[downloadInfo userInfo];
-			[[self client] downloadDidFinish:[record propertyForKey:CKQueueDownloadRemoteFileKey] error:nil];
+			[[self client] downloadDidFinish:[record remotePath] error:nil];
 
 			if ([downloadInfo delegateRespondsToTransferDidFinish])
 				[[downloadInfo delegate] transferDidFinish:[downloadInfo userInfo] error:nil];
@@ -714,9 +714,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 																		  remote:remotePath
 																		delegate:delegate ? delegate : transfer
 																		userInfo:transfer];
-	[transfer setObject:remotePath forKey:CKQueueDownloadRemoteFileKey];
-	[transfer setObject:localPath forKey:CKQueueDownloadDestinationFileKey];
-	
+
 	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:remotePath to:dirPath];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:r
 											 awaitState:CKConnectionIdleState
