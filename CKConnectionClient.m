@@ -242,9 +242,9 @@
     if (challenge == _currentAuthenticationChallenge)
     {
         [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-         withObject:credential
-         withObject:_originalAuthenticationChallenge
-         inThread:_authenticationThread];
+																	withObject:credential
+																	withObject:_originalAuthenticationChallenge
+																	  inThread:_authenticationThread];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
@@ -257,8 +257,8 @@
     if (challenge == _currentAuthenticationChallenge)
     {
         [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-         withObject:_originalAuthenticationChallenge
-         inThread:_authenticationThread];
+																	withObject:_originalAuthenticationChallenge
+																	  inThread:_authenticationThread];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
@@ -274,9 +274,9 @@
         [[self connection] forceDisconnect];
         
         // Forward the message on to the original sender
-        [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-         withObject:_originalAuthenticationChallenge
-         inThread:_authenticationThread];
+        [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd 
+																	withObject:_originalAuthenticationChallenge
+																	  inThread:_authenticationThread];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
