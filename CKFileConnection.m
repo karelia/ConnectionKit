@@ -1,4 +1,3 @@
-#if 0
 /*
  Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
@@ -479,7 +478,10 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
 	NSDictionary *attribs = [myFileManager fileAttributesAtPath:localPath traverseLink:YES];
-	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForConnection:self
+														sourceLocalPath:localPath
+												  destinationRemotePath:remotePath
+																   size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
@@ -572,8 +574,10 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
-	CKTransferRecord *rec = [CKTransferRecord uploadRecordForRemotePath:remotePath
-														size:[data length]];
+	CKTransferRecord *rec = [CKTransferRecord uploadRecordForConnection:self
+														sourceLocalPath:@""
+												  destinationRemotePath:remotePath
+																   size:[data length]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
 																		  offset:0
@@ -705,7 +709,10 @@ checkRemoteExistence:(NSNumber *)check;
 						 overwrite:(BOOL)flag
 						  delegate:(id)delegate
 {
-	CKTransferRecord *record = [CKTransferRecord downloadRecordForRemotePath:remotePath size:0];
+	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
+															sourceRemotePath:remotePath
+														destinationLocalPath:dirPath
+																		size:0];
 	CKTransferRecord *download = [CKInternalTransferRecord recordWithLocal:[dirPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
 																	  data:nil
 																	offset:0
@@ -809,50 +816,50 @@ checkRemoteExistence:(NSNumber *)check;
 	[self queueCommand:cmd];
 }
 
-- (void)threadedRecursivelyDownload:(NSDictionary *)ui
-{
-	CKTransferRecord *root = [ui objectForKey:@"record"];
-	NSString *remotePath = [ui objectForKey:@"remote"];
-	NSString *localPath = [ui objectForKey:@"local"];
-	BOOL flag = [[ui objectForKey:@"overwrite"] boolValue];
-	NSEnumerator *e = [[myFileManager subpathsAtPath:remotePath] objectEnumerator];
-	NSString *cur;
-	BOOL isDir;
-	
-	while ((cur = [e nextObject]))
-	{
-		NSString *r = [remotePath stringByAppendingPathComponent:cur];
-		NSString *l = [localPath stringByAppendingPathComponent:cur];
-		if ([myFileManager fileExistsAtPath:r isDirectory:&isDir] && isDir)
-		{
-			[myFileManager recursivelyCreateDirectory:r attributes:nil];
-		}
-		else
-		{
-			CKTransferRecord *rec = [self downloadFile:r toDirectory:[l stringByDeletingLastPathComponent] overwrite:flag delegate:nil];
-			[CKTransferRecord mergeTextPathRecord:rec withRoot:root];
-		}
-	}	
-	[self setState:CKConnectionIdleState];
-}
-
-- (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
-									   to:(NSString *)localPath
-								overwrite:(BOOL)flag
-{
-	CKTransferRecord *root = [CKTransferRecord rootRecordWithPath:remotePath];
-	NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:root, @"record", remotePath, @"remote", localPath, @"local", [NSNumber numberWithBool:flag], @"overwrite", nil];
-	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedRecursivelyDownload:)
-													  target:self
-												   arguments:[NSArray arrayWithObject:ui]];
-	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
-											 awaitState:CKConnectionIdleState
-											  sentState:CKConnectionDownloadingFileState
-											  dependant:nil
-											   userInfo:nil];
-	[self queueCommand:cmd];
-	return root;
-}
+//- (void)threadedRecursivelyDownload:(NSDictionary *)ui
+//{
+//	CKTransferRecord *root = [ui objectForKey:@"record"];
+//	NSString *remotePath = [ui objectForKey:@"remote"];
+//	NSString *localPath = [ui objectForKey:@"local"];
+//	BOOL flag = [[ui objectForKey:@"overwrite"] boolValue];
+//	NSEnumerator *e = [[myFileManager subpathsAtPath:remotePath] objectEnumerator];
+//	NSString *cur;
+//	BOOL isDir;
+//	
+//	while ((cur = [e nextObject]))
+//	{
+//		NSString *r = [remotePath stringByAppendingPathComponent:cur];
+//		NSString *l = [localPath stringByAppendingPathComponent:cur];
+//		if ([myFileManager fileExistsAtPath:r isDirectory:&isDir] && isDir)
+//		{
+//			[myFileManager recursivelyCreateDirectory:r attributes:nil];
+//		}
+//		else
+//		{
+//			CKTransferRecord *rec = [self downloadFile:r toDirectory:[l stringByDeletingLastPathComponent] overwrite:flag delegate:nil];
+//			[CKTransferRecord mergeTextPathRecord:rec withRoot:root];
+//		}
+//	}	
+//	[self setState:CKConnectionIdleState];
+//}
+//
+//- (CKTransferRecord *)recursivelyDownload:(NSString *)remotePath
+//									   to:(NSString *)localPath
+//								overwrite:(BOOL)flag
+//{
+//	CKTransferRecord *root = [CKTransferRecord rootRecordWithPath:remotePath];
+//	NSDictionary *ui = [NSDictionary dictionaryWithObjectsAndKeys:root, @"record", remotePath, @"remote", localPath, @"local", [NSNumber numberWithBool:flag], @"overwrite", nil];
+//	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedRecursivelyDownload:)
+//													  target:self
+//												   arguments:[NSArray arrayWithObject:ui]];
+//	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
+//											 awaitState:CKConnectionIdleState
+//											  sentState:CKConnectionDownloadingFileState
+//											  dependant:nil
+//											   userInfo:nil];
+//	[self queueCommand:cmd];
+//	return root;
+//}
 
 
 #pragma mark -
@@ -875,4 +882,3 @@ checkRemoteExistence:(NSNumber *)check;
 }
 
 @end
-#endif
