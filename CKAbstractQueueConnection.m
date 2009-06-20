@@ -75,6 +75,15 @@ NSString *CKQueueDomain = @"Queuing";
 		_emptyDirectoriesToDelete = [[NSMutableArray alloc] init];
 		_filesToDelete = [[NSMutableArray alloc] init];
 		_recursiveDeletionLock = [[NSLock alloc] init];		
+		
+		_fileCheckLock = [[NSLock alloc] init];
+		
+		_recursiveS3RenamesQueue = [[NSMutableArray alloc] init];
+		_recursivelyRenamedDirectoriesToDelete = [[NSMutableArray alloc] init];
+		_recursiveS3RenameLock = [[NSLock alloc] init];
+		
+		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
+		_recursiveDownloadLock = [[NSLock alloc] init];		
 	}
 	return self;
 }
@@ -100,6 +109,22 @@ NSString *CKQueueDomain = @"Queuing";
 	[_emptyDirectoriesToDelete release];
 	[_filesToDelete release];
 	[_recursiveDeletionLock release];	
+	
+	[_fileCheckingConnection setDelegate:nil];
+	[_fileCheckingConnection forceDisconnect];
+	[_fileCheckingConnection release];
+	[_fileCheckLock release];
+	[_fileCheckInFlight release];
+	
+	[_recursiveS3RenameLock release];
+	[_recursiveS3RenamesQueue release];
+	[_recursivelyRenamedDirectoriesToDelete release];
+	
+	[_recursiveDownloadConnection setDelegate:nil];
+	[_recursiveDownloadConnection forceDisconnect];
+	[_recursiveDownloadConnection release];
+	[_recursiveDownloadQueue release];
+	[_recursiveDownloadLock release];	
 	
 	[super dealloc];
 }
@@ -149,13 +174,29 @@ NSString *CKQueueDomain = @"Queuing";
 - (void)threadedDisconnect
 {
 	[self emptyAllQueues];
+	[_fileCheckingConnection disconnect];
+	[_recursiveDeletionConnection disconnect];
+	[_recursiveDownloadConnection disconnect];
+	[_recursiveS3RenameConnection disconnect];
 	[super threadedDisconnect];
 }
 
 - (void)threadedForceDisconnect
 {
 	[self emptyAllQueues];
+	[_fileCheckingConnection forceDisconnect];
+	[_recursiveDeletionConnection forceDisconnect];
+	[_recursiveDownloadConnection forceDisconnect];
+	[_recursiveS3RenameConnection forceDisconnect];
 	[super threadedForceDisconnect];
+}
+
+- (void)cleanupConnection
+{
+	[_fileCheckingConnection cleanupConnection];
+	[_recursiveDeletionConnection cleanupConnection];
+	[_recursiveDownloadConnection cleanupConnection];
+	[_recursiveS3RenameConnection cleanupConnection];
 }
 
 - (void)threadedCancelAll
@@ -168,7 +209,9 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (BOOL)isBusy
 {
-	return ([self numberOfCommands] + [self numberOfDeletions] + [self numberOfPermissionChanges] + [self numberOfTransfers]) > 0;
+	BOOL isLocallyBusy = ([self numberOfCommands] + [self numberOfDeletions] + [self numberOfPermissionChanges] + [self numberOfTransfers]) > 0;
+	BOOL peerConnectionsAreBusy = ([_recursiveDownloadConnection isBusy] || [_recursiveDeletionConnection isBusy] || [_fileCheckingConnection isBusy]);
+	return (isLocallyBusy || peerConnectionsAreBusy);
 }
 
 #pragma mark -
