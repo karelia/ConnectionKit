@@ -39,7 +39,8 @@
 
 - (id)init
 {
-	if (self = [super init]) {
+	if (self = [super init])
+	{
 		lock = [[NSRecursiveLock alloc] init];
 		createdOnThread = [NSThread currentThread];
 		[NSThread prepareForConnectionInterThreadMessages];
@@ -101,43 +102,43 @@
 {
 	[lock lock];
 	SEL aSelector = [anInvocation selector];
-	if ([myDelegate respondsToSelector:aSelector])
-	{
-		[anInvocation retainArguments];
+	if (![myDelegate respondsToSelector:aSelector])
+		return;
+	[anInvocation retainArguments];
 
-		if ([[anInvocation methodSignature] methodReturnLength] == 0)
+	if ([[anInvocation methodSignature] methodReturnLength] == 0)
+	{
+		if (useMainThread)
 		{
-			if (useMainThread)
-			{
-				[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:)
-											   withObject:myDelegate
-											waitUntilDone:NO];
-			}
-			else if ([NSThread currentThread] == createdOnThread)
-			{
-				[anInvocation performSelector:@selector(invokeWithTarget:)
-								   withObject:myDelegate];
-			}
-			else
-			{
-				[anInvocation performSelector:@selector(invokeWithTarget:)
-								   withObject:myDelegate
-									 inThread:createdOnThread];
-			}
-		} 
-		else 
-		{
-			//we need to get the return value
-			unsigned int length = [[anInvocation methodSignature] methodReturnLength];
-			void * buffer = (void *)malloc(length);
-			[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:) 
-										   withObject:myDelegate 
-										waitUntilDone:YES];
-			[anInvocation getReturnValue:buffer];
-			[returnValueDelegate runloopForwarder:self returnedValue:buffer];
-			free (buffer);
+			[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:)
+										   withObject:myDelegate
+										waitUntilDone:NO];
 		}
+		else if ([NSThread currentThread] == createdOnThread)
+		{
+			[anInvocation performSelector:@selector(invokeWithTarget:)
+							   withObject:myDelegate];
+		}
+		else
+		{
+			[anInvocation performSelector:@selector(invokeWithTarget:)
+							   withObject:myDelegate
+								 inThread:createdOnThread];
+		}
+	} 
+	else 
+	{
+		//we need to get the return value
+		unsigned int length = [[anInvocation methodSignature] methodReturnLength];
+		void * buffer = (void *)malloc(length);
+		[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:) 
+									   withObject:myDelegate 
+									waitUntilDone:YES];
+		[anInvocation getReturnValue:buffer];
+		[returnValueDelegate runloopForwarder:self returnedValue:buffer];
+		free (buffer);
 	}
+	
 	[lock unlock];
 }
 
