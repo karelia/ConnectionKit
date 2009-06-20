@@ -456,6 +456,10 @@ NSDictionary *sDataAttributes = nil;
 	NSString *destinationRemotePath = [remoteDirectoryPath stringByAppendingPathComponent:[localPath lastPathComponent]];
 	if (!isDirectory)
 	{
+		//Don't upload hidden files if we're not supposed to.
+		if (ignoreHiddenItemsFlag && [[localPath lastPathComponent] hasPrefix:@"."])
+			return nil;
+		
 		//We're uploading a file.
 		return [self _uploadFile:localPath
 						 toFile:destinationRemotePath
@@ -494,6 +498,10 @@ NSDictionary *sDataAttributes = nil;
 	NSString *thisFilename;
 	while ((thisFilename = [directoryContentsEnumerator nextObject]))
 	{
+		//Don't upload hidden files if we're not supposed to.
+		if (ignoreHiddenItemsFlag && [thisFilename hasPrefix:@"."])
+			continue;
+		
 		NSString *thisLocalPath = [localPath stringByAppendingPathComponent:thisFilename];
 		NSString *thisRemotePath = [remoteDirectoryPath stringByAppendingPathComponent:thisFilename];
 		
