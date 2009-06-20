@@ -669,50 +669,6 @@
 	[super contentsOfDirectory:[self webDAVPathForIDiskPath:dirPath]];
 }
 
-- (void)checkExistenceOfPath:(NSString *)path
-{
-	NSAssert(path && ![path isEqualToString:@""], @"no path specified");
-	NSString *dir = [self webDAVPathForIDiskPath:[path stringByDeletingLastPathComponent]];
-	
-	//if we pass in a relative path (such as xxx.tif), then the last path is @"", with a length of 0, so we need to add the current directory
-	//according to docs, passing "/" to stringByDeletingLastPathComponent will return "/", conserving a 1 size
-	
-	if (!dir || [dir length] == 0)
-	{
-		path = [[self currentDirectory] stringByAppendingPathComponent:path];
-	}
-	
-	[self queueFileCheck:path];
-	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processFileCheckingQueue];
-}
-
-- (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath;
-{
-    NSString *name = [_fileCheckInFlight lastPathComponent];
-    NSEnumerator *e = [contents objectEnumerator];
-    NSDictionary *cur;
-    BOOL foundFile = NO;
-    
-    while (cur = [e nextObject]) 
-    {
-        if ([[cur objectForKey:cxFilenameKey] isEqualToString:name]) 
-        {
-            [[self client] connectionDidCheckExistenceOfPath:_fileCheckInFlight pathExists:YES error:nil];
-            foundFile = YES;
-            break;
-        }
-    }
-    if (!foundFile)
-    {
-        [[self client] connectionDidCheckExistenceOfPath:_fileCheckInFlight pathExists:NO error:nil];
-    }
-	
-	[self dequeueFileCheck];
-	[_fileCheckInFlight autorelease];
-	_fileCheckInFlight = nil;
-	[self performSelector:@selector(processFileCheckingQueue) withObject:nil afterDelay:0.0];
-}
-
 #pragma mark authentication
 
 /*	Pull a proposed credential from the user's MobileMe account instead of credential storage
