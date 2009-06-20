@@ -260,6 +260,13 @@ NSString *CKQueueDomain = @"Queuing";
 
 - (void)recursivelyDeleteDirectory:(NSString *)path
 {
+	//Don't perform recursive deletion on WebDAV or MobileMe.
+	if ([self connectionProtocol] == CKWebDAVProtocol || [self connectionProtocol] == CKMobileMeProtocol)
+	{
+		//WebDAV and MobileMe (as WebDAV derived) both support deletion of directories that have contents. No need for recursive deletion here!
+		[self deleteDirectory:path];
+		return;
+	}
 	[_recursiveDeletionLock lock];
 	[_recursiveDeletionsQueue addObject:[path stringByStandardizingPath]];
 	[_recursiveDeletionLock unlock];	
