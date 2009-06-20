@@ -118,6 +118,7 @@ extern NSString *CKQueueDomain;
 	} myQueueFlags;
     BOOL                _isRecursiveUploading;
 	
+	@private
 	//Recursive Deletion
 	NSMutableArray *_recursiveDeletionsQueue;
 	id previousDelegate;
@@ -211,10 +212,3 @@ extern NSString *CKQueueDomain;
 - (NSString *)queueDescription;
 
 @end
-
-//Upload/Download Queue Keys
-extern NSString *CKQueueDownloadDestinationFileKey;
-extern NSString *CKQueueDownloadRemoteFileKey;
-extern NSString *CKQueueUploadLocalDataKey;
-extern NSString *CKQueueUploadOffsetKey;
-extern NSString *CKQueueDownloadTransferPercentReceived;

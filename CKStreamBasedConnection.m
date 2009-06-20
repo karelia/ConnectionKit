@@ -104,16 +104,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.sslOn = NO;
 		myStreamFlags.allowsBadCerts = NO;
 		myStreamFlags.initializedSSL = NO;
-		
-		_fileCheckLock = [[NSLock alloc] init];
-		
-		_recursiveS3RenamesQueue = [[NSMutableArray alloc] init];
-		_recursivelyRenamedDirectoriesToDelete = [[NSMutableArray alloc] init];
-		_recursiveS3RenameLock = [[NSLock alloc] init];
-				
-		_recursiveDownloadQueue = [[NSMutableArray alloc] init];
-		_recursiveDownloadLock = [[NSLock alloc] init];
-		
+			
 		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
 		
 		[NSThread prepareForConnectionInterThreadMessages];
@@ -140,21 +131,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	[_sendBufferLock release];
 	[_sendBuffer release];
-	[_fileCheckingConnection setDelegate:nil];
-	[_fileCheckingConnection forceDisconnect];
-	[_fileCheckingConnection release];
-	[_fileCheckLock release];
-	[_fileCheckInFlight release];
-	
-	[_recursiveS3RenameLock release];
-	[_recursiveS3RenamesQueue release];
-	[_recursivelyRenamedDirectoriesToDelete release];
-	
-	[_recursiveDownloadConnection setDelegate:nil];
-	[_recursiveDownloadConnection forceDisconnect];
-	[_recursiveDownloadConnection release];
-	[_recursiveDownloadQueue release];
-	[_recursiveDownloadLock release];
 	
 	[super dealloc];
 }
@@ -399,17 +375,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:con];
-	[_fileCheckingConnection disconnect];
 }
 
 - (void)threadedDisconnect
 {
 	[self setState:CKConnectionNotConnectedState];
 	[self closeStreams];
-	[_fileCheckingConnection disconnect];
-	[_recursiveDeletionConnection disconnect];
-	[_recursiveDownloadConnection disconnect];
-	
 	[super threadedDisconnect];
 }
 
@@ -426,21 +397,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	[self setState:CKConnectionNotConnectedState];
 	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedForceDisconnect];
-	[_fileCheckingConnection forceDisconnect];
-	[_recursiveDeletionConnection forceDisconnect];
-	[_recursiveDownloadConnection forceDisconnect];
-}
-
-- (void) cleanupConnection
-{
-	[_fileCheckingConnection cleanupConnection];
-	[_recursiveDeletionConnection cleanupConnection];
-	[_recursiveDownloadConnection cleanupConnection];
-}
-
-- (BOOL)isBusy
-{
-	return ([super isBusy] || [_recursiveDownloadConnection isBusy] || [_recursiveDeletionConnection isBusy] || [_fileCheckingConnection isBusy]); 
 }
 
 #pragma mark -
