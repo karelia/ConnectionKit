@@ -317,6 +317,7 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 		myQueueFlags.isDownloading = YES;
 		CKTransferRecord *record = [_recursiveDownloadQueue objectAtIndex:0];
 		_numberOfDownloadListingsRemaining++;
+		[record setIsDiscoveringFilesToDownload:YES];
 		[_recursiveDownloadConnection changeToDirectory:[record remotePath]];
 		[_recursiveDownloadConnection directoryContents];
 	}
@@ -330,8 +331,8 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 	CKTransferRecord *rec = [CKTransferRecord downloadRecordForConnection:self
 														 sourceRemotePath:remotePath
 													 destinationLocalPath:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
-																	 size:0];
-	
+																	 size:0 
+															  isDirectory:YES];
 	[rec setProperty:[NSNumber numberWithBool:flag] forKey:CKRecursiveDownloadShouldOverwriteExistingFilesKey];
 
 	[_recursiveDownloadLock lock];
@@ -799,12 +800,25 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 		NSString *thisListingLocalPath = [localPath stringByAppendingPathComponent:relativeRemotePath];
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:thisListingLocalPath attributes:nil];
 		
-		CKTransferRecord *thisDirectoryRecord = [CKTransferRecord downloadRecordForConnection:self
+		CKTransferRecord *thisDirectoryRecord;
+		//If this is the root listing, there is no parent. Items are added directly to this.
+		if ([dirPath isEqualToString:[rootTransferRecord remotePath]])
+			thisDirectoryRecord = rootTransferRecord;
+		else
+		{
+			//A subpath of the root deletion listing.
+			thisDirectoryRecord = [CKTransferRecord downloadRecordForConnection:self
 																			 sourceRemotePath:dirPath
 																		 destinationLocalPath:thisListingLocalPath
-																						 size:0];
-		CKTransferRecord *thisDirectoryParentRecord = [rootTransferRecord childTransferRecordForRemotePath:[dirPath stringByDeletingLastPathComponent]];
-		[thisDirectoryParentRecord addChild:thisDirectoryRecord];
+																						 size:0 
+																				  isDirectory:YES];
+			//Find the parent of this directory
+			CKTransferRecord *thisDirectoryParentRecord = [rootTransferRecord childTransferRecordForRemotePath:[dirPath stringByDeletingLastPathComponent]];
+			
+			//Add this directory to its parent
+			[thisDirectoryParentRecord addChild:thisDirectoryRecord];
+		}
+		
 		
 		NSEnumerator *directoryContentsEnumerator = [contents objectEnumerator];
 		CKDirectoryListingItem *listingItem;
@@ -829,6 +843,7 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 				[thisDirectoryRecord addChild:down];
 			}
 		}
+				
 		if (_numberOfDownloadListingsRemaining == 0)
 		{
             [_recursiveDownloadLock lock];
@@ -836,6 +851,9 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 			
 			//If we were downloading an empty folder, make sure to mark it as complete.
 			CKTransferRecord *rootTransferRecord = [_recursiveDownloadQueue objectAtIndex:0];
+			[rootTransferRecord setIsDiscoveringFilesToDownload:NO];
+			
+			//If it has no children (nothing to download), it's finished.
 			if ([[rootTransferRecord children] count] == 0)
 				[rootTransferRecord transferDidFinish:rootTransferRecord error:nil];
 			
@@ -845,7 +863,11 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 			if ([_recursiveDownloadQueue count] > 0)
 				[self performSelector:@selector(processRecursiveDownloadingQueue) withObject:nil afterDelay:0.0];
 			else
+			{
+				//Finished recursively downloading
 				[self restoreRecursiveDownloadingDelegate];
+				[_recursiveDownloadConnection disconnect];
+			}
 		}
 	}
 	else if (con == _recursiveS3RenameConnection)
@@ -1014,7 +1036,7 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 			}
 			else
 			{
-				[con disconnect];
+				[_recursiveS3RenameConnection disconnect];
 				[[self client] connectionDidRename:fromDirectoryPath to:toDirectoryPath error:nil];
 			}
 		}
