@@ -633,7 +633,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForConnection:self 
 															 sourceLocalPath:localPath
 													   destinationRemotePath:remotePath
-																		size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+																		size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue] 
+																 isDirectory:NO];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
@@ -674,7 +675,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForConnection:self
 															 sourceLocalPath:@""
 													   destinationRemotePath:remotePath
-																		size:[data length]];
+																		size:[data length] 
+																 isDirectory:NO];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
 																		  offset:0
@@ -707,7 +709,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	CKTransferRecord *transfer = [CKTransferRecord downloadRecordForConnection:self
 															  sourceRemotePath:remotePath
 														  destinationLocalPath:localPath
-																		  size:0];
+																		  size:0 
+																   isDirectory:NO];
 	CKInternalTransferRecord *record = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
 																		  offset:0
