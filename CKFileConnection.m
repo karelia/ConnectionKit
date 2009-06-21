@@ -746,12 +746,24 @@ checkRemoteExistence:(NSNumber *)check;
 	NSEnumerator *e = [array objectEnumerator];
 	NSString *cur;
 	
-	while (cur = [e nextObject]) {
+	while (cur = [e nextObject])
+	{
 		NSString *file = [NSString stringWithFormat:@"%@/%@", dirPath, cur];
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[myFileManager fileAttributesAtPath:file
-																								 traverseLink:NO]];
-		[attribs setObject:cur forKey:cxFilenameKey];
-		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
+		NSDictionary *localAttributes = [myFileManager fileAttributesAtPath:file traverseLink:NO];
+		
+		CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
+		[item setFilename:cur];
+		[item setFileType:[localAttributes objectForKey:NSFileType]];
+		[item setReferenceCount:[[localAttributes objectForKey:NSFileReferenceCount] unsignedLongValue]];
+		[item setModificationDate:[localAttributes objectForKey:NSFileModificationDate]];
+		[item setCreationDate:[localAttributes objectForKey:NSFileCreationDate]];
+		[item setSize:[localAttributes objectForKey:NSFileSize]];
+		[item setFileOwnerAccountName:[localAttributes objectForKey:NSFileOwnerAccountName]];
+		[item setGroupOwnerAccountName:[localAttributes objectForKey:NSFileGroupOwnerAccountName]];
+		[item setPosixPermissions:[localAttributes objectForKey:NSFilePosixPermissions]];
+		
+		if ([item isSymbolicLink])
+		{
 			NSString *target = [file stringByResolvingSymlinksInPath];
 			BOOL isDir;
 			[myFileManager fileExistsAtPath:target isDirectory:&isDir];
@@ -759,10 +771,10 @@ checkRemoteExistence:(NSNumber *)check;
 			{
 				target = [target stringByAppendingString:@"/"];
 			}
-			[attribs setObject:target forKey:cxSymbolicLinkTargetKey];
+			[item setSymbolicLinkTarget:target];
 		}
 		
-		[packaged addObject:attribs];
+		[packaged addObject:item];
 	}
 	
 	[[self client] connectionDidReceiveContents:packaged ofDirectory:dirPath error:nil];

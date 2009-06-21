@@ -27,14 +27,14 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #import <Foundation/Foundation.h>
-
+#import "CKAbstractConnection.h"
 
 @interface NSFileManager (Connection)
 
 + (NSString *)_dateStringFromListing:(NSString *)listing;
-+ (NSArray *)attributedFilesFromListing:(NSString *)line;
-+ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes;
-+ (void)parsePermissions:(NSString *)perm withAttributes:(NSMutableDictionary *)attributes;
++ (NSArray *)directoryListingItemsFromListing:(NSString *)line;
++ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words forDirectoryListingItem:(CKDirectoryListingItem *)item;
++ (void)parsePermissions:(NSString *)perm forDirectoryListingItem:(CKDirectoryListingItem *)item;
 
 - (void)recursivelyCreateDirectory:(NSString *)path attributes:(NSDictionary *)attributes;
 - (unsigned long long)sizeOfPath:(NSString *)path;

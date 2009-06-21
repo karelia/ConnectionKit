@@ -234,11 +234,11 @@ NSString *S3PathSeparator = @":";
 						NSString *name = [[[cur elementsForName:@"Name"] objectAtIndex:0] stringValue];
 						NSString *date = [[[cur elementsForName:@"CreationDate"] objectAtIndex:0] stringValue];
 						
-						NSMutableDictionary *d = [NSMutableDictionary dictionary];
-						[d setObject:name forKey:cxFilenameKey];
-						[d setObject:[NSCalendarDate calendarDateWithZuluFormat:date] forKey:NSFileCreationDate];
-						[d setObject:NSFileTypeDirectory forKey:NSFileType];
-						[contents addObject:d];
+						CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
+						[item setFilename:name];
+						[item setModificationDate:[NSCalendarDate calendarDateWithZuluFormat:date]];
+						[item setFileType:NSFileTypeDirectory];
+						[contents addObject:item];
 					}
 				}
 				
@@ -276,28 +276,28 @@ NSString *S3PathSeparator = @":";
 					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
 					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
 					
-					NSMutableDictionary *d = [NSMutableDictionary dictionary];				
+					CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 					
 					if ([name hasSuffix:@"/"])
 					{
 						name = [name substringToIndex:[name length] - 1];
-						[d setObject:NSFileTypeDirectory forKey:NSFileType];
+						[item setFileType:NSFileTypeDirectory];
 					}
 					else
 					{
-						[d setObject:NSFileTypeRegular forKey:NSFileType];
+						[item setFileType:NSFileTypeRegular];
 					}
 					
 					if ([name isEqualToString:@""]) continue; // skip current path name that is returned in results
 					
-					[d setObject:name forKey:cxFilenameKey];
-					[d setObject:[NSCalendarDate calendarDateWithZuluFormat:date] forKey:NSFileModificationDate];
-					[d setObject:class forKey:S3StorageClassKey];
+					[item setFilename:name];
+					[item setModificationDate:[NSCalendarDate calendarDateWithZuluFormat:date]];
+					[item setProperty:class forKey:S3StorageClassKey];
 					NSScanner *scanner = [NSScanner scannerWithString:size];
 					long long filesize;
 					[scanner scanLongLong:&filesize];
-					[d setObject:[NSNumber numberWithLongLong:filesize] forKey:NSFileSize];
-					[contents addObject:d];
+					[item setSize:[NSNumber numberWithLongLong:filesize]];
+					[contents addObject:item];
 				}
 				
 				if (isTruncated)

@@ -1110,17 +1110,17 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 		if (![cur isDirectory])
 		{
 			NSEnumerator *g = [contents objectEnumerator];
-			NSDictionary *file;
+			CKDirectoryListingItem *file;
 			BOOL didFind = NO;
 			while ((file = [g nextObject]))
 			{
-				NSString *filename = [file objectForKey:cxFilenameKey];
+				NSString *filename = [file filename];
 				if ([filename isEqualToString:[cur name]])
 				{
 					[myPathsToVerify removeObject:[cur path]];
 					didFind = YES;
 					
-					if ([[file objectForKey:NSFileSize] unsignedLongLongValue] > 0)
+					if ([[file size] unsignedLongLongValue] > 0)
 					{
 						KTLog(ControllerDomain, KTLogDebug, @"Verified file transferred %@", [cur path]);
 						break;

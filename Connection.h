@@ -59,6 +59,8 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKFileConnection.h>
 #import <Connection/CKDotMacConnection.h>
 
+#import <Connection/CKDirectoryListingItem.h>
+
 #import <Connection/KTLog.h>
 
 #import <Connection/CKConnectionOpenPanel.h>

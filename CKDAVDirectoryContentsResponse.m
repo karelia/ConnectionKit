@@ -31,6 +31,7 @@
 #import "CKDAVDirectoryContentsResponse.h"
 #import "CKDAVDirectoryContentsRequest.h"
 #import "CKConnectionProtocol.h"
+#import "CKDirectoryListingItem.h"
 #import "NSCalendarDate+Connection.h"
 #import "NSString+Connection.h"
 
@@ -57,7 +58,7 @@
 			
 	while (response = [e nextObject])
 	{
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+		CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 		
 		// filename
 		NSArray *hrefElements = [response elementsForLocalName:@"href" URI:@"DAV:"];
@@ -78,8 +79,8 @@
 		if ([path isEqualToString:@"/"] || [standardizedPathForComparison isEqualToString:standardizedCurrentPathForComparison])
 			continue;
 		
-		[attribs setObject:href forKey:@"DAVURI"];
-		[attribs setObject:[path lastPathComponent] forKey:cxFilenameKey];
+		[item setProperty:href forKey:@"DAVURI"];
+		[item setFilename:[path lastPathComponent]];
 		
 		NSArray *propstatElements = [response elementsForLocalName:@"propstat" URI:@"DAV:"];
 		//We do not always have property elements.
@@ -90,7 +91,7 @@
 			@try {
 				NSString *createdDateString = [[[props elementsForLocalName:@"creationdate" URI:@"DAV:"] objectAtIndex:0] stringValue];
 				NSCalendarDate *created = [NSCalendarDate calendarDateWithString:createdDateString];
-				[attribs setObject:created forKey:NSFileCreationDate];
+				[item setCreationDate:created];
 			} 
 			@catch (NSException *e) {
 				
@@ -99,7 +100,7 @@
 			@try {
 				NSString *modifiedDateString = [[[props elementsForLocalName:@"getlastmodified" URI:@"DAV:"] objectAtIndex:0] stringValue];
 				NSCalendarDate *modified = [NSCalendarDate calendarDateWithString:modifiedDateString];
-				[attribs setObject:modified forKey:NSFileModificationDate];
+				[item setModificationDate:modified];
 			}
 			@catch (NSException *e) {
 				
@@ -114,7 +115,7 @@
 					
 					long long size;
 					[sizeScanner scanLongLong:&size];
-					[attribs setObject:[NSNumber numberWithLongLong:size] forKey:NSFileSize];
+					[item setSize:[NSNumber numberWithLongLong:size]];
 				}
 			}
 			@catch (NSException *e) {
@@ -125,23 +126,23 @@
 			NSXMLElement *resourceType = [[props elementsForLocalName:@"resourcetype" URI:@"DAV:"] objectAtIndex:0];
 			if ([resourceType childCount] == 0)
 			{
-				[attribs setObject:NSFileTypeRegular forKey:NSFileType];
+				[item setFileType:NSFileTypeRegular];
 			}
 			else
 			{
 				// WebDAV does not support the notion of Symbolic Links so currently we can take it to be a directory if the node has any children
-				[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+				[item setFileType:NSFileTypeDirectory];
 			}
 		}
 		else
 		{
 			if ([path hasSuffix:@"/"])
-				[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
+				[item setFileType:NSFileTypeDirectory];
 			else
-				[attribs setObject:NSFileTypeRegular forKey:NSFileType];
+				[item setFileType:NSFileTypeRegular];
 		}
 		
-		[contents addObject:attribs];
+		[contents addObject:item];
 	}
 	return contents;
 }
@@ -150,10 +151,11 @@
 {
 	NSMutableString *s = [NSMutableString stringWithFormat:@"Directory Listing for %@:\n", [self path]];
 	NSEnumerator *e = [[self directoryContents] objectEnumerator];
-	NSDictionary *cur;
+	CKDirectoryListingItem *cur;
+	
 	while (cur = [e nextObject])
 	{
-		[s appendFormat:@"%@\t\t\t%@\n", [cur objectForKey:NSFileModificationDate], [cur objectForKey:cxFilenameKey]];
+		[s appendFormat:@"%@\t\t\t%@\n", [cur modificationDate], [cur filename]];
 	}
 	
 	return s;

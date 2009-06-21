@@ -47,10 +47,6 @@ NSString *CKConnectionAwaitStateKey = @"ConnectionAwaitStateKey";
 NSString *CKConnectionSentStateKey = @"ConnectionSentStateKey";
 NSString *CKConnectionCommandKey = @"ConnectionCommandKey";
 
-// Attributes for which there isn't a corresponding NSFileManager key
-NSString *cxFilenameKey = @"cxFilenameKey";
-NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
-
 // User Info Error Keys
 NSString *ConnectionHostKey = @"ConnectionHostKey";
 NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";

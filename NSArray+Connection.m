@@ -30,7 +30,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 
 #import "NSArray+Connection.h"
 #import "NSObject+Connection.h"
-
+#import "CKDirectoryListingItem.h"
 #import "CKConnectionProtocol.h"
 
 
@@ -105,11 +105,11 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 {
 	NSMutableArray *files = [NSMutableArray array];
 	NSEnumerator *e = [self objectEnumerator];
-	NSDictionary *cur;
+	CKDirectoryListingItem *cur;
 	
 	while ((cur = [e nextObject]))
 	{
-		if (![[[cur objectForKey:cxFilenameKey] lastPathComponent] hasPrefix:@"."])
+		if (![[[cur filename] lastPathComponent] hasPrefix:@"."])
 		{
 			[files addObject:cur];
 		}

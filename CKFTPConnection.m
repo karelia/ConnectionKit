@@ -3514,7 +3514,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (NSArray *)parseLines:(NSString *)line
 {
-	return [NSFileManager attributedFilesFromListing:line];
+	return [NSFileManager directoryListingItemsFromListing:line];
 }
  
 /*!	Support upload method, handles all the gory details

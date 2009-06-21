@@ -519,15 +519,15 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 		scanner = [NSScanner scannerWithString:first];
 		[scanner scanLongLong:&f];
 		
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionary];
+		CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 		
-		[attribs setObject:NSFileTypeDirectory forKey:NSFileType];
-		[attribs setObject:group forKey:cxFilenameKey];
-		[attribs setObject:[NSNumber numberWithLongLong:l] forKey:NNTPLastMessageKey];
-		[attribs setObject:[NSNumber numberWithLongLong:f] forKey:NNTPFirstMessageKey];
-		[attribs setObject:[NSNumber numberWithLongLong:abs(l-f)] forKey:NSFileSize];
-		[attribs setObject:[NSNumber numberWithBool:cp] forKey:NNTPCanPostToGroupKey];
-		[groups addObject:attribs];
+		[item setFileType:NSFileTypeDirectory];
+		[item setFilename:group];
+		[item setSize:[NSNumber numberWithLongLong:abs(l-f)]];
+		[item setObject:[NSNumber numberWithLongLong:l] forKey:NNTPLastMessageKey];
+		[item setObject:[NSNumber numberWithLongLong:f] forKey:NNTPFirstMessageKey];
+		[item setObject:[NSNumber numberWithBool:cp] forKey:NNTPCanPostToGroupKey];
+		[groups addObject:item];
 	}
 	return groups;
 }
