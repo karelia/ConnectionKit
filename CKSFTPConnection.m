@@ -420,7 +420,8 @@ static NSString *lsform = nil;
 	CKTransferRecord *record = [CKTransferRecord uploadRecordForConnection:self
 														   sourceLocalPath:localPath
 													 destinationRemotePath:remotePath
-																	  size:uploadSize];
+																	  size:uploadSize 
+															   isDirectory:NO];
 	id internalTransferRecordDelegate = (delegate) ? delegate : record;
 		
 	CKInternalTransferRecord *internalRecord = [CKInternalTransferRecord recordWithLocal:localPath data:data offset:offset remote:remotePath delegate:internalTransferRecordDelegate userInfo:record];
@@ -474,7 +475,8 @@ static NSString *lsform = nil;
 	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
 															sourceRemotePath:remotePath
 														destinationLocalPath:localPath
-																		size:0];
+																		size:0 
+																 isDirectory:NO];
 	
 	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath
 																							data:nil

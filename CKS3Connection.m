@@ -728,7 +728,8 @@ NSString *S3PathSeparator = @":";
 	CKTransferRecord *rec = [CKTransferRecord uploadRecordForConnection:self
 														sourceLocalPath:localPath
 												  destinationRemotePath:remotePath
-																   size:[[NSFileManager defaultManager] sizeOfPath:localPath]];
+																   size:[[NSFileManager defaultManager] sizeOfPath:localPath] 
+															isDirectory:NO];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
 																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForS3]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
@@ -794,7 +795,8 @@ NSString *S3PathSeparator = @":";
 	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
 															sourceRemotePath:fixedRemotePath
 														destinationLocalPath:localPath
-																		size:0];
+																		size:0 
+																 isDirectory:NO];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0

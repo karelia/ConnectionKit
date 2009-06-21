@@ -3051,7 +3051,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
 															sourceRemotePath:remotePath
 														destinationLocalPath:localPath
-																		size:0];
+																		size:0 
+																 isDirectory:NO];
 								
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
@@ -3126,7 +3127,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKTransferRecord *record = [CKTransferRecord downloadRecordForConnection:self
 															sourceRemotePath:remotePath
 														destinationLocalPath:localPath
-																		size:0];
+																		size:0 
+																 isDirectory:NO];
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:offset
@@ -3565,7 +3567,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKTransferRecord *record = [CKTransferRecord uploadRecordForConnection:self 
 														   sourceLocalPath:localPath
 													 destinationRemotePath:remotePath
-																	  size:uploadSize];
+																	  size:uploadSize 
+															   isDirectory:NO];
 	
 	CKInternalTransferRecord *dict = [CKInternalTransferRecord recordWithLocal:localPath
 																		  data:data

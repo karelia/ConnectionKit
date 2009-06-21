@@ -7,7 +7,12 @@ NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTrans
 NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
 
 @interface CKTransferRecord (PrivateMethods)
-- (id)_initWithConnection:(id <CKConnection>)connection localPath:(NSString *)localPath remotePath:(NSString *)remotePath size:(unsigned long long)size;
+- (id)_initWithConnection:(id <CKConnection>)connection
+				localPath:(NSString *)localPath
+			   remotePath:(NSString *)remotePath
+					 size:(unsigned long long)size 
+				 isUpload:(BOOL)isUploadFlag
+			  isDirectory:(BOOL)isDirectoryFlag;
 - (void)_appendToDescription:(NSMutableString *)str indentation:(unsigned)indent;
 - (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta;
 @end
@@ -21,6 +26,12 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
     [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
 triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
+	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"localPath", @"remotePath", nil] triggerChangeNotificationsForDependentKey:@"name"];
+	
+	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"size"] triggerChangeNotificationsForDependentKey:@"progress"];
+	
+	//While we're discovering files to download, we ARE a leaf. This prevents the user from listing our children while they're being changed!
+	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"isDiscoveringFilesToDownload"]triggerChangeNotificationsForDependentKey:@"isLeaf"];
 }
 
 - (void)willChangeValueForKey:(NSString *)key
@@ -39,6 +50,35 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	
 	if ([self parent])
 		[[self parent] didChangeValueForKey:key];
+}
+
+- (id)copyWithZone:(NSZone *)zone
+{
+	CKTransferRecord *recordCopy = [[CKTransferRecord allocWithZone:zone] _initWithConnection:_connection
+																					localPath:_localPath
+																				   remotePath:_remotePath
+																						 size:_sizeInBytes
+																					 isUpload:_isUpload
+																				  isDirectory:_isDirectory];
+	
+	[recordCopy setError:_error];
+	
+	//Add all the children (recursively)
+	NSEnumerator *childEnumerator = [_children objectEnumerator];
+	CKTransferRecord *child;
+	while ((child = [childEnumerator nextObject]))
+	{
+		CKTransferRecord *childCopy = [child copy]; //Calls this method with a nil zone
+		[recordCopy addChild:childCopy];
+	}
+	
+	//Add all the properties
+	NSEnumerator *propertyKeyEnumerator = [_properties keyEnumerator];
+	id key;
+	while ((key = [propertyKeyEnumerator nextObject]))
+		[recordCopy setProperty:[self propertyForKey:key] forKey:key];
+	
+	return recordCopy;
 }
 
 - (NSString *)description
@@ -63,23 +103,42 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 + (CKTransferRecord *)uploadRecordForConnection:(id <CKConnection>)connection
 									  sourceLocalPath:(NSString *)sourceLocalPath 
 								destinationRemotePath:(NSString *)destinationRemotePath
-												 size:(unsigned long long)size
+										   size:(unsigned long long)size 
+									isDirectory:(BOOL)isDirectoryFlag
 {
-	return [[[CKTransferRecord alloc] _initWithConnection:connection localPath:sourceLocalPath remotePath:destinationRemotePath size:size] autorelease];
+	return [[[CKTransferRecord alloc] _initWithConnection:connection
+												localPath:sourceLocalPath
+											   remotePath:destinationRemotePath
+													 size:size 
+												 isUpload:YES
+											  isDirectory:isDirectoryFlag] autorelease];
 }
 
 + (CKTransferRecord *)downloadRecordForConnection:(id <CKConnection>)connection
 										 sourceRemotePath:(NSString *)sourceRemotePath
 									 destinationLocalPath:(NSString *)destinationLocalPath
 													 size:(unsigned long long)size
+									  isDirectory:(BOOL)isDirectoryFlag
 {
-	return [[[CKTransferRecord alloc] _initWithConnection:connection localPath:destinationLocalPath remotePath:sourceRemotePath size:size] autorelease];
+	return [[[CKTransferRecord alloc] _initWithConnection:connection
+												localPath:destinationLocalPath
+											   remotePath:sourceRemotePath
+													 size:size 
+												 isUpload:NO
+											  isDirectory:isDirectoryFlag] autorelease];
 }		
 
-- (id)_initWithConnection:(id <CKConnection>)connection localPath:(NSString *)localPath remotePath:(NSString *)remotePath size:(unsigned long long)size
+- (id)_initWithConnection:(id <CKConnection>)connection
+				localPath:(NSString *)localPath
+			   remotePath:(NSString *)remotePath
+					 size:(unsigned long long)size 
+				 isUpload:(BOOL)isUploadFlag
+			  isDirectory:(BOOL)isDirectoryFlag
 {
 	if ((self = [super init])) 
 	{
+		_isUpload = isUploadFlag;
+		_isDirectory = isDirectoryFlag;
 		_connection = connection;
 		_localPath = [localPath copy];
 		_remotePath = [remotePath copy];
@@ -88,8 +147,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_error = nil;
 		_progress = 0;
+		
+		return self;
 	}
-	return self;
+	return nil;
 }
 
 
@@ -110,6 +171,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)setLocalPath:(NSString *)newLocalPath
 {
+	//As in +initialize, @"name", is dependent on @"localPath"
 	@synchronized (self)
 	{
 		if (_localPath == newLocalPath)
@@ -133,6 +195,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)setRemotePath:(NSString *)newRemotePath
 {
+	//As in +initialize, @"name", is dependent on @"remotePath"
 	@synchronized (self)
 	{
 		if (_remotePath == newRemotePath)
@@ -171,9 +234,9 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	@synchronized (self)
 	{
+		[self willChangeValueForKey:@"parent"];
 		_parent = parent;
-		if (_parent)
-			[_parent _sizeWithChildrenChangedBy:_sizeInBytes];
+		[self didChangeValueForKey:@"parent"];
 	}
 }
 
@@ -186,6 +249,25 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	return nil;
 }
 
+#pragma mark -
+- (void)setIsDiscoveringFilesToDownload:(BOOL)flag
+{
+	@synchronized (self)
+	{
+		[self willChangeValueForKey:@"isDiscoveringFilesToDownload"];
+		_isDiscoveringFilesToDownload = flag;
+		[self didChangeValueForKey:@"isDiscoveringFilesToDownload"];
+	}
+}
+
+- (BOOL)isDiscoveringFilesToDownload
+{
+	@synchronized (self)
+	{
+		return _isDiscoveringFilesToDownload;
+	}
+	return NO;
+}
 
 #pragma mark -
 - (BOOL)isUpload
@@ -197,7 +279,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	@synchronized (self)
 	{
-		return [_children count] > 0;
+		return _isDirectory;
 	}
 	return NO;
 }
@@ -237,6 +319,8 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		[_children addObject:record];
 		[record setParent:self];
 		[self didChangeValueForKey:@"contents"];
+		
+		[self _sizeWithChildrenChangedBy:[record size]];
 	}
 }
 
@@ -251,20 +335,31 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (CKTransferRecord *)childTransferRecordForRemotePath:(NSString *)remotePath
 {
-	//If the remotePath doesn't have the target prefix, we can't possibly have a child with it.
-	if (![remotePath hasPrefix:[self remotePath]])
-		return nil;
-	
-	NSEnumerator *childrenEnumerator = [_children objectEnumerator];
-	CKTransferRecord *child;
-	while ((child = [childrenEnumerator nextObject]))
+	@synchronized (self)
 	{
-		if ([[child remotePath] isEqualToString:remotePath])
-			return child;
-		if (![remotePath hasPrefix:[child remotePath]])
-			continue;
-		//The target is a child of child.
-		return [child childTransferRecordForRemotePath:remotePath];
+		//Are we actually the record we're supposed to find?
+		if ([remotePath isEqualToString:[self remotePath]])
+			return self;
+		
+		//If the remotePath doesn't have the target prefix, we can't possibly have a child with it.
+		if (![remotePath hasPrefix:[self remotePath]])
+			return nil;
+		
+		NSEnumerator *childrenEnumerator = [_children objectEnumerator];
+		CKTransferRecord *child;
+		while ((child = [childrenEnumerator nextObject]))
+		{
+			//Is one of our children what we're looking for?
+			if ([[child remotePath] isEqualToString:remotePath])
+				return child;
+			
+			//It's not one of children, but if it's one of our children's children, our child will be a prefix of the remotePath
+			if (![remotePath hasPrefix:[child remotePath]])
+				continue;
+			
+			//The target is a child of child.
+			return [child childTransferRecordForRemotePath:remotePath];
+		}
 	}
 	
 	return nil;
@@ -301,9 +396,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark -
 - (void)setSize:(unsigned long long)size
 {
+	//As in +initialize, @"progress" is a dependent key on @"size"
 	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"progress"];
+		[self willChangeValueForKey:@"size"];
 		if (_sizeInBytes != 0)
 		{
 			//We're updating our size. We need to update our parents' sizes too.
@@ -311,7 +407,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			[self _sizeWithChildrenChangedBy:sizeDelta];
 		}
 		_sizeInBytes = size;
-		[self didChangeValueForKey:@"progress"];
+		[self didChangeValueForKey:@"size"];
 	}
 }
 
@@ -325,7 +421,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		
 		//Calculate our size including our children
 		unsigned long long size = _sizeInBytes;
-		NSEnumerator *e = [[self children] objectEnumerator];
+		NSEnumerator *e = [_children objectEnumerator];
 		CKTransferRecord *cur;
 		
 		while ((cur = [e nextObject]))
@@ -347,7 +443,17 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta
 {
+	if (sizeDelta == 0)
+		return;
+	
+	//As soon as pass this point, we only rely on _sizeInBytesWithChildren. So if this is our first use of _sizeInBytesWithChildren, let's make sure it reflects _our_ size too.
+	if (_sizeInBytesWithChildren == 0)
+		_sizeInBytesWithChildren = _sizeInBytes;
+	
+	[self willChangeValueForKey:@"size"];
 	_sizeInBytesWithChildren += sizeDelta;
+	[self didChangeValueForKey:@"size"];
+	
 	if ([self parent])
 		[[self parent] _sizeWithChildrenChangedBy:sizeDelta];
 }
@@ -466,6 +572,9 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			return -1;
 		}
 		
+		if ([self isDiscoveringFilesToDownload])
+			return 0;
+		
 		if ([self isDirectory]) 
 		{
 			//get the real transfer progress of the whole directory
@@ -546,25 +655,29 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark Private Extras
 - (void)_appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
 {
-	NSInteger i;
-	for (i = 0; i < indent; i++)
+	@synchronized (self)
 	{
-		[str appendString:@"\t"];
-	}
-	
-	[str appendFormat:@"\t%@", [self name]];
-	if ([self isDirectory])
-	{
-		[str appendString:@"/"];
-	}
-	[str appendFormat:@"\t(%lld of %lld bytes - %@%%)\n", [self transferred], [self size], [self progress]];
-	
-	NSEnumerator *e = [[self children] objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
-	{
-		[cur _appendToDescription:str indentation:indent+1];
+		NSInteger i;
+		for (i = 0; i < indent; i++)
+		{
+			[str appendString:@"\t"];
+		}
+		
+		[str appendFormat:@"\t%@", [self name]];
+		
+		if ([self isDirectory])
+		{
+			[str appendString:@"/"];
+		}
+		[str appendFormat:@"\t(%llu of %llu bytes - %i%%)\n", [self transferred], [self size], [self progress]];
+		
+		NSEnumerator *e = [_children objectEnumerator];
+		CKTransferRecord *cur;
+		
+		while ((cur = [e nextObject]))
+		{
+			[cur _appendToDescription:str indentation:indent+1];
+		}
 	}
 }
 
@@ -635,7 +748,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark NSTreeController Support
 - (BOOL)isLeaf
 {
-	return ![self isDirectory];
+	@synchronized (self)
+	{
+		return (![self isDirectory] || [self isDiscoveringFilesToDownload]);
+	}
+	return YES;
 }
 
 - (NSDictionary *)nameWithProgress

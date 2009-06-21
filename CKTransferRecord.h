@@ -33,9 +33,11 @@ extern NSString *CKTransferRecordProgressChangedNotification;
 extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
-@interface CKTransferRecord : NSObject
+@interface CKTransferRecord : NSObject <NSCopying>
 {
 	BOOL _isUpload;
+	BOOL _isDirectory;
+	BOOL _isDiscoveringFilesToDownload;
 	NSString *_localPath;
 	NSString *_remotePath;
 	unsigned long long _sizeInBytes;
@@ -57,14 +59,15 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 }
 
 /**
-	@method uploadRecordForConnection:sourceLocalPath:destinationRemotePath:size:
+	@method uploadRecordForConnection:sourceLocalPath:destinationRemotePath:size:isDirectory:
 	@abstract The designed initializer for upload records.
 	@result A transfer-record representing the transfer.
  */
 + (CKTransferRecord *)uploadRecordForConnection:(id <CKConnection>)connection
-									  sourceLocalPath:(NSString *)sourceLocalPath 
-								destinationRemotePath:(NSString *)destinationRemotePath
-												 size:(unsigned long long)size;
+								sourceLocalPath:(NSString *)sourceLocalPath 
+						  destinationRemotePath:(NSString *)destinationRemotePath
+										   size:(unsigned long long)size 
+									isDirectory:(BOOL)isDirectoryFlag;
 
 /**
 	@method downloadRecordForConnection:sourceRemotePath:destinationLocalPath:size:
@@ -72,9 +75,10 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 	@result A transfer-record representing the transfer.
  */
 + (CKTransferRecord *)downloadRecordForConnection:(id <CKConnection>)connection
-										 sourceRemotePath:(NSString *)sourceRemotePath
-									 destinationLocalPath:(NSString *)destinationLocalPath
-													 size:(unsigned long long)size;
+								 sourceRemotePath:(NSString *)sourceRemotePath
+							 destinationLocalPath:(NSString *)destinationLocalPath
+											 size:(unsigned long long)size
+									  isDirectory:(BOOL)isDirectoryFlag;
 
 - (CKTransferRecord *)root;
 - (void)setParent:(CKTransferRecord *)parent;
@@ -85,6 +89,13 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 - (NSString *)localPath;
 - (void)setRemotePath:(NSString *)newRemotePath;
 - (NSString *)remotePath;
+
+- (void)setIsDiscoveringFilesToDownload:(BOOL)flag;
+/**
+	@method isDiscoveringFilesToDownload
+	@abstract An indicator of whether or not the receiver is in the process of discovering files (recursively) to download.
+ */
+- (BOOL)isDiscoveringFilesToDownload;
 
 - (BOOL)isUpload;
 - (BOOL)isDirectory;
