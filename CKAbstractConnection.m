@@ -491,7 +491,8 @@ NSDictionary *sDataAttributes = nil;
 	CKTransferRecord *thisDirectoryRecord = [CKTransferRecord uploadRecordForConnection:self
 																		sourceLocalPath:localPath
 																  destinationRemotePath:remoteDirectoryPath
-																				   size:0];
+																				   size:0 
+																			isDirectory:YES];
 	if (parentRecord)
 		[parentRecord addChild:thisDirectoryRecord];
 	
