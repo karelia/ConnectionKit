@@ -95,6 +95,13 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 - (void)addChild:(CKTransferRecord *)record;
 - (NSArray *)children;
+/**
+	@method childTransferRecordForRemotePath:
+	@abstract Fetches the child transfer record that corresponds to the provided path.
+	@param remotePath The remote path of a transfer record.
+	@result The transfer record corresponding to remotePath
+ */
+- (CKTransferRecord *)childTransferRecordForRemotePath:(NSString *)remotePath;
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;

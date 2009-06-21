@@ -97,89 +97,127 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark Core
 - (NSString *)name
 {
-	//There is no reason _localPath or _remotePath should either, EVER, be nil, but if they are, fall back on one another.
-	if (_localPath)
-		return [_localPath lastPathComponent];
-	if (_remotePath)
-		return [_remotePath lastPathComponent];
+	@synchronized (self)
+	{
+		//There is no reason _localPath or _remotePath should either, EVER, be nil, but if they are, fall back on one another.
+		if (_localPath)
+			return [_localPath lastPathComponent];
+		if (_remotePath)
+			return [_remotePath lastPathComponent];
+	}
 	return nil;
 }
 
 - (void)setLocalPath:(NSString *)newLocalPath
 {
-	if (_localPath == newLocalPath)
-		return;
-	
-	[self willChangeValueForKey:@"localPath"];
-	[_localPath release];
-	_localPath = [newLocalPath copy];
-	[self didChangeValueForKey:@"localPath"];
+	@synchronized (self)
+	{
+		if (_localPath == newLocalPath)
+			return;
+		
+		[self willChangeValueForKey:@"localPath"];
+		[_localPath release];
+		_localPath = [newLocalPath copy];
+		[self didChangeValueForKey:@"localPath"];
+	}
 }
 
 - (NSString *)localPath
 {
-	return [NSString stringWithString:_localPath];
+	@synchronized (self)
+	{
+		return [NSString stringWithString:_localPath];
+	}
+	return nil;
 }
 
 - (void)setRemotePath:(NSString *)newRemotePath
 {
-	if (_remotePath == newRemotePath)
-		return;
-	
-	[self willChangeValueForKey:@"remotePath"];
-	[_remotePath release];
-	_remotePath = [newRemotePath copy];
-	[self didChangeValueForKey:@"remotePath"];
+	@synchronized (self)
+	{
+		if (_remotePath == newRemotePath)
+			return;
+		
+		[self willChangeValueForKey:@"remotePath"];
+		[_remotePath release];
+		_remotePath = [newRemotePath copy];
+		[self didChangeValueForKey:@"remotePath"];
+	}
 }
 
 - (NSString *)remotePath
 {
-	return [NSString stringWithString:_remotePath];
+	@synchronized (self)
+	{
+		return [NSString stringWithString:_remotePath];
+	}
+	return nil;
 }
 
 - (CKTransferRecord *)root
 {
-	if (_parent)
+	@synchronized (self)
 	{
-		return [_parent root];
+		if (_parent)
+		{
+			return [_parent root];
+		}
+		return self;
 	}
-	return self;
+	return nil;
 }
 
 - (void)setParent:(CKTransferRecord *)parent
 {
-	_parent = parent;
-	if (_parent)
-		[_parent _sizeWithChildrenChangedBy:_sizeInBytes];
+	@synchronized (self)
+	{
+		_parent = parent;
+		if (_parent)
+			[_parent _sizeWithChildrenChangedBy:_sizeInBytes];
+	}
 }
 
 - (CKTransferRecord *)parent
 {
-	return _parent;
+	@synchronized (self)
+	{
+		return _parent;
+	}
+	return nil;
 }
 
 
 #pragma mark -
 - (BOOL)isUpload
 { 
-	//Placeholder implemenation for CKUploadTransferRecord and CKDownloadTransferRecord
-	return NO;
+	return _isUpload;
 }
 
 - (BOOL)isDirectory
 {
-	return [_children count] > 0;
+	@synchronized (self)
+	{
+		return [_children count] > 0;
+	}
+	return NO;
 }
 
 #pragma mark -
 - (void)setConnection:(id <CKConnection>)connection
 {
-	_connection = connection;
+	@synchronized (self)
+	{
+		_connection = connection;
+	}
 }
 
 - (id <CKConnection>)connection
 {
-	return _connection;
+	@synchronized (self)
+	{
+		return _connection;
+	}
+	return nil;
 }
 
 - (void)cancel:(id)sender
@@ -193,15 +231,43 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	NSParameterAssert(record);
     
-    [self willChangeValueForKey:@"contents"];
-	[_children addObject:record];
-	[record setParent:self];
-	[self didChangeValueForKey:@"contents"];
+	@synchronized (self)
+	{
+		[self willChangeValueForKey:@"contents"];
+		[_children addObject:record];
+		[record setParent:self];
+		[self didChangeValueForKey:@"contents"];
+	}
 }
 
 - (NSArray *)children
 {
-	return [[_children copy] autorelease];
+	@synchronized (self)
+	{
+		return [[_children copy] autorelease];
+	}
+	return nil;
+}
+
+- (CKTransferRecord *)childTransferRecordForRemotePath:(NSString *)remotePath
+{
+	//If the remotePath doesn't have the target prefix, we can't possibly have a child with it.
+	if (![remotePath hasPrefix:[self remotePath]])
+		return nil;
+	
+	NSEnumerator *childrenEnumerator = [_children objectEnumerator];
+	CKTransferRecord *child;
+	while ((child = [childrenEnumerator nextObject]))
+	{
+		if ([[child remotePath] isEqualToString:remotePath])
+			return child;
+		if (![remotePath hasPrefix:[child remotePath]])
+			continue;
+		//The target is a child of child.
+		return [child childTransferRecordForRemotePath:remotePath];
+	}
+	
+	return nil;
 }
 
 #pragma mark -
@@ -235,42 +301,48 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark -
 - (void)setSize:(unsigned long long)size
 {
-	[self willChangeValueForKey:@"progress"];
-	if (_sizeInBytes != 0)
+	@synchronized (self)
 	{
-		//We're updating our size. We need to update our parents' sizes too.
-		unsigned long long sizeDelta = size - _sizeInBytes;
-		[self _sizeWithChildrenChangedBy:sizeDelta];
+		[self willChangeValueForKey:@"progress"];
+		if (_sizeInBytes != 0)
+		{
+			//We're updating our size. We need to update our parents' sizes too.
+			unsigned long long sizeDelta = size - _sizeInBytes;
+			[self _sizeWithChildrenChangedBy:sizeDelta];
+		}
+		_sizeInBytes = size;
+		[self didChangeValueForKey:@"progress"];
 	}
-	_sizeInBytes = size;
-	[self didChangeValueForKey:@"progress"];
 }
 
 - (unsigned long long)size
 {
-	//Have we already calculated our size with children?
-	if (_sizeInBytesWithChildren != 0)
-		return _sizeInBytesWithChildren;
-	
-	//Calculate our size including our children
-	unsigned long long size = _sizeInBytes;
-	NSEnumerator *e = [[self children] objectEnumerator];
-	CKTransferRecord *cur;
-	
-	while ((cur = [e nextObject]))
+	@synchronized (self)
 	{
-		if ([cur respondsToSelector:@selector(size)])
+		//Have we already calculated our size with children?
+		if (_sizeInBytesWithChildren != 0)
+			return _sizeInBytesWithChildren;
+		
+		//Calculate our size including our children
+		unsigned long long size = _sizeInBytes;
+		NSEnumerator *e = [[self children] objectEnumerator];
+		CKTransferRecord *cur;
+		
+		while ((cur = [e nextObject]))
 		{
-			size += [cur size];
+			if ([cur respondsToSelector:@selector(size)])
+			{
+				size += [cur size];
+			}
+			else
+			{
+				NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
+			}
 		}
-		else
-		{
-			NSLog(@"CKTransferRecord content object does not have 'size'");		// work around bogus children?
-		}
+		_sizeInBytesWithChildren = size;
+		return size;
 	}
-	_sizeInBytesWithChildren = size;
-	
-	return size;
+	return 0;
 }
 
 - (void)_sizeWithChildrenChangedBy:(unsigned long long)sizeDelta
@@ -316,18 +388,21 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			_lastDirectorySpeedUpdate = now;
 			NSTimeInterval elapsedTime = now - _transferStartTime;
 			
-			[self willChangeValueForKey:@"speed"];
-			if (elapsedTime == 0.0)
+			@synchronized (self)
 			{
-				//If we don't catch this, we are effectively dividing by zero below. This would leave _speed as NaN.
-				_speed = 0.0;
+				[self willChangeValueForKey:@"speed"];
+				if (elapsedTime == 0.0)
+				{
+					//If we don't catch this, we are effectively dividing by zero below. This would leave _speed as NaN.
+					_speed = 0.0;
+				}
+				else
+				{
+					unsigned long long transferred = [self transferred];
+					_speed = transferred / elapsedTime;
+				}
+				[self didChangeValueForKey:@"speed"];
 			}
-			else
-			{
-				unsigned long long transferred = [self transferred];
-				_speed = transferred / elapsedTime;
-			}
-			[self didChangeValueForKey:@"speed"];
 		}
 	}
 	return _speed;
@@ -335,11 +410,14 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)setSpeed:(float)speed
 {
-	if (speed != _speed)
+	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"speed"];
-		_speed = speed;
-		[self didChangeValueForKey:@"speed"];
+		if (speed != _speed)
+		{
+			[self willChangeValueForKey:@"speed"];
+			_speed = speed;
+			[self didChangeValueForKey:@"speed"];
+		}
 	}
 }
 
@@ -358,47 +436,58 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)setProgress:(NSInteger)progress
 {
-	if (_progress != progress || progress == 100)
+	@synchronized (self)
 	{
-		if (progress == 100 && _progress == 1)
+		if (_progress != progress || progress == 100)
 		{
-			[self forceAnimationUpdate];
-			return;
+			if (progress == 100 && _progress == 1)
+			{
+				[self forceAnimationUpdate];
+				return;
+			}
+			
+			[self willChangeValueForKey:@"progress"];
+			_progress = progress;
+			[self didChangeValueForKey:@"progress"];
+			
+			
+			[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 		}
-		
-		[self willChangeValueForKey:@"progress"];
-		_progress = progress;
-		[self didChangeValueForKey:@"progress"];
-		
-		
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 	}
 }
 
 - (NSInteger)progress
 {
-	// Check if self or descendents have an error, so we can show that error.
-	if ([self hasError])
+	@synchronized (self)
 	{
-		return -1;
+		// Check if self or descendents have an error, so we can show that error.
+		if ([self hasError])
+		{
+			return -1;
+		}
+		
+		if ([self isDirectory]) 
+		{
+			//get the real transfer progress of the whole directory
+			unsigned long long size = [self size];
+			unsigned long long transferred = [self transferred];
+			if (size == 0) size = 1;
+			NSInteger percent = (NSInteger)((transferred / (size * 1.0)) * 100);
+			return percent;
+		}
+		return _progress;
 	}
-	
-	if ([self isDirectory]) 
-	{
-		//get the real transfer progress of the whole directory
-		unsigned long long size = [self size];
-		unsigned long long transferred = [self transferred];
-		if (size == 0) size = 1;
-		NSInteger percent = (NSInteger)((transferred / (size * 1.0)) * 100);
-		return percent;
-	}
-	return _progress;
+	return 0;
 }
 
 #pragma mark -
 - (NSError *)error
 {
-	return _error;
+	@synchronized (self)
+	{
+		return _error;
+	}
+	return nil;
 }
 
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses
@@ -435,18 +524,21 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)setError:(NSError *)error
 {
-	if (error != _error)
+	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
-		[_error autorelease];
-		_error = [error retain];
-		[self didChangeValueForKey:@"progress"];
-		[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
+		if (error != _error)
+		{
+			[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
+			[_error autorelease];
+			_error = [error retain];
+			[self didChangeValueForKey:@"progress"];
+			[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
+		}
+		
+		//Set the error on all parents, too.
+		if ([self parent])
+			[[self parent] setError:error];
 	}
-	
-	//Set the error on all parents, too.
-	if ([self parent])
-		[[self parent] setError:error];
 }
 
 
