@@ -1,3 +1,4 @@
+#if 0
 /*
  Copyright (c) 2007, Ubermind, Inc
  All rights reserved.
@@ -32,6 +33,7 @@
 #import "CKDirectoryTreeController.h"
 #import "CKDirectoryBrowserCell.h"
 #import "CKDirectoryNode.h"
+#import "CKDirectoryListingItem.h"
 #import "NSTabView+Connection.h"
 #import "NSPopUpButton+Connection.h"
 #import "CKConnectionProtocol.h"
@@ -852,12 +854,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
     {
         NSMutableArray *nodes = [NSMutableArray array];
         NSEnumerator *e = [contents objectEnumerator];
-        NSDictionary *cur;
+		CKDirectoryListingItem *cur;
         CKDirectoryNode *node;
         
         while ((cur = [e nextObject]))
         {
-            node = [CKDirectoryNode nodeWithName:[cur objectForKey:cxFilenameKey]];
+            node = [CKDirectoryNode nodeWithName:[cur filename]];
             [node setProperties:cur];
             [nodes addObject:node];
         }
@@ -2573,3 +2575,5 @@ static NSMutableParagraphStyle *sStyle = nil;
 }
 
 @end
+
+#endif

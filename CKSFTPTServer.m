@@ -299,7 +299,7 @@ char **environ;
 			if (![directoryListingBufferString rangeOfString:@"Can't ls"].location != NSNotFound)
 			{
 				[directoryContents removeAllObjects];
-				[directoryContents addObjectsFromArray:[NSFileManager attributedFilesFromListing:directoryListingBufferString]];
+				[directoryContents addObjectsFromArray:[NSFileManager directoryListingItemsFromListing:directoryListingBufferString]];
 			}
 			[directoryListingBufferString release];
 			directoryListingBufferString = [[NSMutableString alloc] init];

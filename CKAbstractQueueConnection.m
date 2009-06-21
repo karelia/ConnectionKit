@@ -35,14 +35,9 @@
 #import "NSString+Connection.h"
 #import "NSFileManager+Connection.h"
 
-//Download Queue Keys
-NSString *CKQueueDownloadDestinationFileKey = @"QueueDownloadDestinationFileKey";
-NSString *CKQueueDownloadRemoteFileKey = @"QueueDownloadRemoteFileKey";
-NSString *CKQueueUploadLocalDataKey = @"QueueUploadLocalDataKey";
-NSString *CKQueueUploadOffsetKey = @"QueueUploadOffsetKey";
-NSString *CKQueueDownloadTransferPercentReceived = @"QueueDownloadTransferPercentReceived";
-
 NSString *CKQueueDomain = @"Queuing";
+
+static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecursiveDownloadShouldOverwriteExistingFilesKey";
 
 #define QUEUE_HISTORY_COMMAND_SIZE 5
 
@@ -320,9 +315,9 @@ NSString *CKQueueDomain = @"Queuing";
 	if (!myQueueFlags.isDownloading && [_recursiveDownloadQueue count] > 0)
 	{
 		myQueueFlags.isDownloading = YES;
-		NSDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
+		CKTransferRecord *record = [_recursiveDownloadQueue objectAtIndex:0];
 		_numberOfDownloadListingsRemaining++;
-		[_recursiveDownloadConnection changeToDirectory:[rec objectForKey:@"remote"]];
+		[_recursiveDownloadConnection changeToDirectory:[record remotePath]];
 		[_recursiveDownloadConnection directoryContents];
 	}
 	[_recursiveDownloadLock unlock];
@@ -337,15 +332,10 @@ NSString *CKQueueDomain = @"Queuing";
 													 destinationLocalPath:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]]
 																	 size:0];
 	
-	NSMutableDictionary *d = [NSMutableDictionary dictionary];
-	
-	[d setObject:rec forKey:@"record"];
-	[d setObject:remotePath forKey:@"remote"];
-	[d setObject:[localPath stringByAppendingPathComponent:[remotePath lastPathComponent]] forKey:@"local"];
-	[d setObject:[NSNumber numberWithBool:flag] forKey:@"overwrite"];
-	
+	[rec setProperty:[NSNumber numberWithBool:flag] forKey:CKRecursiveDownloadShouldOverwriteExistingFilesKey];
+
 	[_recursiveDownloadLock lock];
-	[_recursiveDownloadQueue addObject:d];
+	[_recursiveDownloadQueue addObject:rec];
 	[_recursiveDownloadLock unlock];
 	
 	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] processRecursiveDownloadingQueue];
@@ -700,7 +690,7 @@ NSString *CKQueueDomain = @"Queuing";
 {
 	if (con == _fileCheckingConnection)
 	{
-        NSArray *currentDirectoryContentsFilenames = [contents valueForKey:cxFilenameKey];
+        NSArray *currentDirectoryContentsFilenames = [contents valueForKey:@"filename"];
         NSMutableArray *fileChecksToRemoveFromQueue = [NSMutableArray array];
         [_fileCheckLock lock];
         NSEnumerator *pathsToCheckForEnumerator = [_fileCheckQueue objectEnumerator];
@@ -736,7 +726,7 @@ NSString *CKQueueDomain = @"Queuing";
 		}
 		
 		NSEnumerator *e = [contents objectEnumerator];
-		NSDictionary *cur;
+		CKDirectoryListingItem *cur;
 		
 		[[self client] connectionDidDiscoverFilesToDelete:contents inAncestorDirectory:[_recursiveDeletionsQueue objectAtIndex:0]];
 		
@@ -744,15 +734,15 @@ NSString *CKQueueDomain = @"Queuing";
 		
 		while ((cur = [e nextObject]))
 		{
-			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			if ([cur isDirectory])
 			{
 				_numberOfDeletionListingsRemaining++;
-				[_recursiveDeletionConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDeletionConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur filename]]];
 				[_recursiveDeletionConnection directoryContents];
 			}
 			else
 			{
-				[_filesToDelete addObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_filesToDelete addObject:[dirPath stringByAppendingPathComponent:[cur filename]]];
 			}
 		}
 		
@@ -790,40 +780,53 @@ NSString *CKQueueDomain = @"Queuing";
 	else if (con == _recursiveDownloadConnection) 
 	{
 		[_recursiveDownloadLock lock];
-		NSMutableDictionary *rec = [_recursiveDownloadQueue objectAtIndex:0];
-		//TEMPDISABLECKTransferRecord *root = [rec objectForKey:@"record"];
-		NSString *remote = [rec objectForKey:@"remote"]; 
-		NSString *local = [rec objectForKey:@"local"]; 
-		BOOL overwrite = [[rec objectForKey:@"overwrite"] boolValue];
-		_numberOfDownloadListingsRemaining--;
+		if ([_recursiveDownloadQueue count] <= 0)
+		{
+			[_recursiveDownloadLock unlock];
+			return;
+		}
+		
+		_numberOfDownloadListingsRemaining--;		
+		CKTransferRecord *rootTransferRecord = [_recursiveDownloadQueue objectAtIndex:0];
 		[_recursiveDownloadLock unlock];
 		
-		// setup the local relative directory
-		NSString *relativePath = [dirPath substringFromIndex:[remote length]]; 
-		NSString *localDir = [local stringByAppendingPathComponent:relativePath];
-		[[NSFileManager defaultManager] recursivelyCreateDirectory:localDir attributes:nil];
+		NSString *remotePath = [rootTransferRecord remotePath];
+		NSString *localPath = [rootTransferRecord localPath];
+		BOOL shouldOverwriteExistingFiles = [[rootTransferRecord propertyForKey:CKRecursiveDownloadShouldOverwriteExistingFilesKey] boolValue];
 		
-		NSEnumerator *e = [contents objectEnumerator];
-		NSDictionary *cur;
+		//Setup the local relative directory
+		NSString *relativeRemotePath = [dirPath substringFromIndex:[remotePath length]]; 
+		NSString *thisListingLocalPath = [localPath stringByAppendingPathComponent:relativeRemotePath];
+		[[NSFileManager defaultManager] recursivelyCreateDirectory:thisListingLocalPath attributes:nil];
 		
-		while ((cur = [e nextObject]))
+		CKTransferRecord *thisDirectoryRecord = [CKTransferRecord downloadRecordForConnection:self
+																			 sourceRemotePath:dirPath
+																		 destinationLocalPath:thisListingLocalPath
+																						 size:0];
+		CKTransferRecord *thisDirectoryParentRecord = [rootTransferRecord childTransferRecordForRemotePath:[dirPath stringByDeletingLastPathComponent]];
+		[thisDirectoryParentRecord addChild:thisDirectoryRecord];
+		
+		NSEnumerator *directoryContentsEnumerator = [contents objectEnumerator];
+		CKDirectoryListingItem *listingItem;
+		
+		while ((listingItem = [directoryContentsEnumerator nextObject]))
 		{
-			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			if ([listingItem isDirectory])
 			{
 				[_recursiveDownloadLock lock];
 				_numberOfDownloadListingsRemaining++;
 				[_recursiveDownloadLock unlock];
-				[_recursiveDownloadConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]];
+				[_recursiveDownloadConnection changeToDirectory:[dirPath stringByAppendingPathComponent:[listingItem filename]]];
 				[_recursiveDownloadConnection directoryContents];
 			}
-			else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeRegular])
+			else if ([listingItem isRegularFile])
 			{
-				CKTransferRecord *down = [self downloadFile:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]] 
-												toDirectory:localDir
-												  overwrite:overwrite
+				CKTransferRecord *down = [self downloadFile:[dirPath stringByAppendingPathComponent:[listingItem filename]] 
+												toDirectory:thisListingLocalPath
+												  overwrite:shouldOverwriteExistingFiles
 												   delegate:nil];
-				[down setSize:[[cur objectForKey:NSFileSize] unsignedLongLongValue]];
-				//TEMPDISABLE[CKTransferRecord mergeTextPathRecord:down withRoot:root];
+				[down setSize:[[listingItem size] unsignedLongLongValue]];
+				[thisDirectoryRecord addChild:down];
 			}
 		}
 		if (_numberOfDownloadListingsRemaining == 0)
@@ -832,10 +835,9 @@ NSString *CKQueueDomain = @"Queuing";
 			myQueueFlags.isDownloading = NO;
 			
 			//If we were downloading an empty folder, make sure to mark it as complete.
-			NSDictionary *downloadDict = [_recursiveDownloadQueue objectAtIndex:0];
-			CKTransferRecord *record = [downloadDict objectForKey:@"record"];
-			if ([[record children] count] == 0)
-				[record transferDidFinish:record error:nil];
+			CKTransferRecord *rootTransferRecord = [_recursiveDownloadQueue objectAtIndex:0];
+			if ([[rootTransferRecord children] count] == 0)
+				[rootTransferRecord transferDidFinish:rootTransferRecord error:nil];
 			
 			[_recursiveDownloadQueue removeObjectAtIndex:0];
 			[_recursiveDownloadLock unlock];
@@ -855,11 +857,11 @@ NSString *CKQueueDomain = @"Queuing";
 		[con createDirectory:toDirPath];
 		
 		NSEnumerator *contentsEnumerator = [contents objectEnumerator];
-		NSDictionary *itemDict;
-		while ((itemDict = [contentsEnumerator nextObject]))
+		CKDirectoryListingItem *item;
+		while ((item = [contentsEnumerator nextObject]))
 		{
-			NSString *itemRemotePath = [dirPath stringByAppendingPathComponent:[itemDict objectForKey:cxFilenameKey]];
-			if ([[itemDict objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+			NSString *itemRemotePath = [dirPath stringByAppendingPathComponent:[item filename]];
+			if ([item isDirectory])
 			{
 				_numberOfS3RenameListingsRemaining++;
 				[con changeToDirectory:itemRemotePath];

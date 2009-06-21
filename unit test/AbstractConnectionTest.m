@@ -172,12 +172,12 @@ const NSTimeInterval kTestTimeout = -15.0;
   STAssertNotNil (directoryContents, @"did not receive directory content");
   
   NSEnumerator *theDirectoryEnum = [directoryContents objectEnumerator];
-  NSDictionary *currentFile;
+  CKDirectoryListingItem *currentFile;
   unsigned long savedPermission = 0644;
   BOOL didFindFile = NO;
   while (currentFile = [theDirectoryEnum nextObject])
   {
-    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [file lastPathComponent]])
+    if ([[currentFile filename] isEqualToString: [file lastPathComponent]])
     {
 		savedPermission = [[currentFile objectForKey: @"NSFilePosixPermissions"] unsignedLongValue];
 		didFindFile = YES;
@@ -219,7 +219,7 @@ const NSTimeInterval kTestTimeout = -15.0;
   BOOL didCheckFile = NO;
   while (currentFile = [theDirectoryEnum nextObject])
   {
-    if ([[currentFile objectForKey: @"cxFilenameKey"] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
+    if ([[currentFile filename] isEqualToString: [fileNameExistingOnServer lastPathComponent]])
     {
 		STAssertTrue(0660 == [[currentFile objectForKey:NSFilePosixPermissions] unsignedLongValue], @"did not set the remote permission");
 		didCheckFile = YES;

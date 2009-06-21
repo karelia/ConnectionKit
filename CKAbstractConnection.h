@@ -32,6 +32,7 @@
 #import "CKConnectionProtocol.h" // protocols can't be forward-declared without warning in gcc 4.0
 
 #import "CKConnectionRegistry.h"
+#import "CKDirectoryListingItem.h"
 #import "CKConnectionClientProtocol.h"
 
 

@@ -1,3 +1,4 @@
+#if 0
 /*
  Copyright (c) 2007, Ubermind, Inc
  All rights reserved.
@@ -35,6 +36,8 @@
 #import "NSNumber+Connection.h"
 
 NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemoveNodesNotification";
+static NSString *cxFilenameKey = @"cxFilenameKey";
+static NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
 
 @implementation CKDirectoryNode
 
@@ -655,3 +658,4 @@ static NSImage *sSymFileIcon = nil;
 
 
 
+#endif 
