@@ -49,6 +49,24 @@
 }
 
 #pragma mark -
+#pragma mark NSObject Overrides
+- (NSString *)description
+{
+	NSString *fileTypeString;
+	if ([self isDirectory])
+		fileTypeString = @"Directory";
+	else if ([self isSymbolicLink])
+		fileTypeString = @"Symbolic Link";
+	else if ([self isCharacterSpecialFile])
+		fileTypeString = @"Character Special File";
+	else if ([self isBlockSpecialFile])
+		fileTypeString = @"Block Special File";
+	else
+		fileTypeString = @"Regular File";
+	return [NSString stringWithFormat:@"\"%@\" (%@) - %llu bytes", [self filename], fileTypeString, [self size]];
+}
+
+#pragma mark -
 - (void)setFileType:(NSString *)fileType
 {
 	@synchronized (self)
