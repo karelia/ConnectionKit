@@ -41,8 +41,8 @@
 // You shouldn't generally need to override these methods. They just create a protocol object and
 // hang on to its properties
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client;
-- (NSURLRequest *)request;
-- (id <CKFileTransferProtocolClient>)client;
+@property(nonatomic, readonly) NSURLRequest *request;
+@property(nonatomic, readonly) id <CKFileTransferProtocolClient> client;
 
 
 #pragma mark Overall Connection
