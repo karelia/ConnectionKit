@@ -90,9 +90,8 @@ static NSMutableArray *sRegisteredClasses;
 #pragma mark -
 #pragma mark Accessors
 
-- (NSURLRequest *)request { return _request; }
-
-- (id <CKFileTransferProtocolClient>)client { return _client; }
+@synthesize request = _request;
+@synthesize client = _client;
 
 #pragma mark -
 #pragma mark Overall Connection
