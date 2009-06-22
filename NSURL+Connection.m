@@ -30,7 +30,6 @@
         {
 			NSString *escapedPassword = [password encodeLegallyForURL];
 			[buffer appendFormat:@":%@", escapedPassword];
-			[escapedPassword release];
         }
         [buffer appendString:@"@"];    
     }
