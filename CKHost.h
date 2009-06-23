@@ -103,6 +103,7 @@
 
 - (void)setProperty:(id)property forKey:(NSString *)key;
 - (id)propertyForKey:(NSString *)key;
+- (void)removePropertyForKey:(NSString *)key;
 
 - (NSString *)createDropletAtPath:(NSString *)path;
 
