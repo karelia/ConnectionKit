@@ -248,6 +248,7 @@ static NSImage *sHostIcon = nil;
 {
 	if ([host isEqualToString:_host])
 		return;
+	
 	NSString *oldServerString = (_host != nil) ? [NSString stringWithString:_host] : nil;
 
 	[self willChangeValueForKey:@"host"];
@@ -259,7 +260,11 @@ static NSImage *sHostIcon = nil;
 	if (!oldServerString || [oldServerString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString withUsername:_username path:nil port:[_port intValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:oldServerString
+																						   withUsername:_username
+																								   path:nil
+																								   port:[_port intValue]
+																							   protocol:kSecProtocolTypeFTP];
 	[keychainItem setServer:host];		
 }
 
@@ -279,7 +284,11 @@ static NSImage *sHostIcon = nil;
 	if (!oldPortString || [oldPortString length] == 0)
 		return;
 	
-	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host withUsername:_username path:nil port:[oldPortString intValue] protocol:kSecProtocolTypeFTP];
+	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
+																						   withUsername:_username
+																								   path:nil
+																								   port:[oldPortString intValue]
+																							   protocol:kSecProtocolTypeFTP];
 	[keychainItem setPort:[port intValue]];
 }
 
@@ -438,6 +447,13 @@ static NSImage *sHostIcon = nil;
 {
 	[self willChangeValueForKey:key];
 	[_properties setObject:property forKey:key];
+	[self didChangeValueForKey:key];
+}
+
+- (void)removePropertyForKey:(NSString *)key
+{
+	[self willChangeValueForKey:key];
+	[_properties removeObjectForKey:key];
 	[self didChangeValueForKey:key];
 }
 
