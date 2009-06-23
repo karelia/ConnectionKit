@@ -74,10 +74,8 @@
 		if (_fileType == fileType)
 			return;
 		
-		[self willChangeValueForKey:@"fileType"];
 		[_fileType release];
 		_fileType = [fileType copy];
-		[self didChangeValueForKey:@"fileType"];
 	}
 }
 
@@ -131,9 +129,7 @@
 {
 	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"referenceCount"];
 		_referenceCount = referenceCount;
-		[self didChangeValueForKey:@"referenceCount"];
 	}
 }
 
@@ -154,10 +150,8 @@
 		if (_modificationDate == modificationDate)
 			return;
 		
-		[self willChangeValueForKey:@"modificationDate"];
 		[_modificationDate release];
 		_modificationDate = [modificationDate copy];
-		[self didChangeValueForKey:@"modificationDate"];
 	}
 }
 
@@ -177,10 +171,8 @@
 		if (_creationDate == creationDate)
 			return;
 		
-		[self willChangeValueForKey:@"creationDate"];
 		[_creationDate release];
 		_creationDate = [creationDate copy];
-		[self didChangeValueForKey:@"creationDate"];
 	}
 }
 
@@ -201,10 +193,8 @@
 		if (_size == size)
 			return;
 		
-		[self willChangeValueForKey:@"size"];
 		[_size release];
 		_size = [size copy];
-		[self didChangeValueForKey:@"size"];
 	}
 }
 
@@ -225,10 +215,8 @@
 		if (_fileOwnerAccountName == fileOwnerAccountName)
 			return;
 		
-		[self willChangeValueForKey:@"fileOwnerAccountName"];
 		[_fileOwnerAccountName release];
 		_fileOwnerAccountName = [fileOwnerAccountName copy];
-		[self didChangeValueForKey:@"fileOwnerAccountName"];
 	}
 }
 
@@ -249,10 +237,8 @@
 		if (_groupOwnerAccountName == groupOwnerAccountName)
 			return;
 		
-		[self willChangeValueForKey:@"groupName"];
 		[_groupOwnerAccountName release];
 		_groupOwnerAccountName = [groupOwnerAccountName copy];
-		[self didChangeValueForKey:@"groupName"];
 	}
 }
 
@@ -273,10 +259,8 @@
 		if (_filename == filename)
 			return;
 		
-		[self willChangeValueForKey:@"filename"];
 		[_filename release];
 		_filename = [filename copy];
-		[self didChangeValueForKey:@"filename"];
 	}
 }
 
@@ -295,10 +279,8 @@
 	if (_posixPermissions == posixPermissions)
 		return;
 	
-	[self willChangeValueForKey:@"posixPermissions"];
 	[_posixPermissions release];
 	_posixPermissions = [posixPermissions copy];
-	[self didChangeValueForKey:@"posixPermissions"];
 }
 
 - (NSNumber *)posixPermissions
@@ -314,10 +296,8 @@
 		if (_symbolicLinkTarget == symbolicLinkTarget)
 			return;
 		
-		[self willChangeValueForKey:@"symbolicLinkTarget"];
 		[_symbolicLinkTarget release];
 		_symbolicLinkTarget = [symbolicLinkTarget copy];
-		[self didChangeValueForKey:@"symbolicLinkTarget"];
 	}
 }
 
