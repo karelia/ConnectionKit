@@ -476,40 +476,49 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	{
 		return _sizeInBytes;
 	}
-	return _numberOfBytesTransferred;
+	return _bytesTransferred;
 }
 
 - (float)speed
 {
-	if ([self isDirectory]) 
+	/*
+		We have two modes of speed calculation for directories. If a directory has children which report non-zero speeds themselves, the setSpeed: calls coalesce up the hierarchy (see setSpeed: for why). On small files, speed is often not calculated at all, and remains at zero. In this case, the directory's speed will otherwise remain at zero, so we perform a simplistic calculation of overall speed -- the directory's transferred byte count, divided by its elapsed time. We update this simplistic speed at most at one second intervals. As you will see in setSpeed, we reset the _lastDirectorySpeedUpdateTime when we receive a real non-zero speed (from a child), to allow this method to return the more accurate speed we received from a child.
+	 */
+	@synchronized (self)
 	{
-		if (_transferStartTime == 0.0)
+		//This logic only allows us to perform simple directory speed calculation if we are both a directory and do not have a real non-zero speed from a child.
+		if ([self isDirectory] && (_speed == 0.0 || _lastDirectorySpeedUpdateTime != 0.0))
 		{
-			_transferStartTime = [NSDate timeIntervalSinceReferenceDate];
-		}
-		NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-		if (_lastDirectorySpeedUpdate == 0.0 || now - _lastDirectorySpeedUpdate >= 1.0)
-		{
-			_lastDirectorySpeedUpdate = now;
-			NSTimeInterval elapsedTime = now - _transferStartTime;
+			NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
+			NSTimeInterval timeSinceLastDirectorySpeedUpdate = now - _lastDirectorySpeedUpdateTime;
 			
-			if (elapsedTime == 0.0)
-				[self setSpeed:0.0]; //Prevent divide-by-zero.
-			else
-				[self setSpeed:([self transferred] / elapsedTime)];
-		}
+			BOOL canUpdateNow = (_lastDirectorySpeedUpdateTime == 0.0 || timeSinceLastDirectorySpeedUpdate >= 1.0);
+			if (canUpdateNow)
+			{
+				_lastDirectorySpeedUpdateTime = now;
+				_speed = ([self transferred] / [self elapsedTransferTime]);
+			}
+		}		
+		return _speed;
 	}
-	return _speed;
+	
+	return 0.0;
 }
 
 - (void)setSpeed:(float)speed
 {
 	@synchronized (self)
 	{
-		if (speed != _speed)
-		{
-			_speed = speed;
-		}
+		//Reset the directory speed update time. See note in -speed for why we're doing this.
+		_lastDirectorySpeedUpdateTime = 0.0;
+		if (_speed == speed)
+			return;
+		
+		_speed = speed;
+		
+		//Our parent's speed is dependent on ours.
+		if ([self parent])
+			[[self parent] setSpeed:speed];
 	}
 }
 
@@ -570,6 +579,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		return _progress;
 	}
 	return 0;
+}
+
+- (NSTimeInterval)elapsedTransferTime
+{
+	return ([NSDate timeIntervalSinceReferenceDate] - _transferStartTime);
 }
 
 #pragma mark -
@@ -668,35 +682,44 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 #pragma mark Connection Transfer Delegate
 - (void)transferDidBegin:(CKTransferRecord *)transfer
 {
-	_numberOfBytesTransferred = 0;
-	_numberOfBytesInLastTransferChunk = 0;
-	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
+	//We can be called by children, informing us that they've begun. If we already got that notice from another child, as a directory, ignore it.
+	if (_transferStartTime != 0.0)
+		return;
+	
+	_bytesTransferred = 0;
+	_bytesTransferredSinceLastSpeedUpdate = 0;
+	_lastSpeedUpdateTime = [NSDate timeIntervalSinceReferenceDate];
+	_transferStartTime = [NSDate timeIntervalSinceReferenceDate];
+	
 	[self setProgress:0];
-	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification object:self];
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidBeginNotification 
+														object:self];
+	if ([self parent])
+		[[self parent] transferDidBegin:[self parent]];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length
 {
-	_numberOfBytesTransferred += length;
-	_numberOfBytesInLastTransferChunk += length;
+	_bytesTransferred += length;
+	_bytesTransferredSinceLastSpeedUpdate += length;
 	
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
-	NSTimeInterval difference = now - _lastTransferTime;
+	NSTimeInterval timeSinceLastSpeedUpdate = now - _lastSpeedUpdateTime;
 	
-	if (difference > 2.0 || _numberOfBytesTransferred == _sizeInBytes)
+	if (timeSinceLastSpeedUpdate > 2.0 || _bytesTransferred == _sizeInBytes)
 	{
 		//We're above the threshold, and we changed transferred.
 		[self willChangeValueForKey:@"transferred"];
 		[self didChangeValueForKey:@"transferred"];
 		
 		//Recalculate our speed.
-		if (_numberOfBytesTransferred == _sizeInBytes)
+		if (_bytesTransferred == _sizeInBytes)
 			[self setSpeed:0.0];
 		else
-			[self setSpeed:((double)_numberOfBytesInLastTransferChunk) / difference];
+			[self setSpeed:((double)_bytesTransferredSinceLastSpeedUpdate) / timeSinceLastSpeedUpdate];
 		
-		_numberOfBytesInLastTransferChunk = 0;
-		_lastTransferTime = now;
+		_bytesTransferredSinceLastSpeedUpdate = 0;
+		_lastSpeedUpdateTime = now;
 	}
 }
 
@@ -714,10 +737,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error
 {
 	[self setError:error];
-	_numberOfBytesInLastTransferChunk = (_sizeInBytes - _numberOfBytesTransferred);
-	_numberOfBytesTransferred = _sizeInBytes;
-	_lastTransferTime = [NSDate timeIntervalSinceReferenceDate];
+	_bytesTransferredSinceLastSpeedUpdate = (_sizeInBytes - _bytesTransferred);
+	_bytesTransferred = _sizeInBytes;
+	_lastSpeedUpdateTime = [NSDate timeIntervalSinceReferenceDate];
 	[self setProgress:100];
+	[self setSpeed:0.0];
 
 	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
 	
