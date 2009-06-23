@@ -622,6 +622,9 @@
 		2753CF3C0FF119EE0017A782 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				79CFD8CA09F706C700172CDD /* KTLog.nib */,
+				79CFD83509F7048400172CDD /* KTLog.h */,
+				79CFD83609F7048400172CDD /* KTLog.m */,
 				79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */,
 				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
 				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
@@ -831,9 +834,6 @@
 				795AFEE50B1154E2006905FA /* UKKQueue */,
 				794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */,
 				794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */,
-				79CFD83509F7048400172CDD /* KTLog.h */,
-				79CFD83609F7048400172CDD /* KTLog.m */,
-				79CFD8CA09F706C700172CDD /* KTLog.nib */,
 				79CFD83309F7048400172CDD /* InterThreadMessaging.h */,
 				79CFD83409F7048400172CDD /* InterThreadMessaging.m */,
 				79CFD90009F7077900172CDD /* NSData+Connection.h */,
@@ -1469,7 +1469,7 @@
 				CE55A6610AD194740091C8AE /* zh_CN */,
 			);
 			name = KTLog.nib;
-			sourceTree = SOURCE_ROOT;
+			sourceTree = "<group>";
 		};
 		D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */ = {
 			isa = PBXVariantGroup;
