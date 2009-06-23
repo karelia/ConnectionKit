@@ -114,10 +114,12 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
  */
 - (CKTransferRecord *)childTransferRecordForRemotePath:(NSString *)remotePath;
 
-- (void)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
+- (void)setProperty:(id)property forKey:(id)key;
+- (id)propertyForKey:(id)key;
+- (void)removePropertyForKey:(id)key;
 - (void)setObject:(id)object forKey:(id)key;
 - (id)objectForKey:(id)key;
+- (void)removeObjectForKey:(id)key;
 
 - (unsigned long long)size;
 - (void)setSize:(unsigned long long)size;

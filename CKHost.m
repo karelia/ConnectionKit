@@ -445,6 +445,9 @@ static NSImage *sHostIcon = nil;
 
 - (void)setProperty:(id)property forKey:(NSString *)key
 {
+	NSParameterAssert(property);
+	NSParameterAssert(key);
+	
 	[self willChangeValueForKey:key];
 	[_properties setObject:property forKey:key];
 	[self didChangeValueForKey:key];
@@ -452,6 +455,8 @@ static NSImage *sHostIcon = nil;
 
 - (void)removePropertyForKey:(NSString *)key
 {
+	NSParameterAssert(key);
+	
 	[self willChangeValueForKey:key];
 	[_properties removeObjectForKey:key];
 	[self didChangeValueForKey:key];
