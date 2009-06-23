@@ -438,7 +438,7 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 - (void)connection:(id <CKConnection>)conn appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
 	//Forward to our delegate.
-	[[self client] appendString:string toTranscript:transcript];
+	[[self client] appendLine:string toTranscript:transcript];
 }
 
 - (void)connection:(id <CKConnection>)conn didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
