@@ -875,17 +875,10 @@ NSString *S3PathSeparator = @":";
 
 #pragma mark -
 #pragma mark Authentication
-- (void)connect
-{
-	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] threadedConnect];
-}
-
 - (void)threadedConnect
 {
-    if (_isConnecting || [self isConnected]) return;
-	
-	
-	_isConnecting = YES;
+	[myCurrentDirectory release];
+	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	
 	// Request authentication before connecting
     _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
@@ -910,7 +903,7 @@ NSString *S3PathSeparator = @":";
     _credential = [credential retain];
     
     // Continue on with connecting
-    [super connect];
+    [super threadedConnect];
 }
 
 @end
