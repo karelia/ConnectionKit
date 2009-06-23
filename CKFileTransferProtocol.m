@@ -8,7 +8,7 @@
 
 #import "CKConnectionProtocol1.h"
 
-#import "CKFileSystemProtocol.h"
+#import "CKLocalFileSystemProtocol.h"
 #import "CKWebDAVProtocol.h"
 
 
@@ -23,7 +23,7 @@ static NSMutableArray *sRegisteredClasses;
         sRegisteredClasses = [[NSMutableArray alloc] init];
         
         // Register the built-in protocols
-        [self registerClass:[CKFileSystemProtocol class]];
+        [self registerClass:[CKLocalFileSystemProtocol class]];
         [self registerClass:[CKWebDAVProtocol class]];
     }
 }

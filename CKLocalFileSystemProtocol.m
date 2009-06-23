@@ -6,13 +6,13 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileSystemProtocol.h"
+#import "CKLocalFileSystemProtocol.h"
 
 #import "CKConnectionError.h"
 #import "CKConnectionProtocol1.h"
 
 
-@implementation CKFileSystemProtocol
+@implementation CKLocalFileSystemProtocol
 
 + (BOOL)canInitWithRequest:(NSURLRequest *)request;
 {
