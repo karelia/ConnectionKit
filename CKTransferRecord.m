@@ -444,11 +444,12 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	if (sizeDelta == 0)
 		return;
 	
+	[self willChangeValueForKey:@"size"];
+	
 	//As soon as pass this point, we only rely on _sizeInBytesWithChildren. So if this is our first use of _sizeInBytesWithChildren, let's make sure it reflects _our_ size too.
 	if (_sizeInBytesWithChildren == 0)
 		_sizeInBytesWithChildren = _sizeInBytes;
 	
-	[self willChangeValueForKey:@"size"];
 	_sizeInBytesWithChildren += sizeDelta;
 	[self didChangeValueForKey:@"size"];
 	
@@ -684,10 +685,16 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	
 	if (difference > 2.0 || _numberOfBytesTransferred == _sizeInBytes)
 	{
+		//We're above the threshold, and we changed transferred.
+		[self willChangeValueForKey:@"transferred"];
+		[self didChangeValueForKey:@"transferred"];
+		
+		//Recalculate our speed.
 		if (_numberOfBytesTransferred == _sizeInBytes)
 			[self setSpeed:0.0];
 		else
 			[self setSpeed:((double)_numberOfBytesInLastTransferChunk) / difference];
+		
 		_numberOfBytesInLastTransferChunk = 0;
 		_lastTransferTime = now;
 	}
