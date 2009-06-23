@@ -367,20 +367,25 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 #pragma mark -
 
-- (void)setProperty:(id)property forKey:(NSString *)key
+- (void)setProperty:(id)property forKey:(id)key
 {
-	/// Terrence added this NSLog since the exception doesn't log the key
-	if ( nil == property )
-	{
-		NSLog(@"attempted to set nil property for key %@", key);
-	}
-	
+	NSParameterAssert(property);
+	NSParameterAssert(key);	
 	[_properties setObject:property forKey:key];
 }
 
-- (id)propertyForKey:(NSString *)key
+- (id)propertyForKey:(id)key
 {
+	NSParameterAssert(key);
 	return [_properties objectForKey:key];
+}
+
+- (void)removePropertyForKey:(id)key
+{
+	NSParameterAssert(key);
+	[self willChangeValueForKey:key];
+	[_properties removeObjectForKey:key];
+	[self didChangeValueForKey:key];
 }
 
 - (void)setObject:(id)object forKey:(id)key
@@ -391,6 +396,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 - (id)objectForKey:(id)key
 {
 	return [self propertyForKey:key];
+}
+
+- (void)removeObjectForKey:(id)key
+{
+	[self removePropertyForKey:key];
 }
 
 #pragma mark -
