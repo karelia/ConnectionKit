@@ -289,6 +289,12 @@
 
 /*	Convenience method for sending a string to the delegate for appending to the transcript
  */
+- (void)appendLine:(NSString *)string toTranscript:(CKTranscriptType)transcript
+{
+	NSString *line = ([string hasSuffix:@"\n"]) ? string : [string stringByAppendingString:@"\n"];
+	[self appendString:line toTranscript:transcript];
+}
+
 - (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
 	if (_flags.transcript)
@@ -304,7 +310,7 @@
 	NSString *string = [[NSString alloc] initWithFormat:formatString arguments:arguments];
 	va_end(arguments);
 	
-	[self appendString:string toTranscript:transcript];
+	[self appendLine:string toTranscript:transcript];
 	[string release];
 }
 

@@ -106,7 +106,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (!_isConnecting && ![self isConnected])
 	{
-		[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
+		[[self client] appendLine:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
 		[super connect];
 	}
 }
@@ -121,7 +121,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[super threadedConnect];
 	
     myFileManager = [[NSFileManager alloc] init];
-	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
+	[[self client] appendLine:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	[self setState:CKConnectionIdleState];
 }
 

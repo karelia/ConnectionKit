@@ -282,7 +282,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}
 	}
 	
-    [[self client] appendString:commandToEcho toTranscript:CKTranscriptSent];
+    [[self client] appendLine:commandToEcho toTranscript:CKTranscriptSent];
 		
 	KTLog(CKProtocolDomain, KTLogDebug, @">> %@", commandToEcho);
 
@@ -319,7 +319,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)parseCommand:(CKFTPReply *)reply
 {
-	[[self client] appendString:[reply description] toTranscript:CKTranscriptReceived];
+	[[self client] appendLine:[reply description] toTranscript:CKTranscriptReceived];
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", [reply description]);	/// use <<# to help find commands
 	
@@ -2581,7 +2581,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				return;
 			}
 		}
-		[[self client] appendString:results toTranscript:CKTranscriptData];
+		[[self client] appendLine:results toTranscript:CKTranscriptData];
 
 		NSArray *contents = [self parseLines:results];
 		
@@ -2679,7 +2679,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	//do something
 	KTLog(CKTransportDomain, KTLogError, @"Timed out opening data connection");
 
-	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")
+	[[self client] appendLine:LocalizedStringInConnectionKitBundle(@"Data Stream Timed Out", @"Failed to open a data stream connection")
                    toTranscript:CKTranscriptData];
 	
 	[timer invalidate];
@@ -3827,7 +3827,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 @implementation CKConnectionRequest (CKFTPConnection)
 
-- (NSString *)FTPDataConnectionType { return [self propertyForKey:@"CKFTPDataConnectionType"]; }
+static NSString *CKFTPDataConnectionTypeKey = @"CKFTPDataConnectionType";
+
+- (NSString *)FTPDataConnectionType { return [self propertyForKey:CKFTPDataConnectionTypeKey]; }
 
 @end
 
@@ -3836,13 +3838,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)setFTPDataConnectionType:(NSString *)type
 {
     if (type)
-    {
-        [self setProperty:type forKey:@"CKFTPDataConnectionType"];
-    }
+        [self setProperty:type forKey:CKFTPDataConnectionTypeKey];
     else
-    {
-        [self removePropertyForKey:@"CKFTPDataConnectionType"];
-    }
+        [self removePropertyForKey:CKFTPDataConnectionTypeKey];
 }
 
 @end

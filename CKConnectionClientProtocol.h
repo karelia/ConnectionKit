@@ -40,6 +40,7 @@
 - (NSString *)accountForUsername:(NSString *)username;
 
 #pragma mark Transcript
+- (void)appendLine:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 - (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 - (void)appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...;
 

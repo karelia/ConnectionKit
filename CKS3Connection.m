@@ -440,7 +440,7 @@ NSString *S3PathSeparator = @":";
 				NSRange headerRange = [myResponseBuffer rangeOfData:[[NSString stringWithString:@"\r\n\r\n"] dataUsingEncoding:NSUTF8StringEncoding]];
 				NSString *header = [[myResponseBuffer subdataWithRange:NSMakeRange(0, headerRange.location)] descriptionAsUTF8String];
 				
-				[[self client] appendString:header toTranscript:CKTranscriptReceived];
+				[[self client] appendLine:header toTranscript:CKTranscriptReceived];
 				
 				
 				unsigned start = headerRange.location + headerRange.length;

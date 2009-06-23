@@ -1127,11 +1127,14 @@ static NSString *lsform = nil;
 
 @implementation CKConnectionRequest (CKSFTPConnection)
 
-- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:@"CKSFTPPublicKeyPath"]; }
+static NSString *CKSFTPPublicKeyPathKey = @"CKSFTPPublicKeyPath";
+static NSString *CKSFTPLoggingLevelKey = @"CKSFTPLoggingLevel";
+
+- (NSString *)SFTPPublicKeyPath { return [self propertyForKey:CKSFTPPublicKeyPathKey]; }
 
 - (NSUInteger)SFTPLoggingLevel;
 {
-    return [[self propertyForKey:@"CKSFTPLoggingLevel"] unsignedIntValue];
+    return [[self propertyForKey:CKSFTPLoggingLevelKey] unsignedIntValue];
 }
 
 @end
@@ -1140,12 +1143,15 @@ static NSString *lsform = nil;
 
 - (void)setSFTPPublicKeyPath:(NSString *)path
 {
-    [self setProperty:path forKey:@"CKSFTPPublicKeyPath"];
+	if (path)
+		[self setProperty:path forKey:CKSFTPPublicKeyPathKey];
+	else 
+		[self removePropertyForKey:CKSFTPPublicKeyPathKey];
 }
 
 - (void)setSFTPLoggingLevel:(NSUInteger)level;
 {
-    [self setProperty:[NSNumber numberWithUnsignedInt:level] forKey:@"CKSFTPLoggingLevel"];
+    [self setProperty:[NSNumber numberWithUnsignedInt:level] forKey:CKSFTPLoggingLevelKey];
 }
 
 @end
