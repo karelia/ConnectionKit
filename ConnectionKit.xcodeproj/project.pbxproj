@@ -619,6 +619,19 @@
 			name = Connection;
 			sourceTree = "<group>";
 		};
+		2753CF3C0FF119EE0017A782 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */,
+				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
+				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
+				7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */,
+				79CA054A0B852037005BED50 /* CKCacheableHost.h */,
+				79CA054B0B852037005BED50 /* CKCacheableHost.m */,
+			);
+			name = Utility;
+			sourceTree = "<group>";
+		};
 		27709AC90F74136F0037DF12 /* HTTP */ = {
 			isa = PBXGroup;
 			children = (
@@ -802,6 +815,7 @@
 		79CFD11A09F7022900172CDD /* Legacy */ = {
 			isa = PBXGroup;
 			children = (
+				2753CF3C0FF119EE0017A782 /* Utility */,
 				2753CC770FECD5F70017A782 /* Connections */,
 				7983E2120B0C22D600F5078E /* Bookmarks */,
 				79CFD8A509F705FF00172CDD /* UI */,
@@ -817,8 +831,6 @@
 				795AFEE50B1154E2006905FA /* UKKQueue */,
 				794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */,
 				794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */,
-				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
-				7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */,
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
@@ -844,10 +856,6 @@
 				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
 				79420AD20C91CDE80002B99D /* NSNumber+Connection.h */,
 				79420AD30C91CDE80002B99D /* NSNumber+Connection.m */,
-				79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */,
-				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
-				79CA054A0B852037005BED50 /* CKCacheableHost.h */,
-				79CA054B0B852037005BED50 /* CKCacheableHost.m */,
 				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
 				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 				27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */,
