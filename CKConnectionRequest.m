@@ -136,12 +136,19 @@ const NSTimeInterval CKConnectionRequestDefaultTimeoutInterval = 60.0;
 
 - (void)setProperty:(id)value forKey:(NSString *)key
 {
+	NSParameterAssert(value);
+	NSParameterAssert(key);
+	
+	[self willChangeValueForKey:key];
     [(NSMutableDictionary *)_extensibleProperties setObject:value forKey:key];
+	[self didChangeValueForKey:key];
 }
 
 - (void)removePropertyForKey:(NSString *)key
 {
+	[self willChangeValueForKey:key];
     [(NSMutableDictionary *)_extensibleProperties removeObjectForKey:key];
+	[self didChangeValueForKey:key];
 }
 
 @end
