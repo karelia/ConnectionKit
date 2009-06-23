@@ -3605,7 +3605,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [remotePath stringByDeletingLastPathComponent];
-	if ([parentDirectory length] > 0 && [parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
+	if ([parentDirectory length] > 0 && ![[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectory])
 		[self _changeToDirectory:parentDirectory forDependentCommand:store];
 	
 	[self queueCommand:store];
