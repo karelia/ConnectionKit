@@ -9,7 +9,7 @@
 #import "CKFileTransferProtocol.h"
 
 
-@interface CKFileSystemProtocol : CKFileTransferProtocol
+@interface CKLocalFileSystemProtocol : CKFileTransferProtocol
 {
 @private
     NSFileManager   *_fileManager;
