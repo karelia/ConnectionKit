@@ -177,10 +177,8 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		if (_localPath == newLocalPath)
 			return;
 		
-		[self willChangeValueForKey:@"localPath"];
 		[_localPath release];
 		_localPath = [newLocalPath copy];
-		[self didChangeValueForKey:@"localPath"];
 	}
 }
 
@@ -201,10 +199,8 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		if (_remotePath == newRemotePath)
 			return;
 		
-		[self willChangeValueForKey:@"remotePath"];
 		[_remotePath release];
 		_remotePath = [newRemotePath copy];
-		[self didChangeValueForKey:@"remotePath"];
 	}
 }
 
@@ -234,9 +230,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"parent"];
 		_parent = parent;
-		[self didChangeValueForKey:@"parent"];
 	}
 }
 
@@ -254,9 +248,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 {
 	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"isDiscoveringFilesToDownload"];
 		_isDiscoveringFilesToDownload = flag;
-		[self didChangeValueForKey:@"isDiscoveringFilesToDownload"];
 	}
 }
 
@@ -383,9 +375,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 - (void)removePropertyForKey:(id)key
 {
 	NSParameterAssert(key);
-	[self willChangeValueForKey:key];
 	[_properties removeObjectForKey:key];
-	[self didChangeValueForKey:key];
 }
 
 - (void)setObject:(id)object forKey:(id)key
@@ -409,7 +399,6 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	//As in +initialize, @"progress" is a dependent key on @"size"
 	@synchronized (self)
 	{
-		[self willChangeValueForKey:@"size"];
 		if (_sizeInBytes != 0)
 		{
 			//We're updating our size. We need to update our parents' sizes too.
@@ -417,7 +406,6 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			[self _sizeWithChildrenChangedBy:sizeDelta];
 		}
 		_sizeInBytes = size;
-		[self didChangeValueForKey:@"size"];
 	}
 }
 
@@ -504,21 +492,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			_lastDirectorySpeedUpdate = now;
 			NSTimeInterval elapsedTime = now - _transferStartTime;
 			
-			@synchronized (self)
-			{
-				[self willChangeValueForKey:@"speed"];
-				if (elapsedTime == 0.0)
-				{
-					//If we don't catch this, we are effectively dividing by zero below. This would leave _speed as NaN.
-					_speed = 0.0;
-				}
-				else
-				{
-					unsigned long long transferred = [self transferred];
-					_speed = transferred / elapsedTime;
-				}
-				[self didChangeValueForKey:@"speed"];
-			}
+			if (elapsedTime == 0.0)
+				[self setSpeed:0.0]; //Prevent divide-by-zero.
+			else
+				[self setSpeed:([self transferred] / elapsedTime)];
 		}
 	}
 	return _speed;
@@ -530,9 +507,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	{
 		if (speed != _speed)
 		{
-			[self willChangeValueForKey:@"speed"];
 			_speed = speed;
-			[self didChangeValueForKey:@"speed"];
 		}
 	}
 }
@@ -562,10 +537,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 				return;
 			}
 			
-			[self willChangeValueForKey:@"progress"];
 			_progress = progress;
-			[self didChangeValueForKey:@"progress"];
-			
 			
 			[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
 		}
@@ -712,18 +684,12 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	
 	if (difference > 2.0 || _numberOfBytesTransferred == _sizeInBytes)
 	{
-		[self willChangeValueForKey:@"speed"];
 		if (_numberOfBytesTransferred == _sizeInBytes)
-		{
 			[self setSpeed:0.0];
-		}
 		else
-		{
 			[self setSpeed:((double)_numberOfBytesInLastTransferChunk) / difference];
-		}
 		_numberOfBytesInLastTransferChunk = 0;
 		_lastTransferTime = now;
-		[self didChangeValueForKey:@"speed"];
 	}
 }
 

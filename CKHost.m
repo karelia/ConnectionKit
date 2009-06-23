@@ -251,10 +251,8 @@ static NSImage *sHostIcon = nil;
 	
 	NSString *oldServerString = (_host != nil) ? [NSString stringWithString:_host] : nil;
 
-	[self willChangeValueForKey:@"host"];
 	[_host autorelease];
 	_host = [host copy];
-	[self didChangeValueForKey:@"host"];
 	[self didChange];
 	
 	if (!oldServerString || [oldServerString length] == 0)
@@ -275,10 +273,8 @@ static NSImage *sHostIcon = nil;
 	
 	NSString *oldPortString = (_port) ? [NSString stringWithString:_port] : nil;
 	
-	[self willChangeValueForKey:@"port"];
 	[_port autorelease];
 	_port = [port copy];
-	[self didChangeValueForKey:@"port"];
 	[self didChange];
 	
 	if (!oldPortString || [oldPortString length] == 0)
@@ -302,10 +298,8 @@ static NSImage *sHostIcon = nil;
 	
 	NSString *oldUsernameString = (_username) ? [NSString stringWithString:_username] : nil;
 	
-	[self willChangeValueForKey:@"username"];
 	[_username autorelease];
 	_username = [username copy];
-	[self didChangeValueForKey:@"username"];
 	[self didChange];
 	
 	if (!oldUsernameString || [oldUsernameString length] == 0)
@@ -326,10 +320,8 @@ static NSImage *sHostIcon = nil;
 	if ([_password isEqualToString:password])
 		return;
 
-	[self willChangeValueForKey:@"password"];
 	[_password autorelease];
 	_password = [password copy];
-	[self didChangeValueForKey:@"password"];
 	[self didChange];
 	
 	//Save to keychain
@@ -362,9 +354,7 @@ static NSImage *sHostIcon = nil;
 	if (protocol == _connectionProtocol)
 		return;
 
-	[self willChangeValueForKey:@"protocol"];
 	_connectionProtocol = protocol;
-	[self didChangeValueForKey:@"protocol"];
 	[self didChange];
 }
 
@@ -376,10 +366,8 @@ static NSImage *sHostIcon = nil;
 	if (path == _initialPath)
 		return;
 	
-	[self willChangeValueForKey:@"initialPath"];
 	[_initialPath autorelease];
 	_initialPath = [path copy];
-	[self didChangeValueForKey:@"initialPath"];
 	[self didChange];
 }
 
@@ -392,20 +380,16 @@ static NSImage *sHostIcon = nil;
 	[self setPort:[NSString stringWithFormat:@"%@",[url port]]];
 	[self setConnectionProtocol:[[[CKConnectionRegistry sharedConnectionRegistry] connectionClassForURLScheme:[url scheme]] protocol]];
 	
-	[self willChangeValueForKey:@"URL"];
 	[_URL autorelease];
 	_URL = [url copy];
-	[self didChangeValueForKey:@"URL"];
 }
 
 - (void)setAnnotation:(NSString *)description
 {
 	if (description != _description)
 	{
-		[self willChangeValueForKey:@"annotation"];
 		[_description autorelease];
 		_description = [description copy];
-		[self didChangeValueForKey:@"annotation"];
 		[self didChange];
 	}
 }
@@ -414,10 +398,8 @@ static NSImage *sHostIcon = nil;
 {
 	if (ui != _userInfo)
 	{
-		[self willChangeValueForKey:@"userInfo"];
 		[_userInfo autorelease];
 		_userInfo = [ui retain];
-		[self didChangeValueForKey:@"userInfo"];
 		[self didChange];
 	}
 }
@@ -435,10 +417,8 @@ static NSImage *sHostIcon = nil;
 {
 	if (icon != _icon)
 	{
-		[self willChangeValueForKey:@"icon"];
 		[_icon autorelease];
 		_icon = [icon retain];
-		[self didChangeValueForKey:@"icon"];
 		[self didChange];
 	}
 }
@@ -448,18 +428,14 @@ static NSImage *sHostIcon = nil;
 	NSParameterAssert(property);
 	NSParameterAssert(key);
 	
-	[self willChangeValueForKey:key];
 	[_properties setObject:property forKey:key];
-	[self didChangeValueForKey:key];
 }
 
 - (void)removePropertyForKey:(NSString *)key
 {
 	NSParameterAssert(key);
 	
-	[self willChangeValueForKey:key];
 	[_properties removeObjectForKey:key];
-	[self didChangeValueForKey:key];
 }
 
 - (void)setProperties:(NSDictionary *)properties

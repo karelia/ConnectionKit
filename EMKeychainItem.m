@@ -58,13 +58,12 @@
 - (BOOL)setPassword:(NSString *)newPasswordString
 {
 	if (!newPasswordString)
-	{
 		return NO;
-	}
-	[self willChangeValueForKey:@"password"];
+	if (_password == newPasswordString)
+		return YES;		
+
 	[_password release];
 	_password = [newPasswordString copy];
-	[self didChangeValueForKey:@"password"];
 	
 	const char *newPassword = [newPasswordString UTF8String];
 	OSStatus returnStatus = SecKeychainItemModifyAttributesAndData(coreKeychainItem, NULL, strlen(newPassword), (void *)newPassword);
@@ -75,10 +74,11 @@
 
 - (BOOL)setUsername:(NSString *)newUsername
 {
-	[self willChangeValueForKey:@"username"];
+	if (_username == newUsername)
+		return YES;
+	
 	[_username release];
 	_username = [newUsername copy];
-	[self didChangeValueForKey:@"username"];	
 	
 	return [self _modifyAttributeWithTag:kSecAccountItemAttr toBeString:newUsername];
 }
@@ -87,10 +87,11 @@
 
 - (BOOL)setLabel:(NSString *)newLabel
 {
-	[self willChangeValueForKey:@"label"];
+	if (_label == newLabel)
+		return YES;
+	
 	[_label release];
 	_label = [newLabel copy];
-	[self didChangeValueForKey:@"label"];
 	
 	return [self _modifyAttributeWithTag:kSecLabelItemAttr toBeString:newLabel];
 }
@@ -147,10 +148,11 @@
 
 - (BOOL)setServiceName:(NSString *)newServiceName
 {
-	[self willChangeValueForKey:@"serviceName"];
+	if (_serviceName == newServiceName)
+		return YES;
+	
 	[_serviceName release];
 	_serviceName = [newServiceName copy];
-	[self didChangeValueForKey:@"serviceName"];	
 	
 	return [self _modifyAttributeWithTag:kSecServiceItemAttr toBeString:newServiceName];
 }
@@ -201,10 +203,11 @@
 
 - (BOOL)setServer:(NSString *)newServer
 {
-	[self willChangeValueForKey:@"server"];
+	if (_server == newServer)
+		return YES;
+	
 	[_server release];
 	_server = [newServer copy];	
-	[self didChangeValueForKey:@"server"];
 	
 	return [self _modifyAttributeWithTag:kSecServerItemAttr toBeString:newServer];
 }
@@ -213,10 +216,11 @@
 
 - (BOOL)setPath:(NSString *)newPath
 {
-	[self willChangeValueForKey:@"path"];
+	if (_path == newPath)
+		return YES;
+	
 	[_path release];
 	_path = [newPath copy];
-	[self didChangeValueForKey:@"path"];
 	
 	return [self _modifyAttributeWithTag:kSecPathItemAttr toBeString:newPath];
 }
@@ -225,9 +229,10 @@
 
 - (BOOL)setPort:(NSInteger)newPort
 {
-	[self willChangeValueForKey:@"port"];
+	if (_port == newPort)
+		return YES;
+	
 	_port = newPort;
-	[self didChangeValueForKey:@"port"];
 	
 	return [self _modifyAttributeWithTag:kSecPortItemAttr toBeString:[NSString stringWithFormat:@"%i", newPort]];
 }
@@ -236,9 +241,10 @@
 
 - (BOOL)setProtocol:(SecProtocolType)newProtocol
 {
-	[self willChangeValueForKey:@"protocol"];
+	if (_protocol == newProtocol)
+		return YES;
+	
 	_protocol = newProtocol;
-	[self didChangeValueForKey:@"protocol"];
 	
 	SecKeychainAttribute attributes[1];
 	attributes[0].tag = kSecProtocolItemAttr;
