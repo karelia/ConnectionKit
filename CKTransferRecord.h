@@ -40,14 +40,16 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 	BOOL _isDiscoveringFilesToDownload;
 	NSString *_localPath;
 	NSString *_remotePath;
+	
 	unsigned long long _sizeInBytes;
 	unsigned long long _sizeInBytesWithChildren;
-	unsigned long long _numberOfBytesTransferred;
-	unsigned long long _numberOfBytesInLastTransferChunk;
+	unsigned long long _bytesTransferred;
+	unsigned long long _bytesTransferredSinceLastSpeedUpdate;
 
-	NSTimeInterval _lastTransferTime;
+	NSTimeInterval _lastSpeedUpdateTime;
 	NSTimeInterval _transferStartTime;
-	NSTimeInterval _lastDirectorySpeedUpdate;
+	NSTimeInterval _lastDirectorySpeedUpdateTime;
+	
 	float _speed;
 	NSUInteger _progress;
 	NSMutableArray *_children;
@@ -130,6 +132,7 @@ extern NSString *CKTransferRecordTransferDidFinishNotification;
 - (void)forceAnimationUpdate;
 - (void)setProgress:(NSInteger)progress;
 - (NSInteger)progress;
+- (NSTimeInterval)elapsedTransferTime;
 
 - (NSError *)error;
 - (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
