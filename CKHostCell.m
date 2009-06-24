@@ -261,7 +261,7 @@ textRect.origin.y += 1.0;
     [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
     myFlags.settingUpFieldEditor = NO;
 }
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength;
 {
     _calculateDrawingRectsAndSizes;
     

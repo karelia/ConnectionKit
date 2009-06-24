@@ -110,7 +110,7 @@
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 + (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
-- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+- (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
 
 @end
 

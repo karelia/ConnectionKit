@@ -487,7 +487,7 @@ static Class sCellClass = nil;
             {
                 r = [path rangeOfString:separator options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
             }
-            unsigned row, col;
+            NSUInteger row, col;
             
             while (r.location != NSNotFound)
             {
@@ -1010,7 +1010,7 @@ static Class sCellClass = nil;
 	return NSNotFound;
 }
 
-- (void)column:(unsigned *)column row:(unsigned *)row forItem:(id)item
+- (void)column:(NSUInteger *)column row:(NSUInteger *)row forItem:(id)item
 {
 	unsigned col = [self columnToItem:item];
 	unsigned r = [self rowForItem:item];

@@ -168,7 +168,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
     return UINT_MAX;  //denotes an object that cannot be released
 }
@@ -648,7 +648,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 }
 
 #pragma mark NSOutlineView DataSource
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	if (myFilter)
 	{
@@ -683,7 +683,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return 0;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 	if (myFilter)
 		return [myFilteredHosts objectAtIndex:index];
@@ -829,7 +829,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return [files count] > 0; //Only allow the drag if we are actually dragging something we can drag (i.e., not a BONJOUR/BOOKMARK header)
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
+- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(NSInteger)proposedChildIndex
 {
 	NSPasteboard *pboard = [dropInfo draggingPasteboard];
 	
@@ -877,7 +877,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(int)index
+- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(NSInteger)index
 {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	NSEnumerator *itemEnumerator = nil;
@@ -909,7 +909,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	while ((currentItem = [itemEnumerator nextObject]))
 	{
 		CKHostCategory *currentCategory = [currentItem category];
-		unsigned currentIndex = NSNotFound;
+		NSUInteger currentIndex = NSNotFound;
 		
 		NSArray *parentConnections = (currentCategory) ? [currentCategory hosts] : myConnections;
 		currentIndex = [parentConnections indexOfObjectIdenticalTo:currentItem];
