@@ -376,7 +376,10 @@ static NSString *lsform = nil;
 		
 		//Super Über Cheap Way Until I figure out how to do this in a pretty way.
 		NSString *temporaryParentPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ConnectionKitTemporary"];
-		[[NSFileManager defaultManager] recursivelyCreateDirectory:temporaryParentPath attributes:nil];
+		[[NSFileManager defaultManager] createDirectoryAtPath:temporaryParentPath
+                                  withIntermediateDirectories:YES
+                                                   attributes:nil
+                                                        error:NULL];
 		
 		static unsigned filenameCounter = 0;	// TODO: Make this counter threadsafe
 		filenameCounter++;

@@ -496,26 +496,6 @@ if (![fn isEqualToString:@"."] && \
 	}
 }
 
-- (void)recursivelyCreateDirectory:(NSString *)path attributes:(NSDictionary *)attributes
-{
-	BOOL isDir;
-	
-	if (![self fileExistsAtPath:path isDirectory:&isDir] || !isDir)
-	{
-		NSRange r = [path rangeOfString:@"/"];
-		while (r.location != NSNotFound)
-		{
-			NSString *subpath = [path substringWithRange:NSMakeRange(0,NSMaxRange(r))];
-			if (![self fileExistsAtPath:subpath isDirectory:&isDir] && isDir)
-			{
-				[self createDirectoryAtPath:subpath attributes:attributes];
-			}
-			r = [path rangeOfString:@"/" options:NSLiteralSearch range:NSMakeRange(NSMaxRange(r), [path length] - NSMaxRange(r))];
-		}
-		[self createDirectoryAtPath:path attributes:attributes];
-	}
-}
-
 - (unsigned long long)sizeOfPath:(NSString *)path
 {
 	NSDictionary *attribs = [self fileAttributesAtPath:path traverseLink:NO];
