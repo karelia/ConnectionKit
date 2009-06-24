@@ -42,10 +42,8 @@
 	
 	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
 	
-	NSString *_currentDigestRealm;                                      // HTTP digest-based
-	NSString *_currentDigestOpaque;
-	NSString *_currentDigestNonce;
-	NSUInteger _digestNonceCount;
+	NSURLCredential *_currentCredential;
+	CFHTTPAuthenticationRef _currentAuth;
 	
 	
 	struct __httpconflags {
