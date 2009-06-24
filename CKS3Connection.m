@@ -107,8 +107,6 @@ NSString *S3PathSeparator = @":";
 	[incompleteKeyNames release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
-    [_currentCredential release];
-	[_currentAuthenticationChallenge release];
     
 	[super dealloc];
 }
