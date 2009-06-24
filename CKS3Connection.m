@@ -668,7 +668,7 @@ NSString *S3PathSeparator = @":";
 	 
 	 What we're doing here is really copying the fromPath to the toPath (with the COPY command), and then deleting fromPath. 
 	 
-	 Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameS3Directory:to: which is implemented and handled by StreamBasedConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
+	 Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameS3Directory:to: which is implemented and handled by CKAbstractQueueConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
 	 */
 	
 	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:[toPath encodeLegallyForS3]];
