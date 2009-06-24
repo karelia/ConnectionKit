@@ -502,7 +502,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	return dataBuffer;
 }
 
-- (void) sendQueuedOutput
+- (void)sendQueuedOutput
 {
 	NSMutableData *dataBuffer = [self outputDataBuffer];
 	
