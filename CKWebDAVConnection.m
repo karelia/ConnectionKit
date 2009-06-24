@@ -376,25 +376,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		CKInternalTransferRecord *download = [self currentDownload];
 		if (bytesToTransfer == 0)
 		{
-			// A quick hack around CK's weird HTTP/WebDAV design to understand 401 codes from downloads. This lets authentication work again! This code somewhat mirrors -[CKHTTPConnection processReceivedData:]
-            NSRange responseRange;
-            if ([data length] > 0)
-            {
-                responseRange = [CKHTTPResponse canConstructResponseWithData:myResponseBuffer];
-                if (responseRange.location == NSNotFound) return YES;
-            }
-            else
-            {
-                responseRange = NSMakeRange(0, [myResponseBuffer length]);
-            }
-            
-            NSData *packetData = [myResponseBuffer subdataWithRange:responseRange];
-            CKHTTPResponse *response = [CKHTTPResponse responseWithRequest:myCurrentRequest data:packetData];
-            if ([response code] == 401) return YES;
-            
-            
-            NSDictionary *headers = [response headers];
-            NSString *length = [headers objectForKey:@"Content-Length"];
+			NSDictionary *headers = [CKHTTPResponse headersWithData:myResponseBuffer];
+			NSString *length = [headers objectForKey:@"Content-Length"];
 			
 			if (length)
 			{
