@@ -369,7 +369,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 - (BOOL)processBufferWithNewData:(NSData *)data
 {
 	//If we don't have any authorization, we cannot possibly be downloading. If the initial command we send to the WebDAV server is a download, our state will be downloading, but we will not have authorized. We must allow authorization!
-	BOOL hasAuthorized = (_basicAccessAuthorizationHeader || (_currentDigestRealm && _currentDigestOpaque && _currentDigestNonce));
+	BOOL hasAuthorized = (_basicAccessAuthorizationHeader || _currentAuth);
 	
 	if (hasAuthorized && GET_STATE == CKConnectionDownloadingFileState)
 	{
