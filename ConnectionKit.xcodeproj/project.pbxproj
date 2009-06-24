@@ -622,6 +622,12 @@
 		2753CF3C0FF119EE0017A782 /* Utility */ = {
 			isa = PBXGroup;
 			children = (
+				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
+				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
+				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
+				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
+				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
+				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
@@ -850,14 +856,8 @@
 				797782820B474765008DBA01 /* NSDictionary+Connection.m */,
 				79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */,
 				79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */,
-				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
-				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
-				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
-				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
 				79420AD20C91CDE80002B99D /* NSNumber+Connection.h */,
 				79420AD30C91CDE80002B99D /* NSNumber+Connection.m */,
-				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
-				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 				27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */,
 				27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */,
 				278B96C10F28019D002F3C54 /* NSInvocation+ConnectionKit.h */,
