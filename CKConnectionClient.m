@@ -142,7 +142,7 @@
     }
     else
     {
-        NSURLCredential *credential = [originalChallenge proposedCredential];
+        NSURLCredential *credential = [fullChallenge proposedCredential];
         if ([credential user] && [credential hasPassword] && [originalChallenge previousFailureCount] == 0)
         {
             [[originalChallenge sender] useCredential:credential forAuthenticationChallenge:originalChallenge];
