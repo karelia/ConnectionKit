@@ -107,7 +107,7 @@ NSString *S3PathSeparator = @":";
 	[incompleteKeyNames release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
-    [_credential release];
+    [_currentCredential release];
 	[_currentAuthenticationChallenge release];
     
 	[super dealloc];
@@ -138,10 +138,10 @@ NSString *S3PathSeparator = @":";
 - (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
 	// S3 needs decent credentials to operate
-    NSAssert(_credential, @"S3 requires credentials to operate");
-    NSAssert([_credential user], @"S3 connection has no access key ID");
-    NSAssert([_credential persistence] == NSURLCredentialPersistenceNone, @"S3 passwords cannot be persisted");
-    NSAssert([_credential password], @"S3 connection has no secret key");
+    NSAssert(_currentCredential, @"S3 requires credentials to operate");
+    NSAssert([_currentCredential user], @"S3 connection has no access key ID");
+    NSAssert([_currentCredential persistence] == NSURLCredentialPersistenceNone, @"S3 passwords cannot be persisted");
+    NSAssert([_currentCredential password], @"S3 connection has no secret key");
     
     
     NSString *method = [request method];
@@ -169,8 +169,8 @@ NSString *S3PathSeparator = @":";
 	}
 	[auth appendString:[uri encodeLegally]];
 	
-	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[_credential password]] base64Encoding];
-	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [_credential user], sha1] forKey:@"Authorization"];
+	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[_currentCredential password]] base64Encoding];
+	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [_currentCredential user], sha1] forKey:@"Authorization"];
 }
 
 - (void)processResponse:(CKHTTPResponse *)response
@@ -900,7 +900,7 @@ NSString *S3PathSeparator = @":";
     if (challenge != _currentAuthenticationChallenge)	return;
 	[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
     
-    _credential = [credential retain];
+    _currentCredential = [credential retain];
     
     // Continue on with connecting
     [super threadedConnect];
