@@ -80,6 +80,19 @@ checkRemoteExistence:(NSNumber *)check;
 	return CKFileProtocol;
 }
 
++ (void)load    // registration of this class
+{
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
+	//Register all URL Schemes and the protocol.
+	NSEnumerator *URLSchemeEnumerator = [[self URLSchemes] objectEnumerator];
+	NSString *URLScheme;
+	while ((URLScheme = [URLSchemeEnumerator nextObject]))
+		[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forProtocol:[self protocol] URLScheme:URLScheme];
+	
+    [pool release];
+}
+
 + (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }
 
 - (id)initWithRequest:(CKConnectionRequest *)request
