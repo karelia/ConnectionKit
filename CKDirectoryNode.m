@@ -88,7 +88,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	return NO;
 }
 
-- (unsigned)hash
+- (NSUInteger)hash
 {
 	return [[self path] hash];
 }
@@ -200,7 +200,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	return myName;
 }
 
-int CKDirectoryContentsSort(id obj1, id obj2, void *context)
+NSInteger CKDirectoryContentsSort(id obj1, id obj2, void *context)
 {
 	CKDirectoryNode *n1 = (CKDirectoryNode *)obj1;
 	CKDirectoryNode *n2 = (CKDirectoryNode *)obj2;

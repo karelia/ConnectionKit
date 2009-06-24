@@ -41,7 +41,7 @@
 NSString *CKFailedToParseDirectoryListingException = @"CKFailedToParseDirectoryListingException";
 
 
-int filenameSort(id obj1, id obj2, void *context)
+NSInteger filenameSort(id obj1, id obj2, void *context)
 {
     NSString *f1 = [obj1 objectForKey:[cxFilenameKey lastPathComponent]];
 	NSString *f2 = [obj2 objectForKey:[cxFilenameKey lastPathComponent]];
@@ -219,7 +219,7 @@ if (![fn isEqualToString:@"."] && \
 	{
 		//Filename is after the date column.
 		NSString *lastColumnStringOfDate = [[date componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lastObject];
-		int lastDateColumnIndex = [words indexOfObject:lastColumnStringOfDate];
+		NSInteger lastDateColumnIndex = [words indexOfObject:lastColumnStringOfDate];
 		if (lastDateColumnIndex != NSNotFound)
 			filenameColumnIndex = lastDateColumnIndex + 1;
 	}

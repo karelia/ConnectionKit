@@ -967,7 +967,7 @@ static NSImage *symFile = nil;
 }
 
 #pragma mark ----=NStableView delegate=----
-- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
 	BOOL returnValue = YES;
 	
@@ -982,7 +982,7 @@ static NSImage *symFile = nil;
 }
 
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	//disable the cell we can't select
 	//

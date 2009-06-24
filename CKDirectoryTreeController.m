@@ -1339,7 +1339,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark NSOutlineView Data Source
 
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	int result = 0;
 	
@@ -1365,7 +1365,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return result;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 	id child = nil;
 	
@@ -1561,7 +1561,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark NSBrowser Delegate DataSource
 
-- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column 
+- (NSInteger)browser:(NSBrowser *)sender numberOfRowsInColumn:(NSInteger)column 
 {
 	CKDirectoryNode *node = nil;
 	if (column == 0)
@@ -1576,7 +1576,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return [node countIncludingHiddenFiles:myFlags.showsHiddenFiles];
 }
 
-- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(int)row column:(int)column 
+- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(NSInteger)row column:(NSInteger)column 
 {
 	CKDirectoryNode *parent = nil;
 	
@@ -1601,7 +1601,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 }
 
-- (BOOL)browser:(NSBrowser *)sender shouldShowCellExpansionForRow:(int)rowIndex column:(int)columnIndex
+- (BOOL)browser:(NSBrowser *)sender shouldShowCellExpansionForRow:(NSInteger)rowIndex column:(NSInteger)columnIndex
 {
 	return NO;
 }
