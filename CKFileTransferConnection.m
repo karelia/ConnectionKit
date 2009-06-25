@@ -127,7 +127,7 @@ NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
     return [operation identifier];
 }
 
-- (id)listContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
     CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDirectoryListingOperationWithIdentifier:identifier
                                                                                                              path:path];
@@ -173,7 +173,7 @@ withIntermediateDirectories:(BOOL)createIntermediates
     return [operation identifier];
 }
 
-- (id)deleteItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 {
     CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDeleteOperationWithIdentifier:identifier
                                                                                                    path:path];
@@ -386,7 +386,9 @@ withIntermediateDirectories:(BOOL)createIntermediates
     }
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+        didReceiveProperties:(CKFileInfo *)fileInfo
+                ofItemAtPath:(NSString *)path;
 {
     
 }

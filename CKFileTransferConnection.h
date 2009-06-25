@@ -47,12 +47,19 @@ typedef enum {
 
 // Operations
 - (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
 - (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier;
-- (id)listContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-- (id)createDirectoryAtPath:(NSString *)path withIntermediateDirectories:(BOOL)createIntermediates identifier:(id <NSObject>)identifier;
-- (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
-- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-- (id)deleteItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+- (id)createDirectoryAtPath:(NSString *)path
+withIntermediateDirectories:(BOOL)createIntermediates
+                 identifier:(id <NSObject>)identifier;
+
+- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+//- (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
+//- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
 
 @end
 

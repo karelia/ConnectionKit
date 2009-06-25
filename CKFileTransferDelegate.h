@@ -9,6 +9,9 @@
 #import "CKFileTransferConnection.h"
 
 
+@class CKFileInfo;
+
+
 @protocol CKFileTransferDelegate
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
@@ -61,8 +64,9 @@
            didSendDataOfLength:(NSUInteger)dataLength;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
-              directoryListing:(id)identifier
-            didReceiveContents:(NSArray *)contents;
+                     operation:(id)identifier
+          didReceiveProperties:(CKFileInfo *)fileInfo
+                  ofItemAtPath:(NSString *)path;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
                   appendString:(NSString *)string
