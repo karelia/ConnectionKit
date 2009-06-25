@@ -252,11 +252,13 @@
     [[self connectionThreadProxy] fileTransferProtocol:protocol didUploadDataOfLength:length];
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+        didReceiveProperties:(CKFileInfo *)fileInfo
+                ofItemAtPath:(NSString *)path;
 {
     NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
-    [[self connectionThreadProxy] fileTransferProtocol:protocol didLoadContentsOfDirectory:contents];
+    [[self connectionThreadProxy] fileTransferProtocol:protocol didReceiveProperties:fileInfo ofItemAtPath:path];
 }
 
 #pragma mark Transcript

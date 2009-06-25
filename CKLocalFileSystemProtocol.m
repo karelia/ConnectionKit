@@ -91,36 +91,6 @@
     }
 }
 
-- (void)fetchContentsOfDirectoryAtPath:(NSString *)path
-{
-    NSArray *array = [_fileManager directoryContentsAtPath:path];
-	NSMutableArray *packaged = [NSMutableArray arrayWithCapacity:[array count]];
-	NSEnumerator *e = [array objectEnumerator];
-	NSString *cur;
-	
-	while (cur = [e nextObject]) {
-		NSString *file = [NSString stringWithFormat:@"%@/%@", path, cur];
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[_fileManager fileAttributesAtPath:file
-                                                                                                            traverseLink:NO]];
-		[attribs setObject:cur forKey:cxFilenameKey];
-		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
-			NSString *target = [file stringByResolvingSymlinksInPath];
-			BOOL isDir;
-			[_fileManager fileExistsAtPath:target isDirectory:&isDir];
-			if (isDir && ![target hasSuffix:@"/"])
-			{
-				target = [target stringByAppendingString:@"/"];
-			}
-			[attribs setObject:target forKey:cxSymbolicLinkTargetKey];
-		}
-		
-		[packaged addObject:attribs];
-	}
-	
-	[[self client] fileTransferProtocol:self didLoadContentsOfDirectory:packaged];
-    [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
-}
-
 - (void)createDirectoryAtPath:(NSString *)path
 {
 	BOOL result = [_fileManager createDirectoryAtPath:path attributes:nil];

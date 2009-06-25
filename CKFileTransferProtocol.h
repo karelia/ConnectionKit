@@ -10,8 +10,11 @@
 #import "CKFileTransferConnection.h"
 
 
-@class NSURLRequest;
+@class CKFileInfo;
 @protocol CKFileTransferProtocolClient;
+
+
+#pragma mark -
 
 
 @interface CKFileTransferProtocol : NSObject
@@ -94,6 +97,9 @@
 @end
 
 
+#pragma mark -
+
+
 @protocol CKFileTransferProtocolClient <NSObject>
 
 // Calling any of these methods at an inappropriate time will result in an exception
@@ -106,7 +112,7 @@
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didLoadContentsOfDirectory:(NSArray *)contents;
+- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveProperties:(CKFileInfo *)fileInfo ofItemAtPath:(NSString *)path;
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol

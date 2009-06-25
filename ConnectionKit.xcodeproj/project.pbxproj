@@ -26,6 +26,8 @@
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* ConnectionKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* ConnectionKit.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
+		270B9B840FF3AAB300DC1DAA /* CKFileInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 270B9B820FF3AAB300DC1DAA /* CKFileInfo.h */; };
+		270B9B850FF3AAB400DC1DAA /* CKFileInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 270B9B830FF3AAB300DC1DAA /* CKFileInfo.m */; };
 		2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 2740ED080FE94CD90081C416 /* CKThreadProxy.h */; };
 		2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2740ED090FE94CD90081C416 /* CKThreadProxy.m */; };
 		278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -247,6 +249,8 @@
 		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		270B9B820FF3AAB300DC1DAA /* CKFileInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileInfo.h; sourceTree = "<group>"; };
+		270B9B830FF3AAB300DC1DAA /* CKFileInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileInfo.m; sourceTree = "<group>"; };
 		2740ED080FE94CD90081C416 /* CKThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKThreadProxy.h; sourceTree = "<group>"; };
 		2740ED090FE94CD90081C416 /* CKThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKThreadProxy.m; sourceTree = "<group>"; };
 		2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Connection architecture overview.graffle"; sourceTree = "<group>"; };
@@ -615,6 +619,8 @@
 				278B99A40F2B66C4002F3C54 /* CKFileTransferConnection+Private.h */,
 				278B99A50F2B66C4002F3C54 /* CKFileTransferConnection+Private.m */,
 				27D1E90B0FEB04FF00DC6A84 /* CKFileTransferDelegate.h */,
+				270B9B820FF3AAB300DC1DAA /* CKFileInfo.h */,
+				270B9B830FF3AAB300DC1DAA /* CKFileInfo.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -1020,6 +1026,7 @@
 				278F9A3B0F702FE4003B7645 /* CKHTTPConnection.h in Headers */,
 				2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */,
 				27D1E90C0FEB04FF00DC6A84 /* CKFileTransferDelegate.h in Headers */,
+				270B9B840FF3AAB300DC1DAA /* CKFileInfo.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1354,6 +1361,7 @@
 				27F05A700F2BA0D800DB5FBA /* CKSFTPProtocol.m in Sources */,
 				278F9A3C0F702FE4003B7645 /* CKHTTPConnection.m in Sources */,
 				2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */,
+				270B9B850FF3AAB400DC1DAA /* CKFileInfo.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
