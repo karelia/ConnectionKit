@@ -22,9 +22,15 @@ static NSMutableArray *sRegisteredClasses;
     {
         sRegisteredClasses = [[NSMutableArray alloc] init];
         
-        // Register the built-in protocols
-        [self registerClass:[CKLocalFileSystemProtocol class]];
-        [self registerClass:[CKWebDAVProtocol class]];
+        // Register the built-in protocols. Use NSClassFromString() in case the code's been built without them included. Register S3 last so that it gets consulted *before* WebDAV.
+        Class aProtocol = NSClassFromString(@"CKLocalFileSystemProtocol");
+        if (aProtocol) [self registerClass:aProtocol];
+        
+        aProtocol = NSClassFromString(@"CKWebDAVProtocol");
+        if (aProtocol) [self registerClass:aProtocol];
+        
+        aProtocol = NSClassFromString(@"CKAmazonS3Protocol");
+        if (aProtocol) [self registerClass:aProtocol];
     }
 }
 

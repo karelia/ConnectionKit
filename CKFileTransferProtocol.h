@@ -19,7 +19,7 @@
 
 @interface CKFileTransferProtocol : NSObject
 {
-@private
+  @private
     NSURLRequest             *_request;
     id <CKFileTransferProtocolClient> _client;
 }
