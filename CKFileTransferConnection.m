@@ -9,14 +9,15 @@
 #import <ConnectionKit/ConnectionKit.h>
 #import "CKFileTransferConnection+Private.h"
 
-#import "CKConnectionError.h"
+#import "CKError.h"
 #import "CKConnectionProtocol1.h"
 #import "CKConnectionThreadManager.h"
 
 #import "NSInvocation+ConnectionKit.h"
 
 
-NSString *const CKConnectionErrorDomain = @"ConnectionErrorDomain";
+NSString *const CKErrorDomain = @"ConnectionErrorDomain";
+NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 
 
 @interface CKFileTransferConnection (QueueInternal)

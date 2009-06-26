@@ -288,7 +288,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	if(!host){
 		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", [[[self request] URL] host]);
 		
-        NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain 
+        NSError *error = [NSError errorWithDomain:CKErrorDomain 
                                              code:EHOSTUNREACH
                                          userInfo:
             [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Host Unavailable", @"Couldn't open the port to the host"), NSLocalizedDescriptionKey,
@@ -359,7 +359,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                   LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
                                   [[[self request] URL] host], ConnectionHostKey, nil];
-        NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
+        NSError *error = [NSError errorWithDomain:CKErrorDomain code:EHOSTUNREACH userInfo:userInfo];
         [[self client] connectionDidReceiveError:error];
         
 		return NO;
@@ -706,7 +706,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			
 			if (theState == CKConnectionNotConnectedState) 
 			{
-				error = [NSError errorWithDomain:CKConnectionErrorDomain
+				error = [NSError errorWithDomain:CKErrorDomain
 											code:CKConnectionStreamError
 										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[[self request] URL] host]], NSLocalizedDescriptionKey, [[[self request] URL] host], ConnectionHostKey, nil]];
 			}
@@ -890,7 +890,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			
 			if (GET_STATE == CKConnectionNotConnectedState) 
 			{
-				error = [NSError errorWithDomain:CKConnectionErrorDomain
+				error = [NSError errorWithDomain:CKErrorDomain
 											code:CKConnectionStreamError
 										userInfo:[NSDictionary dictionaryWithObjectsAndKeys:[NSString stringWithFormat:@"%@ %@?", LocalizedStringInConnectionKitBundle(@"Is the service running on the server", @"Stream Error before opening"), [[[self request] URL] host]], NSLocalizedDescriptionKey, [[[self request] URL] host], ConnectionHostKey, nil]];
 			}

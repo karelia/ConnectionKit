@@ -9,7 +9,7 @@
 #import "CKWebDAVProtocol.h"
 
 #import "CKConnectionAuthentication.h"
-#import "CKConnectionError.h"
+#import "CKError.h"
 
 #import "CKAbstractConnection.h"    // For KTLog. Remove dependency when possible
 
@@ -275,7 +275,7 @@
     // It's quite likely there's an error. Make handling it easy
     BOOL result = NO;
     NSString *localizedErrorDescription = nil;
-    int errorCode = CKConnectionErrorUnknown;
+    int errorCode = CKErrorUnknown;
     NSMutableDictionary *errorUserInfo = [NSMutableDictionary dictionary];
     
     
@@ -294,7 +294,7 @@
             }
             else
             {
-                errorCode = CKConnectionErrorBadServerResponse;
+                errorCode = CKErrorBadServerResponse;
                 localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The requested resource does not support WebDAV", "Error starting WebDAV connection");
             }
             
@@ -355,14 +355,14 @@
                     break;
                     
                 case 403:
-                    errorCode = CKConnectionErrorNoPermissionsToReadFile;
+                    errorCode = CKErrorNoPermissionsToReadFile;
                     localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
                     //we fake the directory exists as this is usually the case if it is the root directory
                     [errorUserInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
                     break;
                     
                 case 409:
-                    errorCode = CKConnectionErrorFileDoesNotExist;
+                    errorCode = CKErrorFileDoesNotExist;
                     localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An intermediate directory does not exist and needs to be created before the current directory", @"WebDAV Create Directory Error");
                     break;
                     
@@ -371,7 +371,7 @@
                     break;
                     
                 case 507:
-                    errorCode = CKConnectionErrorDataLengthExceedsMaximum;
+                    errorCode = CKErrorDataLengthExceedsMaximum;
                     localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Insufficient storage space available", @"WebDAV Create Directory Error");
                     break;
             }
@@ -400,7 +400,7 @@
                     break;
                     
                 case 409:
-                    errorCode = CKConnectionErrorFileDoesNotExist;
+                    errorCode = CKErrorFileDoesNotExist;
                     localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"Parent Folder does not exist", @"WebDAV Uploading Error");
                     break;
                     
@@ -451,12 +451,12 @@
     NSError *error = nil;
     if (!result)
     {
-        [errorUserInfo setObject:response forKey:CKConnectionErrorURLResponseErrorKey];
+        [errorUserInfo setObject:response forKey:CKErrorURLResponseErrorKey];
         
         if (!localizedErrorDescription) localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"Unknown connection error");
         [errorUserInfo setObject:localizedErrorDescription forKey:NSLocalizedDescriptionKey];
         
-        error = [NSError errorWithDomain:CKConnectionErrorDomain code:errorCode userInfo:errorUserInfo];
+        error = [NSError errorWithDomain:CKErrorDomain code:errorCode userInfo:errorUserInfo];
     }
     
     [self currentOperationDidFinish:result error:error];
@@ -476,7 +476,7 @@
 - (void)HTTPConnection:(CKHTTPConnection *)connection didFailWithError:(NSError *)error
 {
     // If the HTTP connection failed, the file operation almost certainly did
-    // TODO: Should we be coercing the error to CKConnectionErrorDomain?
+    // TODO: Should we be coercing the error to CKErrorDomain?
     [self currentOperationDidFinish:NO error:error];
 }
 

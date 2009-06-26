@@ -8,7 +8,7 @@
 
 #import "CKFileTransferConnection+Private.h"
 
-#import "CKConnectionError.h"
+#import "CKError.h"
 #import "CKConnectionAuthentication+Internal.h"
 #import "CKThreadProxy.h"
 
@@ -212,8 +212,8 @@
     
     if ([operation operationType] == CKConnectionOperationCreateDirectory &&
         [operation isRecursive] &&
-        [[error domain] isEqualToString:CKConnectionErrorDomain] &&
-        [error code] == CKConnectionErrorFileDoesNotExist)
+        [[error domain] isEqualToString:CKErrorDomain] &&
+        [error code] == CKErrorFileDoesNotExist)
     {
         NSString *path = [[operation path] stringByDeletingLastPathComponent];
         if (![path isEqualToString:@"/"])

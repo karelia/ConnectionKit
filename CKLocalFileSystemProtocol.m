@@ -8,7 +8,7 @@
 
 #import "CKLocalFileSystemProtocol.h"
 
-#import "CKConnectionError.h"
+#import "CKError.h"
 #import "CKConnectionProtocol1.h"
 
 
@@ -68,7 +68,7 @@
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                   LocalizedStringInConnectionKitBundle(@"Failed to upload data", @"FileConnection copy data error"), NSLocalizedDescriptionKey,
                                   path, NSFilePathErrorKey,nil];
-        NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
+        NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:userInfo];
         [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
@@ -86,7 +86,7 @@
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  LocalizedStringInConnectionKitBundle(@"Unable to download data", @"File connection download failure"), NSLocalizedDescriptionKey,
 								  path, NSFilePathErrorKey, nil];
-		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
+		NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:userInfo];
 		[[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
     }
 }
@@ -112,7 +112,7 @@
 							path, NSFilePathErrorKey,
                             nil];		
 		
-        NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:ui];
+        NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:ui];
         [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
@@ -131,7 +131,7 @@
 	{
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObject:localizedDescription forKey:NSLocalizedDescriptionKey];
-		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
+		NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:userInfo];
         [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
@@ -150,7 +150,7 @@
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  LocalizedStringInConnectionKitBundle(@"Could not change file permissions", @"FileConnection set permissions error"), NSLocalizedDescriptionKey,
 								  path, NSFilePathErrorKey, nil];
-		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];
+		NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:userInfo];
         [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }
@@ -171,7 +171,7 @@
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  localizedDescription, NSLocalizedDescriptionKey, 
 								  path, NSFilePathErrorKey, nil];
-		NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:CKConnectionErrorUnknown userInfo:userInfo];		
+		NSError *error = [NSError errorWithDomain:CKErrorDomain code:CKErrorUnknown userInfo:userInfo];		
         [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
 	}
 }

@@ -33,7 +33,7 @@
 
 #import "CKConnectionRegistry.h"
 #import "CKConnectionClientProtocol.h"
-#import "CKConnectionError.h"
+#import "CKError.h"
 
 
 /*!	CKAbstractConnection is a convenience superclass that connections can descend from; it takes care of some of the core functionality.
@@ -41,9 +41,9 @@
  */
 
 enum { 
-	CKConnectionErrorParsingDirectoryListing = 6000, 
+	CKErrorParsingDirectoryListing = 6000, 
 	CKConnectionStreamError, 
-	CKConnectionErrorBadPassword, 
+	CKErrorBadPassword, 
 	CKConnectionNoConnectionsAvailable,
 	CKConnectionNoUsernameOrPassword,
 };
