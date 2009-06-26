@@ -1391,7 +1391,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                                   localizedDescription, NSLocalizedDescriptionKey,
                                                   file, NSFilePathErrorKey,
                                                   [[[self request] URL] host], ConnectionHostKey, nil];
-                        error = [NSError errorWithDomain:CKConnectionErrorDomain code:ConnectionErrorUploading userInfo:userInfo];			
+                        error = [NSError errorWithDomain:CKErrorDomain code:ConnectionErrorUploading userInfo:userInfo];			
                         [self threadedCancelTransfer];			
                         break;
                     }

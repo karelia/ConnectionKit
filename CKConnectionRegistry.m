@@ -122,7 +122,7 @@
                       
     if (!result && error)
 	{
-		NSError *err = [NSError errorWithDomain:CKConnectionErrorDomain
+		NSError *err = [NSError errorWithDomain:CKErrorDomain
 										   code:CKConnectionNoConnectionsAvailable
 									   userInfo:[NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(
 																																@"No connection available for requested connection type", @"failed to find a connection class"),

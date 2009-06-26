@@ -1072,7 +1072,7 @@ static NSString *lsform = nil;
     {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"SFTP connections require some form of authentication.", @"SFTP authenticaton error")
                                                              forKey:NSLocalizedDescriptionKey];
-        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKConnectionErrorBadPassword userInfo:userInfo];
+        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKErrorBadPassword userInfo:userInfo];
         [[self client] connectionDidReceiveError:error];
         
         [self disconnect];
