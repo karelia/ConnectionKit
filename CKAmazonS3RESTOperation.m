@@ -78,10 +78,13 @@ char *NewBase64Encode(const void *inputBuffer,
 
 - (BOOL)isConcurrent { return YES; }
 
-- (void)operationDidFinish
+- (void)operationDidEnd:(BOOL)finished error:(NSError *)error
 {
+    // Connection is no longer needed
+    [_connection cancel];
     [_connection release];  _connection = nil;
     
+    // Mark as finished etc.
     [self willChangeValueForKey:@"isExecuting"];
     [self willChangeValueForKey:@"isFinished"];
     _isExecuting = NO;
@@ -89,7 +92,18 @@ char *NewBase64Encode(const void *inputBuffer,
     [self didChangeValueForKey:@"isExecuting"];
     [self didChangeValueForKey:@"isFinished"];
     
-    CFRelease(self);    // retained at start of connection
+    // Let delegate know
+    if (finished)
+    {
+        [_delegate amazonS3OperationDidFinishLoading:self];
+    }
+    else
+    {
+        [_delegate amazonS3Operation:self didFailWithError:error];
+    }
+    
+    // Retained at start of connection
+    CFRelease(self);
 }
 
 #pragma mark Connection
@@ -99,7 +113,51 @@ char *NewBase64Encode(const void *inputBuffer,
     // All S3 operations should be authenticated using Amazon's unique scheme
     [self addAuthenticationToRequest];
     
-    _connection = [[CKHTTPConnection alloc] initWithRequest:_request delegate:self];
+    _connection = [[NSURLConnection alloc] initWithRequest:_request delegate:self];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // Amazon uses its own authentication scheme so this should never happen!
+    NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUserAuthenticationRequired userInfo:nil];
+    [self connection:connection didFailWithError:error];
+    [error release];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response;
+{
+    if ([response isKindOfClass:[NSHTTPURLResponse class]])
+    {
+        NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
+        if ([httpResponse statusCode] >= 300)   // 3xx errors are likey to be redirects, which NSURLConnection handles
+        {
+            // TODO: Construct an error from the XML payload
+            [self operationDidEnd:NO error:nil];
+        }
+        else
+        {
+            [_delegate amazonS3Operation:self didReceiveResponse:response];
+        }
+    }
+    else
+    {
+        // TODO: Fail with error or assertion?
+    }
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data;
+{
+    [_delegate amazonS3Operation:self didReceiveData:data];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection;
+{
+    [self operationDidEnd:YES error:nil];
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error;
+{
+    [self operationDidEnd:NO error:error];
 }
 
 #pragma mark Authentication
@@ -225,7 +283,7 @@ char *NewBase64Encode(const void *inputBuffer,
 		{
 			NSString *value = [_request valueForHTTPHeaderField:aKey];
             NSAssert1([value rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].location == NSNotFound,
-                      @"Wasn't expecting Amazon S3 request header field to contain a newline character: %@",
+                      @"Wasn't expecting Amazon S3 request header field to contain a newline character:\n%@",
                       value);
             [result appendFormat:@"%@:%@\n", lowercaseKey, value];
 		}

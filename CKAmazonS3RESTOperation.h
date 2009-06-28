@@ -23,7 +23,7 @@
     NSURLCredential                         *_credential;
     id <CKAmazonS3RESTOperationDelegate>    _delegate;  // weak ref
     
-    CKHTTPConnection    *_connection;
+    NSURLConnection *_connection;
     
     BOOL    _isFinished;
     BOOL    _isExecuting;
