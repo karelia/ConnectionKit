@@ -239,22 +239,4 @@
 	return [NSData dataWithBytes:md_value length:md_len];
 }
 
-- (NSData *)sha1HMacWithKey:(NSString*)key
-{
-	HMAC_CTX mdctx;
-	unsigned char md_value[EVP_MAX_MD_SIZE];
-	unsigned int md_len;
-	const char* k = [key cStringUsingEncoding:NSUTF8StringEncoding];
-	const unsigned char *data = [self bytes];
-	int len = [self length];
-	
-	HMAC_CTX_init(&mdctx);
-	HMAC_Init(&mdctx,k,strlen(k),EVP_sha1());
-	HMAC_Update(&mdctx,data, len);
-	HMAC_Final(&mdctx, md_value, &md_len);
-	HMAC_CTX_cleanup(&mdctx);
-	return [NSData dataWithBytes:md_value length:md_len];
-}
-
-
 @end
