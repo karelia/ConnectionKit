@@ -44,15 +44,6 @@
                                                                                   kCFStringEncodingUTF8)) autorelease];
     return result;
 }
-- (NSString *)encodeLegallyForS3
-{
-	NSString *result = [NSMakeCollectable(CFURLCreateStringByAddingPercentEscapes(NULL,
-                                                                                  (CFStringRef)self,
-                                                                                  NULL,
-                                                                                  (CFStringRef)@"+",
-                                                                                  kCFStringEncodingUTF8)) autorelease];
-	return result;
-}	
 
 + (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding
 {
