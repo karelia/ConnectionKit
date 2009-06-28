@@ -40,7 +40,6 @@
 
 // openssl
 - (NSData *)sha1Digest;
-- (NSData *)sha1HMacWithKey:(NSString*)key;
 
 - (NSRange)rangeOfData:(NSData *)data;
 - (NSRange)rangeOfData:(NSData *)data range:(NSRange)range;
