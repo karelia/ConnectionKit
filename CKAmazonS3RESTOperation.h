@@ -12,7 +12,8 @@
 
 #import <Foundation/Foundation.h>
 
-#import "CKHTTPConnection.h"
+
+extern NSString * const CKAmazonErrorCodeKey;
 
 
 @protocol CKAmazonS3RESTOperationDelegate;
