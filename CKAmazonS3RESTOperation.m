@@ -7,7 +7,12 @@
 //
 
 #import "CKAmazonS3RESTOperation.h"
+
+#import "CKHTTPConnection.h"
 #import <CommonCrypto/CommonHMAC.h>
+
+
+NSString *const CKAmazonErrorCodeKey = @"AmazonErrorCode";
 
 
 @interface CKAmazonS3RESTOperation ()
@@ -136,7 +141,7 @@ char *NewBase64Encode(const void *inputBuffer,
         }
         else
         {
-            [_delegate amazonS3Operation:self didReceiveResponse:response];
+            [_delegate amazonS3Operation:self didReceiveResponse:httpResponse];
         }
     }
     else
