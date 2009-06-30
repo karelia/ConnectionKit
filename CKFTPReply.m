@@ -37,19 +37,19 @@
     return [self initWithReplyCode:code textLines:[NSArray arrayWithObject:text]];
 }
 
+- (void)dealloc
+{
+	[_textLines release];
+	[super dealloc];
+}
+
 #pragma mark reply code
 
 - (NSUInteger)replyCode { return _replyCode; }
 
 - (NSString *)replyCodeString
 {
-    NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-    [formatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
-    [formatter setNumberStyle:NSNumberFormatterNoStyle];
-    NSString *result = [formatter stringFromNumber:[NSNumber numberWithUnsignedInt:[self replyCode]]];
-    
-    [formatter release];
-    return result;
+	return [NSString stringWithFormat:@"%u", [self replyCode]];
 }
 
 - (CKFTPReplyType)replyType
@@ -142,14 +142,13 @@
     }
     
     // To get to here, it's a multiline response
-    NSMutableArray *result = [[lines mutableCopy] autorelease];
+    NSMutableArray *result = [lines mutableCopy];
     [result replaceObjectAtIndex:([result count] - 1) withObject:lastLine];
     
-    NSString *firstLine = [[NSString alloc] initWithFormat:@"%@-%@", code, [lines objectAtIndex:0]];
+	NSString *firstLine = [NSString stringWithFormat:@"%@-%@", code, [lines objectAtIndex:0]];
     [result replaceObjectAtIndex:0 withObject:firstLine];
-    [firstLine release];
     
-    return result;
+    return [result autorelease];
 }
 
 - (NSString *)description
@@ -312,7 +311,8 @@
     {
         // Multiline replies require us to wait until the final line is received
         NSString *lastLineCode;
-        if (_multilineReplyBuffer) lastLineCode = [[self replyCodeString] stringByAppendingString:@" "];
+        if (_multilineReplyBuffer)
+			lastLineCode = [[self replyCodeString] stringByAppendingString:@" "];
         
             
         // Split off text lines one at a time. They can end in <CR><LF> or <LF>
@@ -323,7 +323,8 @@
         {
             // What is the range of the actual text? Ignore the <LF>'s preceeding <CR> if it exists
             NSRange lineRange = NSMakeRange(_scanLocation, linebreakStart - _scanLocation);
-            if (((uint8_t *)[_data bytes])[linebreakStart - 1] == '\r') lineRange.length--;
+            if (((uint8_t *)[_data bytes])[linebreakStart - 1] == '\r')
+				lineRange.length--;
             NSData *lineData = [_data subdataWithRange:lineRange];
             
             _scanLocation = linebreakStart + 1;
@@ -337,14 +338,15 @@
             NSString *line = [[NSString alloc] initWithData:lineData encoding:NSASCIIStringEncoding];
             if (line)
             {
-                [line autorelease];
-                
-                
                 // We can easily use the line to finish a standard reply
                 if (!_multilineReplyBuffer)
                 {
                     *excess = [self replyDidBecomeComplete];
+					
+					[_textLines release];
                     _textLines = [[NSArray alloc] initWithObjects:line, nil];
+					
+					[line release];
                     break;
                 }
                 
@@ -352,7 +354,9 @@
                 // If this is the last line of a multiline reply, strip it of the code prefix
                 if ([line hasPrefix:lastLineCode])
                 {
-                    line = [line substringFromIndex:4];
+					NSString *lineWithoutCode = [line substringFromIndex:4];
+					[line release];
+					line = lineWithoutCode;
                     [_multilineReplyBuffer addObject:line];
                     *excess = [self replyDidBecomeComplete];
                     break;
