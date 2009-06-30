@@ -2040,15 +2040,17 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (void)processReceivedData:(NSData *)data
 {
-	if (!_currentReply) _currentReply = [[CKStreamedFTPReply alloc] init];
+	if (!_currentReply)
+		_currentReply = [[CKStreamedFTPReply alloc] init];
     
     NSData *excessData = nil;
     [_currentReply appendData:data nextData:&excessData];
+	
     while ([_currentReply isComplete])
     {
         [self parseCommand:_currentReply];
-        
         [_currentReply release];
+		
         if (excessData)
         {
             _currentReply = [[CKStreamedFTPReply alloc] init];
