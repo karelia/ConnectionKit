@@ -28,6 +28,7 @@
  */
 
 #import "CKHTTPPutRequest.h"
+#import "CKAbstractConnection.h"
 
 
 @implementation CKHTTPPutRequest
@@ -44,7 +45,9 @@
 			NSFileManager *fm = [NSFileManager defaultManager];
 			if ([fm fileExistsAtPath:myFilename])
 			{
-				[myContent appendData:[NSData dataWithContentsOfFile:myFilename]];
+				NSData *fileData = [NSData dataWithContentsOfMappedFile:filename];
+				if (fileData)
+					myContent = [fileData retain];
 			}
 		}
 		
@@ -81,6 +84,36 @@
 - (void)serializeContentWithPacket:(NSMutableData *)packet
 {
 	
+}
+
+#pragma mark -
+#pragma mark Immutable Content Protection
+- (void)appendContent:(NSData *)data
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
+}
+
+- (void)appendContentString:(NSString *)str
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
+}
+
+- (void)setContent:(NSData *)data
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
+}
+
+- (void)setContentString:(NSString *)str
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
 }
 
 @end

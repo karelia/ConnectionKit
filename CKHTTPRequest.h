@@ -12,7 +12,8 @@
  list of conditions and the following disclaimer in the documentation and/or other 
  materials provided with the distribution.
  
- Neither the name of Greg Hulands nor the names of its contributors may be used to 
+ Neither the name of Greg Hulands nor
+ the names of its contributors may be used to 
  endorse or promote products derived from this software without specific prior 
  written permission.
  
@@ -74,7 +75,7 @@
 - (unsigned)contentLength;
 
 - (void)serializeContentWithPacket:(NSMutableData *)packet; // subclasses override. packet is still in the header section at this point. only append your own headers if required, not your content
-- (NSData *)serialized;
+- (NSData *)serializedHeader;
 - (unsigned)headerLength; //only will contain a valid value after serialized is called
 
 - (CKHTTPResponse *)responseWithData:(NSData *)data;

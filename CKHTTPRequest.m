@@ -194,7 +194,7 @@
 
 - (NSData *)content
 {
-	return [NSData dataWithData:myContent];
+	return myContent;
 }
 
 - (NSString *)contentString
@@ -259,18 +259,11 @@
 	}
 }
 
-- (NSData *)serialized
+- (NSData *)serializedHeader
 {
 	NSMutableData *packet = [NSMutableData data];
 	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, [myURI encodeLegally]];
 	[packet appendData:[request dataUsingEncoding:NSUTF8StringEncoding]];
-	//NSData *gzip = [myContent deflate];
-	
-//	if ([gzip length] < HTTPChunkSize)
-//	{
-//		[myHeaders removeObjectForKey:@"Transfer-Encoding"];
-//		[myHeaders removeObjectForKey:@"Content-Coding"];
-//	}
 	
 	//do the headers
 	if ([myPost count] > 0 || [myUploads count] > 0)
@@ -296,7 +289,6 @@
 		[packet appendData:[header dataUsingEncoding:NSUTF8StringEncoding]];
 	}
 	
-	//NSLog(@"%@", [gzip descriptionAsUTF8String]);
 	NSString *stringBoundary = [NSString stringWithString:@"0xKhTmLbOuNdArY"];
 	NSString *contentType = [NSString stringWithFormat:@"multipart/form-data; boundary=%@",stringBoundary];
 	
@@ -307,43 +299,12 @@
 	
 	[self serializeContentWithPacket:packet];
 	
-//	// add an md5 hash header
-//	if ([myContent length] > 0)
-//	{
-//		NSString *md5 = [NSString stringWithFormat:@"Content-MD5: %%@\r\n", [[myContent md5Digest] base64Encoding]];
-//		[packet appendData:[md5 dataUsingEncoding:NSUTF8StringEncoding]];
-//	}
+	NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n\r\n", [myContent length]];
+	[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
 	
-	//if ([gzip length] < HTTPChunkSize)
-	{
-		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n\r\n", [myContent length]];
-		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
-		
-		myHeaderLength = [packet length];
-		
-		[packet appendData:myContent];
-	}
+	myHeaderLength = [packet length];
 	
-	/*	else
-	{
-		[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
-		//append the content
-		NSRange chunkRange = NSMakeRange(0,MIN(DAVChunkSize,[myContent length]));
-		NSData *chunk;
-		
-		while (chunkRange.length > 0)
-		{
-			chunk = [gzip subdataWithRange:chunkRange];
-			NSString *hexSize = [NSString stringWithFormat:@"%x\r\n", chunkRange.length];
-			//NSLog(@"%@", hexSize);
-			[packet appendData:[hexSize dataUsingEncoding:NSUTF8StringEncoding]];
-			[packet appendData:chunk];
-			[packet appendData:[spacer dataUsingEncoding:NSUTF8StringEncoding]];
-			chunkRange.location = chunkRange.location + chunkRange.length;
-			chunkRange.length = MIN(DAVChunkSize, [gzip length] - chunkRange.location);
-		}
-		[packet appendData:[@"0\r\n" dataUsingEncoding:NSUTF8StringEncoding]];
-	}*/
+//	[packet appendData:myContent];
 	
 	return packet;
 }

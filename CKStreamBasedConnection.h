@@ -55,8 +55,9 @@
 	id<InputStream>		_receiveStream;
 	BOOL				_isForceDisconnecting;
 	
-	NSMutableData		*_sendBuffer;
 	NSLock				*_sendBufferLock;
+	NSMutableArray		*_sendBufferQueue;
+	unsigned long long	_currentSendBufferReadLocation;
 	
 	// speed support
 	NSTimeInterval		_lastChunkSent;

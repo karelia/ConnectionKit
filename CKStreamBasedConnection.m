@@ -94,7 +94,9 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
     if (self = [super initWithRequest:request])
 	{
 		_sendBufferLock = [[NSLock alloc] init];
-		_sendBuffer = [[NSMutableData data] retain];
+		_sendBufferQueue = [[NSMutableArray alloc] init];
+		_currentSendBufferReadLocation = 0;
+		
 		_createdThread = [NSThread currentThread];
 		myStreamFlags.sendOpen = NO;
 		myStreamFlags.readOpen = NO;
@@ -130,7 +132,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_receiveStream autorelease];
 	
 	[_sendBufferLock release];
-	[_sendBuffer release];
+	[_sendBufferQueue release];
 	
 	[super dealloc];
 }
@@ -430,7 +432,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_sendStream release];
 	_receiveStream = nil;
 	_sendStream = nil;
-	[_sendBuffer setLength:0];
 	myStreamFlags.sendOpen = NO;
 	myStreamFlags.readOpen = NO;
 }
@@ -496,7 +497,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 	else
 	{
-		dataBuffer = _sendBuffer;
+		[_sendBufferLock lock];
+		if ([_sendBufferQueue count] > 0)
+			dataBuffer = [_sendBufferQueue objectAtIndex:0];
+		else
+			dataBuffer = nil;
+		[_sendBufferLock unlock];
 	}
 	
 	return dataBuffer;
@@ -504,31 +510,36 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 - (void)sendQueuedOutput
 {
+	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
+	
 	NSMutableData *dataBuffer = [self outputDataBuffer];
 	
 	[_sendBufferLock lock];
 	unsigned chunkLength = [dataBuffer length];
 	if ([self shouldChunkData])
 	{
-		chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
+		unsigned long long remainingBytes = [dataBuffer length] - _currentSendBufferReadLocation;
+		chunkLength = MIN(kStreamChunkSize, remainingBytes);
 	}
 	if (chunkLength > 0)
 	{
-		NSData *chunk = [dataBuffer subdataWithRange:NSMakeRange(0,chunkLength)];
-		
-		/*
-		 If this is uncommented, it'll cause massive CPU load when we're doing transfers.
-		 From Greg: "if you enable this, you computer will heat your house this winter"
-			KTLog(CKOutputStreamDomain, KTLogDebug, @"<< %@", [chunk shortDescription]);
-		 */
-		
-		uint8_t *bytes = (uint8_t *)[chunk bytes];
+		NSRange chunkRange = NSMakeRange(_currentSendBufferReadLocation, chunkLength);
+		uint8_t *bytes = (uint8_t *)[[dataBuffer subdataWithRange:chunkRange] bytes];
 		[(NSOutputStream *)_sendStream write:bytes maxLength:chunkLength];
 		[self recalcUploadSpeedWithBytesSent:chunkLength];
 		[self stream:_sendStream sentBytesOfLength:chunkLength];
-		[dataBuffer replaceBytesInRange:NSMakeRange(0,chunkLength)
-							  withBytes:NULL
-								 length:0];
+		_currentSendBufferReadLocation += chunkLength;
+		
+		//We're finished sending this chunk when our next byte to read is BEYOND the last byte.
+		NSUInteger lastByteToReadLocation = [dataBuffer length] - 1;
+		if (_currentSendBufferReadLocation > lastByteToReadLocation)
+		{
+			//We've sent all the bytes from this queued data object. Remove it from the queue.
+			[_sendBufferQueue removeObjectAtIndex:0];
+			
+			//Now that the object we'll be getting from [self outputDataBuffer] will be new, reset the read location
+			_currentSendBufferReadLocation = 0;
+		}
 		_lastChunkSent = [NSDate timeIntervalSinceReferenceDate];
 	}
 	else
@@ -536,33 +547,32 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		// KTLog(OutputStreamDomain, KTLogDebug, @"NOTHING NEEDED TO BE SENT RIGHT NOW");
 	}
 	[_sendBufferLock unlock];
+	
+	[pool release];
 }	
 
 - (unsigned)sendData:(NSData *)data // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
 {
+	//Only queue it if we actually have data to send.
+	if ([data length] <= 0)
+		return 0;
+	
 	if (myStreamFlags.wantsSSL)
 	{
 		if (!myStreamFlags.sslOn && !myStreamFlags.isNegotiatingSSL)
 		{
 			//put into the normal send buffer that is not encrypted.	
 			[_sendBufferLock lock];
-			[_sendBuffer appendData:data];
+			[_sendBufferQueue addObject:data];
 			[_sendBufferLock unlock];
 			return 0;
 		}
 	}
 	BOOL bufferWasEmpty = NO;
-	NSMutableData *dataBuffer = [self outputDataBuffer];
-	
-	if (!dataBuffer) 
-	{
-		KTLog(CKSSLDomain, KTLogFatal, @"No Data Buffer in sendData:");
-		return 0;
-	}
 	
 	[_sendBufferLock lock];
-	bufferWasEmpty = [dataBuffer length] == 0;
-	[dataBuffer appendData:data];
+	bufferWasEmpty = [_sendBufferQueue count] == 0;
+	[_sendBufferQueue addObject:data];
 	[_sendBufferLock unlock];
 	unsigned chunkLength = 0;
 	
