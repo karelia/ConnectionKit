@@ -226,8 +226,6 @@ static NSMutableDictionary *responseMap = nil;
 			
 			while (chunkLength > 0)
 			{
-				//[self appendContent:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
-				
 				lengthRange = [data rangeOfData:newLineData range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
 				if (lengthRange.location == NSNotFound)
 				{

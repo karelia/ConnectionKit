@@ -258,16 +258,20 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[req setHeader:@"trailers" forKey:@"TE"];
 		
 		[self setAuthenticationWithRequest:req];
-		
-		NSData *packet = [req serialized];
-		
 		[[self client] appendString:[[req description] stringByAppendingString:@"\n"] toTranscript:CKTranscriptSent];
 		
+		NSData *headerPacket = [req serializedHeader];
+
+		[self initiatingNewRequest:req withPacket:headerPacket];
 		
-		[self initiatingNewRequest:req withPacket:packet];
+		KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [headerPacket descriptionAsUTF8String]);
 		
-		KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Sending: %@", [[packet subdataWithRange:NSMakeRange(0,[req headerLength])] descriptionAsUTF8String]);
-		[self sendData:packet];
+		//Send the header
+		[self sendData:headerPacket];
+		
+		//Send the actual content if there is any.
+		if ([req contentLength] > 0)
+			[self sendData:[req content]];
 	}
 	else 
 	{
@@ -313,7 +317,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myHTTPFlags.needsReconnection = YES;
-			if (myCurrentRequest && [_sendBuffer length] > 0)
+			
+			[_sendBufferLock lock];
+			BOOL sendBufferQueueIsEmpty = [_sendBufferQueue count] == 0;
+			[_sendBufferLock unlock];
+			if (myCurrentRequest && !sendBufferQueueIsEmpty)
 			{
 				[self sendCommand:myCurrentRequest];
 			}
@@ -349,7 +357,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 			// we don't want to notify the delegate we were disconnected as we want to appear to be a persistent connection
 			[self closeStreams];
 			myHTTPFlags.needsReconnection = YES;
-			if (myCurrentRequest && [_sendBuffer length] > 0)
+			
+			[_sendBufferLock lock];
+			BOOL sendBufferQueueIsEmpty = [_sendBufferQueue count] == 0;
+			[_sendBufferLock unlock];
+			if (myCurrentRequest && !sendBufferQueueIsEmpty)
 			{
 				[self sendCommand:myCurrentRequest];
 			}
@@ -474,7 +486,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	if (!_currentAuth)
 		return nil;
 	
-	NSData *serializedRequest = [request serialized];
+	NSData *serializedRequest = [request serializedHeader];
 	CFHTTPMessageRef saneRequest = CFHTTPMessageCreateEmpty(NULL, YES);
 	BOOL success = CFHTTPMessageAppendBytes(saneRequest, [serializedRequest bytes], [serializedRequest length]);
 	NSAssert(success, @"Invalid request data");

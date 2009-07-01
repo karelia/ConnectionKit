@@ -340,7 +340,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	if (GET_STATE == CKConnectionUploadingFileState)
 	{
 		transferHeaderLength = [req headerLength];
-		bytesToTransfer = [packet length] - transferHeaderLength;
+		bytesToTransfer = [req contentLength];//[packet length] - transferHeaderLength;
 		bytesTransferred = 0;
 		CKInternalTransferRecord *upload = [self currentUpload];
 		

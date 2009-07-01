@@ -29,6 +29,7 @@
 
 
 #import "CKDAVUploadFileRequest.h"
+#import "CKAbstractConnection.h"
 #import <ApplicationServices/ApplicationServices.h>
 
 @implementation CKDAVUploadFileRequest
@@ -44,6 +45,7 @@
 	{
 		myFilename = [filename copy];
 		[self setContent:data];
+		
 		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																		  (CFStringRef)[filename pathExtension],
 																		  NULL) autorelease];
@@ -68,6 +70,8 @@
 	{
 		myLocalFilename = [local copy];
 		myFilename = [remote copy];
+		myContent = [[NSData dataWithContentsOfMappedFile:myLocalFilename] retain];
+		
 		//get the mime type from launch services
 		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
 																		  (CFStringRef)[remote pathExtension],
@@ -116,24 +120,33 @@
 	return myFilename;
 }
 
-- (void)didPushToHistoryQueue
+#pragma mark -
+#pragma mark Immutable Content Protection
+- (void)appendContent:(NSData *)data
 {
-	// release the file data from memory
-	if (myLocalFilename)
-	{
-		[self setContent:[NSData data]];
-	}
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
 }
 
-- (NSData *)serialized
+- (void)appendContentString:(NSString *)str
 {
-	// load the file data at the latest possible time.
-	if (myLocalFilename && [myContent length] == 0)
-	{
-		NSData *data = [NSData dataWithContentsOfFile:myLocalFilename];
-		[self setContent:data];
-	}
-	return [super serialized];
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
 }
 
+- (void)setContent:(NSData *)data
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
+}
+
+- (void)setContentString:(NSString *)str
+{
+	@throw [NSException exceptionWithName:CKConnectionDomain
+								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
+								 userInfo:nil];
+}
 @end
