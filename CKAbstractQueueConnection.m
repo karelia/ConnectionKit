@@ -1136,10 +1136,10 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 			{
 				KTLog(CKStateMachineDomain, KTLogDebug, @"Dispatching Command: %@", command);
 				_state = [command sentState];	// don't use setter; we don't want to recurse
-				[self pushCommandOnHistoryQueue:command];
 				[self dequeueCommand];
 				
 				[self sendCommand:[command command]];
+				[self pushCommandOnHistoryQueue:command];
 				
 				// go to next one, there's something else to do
 				[_queueLock lock];
