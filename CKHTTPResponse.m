@@ -333,16 +333,18 @@ static NSMutableDictionary *responseMap = nil;
 		// now get the data range for the content
 		unsigned start = NSMaxRange(headerRange);
 		
+		NSMutableData *dataBuffer = [NSMutableData data];
+		
 		if (!isChunkedTransfer)
 		{
 			unsigned contentLength = [[myHeaders objectForKey:@"Content-Length"] intValue];
 			if (contentLength > 0)
 			{
-				[self setContent:[data subdataWithRange:NSMakeRange(start, contentLength)]];
+				[dataBuffer appendData:[data subdataWithRange:NSMakeRange(start, contentLength)]];
 			}
 			else
 			{
-				[self setContent:[data subdataWithRange:NSMakeRange(start, [data length] - start)]];
+				[dataBuffer appendData:[data subdataWithRange:NSMakeRange(start, [data length] - start)]];
 			}
 		}
 		else
@@ -358,7 +360,7 @@ static NSMutableDictionary *responseMap = nil;
 			
 			while (chunkLength > 0)
 			{
-				[self appendContent:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
+				[dataBuffer appendData:[data subdataWithRange:NSMakeRange(NSMaxRange(lengthRange), chunkLength)]];
 				
 				lengthRange = [data rangeOfData:[[NSString stringWithString:@"\r\n"] dataUsingEncoding:NSUTF8StringEncoding]
 										  range:NSMakeRange(NSMaxRange(lengthRange) + chunkLength + 2, [data length] - NSMaxRange(lengthRange) - chunkLength - 2)];
@@ -368,6 +370,8 @@ static NSMutableDictionary *responseMap = nil;
 				[scanner scanHexInt:&chunkLength];
 			}
 		}	
+		
+		[self setContent:dataBuffer];
 	}
 	return self;
 }
