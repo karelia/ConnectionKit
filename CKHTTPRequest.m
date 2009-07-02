@@ -292,9 +292,7 @@
 	[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
 	
 	myHeaderLength = [packet length];
-	
-//	[packet appendData:myContent];
-	
+
 	return packet;
 }
 
