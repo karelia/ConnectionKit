@@ -2720,8 +2720,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)closeStreams
 {
-	_ftpFlags.setBinaryTransferMode = NO;
-	_ftpFlags.loggedIn = NO;
+	//Reset all flags.
+	memset(&_ftpFlags, NO, sizeof(_ftpFlags));
+	
+	[_lastAuthenticationChallenge release];
+	_lastAuthenticationChallenge = nil;
+	
+	[_currentAuthenticationCredential release];
+	_currentAuthenticationCredential = nil;
+	
+	[_currentPath release];
+	_currentPath = nil;
+	
+	[_topQueuedChangeDirectoryPath release];
+	_topQueuedChangeDirectoryPath = nil;
+	
+	[_rootPath release];
+	_rootPath = nil;
+	
 	[super closeStreams];
 }
 
