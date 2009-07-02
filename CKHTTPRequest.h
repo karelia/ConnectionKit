@@ -39,7 +39,7 @@
 	id					myUserInfo;
 	
 	NSMutableDictionary *myHeaders;
-	NSMutableData		*myContent;
+	NSData				*myContent;
 	unsigned			myHeaderLength;
 	
 	NSMutableDictionary *myPost;
@@ -62,8 +62,6 @@
 - (void)uploadFile:(NSString *)path forKey:(NSString *)key;
 - (void)uploadData:(NSData *)data withFilename:(NSString *)name forKey:(NSString *)key;
 
-- (void)appendContent:(NSData *)data;
-- (void)appendContentString:(NSString *)str;
 - (void)setContent:(NSData *)data;
 - (void)setContentString:(NSString *)str;
 

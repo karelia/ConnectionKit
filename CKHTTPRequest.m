@@ -171,20 +171,10 @@
 				 forKey:key];
 }
 
-- (void)appendContent:(NSData *)data
-{
-	[myContent appendData:data];
-}
-
-- (void)appendContentString:(NSString *)str
-{
-	[myContent appendData:[str dataUsingEncoding:NSUTF8StringEncoding]];
-}
-
 - (void)setContent:(NSData *)data
 {
-	[myContent setLength:0];
-	[myContent appendData:data];
+	[myContent release];
+	myContent = [[NSData dataWithData:data] retain];
 }
 
 - (void)setContentString:(NSString *)str
@@ -207,56 +197,55 @@
 	return [myContent length];
 }
 
-#define HTTPChunkSize 1024
-
 - (void)serializeContentWithPacket:(NSMutableData *)packet
 {
+	if ([myContent length] != 0 || ([myPost count] == 0 && [myUploads count] == 0))
+		return;
+	
 	NSString *stringBoundary = [NSString stringWithString:@"0xKhTmLbOuNdArY"];
-	if ([myContent length] == 0)
+	NSEnumerator *e = [myPost keyEnumerator];
+	NSString *key;
+	id value;
+	
+	NSMutableData *dataBuffer = [NSMutableData data];
+	
+	while (key = [e nextObject])
 	{
-		if ([myPost count] > 0 || [myUploads count] > 0)
+		[dataBuffer appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+		[dataBuffer appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
+		value = [myPost objectForKey:key];
+		if (![value isKindOfClass:[NSData class]])
 		{
-			NSEnumerator *e = [myPost keyEnumerator];
-			NSString *key;
-			id value;
-			
-			while (key = [e nextObject])
-			{
-				[myContent appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-				[myContent appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"\r\n\r\n", key] dataUsingEncoding:NSUTF8StringEncoding]];
-				value = [myPost objectForKey:key];
-				if (![value isKindOfClass:[NSData class]])
-				{
-					value = [[value description] dataUsingEncoding:NSUTF8StringEncoding];
-				}
-				[myContent appendData:value];
-				[myContent appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-			}
-			
-			// do uploads
-			e = [myUploads keyEnumerator];
-			
-			while (key = [e nextObject])
-			{
-				NSDictionary *rec = [myUploads objectForKey:key];
-				NSString *filename = [rec objectForKey:@"filename"];
-				NSData *data = [rec objectForKey:@"data"];
-				NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-																				  (CFStringRef)[filename pathExtension],
-																				  NULL) autorelease];
-				NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
-				if (!mime || [mime length] == 0)
-				{
-					mime = @"application/octet-stream";
-				}
-				[myContent appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-				[myContent appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\nContent-Type: \"%@\"\r\n\r\n", key, filename, mime] dataUsingEncoding:NSUTF8StringEncoding]];
-				[myContent appendData:data];
-				[myContent appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
-			}
-			[myContent appendData:[[NSString stringWithFormat:@"--%@\r\n\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+			value = [[value description] dataUsingEncoding:NSUTF8StringEncoding];
 		}
+		[dataBuffer appendData:value];
+		[dataBuffer appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
 	}
+	
+	// do uploads
+	e = [myUploads keyEnumerator];
+	
+	while (key = [e nextObject])
+	{
+		NSDictionary *rec = [myUploads objectForKey:key];
+		NSString *filename = [rec objectForKey:@"filename"];
+		NSData *data = [rec objectForKey:@"data"];
+		NSString *UTI = [(NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+																		  (CFStringRef)[filename pathExtension],
+																		  NULL) autorelease];
+		NSString *mime = [(NSString *)UTTypeCopyPreferredTagWithClass((CFStringRef)UTI, kUTTagClassMIMEType) autorelease];	
+		if (!mime || [mime length] == 0)
+		{
+			mime = @"application/octet-stream";
+		}
+		[dataBuffer appendData:[[NSString stringWithFormat:@"--%@\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+		[dataBuffer appendData:[[NSString stringWithFormat:@"Content-Disposition: form-data; name=\"%@\"; filename=\"%@\"\r\nContent-Type: \"%@\"\r\n\r\n", key, filename, mime] dataUsingEncoding:NSUTF8StringEncoding]];
+		[dataBuffer appendData:data];
+		[dataBuffer appendData:[[NSString stringWithFormat:@"\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+	}
+	[dataBuffer appendData:[[NSString stringWithFormat:@"--%@\r\n\r\n",stringBoundary] dataUsingEncoding:NSUTF8StringEncoding]];
+	
+	[self setContent:dataBuffer];
 }
 
 - (NSData *)serializedHeader

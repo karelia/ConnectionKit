@@ -37,7 +37,7 @@
 {
 	if ((self = [super initWithMethod:method uri:uri]))
 	{
-		[myContent appendData:data];
+		[self setContent:data];
 		myFilename = [filename copy];
 		
 		if (!data)
@@ -45,9 +45,8 @@
 			NSFileManager *fm = [NSFileManager defaultManager];
 			if ([fm fileExistsAtPath:myFilename])
 			{
-				NSData *fileData = [NSData dataWithContentsOfMappedFile:filename];
-				if (fileData)
-					myContent = [fileData retain];
+				//We very intentionally do not use the setContent: setter here. It creates a new NSData object by copying the bytes, by way of +dataWithData:. Since we're using a mapped data file, we don't want the bytes to be copied.
+				myContent = [[NSData dataWithContentsOfMappedFile:filename] retain];
 			}
 		}
 		
@@ -85,35 +84,4 @@
 {
 	
 }
-
-#pragma mark -
-#pragma mark Immutable Content Protection
-- (void)appendContent:(NSData *)data
-{
-	@throw [NSException exceptionWithName:CKConnectionDomain
-								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
-								 userInfo:nil];
-}
-
-- (void)appendContentString:(NSString *)str
-{
-	@throw [NSException exceptionWithName:CKConnectionDomain
-								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
-								 userInfo:nil];
-}
-
-- (void)setContent:(NSData *)data
-{
-	@throw [NSException exceptionWithName:CKConnectionDomain
-								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
-								 userInfo:nil];
-}
-
-- (void)setContentString:(NSString *)str
-{
-	@throw [NSException exceptionWithName:CKConnectionDomain
-								   reason:@"CKDavUploadFileRequest contains immutable content. You cannnot append data to it!"
-								 userInfo:nil];
-}
-
 @end
