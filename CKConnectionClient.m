@@ -13,6 +13,7 @@
 #import "InterThreadMessaging.h"
 #import "RunLoopForwarder.h"
 #import "NSURL+Connection.h"
+#import "CKSFTPConnection.h"
 
 
 @interface CKConnectionClient (Private)
@@ -143,7 +144,11 @@
     else
     {
         NSURLCredential *credential = [fullChallenge proposedCredential];
-        if ([credential user] && [credential hasPassword] && [originalChallenge previousFailureCount] == 0)
+		
+		BOOL hasPublicKeyForAuthentication = (([[[self connection] class] protocol] == CKSFTPProtocol) && [[[self connection] request] SFTPPublicKeyPath]);
+		BOOL hasPasswordOrPublicKey = ([credential hasPassword] || hasPublicKeyForAuthentication);
+		
+        if ([credential user] && hasPasswordOrPublicKey && [originalChallenge previousFailureCount] == 0)
         {
             [[originalChallenge sender] useCredential:credential forAuthenticationChallenge:originalChallenge];
         }
@@ -165,7 +170,7 @@
     if (!credential)
     {
         NSURL *connectionURL = [[[self connection] request] URL];
-        
+		
         NSString *user = [connectionURL user];
         if (user)
         {
@@ -177,7 +182,7 @@
             else
             {
                 credential = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:[challenge protectionSpace]] objectForKey:user];
-                if (!result)
+                if (!credential)
                 {
                     credential = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
                 }

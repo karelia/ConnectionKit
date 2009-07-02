@@ -1078,7 +1078,7 @@ static NSString *lsform = nil;
                                                                                           sender:self];
     
     [protectionSpace release];
-    
+	
     [[self client] connectionDidReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
 }
 
@@ -1110,8 +1110,12 @@ static NSString *lsform = nil;
 {
     if (challenge == _lastAuthenticationChallenge)
     {
-        // Store the password ready for after we've connected
-        _currentPassword = [[credential password] copy];
+		//Unlike other connections, we can still connect without a password if we have a public key.
+		if ([credential hasPassword])
+		{
+			// Store the password ready for after we've connected
+			_currentPassword = [[credential password] copy];
+		}
         
         // Start login with the supplied username
         [self connectWithUsername:[credential user]];
