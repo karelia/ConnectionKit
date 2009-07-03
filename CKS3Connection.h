@@ -34,7 +34,6 @@
 {
 	//When we receive a directory listing that is truncated, we keep around the contents in here until we've received all the directory's contents to return the delegate.
 	NSMutableArray *incompleteDirectoryContents; 
-	NSMutableArray *incompleteKeyNames;
 	
 	NSString *myCurrentDirectory;
 	unsigned long long	bytesTransferred;
