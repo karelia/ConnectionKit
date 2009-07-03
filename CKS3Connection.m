@@ -71,7 +71,7 @@ NSString *S3PathSeparator = @":";
 
 #pragma mark init methods
 
-- (id)initWithRequest:(CKConnectionRequest *)request delegate:(id)delegate
+- (id)initWithRequest:(CKConnectionRequest *)request
 {     
     // allow for subdomains of s3
 	if ([[[request URL] host] rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
@@ -93,7 +93,6 @@ NSString *S3PathSeparator = @":";
 	if (self)
 	{
 		incompleteDirectoryContents = [[NSMutableArray array] retain];
-		incompleteKeyNames = [[NSMutableArray array] retain];
 		myCurrentDirectory = @"/";
 	}
     
@@ -104,7 +103,6 @@ NSString *S3PathSeparator = @":";
 - (void)dealloc
 {
 	[incompleteDirectoryContents release];
-	[incompleteKeyNames release];
 	[myCurrentDirectory release];
 	[myDownloadHandle release];
     
@@ -208,9 +206,6 @@ NSString *S3PathSeparator = @":";
 																   error:&error] autorelease];
 				KTLog(CKProtocolDomain, KTLogDebug, @"\n%@", [doc XMLStringWithOptions:NSXMLNodePrettyPrint]);
 				
-				//do the buckets first
-				NSXMLElement *cur;
-				NSEnumerator *e;
 				NSMutableArray *contents = [NSMutableArray array];
 				
 				BOOL isTruncated = NO;
@@ -221,16 +216,24 @@ NSString *S3PathSeparator = @":";
 					NSString *isTruncatedValue = [isTruncatedNode stringValue];
 					isTruncated = [isTruncatedValue isEqualToString:@"true"];
 				}
-								
-				if ([myCurrentDirectory isEqualToString:@"/"])
+				
+				//The current directory is not necessarily the path of what was just listed. (i.e., we can receive listings for paths we aren't "in")
+				NSString *thisDirectoryPath = nil;
+				
+				//Are we a bucket listing?
+				NSArray *bucketNameElements = [[doc rootElement] elementsForName:@"Name"]; //We only want root elements.
+				if ([bucketNameElements count] <= 0)
 				{
-					NSArray *buckets = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
-					e = [buckets objectEnumerator];
+					//This is a bucket listing, so the path is /
+					thisDirectoryPath = @"/";
 					
-					while ((cur = [e nextObject]))
+					NSArray *bucketElements = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
+					NSEnumerator *bucketsEnumerator = [bucketElements objectEnumerator];
+					NSXMLElement *bucketElement;
+					while ((bucketElement = [bucketsEnumerator nextObject]))
 					{
-						NSString *name = [[[cur elementsForName:@"Name"] objectAtIndex:0] stringValue];
-						NSString *date = [[[cur elementsForName:@"CreationDate"] objectAtIndex:0] stringValue];
+						NSString *name = [[[bucketElement elementsForName:@"Name"] objectAtIndex:0] stringValue];
+						NSString *date = [[[bucketElement elementsForName:@"CreationDate"] objectAtIndex:0] stringValue];
 						
 						CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 						[item setFilename:name];
@@ -239,70 +242,87 @@ NSString *S3PathSeparator = @":";
 						[contents addObject:item];
 					}
 				}
-				
-				// contents inside a bucket
-				NSArray *bucketContents = [[doc rootElement] nodesForXPath:@"//Contents" error:&error];
-				e = [bucketContents objectEnumerator];
-				
-				NSString *currentPath = [myCurrentDirectory stringByDeletingFirstPathComponent];
-				
-				NSMutableArray *keyNames = [NSMutableArray arrayWithArray:incompleteKeyNames];
-				while ((cur = [e nextObject]))
+				else
 				{
-					NSString *rawKeyName = [[[cur elementsForName:@"Key"] objectAtIndex:0] stringValue];
-					NSString *name = [self standardizePath:rawKeyName];
+					//Listing the contents of a specific bucket.
+					//Determine our path
+					NSString *thisBucketName = [[bucketNameElements objectAtIndex:0] stringValue];
+					thisDirectoryPath = [self fixPathToBeFilePath:[self standardizePath:thisBucketName]];
+					
+					NSArray *prefixNames = [[doc rootElement] elementsForName:@"Prefix"]; //We only want root elements.
+					if ([prefixNames count] > 0)
+					{
+						NSString *thisPrefixName = [[prefixNames objectAtIndex:0] stringValue];
+						thisDirectoryPath = [thisDirectoryPath stringByAppendingPathComponent:thisPrefixName];
+					}
+				
+					NSString *currentPathWithoutBucket = [thisDirectoryPath stringByDeletingFirstPathComponent];
+					
+					//Process the directories within this directory.
+					//Since we're using a delimiter, directories are under "CommonPrefixes"
+					NSArray *commonPrefixElements = [[doc rootElement] nodesForXPath:@"//CommonPrefixes" error:&error];
+					NSEnumerator *commonPrefixElementEnumerator = [commonPrefixElements objectEnumerator];
+					NSXMLElement *commonPrefixElement;
+					while ((commonPrefixElement = [commonPrefixElementEnumerator nextObject]))
+					{
+						NSString *prefixName = [[[commonPrefixElement elementsForName:@"Prefix"] objectAtIndex:0] stringValue]; //is like "unit-testing/bleh/"
+						NSString *name = prefixName;
+						
+						//A prefix name can be within a parent-folder, like unit-testing/bleh/. Let's chop off the prefix if it is.
+						if ([name hasPrefix:currentPathWithoutBucket])
+							name = [name substringFromIndex:[currentPathWithoutBucket length]]; //is now like bleh/"
+						
+						//We still have a trailing slash.
+						name = [name lastPathComponent]; //Axes the slashes on either end.
+						
+						CKDirectoryListingItem *directoryItem = [CKDirectoryListingItem directoryListingItem];
+						//Unfortunately, when we use a delimiter to get the directory-names, we don't get any information about modification date.
+						[directoryItem setFilename:name];
+						[directoryItem setFileType:NSFileTypeDirectory];
+						[contents addObject:directoryItem];
+					}
+					
+					//Process the files within this directory.
+					NSArray *contentsElements = [[doc rootElement] nodesForXPath:@"//Contents" error:&error];
+					NSEnumerator *contentsElementsEnumerator = [contentsElements objectEnumerator];
+					NSXMLElement *contentElement;
+					while ((contentElement = [contentsElementsEnumerator nextObject]))
+					{
+						NSString *rawKeyName = [[[contentElement elementsForName:@"Key"] objectAtIndex:0] stringValue];
+						NSString *name = [self standardizePath:rawKeyName];
 
-					if ([name length] < [currentPath length]) continue; // this is a record from a parent folder
-					if ([name rangeOfString:currentPath].location == NSNotFound) continue; // this is an element in a different folder
-					
-					if ([name hasPrefix:currentPath])
-						name = [name substringFromIndex:[currentPath length]];
-					
-					/*We receive _all_ directory contents at once, so even when we ask for /brianamerige, we get /brianamerige/wp-admin/page.php, for example. Consequently, when currentpath is /wp-admin, we are only looking for things immediately inside /wp-admin. To achieve this, we only keep _one_ of each of the same first path components.
-					 */
-					if ([keyNames containsObject:[name firstPathComponent]])
-						continue;
-					[keyNames addObject:[name firstPathComponent]];
-					
-					if (![[name firstPathComponent] isEqualToString:[name lastPathComponent]])
-					{
-						//We have /wp-admin/page.php while we're only trying to list /wp-admin
-						name = [[name firstPathComponent] stringByAppendingString:@"/"];
-					}
-					
-					NSString *date = [[[cur elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
-					NSString *size = [[[cur elementsForName:@"Size"] objectAtIndex:0] stringValue];
-					NSString *class = [[[cur elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
-					
-					CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
-					
-					if ([name hasSuffix:@"/"])
-					{
-						name = [name substringToIndex:[name length] - 1];
-						[item setFileType:NSFileTypeDirectory];
-					}
-					else
-					{
+						//A key name can be within a parent-folder, like unit-testing/bleh.txt. Let's chop off the prefix if it is.
+						if ([name hasPrefix:currentPathWithoutBucket])
+							name = [name substringFromIndex:[currentPathWithoutBucket length]]; //is now like bleh/"
+						
+						//We still have a trailing slash.
+						name = [name lastPathComponent]; //Axes the slashes on either end.
+						
+						if ([name isEqualToString:@"/"]) continue; //The current directory's entry. After the currentPathWithoutBucket is removed, we just have a slash.
+												
+						NSString *date = [[[contentElement elementsForName:@"LastModified"] objectAtIndex:0] stringValue];
+						NSString *size = [[[contentElement elementsForName:@"Size"] objectAtIndex:0] stringValue];
+						NSString *class = [[[contentElement elementsForName:@"StorageClass"] objectAtIndex:0] stringValue];
+						
+						CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 						[item setFileType:NSFileTypeRegular];
+
+						
+						[item setFilename:name];
+						[item setModificationDate:[NSCalendarDate calendarDateWithZuluFormat:date]];
+						[item setProperty:class forKey:S3StorageClassKey];
+						NSScanner *scanner = [NSScanner scannerWithString:size];
+						long long filesize;
+						[scanner scanLongLong:&filesize];
+						[item setSize:[NSNumber numberWithLongLong:filesize]];
+						[contents addObject:item];
 					}
-					
-					if ([name isEqualToString:@""]) continue; // skip current path name that is returned in results
-					
-					[item setFilename:name];
-					[item setModificationDate:[NSCalendarDate calendarDateWithZuluFormat:date]];
-					[item setProperty:class forKey:S3StorageClassKey];
-					NSScanner *scanner = [NSScanner scannerWithString:size];
-					long long filesize;
-					[scanner scanLongLong:&filesize];
-					[item setSize:[NSNumber numberWithLongLong:filesize]];
-					[contents addObject:item];
 				}
 				
 				if (isTruncated)
 				{
 					//Keep the contents for the next time around
 					[incompleteDirectoryContents addObjectsFromArray:contents];
-					[incompleteKeyNames addObjectsFromArray:keyNames];
 					
 					//We aren't done yet. There are more keys to be listed in this 'directory'
 					NSString *bucketName = [myCurrentDirectory firstPathComponent];
@@ -314,15 +334,20 @@ NSString *S3PathSeparator = @":";
 							prefixString = [NSString stringWithFormat:@"?prefix=%@", subpath];
 					}
 					
-					if ([prefixString length] == 0)
-						prefixString = @"?"; //If we have no prefix, we need the ? to be /brianamerige?marker=bleh
+					NSString *delimiterString = @"delimiter=/";
+					//If the preceding element, prefixString, isn't there, we need a ?
+					if (!prefixString || [prefixString length] == 0)
+						delimiterString = [@"?" stringByAppendingString:delimiterString];
+					//If it is there, we need a &
 					else
-						prefixString = [prefixString stringByAppendingString:@"&"]; //If we do have a prefix, we need the & to be /brianameige?prefix=dir/&marker=bleh
+						delimiterString = [@"&" stringByAppendingString:delimiterString];
+
 					
-					NSString *lastKeyName = [[[[bucketContents lastObject] elementsForName:@"Key"] objectAtIndex:0] stringValue];
-					NSString *markerString = [NSString stringWithFormat:@"marker=%@", lastKeyName];
+					NSArray *contentsElements = [[doc rootElement] nodesForXPath:@"//Contents" error:&error];
+					NSString *lastKeyName = [[[[contentsElements lastObject] elementsForName:@"Key"] objectAtIndex:0] stringValue];
+					NSString *markerString = [NSString stringWithFormat:@"&marker=%@", lastKeyName]; //& because we always have a delimiter.
 					
-					NSString *uri = [NSString stringWithFormat:@"/%@%@%@", bucketName, prefixString, markerString];
+					NSString *uri = [NSString stringWithFormat:@"/%@%@%@%@", bucketName, prefixString, delimiterString, markerString];
 					CKHTTPRequest *request = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
 					[myCurrentRequest autorelease];
 					myCurrentRequest = request;
@@ -332,12 +357,11 @@ NSString *S3PathSeparator = @":";
 				
 				[contents addObjectsFromArray:incompleteDirectoryContents];
 				[incompleteDirectoryContents removeAllObjects];
-				[incompleteKeyNames removeAllObjects];
 				
 				[self cacheDirectory:myCurrentDirectory withContents:contents];
 				
 				//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
-				[[self client] connectionDidReceiveContents:contents ofDirectory:[self fixPathToBeFilePath:myCurrentDirectory] error:error];
+				[[self client] connectionDidReceiveContents:contents ofDirectory:thisDirectoryPath error:error];
 			}
 			break;
 		}
@@ -608,7 +632,7 @@ NSString *S3PathSeparator = @":";
 {
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DidChangeToDirectory:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects: dirPath, nil]];
+												   arguments:[NSArray arrayWithObjects: [self fixPathToBeDirectoryPath:dirPath], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionChangedDirectoryState
@@ -825,8 +849,16 @@ NSString *S3PathSeparator = @":";
 		if ([subpath length] > 0)
 			prefixString = [NSString stringWithFormat:@"?prefix=%@", subpath];
 	}
+	
+	NSString *delimiterString = @"delimiter=/";
+	//If the preceding element, prefixString, isn't there, we need a ?
+	if (!prefixString || [prefixString length] == 0)
+		delimiterString = [@"?" stringByAppendingString:delimiterString];
+	//If it is there, we need a &
+	else
+		delimiterString = [@"&" stringByAppendingString:delimiterString];
 
-	NSString *uri = [NSString stringWithFormat:@"/%@%@", bucketName, prefixString];
+	NSString *uri = [NSString stringWithFormat:@"/%@%@%@", bucketName, prefixString, delimiterString];
 	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
 	[myCurrentRequest autorelease];
 	myCurrentRequest = r;
@@ -855,9 +887,7 @@ NSString *S3PathSeparator = @":";
 	{
 		[[self client] connectionDidReceiveContents:cachedContents ofDirectory:[self standardizePath:dirPath] error:nil];
 		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
-		{
 			return;
-		}		
 	}		
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
