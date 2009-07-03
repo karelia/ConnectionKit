@@ -219,13 +219,20 @@ NSString *S3PathSeparator = @":";
 				
 				//The current directory is not necessarily the path of what was just listed. (i.e., we can receive listings for paths we aren't "in")
 				NSString *thisDirectoryPath = nil;
-				
+								
 				//Are we a bucket listing?
 				NSArray *bucketNameElements = [[doc rootElement] elementsForName:@"Name"]; //We only want root elements.
 				if ([bucketNameElements count] <= 0)
 				{
 					//This is a bucket listing, so the path is /
 					thisDirectoryPath = @"/";
+					
+					//Our method of dynamically calculating the contents' directory path only works on the first "chunk" of the directory listing.
+					//We need to keep around what directory the listings are for when they are truncated.
+					if (incompleteDirectoryContentsPath)
+						thisDirectoryPath = [NSString stringWithString:incompleteDirectoryContentsPath];
+					else if (isTruncated)
+						incompleteDirectoryContentsPath = [thisDirectoryPath copy];				
 					
 					NSArray *bucketElements = [[doc rootElement] nodesForXPath:@"//Bucket" error:&error];
 					NSEnumerator *bucketsEnumerator = [bucketElements objectEnumerator];
@@ -255,6 +262,13 @@ NSString *S3PathSeparator = @":";
 						NSString *thisPrefixName = [[prefixNames objectAtIndex:0] stringValue];
 						thisDirectoryPath = [thisDirectoryPath stringByAppendingPathComponent:thisPrefixName];
 					}
+					
+					//Our method of dynamically calculating the contents' directory path only works on the first "chunk" of the directory listing.
+					//We need to keep around what directory the listings are for when they are truncated.
+					if (incompleteDirectoryContentsPath)
+						thisDirectoryPath = [NSString stringWithString:incompleteDirectoryContentsPath];
+					else if (isTruncated)
+						incompleteDirectoryContentsPath = [thisDirectoryPath copy];						
 				
 					NSString *currentPathWithoutBucket = [thisDirectoryPath stringByDeletingFirstPathComponent];
 					
@@ -266,14 +280,16 @@ NSString *S3PathSeparator = @":";
 					while ((commonPrefixElement = [commonPrefixElementEnumerator nextObject]))
 					{
 						NSString *prefixName = [[[commonPrefixElement elementsForName:@"Prefix"] objectAtIndex:0] stringValue]; //is like "unit-testing/bleh/"
-						NSString *name = prefixName;
+						NSString *name = [self standardizePath:prefixName];
 						
-						//A prefix name can be within a parent-folder, like unit-testing/bleh/. Let's chop off the prefix if it is.
+						//A prefix name can be within a parent-folder, like /unit-testing/bleh/. Let's chop off the prefix if it is.
 						if ([name hasPrefix:currentPathWithoutBucket])
-							name = [name substringFromIndex:[currentPathWithoutBucket length]]; //is now like bleh/"
+							name = [name substringFromIndex:[currentPathWithoutBucket length]]; //is now like /bleh/"
 						
 						//We still have a trailing slash.
 						name = [name lastPathComponent]; //Axes the slashes on either end.
+						
+						if ([name isEqualToString:@"/"]) continue; //The current directory's entry. After the currentPathWithoutBucket is removed, we just have a slash.
 						
 						CKDirectoryListingItem *directoryItem = [CKDirectoryListingItem directoryListingItem];
 						//Unfortunately, when we use a delimiter to get the directory-names, we don't get any information about modification date.
@@ -323,13 +339,13 @@ NSString *S3PathSeparator = @":";
 				{
 					//Keep the contents for the next time around
 					[incompleteDirectoryContents addObjectsFromArray:contents];
-					
+										
 					//We aren't done yet. There are more keys to be listed in this 'directory'
-					NSString *bucketName = [myCurrentDirectory firstPathComponent];
+					NSString *bucketName = [thisDirectoryPath firstPathComponent];
 					NSString *prefixString = @"";
 					if ([bucketName length] > 1)
 					{
-						NSString *subpath = [myCurrentDirectory substringFromIndex:[bucketName length] + 2];
+						NSString *subpath = [thisDirectoryPath substringFromIndex:[bucketName length] + 2];
 						if ([subpath length] > 0)
 							prefixString = [NSString stringWithFormat:@"?prefix=%@", subpath];
 					}
@@ -356,9 +372,16 @@ NSString *S3PathSeparator = @":";
 				}
 				
 				[contents addObjectsFromArray:incompleteDirectoryContents];
-				[incompleteDirectoryContents removeAllObjects];
 				
-				[self cacheDirectory:myCurrentDirectory withContents:contents];
+				//If we're done gathering truncated contents, clean up.
+				[incompleteDirectoryContents removeAllObjects];
+				if (incompleteDirectoryContentsPath)
+				{
+					[incompleteDirectoryContentsPath release];
+					incompleteDirectoryContentsPath = nil;
+				}
+				
+				[self cacheDirectory:thisDirectoryPath withContents:contents];
 				
 				//We use fixPathToBeFilePath to strip the / from the end –– we don't traditionally have this in the last path component externally.
 				[[self client] connectionDidReceiveContents:contents ofDirectory:thisDirectoryPath error:error];
