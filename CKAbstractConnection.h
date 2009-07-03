@@ -62,6 +62,10 @@ extern NSString *CKInputStreamDomain;
 extern NSString *CKOutputStreamDomain;
 extern NSString *CKSSLDomain;
 
+//User Default Keys
+extern NSString *CKDoesNotCacheDirectoryListingsKey;
+extern NSString *CKDoesNotRefreshCachedListingsKey;
+
 typedef enum {
 	CKConnectionNotConnectedState = 0,
 	CKConnectionIdleState,

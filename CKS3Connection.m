@@ -905,13 +905,21 @@ NSString *S3PathSeparator = @":";
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no dirPath");
 	
-	NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
-	if (cachedContents)
+	//Users can explicitly request we not cache directory listings. Are we allowed to?
+	BOOL cachingDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:CKDoesNotCacheDirectoryListingsKey];
+	if (!cachingDisabled)
 	{
-		[[self client] connectionDidReceiveContents:cachedContents ofDirectory:[self standardizePath:dirPath] error:nil];
-		if ([[NSUserDefaults standardUserDefaults] boolForKey:@"CKDoesNotRefreshCachedListings"])
-			return;
-	}		
+		//We're allowed to cache directory listings. Return a cached listing if possible.
+		NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+		if (cachedContents)
+		{
+			[[self client] connectionDidReceiveContents:cachedContents ofDirectory:dirPath error:nil];
+			
+			//By default, we automatically refresh the cached listings after returning the cached version. Users can explicitly request we not do this.
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:CKDoesNotRefreshCachedListingsKey])
+				return;
+		}		
+	}
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(s3DirectoryContents:)
 													  target:self

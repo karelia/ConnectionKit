@@ -64,6 +64,11 @@ NSString *CKInputStreamDomain = @"Input Stream";
 NSString *CKOutputStreamDomain = @"Output Stream";
 NSString *CKSSLDomain = @"SSL";
 
+//User Defaults
+NSString *CKDoesNotCacheDirectoryListingsKey = @"CKDoesNotCacheDirectoryListings";
+NSString *CKDoesNotRefreshCachedListingsKey = @"CKDoesNotRefreshCachedListings";
+
+
 NSDictionary *sSentAttributes = nil;
 NSDictionary *sReceivedAttributes = nil;
 NSDictionary *sDataAttributes = nil;
