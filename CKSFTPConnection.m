@@ -307,9 +307,27 @@ static NSString *lsform = nil;
 	[self queueCommand:pwd];
 }
 
-- (void)contentsOfDirectory:(NSString *)newDir
+- (void)contentsOfDirectory:(NSString *)dirPath
 {
-	[self changeToDirectory:newDir];
+	NSParameterAssert(dirPath);
+	
+	//Users can explicitly request we not cache directory listings. Are we allowed to?
+	BOOL cachingDisabled = [[NSUserDefaults standardUserDefaults] boolForKey:CKDoesNotCacheDirectoryListingsKey];
+	if (!cachingDisabled)
+	{
+		//We're allowed to cache directory listings. Return a cached listing if possible.
+		NSArray *cachedContents = [self cachedContentsWithDirectory:dirPath];
+		if (cachedContents)
+		{
+			[[self client] connectionDidReceiveContents:cachedContents ofDirectory:dirPath error:nil];
+			
+			//By default, we automatically refresh the cached listings after returning the cached version. Users can explicitly request we not do this.
+			if ([[NSUserDefaults standardUserDefaults] boolForKey:CKDoesNotRefreshCachedListingsKey])
+				return;
+		}		
+	}
+	
+	[self changeToDirectory:dirPath];
 	[self directoryContents];
 }
 
@@ -889,6 +907,9 @@ static NSString *lsform = nil;
 
 - (void)didReceiveDirectoryContents:(NSArray*)items
 {
+	//Cache the directory listings.
+	[self cacheDirectory:currentDirectory withContents:items];
+	
 	[[self client] connectionDidReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
 }
 
