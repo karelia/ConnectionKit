@@ -15,7 +15,6 @@
 
 
 @interface CKWebDAVProtocol ()
-- (void)startHTTPRequest:(NSURLRequest *)request;   
 - (void)currentOperationDidFinish:(BOOL)didFinish error:(NSError *)error;
 @end
 
@@ -51,7 +50,7 @@
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
     [request setHTTPMethod:@"OPTIONS"];
     
-    [self startHTTPRequest:request];
+    [self startOperationWithRequest:request];
     [request release];
 }
 
@@ -63,64 +62,14 @@
 - (void)downloadContentsOfFileAtPath:(NSString *)remotePath
 {
     _status = CKWebDAVProtocolStatusDownload;
-    
-    
-    // Downloads are just simple GET requests
-    NSURL *URL = [[NSURL alloc] initWithString:remotePath relativeToURL:[[self request] URL]];
-    NSURLRequest *request = [[NSURLRequest alloc] initWithURL:URL];
-    [URL release];
-    
-    
-    // Start the request
-    [self startHTTPRequest:request];
-    [request release];
+    [super downloadContentsOfFileAtPath:remotePath];
 }
 
 - (void)uploadData:(NSData *)data toPath:(NSString *)path
 {
     _status = CKWebDAVProtocolStatusUploading;
     
-    
-    // Send a PUT request with the data
-    NSURL *URL = [[NSURL alloc] initWithString:path relativeToURL:[[self request] URL]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
-    [request setHTTPMethod:@"PUT"];
-    [URL release];
-    
-    
-    // Include MIME type
-    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                            (CFStringRef)[path pathExtension],
-                                                            NULL);
-    NSString *MIMEType = [NSMakeCollectable(UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType)) autorelease];	
-    if (!MIMEType || [MIMEType length] == 0)
-    {
-        // if this list grows, consider using a dictionary of corrected UTI to MIME mappings instead
-        if ([(NSString *)UTI isEqualToString:@"public.css"])
-        {
-            MIMEType = @"text/css";
-        }
-        else if ([(NSString *)UTI isEqualToString:(NSString *)kUTTypeICO])
-        {
-            MIMEType = @"image/vnd.microsoft.icon";
-        }
-        else
-        {
-            MIMEType = @"application/octet-stream";
-        }
-    }
-    CFRelease(UTI);
-    
-    [request setValue:MIMEType forHTTPHeaderField:@"Content-Type"];
-    
-    
-    // Include data
-    [request setHTTPBody:data];
-    
-    
-    // Send the request
-    [self startHTTPRequest:request];
-    [request release];
+    [super uploadData:data toPath:path];
 }
 
 - (void)fetchContentsOfDirectoryAtPath:(NSString *)path
@@ -129,7 +78,7 @@
     
     
     // Send a PROPFIND request
-    NSString *directoryPath = [path stringByAppendingString:@"/"];
+    NSString *directoryPath = [path stringByAppendingString:@"/"];  // TODO: Handle the path like a proper POSIX one which could have any number of trailing slashes
     NSURL *URL = [[NSURL alloc] initWithString:directoryPath relativeToURL:[[self request] URL]];
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
@@ -140,7 +89,7 @@
     
     
     // Send the request
-    [self startHTTPRequest:request];
+    [self startOperationWithRequest:request];
     [request release];
 }
 
@@ -157,7 +106,7 @@
     
     
     // Send the request
-    [self startHTTPRequest:request];
+    [self startOperationWithRequest:request];
     [request release];
 }
 
@@ -180,25 +129,14 @@
     
     
     // Send the request
-    [self startHTTPRequest:request];
+    [self startOperationWithRequest:request];
     [request release];
 }
 
 - (void)deleteItemAtPath:(NSString *)path
 {
     _status = CKWebDAVProtocolStatusDeletingItem;
-    
-    
-    // Send a DELETE request
-    NSURL *URL = [[NSURL alloc] initWithString:path relativeToURL:[[self request] URL]];
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:URL];
-    [request setHTTPMethod:@"DELETE"];
-    [URL release];
-    
-    
-    // Send the request
-    [self startHTTPRequest:request];
-    [request release];
+    [super deleteItemAtPath:path];
 }
 
 - (void)stopCurrentOperation
@@ -254,7 +192,7 @@
 
 /*  Creates and schedules an HTTP connection for the request.
  */
-- (void)startHTTPRequest:(NSURLRequest *)request
+- (void)startOperationWithRequest:(NSURLRequest *)request
 {
     NSAssert(!_HTTPConnection, @"Attempting to start an HTTP request while a response is stored");
     _HTTPConnection = [[CKHTTPConnection alloc] initWithRequest:request delegate:self];
