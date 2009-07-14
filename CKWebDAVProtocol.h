@@ -6,7 +6,7 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileTransferProtocol.h"
+#import "CKHTTPBasedProtocol.h"
 
 #import "CKHTTPConnection.h"
 
@@ -25,7 +25,7 @@ typedef enum {
 } CKWebDAVProtocolStatus;
 
 
-@interface CKWebDAVProtocol : CKFileTransferProtocol <CKHTTPConnectionDelegate>
+@interface CKWebDAVProtocol : CKHTTPBasedProtocol <CKHTTPConnectionDelegate>
 {
 @private
     CKWebDAVProtocolStatus  _status;

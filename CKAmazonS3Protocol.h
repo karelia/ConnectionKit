@@ -6,12 +6,15 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileTransferProtocol.h"
+#import "CKHTTPBasedProtocol.h"
+#import "CKAmazonS3RESTOperation.h"
 
 
-@interface CKAmazonS3Protocol : CKFileTransferProtocol
+@interface CKAmazonS3Protocol : CKHTTPBasedProtocol <CKAmazonS3RESTOperationDelegate>
 {
+    NSURLCredential *_credential;
     
+    CKAmazonS3RESTOperation *_currentOperation;
 }
 
 @end
