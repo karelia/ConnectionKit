@@ -45,6 +45,7 @@ typedef enum {
 
 - (NSURLRequest *)request;
 
+- (void)closeWhenAllOperationsAreFinished;
 - (void)cancel; // ceases delegate messages and forces the connection to stop as soon as possible
 
 - (id)enqueueRequest:(CKFileRequest *)request identifier:(id <NSObject>)identifier;
