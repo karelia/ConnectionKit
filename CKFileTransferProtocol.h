@@ -77,14 +77,7 @@
 // progress. Similarly, listing the contents of a directory is a special case where you should use
 // -protocol:didFetchContentsOfDirectory: instead of -protocolCurrentOperationDidFinish:
 
-- (void)downloadContentsOfFileAtPath:(NSString *)remotePath;
-- (void)uploadData:(NSData *)data toPath:(NSString *)path;
-
-- (void)fetchContentsOfDirectoryAtPath:(NSString *)path;
-- (void)createDirectoryAtPath:(NSString *)path;
-- (void)moveItemAtPath:(NSString *)fromPath toPath:(NSString *)toPath;
-- (void)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path;
-- (void)deleteItemAtPath:(NSString *)path;
+- (void)startCurrentOperationWithRequest:(CKFileRequest *)request;
 
 /*!
  @method stopCurrentOperation
@@ -94,6 +87,7 @@
  mid-operation.
  */
 - (void)stopCurrentOperation;
+
 
 + (id)propertyForKey:(NSString *)key inRequest:(CKFileRequest *)request;
 + (void)setProperty:(id)value forKey:(NSString *)key inRequest:(CKMutableFileRequest *)request;

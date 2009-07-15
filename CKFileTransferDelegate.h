@@ -53,9 +53,6 @@
     didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
-             operationDidBegin:(id)identifier;
-
-- (void)fileTransferConnection:(CKFileTransferConnection *)connection
                       download:(id)identifier
                 didReceiveData:(NSData *)data;
 
