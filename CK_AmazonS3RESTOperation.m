@@ -6,7 +6,7 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKAmazonS3RESTOperation.h"
+#import "CK_AmazonS3RESTOperation.h"
 
 #import "CKHTTPConnection.h"
 #import <CommonCrypto/CommonHMAC.h>
@@ -15,7 +15,7 @@
 NSString *const CKAmazonErrorCodeKey = @"AmazonErrorCode";
 
 
-@interface CKAmazonS3RESTOperation ()
+@interface CK_AmazonS3RESTOperation ()
 - (void)addAuthenticationToRequest;
 - (NSString *)requestSignature;
 - (NSString *)requestStringToSign;
@@ -34,13 +34,13 @@ char *NewBase64Encode(const void *inputBuffer,
 #pragma mark -
 
 
-@implementation CKAmazonS3RESTOperation
+@implementation CK_AmazonS3RESTOperation
 
 #pragma mark Init & Dealloc
 
 - (id)initWithRequest:(NSURLRequest *)request
            credential:(NSURLCredential *)credential
-             delegate:(id <CKAmazonS3RESTOperationDelegate>)delegate;
+             delegate:(id <CK_AmazonS3RESTOperationDelegate>)delegate;
 {
     NSParameterAssert(request);
     NSParameterAssert(credential);
@@ -69,33 +69,14 @@ char *NewBase64Encode(const void *inputBuffer,
 - (void)start
 {
     CFRetain(self); // want to be sure operation is not accidentally deallocated mid-connection
-    
-    [self willChangeValueForKey:@"isExecuting"];
-    _isExecuting = YES;
-    [self didChangeValueForKey:@"isExecuting"];
-    
-    [self main];
+    [super start];
 }
-
-- (BOOL)isFinished { return _isFinished; }
-
-- (BOOL)isExecuting { return _isExecuting; }
-
-- (BOOL)isConcurrent { return YES; }
 
 - (void)operationDidEnd:(BOOL)finished error:(NSError *)error
 {
     // Connection is no longer needed
     [_connection cancel];
     [_connection release];  _connection = nil;
-    
-    // Mark as finished etc.
-    [self willChangeValueForKey:@"isExecuting"];
-    [self willChangeValueForKey:@"isFinished"];
-    _isExecuting = NO;
-    _isFinished = YES;
-    [self didChangeValueForKey:@"isExecuting"];
-    [self didChangeValueForKey:@"isFinished"];
     
     // Let delegate know
     if (finished)

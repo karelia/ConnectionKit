@@ -10,6 +10,13 @@
 #import "CKFileTransferProtocol.h"
 
 
+NSString *CKOperationTypeDownload = @"CKDownloadOperation";
+NSString *CKOperationTypeUpload = @"CKUploadOperation";
+NSString *CKOperationTypeDirectoryContents = @"CKFetchDirectoryContentsOperation";
+NSString *CKOperationTypeCreateDirectory = @"CKCreateDirectoryOperation";
+NSString *CKOperationTypeRemove = @"CKDeleteItemOperation";
+
+
 @interface CKFileRequest ()
 
 @property(nonatomic, retain, setter=CK_setExtensibleProperties) id CK_extensibleProperties;
@@ -111,6 +118,13 @@
     return [CKFileTransferProtocol propertyForKey:@"CKFileType" inRequest:self];
 }
 
+- (BOOL)createIntermediateDirectories
+{
+    NSNumber *result = [CKFileTransferProtocol propertyForKey:@"CKCreateIntermediateDirectories"
+                                                    inRequest:self];
+    return [result boolValue];
+}
+
 // CKFileTransferProtocol will use this to get properties
 @synthesize CK_extensibleProperties = _extensibleProperties;
 
@@ -160,12 +174,6 @@
 
 #pragma mark Properties
 
-@dynamic operationType;
-- (void)setOperationType:(NSString *)type
-{
-    [self CK_setOperationType:type];
-}
-
 @dynamic path;
 - (void)setPath:(NSString *)path
 {
@@ -191,6 +199,14 @@
     {
         [CKFileTransferProtocol removePropertyForKey:@"CKFileType" inRequest:self];
     }
+}
+
+@dynamic createIntermediateDirectories;
+- (void)setCreateIntermediateDirectories:(BOOL)flag
+{
+    [CKFileTransferProtocol setProperty:[NSNumber numberWithBool:flag]
+                                 forKey:@"CKCreateIntermediateDirectories"
+                              inRequest:self];
 }
 
 #pragma mark Copying

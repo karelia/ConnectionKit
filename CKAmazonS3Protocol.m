@@ -42,7 +42,7 @@
 
 #pragma mark Operations
 
-- (void)fetchContentsOfDirectoryAtPath:(NSString *)path
+- (void)fetchContentsOfDirectoryAtPath:(NSString *)remotePath
 {
     // S3 uses GET requests for directory contents. We then have to parse out the contents of the returned XML
     NSURL *URL = [[NSURL alloc] initWithString:remotePath relativeToURL:[[self request] URL]];
@@ -86,7 +86,7 @@
 - (void)startOperationWithRequest:(NSURLRequest *)request
 {
     NSAssert(!_currentOperation, @"Attempting to start an S3 operation while another is in progress");
-    _currentOperation = [[CKAmazonS3RESTOperation alloc] initWithRequest:request
+    _currentOperation = [[CK_AmazonS3RESTOperation alloc] initWithRequest:request
                                                               credential:_credential
                                                                 delegate:self];
     NSAssert1(_currentOperation, @"Failed to create a connection for request: %@", request);

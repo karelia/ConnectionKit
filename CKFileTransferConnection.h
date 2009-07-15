@@ -16,13 +16,14 @@ typedef enum {
 } CKTranscriptType;
 
 
-@class NSURLRequest, CKFileTransferProtocol;
+@class NSURLRequest, CKFileRequest, CKFileTransferProtocol;
+@class CK_FileOperation;
 @protocol CKFileTransferDelegate, CKFileTransferProtocolClient;
     
 
 @interface CKFileTransferConnection : NSObject
 {
-@private
+  @private
     NSURLRequest                *_request;
     id <CKFileTransferDelegate> _delegate;;
     NSString                    *_name;
@@ -33,39 +34,21 @@ typedef enum {
     int                                 _status;
     
     // Operation queue
-    id              _currentOperation;
-    NSMutableArray  *_queue;
-    
+    NSOperationQueue    *_queue;
+    CK_FileOperation    *_currentOperation;
 }
 
-+ (CKFileTransferConnection *)connectionWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferDelegate>)delegate;
++ (CKFileTransferConnection *)connectionWithRequest:(NSURLRequest *)request 
+                                           delegate:(id <CKFileTransferDelegate>)delegate;
+
 - (id)initWithRequest:(NSURLRequest *)request delegate:(id <CKFileTransferDelegate>)delegate;
 
 - (NSURLRequest *)request;
 
 - (void)cancel; // ceases delegate messages and forces the connection to stop as soon as possible
 
-// Operations
-- (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier;
+- (id)enqueueRequest:(CKFileRequest *)request identifier:(id <NSObject>)identifier;
 
-- (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier;
-
-- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-
-- (id)createDirectoryAtPath:(NSString *)path
-withIntermediateDirectories:(BOOL)createIntermediates
-                 identifier:(id <NSObject>)identifier;
-
-- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-
-//- (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
-//- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-
-@end
-
-
-@interface CKFileTransferConnection (Queue)
-//- (void)removeAllQueuedOperations;
 @end
 
 
@@ -87,3 +70,24 @@ withIntermediateDirectories:(BOOL)createIntermediates
 @interface NSMutableURLRequest (CKMutableSFTPURLRequest)
 - (void)setSFTPPublicKeyPath:(NSString *)path;
 @end
+
+
+#pragma mark -
+
+
+@interface CKFileTransferConnection (SimpleOperations)
+
+- (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+- (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+- (id)createDirectoryAtPath:(NSString *)path
+withIntermediateDirectories:(BOOL)createIntermediates
+                 identifier:(id <NSObject>)identifier;
+
+- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+
+@end
+

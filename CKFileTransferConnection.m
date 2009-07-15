@@ -6,8 +6,11 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import <ConnectionKit/ConnectionKit.h>
+//#import <ConnectionKit/ConnectionKit.h>
 #import "CKFileTransferConnection+Private.h"
+#import "CKFileTransferDelegate.h"
+#import "CK_FileTransferClient.h"
+#import "CK_FileOperation.h"
 
 #import "CKError.h"
 #import "CKConnectionProtocol1.h"
@@ -21,8 +24,6 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 
 
 @interface CKFileTransferConnection (QueueInternal)
-- (void)enqueueOperation:(CKConnectionOperation *)operation;
-- (void)dequeueOperation;
 @end
 
 
@@ -49,12 +50,18 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     {
         _request = [request copy];
         _delegate = delegate;
-        _queue = [[NSMutableArray alloc] init];
+        
+        
+        // Setup the queue. It starts off suspended
+        _queue = [[NSOperationQueue alloc] init];
+        [_queue setMaxConcurrentOperationCount:1];
+        [_queue setSuspended:YES];
+        
         
         // Start connection
-        _client = [[CKFileTransferProtocolClient alloc] initWithConnection:self];
+        _client = [[CK_FileTransferClient alloc] initWithConnection:self];
         _protocol = [[protocolClass alloc] initWithRequest:[self request] client:_client];
-        [(CKFileTransferProtocolClient *)_client setConnectionProtocol:_protocol];
+        [(CK_FileTransferClient *)_client setConnectionProtocol:_protocol];
         
         _status = CKConnectionStatusOpening;
         [[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:_protocol] startConnection];
@@ -71,7 +78,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 - (void)dealloc
 {
     NSAssert(!_currentOperation, @"Deallocating connection mid-operation");
-    NSAssert([_queue count] == 0, @"Deallocating connection with items still on the queue");
+    NSAssert([[_queue operations] count] == 0, @"Deallocating connection with items still on the queue");
     [_queue release];
     [_currentOperation release];
     
@@ -107,83 +114,18 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     _delegate = nil;    // It'll stop receiving messages
 }
 
-- (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier
+- (id)enqueueRequest:(CKFileRequest *)request identifier:(id <NSObject>)identifier
 {
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDownloadOperationWithIdentifier:identifier
-                                                                                                     path:path];
-    [self enqueueOperation:operation];
+    CK_FileOperation *operation = [[CK_FileOperation alloc] initWithIdentifier:identifier
+                                                                       request:request
+                                                                    connection:self];
+    
+    [_queue addOperation:operation];
     [operation release];
     
     return [operation identifier];
 }
-
-- (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initUploadOperationWithIdentifier:identifier
-                                                                                                   path:path
-                                                                                                   data:data];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
-- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDirectoryListingOperationWithIdentifier:identifier
-                                                                                                             path:path];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
-- (id)createDirectoryAtPath:(NSString *)path
-withIntermediateDirectories:(BOOL)createIntermediates
-                 identifier:(id <NSObject>)identifier;
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initCreateDirectoryOperationWithIdentifier:identifier
-                                                                                                            path:path
-                                                                                                       recursive:createIntermediates
-                                                                                                   mainOperation:nil];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
-- (id)moveItemAtPath:(NSString *)sourcePath toPath:(NSString *)destinationPath identifier:(id <NSObject>)identifier;
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initMoveOperationWithIdentifier:identifier
-                                                                                                 path:sourcePath
-                                                                                      destinationPath:destinationPath];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
-- (id)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initSetPermissionsOperationWithIdentifier:identifier
-                                                                                                           path:path
-                                                                                                    permissions:posixPermissions];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
-- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
-{
-    CKConnectionOperation *operation = [[CKConnectionOperation alloc] initDeleteOperationWithIdentifier:identifier
-                                                                                                   path:path];
-    [self enqueueOperation:operation];
-    [operation release];
-    
-    return [operation identifier];
-}
-
+                                   
 @end
 
 
@@ -196,95 +138,44 @@ withIntermediateDirectories:(BOOL)createIntermediates
 
 - (CKConnectionStatus)status { return _status; }
 
-- (CKConnectionOperation *)currentOperation { return _currentOperation; }
+- (CK_FileOperation *)currentOperation { return _currentOperation; }
 
-- (void)setCurrentOperation:(CKConnectionOperation *)operation
+// Called by a CK_FileOperation as the operation queue fires it off. We must act upon it to set the protocol to work
+- (void)CK_operationDidBegin:(CK_FileOperation *)operation;
 {
-    [operation retain];
-    [_currentOperation release];
-    _currentOperation = operation;
+    // Store the operation
+    NSAssert(![self currentOperation], @"Trying to start operation while another is active");
+    _currentOperation = [operation retain];
+    
+    // Start operation
+    CKFileTransferProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
+    [workerThreadProxy startCurrentOperationWithRequest:[operation request]];
 }
 
-@end
-
-
-#pragma mark -
-
-
-@implementation CKFileTransferConnection (Queue)
-
-/*  Adds the operation to the queue or starts it immediately if nothing else is in progress
- */
-- (void)enqueueOperation:(CKConnectionOperation *)operation
+- (void)CK_currentOperationDidEnd:(BOOL)success error:(NSError *)error
 {
-    [_queue addObject:operation];
-    [self dequeueOperation];
-}
-
-/*  Starts the next operation if the connection is ready
- */
-- (void)dequeueOperation
-{
-    if (!_currentOperation && _status == CKConnectionStatusOpen)
+    // We're done, reset operation storage
+    CK_FileOperation *operation = [self currentOperation];
+    [operation operationDidFinish];
+    _currentOperation = nil;    // it's released at the end of this method
+    
+    // Inform the delegate
+    id delegate = [self delegate];
+    if (success)
     {
-        // Remove from the queue
-        if ([_queue count] > 0)
-        {
-            _currentOperation = [[_queue objectAtIndex:0] retain];
-            [_queue removeObjectAtIndex:0];
-            
-            // Inform delegate
-            id delegate = [self delegate];
-            if ([delegate respondsToSelector:@selector(fileTransferConnection:operationDidBegin:)])
-            {
-                [delegate fileTransferConnection:self operationDidBegin:[_currentOperation identifier]];
-            }
-            
-            
-            // Start protocol's operation implementation on worker thread
-            CKFileTransferProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
-            switch ([_currentOperation operationType])
-            {
-                case CKConnectionOperationUpload:
-                    [workerThreadProxy uploadData:[_currentOperation data] toPath:[_currentOperation path]];
-                    break;
-                    
-                case CKConnectionOperationDownload:
-                    [workerThreadProxy downloadContentsOfFileAtPath:[_currentOperation path]];
-                    break;
-                    
-                case CKConnectionOperationDirectoryListing:
-                    [workerThreadProxy fetchContentsOfDirectoryAtPath:[_currentOperation path]];
-                    break;
-                    
-                case CKConnectionOperationCreateDirectory:
-                    [workerThreadProxy createDirectoryAtPath:[_currentOperation path]];
-                    break;
-                    
-                case CKConnectionOperationMove:
-                    [workerThreadProxy moveItemAtPath:[_currentOperation path] toPath:[_currentOperation destinationPath]];
-                    break;
-                    
-                case CKConnectionOperationSetPermissions:
-                    [workerThreadProxy setPermissions:[_currentOperation permissions] ofItemAtPath:[_currentOperation path]];
-                    break;
-                    
-                case CKConnectionOperationDelete:
-                    [workerThreadProxy deleteItemAtPath:[_currentOperation path]];
-                    break;
-                    
-                default:
-                    [NSException raise:NSInternalInconsistencyException format:@"Dequeueing unrecognised connection type"];
-                    break;
-            }
-        }
+        [delegate fileTransferConnection:self
+                      operationDidFinish:[operation identifier]];
     }
-}
-
-- (void)currentOperationDidStop
-{
-    [_currentOperation release];
-    _currentOperation = nil;
+    else
+    {
+        // When performing a recursive operation, it could fail mid-way. If so, we must report the error usuing the ORIGINAL operation identifier.
+        [[self delegate] fileTransferConnection:self
+                                      operation:[operation identifier]
+                               didFailWithError:error];
+    }
+    
+    // Tidy up
+    [operation release];
 }
 
 @end
@@ -305,15 +196,15 @@ withIntermediateDirectories:(BOOL)createIntermediates
 {
     _status = CKConnectionStatusOpen;
     
-    // We're ready to start processing
-    [self dequeueOperation];
-    
     // Inform the delegate
     id delegate = [self delegate];
     if ([delegate respondsToSelector:@selector(fileTransferConnection:didOpenWithCurrentDirectoryPath:)])
     {
         [delegate fileTransferConnection:self didOpenWithCurrentDirectoryPath:path];
     }
+    
+    // We're ready to start processing
+    [_queue setSuspended:NO];
 }
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
@@ -344,27 +235,12 @@ withIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
 {
-    // Inform the delegate
-    id delegate = [self delegate];
-    [delegate fileTransferConnection:self operationDidFinish:[[self currentOperation] identifier]];
-    
-    
-    // Move onto the next operation
-    [self currentOperationDidStop];
-    [self dequeueOperation];
+    [self CK_currentOperationDidEnd:YES error:nil];
 }
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
-    // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
-    // When performing a recursive operation, it could fail mid-way. If so, we must report the error usuing the ORIGINAL operation identifier.
-    CKConnectionOperation *operation = [self currentOperation];
-    id <NSObject> operationID = ([operation mainOperation]) ? [[operation mainOperation] identifier] : [operation identifier];
-    [[self delegate] fileTransferConnection:self operation:operationID didFailWithError:error];
-    
-    
-    [self currentOperationDidStop];
-    [self dequeueOperation];
+    [self CK_currentOperationDidEnd:NO error:error];
 }
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
@@ -410,3 +286,63 @@ withIntermediateDirectories:(BOOL)createIntermediates
 @end
 
 
+#pragma mark -
+
+
+@implementation CKFileTransferConnection (SimpleOperations)
+
+- (id)downloadContentsOfPath:(NSString *)path identifier:(id <NSObject>)identifier
+{
+    CKFileRequest *request = [[CKFileRequest alloc] initWithOperationType:CKOperationTypeDownload
+                                                                     path:path];
+    
+    id result = [self enqueueRequest:request identifier:identifier];
+    [request release];
+    return result;
+}
+
+- (id)uploadData:(NSData *)data toPath:(NSString *)path identifier:(id <NSObject>)identifier
+{
+    CKMutableFileRequest *request = [[CKMutableFileRequest alloc] initWithOperationType:CKOperationTypeUpload
+                                                                                   path:path];
+    [request setData:data fileType:nil];
+    
+    id result = [self enqueueRequest:request identifier:identifier];
+    [request release];
+    return result;
+}
+
+- (id)fetchContentsOfDirectoryAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+{
+    CKFileRequest *request = [[CKFileRequest alloc] initWithOperationType:CKOperationTypeDirectoryContents
+                                                                     path:path];
+    
+    id result = [self enqueueRequest:request identifier:identifier];
+    [request release];
+    return result;
+}
+
+- (id)createDirectoryAtPath:(NSString *)path
+withIntermediateDirectories:(BOOL)createIntermediates
+                 identifier:(id <NSObject>)identifier;
+{
+    CKMutableFileRequest *request = [[CKMutableFileRequest alloc] initWithOperationType:CKOperationTypeCreateDirectory
+                                                                                   path:path];
+    [request setCreateIntermediateDirectories:createIntermediates];
+    
+    id result = [self enqueueRequest:request identifier:identifier];
+    [request release];
+    return result;
+}
+
+- (id)removeItemAtPath:(NSString *)path identifier:(id <NSObject>)identifier;
+{
+    CKFileRequest *request = [[CKFileRequest alloc] initWithOperationType:CKOperationTypeRemove
+                                                                     path:path];
+    
+    id result = [self enqueueRequest:request identifier:identifier];
+    [request release];
+    return result;
+}
+
+@end

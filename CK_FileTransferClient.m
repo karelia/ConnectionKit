@@ -1,19 +1,18 @@
 //
-//  CKConnection+Private.m
-//  Connection
+//  CK_FileTransferClient.m
+//  ConnectionKit
 //
-//  Created by Mike on 24/01/2009.
+//  Created by Mike on 15/07/2009.
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileTransferConnection+Private.h"
+#import "CK_FileTransferClient.h"
 
-#import "CKError.h"
-#import "CKConnectionAuthentication+Internal.h"
+#import "CKConnectionAuthentication.h"
 #import "CKThreadProxy.h"
 
 
-@implementation CKFileTransferProtocolClient
+@implementation CK_FileTransferClient
 
 #pragma mark Init & Dealloc
 
@@ -51,7 +50,7 @@
 }
 
 - (CKFileTransferConnection *)connectionThreadProxy { return _threadProxy; }
-    
+
 #pragma mark Overall connection
 
 /*  Sending a message directly from the worker thread to the delegate is a bad idea as it is
@@ -80,7 +79,7 @@
 /*  Support method for filling an NSURLAuthenticationChallenge object. If no credential was supplied,
  *  looks for one from the connection's URL, and then falls back to using NSURLCredentialStorage.
  */
-- (NSURLAuthenticationChallenge *)_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge
+- (NSURLAuthenticationChallenge *)CK_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSURLAuthenticationChallenge *result = challenge;
     
@@ -134,7 +133,7 @@
     NSURLAuthenticationChallenge *fullChallenge = challenge;
     if (![challenge proposedCredential])
     {
-        fullChallenge = [self _fullAuthenticationChallengeForChallenge:challenge];
+        fullChallenge = [self CK_fullAuthenticationChallengeForChallenge:challenge];
     }
     
     
@@ -144,7 +143,7 @@
     {
         // Set up a proxy -sender object to forward the request to the main thread
         [[self connectionThreadProxy] fileTransferProtocol:protocol
-                       didReceiveAuthenticationChallenge:fullChallenge];
+                         didReceiveAuthenticationChallenge:fullChallenge];
     }
     else
     {
@@ -167,38 +166,7 @@
     NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
-    // For recursive directory creation that has successfully created a parent directory, proceed to
-    // the next child directory
-    CKConnectionOperation *operation = [[self connection] currentOperation];
-    CKConnectionOperation *mainOperation = [operation mainOperation];
-    BOOL reportSuccess = YES;
-    
-    if ([operation operationType] == CKConnectionOperationCreateDirectory && mainOperation)
-    {
-        NSString *finalPath = [mainOperation path];
-        NSString *path = [operation path];
-        if (![finalPath isEqualToString:path])
-        {
-            NSString *nextPath = [path stringByAppendingPathComponent:[[finalPath pathComponents] objectAtIndex:[[path pathComponents] count]]];
-            
-            CKConnectionOperation *newOp = [[CKConnectionOperation alloc]
-                                            initCreateDirectoryOperationWithIdentifier:[operation identifier]
-                                            path:nextPath
-                                            recursive:NO
-                                            mainOperation:mainOperation];
-            [[self connection] setCurrentOperation:newOp];
-            [newOp release];
-            
-            // Try the next operation
-            reportSuccess = NO;
-            [[self connectionProtocol] createDirectoryAtPath:nextPath];
-        }
-    }
-    
-    if (reportSuccess)
-    {
-        [[self connectionThreadProxy] fileTransferProtocolDidFinishCurrentOperation:protocol];
-    }
+    [[self connectionThreadProxy] fileTransferProtocolDidFinishCurrentOperation:protocol];
 }
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
@@ -206,36 +174,7 @@
     NSAssert2(protocol == [self connectionProtocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
-    // For recursive directory creation, try to create the parent directory rather than fail if possible.
-    BOOL reportError = YES;
-    CKConnectionOperation *operation = [[self connection] currentOperation];
-    
-    if ([operation operationType] == CKConnectionOperationCreateDirectory &&
-        [operation isRecursive] &&
-        [[error domain] isEqualToString:CKErrorDomain] &&
-        [error code] == CKErrorFileDoesNotExist)
-    {
-        NSString *path = [[operation path] stringByDeletingLastPathComponent];
-        if (![path isEqualToString:@"/"])
-        {
-            CKConnectionOperation *newOp = [[CKConnectionOperation alloc]
-                                            initCreateDirectoryOperationWithIdentifier:[operation identifier]
-                                            path:path
-                                            recursive:YES
-                                            mainOperation:([operation mainOperation] ? [operation mainOperation] : operation)];
-            [[self connection] setCurrentOperation:newOp];
-            [newOp release];
-            
-            // Try the new operation
-            reportError = NO;
-            [[self connectionProtocol] createDirectoryAtPath:path];
-        }
-    }
-    
-    if (reportError)
-    {
-        [[self connectionThreadProxy] fileTransferProtocol:protocol currentOperationDidFailWithError:error];
-    }
+    [[self connectionThreadProxy] fileTransferProtocol:protocol currentOperationDidFailWithError:error];
 }
 
 - (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
@@ -284,3 +223,4 @@
 }
 
 @end
+

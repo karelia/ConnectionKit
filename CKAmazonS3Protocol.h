@@ -7,14 +7,14 @@
 //
 
 #import "CKHTTPBasedProtocol.h"
-#import "CKAmazonS3RESTOperation.h"
+#import "CK_AmazonS3RESTOperation.h"
 
 
-@interface CKAmazonS3Protocol : CKHTTPBasedProtocol <CKAmazonS3RESTOperationDelegate>
+@interface CKAmazonS3Protocol : CKHTTPBasedProtocol <CK_AmazonS3RESTOperationDelegate>
 {
     NSURLCredential *_credential;
     
-    CKAmazonS3RESTOperation *_currentOperation;
+    CK_AmazonS3RESTOperation *_currentOperation;
 }
 
 @end
