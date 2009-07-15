@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CKFileTransferConnection.h"
+#import "CKFileRequest.h"
 
 
 @class CKFileInfo;
@@ -93,6 +94,10 @@
  mid-operation.
  */
 - (void)stopCurrentOperation;
+
++ (id)propertyForKey:(NSString *)key inRequest:(CKFileRequest *)request;
++ (void)setProperty:(id)value forKey:(NSString *)key inRequest:(CKMutableFileRequest *)request;
++ (void)removePropertyForKey:(NSString *)key inRequest:(CKMutableFileRequest *)request;
 
 @end
 

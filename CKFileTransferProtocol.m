@@ -155,4 +155,22 @@ static NSMutableArray *sRegisteredClasses;
     SUBCLASS_RESPONSIBLE;
 }
 
++ (id)propertyForKey:(NSString *)key inRequest:(CKFileRequest *)request
+{
+    NSDictionary *properties = [request performSelector:@selector(CK_extensibleProperties)];
+    return [properties objectForKey:key];
+}
+
++ (void)setProperty:(id)value forKey:(NSString *)key inRequest:(CKMutableFileRequest *)request
+{
+    NSMutableDictionary *properties = [request performSelector:@selector(CK_extensibleProperties)];
+    [properties setObject:value forKey:key];
+}
+
++ (void)removePropertyForKey:(NSString *)key inRequest:(CKMutableFileRequest *)request;
+{
+    NSMutableDictionary *properties = [request performSelector:@selector(CK_extensibleProperties)];
+    [properties removeObjectForKey:key];
+}
+
 @end
