@@ -31,6 +31,7 @@ typedef enum {
     // Protocol
     CKFSProtocol              *_protocol;
     id <CKFileTransferProtocolClient>   _client;
+    id <CKFileTransferProtocolClient>   _clientThreadProxy;
     int                                 _status;
     
     // Operation queue

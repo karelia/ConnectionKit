@@ -30,6 +30,10 @@
 #import <Foundation/Foundation.h>
 
 
+#define LocalizedStringInConnectionKitBundle(key, comment) \
+[[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
+
+
 @interface NSString (Connection)
 
 - (NSString *)encodeLegally;

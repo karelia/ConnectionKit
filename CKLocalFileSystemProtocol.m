@@ -9,7 +9,7 @@
 #import "CKLocalFileSystemProtocol.h"
 
 #import "CKError.h"
-#import "CKConnectionProtocol1.h"
+#import "NSString+Connection.h"
 
 
 @implementation CKLocalFileSystemProtocol

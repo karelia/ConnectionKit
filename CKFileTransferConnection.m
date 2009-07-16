@@ -11,12 +11,10 @@
 #import "CKFileTransferDelegate.h"
 #import "CK_FileTransferClient.h"
 #import "CK_FileOperation.h"
+#import "CKFSProtocolThread.h"
 
 #import "CKError.h"
-#import "CKConnectionProtocol1.h"
-#import "CKConnectionThreadManager.h"
-
-#import "NSInvocation+ConnectionKit.h"
+#import "CKThreadProxy.h"
 
 
 NSString *const CKErrorDomain = @"ConnectionErrorDomain";
@@ -57,14 +55,18 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
         [_queue setMaxConcurrentOperationCount:1];
         [_queue setSuspended:YES];
         
-        
-        // Start connection
+        // Setup protocol
         _client = [[CK_FileTransferClient alloc] initWithConnection:self];
+        _clientThreadProxy = [CKThreadProxy CK_proxyWithTarget:_client
+                                                        thread:[CKFSProtocolThread FSProtocolThread]];
+        [_clientThreadProxy retain];
+        
         _protocol = [[protocolClass alloc] initWithRequest:[self request] client:_client];
         [(CK_FileTransferClient *)_client setConnectionProtocol:_protocol];
         
+        // Start connection
         _status = CKConnectionStatusOpening;
-        [[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:_protocol] startConnection];
+        [_clientThreadProxy startConnection];
     }
     else
     {
@@ -148,8 +150,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     _currentOperation = [operation retain];
     
     // Start operation
-    CKFSProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
-    [workerThreadProxy startCurrentOperationWithRequest:[operation request]];
+    [_clientThreadProxy startCurrentOperationWithRequest:[operation request]];
 }
 
 - (void)CK_currentOperationDidEnd:(BOOL)success error:(NSError *)error
