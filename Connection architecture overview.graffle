@@ -37,6 +37,135 @@
 	<key>GraphicsList</key>
 	<array>
 		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Font</key>
+				<string>Helvetica</string>
+				<key>Size</key>
+				<real>12</real>
+			</dict>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>2</integer>
+			</dict>
+			<key>ID</key>
+			<integer>34</integer>
+			<key>Points</key>
+			<array>
+				<string>{463.089, 146.622}</string>
+				<string>{498.302, 176.52}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>LineType</key>
+					<integer>1</integer>
+					<key>TailArrow</key>
+					<string>0</string>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>32</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>Class</key>
+			<string>LineGraphic</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Font</key>
+				<string>Helvetica</string>
+				<key>Size</key>
+				<real>12</real>
+			</dict>
+			<key>Head</key>
+			<dict>
+				<key>ID</key>
+				<integer>32</integer>
+			</dict>
+			<key>ID</key>
+			<integer>33</integer>
+			<key>Points</key>
+			<array>
+				<string>{343.104, 176.179}</string>
+				<string>{375.25, 146.299}</string>
+			</array>
+			<key>Style</key>
+			<dict>
+				<key>stroke</key>
+				<dict>
+					<key>HeadArrow</key>
+					<string>FilledArrow</string>
+					<key>LineType</key>
+					<integer>1</integer>
+					<key>TailArrow</key>
+					<string>0</string>
+				</dict>
+			</dict>
+			<key>Tail</key>
+			<dict>
+				<key>ID</key>
+				<integer>4</integer>
+			</dict>
+		</dict>
+		<dict>
+			<key>Bounds</key>
+			<string>{{375.25, 120.787}, {87.4576, 51.0236}}</string>
+			<key>Class</key>
+			<string>ShapedGraphic</string>
+			<key>Flow</key>
+			<string>Overflow</string>
+			<key>FontInfo</key>
+			<dict>
+				<key>Font</key>
+				<string>GillSans</string>
+				<key>Size</key>
+				<real>10</real>
+			</dict>
+			<key>HFlip</key>
+			<string>YES</string>
+			<key>ID</key>
+			<integer>32</integer>
+			<key>Line</key>
+			<dict>
+				<key>ID</key>
+				<integer>18</integer>
+				<key>Position</key>
+				<real>0.19793766736984253</real>
+				<key>RotationType</key>
+				<integer>0</integer>
+			</dict>
+			<key>Magnets</key>
+			<array>
+				<string>{0, 1}</string>
+				<string>{0, -1}</string>
+				<string>{1, 0}</string>
+				<string>{-1, 0}</string>
+			</array>
+			<key>Shape</key>
+			<string>Rectangle</string>
+			<key>Text</key>
+			<dict>
+				<key>Text</key>
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
+{\fonttbl\f0\fnil\fcharset0 GillSans;}
+{\colortbl;\red255\green255\blue255;}
+\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
+
+\f0\fs24 \cf0 Thread Proxy}</string>
+			</dict>
+			<key>Wrap</key>
+			<string>YES</string>
+		</dict>
+		<dict>
 			<key>Bounds</key>
 			<string>{{247.979, 380.557}, {342, 17}}</string>
 			<key>Class</key>
@@ -86,7 +215,7 @@
 				<key>Align</key>
 				<integer>0</integer>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
@@ -139,7 +268,7 @@
 				<key>Align</key>
 				<integer>0</integer>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\ql\qnatural\pardirnatural
@@ -259,7 +388,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -340,7 +469,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -421,7 +550,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -502,7 +631,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -555,7 +684,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -606,7 +735,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -762,7 +891,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -798,7 +927,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -825,7 +954,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<integer>12</integer>
 			<key>Points</key>
 			<array>
-				<string>{663.255, 219.449}</string>
+				<string>{663.542, 219.039}</string>
 				<string>{581.387, 336.558}</string>
 			</array>
 			<key>Style</key>
@@ -874,52 +1003,12 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
 \f0\fs22 \cf0 Authentication Challenge}</string>
-			</dict>
-		</dict>
-		<dict>
-			<key>Class</key>
-			<string>LineGraphic</string>
-			<key>FontInfo</key>
-			<dict>
-				<key>Font</key>
-				<string>Helvetica</string>
-				<key>Size</key>
-				<real>12</real>
-			</dict>
-			<key>Head</key>
-			<dict>
-				<key>ID</key>
-				<integer>2</integer>
-			</dict>
-			<key>ID</key>
-			<integer>10</integer>
-			<key>Points</key>
-			<array>
-				<string>{342.737, 176.52}</string>
-				<string>{498.302, 176.52}</string>
-			</array>
-			<key>Style</key>
-			<dict>
-				<key>stroke</key>
-				<dict>
-					<key>HeadArrow</key>
-					<string>FilledArrow</string>
-					<key>LineType</key>
-					<integer>1</integer>
-					<key>TailArrow</key>
-					<string>0</string>
-				</dict>
-			</dict>
-			<key>Tail</key>
-			<dict>
-				<key>ID</key>
-				<integer>4</integer>
 			</dict>
 		</dict>
 		<dict>
@@ -941,8 +1030,8 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<integer>9</integer>
 			<key>Points</key>
 			<array>
-				<string>{254.78, 176.52}</string>
-				<string>{221.226, 176.52}</string>
+				<string>{255.28, 176.52}</string>
+				<string>{221.227, 176.52}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -981,8 +1070,8 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<integer>8</integer>
 			<key>Points</key>
 			<array>
-				<string>{376.79, 226.307}</string>
-				<string>{342.737, 176.52}</string>
+				<string>{375.25, 209.299}</string>
+				<string>{342.738, 176.52}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1022,7 +1111,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Points</key>
 			<array>
 				<string>{498.302, 176.52}</string>
-				<string>{464.248, 226.307}</string>
+				<string>{462.708, 209.299}</string>
 			</array>
 			<key>Style</key>
 			<dict>
@@ -1110,7 +1199,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -1146,7 +1235,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -1156,9 +1245,11 @@ Messages for control of the connection are shunted backwards and forwards over t
 		</dict>
 		<dict>
 			<key>Bounds</key>
-			<string>{{376.79, 183.787}, {87.4576, 85.0394}}</string>
+			<string>{{375.25, 183.787}, {87.4576, 51.0236}}</string>
 			<key>Class</key>
 			<string>ShapedGraphic</string>
+			<key>Flow</key>
+			<string>Overflow</string>
 			<key>FontInfo</key>
 			<dict>
 				<key>Font</key>
@@ -1170,6 +1261,15 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<string>YES</string>
 			<key>ID</key>
 			<integer>3</integer>
+			<key>Line</key>
+			<dict>
+				<key>ID</key>
+				<integer>18</integer>
+				<key>Position</key>
+				<real>0.38323169946670532</real>
+				<key>RotationType</key>
+				<integer>0</integer>
+			</dict>
 			<key>Magnets</key>
 			<array>
 				<string>{0, 1}</string>
@@ -1182,13 +1282,15 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
 
 \f0\fs24 \cf0 Thread Proxy}</string>
 			</dict>
+			<key>Wrap</key>
+			<string>YES</string>
 		</dict>
 		<dict>
 			<key>Bounds</key>
@@ -1218,7 +1320,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -1254,7 +1356,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 			<key>Text</key>
 			<dict>
 				<key>Text</key>
-				<string>{\rtf1\ansi\ansicpg1252\cocoartf1030
+				<string>{\rtf1\ansi\ansicpg1252\cocoartf1033
 {\fonttbl\f0\fnil\fcharset0 GillSans;}
 {\colortbl;\red255\green255\blue255;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\qc\pardirnatural
@@ -1438,7 +1540,7 @@ Messages for control of the connection are shunted backwards and forwards over t
 		</dict>
 	</array>
 	<key>ModificationDate</key>
-	<string>2009-07-15 15:41:07 +0100</string>
+	<string>2009-07-16 13:10:07 +0100</string>
 	<key>Modifier</key>
 	<string>Mike</string>
 	<key>NotesVisible</key>

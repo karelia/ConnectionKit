@@ -21,17 +21,14 @@
 //             ------------->
 @interface CK_FileTransferClient : NSObject <CKFileTransferProtocolClient>
 {
-    CKFileTransferConnection            *_connection;   // Weak ref
-    CKFSProtocol    *_protocol;     // Weak ref
-    
-    id  _threadProxy;
+    CKFileTransferConnection    *_connectionThreadProxy;
+    CKFSProtocol                *_protocol;
 }
 
 - (id)initWithConnection:(CKFileTransferConnection *)connection;
-- (CKFileTransferConnection *)connection;
 
-- (CKFSProtocol *)connectionProtocol;
-- (void)setConnectionProtocol:(CKFSProtocol *)protocol; // Single-use method
+- (void)startWithRequest:(NSURLRequest *)request;
+- (CKFSProtocol *)protocol;
 
 @end
 

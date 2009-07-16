@@ -26,6 +26,8 @@
 }
 
 #pragma mark Protocol registration
+
+// FIXME: Make protcol class handling threadsafe
 /*!
  @method registerClass:
  @param protocolClass The subclass of CKFSProtocol to register
