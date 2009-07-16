@@ -10,8 +10,7 @@
 
 #import "CKConnectionAuthentication.h"
 #import "CKError.h"
-
-#import "CKAbstractConnection.h"    // For KTLog. Remove dependency when possible
+#import "NSString+Connection.h"
 
 
 @interface CKWebDAVProtocol ()
@@ -295,8 +294,6 @@
                 case 403:
                     errorCode = CKErrorNoPermissionsToReadFile;
                     localizedErrorDescription = LocalizedStringInConnectionKitBundle(@"The server does not allow the creation of directories at the current location", @"WebDAV Create Directory Error");
-                    //we fake the directory exists as this is usually the case if it is the root directory
-                    [errorUserInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
                     break;
                     
                 case 409:

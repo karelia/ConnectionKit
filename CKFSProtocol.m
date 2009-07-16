@@ -6,7 +6,6 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKConnectionProtocol1.h"
 
 #import "CKLocalFileSystemProtocol.h"
 #import "CKWebDAVProtocol.h"
