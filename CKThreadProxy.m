@@ -8,7 +8,7 @@
 
 #import "CKThreadProxy.h"
 
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
 @interface CKAuthenticationChallengeSenderThreadProxy : NSProxy <NSURLAuthenticationChallengeSender>
@@ -64,7 +64,7 @@
                     waitUntilDone:([[anInvocation methodSignature] methodReturnLength] > 0)];
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+- (void)FSProtocol:(CKFSProtocol *)protocol
     didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     //  Set up a special thread proxy to handle the delegate's response to the challenge.

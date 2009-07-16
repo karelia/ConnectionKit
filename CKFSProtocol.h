@@ -1,5 +1,5 @@
 //
-//  CKFileTransferProtocol.h
+//  CKFSProtocol.h
 //  Marvel
 //
 //  Created by Mike on 18/01/2009.
@@ -18,7 +18,7 @@
 #pragma mark -
 
 
-@interface CKFileTransferProtocol : NSObject
+@interface CKFSProtocol : NSObject
 {
   @private
     NSURLRequest             *_request;
@@ -28,9 +28,9 @@
 #pragma mark Protocol registration
 /*!
  @method registerClass:
- @param protocolClass The subclass of CKFileTransferProtocol to register
+ @param protocolClass The subclass of CKFSProtocol to register
  @result YES if the registration is successful, NO otherwise. The only failure condition is if
- protocolClass is not a subclass of CKFileTransferProtocol.
+ protocolClass is not a subclass of CKFSProtocol.
  @discussion This method is only safe to use on the main thread.
  */
 + (BOOL)registerClass:(Class)protocolClass;
@@ -103,18 +103,18 @@
 
 // Calling any of these methods at an inappropriate time will result in an exception
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)FSProtocol:(CKFSProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path;
+- (void)FSProtocol:(CKFSProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)FSProtocol:(CKFSProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
-- (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveProperties:(CKFileInfo *)fileInfo ofItemAtPath:(NSString *)path;
+- (void)FSProtocolDidFinishCurrentOperation:(CKFSProtocol *)protocol;
+- (void)FSProtocol:(CKFSProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)FSProtocol:(CKFSProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)FSProtocol:(CKFSProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)FSProtocol:(CKFSProtocol *)protocol didReceiveProperties:(CKFileInfo *)fileInfo ofItemAtPath:(NSString *)path;
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+- (void)FSProtocol:(CKFSProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)FSProtocol:(CKFSProtocol *)protocol
                 appendFormat:(NSString *)formatString
                 toTranscript:(CKTranscriptType)transcript, ...;
 

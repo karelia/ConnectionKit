@@ -8,10 +8,10 @@
 
 #import "CKFileTransferConnection+Private.h"
 
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
-//  CK_FileTransferClient manages the threaded interaction with a CKFileTransferProtocol
+//  CK_FileTransferClient manages the threaded interaction with a CKFSProtocol
 //  subclass. It generally just forwards the methods onto the host CKConnection object on the main
 //  thread.
 //
@@ -22,7 +22,7 @@
 @interface CK_FileTransferClient : NSObject <CKFileTransferProtocolClient>
 {
     CKFileTransferConnection            *_connection;   // Weak ref
-    CKFileTransferProtocol    *_protocol;     // Weak ref
+    CKFSProtocol    *_protocol;     // Weak ref
     
     id  _threadProxy;
 }
@@ -30,8 +30,8 @@
 - (id)initWithConnection:(CKFileTransferConnection *)connection;
 - (CKFileTransferConnection *)connection;
 
-- (CKFileTransferProtocol *)connectionProtocol;
-- (void)setConnectionProtocol:(CKFileTransferProtocol *)protocol; // Single-use method
+- (CKFSProtocol *)connectionProtocol;
+- (void)setConnectionProtocol:(CKFSProtocol *)protocol; // Single-use method
 
 @end
 

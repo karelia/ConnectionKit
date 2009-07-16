@@ -6,10 +6,10 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
-@interface CKSFTPProtocol : CKFileTransferProtocol {
+@interface CKSFTPProtocol : CKFSProtocol {
 
 }
 

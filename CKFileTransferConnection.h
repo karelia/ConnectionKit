@@ -16,7 +16,7 @@ typedef enum {
 } CKTranscriptType;
 
 
-@class NSURLRequest, CKFileRequest, CKFileTransferProtocol;
+@class NSURLRequest, CKFileRequest, CKFSProtocol;
 @class CK_FileOperation;
 @protocol CKFileTransferDelegate, CKFileTransferProtocolClient;
     
@@ -29,7 +29,7 @@ typedef enum {
     NSString                    *_name;
     
     // Protocol
-    CKFileTransferProtocol              *_protocol;
+    CKFSProtocol              *_protocol;
     id <CKFileTransferProtocolClient>   _client;
     int                                 _status;
     

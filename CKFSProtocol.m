@@ -1,5 +1,5 @@
 //
-//  CKFileTransferProtocol.m
+//  CKFSProtocol.m
 //  Marvel
 //
 //  Created by Mike on 18/01/2009.
@@ -12,7 +12,7 @@
 #import "CKWebDAVProtocol.h"
 
 
-@implementation CKFileTransferProtocol
+@implementation CKFSProtocol
 
 static NSMutableArray *sRegisteredClasses;
 
@@ -36,7 +36,7 @@ static NSMutableArray *sRegisteredClasses;
 
 + (BOOL)registerClass:(Class)protocolClass
 {
-    BOOL result = [protocolClass isSubclassOfClass:[CKFileTransferProtocol class]];
+    BOOL result = [protocolClass isSubclassOfClass:[CKFSProtocol class]];
     if (result && [sRegisteredClasses indexOfObjectIdenticalTo:protocolClass] == NSNotFound)
     {
         [sRegisteredClasses addObject:protocolClass];

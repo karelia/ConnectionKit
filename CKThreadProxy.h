@@ -9,7 +9,7 @@
 #import <Cocoa/Cocoa.h>
 
 
-@class CKFileTransferProtocol;
+@class CKFSProtocol;
 
 
 // Provides a simple way to message another thread. Has a couple of ConnectionKit-specific tricks up its sleave; see inside for details
@@ -24,6 +24,6 @@
 + (id)CK_proxyWithTarget:(id <NSObject>)target thread:(NSThread *)thread;
 
 // In addition to forwarding the message onto the main thread, the proxy guarantees the reply will be returned on the thread that sent the challenge.
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)FSProtocol:(CKFSProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 @end
