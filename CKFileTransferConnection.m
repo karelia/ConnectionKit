@@ -55,18 +55,15 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
         [_queue setMaxConcurrentOperationCount:1];
         [_queue setSuspended:YES];
         
-        // Setup protocol
-        _client = [[CK_FileTransferClient alloc] initWithConnection:self];
-        _clientThreadProxy = [CKThreadProxy CK_proxyWithTarget:_client
+        // Setup client/protocol
+        CK_FileTransferClient *client = [[CK_FileTransferClient alloc] initWithConnection:self];
+        _clientThreadProxy = [CKThreadProxy CK_proxyWithTarget:client
                                                         thread:[CKFSProtocolThread FSProtocolThread]];
         [_clientThreadProxy retain];
-        
-        _protocol = [[protocolClass alloc] initWithRequest:[self request] client:_client];
-        [(CK_FileTransferClient *)_client setConnectionProtocol:_protocol];
-        
+                
         // Start connection
         _status = CKConnectionStatusOpening;
-        [_clientThreadProxy startConnection];
+        [_clientThreadProxy startWithRequest:request];
     }
     else
     {
@@ -85,7 +82,6 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     [_currentOperation release];
     
     [_request release];
-    [_protocol release];
     [_name release];
     
     [super dealloc];
@@ -102,11 +98,6 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     name = [name copy];
     [_name release];
     _name = name;
-}
-
-- (CKFSProtocol *)protocol
-{
-    return _protocol;   // _protocol is an id to provide less of a hint to external code
 }
 
 #pragma mark Connection
