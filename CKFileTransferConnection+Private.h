@@ -7,7 +7,7 @@
 //
 
 #import "CKFileTransferConnection.h"
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
 typedef enum {

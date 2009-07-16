@@ -160,22 +160,22 @@
     {
         if (didFinish)
         {
-            [[self client] fileTransferProtocol:self didOpenConnectionWithCurrentDirectoryPath:nil];
+            [[self client] FSProtocol:self didOpenConnectionWithCurrentDirectoryPath:nil];
         }
         else
         {
-            [[self client] fileTransferProtocol:self didFailWithError:error];
+            [[self client] FSProtocol:self didFailWithError:error];
         }
     }
     else
     {
         if (didFinish)
         {
-            [[self client] fileTransferProtocolDidFinishCurrentOperation:self];
+            [[self client] FSProtocolDidFinishCurrentOperation:self];
         }
         else
         {
-            [[self client] fileTransferProtocol:self currentOperationDidFailWithError:error];
+            [[self client] FSProtocol:self currentOperationDidFailWithError:error];
         }
     }
 }
@@ -200,7 +200,7 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    [[self client] fileTransferProtocol:self didReceiveAuthenticationChallenge:challenge];
+    [[self client] FSProtocol:self didReceiveAuthenticationChallenge:challenge];
 }
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
@@ -402,7 +402,7 @@
 
 - (void)HTTPConnection:(CKHTTPConnection *)connection didReceiveData:(NSData *)data
 {
-    [[self client] fileTransferProtocol:self didDownloadData:data];
+    [[self client] FSProtocol:self didDownloadData:data];
 }
 
 - (void)HTTPConnectionDidFinishLoading:(CKHTTPConnection *)connection

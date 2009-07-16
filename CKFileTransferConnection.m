@@ -45,7 +45,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 {
     [super init];
     
-    Class protocolClass = [CKFileTransferProtocol classForRequest:request];
+    Class protocolClass = [CKFSProtocol classForRequest:request];
     if (protocolClass)
     {
         _request = [request copy];
@@ -102,7 +102,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     _name = name;
 }
 
-- (CKFileTransferProtocol *)protocol
+- (CKFSProtocol *)protocol
 {
     return _protocol;   // _protocol is an id to provide less of a hint to external code
 }
@@ -148,7 +148,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     _currentOperation = [operation retain];
     
     // Start operation
-    CKFileTransferProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
+    CKFSProtocol *workerThreadProxy = [[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:[self protocol]];
     [workerThreadProxy startCurrentOperationWithRequest:[operation request]];
 }
 
@@ -192,7 +192,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
  *      B) dispatching the next operation
  */
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
+- (void)FSProtocol:(CKFSProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
     _status = CKConnectionStatusOpen;
     
@@ -207,7 +207,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     [_queue setSuspended:NO];
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)FSProtocol:(CKFSProtocol *)protocol didFailWithError:(NSError *)error;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -221,7 +221,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 
 #pragma mark Authorization
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)FSProtocol:(CKFSProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // Inform the delegate
     id delegate = [self delegate];
@@ -233,17 +233,17 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 
 #pragma mark Operations
 
-- (void)fileTransferProtocolDidFinishCurrentOperation:(CKFileTransferProtocol *)protocol;
+- (void)FSProtocolDidFinishCurrentOperation:(CKFSProtocol *)protocol;
 {
     [self CK_currentOperationDidEnd:YES error:nil];
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
+- (void)FSProtocol:(CKFSProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
     [self CK_currentOperationDidEnd:NO error:error];
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didDownloadData:(NSData *)data;
+- (void)FSProtocol:(CKFSProtocol *)protocol didDownloadData:(NSData *)data;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
@@ -253,7 +253,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     }
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
+- (void)FSProtocol:(CKFSProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
     // Inform the delegate. Gives it a chance to e.g. cancel the connection in response
     id delegate = [self delegate];
@@ -263,14 +263,14 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     }
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol
+- (void)FSProtocol:(CKFSProtocol *)protocol
         didReceiveProperties:(CKFileInfo *)fileInfo
                 ofItemAtPath:(NSString *)path;
 {
     
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
+- (void)FSProtocol:(CKFSProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
     id delegate = [self delegate];
     if ([delegate respondsToSelector:@selector(fileTransferConnection:appendString:toTranscript:)])
@@ -279,7 +279,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
     }
 }
 
-- (void)fileTransferProtocol:(CKFileTransferProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
+- (void)FSProtocol:(CKFSProtocol *)protocol appendFormat:(NSString *)formatString toTranscript:(CKTranscriptType)transcript, ...
 {   // This method should never actually be called!
 }
 

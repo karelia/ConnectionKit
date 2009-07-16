@@ -7,7 +7,7 @@
 //
 
 #import "CKFileRequest.h"
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
 NSString *CKOperationTypeDownload = @"CKDownloadOperation";
@@ -110,22 +110,22 @@ NSString *CKOperationTypeRemove = @"CKDeleteItemOperation";
 
 - (NSData *)data
 {
-    return [CKFileTransferProtocol propertyForKey:@"CKData" inRequest:self];
+    return [CKFSProtocol propertyForKey:@"CKData" inRequest:self];
 }
 
 - (NSString *)fileType
 {
-    return [CKFileTransferProtocol propertyForKey:@"CKFileType" inRequest:self];
+    return [CKFSProtocol propertyForKey:@"CKFileType" inRequest:self];
 }
 
 - (BOOL)createIntermediateDirectories
 {
-    NSNumber *result = [CKFileTransferProtocol propertyForKey:@"CKCreateIntermediateDirectories"
+    NSNumber *result = [CKFSProtocol propertyForKey:@"CKCreateIntermediateDirectories"
                                                     inRequest:self];
     return [result boolValue];
 }
 
-// CKFileTransferProtocol will use this to get properties
+// CKFSProtocol will use this to get properties
 @synthesize CK_extensibleProperties = _extensibleProperties;
 
 #pragma mark Copying
@@ -186,25 +186,25 @@ NSString *CKOperationTypeRemove = @"CKDeleteItemOperation";
     // UTI can be nil for "unknown." Protocol must choose how to deal with it, generally falling back to something like binary/octet-stream
     
     data = [data copy];
-    [CKFileTransferProtocol setProperty:data forKey:@"CKData" inRequest:self];
+    [CKFSProtocol setProperty:data forKey:@"CKData" inRequest:self];
     [data release];
     
     if (UTI)
     {
         UTI = [UTI copy];
-        [CKFileTransferProtocol setProperty:UTI forKey:@"CKFileType" inRequest:self];
+        [CKFSProtocol setProperty:UTI forKey:@"CKFileType" inRequest:self];
         [UTI release];
     }
     else
     {
-        [CKFileTransferProtocol removePropertyForKey:@"CKFileType" inRequest:self];
+        [CKFSProtocol removePropertyForKey:@"CKFileType" inRequest:self];
     }
 }
 
 @dynamic createIntermediateDirectories;
 - (void)setCreateIntermediateDirectories:(BOOL)flag
 {
-    [CKFileTransferProtocol setProperty:[NSNumber numberWithBool:flag]
+    [CKFSProtocol setProperty:[NSNumber numberWithBool:flag]
                                  forKey:@"CKCreateIntermediateDirectories"
                               inRequest:self];
 }

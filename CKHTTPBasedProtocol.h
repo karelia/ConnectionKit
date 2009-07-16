@@ -6,13 +6,13 @@
 //  Copyright 2009 Karelia Software. All rights reserved.
 //
 
-#import "CKFileTransferProtocol.h"
+#import "CKFSProtocol.h"
 
 
 //  WebDAV and S3 share much in common; they both follow a REST-like HTTP protocol. This class is a nice convenience to provide the code they share
 
 
-@interface CKHTTPBasedProtocol : CKFileTransferProtocol
+@interface CKHTTPBasedProtocol : CKFSProtocol
 @end
 
 
