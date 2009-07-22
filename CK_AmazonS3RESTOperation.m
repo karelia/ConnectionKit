@@ -59,7 +59,7 @@ char *NewBase64Encode(const void *inputBuffer,
 {
     [_request release];
     [_credential release];
-    // Connection should have been released before this
+    // Connection and errorData should have been released before this
     
     [super dealloc];
 }
@@ -117,8 +117,7 @@ char *NewBase64Encode(const void *inputBuffer,
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
         if ([httpResponse statusCode] >= 300)   // 3xx errors are likey to be redirects, which NSURLConnection handles
         {
-            // TODO: Construct an error from the XML payload
-            [self operationDidEnd:NO error:nil];
+            _errorData = [[NSMutableData alloc] init];
         }
         else
         {
@@ -133,12 +132,28 @@ char *NewBase64Encode(const void *inputBuffer,
 
 - (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data;
 {
-    [_delegate amazonS3Operation:self didReceiveData:data];
+    if (_errorData)
+    {
+        [_errorData appendData:data];
+    }
+    else
+    {
+        [_delegate amazonS3Operation:self didReceiveData:data];
+    }
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
-    [self operationDidEnd:YES error:nil];
+    if (_errorData)
+    {
+        // FIXME: Generate an error from the data
+        [self operationDidEnd:NO error:nil];
+        [_errorData release],   _errorData = nil;
+    }
+    else
+    {
+        [self operationDidEnd:YES error:nil];
+    }
 }
 
 - (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error;
@@ -205,15 +220,6 @@ char *NewBase64Encode(const void *inputBuffer,
 - (NSString *)requestStringToSign
 {
     // S3 authentication relies in part on the date the request was made. This may already have been specified. If not, generate it now
-    NSString *date = [_request valueForHTTPHeaderField:@"Date"];
-    if (!date)
-    {
-        CFHTTPMessageRef HTTPMessage = [_request makeHTTPMessage];
-        date = [NSMakeCollectable(CFHTTPMessageCopyHeaderFieldValue(HTTPMessage, CFSTR("Date"))) autorelease];
-        [_request setValue:date forHTTPHeaderField:@"Date"];
-    }
-    
-    
     NSString *contentType = [_request valueForHTTPHeaderField:@"Content-Type"];
     if (!contentType) contentType = @"";
 	
@@ -222,7 +228,7 @@ char *NewBase64Encode(const void *inputBuffer,
                         [_request HTTPMethod],
                         contentType,
                         @"",                            // placeholder for MD5 hash
-                        date,
+                        @"",                            // will use x-amz-date instead of standard Date header
                         [self canonicalizedAmzHeaders], // already includes a trailing \n
                         [self canonicalizedResource]];
     
@@ -237,10 +243,10 @@ char *NewBase64Encode(const void *inputBuffer,
     
     // Stick in bucket name too if it's specified by subdomain
     NSString *host = [URL host];
-    if ([host length] > [@"amazonaws.com" length])
+    if ([host length] > [@"s3.amazonaws.com" length])
     {
-        NSString *subdomain = [host substringToIndex:([host length] - [@"amazonaws.com" length])];
-        [buffer insertString:subdomain atIndex:0];
+        NSString *subdomain = [host substringToIndex:([host length] - [@"s3.amazonaws.com" length])];
+        [buffer insertString:[@"/" stringByAppendingString:subdomain] atIndex:0];
     }
     
     // Include subresource
@@ -257,6 +263,19 @@ char *NewBase64Encode(const void *inputBuffer,
 
 - (NSString *)canonicalizedAmzHeaders
 {
+    // Cocoa doesn't let us get at the date header from a request before it's sent (makes sense really!), so we're using x-amz-date instead. Need to set it here if not already in place
+    NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
+    [formatter setFormatterBehavior:NSDateFormatterBehavior10_4];
+    [formatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
+	[formatter setDateFormat:@"EEE, dd MMM yyyy HH:mm:ss 'GMT'"];
+	
+    NSDate *date = [[NSDate alloc] init];
+    NSString *httpDate = [formatter stringFromDate:date];
+    [_request setValue:httpDate forHTTPHeaderField:@"x-amz-date"];
+    [date release];
+    
+    
+    
     NSMutableString *result = [NSMutableString string];
     
     NSArray *headerFieldKeys = [[_request allHTTPHeaderFields] allKeys];
@@ -265,7 +284,7 @@ char *NewBase64Encode(const void *inputBuffer,
     {
         // Includes only S3-specific fields. Everything is lower-cased. Compress excess whitespace down to a single space.
         NSString *lowercaseKey = [aKey lowercaseString];
-        if ([lowercaseKey hasPrefix:@"x-amz"])
+        if ([lowercaseKey hasPrefix:@"x-amz-"])
 		{
 			NSString *value = [_request valueForHTTPHeaderField:aKey];
             NSAssert1([value rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].location == NSNotFound,
