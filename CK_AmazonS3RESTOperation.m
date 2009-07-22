@@ -78,6 +78,8 @@ char *NewBase64Encode(const void *inputBuffer,
     [_connection cancel];
     [_connection release];  _connection = nil;
     
+    [self operationDidFinish];
+    
     // Let delegate know
     if (finished)
     {
