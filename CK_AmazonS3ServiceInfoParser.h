@@ -9,11 +9,12 @@
 #import <Cocoa/Cocoa.h>
 
 
-@class CKFileInfo;
+@class CKFSItemInfo;
 
 
 @interface CK_AmazonS3ServiceInfoParser : NSObject
 {
+  @private
     NSMutableArray      *_directoryContents;
     NSString            *_filenameInProgress;
     NSMutableDictionary *_attributesInProgress;
@@ -22,6 +23,6 @@
     NSMutableString *_textInProgress;
 }
 
-- (CKFileInfo *)parseData:(NSData *)data;
+- (CKFSItemInfo *)parseData:(NSData *)data;
 
 @end
