@@ -119,6 +119,7 @@ char *NewBase64Encode(const void *inputBuffer,
         NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
         if ([httpResponse statusCode] >= 300)   // 3xx errors are likey to be redirects, which NSURLConnection handles
         {
+            _errorResponse = [httpResponse copy];
             _errorData = [[NSMutableData alloc] init];
         }
         else
@@ -146,10 +147,22 @@ char *NewBase64Encode(const void *inputBuffer,
 
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection;
 {
-    if (_errorData)
+    if (_errorResponse)
     {
         // FIXME: Generate an error from the data
-        [self operationDidEnd:NO error:nil];
+        NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                  _errorResponse, @"URLResponse",
+                                  _errorData, @"ReceivedData",
+                                  nil];
+        
+        NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain
+                                                    code:NSURLErrorUnknown
+                                                userInfo:userInfo];
+        
+        [self operationDidEnd:NO error:error];
+        [error release];
+        
+        [_errorResponse release], _errorResponse = nil;
         [_errorData release],   _errorData = nil;
     }
     else
@@ -241,7 +254,10 @@ char *NewBase64Encode(const void *inputBuffer,
 {
     // Canonicalized resource string is based around the URL path (HTTP header URI)
     NSURL *URL = [_request URL];
-    NSMutableString *buffer = [[URL path] mutableCopy];
+    
+    CFStringRef path = CFURLCopyPath((CFURLRef)[URL absoluteURL]);  // maintain trailing slash. Oddly, doesn't seem to do unescaping
+    NSMutableString *buffer = [(NSString *)path mutableCopy];
+    CFRelease(path);
     
     // Stick in bucket name too if it's specified by subdomain
     NSString *host = [URL host];
@@ -258,7 +274,7 @@ char *NewBase64Encode(const void *inputBuffer,
         [buffer appendFormat:@"?%@", query];
     }
         
-    NSString *result = [buffer stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSString *result = [[buffer copy] autorelease];
     [buffer release];
     return result;
 }

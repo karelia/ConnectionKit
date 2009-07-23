@@ -24,8 +24,9 @@ extern NSString * const CKAmazonErrorCodeKey;
     NSURLCredential                         *_credential;
     id <CK_AmazonS3RESTOperationDelegate>    _delegate;  // weak ref
     
-    NSURLConnection *_connection;
-    NSMutableData   *_errorData;
+    NSURLConnection     *_connection;
+    NSHTTPURLResponse   *_errorResponse;
+    NSMutableData       *_errorData;
 }
 
 - (id)initWithRequest:(NSURLRequest *)request
