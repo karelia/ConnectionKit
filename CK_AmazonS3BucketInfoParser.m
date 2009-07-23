@@ -13,19 +13,6 @@
 
 @implementation CK_AmazonS3BucketInfoParser
 
-static NSArray *bucketContentsKeys;
-
-+ (void)initialize
-{
-    if (!bucketContentsKeys)
-    {
-        bucketContentsKeys = [[NSArray alloc] initWithObjects:
-                              @"ListBucketResult",
-                              @"Contents",
-                              nil];
-    }
-}
-
 - (CKFSItemInfo *)parseData:(NSData *)data;
 {
     _result = [[CKMutableFSItemInfo alloc] init];
@@ -47,9 +34,23 @@ static NSArray *bucketContentsKeys;
 {
     [_keysInProgress addObject:elementName];
     
-    if ([_keysInProgress isEqualToArray:bucketContentsKeys])
+    if ([_keysInProgress isEqualToArray:[NSArray arrayWithObjects:
+                                         @"ListBucketResult",
+                                         @"Contents",
+                                         nil]])
     {
-        _itemInProgress = [[CKMutableFSItemInfo alloc] init];
+        _itemInProgress = [[CKMutableFSItemInfo alloc] initWithFilename:nil
+                                                             attributes:[NSDictionary dictionaryWithObject:NSFileTypeRegular
+                                                                                                    forKey:NSFileType]];
+    }
+    else if ([_keysInProgress isEqualToArray:[NSArray arrayWithObjects:
+                                              @"ListBucketResult",
+                                              @"CommonPrefixes",
+                                              nil]])
+    {
+        _itemInProgress = [[CKMutableFSItemInfo alloc] initWithFilename:nil
+                                                             attributes:[NSDictionary dictionaryWithObject:NSFileTypeDirectory
+                                                                                                    forKey:NSFileType]];
     }
 }
 
@@ -63,14 +64,14 @@ static NSArray *bucketContentsKeys;
     }
     else if (_itemInProgress)
     {
-        if ([elementName isEqualToString:@"Contents"])
+        if ([elementName isEqualToString:@"Contents"] || [elementName isEqualToString:@"CommonPrefixes"])
         {
             [_result addDirectoryContentsItem:_itemInProgress];
             [_itemInProgress release], _itemInProgress = nil;
         }
         else
         {
-            if ([elementName isEqualToString:@"Key"])
+            if ([elementName isEqualToString:@"Key"] || [elementName isEqualToString:@"Prefix"])
             {
                 [_itemInProgress setFilename:_textInProgress];
             }
