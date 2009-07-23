@@ -247,7 +247,7 @@ char *NewBase64Encode(const void *inputBuffer,
     NSString *host = [URL host];
     if ([host length] > [@"s3.amazonaws.com" length])
     {
-        NSString *subdomain = [host substringToIndex:([host length] - [@"s3.amazonaws.com" length])];
+        NSString *subdomain = [host substringToIndex:([host length] - [@"s3.amazonaws.com" length] - 1)];
         [buffer insertString:[@"/" stringByAppendingString:subdomain] atIndex:0];
     }
     
