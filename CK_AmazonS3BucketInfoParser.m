@@ -71,9 +71,13 @@
         }
         else
         {
-            if ([elementName isEqualToString:@"Key"] || [elementName isEqualToString:@"Prefix"])
+            if ([elementName isEqualToString:@"Key"])
             {
                 [_itemInProgress setFilename:_textInProgress];
+            }
+            else if ([elementName isEqualToString:@"Prefix"])
+            {
+                [_itemInProgress setFilename:[_textInProgress substringToIndex:([_textInProgress length] - 1)]];
             }
             else if ([elementName isEqualToString:@"LastModified"])
             {
