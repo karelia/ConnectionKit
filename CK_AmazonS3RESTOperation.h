@@ -29,6 +29,9 @@ extern NSString * const CKAmazonErrorCodeKey;
     NSMutableData       *_errorData;
 }
 
++ (void)addAuthentication:(NSURLCredential *)credential
+                toRequest:(NSMutableURLRequest *)request;
+
 - (id)initWithRequest:(NSURLRequest *)request
            credential:(NSURLCredential *)credential
              delegate:(id <CK_AmazonS3RESTOperationDelegate>)delegate;
