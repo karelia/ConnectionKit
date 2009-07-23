@@ -15,7 +15,10 @@
 
 - (CKFSItemInfo *)parseData:(NSData *)data;
 {
-    _result = [[CKMutableFSItemInfo alloc] init];
+    _result = [[CKMutableFSItemInfo alloc] initWithFilename:nil
+                                                 attributes:[NSDictionary dictionaryWithObject:NSFileTypeDirectory
+                                                                                        forKey:NSFileType]];
+               
     _keysInProgress = [[NSMutableArray alloc] initWithCapacity:4];
     
     NSXMLParser *parser = [[NSXMLParser alloc] initWithData:data];
@@ -73,11 +76,19 @@
         {
             if ([elementName isEqualToString:@"Key"])
             {
-                [_itemInProgress setFilename:_textInProgress];
+                // This is a key, or the prefix. If the latter, it will end with a slash
+                if ([_textInProgress hasSuffix:@"/"])
+                {
+                    [_itemInProgress release], _itemInProgress = nil;
+                }
+                else
+                {
+                    [_itemInProgress setFilename:[_textInProgress lastPathComponent]];
+                }
             }
             else if ([elementName isEqualToString:@"Prefix"])
             {
-                [_itemInProgress setFilename:[_textInProgress substringToIndex:([_textInProgress length] - 1)]];
+                [_itemInProgress setFilename:[_textInProgress lastPathComponent]];
             }
             else if ([elementName isEqualToString:@"LastModified"])
             {
