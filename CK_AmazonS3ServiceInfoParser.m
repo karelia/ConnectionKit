@@ -8,12 +8,12 @@
 
 #import "CK_AmazonS3ServiceInfoParser.h"
 
-#import "CKFileInfo.h"
+#import "CKFSItemInfo.h"
 
 
 @implementation CK_AmazonS3ServiceInfoParser
 
-- (CKFileInfo *)parseData:(NSData *)data;
+- (CKFSItemInfo *)parseData:(NSData *)data;
 {
     _directoryContents = [[NSMutableArray alloc] init];
     _keysInProgress = [[NSMutableArray alloc] initWithCapacity:4];
@@ -25,7 +25,7 @@
         [_directoryContents release], _directoryContents = nil;
     }
     
-    CKFileInfo *result = [[CKFileInfo alloc] initWithDirectoryContents:_directoryContents];
+    CKFSItemInfo *result = [[CKFSItemInfo alloc] initWithDirectoryContents:_directoryContents];
     
     [_directoryContents release];
     [_keysInProgress release];
@@ -51,7 +51,7 @@
         
         if ([elementName isEqualToString:@"Bucket"])
         {
-            CKFileInfo *info = [[CKFileInfo alloc] initWithFilename:_filenameInProgress
+            CKFSItemInfo *info = [[CKFSItemInfo alloc] initWithFilename:_filenameInProgress
                                                          attributes:_attributesInProgress];
             [_filenameInProgress release], _filenameInProgress = nil;
             [_attributesInProgress release], _attributesInProgress = nil;
