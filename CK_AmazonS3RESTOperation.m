@@ -17,10 +17,10 @@ NSString *const CKAmazonErrorCodeKey = @"AmazonErrorCode";
 
 @interface CK_AmazonS3RESTOperation ()
 - (void)addAuthenticationToRequest;
-- (NSString *)requestSignature;
-- (NSString *)requestStringToSign;
-- (NSString *)canonicalizedResource;
-- (NSString *)canonicalizedAmzHeaders;
++ (NSString *)signatureForRequest:(NSMutableURLRequest *)request credential:(NSURLCredential *)credential;
++ (NSString *)stringToSignForRequest:(NSMutableURLRequest *)request;
++ (NSString *)canonicalizedResourceForRequest:(NSURLRequest *)request;
++ (NSString *)canonicalizedAmzHeadersForRequest:(NSMutableURLRequest *)request;
 @end
 
 
@@ -178,22 +178,28 @@ char *NewBase64Encode(const void *inputBuffer,
 
 #pragma mark Authentication
 
-- (void)addAuthenticationToRequest
-{    
-    NSString *AWSAccessKeyId = [_credential user];
++ (void)addAuthentication:(NSURLCredential *)credential
+                toRequest:(NSMutableURLRequest *)request;
+{
+    NSString *AWSAccessKeyId = [credential user];
     
     NSString *authorization = [NSString stringWithFormat:
                                @"AWS %@:%@",
                                AWSAccessKeyId,
-                               [self requestSignature]];
+                               [self signatureForRequest:request credential:credential]];
     
-	[_request setValue:authorization forHTTPHeaderField:@"Authorization"];
+	[request setValue:authorization forHTTPHeaderField:@"Authorization"];
 }
 
-- (NSString *)requestSignature
+- (void)addAuthenticationToRequest
+{    
+    [[self class] addAuthentication:_credential toRequest:_request];
+}
+
++ (NSString *)signatureForRequest:(NSMutableURLRequest *)request credential:(NSURLCredential *)credential;
 {
-    NSData *secretAccessKeyID = [[_credential password] dataUsingEncoding:NSUTF8StringEncoding];
-    NSData *stringToSignData = [[self requestStringToSign] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *secretAccessKeyID = [[credential password] dataUsingEncoding:NSUTF8StringEncoding];
+    NSData *stringToSignData = [[self stringToSignForRequest:request] dataUsingEncoding:NSUTF8StringEncoding];
     unsigned char md_value[CC_SHA1_DIGEST_LENGTH];
     
     CCHmac(kCCHmacAlgSHA1,
@@ -232,28 +238,28 @@ char *NewBase64Encode(const void *inputBuffer,
     return [result autorelease];
 }
 
-- (NSString *)requestStringToSign
++ (NSString *)stringToSignForRequest:(NSMutableURLRequest *)request;
 {
     // S3 authentication relies in part on the date the request was made. This may already have been specified. If not, generate it now
-    NSString *contentType = [_request valueForHTTPHeaderField:@"Content-Type"];
+    NSString *contentType = [request valueForHTTPHeaderField:@"Content-Type"];
     if (!contentType) contentType = @"";
 	
     NSString *result = [NSString stringWithFormat:
                         @"%@\n%@\n%@\n%@\n%@%@",
-                        [_request HTTPMethod],
+                        [request HTTPMethod],
                         contentType,
                         @"",                            // placeholder for MD5 hash
                         @"",                            // will use x-amz-date instead of standard Date header
-                        [self canonicalizedAmzHeaders], // already includes a trailing \n
-                        [self canonicalizedResource]];
+                        [self canonicalizedAmzHeadersForRequest:request], // already includes a trailing \n
+                        [self canonicalizedResourceForRequest:request]];
     
     return result;
 }
 
-- (NSString *)canonicalizedResource
++ (NSString *)canonicalizedResourceForRequest:(NSURLRequest *)request;
 {
     // Canonicalized resource string is based around the URL path (HTTP header URI)
-    NSURL *URL = [_request URL];
+    NSURL *URL = [request URL];
     
     CFStringRef path = CFURLCopyPath((CFURLRef)[URL absoluteURL]);  // maintain trailing slash. Oddly, doesn't seem to do unescaping
     NSMutableString *buffer = [(NSString *)path mutableCopy];
@@ -279,7 +285,7 @@ char *NewBase64Encode(const void *inputBuffer,
     return result;
 }
 
-- (NSString *)canonicalizedAmzHeaders
++ (NSString *)canonicalizedAmzHeadersForRequest:(NSMutableURLRequest *)request;
 {
     // Cocoa doesn't let us get at the date header from a request before it's sent (makes sense really!), so we're using x-amz-date instead. Need to set it here if not already in place
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
@@ -289,14 +295,14 @@ char *NewBase64Encode(const void *inputBuffer,
 	
     NSDate *date = [[NSDate alloc] init];
     NSString *httpDate = [formatter stringFromDate:date];
-    [_request setValue:httpDate forHTTPHeaderField:@"x-amz-date"];
+    [request setValue:httpDate forHTTPHeaderField:@"x-amz-date"];
     [date release];
     
     
     
     NSMutableString *result = [NSMutableString string];
     
-    NSArray *headerFieldKeys = [[_request allHTTPHeaderFields] allKeys];
+    NSArray *headerFieldKeys = [[request allHTTPHeaderFields] allKeys];
     NSArray *sortedHeaderFieldKeys = [headerFieldKeys sortedArrayUsingSelector:@selector(caseInsensitiveCompare:)];
     for (NSString *aKey in sortedHeaderFieldKeys)
     {
@@ -304,7 +310,7 @@ char *NewBase64Encode(const void *inputBuffer,
         NSString *lowercaseKey = [aKey lowercaseString];
         if ([lowercaseKey hasPrefix:@"x-amz-"])
 		{
-			NSString *value = [_request valueForHTTPHeaderField:aKey];
+			NSString *value = [request valueForHTTPHeaderField:aKey];
             NSAssert1([value rangeOfCharacterFromSet:[NSCharacterSet newlineCharacterSet]].location == NSNotFound,
                       @"Wasn't expecting Amazon S3 request header field to contain a newline character:\n%@",
                       value);
