@@ -40,6 +40,7 @@
     if ([_keysInProgress count] >= 3)
     {
         _attributesInProgress = [[NSMutableDictionary alloc] init];
+        [_attributesInProgress setObject:NSFileTypeDirectory forKey:NSFileType];
     }
 }
 
@@ -51,6 +52,7 @@
         
         if ([elementName isEqualToString:@"Bucket"])
         {
+            
             CKFSItemInfo *info = [[CKFSItemInfo alloc] initWithFilename:_filenameInProgress
                                                          attributes:_attributesInProgress];
             [_filenameInProgress release], _filenameInProgress = nil;
