@@ -9,7 +9,7 @@
 #import "CKFileTransferConnection.h"
 
 
-@class CKFileInfo;
+@class CKFSItemInfo;
 
 
 @protocol CKFileTransferDelegate
@@ -62,7 +62,7 @@
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection
                      operation:(id)identifier
-          didReceiveProperties:(CKFileInfo *)fileInfo
+          didReceiveProperties:(CKFSItemInfo *)fileInfo
                   ofItemAtPath:(NSString *)path;
 
 - (void)fileTransferConnection:(CKFileTransferConnection *)connection

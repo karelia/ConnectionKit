@@ -56,7 +56,7 @@
 
 - (void)FSProtocol:(CKFSProtocol *)protocol didOpenConnectionWithCurrentDirectoryPath:(NSString *)path
 {
-	NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     NSAssert([[self connectionThreadProxy] status] == CKConnectionStatusOpening, @"The connection is not ready to be opened");  // This should never be called twice
     
     [[self connectionThreadProxy] FSProtocol:protocol didOpenConnectionWithCurrentDirectoryPath:path];
@@ -64,7 +64,7 @@
 
 - (void)FSProtocol:(CKFSProtocol *)protocol didFailWithError:(NSError *)error;
 {
-	NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     [[self connectionThreadProxy] FSProtocol:protocol didFailWithError:error];
 }
@@ -120,7 +120,7 @@
 
 - (void)FSProtocol:(CKFSProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-	NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     NSAssert([[self connectionThreadProxy] status] > CKConnectionStatusNotOpen, @"The connection has not started yet");  // Should only happen while running
     
     
@@ -158,7 +158,7 @@
 
 - (void)FSProtocolDidFinishCurrentOperation:(CKFSProtocol *)protocol;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     [[self connectionThreadProxy] FSProtocolDidFinishCurrentOperation:protocol];
@@ -166,7 +166,7 @@
 
 - (void)FSProtocol:(CKFSProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     
     [[self connectionThreadProxy] FSProtocol:protocol currentOperationDidFailWithError:error];
@@ -174,23 +174,23 @@
 
 - (void)FSProtocol:(CKFSProtocol *)protocol didDownloadData:(NSData *)data;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     [[self connectionThreadProxy] FSProtocol:protocol didDownloadData:data];
 }
 
 - (void)FSProtocol:(CKFSProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     [[self connectionThreadProxy] FSProtocol:protocol didUploadDataOfLength:length];
 }
 
 - (void)FSProtocol:(CKFSProtocol *)protocol
-        didReceiveProperties:(CKFileInfo *)fileInfo
+        didReceiveProperties:(CKFSItemInfo *)fileInfo
                 ofItemAtPath:(NSString *)path;
 {
-    NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+    NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     [[self connectionThreadProxy] FSProtocol:protocol didReceiveProperties:fileInfo ofItemAtPath:path];
 }
@@ -201,7 +201,7 @@
  */
 - (void)FSProtocol:(CKFSProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
-	NSAssert2(protocol == [self protocol], @"-[CKFileTransferProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
+	NSAssert2(protocol == [self protocol], @"-[CKFSProtocolClient %@] message received from unknown protocol: %@", NSStringFromSelector(_cmd), protocol);
     
     [[self connectionThreadProxy] FSProtocol:protocol appendString:string toTranscript:transcript];
 }

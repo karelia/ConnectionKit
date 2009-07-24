@@ -28,7 +28,7 @@ typedef enum {
 @end
 
 
-@interface CKFileTransferConnection (ProtocolClient) <CKFileTransferProtocolClient>
+@interface CKFileTransferConnection (ProtocolClient) <CKFSProtocolClient>
 @end
 
 
