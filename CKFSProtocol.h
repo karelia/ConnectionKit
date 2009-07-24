@@ -11,8 +11,8 @@
 #import "CKFileRequest.h"
 
 
-@class CKFileInfo;
-@protocol CKFileTransferProtocolClient;
+@class CKFSItemInfo;
+@protocol CKFSProtocolClient;
 
 
 #pragma mark -
@@ -22,7 +22,7 @@
 {
   @private
     NSURLRequest             *_request;
-    id <CKFileTransferProtocolClient> _client;
+    id <CKFSProtocolClient> _client;
 }
 
 #pragma mark Protocol registration
@@ -46,9 +46,9 @@
 #pragma mark Protocol basics
 // You shouldn't generally need to override these methods. They just create a protocol object and
 // hang on to its properties
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFSProtocolClient>)client;
 @property(nonatomic, readonly) NSURLRequest *request;
-@property(nonatomic, readonly) id <CKFileTransferProtocolClient> client;
+@property(nonatomic, readonly) id <CKFSProtocolClient> client;
 
 
 #pragma mark Overall Connection
@@ -72,6 +72,12 @@
 
 
 #pragma mark File operations
+
+/*  You are responsible for returning an NSOperation subclass that the client will set going when ready. If your protocol does not support the request, return nil; the client can then try a different variation of the request or fail the operation.
+ *  NOTE: The returned object is implicitly retained, the sender is responsible for releasing it (with either release or autorelease).
+ */
+//- (NSOperation *)newOperationWithRequest:(CKFileRequest *)request client:(id <CKFSOperationProtocolClient>)client;
+
 // You should override these methods to immediately perform the operation asynchronously. You should
 // inform the client when the operation has finished, or if it failed. The connection system will
 // not make another request until one of those messages has been received.
@@ -79,17 +85,8 @@
 // progress. Similarly, listing the contents of a directory is a special case where you should use
 // -protocol:didFetchContentsOfDirectory: instead of -protocolCurrentOperationDidFinish:
 
-- (void)startCurrentOperationWithRequest:(CKFileRequest *)request;
 
-/*!
- @method stopCurrentOperation
- @abstract Requests the protocol stop the current operation as soon as possible
- @discussion When this method is called, your subclass should immediately stop the current operation.
- Thus could be in response to a cancel request, so your code should be able to handle this call
- mid-operation.
- */
-- (void)stopCurrentOperation;
-
+#pragma mark Extensible request properties
 
 + (id)propertyForKey:(NSString *)key inRequest:(CKFileRequest *)request;
 + (void)setProperty:(id)value forKey:(NSString *)key inRequest:(CKMutableFileRequest *)request;
@@ -101,7 +98,7 @@
 #pragma mark -
 
 
-@protocol CKFileTransferProtocolClient <NSObject>
+@protocol CKFSProtocolClient <NSObject>
 
 // Calling any of these methods at an inappropriate time will result in an exception
 
@@ -109,11 +106,14 @@
 - (void)FSProtocol:(CKFSProtocol *)protocol didFailWithError:(NSError *)error;
 - (void)FSProtocol:(CKFSProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
-- (void)FSProtocolDidFinishCurrentOperation:(CKFSProtocol *)protocol;
-- (void)FSProtocol:(CKFSProtocol *)protocol currentOperationDidFailWithError:(NSError *)error;
-- (void)FSProtocol:(CKFSProtocol *)protocol didDownloadData:(NSData *)data;
-- (void)FSProtocol:(CKFSProtocol *)protocol didUploadDataOfLength:(NSUInteger)length;
-- (void)FSProtocol:(CKFSProtocol *)protocol didReceiveProperties:(CKFileInfo *)fileInfo ofItemAtPath:(NSString *)path;
+// Handling operation completion and cancellation
+- (void)FSProtocol:(CKFSProtocol *)protocol operation:(NSOperation *)operation didFailWithError:(NSError *)error;
+- (void)FSProtocol:(CKFSProtocol *)protocol operation:(NSOperation *)operation didDownloadData:(NSData *)data;
+- (void)FSProtocol:(CKFSProtocol *)protocol operation:(NSOperation *)operation didUploadDataOfLength:(NSUInteger)length;
+
+// Operation may be nil to signify the receipt of properties outside of performing an operation
+- (void)FSProtocol:(CKFSProtocol *)protocol operation:(NSOperation *)operation didReceiveProperties:(CKFSItemInfo *)fileInfo ofItemAtPath:(NSString *)path;
+
 
 - (void)FSProtocol:(CKFSProtocol *)protocol appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 - (void)FSProtocol:(CKFSProtocol *)protocol
@@ -121,4 +121,7 @@
                 toTranscript:(CKTranscriptType)transcript, ...;
 
 @end
+
+
+#pragma mark -
 

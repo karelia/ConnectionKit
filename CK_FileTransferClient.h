@@ -19,7 +19,7 @@
 //  
 //  Connection -> Protocol -> Client
 //             ------------->
-@interface CK_FileTransferClient : NSObject <CKFileTransferProtocolClient>
+@interface CK_FileTransferClient : NSObject <CKFSProtocolClient>
 {
     CKFileTransferConnection    *_connectionThreadProxy;
     CKFSProtocol                *_protocol;

@@ -71,7 +71,7 @@ static NSMutableArray *sRegisteredClasses;
 #pragma mark -
 #pragma mark Init & Dealloc
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFSProtocolClient>)client
 {
     NSParameterAssert(request);
     NSParameterAssert(client);

@@ -31,7 +31,7 @@
     return NO;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFileTransferProtocolClient>)client
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFSProtocolClient>)client
 {
     self = [super initWithRequest:request client:client];
     if (self)

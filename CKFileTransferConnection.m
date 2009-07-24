@@ -256,7 +256,7 @@ NSString *const CKErrorURLResponseErrorKey = @"URLResponse";
 }
 
 - (void)FSProtocol:(CKFSProtocol *)protocol
-        didReceiveProperties:(CKFileInfo *)fileInfo
+        didReceiveProperties:(CKFSItemInfo *)fileInfo
                 ofItemAtPath:(NSString *)path;
 {
     
