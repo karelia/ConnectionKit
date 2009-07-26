@@ -18,7 +18,91 @@
 #pragma mark -
 
 
-@interface CKFSProtocol : NSObject
+@protocol CKReadOnlyFS
+@optional
+
+// MUST implement either of these two
+- (NSArray *)contentsOfDirectoryAtPath:(NSString *)path error:(NSError **)error;
+- (CKFSItemInfo *)loadContentsOfDirectoryAtPath:(NSString *)path error:(NSError **)error;
+
+// MUST implement either of these two
+- (NSDictionary *)attributesOfItemAtPath:(NSString *)path
+                                userData:(id)userData
+                                   error:(NSError **)error;
+- (CKFSItemInfo *)loadAttributesOfItemAtPath:(NSString *)path
+                                    userData:(id)userData
+                                       error:(NSError **)error;
+
+- (NSDictionary *)attributesOfFileSystemForPath:(NSString *)path
+                                          error:(NSError **)error;
+
+// MUST implement either -contentsAtPath: or the other three methods
+- (NSData *)contentsAtPath:(NSString *)path;
+- (BOOL)openFileAtPath:(NSString *)path 
+                  mode:(int)mode
+              userData:(id *)userData
+                 error:(NSError **)error;
+- (void)releaseFileAtPath:(NSString *)path userData:(id)userData;
+- (int)readFileAtPath:(NSString *)path 
+             userData:(id)userData
+               buffer:(char *)buffer 
+                 size:(size_t)size 
+               offset:(off_t)offset
+                error:(NSError **)error;
+
+@end
+
+
+@protocol CKReadWriteFS <CKReadOnlyFS>
+
+- (BOOL)createDirectoryAtPath:(NSString *)path 
+                   attributes:(NSDictionary *)attributes
+                        error:(NSError **)error;
+
+- (BOOL)createFileAtPath:(NSString *)path 
+              attributes:(NSDictionary *)attributes
+                userData:(id *)userData
+                   error:(NSError **)error;
+- (BOOL)openFileAtPath:(NSString *)path 
+                  mode:(int)mode
+              userData:(id *)userData
+                 error:(NSError **)error;
+
+- (void)releaseFileAtPath:(NSString *)path userData:(id)userData;
+
+- (int)writeFileAtPath:(NSString *)path 
+              userData:(id)userData
+                buffer:(const char *)buffer
+                  size:(size_t)size 
+                offset:(off_t)offset
+                 error:(NSError **)error;
+
+- (BOOL)removeItemAtPath:(NSString *)path error:(NSError **)error;
+
+@optional
+
+- (BOOL)setAttributes:(NSDictionary *)attributes 
+         ofItemAtPath:(NSString *)path
+             userData:(id)userData
+                error:(NSError **)error;
+
+- (BOOL)exchangeDataOfItemAtPath:(NSString *)path1
+                  withItemAtPath:(NSString *)path2
+                           error:(NSError **)error;
+
+- (BOOL)moveItemAtPath:(NSString *)source 
+                toPath:(NSString *)destination
+                 error:(NSError **)error;
+
+- (BOOL)removeDirectoryAtPath:(NSString *)path error:(NSError **)error;
+
+@end
+
+
+#pragma mark -
+
+
+@interface CKFSProtocol : NSObject <CKReadOnlyFS>
 {
   @private
     NSURLRequest             *_request;
@@ -35,7 +119,7 @@
  protocolClass is not a subclass of CKFSProtocol.
  @discussion This method is only safe to use on the main thread.
  */
-+ (BOOL)registerClass:(Class)protocolClass;
++ (BOOL)registerClass:(Class <CKReadOnlyFS>)protocolClass;
 
 + (Class)classForRequest:(NSURLRequest *)request;
 

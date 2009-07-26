@@ -28,6 +28,8 @@
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
 		270B9B840FF3AAB300DC1DAA /* CKFSItemInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 270B9B820FF3AAB300DC1DAA /* CKFSItemInfo.h */; };
 		270B9B850FF3AAB400DC1DAA /* CKFSItemInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 270B9B830FF3AAB300DC1DAA /* CKFSItemInfo.m */; };
+		27328159101C6A3F00EACF15 /* CKFSConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27328157101C6A3F00EACF15 /* CKFSConnection.h */; };
+		2732815A101C6A3F00EACF15 /* CKFSConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27328158101C6A3F00EACF15 /* CKFSConnection.m */; };
 		2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 2740ED080FE94CD90081C416 /* CKThreadProxy.h */; };
 		2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 2740ED090FE94CD90081C416 /* CKThreadProxy.m */; };
 		2745C064100F470300AB2F29 /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2745C062100F470300AB2F29 /* NSString+Connection.h */; };
@@ -165,6 +167,8 @@
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		270B9B820FF3AAB300DC1DAA /* CKFSItemInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFSItemInfo.h; sourceTree = "<group>"; };
 		270B9B830FF3AAB300DC1DAA /* CKFSItemInfo.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFSItemInfo.m; sourceTree = "<group>"; };
+		27328157101C6A3F00EACF15 /* CKFSConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFSConnection.h; sourceTree = "<group>"; };
+		27328158101C6A3F00EACF15 /* CKFSConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFSConnection.m; sourceTree = "<group>"; };
 		2740ED080FE94CD90081C416 /* CKThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKThreadProxy.h; sourceTree = "<group>"; };
 		2740ED090FE94CD90081C416 /* CKThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKThreadProxy.m; sourceTree = "<group>"; };
 		2740EE3E0FE9AFF60081C416 /* Connection architecture overview.graffle */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = "Connection architecture overview.graffle"; sourceTree = "<group>"; };
@@ -497,6 +501,8 @@
 				27B052A6100E1BA100338264 /* CK_FileTransferClient.m */,
 				2745C07A100F495C00AB2F29 /* CKFSProtocolThread.h */,
 				2745C07B100F495C00AB2F29 /* CKFSProtocolThread.m */,
+				27328157101C6A3F00EACF15 /* CKFSConnection.h */,
+				27328158101C6A3F00EACF15 /* CKFSConnection.m */,
 			);
 			name = Connection;
 			sourceTree = "<group>";
@@ -680,6 +686,7 @@
 				27FD82D2101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.h in Headers */,
 				27FD82D4101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h in Headers */,
 				27FD82D6101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h in Headers */,
+				27328159101C6A3F00EACF15 /* CKFSConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -969,6 +976,7 @@
 				27FD82D3101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m in Sources */,
 				27FD82D5101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m in Sources */,
 				27FD82D7101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m in Sources */,
+				2732815A101C6A3F00EACF15 /* CKFSConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
