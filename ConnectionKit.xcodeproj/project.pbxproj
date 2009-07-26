@@ -34,8 +34,6 @@
 		2745C065100F470300AB2F29 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 2745C063100F470300AB2F29 /* NSString+Connection.m */; };
 		2745C07C100F495C00AB2F29 /* CKFSProtocolThread.h in Headers */ = {isa = PBXBuildFile; fileRef = 2745C07A100F495C00AB2F29 /* CKFSProtocolThread.h */; };
 		2745C07D100F495C00AB2F29 /* CKFSProtocolThread.m in Sources */ = {isa = PBXBuildFile; fileRef = 2745C07B100F495C00AB2F29 /* CKFSProtocolThread.m */; };
-		27774F630FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27774F610FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.h */; };
-		27774F640FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27774F620FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.m */; };
 		278B966A0F27FC18002F3C54 /* CKWebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		278B966B0F27FC18002F3C54 /* CKWebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */; };
 		278B967E0F27FCDE002F3C54 /* CKFileTransferConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B96740F27FCDC002F3C54 /* CKFileTransferConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -62,8 +60,6 @@
 		27B052A7100E1BA100338264 /* CK_FileTransferClient.h in Headers */ = {isa = PBXBuildFile; fileRef = 27B052A5100E1BA100338264 /* CK_FileTransferClient.h */; };
 		27B052A8100E1BA100338264 /* CK_FileTransferClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27B052A6100E1BA100338264 /* CK_FileTransferClient.m */; };
 		27D1E90C0FEB04FF00DC6A84 /* CKFileTransferDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D1E90B0FEB04FF00DC6A84 /* CKFileTransferDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27EF164C0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27EF164A0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.h */; };
-		27EF164D0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27EF164B0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.m */; };
 		27F05A6B0F2BA0B200DB5FBA /* CKFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		27F05A6C0F2BA0B200DB5FBA /* CKFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */; };
 		27F05A6F0F2BA0D800DB5FBA /* CKSFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -176,8 +172,6 @@
 		2745C063100F470300AB2F29 /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
 		2745C07A100F495C00AB2F29 /* CKFSProtocolThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFSProtocolThread.h; sourceTree = "<group>"; };
 		2745C07B100F495C00AB2F29 /* CKFSProtocolThread.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFSProtocolThread.m; sourceTree = "<group>"; };
-		27774F610FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKAmazonS3Protocol.h; sourceTree = "<group>"; };
-		27774F620FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAmazonS3Protocol.m; sourceTree = "<group>"; };
 		278B96680F27FC18002F3C54 /* CKWebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVProtocol.h; sourceTree = "<group>"; };
 		278B96690F27FC18002F3C54 /* CKWebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVProtocol.m; sourceTree = "<group>"; };
 		278B96740F27FCDC002F3C54 /* CKFileTransferConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileTransferConnection.h; sourceTree = "<group>"; };
@@ -204,8 +198,6 @@
 		27B052A5100E1BA100338264 /* CK_FileTransferClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK_FileTransferClient.h; sourceTree = "<group>"; };
 		27B052A6100E1BA100338264 /* CK_FileTransferClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK_FileTransferClient.m; sourceTree = "<group>"; };
 		27D1E90B0FEB04FF00DC6A84 /* CKFileTransferDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileTransferDelegate.h; sourceTree = "<group>"; };
-		27EF164A0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK_AmazonS3RESTOperation.h; sourceTree = "<group>"; };
-		27EF164B0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK_AmazonS3RESTOperation.m; sourceTree = "<group>"; };
 		27F05A690F2BA0B200DB5FBA /* CKFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPProtocol.h; sourceTree = "<group>"; };
 		27F05A6A0F2BA0B200DB5FBA /* CKFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPProtocol.m; sourceTree = "<group>"; };
 		27F05A6D0F2BA0D800DB5FBA /* CKSFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPProtocol.h; sourceTree = "<group>"; };
@@ -448,10 +440,6 @@
 				27FD82D1101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m */,
 				27FD82B21019E74E00C0EB4A /* CKAmazonS3Handle.h */,
 				27FD82B31019E74E00C0EB4A /* CKAmazonS3Handle.m */,
-				27774F610FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.h */,
-				27774F620FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.m */,
-				27EF164A0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.h */,
-				27EF164B0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.m */,
 			);
 			name = S3;
 			sourceTree = "<group>";
@@ -681,8 +669,6 @@
 				2740ED0A0FE94CD90081C416 /* CKThreadProxy.h in Headers */,
 				27D1E90C0FEB04FF00DC6A84 /* CKFileTransferDelegate.h in Headers */,
 				270B9B840FF3AAB300DC1DAA /* CKFSItemInfo.h in Headers */,
-				27774F630FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.h in Headers */,
-				27EF164C0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.h in Headers */,
 				279EF8DA100CFBEC003CF6E2 /* CKHTTPBasedProtocol.h in Headers */,
 				279EF99B100D3F26003CF6E2 /* CKFileRequest.h in Headers */,
 				279EFA26100DE65D003CF6E2 /* CK_FileOperation.h in Headers */,
@@ -972,8 +958,6 @@
 				278F9A3C0F702FE4003B7645 /* CKHTTPConnection.m in Sources */,
 				2740ED0B0FE94CD90081C416 /* CKThreadProxy.m in Sources */,
 				270B9B850FF3AAB400DC1DAA /* CKFSItemInfo.m in Sources */,
-				27774F640FF3E8AC00CEFCA2 /* CKAmazonS3Protocol.m in Sources */,
-				27EF164D0FF7BB85000D52D1 /* CK_AmazonS3RESTOperation.m in Sources */,
 				279EF8DB100CFBEC003CF6E2 /* CKHTTPBasedProtocol.m in Sources */,
 				279EF99C100D3F26003CF6E2 /* CKFileRequest.m in Sources */,
 				279EFA27100DE65D003CF6E2 /* CK_FileOperation.m in Sources */,

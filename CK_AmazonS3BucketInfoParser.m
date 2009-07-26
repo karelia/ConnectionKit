@@ -1,6 +1,6 @@
 //
 //  CK_AmazonS3BucketInfoParser.m
-//  S3MacFUSE
+//  ConnectionKit
 //
 //  Created by Mike on 23/07/2009.
 //  Copyright 2009 Karelia Software. All rights reserved.
