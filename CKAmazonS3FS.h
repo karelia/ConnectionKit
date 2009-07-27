@@ -7,7 +7,9 @@
 //
 // Filesystem operations.
 //
-#import <Foundation/Foundation.h>
+
+
+#import "CKFSProtocol.h"
 
 
 // The core set of file system operations. This class will serve as the delegate
@@ -19,7 +21,7 @@
 @class CKFSItemInfo;
 
 
-@interface CKAmazonS3FSProtocol : NSObject
+@interface CKAmazonS3FS : CKFSProtocol <CKReadWriteFS>
 {
     NSURLCredential *_credential;
 }
@@ -30,7 +32,7 @@
 
 
 
-@interface CKAmazonS3FSProtocol (UnderlyingOperations)
+@interface CKAmazonS3FS (UnderlyingOperations)
 
 - (CKFSItemInfo *)serviceInfo:(NSError **)outError;
 
@@ -46,7 +48,6 @@
                           inBucket:(NSString *)bucket
                              error:(NSError **)outError;
 
-- (CKFSItemInfo *)contentsOfS3DirectoryAtPath:(NSString *)path error:(NSError **)outError;
 - (BOOL)deleteItemAtPath:(NSString *)path error:(NSError **)outError;
 
 @end

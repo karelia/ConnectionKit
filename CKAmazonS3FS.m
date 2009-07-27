@@ -7,7 +7,7 @@
 //
 #import <sys/xattr.h>
 #import <sys/stat.h>
-#import "CKAmazonS3FSProtocol.h"
+#import "CKAmazonS3FS.h"
 #import <MacFUSE/MacFUSE.h>
 
 #import "CKFSItemInfo.h"
@@ -30,7 +30,7 @@
 #pragma mark -
 
 
-@interface CKAmazonS3FSProtocol (Private)
+@interface CKAmazonS3FS (Private)
 - (NSData *)dataWithRequest:(NSURLRequest *)request
                           response:(NSHTTPURLResponse **)response
                              error:(NSError **)error;
@@ -48,7 +48,7 @@
 // for GMUserFileSystemFilesystem. For more details, see the section on 
 // GMUserFileSystemOperations found in the documentation at:
 // http://macfuse.googlecode.com/svn/trunk/core/sdk-objc/Documentation/index.html
-@implementation CKAmazonS3FSProtocol
+@implementation CKAmazonS3FS
 
 #pragma mark Init
 
@@ -61,44 +61,63 @@
 
 #pragma mark Directory Contents
 
-- (NSArray *)contentsOfDirectoryAtPath:(NSString *)path error:(NSError **)outError
+- (CKFSItemInfo *)loadContentsOfDirectoryAtPath:(NSString *)path error:(NSError **)outError;
 {
-    NSArray *result = nil;
-    NSError *error = nil;
+    CKFSItemInfo *result;
     
+    if ([path isEqualToString:@"/"])
+    {
+        result = [self serviceInfo:outError];
+    }
+    else
+    {
+        // Need to convert the path into bucket & prefix. e.g.
+        //  /foo/bar  >>  foo, bar/
+        //  /foo/bar/baz  >>  foo, bar/baz/
+        NSString *prefix = nil;
+        
+        NSArray *pathComponents = [path pathComponents];
+        if ([pathComponents count] >= 3)
+        {
+            NSArray *prefixComponents = [pathComponents subarrayWithRange:
+                                         NSMakeRange(2,[pathComponents count] - 2)];
+            prefix = [[NSString pathWithComponents:prefixComponents]
+                      stringByAppendingString:@"/"];
+        }
+        
+        result = [self infoForBucket:[[path pathComponents] objectAtIndex:1]
+                              prefix:prefix 
+                           delimiter:@"/"
+                               error:outError];
+    }
     
-    CKFSItemInfo *info = [self contentsOfS3DirectoryAtPath:path error:&error];
-    result = [[info directoryContents] valueForKey:@"filename"];
-    
-    
-    // Finish up
-    if (!error) error = [NSError errorWithPOSIXCode:ENOENT];
-    if (outError) *outError = error;
     return result;
 }
 
 #pragma mark Getting and Setting Attributes
 
-- (NSDictionary *)attributesOfItemAtPath:(NSString *)path
-                                userData:(id)userData
-                                   error:(NSError **)error
+- (CKFSItemInfo *)loadAttributesOfItemAtPath:(NSString *)path
+                                    userData:(id)userData
+                                       error:(NSError **)outError;
 {
-    NSDictionary *result = nil;
+    CKFSItemInfo *result = nil;
     
     // No need to fetch service or bucket attributes, we know them all already
     if ([path isEqualToString:@"/"])
     {
-        result = [NSDictionary dictionaryWithObject:NSFileTypeDirectory forKey:NSFileType];
+        NSDictionary *attributes = [NSDictionary dictionaryWithObject:NSFileTypeDirectory
+                                                               forKey:NSFileType];
+        result = [CKFSItemInfo infoWithFileAttributes:attributes];
     }
     else if ([[path pathComponents] count] == 2)
     {
         NSString *bucket = [[path pathComponents] objectAtIndex:1];
-        CKFSItemInfo *serviceInfo = [self contentsOfS3DirectoryAtPath:@"/" error:error];
+        CKFSItemInfo *serviceInfo = [self loadContentsOfDirectoryAtPath:@"/" error:outError];
         for (CKFSItemInfo *aBucket in [serviceInfo directoryContents])
         {
             if ([[aBucket filename] isEqualToString:bucket])
             {
-                result = [aBucket fileAttributes];
+                result = aBucket;
                 break;
             }
         }
@@ -118,29 +137,20 @@
         NSString *key = [NSString pathWithComponents:keyComponents];
         NSString *dirKey = [key stringByAppendingString:@"/"];
         
-        CKFSItemInfo *info = [self infoForObjectForKey:dirKey
-                                              inBucket:bucket
-                                                 error:error];
+        result = [self infoForObjectForKey:dirKey
+                                  inBucket:bucket
+                                     error:outError];
         
-        if (!info)
+        if (!result)
         {
-            info = [self infoForObjectForKey:key
-                                    inBucket:bucket
-                                       error:error];
+            result = [self infoForObjectForKey:key
+                                      inBucket:bucket
+                                         error:outError];
         }
-        
-        result = [info fileAttributes];
-        if (!result && info) result = [NSDictionary dictionary];
     }
     
     
     return result;
-}
-
-- (NSDictionary *)attributesOfFileSystemForPath:(NSString *)path
-                                          error:(NSError **)error
-{
-    return [NSDictionary dictionary];  // Default file system attributes. Can't really gather anything more about S3
 }
 
 #pragma mark File Contents
@@ -190,7 +200,7 @@
     return result;
 }
 
-- (int)writeFileAtPath:(NSString *)path 
+- (int)XwriteFileAtPath:(NSString *)path 
               userData:(id)userData
                 buffer:(const char *)buffer
                   size:(size_t)size 
@@ -244,7 +254,7 @@
 #pragma mark -
 
 
-@implementation CKAmazonS3FSProtocol (UnderlyingOperations)
+@implementation CKAmazonS3FS (UnderlyingOperations)
 
 #pragma mark Service
 
@@ -395,39 +405,6 @@
 }
 
 #pragma mark General
-
-- (CKFSItemInfo *)contentsOfS3DirectoryAtPath:(NSString *)path error:(NSError **)outError;
-{
-    CKFSItemInfo *result;
-    
-    if ([path isEqualToString:@"/"])
-    {
-        result = [self serviceInfo:outError];
-    }
-    else
-    {
-        // Need to convert the path into bucket & prefix. e.g.
-        //  /foo/bar  >>  foo, bar/
-        //  /foo/bar/baz  >>  foo, bar/baz/
-        NSString *prefix = nil;
-        
-        NSArray *pathComponents = [path pathComponents];
-        if ([pathComponents count] >= 3)
-        {
-            NSArray *prefixComponents = [pathComponents subarrayWithRange:
-                                         NSMakeRange(2,[pathComponents count] - 2)];
-            prefix = [[NSString pathWithComponents:prefixComponents]
-                      stringByAppendingString:@"/"];
-        }
-        
-        result = [self infoForBucket:[[path pathComponents] objectAtIndex:1]
-                              prefix:prefix 
-                           delimiter:@"/"
-                               error:outError];
-    }
-    
-    return result;
-}
 
 - (BOOL)deleteItemAtPath:(NSString *)path error:(NSError **)outError;
 {

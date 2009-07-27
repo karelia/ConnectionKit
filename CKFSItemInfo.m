@@ -21,6 +21,33 @@
 
 #pragma mark Init & Dealloc
 
++ (id)infoWithFilename:(NSString *)filename
+{
+    return [[[self alloc] initWithFilename:filename attributes:nil] autorelease];
+}
+
++ (id)infoWithFileAttributes:(NSDictionary *)attributes;
+{
+    return [[[self alloc] initWithFilename:nil attributes:attributes] autorelease];
+}
+
++ (id)infoWithDirectoryContents:(NSArray *)contents
+{
+    return [[[self alloc] initWithDirectoryContents:contents] autorelease];
+}
+
++ (id)infoWithFilenames:(NSArray *)filenames
+{
+    NSMutableArray *contents = [[NSMutableArray alloc] initWithCapacity:[filenames count]];
+    for (NSString *aFilename in filenames)
+    {
+        CKFSItemInfo *item = [[CKFSItemInfo alloc] initWithFilename:aFilename attributes:nil];
+        [contents addObject:item];
+        [item release];
+    }
+    return [self infoWithDirectoryContents:contents];
+}
+
 - (id)initWithFilename:(NSString *)filename attributes:(NSDictionary *)attributes
 {
     [self init];

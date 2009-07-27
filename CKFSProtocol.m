@@ -92,68 +92,6 @@ static NSMutableArray *sRegisteredClasses;
     [super dealloc];
 }
 
-#pragma mark -
-#pragma mark Accessors
-
-@synthesize request = _request;
-@synthesize client = _client;
-
-#pragma mark -
-#pragma mark Overall Connection
-
-- (void)startConnection
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)stopConnection
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-#pragma mark -
-#pragma mark File Operations
-
-- (void)downloadContentsOfFileAtPath:(NSString *)remotePath
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)uploadData:(NSData *)data toPath:(NSString *)path
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)fetchContentsOfDirectoryAtPath:(NSString *)path
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)createDirectoryAtPath:(NSString *)path
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)moveItemAtPath:(NSString *)fromPath toPath:(NSString *)toPath
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)setPermissions:(unsigned long)posixPermissions ofItemAtPath:(NSString *)path
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)deleteItemAtPath:(NSString *)path
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
-- (void)stopCurrentOperation
-{
-    SUBCLASS_RESPONSIBLE;
-}
-
 + (id)propertyForKey:(NSString *)key inRequest:(CKFileRequest *)request
 {
     NSDictionary *properties = [request performSelector:@selector(CK_extensibleProperties)];
@@ -170,6 +108,22 @@ static NSMutableArray *sRegisteredClasses;
 {
     NSMutableDictionary *properties = [request performSelector:@selector(CK_extensibleProperties)];
     [properties removeObjectForKey:key];
+}
+
+#pragma mark FS
+
+- (NSArray *)contentsOfDirectoryAtPath:(NSString *)path error:(NSError **)error;
+{
+    CKFSItemInfo *info = [self loadContentsOfDirectoryAtPath:path error:error];
+    NSArray *result = [[info directoryContents] valueForKey:@"filename"];
+    return result;
+}
+
+- (NSDictionary *)attributesOfItemAtPath:(NSString *)path
+                                userData:(id)userData
+                                   error:(NSError **)error;
+{
+    return [[self loadAttributesOfItemAtPath:path userData:userData error:error] fileAttributes];
 }
 
 @end

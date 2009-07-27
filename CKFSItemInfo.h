@@ -17,6 +17,11 @@
     NSDictionary    *_attributes;
 }
 
++ (id)infoWithFilename:(NSString *)filename;
++ (id)infoWithFileAttributes:(NSDictionary *)attributes;
++ (id)infoWithDirectoryContents:(NSArray *)contents;
++ (id)infoWithFilenames:(NSArray *)filenames;
+
 - (id)initWithFilename:(NSString *)filename attributes:(NSDictionary *)attributes;
 - (id)initWithDirectoryContents:(NSArray *)directoryContents;
 - (id)initWithItemInfo:(CKFSItemInfo *)item;
