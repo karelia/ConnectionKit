@@ -12,32 +12,30 @@
 
 
 @class CKFSItemInfo;
-@protocol CKFSProtocolClient;
 
 
-#pragma mark -
+@protocol CKReadOnlyFS <NSObject>
 
-
-@protocol CKReadOnlyFS
-@optional
-
-// MUST implement either of these two
 - (NSArray *)contentsOfDirectoryAtPath:(NSString *)path error:(NSError **)error;
-- (CKFSItemInfo *)loadContentsOfDirectoryAtPath:(NSString *)path error:(NSError **)error;
 
-// MUST implement either of these two
 - (NSDictionary *)attributesOfItemAtPath:(NSString *)path
                                 userData:(id)userData
                                    error:(NSError **)error;
+
+@optional
+
+// These two are an optional, improved version of the required methods. Allow returning more information.
+- (CKFSItemInfo *)loadContentsOfDirectoryAtPath:(NSString *)path error:(NSError **)outError;
 - (CKFSItemInfo *)loadAttributesOfItemAtPath:(NSString *)path
                                     userData:(id)userData
-                                       error:(NSError **)error;
+                                       error:(NSError **)outError;
 
 - (NSDictionary *)attributesOfFileSystemForPath:(NSString *)path
                                           error:(NSError **)error;
 
 // MUST implement either -contentsAtPath: or the other three methods
 - (NSData *)contentsAtPath:(NSString *)path;
+
 - (BOOL)openFileAtPath:(NSString *)path 
                   mode:(int)mode
               userData:(id *)userData
@@ -102,16 +100,21 @@
 #pragma mark -
 
 
+/*  An abstract implementation of the CKReadOnlyFS. Provides protocol registration (+registerClass: etc.) and implements placeholders for all of the required methods.
+ *  You will generally want to subclass it to provide a concrete implementation, one that also conforms to CKReadWriteFS.
+ */
+
+@protocol CKFSProtocolClient;
 @interface CKFSProtocol : NSObject <CKReadOnlyFS>
 {
   @private
-    NSURLRequest             *_request;
+    NSURLRequest            *_request;
     id <CKFSProtocolClient> _client;
 }
 
 #pragma mark Protocol registration
 
-// FIXME: Make protcol class handling threadsafe
+// FIXME: Make protocol class handling threadsafe
 /*!
  @method registerClass:
  @param protocolClass The subclass of CKFSProtocol to register
@@ -127,47 +130,6 @@
 + (BOOL)canInitWithRequest:(NSURLRequest *)request;
 
 
-#pragma mark Protocol basics
-// You shouldn't generally need to override these methods. They just create a protocol object and
-// hang on to its properties
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CKFSProtocolClient>)client;
-@property(nonatomic, readonly) NSURLRequest *request;
-@property(nonatomic, readonly) id <CKFSProtocolClient> client;
-
-
-#pragma mark Overall Connection
-/*!
- @method startConnection
- @abstract Starts the connection.
- @discussion Protocols like SFTP and FTP use this to contact the host and log in. You should provide
- feedback to -client. Once a -protocol:didStartConnectionAtPath: message is sent, the connection
- system will start to provide you with operations to perform.
- */
-- (void)startConnection;
-
-/*!
- @method stopConnection
- @abstract Stops the connection.
- @discussion When this method is called, your subclass should immediately stop any in-progress
- operations and close the connection. This could be in response to a cancel request, so your code
- should be able to handle this call mid-operation.
- */
-- (void)stopConnection;
-
-
-#pragma mark File operations
-
-/*  You are responsible for returning an NSOperation subclass that the client will set going when ready. If your protocol does not support the request, return nil; the client can then try a different variation of the request or fail the operation.
- *  NOTE: The returned object is implicitly retained, the sender is responsible for releasing it (with either release or autorelease).
- */
-//- (NSOperation *)newOperationWithRequest:(CKFileRequest *)request client:(id <CKFSOperationProtocolClient>)client;
-
-// You should override these methods to immediately perform the operation asynchronously. You should
-// inform the client when the operation has finished, or if it failed. The connection system will
-// not make another request until one of those messages has been received.
-// Uploads and downloads use specialised client methods to keep the connection system informed of
-// progress. Similarly, listing the contents of a directory is a special case where you should use
-// -protocol:didFetchContentsOfDirectory: instead of -protocolCurrentOperationDidFinish:
 
 
 #pragma mark Extensible request properties

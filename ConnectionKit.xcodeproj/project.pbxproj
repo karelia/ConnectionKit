@@ -72,8 +72,8 @@
 		27FD82D3101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 27FD82CD101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m */; };
 		27FD82D4101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h in Headers */ = {isa = PBXBuildFile; fileRef = 27FD82CE101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h */; };
 		27FD82D5101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m in Sources */ = {isa = PBXBuildFile; fileRef = 27FD82CF101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m */; };
-		27FD82D6101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27FD82D0101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h */; };
-		27FD82D7101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27FD82D1101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m */; };
+		27FD82D6101A01ED00C0EB4A /* CKAmazonS3FS.h in Headers */ = {isa = PBXBuildFile; fileRef = 27FD82D0101A01ED00C0EB4A /* CKAmazonS3FS.h */; };
+		27FD82D7101A01ED00C0EB4A /* CKAmazonS3FS.m in Sources */ = {isa = PBXBuildFile; fileRef = 27FD82D1101A01ED00C0EB4A /* CKAmazonS3FS.m */; };
 		7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999680CA8376B00A22156 /* gear_disabled.tiff */; };
 		7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999690CA8376B00A22156 /* gear_normal.tiff */; };
 		7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7909996A0CA8376B00A22156 /* gear_pressed.tiff */; };
@@ -212,8 +212,8 @@
 		27FD82CD101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK_AmazonS3BucketInfoParser.m; sourceTree = "<group>"; };
 		27FD82CE101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK_AmazonS3ServiceInfoParser.h; sourceTree = "<group>"; };
 		27FD82CF101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK_AmazonS3ServiceInfoParser.m; sourceTree = "<group>"; };
-		27FD82D0101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKAmazonS3FSProtocol.h; sourceTree = "<group>"; };
-		27FD82D1101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAmazonS3FSProtocol.m; sourceTree = "<group>"; };
+		27FD82D0101A01ED00C0EB4A /* CKAmazonS3FS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKAmazonS3FS.h; sourceTree = "<group>"; };
+		27FD82D1101A01ED00C0EB4A /* CKAmazonS3FS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAmazonS3FS.m; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
@@ -440,8 +440,8 @@
 				27FD82CD101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m */,
 				27FD82CE101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h */,
 				27FD82CF101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m */,
-				27FD82D0101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h */,
-				27FD82D1101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m */,
+				27FD82D0101A01ED00C0EB4A /* CKAmazonS3FS.h */,
+				27FD82D1101A01ED00C0EB4A /* CKAmazonS3FS.m */,
 				27FD82B21019E74E00C0EB4A /* CKAmazonS3Handle.h */,
 				27FD82B31019E74E00C0EB4A /* CKAmazonS3Handle.m */,
 			);
@@ -685,7 +685,7 @@
 				27FD82B41019E74E00C0EB4A /* CKAmazonS3Handle.h in Headers */,
 				27FD82D2101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.h in Headers */,
 				27FD82D4101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.h in Headers */,
-				27FD82D6101A01ED00C0EB4A /* CKAmazonS3FSProtocol.h in Headers */,
+				27FD82D6101A01ED00C0EB4A /* CKAmazonS3FS.h in Headers */,
 				27328159101C6A3F00EACF15 /* CKFSConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -975,7 +975,7 @@
 				27FD82B51019E74E00C0EB4A /* CKAmazonS3Handle.m in Sources */,
 				27FD82D3101A01ED00C0EB4A /* CK_AmazonS3BucketInfoParser.m in Sources */,
 				27FD82D5101A01ED00C0EB4A /* CK_AmazonS3ServiceInfoParser.m in Sources */,
-				27FD82D7101A01ED00C0EB4A /* CKAmazonS3FSProtocol.m in Sources */,
+				27FD82D7101A01ED00C0EB4A /* CKAmazonS3FS.m in Sources */,
 				2732815A101C6A3F00EACF15 /* CKFSConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

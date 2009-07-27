@@ -7,14 +7,15 @@
 //
 
 /*  Should be fairly obvious what most of these do, just like the NSFileManager equivalents. Two big differences:
- *      1)  Some methods use CKFSItemInfo. This is a more informative wrapper around both a file attribute dictionary & directory contents. Allows you to uitilise the connection more efficiently
+ *      1)  Some methods use CKFSItemInfo. This is a more informative wrapper around both a file attribute dictionary & directory contents. Allows you to utilise the connection more efficiently
  *      2)  Any use of a path refers to the path on the server (that's all we have access to). URLs are for local-ish operations.
  *
  *  Also take note that all operations are synchronous, so you probably won't want to call them on the main thread.
  */
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
+#import "CKFSProtocol.h"
 
 
 @class CKFSItemInfo;
@@ -25,7 +26,7 @@
 }
 
 // Temporary initializer till we have a better system in place
-- (id)initWithCredential:(NSURLCredential *)credential;
+- (id)initWithProtocol:(id <CKReadOnlyFS>)filesystem;
 
 
 #pragma mark Creating an Item
