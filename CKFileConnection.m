@@ -832,7 +832,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	while (cur = [e nextObject])
 	{
-		NSString *file = [NSString stringWithFormat:@"%@/%@", dirPath, cur];
+		NSString *file = [dirPath stringByAppendingPathComponent:cur];
 		NSDictionary *localAttributes = [myFileManager fileAttributesAtPath:file traverseLink:NO];
 		
 		CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
