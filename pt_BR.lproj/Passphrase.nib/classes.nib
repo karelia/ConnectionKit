@@ -1,0 +1,32 @@
+{
+    IBClasses =     (
+                {
+            ACTIONS =             {
+                cancel = id;
+                unlock = id;
+            };
+            CLASS = CKSSHPassphrase;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                oKeyLocation = NSTextField;
+                oPanel = NSPanel;
+                oPassword = NSSecureTextField;
+                oSave = NSButton;
+            };
+            SUPERCLASS = NSObject;
+        },
+                {
+            ACTIONS =             {
+                "" = id;
+            };
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        }
+    );
+    IBVersion = 1;
+}

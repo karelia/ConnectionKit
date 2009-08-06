@@ -1,0 +1,27 @@
+{
+    IBClasses =     (
+                {
+            CLASS = FirstResponder;
+            LANGUAGE = ObjC;
+            SUPERCLASS = NSObject;
+        },
+                {
+            ACTIONS =             {
+                addDomain = id;
+                logToConsoleChanged = id;
+            };
+            CLASS = KTLogger;
+            LANGUAGE = ObjC;
+            OUTLETS =             {
+                oDomains = NSTableView;
+                oPanel = NSPanel;
+            };
+            SUPERCLASS = NSObject;
+        },
+                {
+            CLASS = NSObject;
+            LANGUAGE = ObjC;
+        }
+    );
+    IBVersion = 1;
+}
