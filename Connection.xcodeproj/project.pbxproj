@@ -490,6 +490,13 @@
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE953A04102BACE70066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt_BR; path = pt_BR.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE953A05102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
+		CE953A06102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKTransferController.nib; sourceTree = "<group>"; };
+		CE953A07102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
+		CE953A08102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/Passphrase.nib; sourceTree = "<group>"; };
+		CE953A0B102BAD0E0066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
+		CE953A13102BAD1B0066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		CEA9AFD10A64223000855897 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -1218,6 +1225,7 @@
 				da,
 				it,
 				zh_CN,
+				pt_BR,
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
@@ -1520,6 +1528,7 @@
 				CEB563850A7AB7070081179A /* de */,
 				CE1AD3DF0A7E845A0083C01E /* it */,
 				CE55A6620AD194740091C8AE /* zh_CN */,
+				CE953A04102BACE70066C08F /* pt_BR */,
 			);
 			name = Localizable.strings;
 			sourceTree = "<group>";
@@ -1535,6 +1544,7 @@
 				CEF894F80BD72A6A002886AA /* ja */,
 				CEF894FD0BD72A70002886AA /* zh_CN */,
 				CEF895020BD72A76002886AA /* zh_TW */,
+				CE953A0B102BAD0E0066C08F /* pt_BR */,
 			);
 			name = DropletLauncher.nib;
 			sourceTree = "<group>";
@@ -1550,6 +1560,7 @@
 				CEBC05700DB9455A001BF0DF /* ja */,
 				CEBC05710DB9455F001BF0DF /* zh_CN */,
 				CEBC05720DB94567001BF0DF /* zh_TW */,
+				CE953A05102BAD030066C08F /* pt_BR */,
 			);
 			name = CKDirectoryTree.nib;
 			sourceTree = "<group>";
@@ -1565,6 +1576,7 @@
 				CE05A3660B6A94B500A25808 /* fr */,
 				CE05A3670B6A94BB00A25808 /* de */,
 				CE05A3680B6A94C000A25808 /* da */,
+				CE953A06102BAD030066C08F /* pt_BR */,
 			);
 			name = CKTransferController.nib;
 			sourceTree = "<group>";
@@ -1580,6 +1592,7 @@
 				CEB563840A7AB7070081179A /* de */,
 				CE1AD3DE0A7E845A0083C01E /* it */,
 				CE55A6600AD194740091C8AE /* zh_CN */,
+				CE953A07102BAD030066C08F /* pt_BR */,
 			);
 			name = ConnectionOpenPanel.nib;
 			sourceTree = "<group>";
@@ -1595,6 +1608,7 @@
 				CED1897D0AC32105002E8A4A /* da */,
 				CED1897E0AC3210D002E8A4A /* ja */,
 				CE55A6610AD194740091C8AE /* zh_CN */,
+				CE953A13102BAD1B0066C08F /* pt_BR */,
 			);
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
@@ -1610,6 +1624,7 @@
 				3C2A09CF0D91B4BE002B8174 /* ja */,
 				3C2A09D20D91B4D7002B8174 /* zh_CN */,
 				3C2A09D50D91B4E3002B8174 /* zh_TW */,
+				CE953A08102BAD030066C08F /* pt_BR */,
 			);
 			name = Passphrase.nib;
 			sourceTree = "<group>";
