@@ -264,10 +264,9 @@ typedef enum
 
 @interface NSObject (CKConnectionDelegate)
 
-// There are 29 callbacks & flags.
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
-#pragma mark Overall connection
+#pragma mark Connecting / Disconnecting
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
 /*!
 	@method connection:didOpenAtPath:error:
@@ -278,8 +277,6 @@ typedef enum
  */
 - (void)connection:(id <CKConnection>)con didOpenAtPath:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
-
-- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
 
 #pragma mark Authentication
 /*!
@@ -300,17 +297,8 @@ typedef enum
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 
 
-#pragma mark Other
-
+#pragma mark General
 - (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
-
-//Recursive Deletion Delegate Methods
-- (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
-- (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inDirectory:(NSString *)dirPath;
-- (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 - (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
@@ -318,19 +306,34 @@ typedef enum
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
+- (void)connectionDidCancelTransfer:(id <CKConnection>)con; // this is deprecated. Use method below
+- (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
+
+- (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
+
+- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
+
+#pragma mark Deletion
+- (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
+
+//Recursive Deletion Methods
+- (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inAncestorDirectory:(NSString *)ancestorDirPath;
+- (void)connection:(id <CKConnection>)con didDiscoverFilesToDelete:(NSArray *)contents inDirectory:(NSString *)dirPath;
+- (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
+- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
+
+#pragma mark Downloading
 - (void)connection:(id <CKConnection>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con download:(NSString *)path receivedDataOfLength:(unsigned long long)length; 
 - (void)connection:(id <CKConnection>)con downloadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <CKConnection>)con downloadDidFinish:(NSString *)remotePath error:(NSError *)error;
 
+#pragma mark Uploading
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
 - (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath;
 - (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
-- (void)connectionDidCancelTransfer:(id <CKConnection>)con; // this is deprecated. Use method below
-- (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
-
-- (void)connection:(id <CKConnection>)con checkedExistenceOfPath:(NSString *)path pathExists:(BOOL)exists error:(NSError *)error;
 
 #pragma mark Transcript
 /*!
