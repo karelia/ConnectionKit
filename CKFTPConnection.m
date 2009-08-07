@@ -2759,6 +2759,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self _changeToDirectory:dirPath forDependentCommand:nil];
 }
 
+/*!
+	@abstract Returns the commands necessary to safely change to the given directory.
+	@param dirPath The directory to change to.
+	@param dependentCommand A command that is dependent on the successful change of working directory to dirPath.
+	@result An array of CKConnectionCommands, in the order that they should be added to the queue.
+	@discussion If necessary, the change to dirPath as the current working directory will be split into several CWD commands. This is to faciliate success directory changes on (the many) FTP servers that do not support long paths. In this method, path changes are split into, at most, 100 character chunks.
+ */
 - (NSArray *)_commandsToChangeToDirectory:(NSString *)dirPath forDependentCommand:(CKConnectionCommand *)dependentCommand
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
