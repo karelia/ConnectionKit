@@ -886,12 +886,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	NSString *path = [reply quotedString];
-    if (!path || [path length] == 0)
+	NSString *directoryName = [reply quotedString];
+    if (!directoryName || [directoryName length] == 0)
     {
-        path = [[[self lastCommand] command] argumentField];
+        directoryName = [[[self lastCommand] command] argumentField];
     }
-    [[self client] connectionDidCreateDirectory:path error:error];
+	
+	//To make it a full path, append it to our current directory.
+	NSString *directoryPath = [[self currentDirectory] stringByAppendingPathComponent:directoryName];
+    [[self client] connectionDidCreateDirectory:directoryPath error:error];
     
 	[self setState:CKConnectionIdleState];
 }
@@ -2723,6 +2726,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	//Reset all flags.
 	memset(&_ftpFlags, NO, sizeof(_ftpFlags));
 	
+	//Set the flags that are yes by default
+	_ftpFlags.canUseActive = YES;
+	_ftpFlags.canUseEPRT = YES;
+	_ftpFlags.canUsePASV = YES;
+	_ftpFlags.canUseEPSV = YES;
+	_ftpFlags.hasSize = YES;	
+	
 	[_lastAuthenticationChallenge release];
 	_lastAuthenticationChallenge = nil;
 	
@@ -2749,11 +2759,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[self _changeToDirectory:dirPath forDependentCommand:nil];
 }
 
-- (void)_changeToDirectory:(NSString *)dirPath forDependentCommand:(CKConnectionCommand *)dependentCommand
+- (NSArray *)_commandsToChangeToDirectory:(NSString *)dirPath forDependentCommand:(CKConnectionCommand *)dependentCommand
 {
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
-	//If we're already going to be in the parent directory of dirPath when our command gets executed, just change to the last path component.
+	NSMutableArray *commandsInQueueOrder = [NSMutableArray array]; //The CKConnectionCommands in the order they should be queued.
+	
+		//If we're already going to be in the parent directory of dirPath when our command gets executed, just change to the last path component.
 	NSString *parentDirectoryPath = [dirPath stringByDeletingLastPathComponent];
 	if ([self topQueuedChangeDirectoryPath] && [[self topQueuedChangeDirectoryPath] isEqualToString:parentDirectoryPath])
 	{
@@ -2767,16 +2779,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													  sentState:CKConnectionChangingDirectoryState
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
 													   userInfo:nil];		
-		[self setTopQueuedChangeDirectoryPath:dirPath];
-		[self queueCommand:cwd];
-		[self queueCommand:pwd];
-		return;
+		[commandsInQueueOrder addObject:cwd];
+		[commandsInQueueOrder addObject:pwd];
+		return (NSArray *)commandsInQueueOrder;
 	}
 	
 	//We can't just move by one directory level. Quite unfortunately, because some FTP servers have limits on the length of paths that can be sent, we should split the CWDs into roughly 100 character chunks.
 	
 	NSString *thisCWDChunkPath = [NSString string]; /* This change-working-directory chunk's path */
-	NSArray *pathComponents = [dirPath pathComponents]; /* The path components of dirPath to enumerator */
+	NSArray *pathComponents = [dirPath pathComponents]; /* The path components of dirPath to enumerate */
 	NSEnumerator *pathComponentsEnumerator = [pathComponents objectEnumerator]; /* The enumerator for the path components of dirPath */
 	NSString *pathComponent; /*The enumerative path component of dirPath */
 	while ((pathComponent = [pathComponentsEnumerator nextObject]))
@@ -2795,8 +2806,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                                          dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
 														   userInfo:nil];
 			
-			[self queueCommand:cwd];
-			[self queueCommand:pwd];
+			[commandsInQueueOrder addObject:cwd];
+			[commandsInQueueOrder addObject:pwd];
 			
 			thisCWDChunkPath = [NSString string];
 		}
@@ -2818,9 +2829,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
 													   userInfo:nil];
 		
-		[self queueCommand:cwd];
-		[self queueCommand:pwd];		
+		[commandsInQueueOrder addObject:cwd];
+		[commandsInQueueOrder addObject:pwd];
 	}
+		
+	return (NSArray *)commandsInQueueOrder;
+}
+
+- (void)_changeToDirectory:(NSString *)dirPath forDependentCommand:(CKConnectionCommand *)dependentCommand
+{
+	NSArray *commandsInQueueOrder = [self _commandsToChangeToDirectory:dirPath forDependentCommand:dependentCommand];
+	
+	NSEnumerator *commandsEnumerator = [commandsInQueueOrder objectEnumerator];
+	CKConnectionCommand *command;
+	while ((command = [commandsEnumerator nextObject]))
+		[self queueCommand:command];
 	
 	[self setTopQueuedChangeDirectoryPath:dirPath];
 }
@@ -3218,18 +3241,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	// If we're being asked for the contents of a directory other than the directory we're in now, we'll need to change back to the current directory once we've listed dirPath
 	if (![currentDir isEqualToString:dirPath])
 	{
-		CKConnectionCommand *pwd2 = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
-												  awaitState:CKConnectionIdleState 
-												   sentState:CKConnectionAwaitingCurrentDirectoryState
-												   dependant:nil
-													userInfo:nil];
-		CKConnectionCommand *cwd2 = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField:currentDir]
-												  awaitState:CKConnectionIdleState 
-												   sentState:CKConnectionChangingDirectoryState
-												   dependant:pwd2
-													userInfo:nil];
-		[_commandQueue insertObject:pwd2 atIndex:0];
-		[_commandQueue insertObject:cwd2 atIndex:0];
+		NSArray *changeBackCommands = [self _commandsToChangeToDirectory:currentDir forDependentCommand:nil];
+		//We enumerate in reverse because we're adding to the front of the queue, and changeBackCommands is in add-to-queue order
+		NSEnumerator *commandsEnumerator = [changeBackCommands reverseObjectEnumerator];
+		CKConnectionCommand *command;
+		while ((command = [commandsEnumerator nextObject]))
+			[_commandQueue insertObject:command atIndex:0];
 	}
 
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
@@ -3239,20 +3256,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											 dependant:dataCmd 
 											  userInfo:nil];
 	
-	CKConnectionCommand *pwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"PWD"]
-											 awaitState:CKConnectionIdleState 
-											  sentState:CKConnectionAwaitingCurrentDirectoryState
-											  dependant:nil
-											   userInfo:nil];
-	CKConnectionCommand *cwd = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"CWD" argumentField: dirPath]
-											 awaitState:CKConnectionIdleState 
-											  sentState:CKConnectionChangingDirectoryState
-											  dependant:pwd
-											   userInfo:nil];
 	[_commandQueue insertObject:ls atIndex:0];
 	[_commandQueue insertObject:dataCmd atIndex:0];
-	[_commandQueue insertObject:pwd atIndex:0];
-	[_commandQueue insertObject:cwd atIndex:0];
+	
+	NSArray *changeToNewDirCommands = [self _commandsToChangeToDirectory:dirPath forDependentCommand:nil];
+	//We enumerate in reverse because we're adding to the front of the queue, and changeToNewDirCommands is in add-to-queue order
+	NSEnumerator *commandsEnumerator = [changeToNewDirCommands reverseObjectEnumerator];
+	CKConnectionCommand *command;
+	while ((command = [commandsEnumerator nextObject]))
+		[_commandQueue insertObject:command atIndex:0];
+
 	[self endBulkCommands];
 	
 	[self setState:CKConnectionIdleState];
@@ -3322,7 +3335,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	 (4) "Active"
 	 */
 	NSString *preferredDataConnectionType = [[self request] FTPDataConnectionType];
-	
+		
 	NSString *connectionTypeString = nil;
 	CKConnectionState sendState;
 	
