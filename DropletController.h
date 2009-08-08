@@ -7,11 +7,11 @@
 {
     IBOutlet NSButton *oCancel;
     IBOutlet NSTextField *oPassword;
-    IBOutlet NSPanel *oPasswordPanel;
+    IBOutlet NSWindow *oPasswordPanel;
     IBOutlet NSTextField *oPasswordText;
     IBOutlet NSProgressIndicator *oProgressBar;
     IBOutlet NSTextField *oStatus;
-    IBOutlet NSPanel *oWindow;
+    IBOutlet NSWindow *oWindow;
 	IBOutlet NSOutlineView *oFiles;
 	IBOutlet NSButton *oToggleFiles;
 	
