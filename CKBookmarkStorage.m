@@ -789,6 +789,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	
 	// we write out all the hosts /tmp
 	NSString *wd = [NSString stringWithFormat:@"/tmp/ck"];
+	[[NSFileManager defaultManager] removeFileAtPath:wd handler:nil];
 	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
 	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
 									   forLocal:NO];
