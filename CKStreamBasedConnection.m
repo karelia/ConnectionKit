@@ -326,14 +326,16 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		KTLog(CKTransportDomain, KTLogDebug, @"connect() failed");
 	}
 	
-	if(!_receiveStream || !_sendStream){
+	if (!_receiveStream || !_sendStream)
+	{
 		KTLog(CKTransportDomain, KTLogError, @"Cannot create a stream to the host: %@", [[[self request] URL] host]);
 		
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                   LocalizedStringInConnectionKitBundle(@"Stream Unavailable", @"Error creating stream"), NSLocalizedDescriptionKey,
                                   [[[self request] URL] host], ConnectionHostKey, nil];
         NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain code:EHOSTUNREACH userInfo:userInfo];
-        [[self client] connectionDidReceiveError:error];
+		[[self client] connectionDidConnectToHost:[[[self request] URL] host] error:error];
+		[[self client] connectionDidReceiveError:error];
         
 		return NO;
 	}
