@@ -3101,7 +3101,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 														destinationLocalPath:localPath
 																		size:0 
 																 isDirectory:NO];
-								
+	
 	CKInternalTransferRecord *download = [CKInternalTransferRecord recordWithLocal:localPath
 																			  data:nil
 																			offset:0
