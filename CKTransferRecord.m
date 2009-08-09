@@ -27,11 +27,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
 triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"localPath", @"remotePath", nil] triggerChangeNotificationsForDependentKey:@"name"];
-	
 	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"size"] triggerChangeNotificationsForDependentKey:@"progress"];
-	
 	//While we're discovering files to download, we ARE a leaf. This prevents the user from listing our children while they're being changed!
-	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"isDiscoveringFilesToDownload"]triggerChangeNotificationsForDependentKey:@"isLeaf"];
+	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"isDiscoveringFilesToDownload", nil] triggerChangeNotificationsForDependentKey:@"isLeaf"];
 }
 
 - (void)willChangeValueForKey:(NSString *)key
@@ -147,7 +145,6 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		_properties = [[NSMutableDictionary dictionary] retain];
 		_error = nil;
 		_progress = 0;
-		
 		return self;
 	}
 	return nil;
