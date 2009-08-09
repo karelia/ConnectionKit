@@ -176,6 +176,14 @@ extern NSString *CKQueueDomain;
 - (void)queueFileCheck:(id)file;
 
 - (void)dequeueCommand;
+
+/*!
+	@abstract Dequeues all commands that are dependent on the given command.
+	@param command The command whose dependents should be dequeued.
+	@discussion This method is recursive. That is, commands (directly or distantly) dependent on the dependent commands of command are dequeued.
+ */
+- (void)dequeueDependentsOfCommand:(CKConnectionCommand *)command;
+
 - (void)dequeueDownload;
 - (void)dequeueUpload;
 - (void)dequeueDeletion;

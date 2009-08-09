@@ -270,7 +270,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else if ([[command description] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
 	{
-		command = @"LIST";
+		command = [CKFTPCommand commandWithCode:@"LIST"];
 	}
 
 	NSString *commandToEcho = [command description];
@@ -699,8 +699,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	NSError *error = nil;
 	NSString *path = [reply quotedString];
-	if (!path || [path length] == 0)
-		path = [[[self lastCommand] command] argumentField];	
+	if (!path)
+		path = (NSString *)[[self lastCommand] userInfo];
 	
 	BOOL connectionJustOpened = NO;
 	switch ([reply replyCode])
@@ -787,9 +787,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)_receivedReplyInConnectionChangingDirectoryState:(CKFTPReply *)reply
 {
 	NSError *error = nil;
-	NSString *path = [reply quotedString];
-	if (!path || [path length] == 0)
-		path = [[[self lastCommand] command] argumentField];		
+
+	NSString *directoryPath = (NSString *)[[self lastCommand] userInfo];
+	
 	switch ([reply replyCode])
 	{
 		case 421:
@@ -808,13 +808,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
-									  [reply description], NSLocalizedFailureReasonErrorKey, path, NSFilePathErrorKey, nil];
+									  [reply description], NSLocalizedFailureReasonErrorKey, directoryPath, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			break;			
 		}		
 		case 550: //Requested action not taken, file not found. //Permission Denied
 		{
-			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied"), NSLocalizedDescriptionKey, directoryPath, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:[reply replyCode] userInfo:userInfo];
 			break;
 		}
@@ -822,15 +822,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-
-    [[self client] connectionDidChangeToDirectory:path error:error];
-    
+	//If we couldn't change to the directory, unroll and dependant commands.
+	if (error)
+		[self dequeueDependentsOfCommand:[self lastCommand]];
+	
+    [[self client] connectionDidChangeToDirectory:directoryPath error:error];
 	[self setState:CKConnectionIdleState];
 }
 
 - (void)_receivedReplyInConnectionCreateDirectoryState:(CKFTPReply *)reply
 {
 	NSError *error = nil;
+	
+	NSString *directoryPath = (NSString *)[[self lastCommand] userInfo];
+	
 	switch ([reply replyCode])
 	{
 		case 421:
@@ -874,9 +879,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			//peer if the dir exists for confirmation until then we will make the assumption that it exists.
 			//if ([command rangeOfString:@"exists"].location != NSNotFound) {
 			[userInfo setObject:[NSNumber numberWithBool:YES] forKey:ConnectionDirectoryExistsKey];
-			NSString *path = [[[self lastCommand] command] argumentField];
-			[userInfo setObject:path forKey:ConnectionDirectoryExistsFilenameKey];
-			[userInfo setObject:path forKey:NSFilePathErrorKey];
+			[userInfo setObject:directoryPath forKey:ConnectionDirectoryExistsFilenameKey];
+			[userInfo setObject:directoryPath forKey:NSFilePathErrorKey];
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:[reply description] forKey:NSLocalizedFailureReasonErrorKey];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:[reply replyCode] userInfo:userInfo];
@@ -886,16 +890,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			break;
 	}
 	
-	NSString *directoryName = [reply quotedString];
-    if (!directoryName || [directoryName length] == 0)
-    {
-        directoryName = [[[self lastCommand] command] argumentField];
-    }
-	
-	//To make it a full path, append it to our current directory.
-	NSString *directoryPath = [[self currentDirectory] stringByAppendingPathComponent:directoryName];
     [[self client] connectionDidCreateDirectory:directoryPath error:error];
-    
 	[self setState:CKConnectionIdleState];
 }
 
@@ -1205,6 +1200,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		default:
 			break;
 	}
+	
+	
 	if (error)
 	{	
 		//Unlike other methods, we check that error isn't nil here, because we're sending the finished delegate message on error, whereas the "successful" codes send downloadProgressed messages.
@@ -1218,21 +1215,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		[download release];
 		
-		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
-		[_queueLock lock];
-		CKConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
-		if (nextCommand)
-		{
-			NSEnumerator *enumerator = [[nextCommand dependantCommands] objectEnumerator];
-			CKConnectionCommand *dependent;
-			while (dependent = [enumerator nextObject])
-			{
-				[_commandQueue removeObject:dependent];
-			}
-			
-			[_commandQueue removeObject:nextCommand];
-		}
-		[_queueLock unlock];
+		//Dequeue any dependent commands.
+		[self dequeueDependentsOfCommand:[self lastCommand]];
 		[self setState:CKConnectionIdleState];
 	}
 }
@@ -1505,21 +1489,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		[upload release];
 		
-		//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
-		[_queueLock lock];
-		CKConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
-		if (nextCommand)
-		{
-			NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
-			CKConnectionCommand *dependent;
-			while (dependent = [e nextObject])
-			{
-				[_commandQueue removeObject:dependent];
-			}
-			
-			[_commandQueue removeObject:nextCommand];
-		}
-		[_queueLock unlock];		
+		[self dequeueDependentsOfCommand:[self lastCommand]];
 		[self setState:CKConnectionIdleState];
 	}
 }
@@ -1785,20 +1755,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 		[download release];
 		
-		//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
-		[_queueLock lock];
-		CKConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
-		if (nextCommand)
-		{
-			NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
-			CKConnectionCommand *dependent;
-			while (dependent = [e nextObject])
-			{
-				[_commandQueue removeObject:dependent];
-			}
-			[_commandQueue removeObject:nextCommand];
-		}
-		[_queueLock unlock];
+		//Dequeue any dependent commands
+		[self dequeueDependentsOfCommand:[self lastCommand]];
 		[self setState:CKConnectionIdleState];
 	}
 }
@@ -2234,21 +2192,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					
 					[upload release];
 
-					//At this point the top of the command queue is something associated with this upload. Remove it and all of its dependents.
-					[_queueLock lock];
-					CKConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
-					if (nextCommand)
-					{
-						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
-						CKConnectionCommand *dependent;
-						while (dependent = [e nextObject])
-						{
-							[_commandQueue removeObject:dependent];
-						}
-						
-						[_commandQueue removeObject:nextCommand];
-					}
-					[_queueLock unlock];		
+					//Dequeue any dependent commands.
+					[self dequeueDependentsOfCommand:[self lastCommand]];
 					[self setState:CKConnectionIdleState];
 				}
 				if (GET_STATE == CKConnectionDownloadingFileState)
@@ -2263,21 +2208,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					
 					[download release];
 					
-					//At this point the top of the command queue is something associated with this download. Remove it and all of its dependents.
-					[_queueLock lock];
-					CKConnectionCommand *nextCommand = ([_commandQueue count] > 0) ? [_commandQueue objectAtIndex:0] : nil;
-					if (nextCommand)
-					{
-						NSEnumerator *e = [[nextCommand dependantCommands] objectEnumerator];
-						CKConnectionCommand *dependent;
-						while (dependent = [e nextObject])
-						{
-							[_commandQueue removeObject:dependent];
-						}
-						
-						[_commandQueue removeObject:nextCommand];
-					}
-					[_queueLock unlock];
+					//Dequeue any dependent commands.
+					[self dequeueDependentsOfCommand:[self lastCommand]];
 					[self setState:CKConnectionIdleState];
 				}
 				//This will most likely occur when there is a misconfig of the server and we cannot open a data connection so we have unroll the command stack
@@ -2785,7 +2717,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													 awaitState:CKConnectionIdleState 
 													  sentState:CKConnectionChangingDirectoryState
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
-													   userInfo:nil];		
+													   userInfo:dirPath];		
 		[commandsInQueueOrder addObject:cwd];
 		[commandsInQueueOrder addObject:pwd];
 		return (NSArray *)commandsInQueueOrder;
@@ -2797,6 +2729,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSArray *pathComponents = [dirPath pathComponents]; /* The path components of dirPath to enumerate */
 	NSEnumerator *pathComponentsEnumerator = [pathComponents objectEnumerator]; /* The enumerator for the path components of dirPath */
 	NSString *pathComponent; /*The enumerative path component of dirPath */
+	NSString *basePath = [NSString string];
 	while ((pathComponent = [pathComponentsEnumerator nextObject]))
 	{
 		//Is appending this path component going to push us over our 100 character max?
@@ -2811,11 +2744,12 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 														 awaitState:CKConnectionIdleState 
 														  sentState:CKConnectionChangingDirectoryState
                                                          dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
-														   userInfo:nil];
+														   userInfo:[basePath stringByAppendingPathComponent:thisCWDChunkPath]];
 			
 			[commandsInQueueOrder addObject:cwd];
 			[commandsInQueueOrder addObject:pwd];
 			
+			basePath = [basePath stringByAppendingPathComponent:thisCWDChunkPath];
 			thisCWDChunkPath = [NSString string];
 		}
 		
@@ -2834,7 +2768,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 													 awaitState:CKConnectionIdleState 
 													  sentState:CKConnectionChangingDirectoryState
                                                      dependants:[NSArray arrayWithObjects:pwd, dependentCommand, nil]
-													   userInfo:nil];
+													   userInfo:[basePath stringByAppendingPathComponent:thisCWDChunkPath]];
 		
 		[commandsInQueueOrder addObject:cwd];
 		[commandsInQueueOrder addObject:pwd];
@@ -2872,7 +2806,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 												 awaitState:CKConnectionIdleState 
 												  sentState:CKConnectionCreateDirectoryState
 												  dependant:nil
-												   userInfo:nil];
+												   userInfo:dirPath];
 	
 	// Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [dirPath stringByDeletingLastPathComponent];
@@ -2893,7 +2827,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionSettingPermissionsState
 											  dependant:nil
-											   userInfo:nil];
+											   userInfo:path];
 	[self pushCommandOnHistoryQueue:com];
 	[self sendCommand:cmd];
     [cmd release];
@@ -2930,11 +2864,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionSettingPermissionsState
 												dependant:nil
-												 userInfo:nil];
+												 userInfo:dirPath];
 	CKConnectionCommand *mkdir = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"MKD" argumentField:[dirPath lastPathComponent]]											   awaitState:CKConnectionIdleState 
                                                     sentState:CKConnectionCreateDirectoryState
                                                     dependant:chmod
-                                                     userInfo:nil];
+                                                     userInfo:dirPath];
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [dirPath stringByDeletingLastPathComponent];
@@ -3017,7 +2951,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                                  awaitState:CKConnectionIdleState 
                                                   sentState:CKConnectionDeleteFileState
                                                   dependant:nil
-                                                   userInfo:nil];
+                                                   userInfo:path];
 	
 	//Move to the parent path. This prevents issues with path being too long in the command.
 	NSString *parentDirectory = [path stringByDeletingLastPathComponent];
@@ -3232,7 +3166,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
-											  userInfo:nil];
+											  userInfo:[self currentDirectory]];
 	CKConnectionCommand *dataCmd = [self pushDataConnectionOnCommandQueue];
 	[dataCmd addDependantCommand:ls];
 	
@@ -3260,13 +3194,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CKConnectionCommand *ls = [CKConnectionCommand command:[CKFTPCommand commandWithCode:@"LIST" argumentField:@"-a"]
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 
-											 dependant:dataCmd 
-											  userInfo:nil];
+											 dependant:nil 
+											  userInfo:dirPath];
+	[dataCmd addDependantCommand:ls];
 	
 	[_commandQueue insertObject:ls atIndex:0];
 	[_commandQueue insertObject:dataCmd atIndex:0];
 	
-	NSArray *changeToNewDirCommands = [self _commandsToChangeToDirectory:dirPath forDependentCommand:nil];
+	NSArray *changeToNewDirCommands = [self _commandsToChangeToDirectory:dirPath forDependentCommand:ls];
 	//We enumerate in reverse because we're adding to the front of the queue, and changeToNewDirCommands is in add-to-queue order
 	NSEnumerator *commandsEnumerator = [changeToNewDirCommands reverseObjectEnumerator];
 	CKConnectionCommand *command;
@@ -3305,7 +3240,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 											awaitState:CKConnectionIdleState 
 											 sentState:CKConnectionAwaitingDirectoryContentsState 
 											 dependant:nil 
-											  userInfo:nil];
+											  userInfo:dirPath];
 	[self queueCommand:ls];
 }
 
