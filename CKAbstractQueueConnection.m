@@ -1298,6 +1298,24 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 	DEQUEUE(_commandQueue)
 }
 
+- (void)dequeueDependentsOfCommand:(CKConnectionCommand *)command
+{
+	KTLog(CKQueueDomain, KTLogDebug, @"Dequeueing command (dependents will follow): %@", command);
+	
+	[_queueLock lock]; //_queueLock is a recursive lock.
+	
+	NSArray *dependentCommands = [command dependantCommands];
+	NSEnumerator *dependentCommandsEnumerator = [dependentCommands objectEnumerator];
+	CKConnectionCommand *dependentCommand;
+	while ((dependentCommand = [dependentCommandsEnumerator nextObject]))
+	{
+		[self dequeueDependentsOfCommand:dependentCommand];
+		[_commandQueue removeObject:dependentCommand];
+	}
+	
+	[_queueLock unlock];
+}
+
 - (void)dequeueDownload
 {
 	KTLog(CKQueueDomain, KTLogDebug, @"Dequeuing Download");
