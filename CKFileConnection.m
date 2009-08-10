@@ -397,7 +397,7 @@ checkRemoteExistence:(NSNumber *)check;
     if (![fm fileExistsAtPath:[upload localPath]])
     {
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  LocalizedStringInConnectionKitBundle(@"File does  not exist", @"FileConnection error"), NSLocalizedDescriptionKey, 
+                                  LocalizedStringInConnectionKitBundle(@"File does not exist", @"FileConnection error"), NSLocalizedDescriptionKey, 
                                   [upload localPath], NSFilePathErrorKey, nil];
         NSError *error = [NSError errorWithDomain:CKFileConnectionErrorDomain code:-1 userInfo:userInfo];
         [upload retain];
