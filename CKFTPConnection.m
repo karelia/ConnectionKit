@@ -1990,6 +1990,11 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		[self handleDataSendStreamEvent:eventCode];
 	}
+	else if ((aStream == _receiveStream || aStream == _sendStream) && eventCode == NSStreamEventEndEncountered && (GET_STATE == CKConnectionDownloadingFileState || GET_STATE == CKConnectionUploadingFileState))
+	{
+		//In the event we're downloading or uploading, and the control stream ends, we *do not* close down. This would mess up our internal state and prevent us from completeing the transfer. Instead, we set a flag which we look for when the dataStreams close down.
+		_isWaitingForTransferToFinishToCloseStreams = YES;
+	}
 	else
 	{
 		[super stream:aStream handleEvent:eventCode];
@@ -2097,7 +2102,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						}
 					}
 				}
-				else {
+				else
+				{
 					[_dataBuffer appendBytes:buf length:len];
 				}
 			}
@@ -2536,6 +2542,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self setState:CKConnectionIdleState];
 		}
 	}
+	
+	if (_isWaitingForTransferToFinishToCloseStreams)
+	{
+		_isWaitingForTransferToFinishToCloseStreams = NO;
+		[self closeStreams];
+		[self setState:CKConnectionNotConnectedState];
+		[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
+	}	
 }
 
 - (void)closeDataStreams
