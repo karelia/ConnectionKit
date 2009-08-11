@@ -71,6 +71,7 @@ typedef enum {
 	NSMutableData		*_dataBuffer;
 	
 	NSTimer				*_openStreamsTimeout;
+	BOOL				_isWaitingForTransferToFinishToCloseStreams;
 	NSInputStream		*_dataReceiveStream;
 	NSOutputStream		*_dataSendStream;
 	
