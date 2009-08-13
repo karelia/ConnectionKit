@@ -1068,8 +1068,7 @@ static NSString *lsform = nil;
 
 - (void)passwordErrorOccurred
 {
-	// TODO: Use the new authentication APIs instead
-	// [_forwarder connectionDidSendBadPassword:self];
+	[self continueWithoutCredentialForAuthenticationChallenge:_lastAuthenticationChallenge];
 }
 
 @end
@@ -1116,12 +1115,8 @@ static NSString *lsform = nil;
     // SFTP absolutely requires authentication to continue, so fail with an error
     if (challenge == _lastAuthenticationChallenge)
     {
-        NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"SFTP connections require some form of authentication.", @"SFTP authenticaton error")
-                                                             forKey:NSLocalizedDescriptionKey];
-        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:CKConnectionErrorBadPassword userInfo:userInfo];
-        [[self client] connectionDidReceiveError:error];
-        
-        [self disconnect];
+		[self disconnect];
+		[[self client] connectionDidCancelAuthenticationChallenge:challenge];
     }
 }
 
