@@ -434,22 +434,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self sendCommand:@"DATA_CON"];
 			break;
 		}		
-		case 530: //User not logged in
-		{
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
-                                      [reply description], NSLocalizedFailureReasonErrorKey,
-                                      [[[self request] URL] host], ConnectionHostKey, nil];
-            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:[reply replyCode] userInfo:userInfo];
-            [[self client] connectionDidReceiveError:error];
-            
-			if (GET_STATE != CKConnectionSentQuitState)
-			{
-				[self sendCommand:[CKFTPCommand commandWithCode:@"QUIT"]];
-				[self setState:CKConnectionSentQuitState];
-			}
-			break;
-		}			
 		default:
 			break;
 	}
@@ -3783,7 +3767,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    // TODO: Attempt to continue downloading, login anonymously, or disconnect with an error?
+	[self disconnect];
+	[[self client] connectionDidCancelAuthenticationChallenge:challenge];
 }
 
 /*  Start login
@@ -3806,7 +3791,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
         }
         else
         {
-            // TODO: Fail with error
+			[self continueWithoutCredentialForAuthenticationChallenge:challenge];
         }
     }
 }
