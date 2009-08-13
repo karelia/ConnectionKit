@@ -203,7 +203,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 										 userInfo:nil];
 		}
 	}
-    else
+	//"forbidden" indicates a failure of authentication.
+	else if ([response code] != 403)
     {
         // We're currently authenticated, so reset the failure counter
         _authenticationFailureCount = 0;
@@ -441,10 +442,12 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
 	if (challenge == _currentAuthenticationChallenge)
     {
-		[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-        
-        [self sendError:@"" code:401];  // TODO: The error should include the response string from the server
-        
+		[[self client] connectionDidCancelAuthenticationChallenge:challenge];
+		
+		//We failed to connect
+		[_currentAuthenticationChallenge release];
+		_currentAuthenticationChallenge = nil;
+				
         // Move onto the next command
         [self setState:CKConnectionIdleState];
 	}
