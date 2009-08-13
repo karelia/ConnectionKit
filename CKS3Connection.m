@@ -181,9 +181,12 @@ NSString *S3PathSeparator = @":";
 		NSString *code = [[[[doc rootElement] nodesForXPath:@"//Error/Code" error:&error] objectAtIndex:0] stringValue];
 		[doc release];
 		
-		if ([code isEqualToString:@"SignatureDoesNotMatch"])
+		//Catches bad pass and bad user, respectively.
+		if ([code isEqualToString:@"SignatureDoesNotMatch"] || [code isEqualToString:@"InvalidAccessKeyId"])
 		{
-			// TODO: Send a fresh authentication request and try again
+			//This calls connectionDidReceiveAuthenticationChallenge, increases failure count, etc.
+			[self threadedConnect];
+			return;
 		}
 		else
 		{
@@ -942,12 +945,15 @@ NSString *S3PathSeparator = @":";
 	// Request authentication before connecting
     _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
                                                                                  proposedCredential:nil
-                                                                               previousFailureCount:0
+                                                                               previousFailureCount:_authenticationFailureCount
                                                                                     failureResponse:nil
                                                                                               error:nil
                                                                                              sender:self];
     
     [[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
+	
+	//Prepare for another failure.
+	_authenticationFailureCount++;
 }
 
 /*  CKHTTPConnection implements the -cancel and -continueWithCredential methods for us in a perfectly
@@ -956,8 +962,11 @@ NSString *S3PathSeparator = @":";
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if (challenge != _currentAuthenticationChallenge)	return;
-	[_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+    if (challenge != _currentAuthenticationChallenge)
+		return;
+	
+	[_currentAuthenticationChallenge release];
+	_currentAuthenticationChallenge = nil;
     
     _currentCredential = [credential retain];
     
