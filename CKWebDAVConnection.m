@@ -421,7 +421,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					[[download delegate] transfer:[download userInfo] transferredDataOfLength:[fileData length]];
 				}
 				
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
+				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
 				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
 				
 				if ([download delegateRespondsToTransferProgressedTo])
