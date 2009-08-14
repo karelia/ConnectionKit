@@ -271,19 +271,23 @@ static NSImage *sHostIcon = nil;
 	if (port == _port)
 		return;
 	
-	NSString *oldPortString = (_port) ? [NSString stringWithString:_port] : nil;
+	NSNumber *oldPort = nil;
+	if (_port && [_port isKindOfClass:[NSString class]])
+		oldPort = [NSNumber numberWithInt:[_port intValue]];
+	else if (_port && [_port isKindOfClass:[NSNumber class]])
+		oldPort = [NSNumber numberWithInt:[_port intValue]];
 	
 	[_port autorelease];
 	_port = [port copy];
 	[self didChange];
 	
-	if (!oldPortString || [oldPortString length] == 0)
+	if (!oldPort)
 		return;
 	
 	EMInternetKeychainItem *keychainItem = [[EMKeychainProxy sharedProxy] internetKeychainItemForServer:_host
 																						   withUsername:_username
 																								   path:nil
-																								   port:[oldPortString intValue]
+																								   port:[oldPort intValue]
 																							   protocol:kSecProtocolTypeFTP];
 	[keychainItem setPort:[port intValue]];
 }
