@@ -500,8 +500,6 @@ NSString *S3PathSeparator = @":";
 				bytesTransferred += [fileData length];
 				
 				[[self client] download:[record remotePath] didReceiveDataOfLength:[fileData length]];
-				
-				
 				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
 				[[self client] download:[record remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
 			}
