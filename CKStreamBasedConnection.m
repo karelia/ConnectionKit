@@ -817,10 +817,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		{
 			break;
 		}
-		case NSStreamEventHasSpaceAvailable:
-		{
-			break;
-		}
 	}
 }
 
