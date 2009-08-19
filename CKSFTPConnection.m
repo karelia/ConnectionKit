@@ -905,12 +905,15 @@ static NSString *lsform = nil;
 	[[self client] connectionDidDisconnectFromHost:[[[self request] URL] host]];
 }
 
-- (void)didReceiveDirectoryContents:(NSArray*)items
+- (void)didReceiveDirectoryContents:(NSArray*)items error:(NSError *)error
 {
-	//Cache the directory listings.
-	[self cacheDirectory:currentDirectory withContents:items];
+	if (!error)
+	{
+		//Cache the directory listings.
+		[self cacheDirectory:currentDirectory withContents:items];
+	}
 	
-	[[self client] connectionDidReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:nil];
+	[[self client] connectionDidReceiveContents:items ofDirectory:[NSString stringWithString:currentDirectory] error:error];
 }
 
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred

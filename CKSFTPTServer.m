@@ -228,7 +228,7 @@ char **environ;
     free(transferProgressStringCopy);
 }
 
-- (void)collectListingFromMaster:(int)theMaster fileStream:(FILE *)stream forWrapperConnection:(CKSFTPConnection *)wrapperConnection
+- (BOOL)collectListingFromMaster:(int)theMaster fileStream:(FILE *)stream forWrapperConnection:(CKSFTPConnection *)wrapperConnection
 {
     char buf[MAXPATHLEN * 2] = { 0 };
     char tmp1[MAXPATHLEN * 2], tmp2[MAXPATHLEN * 2];
@@ -244,16 +244,16 @@ char **environ;
         FD_SET(master, &readmask);
 		
         if (select(master + 1, &readmask, NULL, NULL, NULL) < 0)
-            return;
+            return NO;
 		if (!FD_ISSET(master, &readmask))
 			continue;
 		if (fgets((char *)buf, (MAXPATHLEN * 2), stream) == NULL)
-			return;
+			return NO;
 		
 		if ([self bufferContainsError:buf])
 		{
 			[wrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:buf]];
-			return;
+			return NO;
 		}
 		if ([self buffer:buf containsString:"<Press any key"])
 		{
@@ -296,14 +296,16 @@ char **environ;
 		{
 			memset(buf, '\0', strlen(buf));
 			[wrapperConnection finishedCommand];
-			if (![directoryListingBufferString rangeOfString:@"Can't ls"].location != NSNotFound)
+			BOOL canParse = ([directoryListingBufferString rangeOfString:@"Can't ls"].location == NSNotFound);
+			if (canParse)
 			{
 				[directoryContents removeAllObjects];
 				[directoryContents addObjectsFromArray:[NSFileManager directoryListingItemsFromListing:directoryListingBufferString]];
 			}
 			[directoryListingBufferString release];
 			directoryListingBufferString = [[NSMutableString alloc] init];
-			return;
+			
+			return canParse;
 		}
 		else
 		{
@@ -312,7 +314,9 @@ char **environ;
 				[directoryListingBufferString appendString:bufferAppension];
 		}
 		memset(buf, '\0', strlen((char *)buf));
-    }   
+    }
+	
+	return NO;
 }
 
 #pragma mark -
@@ -538,9 +542,17 @@ char **environ;
 		if ([self bufferContainsDirectoryListing:serverResponseBuffer])
 		{
 			wasListing = YES;
-			[self collectListingFromMaster:master fileStream:masterFileStream forWrapperConnection:sftpWrapperConnection];
+			BOOL didParseSuccessfully = [self collectListingFromMaster:master fileStream:masterFileStream forWrapperConnection:sftpWrapperConnection];
 			memset(serverResponseBuffer, '\0', strlen(serverResponseBuffer));
-			[sftpWrapperConnection didReceiveDirectoryContents:directoryContents];
+			
+			NSError *error = nil;
+			if (!didParseSuccessfully)
+			{
+				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Directory Parsing Error", @"Error parsing directory listing"), NSLocalizedDescriptionKey, nil];
+				error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+			}
+			
+			[sftpWrapperConnection didReceiveDirectoryContents:directoryContents error:error];
 		}
 		
 		if (serverResponseBuffer[0] != '\0')
