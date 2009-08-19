@@ -1440,7 +1440,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			CKInternalTransferRecord *upload = [self currentUpload];
 			NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"You do not have access to write file %@", @"FTP file upload error"), [upload remotePath]];
 			[userInfo setValue:[upload remotePath] forKey:NSFilePathErrorKey];
-			[self dequeueUpload];			
 			[userInfo setObject:localizedDescription forKey:NSLocalizedDescriptionKey];
 			[userInfo setObject:[reply description] forKey:NSLocalizedFailureReasonErrorKey];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:[reply replyCode] userInfo:userInfo];
