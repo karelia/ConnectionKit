@@ -268,10 +268,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		_ftpFlags.isActiveDataConn = NO;
 	}
-	else if ([[command description] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
-	{
-		command = [CKFTPCommand commandWithCode:@"LIST"];
-	}
+//	else if ([[command description] isEqualToString:@"LIST -a"] && _ftpFlags.isMicrosoft)
+//	{
+//		command = [CKFTPCommand commandWithCode:@"LIST"];
+//	}
 
 	NSString *commandToEcho = [command description];
 	if ([[command commandCode] isEqualToString:@"PASS"])
