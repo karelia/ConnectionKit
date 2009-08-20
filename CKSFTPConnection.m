@@ -329,6 +329,7 @@ static NSString *lsform = nil;
 	
 	[self changeToDirectory:dirPath];
 	[self directoryContents];
+	[self changeToDirectory:currentDirectory];
 }
 
 - (void)directoryContents

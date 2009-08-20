@@ -387,7 +387,6 @@ char **environ;
 	BOOL hasValidPassword = NO;
 	BOOL passwordWasSent = NO;
 	BOOL rootDirectoryWasSet = NO;
-	BOOL wasChanging = NO;
 	BOOL wasListing = NO;
 	BOOL atSFTPPrompt = NO;
 	int numberOfPromptArrivalsToIgnore = 0;
@@ -449,11 +448,6 @@ char **environ;
 				rootDirectoryWasSet = YES;
 				[sftpWrapperConnection didSetRootDirectory];
 			}
-			else if (wasChanging)
-			{
-				[sftpWrapperConnection directoryContents];
-				wasChanging = NO;
-			}
 			else if (wasListing)
 			{
 				wasListing = NO;
@@ -504,7 +498,6 @@ char **environ;
 			}
 			else if ([self buffer:serverResponseBuffer containsString:"Changing owner on"] || [self buffer:serverResponseBuffer containsString:"Changing group on"] || [self buffer:serverResponseBuffer containsString:"Changing mode on"])
 			{
-				wasChanging = YES;
 				if ([self buffer:serverResponseBuffer containsString:"Couldn't "])
 				{
 					[sftpWrapperConnection receivedErrorInServerResponse:[NSString stringWithUTF8String:serverResponseBuffer]];
