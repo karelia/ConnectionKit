@@ -932,7 +932,22 @@ static NSString *lsform = nil;
 	if (progressPercentage != 100.0)
 	{
 		unsigned long long previousTransferred = [record transferred];
-		unsigned long long chunkLength = amountTransferred - previousTransferred;
+		
+		//If we're reporting a negative chunkLength, return.
+		if (amountTransferred < previousTransferred)
+			return;
+		else if (amountTransferred == previousTransferred)
+		{
+			//When the transferred amount exceeds 9999 KB, SFTP starts reporting progress in MB. Consequently, amountTransferred will be 10MB until 11 MB is hit. In this case, amountTransferred will not update. So to compensate, we calculate the *true* amount transferred by the progressPercentage.
+			amountTransferred = ((progressPercentage / 100.0) * [record size]);
+			
+			//Note that to ensure a continuously *increasing* -transferred reading on the record, we leave chunkLength as zero 
+			if (amountTransferred <= previousTransferred)
+				return;
+		}
+		
+		unsigned long long chunkLength = (amountTransferred - previousTransferred);
+		
 		if ([uploadInfo delegateRespondsToTransferTransferredData])
 			[[uploadInfo delegate] transfer:record transferredDataOfLength:chunkLength];
 	}
