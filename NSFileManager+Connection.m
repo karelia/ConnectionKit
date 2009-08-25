@@ -33,10 +33,6 @@
 #import "RegexKitLite.h"
 
 
-//Exception Names
-NSString *CKFailedToParseDirectoryListingException = @"CKFailedToParseDirectoryListingException";
-
-
 int filenameSort(id obj1, id obj2, void *context)
 {
     NSString *f1 = [obj1 filename];
