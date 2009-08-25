@@ -300,8 +300,13 @@ char **environ;
 			if (canParse)
 			{
 				[directoryContents removeAllObjects];
-				[directoryContents addObjectsFromArray:[NSFileManager directoryListingItemsFromListing:directoryListingBufferString]];
+				NSArray *directoryListingItems = [NSFileManager directoryListingItemsFromListing:directoryListingBufferString];
+				if (directoryListingItems)
+					[directoryContents addObjectsFromArray:directoryListingItems];
+				else
+					canParse = NO;
 			}
+			
 			[directoryListingBufferString release];
 			directoryListingBufferString = [[NSMutableString alloc] init];
 			

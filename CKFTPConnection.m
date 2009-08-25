@@ -2510,12 +2510,20 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		[[self client] appendLine:results toTranscript:CKTranscriptData];
 
 		NSArray *contents = [self parseLines:results];
+		NSError *error = nil;
+		if (contents)
+		{
+			KTLog(CKParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
+
+			[self cacheDirectory:_currentPath withContents:contents];
+		}
+		else
+		{
+			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Directory Parsing Error", @"Error parsing directory listing"), NSLocalizedDescriptionKey, nil];
+			error = [NSError errorWithDomain:CKFTPErrorDomain code:0 userInfo:userInfo];
+		}
 		
-		KTLog(CKParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
-		
-		[self cacheDirectory:_currentPath withContents:contents];
-		
-		[[self client] connectionDidReceiveContents:contents ofDirectory:_currentPath error:nil];
+		[[self client] connectionDidReceiveContents:contents ofDirectory:_currentPath error:error];
 		
 		[results release];
 		[_dataBuffer setLength:0];

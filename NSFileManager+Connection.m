@@ -136,8 +136,6 @@ if (![fn isEqualToString:@"."] && \
 		{
 			//No way to separate lines, error.
 			KTLog(CKParsingDomain, KTLogError, @"Could not determine line endings, try refreshing directory");
-			NSException *exception = [NSException exceptionWithName:CKFailedToParseDirectoryListingException reason:@"Could not determine line endings." userInfo:nil];
-			@throw exception;
 			return nil;
 		}
 		lineEnding = @"\n";
@@ -254,6 +252,12 @@ if (![fn isEqualToString:@"."] && \
 	
 	NSMutableArray *directoryListingItems = [NSMutableArray array];
 	NSArray *lines = [NSFileManager _linesFromListing:listing];
+	if (!lines)
+	{
+		//If we cna't parse the lines, we cannot continue. Parsing the rest of the listing depends on the date. Log it, and return nil
+		NSLog(@"Failed to parse directory listing:\"%@\"", listing);
+		return nil;
+	}
 	NSEnumerator *lineEnumerator = [lines objectEnumerator];
 	NSString *line;
 	while ((line = [lineEnumerator nextObject]))
@@ -359,10 +363,9 @@ if (![fn isEqualToString:@"."] && \
 			NSString *dateString = [NSFileManager _dateStringFromListing:line]; //Date
 			if (!dateString)
 			{
-				//Much of what we do from this point is based on finding the date. This is a serious bug, and should be addressed. Log it out, report an error.
-				NSLog(@"Could not parse date from line %@ of listing %@", line, listing);
-				NSException *exception = [NSException exceptionWithName:CKFailedToParseDirectoryListingException reason:LocalizedStringInConnectionKitBundle(@"Error parsing directory listing", @"Directory Parsing Error") userInfo:nil];
-				@throw exception;
+				//If we cna't parse the date, we cannot continue. Parsing the rest of the listing depends on the date. Log it, and return nil
+				NSLog(@"Failed to parse directory listing:\"%@\"", listing);
+				return nil;
 			}
             
 			NSArray *dateComponents = [dateString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
