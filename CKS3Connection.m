@@ -861,6 +861,11 @@ NSString *S3PathSeparator = @":";
 	return record;
 }
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
+{
+	NSLog(@"S3 does not support setting permissions on files yet!");
+}
+
 - (void)s3DirectoryContents:(NSString *)dir
 {
 	NSString *theDir = dir != nil ? dir : myCurrentDirectory;
