@@ -785,21 +785,17 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	{
 		if (transferHeaderLength > 0)
 		{
+			//If we only sent the header (or part of it), there's we haven't send any data yet.
 			if (length <= transferHeaderLength)
-			{
-				transferHeaderLength -= length;
-			}
-			else
-			{
-				length -= transferHeaderLength;
-				transferHeaderLength = 0;
-				bytesTransferred += length;
-			}
-		}
-		else
-		{
+				return;
+			
+			length -= transferHeaderLength;
+			transferHeaderLength = 0;
 			bytesTransferred += length;
 		}
+		else
+			bytesTransferred += length;
+				
 		CKInternalTransferRecord *upload = [self currentUpload];
 		
 		if (bytesToTransfer > 0)
