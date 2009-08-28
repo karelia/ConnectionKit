@@ -258,7 +258,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		
-		[self setAuthenticationWithRequest:req];
+		BOOL isAuthenticated = [self setAuthenticationWithRequest:req];
 		[[self client] appendString:[[req description] stringByAppendingString:@"\n"] toTranscript:CKTranscriptSent];
 		
 		NSData *headerPacket = [req serializedHeader];
@@ -270,8 +270,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		//Send the header
 		[self sendData:headerPacket];
 		
-		//Send the actual content if there is any.
-		if ([req contentLength] > 0)
+		//Send the actual content if there is any. We only do this if we've got some authentication (otherwise we're sending for no reason)
+		if (isAuthenticated && [req contentLength] > 0)
 			[self sendData:[req content]];
 	}
 	else 
@@ -287,11 +287,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	
 }
 
-- (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
+- (BOOL)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
 	//Do we already have an authentication header? If so, leave it in tact.
 	if ([request headerForKey:@"Authorization"])
-		return;
+		return YES;
 	
 	NSString *authorizationString = nil;
 
@@ -302,7 +302,12 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		authorizationString = _basicAccessAuthorizationHeader;
 	
 	if (authorizationString)
+	{
 		[request setHeader:authorizationString forKey:@"Authorization"];
+		return YES;
+	}
+	
+	return NO;
 }
 
 #pragma mark -

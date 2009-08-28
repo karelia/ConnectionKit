@@ -131,7 +131,7 @@ NSString *S3PathSeparator = @":";
 #pragma mark -
 #pragma mark HTTP Overrides
 
-- (void)setAuthenticationWithRequest:(CKHTTPRequest *)request
+- (BOOL)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
 	// S3 needs decent credentials to operate
     NSAssert(_currentCredential, @"S3 requires credentials to operate");
@@ -167,6 +167,8 @@ NSString *S3PathSeparator = @":";
 	
 	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[_currentCredential password]] base64Encoding];
 	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [_currentCredential user], sha1] forKey:@"Authorization"];
+	
+	return YES;
 }
 
 - (void)processResponse:(CKHTTPResponse *)response

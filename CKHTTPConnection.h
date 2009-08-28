@@ -65,7 +65,7 @@
 - (void)processResponse:(CKHTTPResponse *)response; //subclasses override
 - (void)initiatingNewRequest:(CKHTTPRequest *)request withPacket:(NSData *)packet; //override
 - (BOOL)processBufferWithNewData:(NSData *)data; //subclass can process the response buffer, returns YES if the superclass should also try to process it.
-- (void)setAuthenticationWithRequest:(CKHTTPRequest *)request; // a way to override the authentication header
+- (BOOL)setAuthenticationWithRequest:(CKHTTPRequest *)request; // a way to override the authentication header
 
 @end
 
