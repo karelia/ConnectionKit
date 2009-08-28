@@ -217,14 +217,14 @@
 		LocalizedStringInConnectionKitBundle(@"EB", @"filesize: exabytes")
 	};
 	
-	int power = floor(log(size) / log(1024));
+	int power = floor(log(size) / log(1000));
 	if (power > 1)
 	{
-		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
+		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1000, power), suffix[power]];
 	}
 	else
 	{
-		return [NSString stringWithFormat:@"%01.0lf %@", size / pow(1024, power), suffix[power]];
+		return [NSString stringWithFormat:@"%01.0lf %@", size / pow(1000, power), suffix[power]];
 	}
 }
 
