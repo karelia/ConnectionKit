@@ -38,6 +38,7 @@
 #import "NSString+Connection.h"
 #import "NSObject+Connection.h"
 #import "RegexKitLite.h"
+#import "CKDAVUploadFileResponse.h"
 
 enum {
 	HTTPSentGenericRequestState = 32012
@@ -157,7 +158,10 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	KTLog(CKProtocolDomain, KTLogDebug, @"HTTP Received: %@", [response shortDescription]);
 	
 	[[self client] appendLine:[[response description] stringByAppendingString:@"\n"] toTranscript:CKTranscriptReceived];
-	[[self client] appendLine:[[response formattedResponse] stringByAppendingString:@"\n"] toTranscript:CKTranscriptData];
+	
+	//If we're 401 and an upload, don't print the response (i.e., failed) , since we're going to send an authorization.
+	if ([response code] != 401 || ![response isKindOfClass:[CKDAVUploadFileResponse class]])
+		[[self client] appendLine:[[response formattedResponse] stringByAppendingString:@"\n"] toTranscript:CKTranscriptData];
 	
 	
 	if ([response code] == 401)
