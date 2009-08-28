@@ -183,25 +183,25 @@ char **environ;
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfKBString UTF8String];
-		baseMultiplier = pow(1024, 1);
+		baseMultiplier = pow(1000, 1);
 	}
 	else if ([formattedAmountString hasSuffix:@"MB"])
 	{
 		NSString *numberOfMBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfMBString UTF8String];
-		baseMultiplier = pow(1024, 2);
+		baseMultiplier = pow(1000, 2);
 	}
 	else if ([formattedAmountString hasSuffix:@"GB"])
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfKBString UTF8String];
-		baseMultiplier = pow(1024, 3);
+		baseMultiplier = pow(1000, 3);
 	}	
 	else if ([formattedAmountString hasSuffix:@"TB"])
 	{
 		NSString *numberOfKBString = [formattedAmountString substringWithRange:NSMakeRange(0, [formattedAmountString length] - 2)];		
 		amountCharacter = (char *)[numberOfKBString UTF8String];
-		baseMultiplier = pow(1024, 4);
+		baseMultiplier = pow(1000, 4);
 	}	
 	else
 		amountCharacter = transferAmount;
