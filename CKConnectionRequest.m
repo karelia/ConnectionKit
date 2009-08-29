@@ -47,6 +47,14 @@ const NSTimeInterval CKConnectionRequestDefaultTimeoutInterval = 60.0;
     return [self _initWithURL:URL timeoutInterval:timeoutInterval extensibleProperties:nil];
 }
 
+- (void)dealloc
+{
+	[_URL release];
+	[_extensibleProperties release];
+	
+	[super dealloc];
+}
+
 - (NSURL *)URL { return _URL; }
 
 - (NSTimeInterval)timeoutInterval { return _timeoutInterval; }
