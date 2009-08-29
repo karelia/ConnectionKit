@@ -47,7 +47,7 @@
  */
 @protocol OutputStream, InputStream;
 
-@interface CKStreamBasedConnection : CKAbstractQueueConnection 
+@interface CKStreamBasedConnection : CKAbstractQueueConnection  <NSStreamDelegate>
 {
 	NSThread			*_createdThread;
 	
@@ -131,6 +131,8 @@
 
 // SSL Support
 - (void)setSSLOn:(BOOL)flag;
+
+- (void)stream:(NSStream *)stream handleEvent:(NSStreamEvent)theEvent; //private
 
 @end
 

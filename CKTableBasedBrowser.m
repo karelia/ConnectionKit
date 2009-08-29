@@ -1289,7 +1289,7 @@ static Class sCellClass = nil;
 #pragma mark -
 #pragma mark NSTableView Data Source
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	unsigned columnIndex = [self columnWithTable:aTableView];
 	NSString *path = [self pathToColumn:columnIndex];
@@ -1299,7 +1299,7 @@ static Class sCellClass = nil;
 	return [myDataSource tableBrowser:self numberOfChildrenOfItem:item];
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	unsigned columnIndex = [self columnWithTable:aTableView];
 	NSString *path = [self pathToColumn:columnIndex];
@@ -1308,17 +1308,17 @@ static Class sCellClass = nil;
 	return [myDataSource tableBrowser:self child:rowIndex ofItem:item];
 }
 
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	
 }
 
-- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(int)row dropOperation:(NSTableViewDropOperation)operation
+- (BOOL)tableView:(NSTableView *)aTableView acceptDrop:(id <NSDraggingInfo>)info row:(NSInteger)row dropOperation:(NSTableViewDropOperation)operation
 {
 	return NO;
 }
 
-- (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id <NSDraggingInfo>)info proposedRow:(int)row proposedDropOperation:(NSTableViewDropOperation)operation
+- (NSDragOperation)tableView:(NSTableView *)aTableView validateDrop:(id <NSDraggingInfo>)info proposedRow:(NSInteger)row proposedDropOperation:(NSTableViewDropOperation)operation
 {
 	return NSDragOperationNone;
 }
@@ -1331,7 +1331,7 @@ static Class sCellClass = nil;
 #pragma mark -
 #pragma mark NSTableView Delegate
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	if (myDelegateFlags.willDisplayCell)
 	{
@@ -1340,7 +1340,7 @@ static Class sCellClass = nil;
 	}
 }
 
-- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
 	if (myFlags.isEnabled)
 	{

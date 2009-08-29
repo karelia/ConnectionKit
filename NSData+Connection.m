@@ -28,6 +28,7 @@
  
  */
 #import "NSData+Connection.h"
+#import "NSString+Connection.h"
 #import <zlib.h>
 #import <openssl/ssl.h>
 #import <openssl/hmac.h>
@@ -47,8 +48,7 @@
 	char * base64Pointer;
     long base64Length = BIO_get_mem_data(mem, &base64Pointer);
 	
-	NSString * base64String = [NSString stringWithCString:base64Pointer
-												   length:base64Length];
+	NSString * base64String = [NSString stringWithData:[NSData dataWithBytes:base64Pointer length:base64Length] encoding:NSASCIIStringEncoding];
 	
 	BIO_free_all(mem);
     return base64String;

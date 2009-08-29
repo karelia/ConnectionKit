@@ -161,8 +161,6 @@
 		79CFD86D09F7048500172CDD /* CKDotMacConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82C09F7048400172CDD /* CKDotMacConnection.m */; };
 		79CFD86F09F7048500172CDD /* CKFileConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD82E09F7048400172CDD /* CKFileConnection.m */; };
 		79CFD87109F7048500172CDD /* CKFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83009F7048400172CDD /* CKFTPConnection.m */; };
-		79CFD87409F7048500172CDD /* InterThreadMessaging.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83309F7048400172CDD /* InterThreadMessaging.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83409F7048400172CDD /* InterThreadMessaging.m */; };
 		79CFD87609F7048500172CDD /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83509F7048400172CDD /* KTLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD87709F7048500172CDD /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
 		79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84109F7048400172CDD /* RunLoopForwarder.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -429,8 +427,6 @@
 		79CFD83009F7048400172CDD /* CKFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPConnection.m; sourceTree = "<group>"; };
 		79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPOverSSLConnection.h; sourceTree = "<group>"; };
 		79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPOverSSLConnection.m; sourceTree = "<group>"; };
-		79CFD83309F7048400172CDD /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
-		79CFD83409F7048400172CDD /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79CFD83509F7048400172CDD /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
 		79CFD83609F7048400172CDD /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
 		79CFD83709F7048400172CDD /* CKMultipleConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKMultipleConnection.h; sourceTree = "<group>"; };
@@ -925,8 +921,6 @@
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
-				79CFD83309F7048400172CDD /* InterThreadMessaging.h */,
-				79CFD83409F7048400172CDD /* InterThreadMessaging.m */,
 				79CFD84109F7048400172CDD /* RunLoopForwarder.h */,
 				79CFD84209F7048400172CDD /* RunLoopForwarder.m */,
 				79CFD90009F7077900172CDD /* NSData+Connection.h */,
@@ -1064,7 +1058,6 @@
 				79CFD84F09F7048500172CDD /* CKConnectionProtocol.h in Headers */,
 				79CFD85009F7048500172CDD /* CKAbstractQueueConnection.h in Headers */,
 				79CFD85209F7048500172CDD /* CKConnectionOpenPanel.h in Headers */,
-				79CFD87409F7048500172CDD /* InterThreadMessaging.h in Headers */,
 				79CFD87609F7048500172CDD /* KTLog.h in Headers */,
 				79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */,
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
@@ -1412,7 +1405,6 @@
 				79CFD86D09F7048500172CDD /* CKDotMacConnection.m in Sources */,
 				79CFD86F09F7048500172CDD /* CKFileConnection.m in Sources */,
 				79CFD87109F7048500172CDD /* CKFTPConnection.m in Sources */,
-				79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */,
 				79CFD87709F7048500172CDD /* KTLog.m in Sources */,
 				79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */,
 				79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */,
@@ -2023,9 +2015,11 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1)";
+				ARCHS_STANDARD_32_64_BIT_PRE_XCODE_3_1 = "x86_64 i386 ppc";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
-				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
-				GCC_VERSION = 4.0;
+				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
+				GCC_VERSION = "";
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				PREBINDING = NO;

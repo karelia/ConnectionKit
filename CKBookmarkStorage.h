@@ -42,7 +42,7 @@
 
 @class CKHostCategory, CKBonjourCategory, CKHost;
 
-@interface CKBookmarkStorage : NSObject 
+@interface CKBookmarkStorage : NSObject  <NSOutlineViewDataSource>
 {
 	NSMutableArray *myLeopardSourceListGroups;
 	NSMutableArray *myConnections;

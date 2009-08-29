@@ -30,7 +30,7 @@
 #import "CKHostCategory.h"
 
 
-@interface CKBonjourCategory : CKHostCategory
+@interface CKBonjourCategory : CKHostCategory <NSNetServiceBrowserDelegate, NSNetServiceDelegate>
 {
 	NSNetServiceBrowser *myFTPBrowser;
 	NSNetServiceBrowser *mySFTPBrowser;

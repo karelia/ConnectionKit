@@ -23,6 +23,7 @@
  */
 
 #import "EMKeychainProxy.h"
+#import "NSString+Connection.h"
 
 @implementation EMKeychainProxy
 
@@ -57,7 +58,7 @@ static EMKeychainProxy *sharedProxy = nil;
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
     return UINT_MAX;  //denotes an object that cannot be released
 }
@@ -103,7 +104,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithData:[NSData dataWithBytes:password length:passwordLength] encoding:NSUTF8StringEncoding];
 	SecKeychainItemFreeContent(NULL, password);
 
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
@@ -148,7 +149,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithData:[NSData dataWithBytes:password length:passwordLength] encoding:NSUTF8StringEncoding];
 	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];

@@ -31,7 +31,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-@interface CKTableBasedBrowser : NSView
+@interface CKTableBasedBrowser : NSView <NSTableViewDataSource, NSTableViewDelegate>
 {
 	id myDataSource; // not retained
 	id myDelegate; // not retained

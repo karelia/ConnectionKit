@@ -192,7 +192,7 @@
 {
 	// toHash is an NSData
 	NSData *toHash = [self dataUsingEncoding:NSUTF8StringEncoding];
-	unsigned char *digest = (unsigned char *)MD5([toHash bytes], [toHash length], NULL);
+	unsigned char *digest = (unsigned char *)CC_MD5([toHash bytes], [toHash length], NULL);
 	return [NSString stringWithFormat: @"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 			digest[0], digest[1], 
 			digest[2], digest[3],

@@ -432,7 +432,7 @@ static NSString *lsform = nil;
 	}
 	else
 	{
-		NSDictionary *attributes = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+		NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:nil];
 		uploadSize = [[attributes objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
@@ -988,6 +988,7 @@ static NSString *lsform = nil;
 	NSString *remotePath = [downloadInfo remotePath];
 	[[self client] download:remotePath didProgressToPercent:progress];
 }
+
 - (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo
 {
 	NSString *remotePath = [downloadInfo objectForKey:@"remotePath"];

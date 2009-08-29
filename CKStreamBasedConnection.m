@@ -35,7 +35,7 @@
 #import "CKStreamBasedConnection.h"
 
 #import "CKConnectionThreadManager.h"
-#import "InterThreadMessaging.h"
+
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
@@ -43,6 +43,7 @@
 #import "CKTransferRecord.h"
 #import "CKConnectionProtocol.h"
 #import "CKInternalTransferRecord.h"
+#import "NSString+Connection.h"
 
 #import <sys/types.h> 
 #import <sys/socket.h> 
@@ -108,8 +109,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.initializedSSL = NO;
 			
 		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
-		
-		[NSThread prepareForConnectionInterThreadMessages];
 	}
 	
 	return self;
@@ -188,7 +187,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	if (getsockname([self socket], &sock, &len) >= 0) {
 		char *addr = inet_ntoa(((struct sockaddr_in *)&sock)->sin_addr);
-		return [NSString stringWithCString:addr];
+		return [NSString stringWithData:[NSData dataWithBytes:addr length:strlen(addr)] encoding:NSASCIIStringEncoding];
 	}
 	return nil;
 }
@@ -723,7 +722,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 																   arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
-					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					[inv performSelector:@selector(invoke) onThread:_createdThread withObject:nil waitUntilDone:NO];
 					
 					while (_sendStream == nil || _receiveStream == nil)
 					{
@@ -891,7 +890,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 																   arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
-					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					[inv performSelector:@selector(invoke) onThread:_createdThread withObject:nil waitUntilDone:NO];
 					
 					while (_sendStream == nil || _receiveStream == nil)
 					{

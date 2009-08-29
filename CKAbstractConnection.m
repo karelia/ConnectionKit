@@ -34,7 +34,7 @@
 #import "CKTransferRecord.h"
 
 #import "CKConnectionThreadManager.h"
-#import "InterThreadMessaging.h"
+
 
 #import "NSString+Connection.h"
 #import "NSURL+Connection.h"
@@ -501,7 +501,8 @@ NSDictionary *sDataAttributes = nil;
 	if (parentRecord)
 		[parentRecord addChild:thisDirectoryRecord];
 	
-	NSEnumerator *directoryContentsEnumerator = [[[NSFileManager defaultManager] directoryContentsAtPath:localPath] objectEnumerator];
+    NSError *error = nil;
+	NSEnumerator *directoryContentsEnumerator = [[[NSFileManager defaultManager] contentsOfDirectoryAtPath:localPath error:&error] objectEnumerator];
 	NSString *thisFilename;
 	while ((thisFilename = [directoryContentsEnumerator nextObject]))
 	{

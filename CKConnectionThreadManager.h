@@ -30,7 +30,7 @@
 #import <Foundation/Foundation.h>
 
 
-@interface CKConnectionThreadManager : NSObject 
+@interface CKConnectionThreadManager : NSObject <NSPortDelegate>
 {
 	NSLock			*myLock;
 	NSMutableArray	*myTasks;

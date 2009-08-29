@@ -65,7 +65,6 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
 
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>

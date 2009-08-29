@@ -392,7 +392,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				BOOL isDir;
 				if ([fm fileExistsAtPath:[download localPath] isDirectory:&isDir] && !isDir)
 				{
-					[fm removeFileAtPath:[download localPath] handler:nil];
+					[fm removeItemAtPath:[download localPath] error:nil];
 				}
 				[fm createFileAtPath:[download localPath]
 							contents:nil
@@ -612,7 +612,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
-	NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+	NSDictionary *attribs = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:nil];
 	CKTransferRecord *transfer = [CKTransferRecord uploadRecordForConnection:self 
 															 sourceLocalPath:localPath
 													   destinationRemotePath:remotePath

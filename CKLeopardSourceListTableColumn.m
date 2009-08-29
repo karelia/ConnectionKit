@@ -10,7 +10,7 @@
 
 @implementation CKLeopardSourceListTableColumn
 
-- (id)dataCellForRow:(int)row
+- (id)dataCellForRow:(NSInteger)row
 {
 	if (row >= 0)
 	{

@@ -415,7 +415,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		{
 			//The database has been locked for over 2 seconds. CK is obviously not writing to it, but the lock still exists. Remove the lock
 			NSLog(@"CKRegistry has been locked for over 2 seconds. Removing Lock.");
-			[fm removeFileAtPath:lockPath handler:nil];
+			[fm removeItemAtPath:lockPath error:nil];
 			databaseWriteFailCount = 0;
 		}
 		else
@@ -462,7 +462,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	{
 		[myConnections insertObject:myBonjour atIndex:idx];
 	}
-	[fm removeFileAtPath:lockPath handler:nil];
+	[fm removeItemAtPath:lockPath error:nil];
 	
 	NSString *pid = [[NSString stringWithFormat:@"%d", [[NSProcessInfo processInfo] processIdentifier]] retain];
 	[myCenter postNotificationName:CKRegistryNotification object:pid userInfo:nil];
@@ -605,7 +605,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 		else
 		{
 			NSString *catDir = [path stringByAppendingPathComponent:[cur name]];
-			[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+			[[NSFileManager defaultManager] createDirectoryAtPath:catDir withIntermediateDirectories:YES attributes:nil error:nil];
 			[self recursivelyWrite:cur to:catDir];
 		}
 	}
@@ -789,8 +789,8 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	
 	// we write out all the hosts /tmp
 	NSString *wd = [NSString stringWithFormat:@"/tmp/ck"];
-	[[NSFileManager defaultManager] removeFileAtPath:wd handler:nil];
-	[[NSFileManager defaultManager] createDirectoryAtPath:wd attributes:nil];
+	[[NSFileManager defaultManager] removeItemAtPath:wd error:nil];
+	[[NSFileManager defaultManager] createDirectoryAtPath:wd withIntermediateDirectories:YES attributes:nil error:nil];
 	[outlineView setDraggingSourceOperationMask:NSDragOperationCopy  
 									   forLocal:NO];
 	NSMutableArray *types = [NSMutableArray arrayWithObject:CKDraggedBookmarksPboardType];
@@ -820,7 +820,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 			else if (![cur isKindOfClass:[NSDictionary class]])
 			{
 				NSString *catDir = [wd stringByAppendingPathComponent:[cur name]];
-				[[NSFileManager defaultManager] createDirectoryAtPath:catDir attributes:nil];
+				[[NSFileManager defaultManager] createDirectoryAtPath:catDir withIntermediateDirectories:YES attributes:nil error:nil];
 				[files addObject:catDir];
 				[self recursivelyWrite:cur to:catDir];
 			}
@@ -914,7 +914,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	while ((currentItem = [itemEnumerator nextObject]))
 	{
 		CKHostCategory *currentCategory = [currentItem category];
-		unsigned currentIndex = NSNotFound;
+		NSInteger currentIndex = NSNotFound;
 		
 		NSArray *parentConnections = (currentCategory) ? [currentCategory hosts] : myConnections;
 		currentIndex = [parentConnections indexOfObjectIdenticalTo:currentItem];

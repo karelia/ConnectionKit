@@ -39,7 +39,7 @@
 #import "RunLoopForwarder.h"
 #import "CKFTPConnection.h"
 #import "CKSFTPConnection.h"
-#import "InterThreadMessaging.h"
+
 
 NSString *ControllerDomain = @"Controller";
 NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
@@ -249,9 +249,7 @@ NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";
 - (void)kickoff:(id)unused
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	
-	[NSThread prepareForConnectionInterThreadMessages]; //make sure we have a runloop on this thread
-	
+		
 	myPhase = CKKickoffPhase;
 	myFlags.stopTransfer = NO;
 	

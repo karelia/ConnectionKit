@@ -21,15 +21,30 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 #pragma mark -
 #pragma mark NSObject Overrides
-+ (void)initialize
+
++ (NSSet *)keyPathsForValuesAffectingNameWithProgress
 {
-	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
-    [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
-triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
-	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"localPath", @"remotePath", nil] triggerChangeNotificationsForDependentKey:@"name"];
-	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"size"] triggerChangeNotificationsForDependentKey:@"progress"];
-	//While we're discovering files to download, we ARE a leaf. This prevents the user from listing our children while they're being changed!
-	[CKTransferRecord setKeys:[NSArray arrayWithObjects:@"isDiscoveringFilesToDownload", nil] triggerChangeNotificationsForDependentKey:@"isLeaf"];
+    return [NSSet setWithObjects:@"progress", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingNameWithProgressAndFileSize
+{
+    return [NSSet setWithObjects:@"progress", @"name", @"size", nil];
+}
+
++ (NSSet *)keyPathsForValuesAffectingName
+{
+    return [NSSet setWithObjects:@"localPath", @"remotePath", nil];
+}
+
++ (NSSet *)keyPathsForValuesProgress
+{
+    return [NSSet setWithObjects:@"size", nil];
+}
+
++ (NSSet *)keyPathsForValuesIsLeaf
+{
+    return [NSSet setWithObjects:@"isDiscoveringFilesToDownload", nil];
 }
 
 - (void)willChangeValueForKey:(NSString *)key

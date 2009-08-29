@@ -33,7 +33,7 @@
  */
 
 #import "RunLoopForwarder.h"
-#import "InterThreadMessaging.h"
+
 
 @implementation RunLoopForwarder
 
@@ -43,7 +43,6 @@
 	{
 		lock = [[NSRecursiveLock alloc] init];
 		createdOnThread = [NSThread currentThread];
-		[NSThread prepareForConnectionInterThreadMessages];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(threadWillDie:)
 													 name:NSThreadWillExitNotification
@@ -122,8 +121,9 @@
 		else
 		{
 			[anInvocation performSelector:@selector(invokeWithTarget:)
-							   withObject:myDelegate
-								 inThread:createdOnThread];
+                                 onThread:createdOnThread
+                               withObject:myDelegate
+                            waitUntilDone:NO];
 		}
 	} 
 	else 

@@ -10,7 +10,7 @@
 
 #import "CKAbstractConnection.h"
 #import "CKFTPConnection.h"
-#import "InterThreadMessaging.h"
+
 #import "RunLoopForwarder.h"
 #import "NSURL+Connection.h"
 #import "CKSFTPConnection.h"
@@ -242,14 +242,22 @@
     return result;
 }
 
+- (void)wrappedUseCredentialForAuthenticationChallenge:(NSArray *)params
+{
+    id<NSURLAuthenticationChallengeSender> sender = [params objectAtIndex:0];
+    NSURLCredential *credential = [params objectAtIndex:1];
+    NSURLAuthenticationChallenge *original = [params objectAtIndex:2];
+    
+    [sender useCredential:credential forAuthenticationChallenge:original];
+}
+
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     if (challenge == _currentAuthenticationChallenge)
     {
-        [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-																	withObject:credential
-																	withObject:_originalAuthenticationChallenge
-																	  inThread:_authenticationThread];
+        [self performSelector:@selector(wrappedUseCredentialForAuthenticationChallenge:)
+                     onThread:_authenticationThread
+                   withObject:[NSArray arrayWithObjects:[_originalAuthenticationChallenge sender], credential, _originalAuthenticationChallenge, nil] waitUntilDone:NO];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
@@ -262,8 +270,9 @@
     if (challenge == _currentAuthenticationChallenge)
     {
         [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
+                                                                      onThread:_authenticationThread
 																	withObject:_originalAuthenticationChallenge
-																	  inThread:_authenticationThread];
+                                                                 waitUntilDone:NO];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
@@ -280,8 +289,9 @@
         
         // Forward the message on to the original sender
         [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd 
+                                                                      onThread:_authenticationThread
 																	withObject:_originalAuthenticationChallenge
-																	  inThread:_authenticationThread];
+                                                                 waitUntilDone:NO];
         
         [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
         [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;

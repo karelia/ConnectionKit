@@ -478,7 +478,7 @@ NSString *S3PathSeparator = @":";
 				BOOL isDir;
 				if ([fm fileExistsAtPath:[record localPath] isDirectory:&isDir] && !isDir)
 				{
-					[fm removeFileAtPath:[record localPath] handler:nil];
+					[fm removeItemAtPath:[record localPath] error:nil];
 				}
 				[fm createFileAtPath:[record localPath]
 							contents:nil

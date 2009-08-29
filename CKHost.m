@@ -708,23 +708,23 @@ static NSImage *sHostIcon = nil;
 	
 	if ([fm fileExistsAtPath:app])
 	{
-		[fm removeFileAtPath:app handler:nil];
+		[fm removeItemAtPath:app error:nil];
 	}
-	
-	if (![fm createDirectoryAtPath:app attributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0775] forKey:NSFilePosixPermissions]])
+
+	if (![fm createDirectoryAtPath:app withIntermediateDirectories:NO attributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:0775] forKey:NSFilePosixPermissions] error:nil])
 	{
 		return nil;
 	}
-	[fm changeFileAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:NSFileExtensionHidden] atPath:app];
-	if (![fm createDirectoryAtPath:contents attributes:nil])
+	[fm setAttributes:[NSDictionary dictionaryWithObject:[NSNumber numberWithBool:YES] forKey:NSFileExtensionHidden] ofItemAtPath:app error:nil];
+	if (![fm createDirectoryAtPath:contents withIntermediateDirectories:NO attributes:nil error:nil])
 	{
 		return nil;
 	}
-	if (![fm createDirectoryAtPath:exe attributes:nil])
+	if (![fm createDirectoryAtPath:exe withIntermediateDirectories:NO attributes:nil error:nil])
 	{
 		return nil;
 	}
-	if (![fm createDirectoryAtPath:resources attributes:nil])
+	if (![fm createDirectoryAtPath:resources withIntermediateDirectories:NO attributes:nil error:nil])
 	{
 		return nil;
 	}
@@ -736,19 +736,19 @@ static NSImage *sHostIcon = nil;
 	[NSKeyedArchiver archiveRootObject:self toFile:[[resources stringByAppendingPathComponent:@"configuration"] stringByAppendingPathExtension:@"ckhost"]];
 	
 	// copy executable
-	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@""] 
-		  toPath:[exe stringByAppendingPathComponent:@"DropletLauncher"] 
-		 handler:nil];
+	[fm copyItemAtPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@""] 
+                toPath:[exe stringByAppendingPathComponent:@"DropletLauncher"] 
+                 error:nil];
 	
 	// copy icon
-	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletIcon" ofType:@"icns"] 
-		  toPath:[[resources stringByAppendingPathComponent:@"DropletIcon"] stringByAppendingPathExtension:@"icns"]
-		 handler:nil];
+	[fm copyItemAtPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletIcon" ofType:@"icns"] 
+                toPath:[[resources stringByAppendingPathComponent:@"DropletIcon"] stringByAppendingPathExtension:@"icns"]
+                 error:nil];
 	
 	// copy the nib
-	[fm copyPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@"nib"] 
-		  toPath:[[resources stringByAppendingPathComponent:@"DropletLauncher"] stringByAppendingPathExtension:@"nib"]
-		 handler:nil];
+	[fm copyItemAtPath:[[NSBundle bundleForClass:[self class]] pathForResource:@"DropletLauncher" ofType:@"nib"] 
+                toPath:[[resources stringByAppendingPathComponent:@"DropletLauncher"] stringByAppendingPathExtension:@"nib"]
+                 error:nil];
 	
 	// hide the .app extension
 	

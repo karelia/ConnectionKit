@@ -28,6 +28,7 @@
  */
 
 #import "KTLog.h"
+#import "NSString+Connection.h"
 #import <stdarg.h>
 
 @interface KTLogger (Private)
@@ -188,15 +189,11 @@ static NSString *KTLevelMap[] = {
 {
 	NSString *logPath = [[NSString stringWithFormat:@"%@", NSHomeDirectory()] stringByAppendingPathComponent:@"Library/Logs/"];
 	NSFileManager *fm = [NSFileManager defaultManager];
-	BOOL isDir;
 	
-	if (!([fm fileExistsAtPath:logPath isDirectory:&isDir] && isDir))
-	{
-		if (![fm createDirectoryAtPath:logPath attributes:nil])
-		{
-			NSLog(@"Failed to create log directory: %@", logPath);
-		}
-	}
+	if (![fm createDirectoryAtPath:logPath withIntermediateDirectories:YES attributes:nil error:nil])
+    {
+        NSLog(@"Failed to create log directory: %@", logPath);
+    }
 	
 	NSString *processName = [[NSProcessInfo processInfo] processName];
 	NSString *logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.ktlog", processName]];
@@ -240,13 +237,13 @@ static NSString *KTLevelMap[] = {
 		from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i - 1]];
 		to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
 		
-		[fm movePath:from toPath:to handler:nil];
+		[fm moveItemAtPath:from toPath:to error:nil];
 		i--;
 	}
 	
 	from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.ktlog", processName]];
 	to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
-	[fm movePath:from toPath:to handler:nil];
+	[fm moveItemAtPath:from toPath:to error:nil];
 }
 
 
@@ -259,7 +256,7 @@ static NSString *KTLevelMap[] = {
 		 message:(NSString *)log
 {
 	NSDate *now = [NSDate date];
-	NSString *filename = [NSString stringWithCString:file];
+	NSString *filename = [NSString stringWithData:[NSData dataWithBytes:file length:strlen(file)] encoding:NSUTF8StringEncoding];
 	NSNumber *lineNumber = [NSNumber numberWithInt:line];
 	NSNumber *thisLevel = [NSNumber numberWithInt:level];
 
@@ -301,7 +298,7 @@ static NSString *KTLevelMap[] = {
 	{
 		[_loggingDelegate logger:self logged:rec];
 	}
-	NSDictionary *logAttribs = [[NSFileManager defaultManager] fileAttributesAtPath:[self logfileName] traverseLink:YES];
+	NSDictionary *logAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:[self logfileName] error:nil];
 	if ([[logAttribs objectForKey:NSFileSize] unsignedLongLongValue] > KTLogMaximumLogSize)
 	{
 		[self rotateLogs];
@@ -481,12 +478,12 @@ static NSString *KTLevelMap[] = {
 #pragma mark -
 #pragma mark NSTableView Datasource
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	return [myLoggingLevels count];
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];
@@ -500,7 +497,7 @@ static NSString *KTLevelMap[] = {
 	}
 }
 
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSMutableDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];

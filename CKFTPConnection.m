@@ -1065,7 +1065,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
 				
 				if ( !isResume ) {
-					[fm removeFileAtPath:[download localPath] handler:nil];
+					[fm removeItemAtPath:[download localPath] error:nil];
 					[fm createFileAtPath:[download localPath]
 								contents:nil
 							  attributes:nil];
@@ -1241,7 +1241,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSAssert((nil != _readHandle), @"_readHandle is nil!");
 				
 				// Calculate size to transfer is total file size minus offset
-				_transferSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize] longLongValue] - offset;
+				_transferSize = [[[[NSFileManager defaultManager] attributesOfItemAtPath:file error:nil] objectForKey:NSFileSize] longLongValue] - offset;
 				
 				[_readHandle seekToFileOffset:offset]; 
 				NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
@@ -1328,7 +1328,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					bytes = (uint8_t *)[chunk bytes];
 					chunkLength = [chunk length];		// actual length of bytes read
                     
-                    NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
+                    NSNumber *size = [[[NSFileManager defaultManager] attributesOfItemAtPath:file error:nil] objectForKey:NSFileSize];
                     _transferSize = [size unsignedLongLongValue];
 				}
 				
@@ -2042,7 +2042,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
 						
 						if ( !isResume ) {
-							[fm removeFileAtPath:[download localPath] handler:nil];
+							[fm removeItemAtPath:[download localPath] error:nil];
 							[fm createFileAtPath:[download localPath]
 										contents:nil
 									  attributes:nil];
@@ -3486,7 +3486,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		KTLog(CKTransportDomain, KTLogError, @"Failed to setup PORT socket, trying PASV");
 		_state = FTPSettingPassiveState;
-		return @"PASV";
+		return [CKFTPCommand commandWithCode:@"PASV"];
 	}
 	div_t portDiv = div(_lastActivePort, 256);
 	NSString *ip = [[[[NSHost currentHost] ipv4Address] componentsSeparatedByString:@"."] componentsJoinedByString:@","];
@@ -3543,7 +3543,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else
 	{
-		NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+		NSDictionary *attribs = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:nil];
 		uploadSize = [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
