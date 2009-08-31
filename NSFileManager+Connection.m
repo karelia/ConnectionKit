@@ -46,21 +46,20 @@ int filenameSort(id obj1, id obj2, void *context)
 
 + (NSString *)fixFilename:(NSString *)filename forDirectoryListingItem:(CKDirectoryListingItem *)item
 {
-	NSString *fname = [NSString stringWithString:[filename stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]]];
 	if ([item isDirectory])
 	{
-		if ([fname hasSuffix:@"/"])
-			fname = [fname substringToIndex:[fname length] - 1];
+		if ([filename hasSuffix:@"/"])
+			filename = [filename substringToIndex:[filename length] - 1];
 	}
 	if ([item isSymbolicLink])
 	{
-		if ([fname hasSuffix:@"@"])
-			fname = [fname substringToIndex:[fname length] - 1];
+		if ([filename hasSuffix:@"@"])
+			filename = [filename substringToIndex:[filename length] - 1];
 	}
-	if ([fname hasSuffix:@"@"]) //We get @'s on the filename for aliases on Mac OS X Server.
+	if ([filename hasSuffix:@"@"]) //We get @'s on the filename for aliases on Mac OS X Server.
 	{
 		[item setFileType:NSFileTypeSymbolicLink];
-		fname = [fname substringToIndex:[fname length] - 1];
+		filename = [filename substringToIndex:[filename length] - 1];
 	}
 	
 	NSNumber *permissions = [item posixPermissions];
@@ -70,12 +69,12 @@ int filenameSort(id obj1, id obj2, void *context)
 		unsigned long perms = [permissions unsignedLongValue];
 		if ((perms & 01) || (perms & 010) || (perms & 0100))
 		{
-			if ([fname hasSuffix:@"*"])
-				fname = [fname substringToIndex:[fname length] - 1];
+			if ([filename hasSuffix:@"*"])
+				filename = [filename substringToIndex:[filename length] - 1];
 		}
 	}
 	
-	return fname;
+	return filename;
 }
 
 /* 
