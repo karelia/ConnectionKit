@@ -30,7 +30,6 @@
 
 #import "CKFileConnection.h"
 #import "RunLoopForwarder.h"
-#import "InterThreadMessaging.h"
 #import "CKConnectionThreadManager.h"
 #import "CKInternalTransferRecord.h"
 #import "CKTransferRecord.h"

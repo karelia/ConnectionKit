@@ -29,7 +29,6 @@
 
 #import "CKConnectionThreadManager.h"
 #import "KTLog.h"
-#import "InterThreadMessaging.h"
 #import "CKAbstractConnection.h"
 
 @interface CKConnectionThreadManager (Private)
@@ -89,8 +88,6 @@ static NSLock *_initLock = nil;
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 	myBgThread = [NSThread currentThread];
-	[NSThread prepareForConnectionInterThreadMessages];
-	
 	[[NSRunLoop currentRunLoop] addPort:myPort forMode:NSDefaultRunLoopMode];
 	
 	// NOTE: this may be leaking ... there are two retains going on here.  Apple bug report #2885852, still open since 2002!

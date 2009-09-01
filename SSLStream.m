@@ -31,7 +31,6 @@
 #import "SSLStream.h"
 #import "CKAbstractConnection.h"
 #import "RunLoopForwarder.h"
-#import "InterThreadMessaging.h"
 
 // This file heavily based on ONBSocket, ONBSSLContext and ONBSSLIdentity
 // These classes were re-licensed from GPL to BSD for use in the Connection Framework project
