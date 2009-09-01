@@ -39,7 +39,6 @@
 #import "RunLoopForwarder.h"
 #import "CKFTPConnection.h"
 #import "CKSFTPConnection.h"
-#import "InterThreadMessaging.h"
 
 NSString *ControllerDomain = @"Controller";
 NSString *CKTransferControllerDomain = @"CKTransferControllerDomain";

@@ -45,7 +45,6 @@
 
 #import "ONBSocket.h"
 #import "ONBSSLContext.h"
-#import "InterThreadMessaging.h"
 #import <netinet/in.h>
 
 @interface ONBSocket ( ONBSocketPrivateMethods )

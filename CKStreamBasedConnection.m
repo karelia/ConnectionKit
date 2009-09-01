@@ -35,7 +35,6 @@
 #import "CKStreamBasedConnection.h"
 
 #import "CKConnectionThreadManager.h"
-#import "InterThreadMessaging.h"
 #import "NSData+Connection.h"
 #import "NSObject+Connection.h"
 #import "RunLoopForwarder.h"
@@ -108,8 +107,6 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		myStreamFlags.initializedSSL = NO;
 			
 		mySSLEncryptedSendBuffer = [[NSMutableData data] retain];
-		
-		[NSThread prepareForConnectionInterThreadMessages];
 	}
 	
 	return self;
@@ -723,7 +720,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 																   arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
-					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					[inv performSelector:@selector(invoke) onThread:_createdThread withObject:nil waitUntilDone:NO];
 					
 					while (_sendStream == nil || _receiveStream == nil)
 					{
@@ -891,7 +888,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 																   arguments:[NSArray array]];
 					int port = [self port];
 					[inv setArgument:&port atIndex:2];
-					[inv performSelector:@selector(invoke) inThread:_createdThread];
+					[inv performSelector:@selector(invoke) onThread:_createdThread withObject:nil waitUntilDone:NO];
 					
 					while (_sendStream == nil || _receiveStream == nil)
 					{

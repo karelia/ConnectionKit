@@ -34,7 +34,6 @@
 #import "CKTransferRecord.h"
 
 #import "CKConnectionThreadManager.h"
-#import "InterThreadMessaging.h"
 
 #import "NSString+Connection.h"
 #import "NSURL+Connection.h"
