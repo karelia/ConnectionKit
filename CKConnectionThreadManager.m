@@ -157,7 +157,7 @@ static NSLock *_initLock = nil;
 - (void)processTasks
 {
 	[myLock lock];
-	NSArray *tasks = [[myTasks copy] autorelease];
+	NSArray *tasks = [NSArray arrayWithArray:myTasks];
 	[myTasks removeAllObjects];
 	[myLock unlock];
 	NSEnumerator *e = [tasks objectEnumerator];
@@ -165,9 +165,9 @@ static NSLock *_initLock = nil;
 	
 	while (cur = [e nextObject])
 	{
-		@try {
+		@try
+		{
 			[cur invoke];
-			[[cur target] release];
 		}
 		@catch (NSException *ex) {
 			KTLog(CKThreadingDomain, KTLogDebug, @"Exception caught when invoking: %@\n %@", cur, ex);
@@ -199,8 +199,10 @@ static NSLock *_initLock = nil;
 - (id)prepareWithInvocationTarget:(id)target
 {
 	[myLock lock];
+	
 	[myTarget release];
 	myTarget = [target retain];
+	
 	return self;
 }
 
@@ -218,11 +220,13 @@ static NSLock *_initLock = nil;
 {
 	[inv setTarget:myTarget];
 	[inv retainArguments];
+	
+	[myTarget release];
 	myTarget = nil;
+	
 	[myLock unlock];
 	
 	[self scheduleInvocation:inv];
-	//[self performSelector:@selector(scheduleInvocation:) withObject:inv afterDelay:0.0];
 }
 
 @end
