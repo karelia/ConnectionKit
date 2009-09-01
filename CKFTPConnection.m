@@ -3361,8 +3361,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 - (void)setDataInputStreamAndOpen:(NSInputStream *)iStream outputStream:(NSOutputStream *)oStream socket:(CFSocketNativeHandle)sock
 {
 	_connectedActive = sock;
-	_dataSendStream = oStream;
-	_dataReceiveStream = iStream;
+	_dataSendStream = oStream; //Gets retained by prepareAndOpenDataStreams
+	_dataReceiveStream = iStream; //Gets retained by prepareAndOpenDataStreams
 	[self prepareAndOpenDataStreams];
 }
 
@@ -3376,11 +3376,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		
 	CFStreamCreatePairWithSocket(kCFAllocatorDefault, connectedFrom, &read, &write);
 	//cast as NSStreams
-	NSInputStream *iStream = [(NSInputStream *)read autorelease];
-	NSOutputStream *oStream = [(NSOutputStream *)write autorelease];
+	NSInputStream *iStream = (NSInputStream *)read;
+	NSOutputStream *oStream = (NSOutputStream *)write;
 	
 	//send the data streams to the ftp connection object
 	[con setDataInputStreamAndOpen:iStream outputStream:oStream socket:connectedFrom];
+	
+	//These were retained by prepareAndOpenDataStreams, which was called by setDataInputStreamAndOpen:...
+	[iStream release];
+	[oStream release];
 	
 	//close down the original listening socket
 	CFSocketInvalidate(s);
