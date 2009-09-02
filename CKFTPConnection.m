@@ -3707,9 +3707,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)setCurrentAuthenticationCredential:(NSURLCredential *)credential
 {
-    credential = [credential copy];
-    [_currentAuthenticationCredential release]; // Should generally be nil already
-    _currentAuthenticationCredential = credential;
+	[_currentAuthenticationCredential release];
+	_currentAuthenticationCredential = [credential copy];
 }
 
 /*  Uses the delegate to authenticate the connection. If the delegate (heaven forbid) doesn't
