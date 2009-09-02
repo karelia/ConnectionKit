@@ -295,7 +295,9 @@
  */
 - (void)appendLine:(NSString *)string toTranscript:(CKTranscriptType)transcript
 {
-	NSString *line = ([string hasSuffix:@"\n"]) ? string : [string stringByAppendingString:@"\n"];
+	if (![string hasSuffix:@"\n"])
+		string = [string stringByAppendingString:@"\n"];
+	
 	[self appendString:line toTranscript:transcript];
 }
 
