@@ -298,7 +298,7 @@
 	if (![string hasSuffix:@"\n"])
 		string = [string stringByAppendingString:@"\n"];
 	
-	[self appendString:line toTranscript:transcript];
+	[self appendString:string toTranscript:transcript];
 }
 
 - (void)appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
