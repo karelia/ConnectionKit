@@ -443,7 +443,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
     if (challenge == _currentAuthenticationChallenge)
     {
-        [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
+        [_currentAuthenticationChallenge release];
+		_currentAuthenticationChallenge = nil;
     }
 }
 
