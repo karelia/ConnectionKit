@@ -429,18 +429,6 @@ static NSString *CKRecursiveDownloadShouldOverwriteExistingFilesKey = @"CKRecurs
 
 #pragma mark -
 #pragma mark Peer Connection Delegate Methods
-- (void)connection:(id <CKConnection>)conn didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-	//Forward to our delegate 
-	[[self client] connectionDidReceiveAuthenticationChallenge:challenge];
-}
-
-- (void)connection:(id <CKConnection>)conn appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript
-{
-	//Forward to our delegate.
-	[[self client] appendLine:string toTranscript:transcript];
-}
-
 - (void)connection:(id <CKConnection>)conn didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	//We failed to do whatever recursive operation we were asked to do. Appropriately error!

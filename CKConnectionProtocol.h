@@ -279,21 +279,6 @@ typedef enum
 - (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
 
 #pragma mark Authentication
-/*!
- @method connection:didReceiveAuthenticationChallenge:
- @abstract Operates just like the NSURLConnection delegate method -connection:didReceiveAuthenticationChallenge:
- @param connection The connection for which authentication is needed
- @param challenge The NSURLAuthenticationChallenge to start authentication for
- */
-- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-/*!
- @method connection:didCancelAuthenticationChallenge:
- @abstract Operates exactly the same as its NSURLConnection counterpart.
- @param connection The connection sending the message.
- @param challenge The challenge that was canceled.
- */
-- (void)connection:(id <CKConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 
 

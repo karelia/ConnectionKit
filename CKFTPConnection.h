@@ -120,10 +120,6 @@ typedef enum {
 	} _ftpFlags;
 	
 	NSTimer *_noopTimer;
-    
-    // Authentication
-    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
-    NSURLCredential                 *_currentAuthenticationCredential;
 }
 
 

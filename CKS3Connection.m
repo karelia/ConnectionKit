@@ -40,6 +40,7 @@
 #import "CKTransferRecord.h"
 #import "NSFileManager+Connection.h"
 #import "CKConnectionProtocol.h"
+#import "NSURL+Connection.h"
 
 
 NSString *S3ErrorDomain = @"S3ErrorDomain";
@@ -134,10 +135,10 @@ NSString *S3PathSeparator = @":";
 - (BOOL)setAuthenticationWithRequest:(CKHTTPRequest *)request
 {
 	// S3 needs decent credentials to operate
-    NSAssert(_currentCredential, @"S3 requires credentials to operate");
-    NSAssert([_currentCredential user], @"S3 connection has no access key ID");
-    NSAssert([_currentCredential persistence] == NSURLCredentialPersistenceNone, @"S3 passwords cannot be persisted");
-    NSAssert([_currentCredential password], @"S3 connection has no secret key");
+	NSString *username = [[[self request] URL] user];
+	NSString *password = [[[self request] URL] originalUnescapedPassword];
+    NSAssert(username, @"S3 connection has no access key ID");
+    NSAssert(password, @"S3 connection has no secret key");
     
     
     NSString *method = [request method];
@@ -165,8 +166,8 @@ NSString *S3PathSeparator = @":";
 	}
 	[auth appendString:[uri encodeLegally]];
 	
-	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:[_currentCredential password]] base64Encoding];
-	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", [_currentCredential user], sha1] forKey:@"Authorization"];
+	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:password] base64Encoding];
+	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", username, sha1] forKey:@"Authorization"];
 	
 	return YES;
 }
@@ -947,36 +948,8 @@ NSString *S3PathSeparator = @":";
 	[myCurrentDirectory release];
 	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	
-	// Request authentication before connecting
-    _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:nil
-                                                                                 proposedCredential:nil
-                                                                               previousFailureCount:_authenticationFailureCount
-                                                                                    failureResponse:nil
-                                                                                              error:nil
-                                                                                             sender:self];
-    
-    [[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
-	
-	//Prepare for another failure.
-	_authenticationFailureCount++;
-}
-
-/*  CKHTTPConnection implements the -cancel and -continueWithCredential methods for us in a perfectly
- *  decent manner, so don't bother overriding them.
- */
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge != _currentAuthenticationChallenge)
-		return;
-	
-	[_currentAuthenticationChallenge release];
-	_currentAuthenticationChallenge = nil;
-    
-    _currentCredential = [credential retain];
-    
-    // Continue on with connecting
-    [super threadedConnect];
+	_hasAttemptedAuthentication = YES;
+	[super threadedConnect];
 }
 
 @end

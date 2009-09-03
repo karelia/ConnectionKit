@@ -103,6 +103,7 @@ typedef enum {
 @protected
 	BOOL	_isConnecting;	// YES once -connect has been called and before isConnected returns YES
     BOOL    _isConnected;
+	BOOL _hasAttemptedAuthentication;
     BOOL    _inBulk;
 	NSMutableDictionary *_cachedDirectoryContents;
 	NSMutableDictionary *_properties;

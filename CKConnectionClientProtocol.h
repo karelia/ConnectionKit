@@ -25,17 +25,6 @@
 - (void)connectionDidReceiveError:(NSError *)error;
 
 #pragma mark Authentication
-
-/*!
- @method connectionDidReceiveAuthenticationChallenge:
- @discussion The client guarantees that it will answer the request on the same thread that
- called this method. The client may add a default credential to the challenge it issues to the
- connection delegate, if protocol did not provide one. If the client cancels the challenge, it will
- automatically call -[CKConnection forceDisconnect] before forwarding the message to the sender.
- */
-- (void)connectionDidReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)connectionDidCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-
 - (NSString *)passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;
 - (NSString *)accountForUsername:(NSString *)username;
 

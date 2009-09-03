@@ -39,6 +39,7 @@
 #import "NSObject+Connection.h"
 #import "RegexKitLite.h"
 #import "CKDAVUploadFileResponse.h"
+#import "NSURL+Connection.h"
 
 enum {
 	HTTPSentGenericRequestState = 32012
@@ -84,8 +85,6 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[myCurrentRequest release];
 	[myResponseBuffer release];
 	[_basicAccessAuthorizationHeader release];
-	[_currentAuthenticationChallenge release];
-	[_currentCredential release];
 	if (_currentAuth)
 		CFRelease(_currentAuth);
 	
@@ -190,12 +189,12 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		NSString *authMethod = [(NSString *)CFHTTPAuthenticationCopyMethod(_currentAuth) autorelease];
 		if ([authMethod isEqualToString:@"Basic"])
 		{
-			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
+			[self _authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
 			return;
 		}
 		else if ([authMethod isEqualToString:@"Digest"])
 		{
-			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
+			[self _authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
 			return;
 		}
 		else
@@ -211,7 +210,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	else if ([response code] != 403)
     {
         // We're currently authenticated, so reset the failure counter
-        _authenticationFailureCount = 0;
+		_hasAttemptedAuthentication = NO;
     }
 	
 	[myCurrentRequest release];
@@ -407,78 +406,30 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 #pragma mark -
 #pragma mark Authentication
 
-- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod
+- (void)_authenticateConnectionWithMethod:(NSString *)authenticationMethod
 {
-	// Create authentication challenge object
-	NSURLProtectionSpace *protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
-																				  port:[self port]
-																			  protocol:[[[self request] URL] scheme]
-																				 realm:nil
-																  authenticationMethod:authenticationMethod];
-	
-	[_currentAuthenticationChallenge release];
-	_currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-																				 proposedCredential:[self proposedCredential]
-																			   previousFailureCount:_authenticationFailureCount
-																					failureResponse:nil
-																							  error:nil
-																							 sender:self];
-	
-	[protectionSpace release];
-	
-	[[self client] connectionDidReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
-	
-	// Prepare for another failure
-	_authenticationFailureCount++;
-}
-
-/*  MobileMe overrides this to fetch the user's account
- */
-- (NSURLCredential *)proposedCredential
-{
-    return nil;
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _currentAuthenticationChallenge)
-    {
-        [_currentAuthenticationChallenge release];
-		_currentAuthenticationChallenge = nil;
-    }
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-	if (challenge == _currentAuthenticationChallenge)
-    {
-		[[self client] connectionDidCancelAuthenticationChallenge:challenge];
+	//If we've already attempted authentication, our we don't have a user and a password, fail.
+	BOOL canAttemptAuthentication = (!_hasAttemptedAuthentication && [[[self request] URL] user] && [[[self request] URL] originalUnescapedPassword]);
+	if (!canAttemptAuthentication)
+	{
+		//Authentication information is wrong. Send an error and disconnect.
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
+		NSError *error = [NSError errorWithDomain:CKHTTPConnectionErrorDomain code:0 userInfo:userInfo];
+		[[self client] connectionDidOpenAtPath:nil error:error];
 		
-		//We failed to connect
-		[_currentAuthenticationChallenge release];
-		_currentAuthenticationChallenge = nil;
-				
-        // Move onto the next command
-        [self setState:CKConnectionIdleState];
-	}
-}
-
-/*  Retry the request, this time with authentication information.
- */
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge != _currentAuthenticationChallenge)
+		[self disconnect];
+		
 		return;
+	}
 	
-	[_currentCredential release];
-	_currentCredential = [credential retain];
-	
-	//In setAuthenticationForRequest:, we try to use digest based on the credentials retained here.
 	//If we're using basic authorization, store the authorization header.
-	if ([[[challenge protectionSpace] authenticationMethod] isEqualToString:NSURLAuthenticationMethodHTTPBasic])
+	if ([authenticationMethod isEqualToString:NSURLAuthenticationMethodHTTPBasic])
     {
         // Store the new credential
-		NSString *authString = [[NSString alloc] initWithFormat:@"%@:%@", [credential user], [credential password]];
+		NSString *username = [[[self request] URL] user];
+		NSString *password = [[[self request] URL] originalUnescapedPassword];
+		
+		NSString *authString = [[NSString alloc] initWithFormat:@"%@:%@", username, password];
 		NSData *authData = [authString dataUsingEncoding:NSUTF8StringEncoding];
 		[authString release];
 		
@@ -486,11 +437,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		_basicAccessAuthorizationHeader = [[NSString alloc] initWithFormat:@"Basic %@", [authData base64Encoding]];
     }
 	
-	[_currentAuthenticationChallenge release];
-	_currentAuthenticationChallenge = nil;	
+	//We only do this once.
+	_hasAttemptedAuthentication = YES;
 		
 	// Resend the request with authentication.
-	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];
+	[[[CKConnectionThreadManager defaultManager] prepareWithInvocationTarget:self] sendCommand:myCurrentRequest];	
 }
 
 - (NSString *)_digestAuthorizationHeaderForRequest:(CKHTTPRequest *)request
@@ -507,8 +458,8 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	CFStreamError error;
 	success = CFHTTPMessageApplyCredentials(saneRequest,
 											_currentAuth, 
-											(CFStringRef)[_currentCredential user], 
-											(CFStringRef)[_currentCredential password],
+											(CFStringRef)[[[self request] URL] user],
+											(CFStringRef)[[[self request] URL] originalUnescapedPassword],
 											&error);
 	NSAssert(success, @"Could not apply credential to request");
 	
