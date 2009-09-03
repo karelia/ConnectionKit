@@ -89,7 +89,7 @@
 - (CKHostCategory *)category;
 
 
-- (NSString *)uuid;
+- (NSString *)UUID;
 - (BOOL)isAbsoluteInitialPath;
 - (NSURL *)baseURL; // doesn't contain initialPath
 - (NSString *)annotation;

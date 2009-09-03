@@ -50,7 +50,7 @@
 	}
 	
 	//We are not passed a legally encoded URI because we need to keep myPath around as the original. 
-	if (self = [super initWithMethod:@"PROPFIND" uri:[uri encodeLegally]])
+	if (self = [super initWithMethod:@"PROPFIND" uri:[uri encodeLegallyForURI]])
 	{
 		[self setHeader:@"1" forKey:@"Depth"];
 		

@@ -111,8 +111,7 @@ NSDictionary *sDataAttributes = nil;
 			break;
 	}
 	
-	NSAttributedString *result = [NSAttributedString attributedStringWithString:string attributes:attributes];
-	return result;
+	return [[[NSAttributedString alloc] initWithString:string attributes:attributes] autorelease];
 }
 
 + (NSDictionary *)sentTranscriptStringAttributes

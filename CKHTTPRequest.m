@@ -251,7 +251,7 @@
 - (NSData *)serializedHeader
 {
 	NSMutableData *packet = [NSMutableData data];
-	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, [myURI encodeLegally]];
+	NSString *request = [NSString stringWithFormat:@"%@ %@ HTTP/1.1\r\n", myMethod, [myURI encodeLegallyForURI]];
 	[packet appendData:[request dataUsingEncoding:NSUTF8StringEncoding]];
 	
 	//do the headers
