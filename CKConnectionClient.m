@@ -133,8 +133,7 @@
     // Does the delegate support this? If not, handle it ourselves
     if (_flags.authorizeConnection)
     {
-        _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:fullChallenge
-                                                                                                         sender:self];
+        _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:fullChallenge sender:self];
         _originalAuthenticationChallenge = [originalChallenge retain];
         _authenticationThread = [[NSThread currentThread] retain];
         
@@ -163,50 +162,45 @@
  */
 - (NSURLAuthenticationChallenge *)_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSURLAuthenticationChallenge *result = challenge;
-    
     NSURLCredential *credential = [challenge proposedCredential];
-    if (!credential)
-    {
-        NSURL *connectionURL = [[[self connection] request] URL];
-		
-        NSString *user = [connectionURL user];
-        if (user)
-        {
-            NSString *password = [connectionURL originalUnescapedPassword];
-            if (password)
-            {
-                credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
-            }
-            else
-            {
-                credential = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:[challenge protectionSpace]] objectForKey:user];
-                if (!credential)
-                {
-                    credential = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
-                }
-            }
-        }
-        else
-        {
-            credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:[challenge protectionSpace]];
-        }
-        
-        
-        // Create a new request with the credential
-        if (credential)
-        {
-            result = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace]
-                                                                proposedCredential:credential
-                                                              previousFailureCount:[challenge previousFailureCount]
-                                                                   failureResponse:[challenge failureResponse]
-                                                                             error:[challenge error]
-                                                                            sender:[challenge sender]];
-            [result autorelease];
-        }
-    }
-    
-    return result;
+	if (credential)
+		return challenge;
+
+	NSURL *connectionURL = [[[self connection] request] URL];
+	
+	NSString *user = [connectionURL user];
+	if (user)
+	{
+		NSString *password = [connectionURL originalUnescapedPassword];
+		if (password)
+		{
+			credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
+		}
+		else
+		{
+			credential = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:[challenge protectionSpace]] objectForKey:user];
+			if (!credential)
+			{
+				credential = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
+			}
+		}
+	}
+	else
+	{
+		credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:[challenge protectionSpace]];
+	}
+	
+	if (!credential)
+		return challenge;
+	
+	NSURLAuthenticationChallenge *fullChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace] 
+																							 proposedCredential:credential
+																						   previousFailureCount:[challenge previousFailureCount]
+																								failureResponse:[challenge failureResponse]
+																										  error:[challenge error]
+																										 sender:[challenge sender]];
+	
+	return [fullChallenge autorelease];
 }
 
 - (void)connectionDidCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
@@ -245,12 +239,20 @@
 {
     if (challenge == _currentAuthenticationChallenge)
     {
-		NSInvocation *useCredentialInvocation = [NSInvocation invocationWithSelector:_cmd target:[_originalAuthenticationChallenge sender] arguments:[NSArray arrayWithObjects:credential, _originalAuthenticationChallenge, nil]];
+		NSInvocation *useCredentialInvocation = [NSInvocation invocationWithSelector:_cmd
+																			  target:[_originalAuthenticationChallenge sender]
+																		   arguments:[NSArray arrayWithObjects:credential, _originalAuthenticationChallenge, nil]];
 		[useCredentialInvocation retainArguments];
 		[useCredentialInvocation performSelector:@selector(invoke) onThread:_authenticationThread withObject:nil waitUntilDone:NO];
-        [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-        [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
-        [_authenticationThread release];            _authenticationThread = nil;
+		
+        [_currentAuthenticationChallenge release];
+		_currentAuthenticationChallenge = nil;
+		
+        [_originalAuthenticationChallenge release]; 
+		_originalAuthenticationChallenge = nil;
+		
+        [_authenticationThread release];
+		_authenticationThread = nil;
     }
 }
 
@@ -263,9 +265,14 @@
 																	withObject:_originalAuthenticationChallenge
 																 waitUntilDone:NO];
         
-        [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-        [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
-        [_authenticationThread release];            _authenticationThread = nil;
+        [_currentAuthenticationChallenge release];
+		_currentAuthenticationChallenge = nil;
+		
+        [_originalAuthenticationChallenge release]; 
+		_originalAuthenticationChallenge = nil;
+		
+        [_authenticationThread release];
+		_authenticationThread = nil;
     }
 }
 
@@ -282,9 +289,14 @@
 																	withObject:_originalAuthenticationChallenge
 																 waitUntilDone:NO];
         
-        [_currentAuthenticationChallenge release];  _currentAuthenticationChallenge = nil;
-        [_originalAuthenticationChallenge release]; _originalAuthenticationChallenge = nil;
-        [_authenticationThread release];            _authenticationThread = nil;
+        [_currentAuthenticationChallenge release];
+		_currentAuthenticationChallenge = nil;
+		
+        [_originalAuthenticationChallenge release]; 
+		_originalAuthenticationChallenge = nil;
+		
+        [_authenticationThread release];
+		_authenticationThread = nil;
     }
 }
 

@@ -3729,6 +3729,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     
     
     [_lastAuthenticationChallenge release];
+	_lastAuthenticationChallenge = nil;
     
     NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
                                                                                   port:[self port]
@@ -3756,7 +3757,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
  */
 - (void)sendPassword
 {
-    NSString *password = [[[self currentAuthenticationCredential] password] copy];
+    NSString *password = [NSString stringWithString:[[self currentAuthenticationCredential] password]];
     NSAssert(password, @"Somehow a password-less credential has entered the FTP system");
     
     // Dispose of the credentials once the password has been sent
@@ -3764,7 +3765,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
        
     [self sendCommand:[CKFTPCommand commandWithCode:@"PASS" argumentField:password]];
     [self setState:CKConnectionSentPasswordState];
-    [password release];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
