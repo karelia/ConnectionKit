@@ -14,15 +14,6 @@
 #import "NSURL+Connection.h"
 #import "CKSFTPConnection.h"
 
-
-@interface CKConnectionClient (Private)
-- (NSURLAuthenticationChallenge *)_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge;
-@end
-
-
-#pragma mark -
-
-
 @implementation CKConnectionClient
 
 - (id)initWithConnection:(CKAbstractConnection *)connection
@@ -118,99 +109,6 @@
 
 #pragma mark -
 #pragma mark Authentication
-
-- (void)connectionDidReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)originalChallenge;
-{
-    // For now, CKConnection client only supports one challenge at a time
-    NSAssert(!_currentAuthenticationChallenge && !_originalAuthenticationChallenge && !_authenticationThread,
-             @"CKConnectionClient only supports a single authentication challenge at a time");
-    
-    
-    // Fill in any gaps in the challenge
-    NSURLAuthenticationChallenge *fullChallenge = [self _fullAuthenticationChallengeForChallenge:originalChallenge];
-    
-    
-    // Does the delegate support this? If not, handle it ourselves
-    if (_flags.authorizeConnection)
-    {
-        _currentAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:fullChallenge sender:self];
-        _originalAuthenticationChallenge = [originalChallenge retain];
-        _authenticationThread = [[NSThread currentThread] retain];
-        
-        [_forwarder connection:[self connection] didReceiveAuthenticationChallenge:_currentAuthenticationChallenge];
-    }
-    else
-    {
-        NSURLCredential *credential = [fullChallenge proposedCredential];
-		
-		BOOL hasPublicKeyForAuthentication = (([[[self connection] class] protocol] == CKSFTPProtocol) && [[[self connection] request] SFTPPublicKeyPath]);
-		BOOL hasPasswordOrPublicKey = ([credential hasPassword] || hasPublicKeyForAuthentication);
-		
-        if ([credential user] && hasPasswordOrPublicKey && [originalChallenge previousFailureCount] == 0)
-        {
-            [[originalChallenge sender] useCredential:credential forAuthenticationChallenge:originalChallenge];
-        }
-        else
-        {
-            [[originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:originalChallenge];
-        }
-    }
-}
-
-/*  Support method for filling an NSURLAuthenticationChallenge object. If no credential was supplied,
- *  looks for one from the connection's URL, and then falls back to using NSURLCredentialStorage.
- */
-- (NSURLAuthenticationChallenge *)_fullAuthenticationChallengeForChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    NSURLCredential *credential = [challenge proposedCredential];
-	if (credential)
-		return challenge;
-
-	NSURL *connectionURL = [[[self connection] request] URL];
-	
-	NSString *user = [connectionURL user];
-	if (user)
-	{
-		NSString *password = [connectionURL originalUnescapedPassword];
-		if (password)
-		{
-			credential = [[[NSURLCredential alloc] initWithUser:user password:password persistence:NSURLCredentialPersistenceNone] autorelease];
-		}
-		else
-		{
-			credential = [[[NSURLCredentialStorage sharedCredentialStorage] credentialsForProtectionSpace:[challenge protectionSpace]] objectForKey:user];
-			if (!credential)
-			{
-				credential = [[[NSURLCredential alloc] initWithUser:user password:nil persistence:NSURLCredentialPersistenceNone] autorelease];
-			}
-		}
-	}
-	else
-	{
-		credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:[challenge protectionSpace]];
-	}
-	
-	if (!credential)
-		return challenge;
-	
-	NSURLAuthenticationChallenge *fullChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace] 
-																							 proposedCredential:credential
-																						   previousFailureCount:[challenge previousFailureCount]
-																								failureResponse:[challenge failureResponse]
-																										  error:[challenge error]
-																										 sender:[challenge sender]];
-	
-	return [fullChallenge autorelease];
-}
-
-- (void)connectionDidCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (_flags.cancelAuthorization)
-    {
-        [_forwarder connection:[self connection] didCancelAuthenticationChallenge:challenge];
-    }
-}
-
 - (NSString *)passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath
 {
     NSString *result = nil;
@@ -233,71 +131,6 @@
     }
     
     return result;
-}
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _currentAuthenticationChallenge)
-    {
-		NSInvocation *useCredentialInvocation = [NSInvocation invocationWithSelector:_cmd
-																			  target:[_originalAuthenticationChallenge sender]
-																		   arguments:[NSArray arrayWithObjects:credential, _originalAuthenticationChallenge, nil]];
-		[useCredentialInvocation retainArguments];
-		[useCredentialInvocation performSelector:@selector(invoke) onThread:_authenticationThread withObject:nil waitUntilDone:NO];
-		
-        [_currentAuthenticationChallenge release];
-		_currentAuthenticationChallenge = nil;
-		
-        [_originalAuthenticationChallenge release]; 
-		_originalAuthenticationChallenge = nil;
-		
-        [_authenticationThread release];
-		_authenticationThread = nil;
-    }
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _currentAuthenticationChallenge)
-    {
-		[(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-																	  onThread:_authenticationThread
-																	withObject:_originalAuthenticationChallenge
-																 waitUntilDone:NO];
-        
-        [_currentAuthenticationChallenge release];
-		_currentAuthenticationChallenge = nil;
-		
-        [_originalAuthenticationChallenge release]; 
-		_originalAuthenticationChallenge = nil;
-		
-        [_authenticationThread release];
-		_authenticationThread = nil;
-    }
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _currentAuthenticationChallenge)
-    {
-        // All CKConnections should behave like this for now
-        [[self connection] forceDisconnect];
-        
-        // Forward the message on to the original sender
-		[(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
-																	  onThread:_authenticationThread
-																	withObject:_originalAuthenticationChallenge
-																 waitUntilDone:NO];
-        
-        [_currentAuthenticationChallenge release];
-		_currentAuthenticationChallenge = nil;
-		
-        [_originalAuthenticationChallenge release]; 
-		_originalAuthenticationChallenge = nil;
-		
-        [_authenticationThread release];
-		_authenticationThread = nil;
-    }
 }
 
 #pragma mark -

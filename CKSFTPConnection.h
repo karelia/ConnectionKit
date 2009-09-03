@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 #import "CKStreamBasedConnection.h"
 
-extern NSString *SFTPErrorDomain;
+extern NSString *CKSFTPErrorDomain;
 
 @class CKSFTPTServer, CKInternalTransferRecord;
 
@@ -24,10 +24,6 @@ extern NSString *SFTPErrorDomain;
 	NSMutableArray *attemptedKeychainPublicKeyAuthentications;
 	NSMutableArray *connectToQueue;
 	NSTimer *_connectTimeoutTimer;
-
-@private
-    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
-    NSString                        *_currentPassword;
 }
 
 - (int)masterProxy;

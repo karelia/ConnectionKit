@@ -57,13 +57,11 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKFTPConnection.h>
 #import <Connection/CKSFTPConnection.h>
 #import <Connection/CKFileConnection.h>
-#import <Connection/CKDotMacConnection.h>
 
 #import <Connection/CKDirectoryListingItem.h>
 
 #import <Connection/KTLog.h>
 
-#import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
 
 #import <Connection/NSData+Connection.h>
@@ -74,12 +72,8 @@ typedef unsigned int   NSUInteger;
 #import <Connection/NSNumber+Connection.h>
 #import <Connection/NSURL+Connection.h>
 
-#import <Connection/CKTransferController.h>
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
-#import <Connection/CKDirectoryTreeController.h>
-#import <Connection/CKDirectoryNode.h>
-#import <Connection/CKTableBasedBrowser.h>
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>

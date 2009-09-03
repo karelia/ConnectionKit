@@ -27,9 +27,12 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Connection/CKHost.h>
-#import <Connection/Connection.h>
+#import "CKHost.h"
 #import "EMKeychainProxy.h"
+#import "CKBookmarkStorage.h"
+#import "CKConnectionRegistry.h"
+
+#import "NSString+Connection.h"
 
 NSString *CKHostChanged = @"CKHostChanged";
 static NSImage *sHostIcon = nil;

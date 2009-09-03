@@ -17,7 +17,7 @@
 #import "EMKeychainProxy.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol.h"
-#import "CKURLProtectionSpace.h"
+#import "NSURL+Connection.h"
 
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
@@ -51,8 +51,9 @@
 @end
 
 
-@interface CKSFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
-- (void)_sendAuthenticationChallenge;
+@interface CKSFTPConnection (Authentication)
+//! @abstract Sends the username if we can possibly authenticate. If authentication has been attempted before, fails.
+- (void)_authenticateConnection;
 @end
 
 
@@ -61,7 +62,7 @@
 
 @implementation CKSFTPConnection
 
-NSString *SFTPErrorDomain = @"SFTPErrorDomain";
+NSString *CKSFTPErrorDomain = @"CKSFTPErrorDomain";
 static NSString *lsform = nil;
 
 #pragma mark -
@@ -131,8 +132,6 @@ static NSString *lsform = nil;
 	[currentDirectory release];
 	[rootDirectory release];
 	[attemptedKeychainPublicKeyAuthentications release];
-    [_lastAuthenticationChallenge release];
-    [_currentPassword release];
 	
 	[super dealloc];
 }
@@ -163,7 +162,7 @@ static NSString *lsform = nil;
 	_isConnecting = YES;
 	
     // Can't connect till we have a password (due to using the SFTP command-line tool)
-    [self _sendAuthenticationChallenge];
+    [self _authenticateConnection];
 }
 
 /*  Support method. Called once the delegate has provided a username to connect with
@@ -193,7 +192,8 @@ static NSString *lsform = nil;
     }
     
     // Authentication
-	if (_currentPassword && [_currentPassword length] > 0)
+	NSString *password = [[[self request] URL] originalUnescapedPassword];
+	if (password && [password length] > 0)
     {
 		[parameters addObject:@"-o PubkeyAuthentication=no"];
     }
@@ -485,7 +485,7 @@ static NSString *lsform = nil;
         NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
                                   LocalizedStringInConnectionKitBundle(@"Local File already exists", @"FTP download error"), NSLocalizedDescriptionKey,
                                   remotePath, NSFilePathErrorKey, nil];
-        NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
+        NSError *error = [NSError errorWithDomain:CKSFTPErrorDomain code:FTPDownloadFileExists userInfo:userInfo];
         [[self client] connectionDidReceiveError:error];
 		
 		return nil;
@@ -682,7 +682,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
 	[[self client] connectionDidChangeToDirectory:path error:error];	
@@ -699,7 +699,7 @@ static NSString *lsform = nil;
 	{
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Create directory operation failed", @"Create directory operation failed");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, path, NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];
 	}
 	
 	[[self client] connectionDidCreateDirectory:path error:error];
@@ -718,7 +718,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, fromPath, @"fromPath", toPath, @"toPath", nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];		
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];		
 	}
 	
 	[fromPath retain];
@@ -742,7 +742,7 @@ static NSString *lsform = nil;
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  localizedDescription, NSLocalizedDescriptionKey, 
 								  [self currentPermissionChange], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
 	[[self client] connectionDidSetPermissionsForFile:[self currentPermissionChange] error:error];
@@ -758,7 +758,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [self currentDeletion], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
 	[[self client] connectionDidDeleteFile:[self currentDeletion] error:error];
@@ -774,7 +774,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [self currentDeletion], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
 	[[self client] connectionDidDeleteDirectory:[self currentDeletion] error:error];
@@ -791,7 +791,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentUpload] remotePath], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
 	CKInternalTransferRecord *upload = [[self currentUpload] retain]; 
@@ -816,7 +816,7 @@ static NSString *lsform = nil;
 		if ([errorResponse containsSubstring:@"permission"]) //Permission issue
 			localizedDescription = LocalizedStringInConnectionKitBundle(@"Permission Denied", @"Permission Denied");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, [[self currentDownload] remotePath], NSFilePathErrorKey, nil];
-		error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];				
+		error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];				
 	}
 	
 	CKInternalTransferRecord *download = [[self currentDownload] retain]; 
@@ -872,7 +872,7 @@ static NSString *lsform = nil;
                               localizedDescription, NSLocalizedDescriptionKey, 
                               [[[self request] URL] host], ConnectionHostKey, nil];
     
-    NSError *error = [NSError errorWithDomain:SFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
+    NSError *error = [NSError errorWithDomain:CKSFTPErrorDomain code:StreamErrorTimedOut userInfo:userInfo];
     [[self client] connectionDidConnectToHost:[[[self request] URL] host] error:error];
 }
 
@@ -1001,10 +1001,11 @@ static NSString *lsform = nil;
 
 - (void)requestPasswordWithPrompt:(char *)header
 {
-	if (_currentPassword)
+	NSString *password = [[[self request] URL] originalUnescapedPassword];
+	if (password)
     {
         // Send the password to the server
-        CKConnectionCommand *command = [CKConnectionCommand command:_currentPassword
+        CKConnectionCommand *command = [CKConnectionCommand command:password
 													     awaitState:CKConnectionIdleState
 													      sentState:CKConnectionSentPasswordState
 													      dependant:nil
@@ -1012,13 +1013,11 @@ static NSString *lsform = nil;
 		[self pushCommandOnHistoryQueue:command];
 		_state = [command sentState];
 		[self sendCommand:[command command]];
-
-		[_currentPassword release]; _currentPassword = nil;
     }
     else
 	{
-		// Request a new password from the delegate
-        [self _sendAuthenticationChallenge];
+		//We're being asked for a password, and we don't have one. That means we were supposed to authenticate via public key and we failed. Calling _authenticateConnection will fail us appropriately since _hasAttemptedAuthentication is YES.
+        [self _authenticateConnection];
 	}
 }
 
@@ -1087,7 +1086,8 @@ static NSString *lsform = nil;
 
 - (void)passwordErrorOccurred
 {
-	[self continueWithoutCredentialForAuthenticationChallenge:_lastAuthenticationChallenge];
+	//_hasAttemptedAuthentication is yes, so this will fail.
+	[self _authenticateConnection];
 }
 
 @end
@@ -1099,62 +1099,26 @@ static NSString *lsform = nil;
 
 @implementation CKSFTPConnection (Authentication)
 
-- (void)_sendAuthenticationChallenge
+- (void)_authenticateConnection
 {
-    NSInteger previousFailureCount = (_lastAuthenticationChallenge) ? [_lastAuthenticationChallenge previousFailureCount] + 1 : 0;
-    
-    NSURLProtectionSpace *protectionSpace = [[CKURLProtectionSpace alloc] initWithHost:[[[self request] URL] host]
-                                                                                  port:[self port]
-                                                                              protocol:@"ssh"
-                                                                                 realm:nil
-                                                                  authenticationMethod:NSURLAuthenticationMethodDefault];
-    
-    _lastAuthenticationChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:protectionSpace
-                                                                              proposedCredential:nil
-                                                                            previousFailureCount:previousFailureCount
-                                                                                 failureResponse:nil
-                                                                                           error:nil
-                                                                                          sender:self];
-    
-    [protectionSpace release];
-	
-    [[self client] connectionDidReceiveAuthenticationChallenge:_lastAuthenticationChallenge];
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _lastAuthenticationChallenge)
-    {
-        [self disconnect];
-    }
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    // SFTP absolutely requires authentication to continue, so fail with an error
-    if (challenge == _lastAuthenticationChallenge)
-    {
+	//If we've already attempted authentication, our we don't have a user, fail.
+	BOOL canAttemptAuthentication = (!_hasAttemptedAuthentication && [[[self request] URL] user] );
+	if (!canAttemptAuthentication)
+	{
+		//Authentication information is wrong. Send an error and disconnect.
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
+		NSError *error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];
+		[[self client] connectionDidOpenAtPath:nil error:error];
+		
 		[self disconnect];
-		[[self client] connectionDidCancelAuthenticationChallenge:challenge];
-    }
-}
-
-/*  Start login
- */
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge == _lastAuthenticationChallenge)
-    {
-		//Unlike other connections, we can still connect without a password if we have a public key.
-		if ([credential hasPassword])
-		{
-			// Store the password ready for after we've connected
-			_currentPassword = [[credential password] copy];
-		}
-        
-        // Start login with the supplied username
-        [self connectWithUsername:[credential user]];
-    }
+		
+		return;		
+	}
+	
+	//We only do this once before disconnecting.
+	_hasAttemptedAuthentication = YES;
+	
+	[self connectWithUsername:[[[self request] URL] user]];
 }
 
 @end

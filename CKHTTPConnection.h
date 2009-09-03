@@ -31,18 +31,12 @@
 
 @class CKHTTPRequest, CKHTTPResponse;
 
-@interface CKHTTPConnection : CKStreamBasedConnection <NSURLAuthenticationChallengeSender>
+@interface CKHTTPConnection : CKStreamBasedConnection
 {
 	id				myCurrentRequest;
 	NSMutableData	*myResponseBuffer;
 	
-	// Authentication
-	NSURLAuthenticationChallenge	*_currentAuthenticationChallenge;	// General
-    NSInteger						_authenticationFailureCount;
-	
 	NSString	*_basicAccessAuthorizationHeader;                       // HTTP basic
-	
-	NSURLCredential *_currentCredential;
 	CFHTTPAuthenticationRef _currentAuth;
 	
 	
@@ -71,6 +65,5 @@
 
 
 @interface CKHTTPConnection (SubclassSupport)
-- (void)authenticateConnectionWithMethod:(NSString *)authenticationMethod;
-- (NSURLCredential *)proposedCredential;
+- (void)_authenticateConnectionWithMethod:(NSString *)authenticationMethod;
 @end

@@ -547,7 +547,7 @@ char **environ;
 			if (!didParseSuccessfully)
 			{
 				NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"Directory Parsing Error", @"Error parsing directory listing"), NSLocalizedDescriptionKey, nil];
-				error = [NSError errorWithDomain:SFTPErrorDomain code:0 userInfo:userInfo];
+				error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];
 			}
 			
 			[sftpWrapperConnection didReceiveDirectoryContents:directoryContents error:error];
