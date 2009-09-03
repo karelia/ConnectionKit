@@ -173,7 +173,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		NSAssert(validData, @"Authorization request that CKResponse could handle, but CFMessage could not");
 		
 		NSURL *baseURL = [[self request] URL];
-		NSURL *URL = [NSURL URLWithString:[[myCurrentRequest uri] encodeLegally] relativeToURL:baseURL];
+		NSURL *URL = [NSURL URLWithString:[[myCurrentRequest uri] encodeLegallyForURI] relativeToURL:baseURL];
 		CFURLRef absoluteURL = (CFURLRef)[URL absoluteURL];
 		_CFHTTPMessageSetResponseURL(saneResponse, absoluteURL);	//bug in CFHTTPMessage requires this to be used when working with CFHTTPMessageCreateEmpty
 		

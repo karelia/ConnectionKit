@@ -74,8 +74,8 @@
 			url = [NSURL URLWithString:[NSString stringWithFormat:@"http://%@%@", [self headerForKey:@"Host"], href]];
 		NSString *path = [url path];
 		
-		NSString *standardizedPathForComparison = [path stringByStandardizingHTTPPath];
-		NSString *standardizedCurrentPathForComparison = [[self path] stringByStandardizingHTTPPath];		
+		NSString *standardizedPathForComparison = [path stringByStandardizingPathWithLeadingSlash];
+		NSString *standardizedCurrentPathForComparison = [[self path] stringByStandardizingPathWithLeadingSlash];		
 		if ([path isEqualToString:@"/"] || [standardizedPathForComparison isEqualToString:standardizedCurrentPathForComparison])
 			continue;
 		

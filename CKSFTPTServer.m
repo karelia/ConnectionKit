@@ -329,7 +329,7 @@ char **environ;
 
 - (oneway void)connectToServerWithArguments:(NSArray *)arguments forWrapperConnection:(CKSFTPConnection *)sftpWrapperConnection
 {
-	NSString *sftpBinaryPath = [NSString pathForExecutable:@"sftp"];
+	NSString *sftpBinaryPath = [@"/usr/bin" stringByAppendingPathComponent:@"sftp"];
 	if (!sftpBinaryPath)
 	{
 		NSLog(@"Could Not Find SFTP Binary Path");

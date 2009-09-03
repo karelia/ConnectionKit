@@ -555,8 +555,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 	NSAssert(fromPath && ![fromPath isEqualToString:@""], @"fromPath is nil!");
     NSAssert(toPath && ![toPath isEqualToString:@""], @"toPath is nil!");
 	
-	fromPath = [fromPath stringByStandardizingHTTPPath];
-	toPath = [toPath stringByStandardizingHTTPPath];
+	fromPath = [fromPath stringByStandardizingPathWithLeadingSlash];
+	toPath = [toPath stringByStandardizingPathWithLeadingSlash];
 	
 	CKHTTPRequest *req = [CKHTTPRequest requestWithMethod:@"MOVE" uri:fromPath];
 	

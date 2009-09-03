@@ -45,9 +45,8 @@ static NSImage *sHostIcon = nil;
 
 @implementation CKHost
 
-- (NSString *)UUID { return _UUID; }
-
 - (NSString *)uuid { return _UUID; }
+- (NSString *)UUID { return _UUID; }
 - (NSString *)host { return _host; }
 - (NSString *)port { return _port; }
 - (NSString *)username { return _username; }
@@ -76,7 +75,7 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		_UUID = [[NSString uuid] retain];
+		_UUID = [[NSString UUID] retain];
 		_connectionProtocol = CKFTPProtocol;
 		_host = @"";
 		_username = @"";
@@ -141,12 +140,13 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		(void) [[dictionary objectForKey:@"version"] intValue];
-#pragma unused (version)
-		_UUID = [[dictionary objectForKey:@"uuid"] copy];
+		_UUID = [[dictionary objectForKey:@"UUID"] copy];
 		if (!_UUID)
 		{
-			_UUID = [[NSString uuid] retain];
+			//Legacy support -- it was previously encoded as lower case.
+			_UUID = [[dictionary objectForKey:@"uuid"] copy];
+			if (!_UUID)
+				_UUID = [[NSString UUID] retain];
 		}
 		_host = [[dictionary objectForKey:@"host"] copy];
 		_port = [[dictionary objectForKey:@"port"] copy];
@@ -154,15 +154,16 @@ static NSImage *sHostIcon = nil;
 		_connectionProtocol = [[dictionary objectForKey:@"protocol"] intValue];
 		_description = [[dictionary objectForKey:@"description"] copy];
 		_initialPath = [[dictionary objectForKey:@"initialPath"] copy];
+		
 		if (!_initialPath)
-		{
 			_initialPath = @"";
-		}
+		
 		NSData *data = [dictionary objectForKey:@"icon"];
 		if (data)
 			_icon = [[NSImage alloc] initWithData:data];
 		else
 			_icon = [sHostIcon retain];
+		
 		NSDictionary *props = [dictionary objectForKey:@"properties"];
 		_properties = [[NSMutableDictionary alloc] init];
 		if (props)
@@ -177,7 +178,7 @@ static NSImage *sHostIcon = nil;
 	
 	[plist setObject:@"host" forKey:@"class"];
 	[plist setObject:[NSNumber numberWithInt:[CKHost version]] forKey:@"version"];
-	[plist setObject:_UUID forKey:@"uuid"];
+	[plist setObject:_UUID forKey:@"UUID"];
 	[plist setObject:[NSNumber numberWithInt:_connectionProtocol] forKey:@"protocol"];
 
 	if (_host)
@@ -202,12 +203,13 @@ static NSImage *sHostIcon = nil;
 {
 	if ((self = [super init]))
 	{
-		(void) [coder decodeIntForKey:@"version"];
-#pragma unused (version)
-		_UUID = [[coder decodeObjectForKey:@"uuid"] copy];
+		_UUID = [[coder decodeObjectForKey:@"UUID"] copy];
 		if (!_UUID)
 		{
-			_UUID = [[NSString uuid] retain];
+			//Legacy support -- it was previously encoded as lower case.
+			_UUID = [[coder decodeObjectForKey:@"uuid"] copy];
+			if (!_UUID)
+				_UUID = [[NSString UUID] retain];
 		}
 		_host = [[coder decodeObjectForKey:@"host"] copy];
 		_port = [[coder decodeObjectForKey:@"port"] copy];
@@ -233,7 +235,7 @@ static NSImage *sHostIcon = nil;
 - (void)encodeWithCoder:(NSCoder *)coder
 {
 	[coder encodeInt:[CKHost version] forKey:@"version"];
-	[coder encodeObject:_UUID forKey:@"uuid"];
+	[coder encodeObject:_UUID forKey:@"UUID"];
 	[coder encodeObject:_host forKey:@"host"];
 	[coder encodeObject:_port forKey:@"port"];
 	[coder encodeObject:_username forKey:@"username"];

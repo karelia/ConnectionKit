@@ -40,7 +40,7 @@
 		path = [NSString stringWithFormat:@"/%@", path];
 	}
 	
-	return [[[CKDAVDeleteRequest alloc] initWithMethod:nil uri:[path encodeLegally]] autorelease];
+	return [[[CKDAVDeleteRequest alloc] initWithMethod:nil uri:[path encodeLegallyForURI]] autorelease];
 }
 
 - (id)initWithMethod:(NSString *)method uri:(NSString *)uri

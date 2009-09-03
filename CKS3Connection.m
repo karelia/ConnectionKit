@@ -164,7 +164,7 @@ NSString *S3PathSeparator = @":";
 	{
 		uri = [uri substringToIndex:r.location];
 	}
-	[auth appendString:[uri encodeLegally]];
+	[auth appendString:[uri encodeLegallyForURI]];
 	
 	NSString *sha1 = [[[auth dataUsingEncoding:NSUTF8StringEncoding] sha1HMacWithKey:password] base64Encoding];
 	[request setHeader:[NSString stringWithFormat:@"AWS %@:%@", username, sha1] forKey:@"Authorization"];
@@ -370,7 +370,7 @@ NSString *S3PathSeparator = @":";
 					NSString *markerString = [NSString stringWithFormat:@"&marker=%@", lastKeyName]; //& because we always have a delimiter.
 					
 					NSString *uri = [NSString stringWithFormat:@"/%@%@%@%@", bucketName, prefixString, delimiterString, markerString];
-					CKHTTPRequest *request = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
+					CKHTTPRequest *request = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForAmazonS3URI]];
 					[myCurrentRequest autorelease];
 					myCurrentRequest = request;
 					[self sendCommand:request];					
@@ -691,7 +691,7 @@ NSString *S3PathSeparator = @":";
 		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
 	}
 		
-	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:[dirPath encodeLegallyForS3]];
+	CKHTTPRequest *req = [[CKHTTPRequest alloc] initWithMethod:@"PUT" uri:[dirPath encodeLegallyForAmazonS3URI]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionCreateDirectoryState
@@ -720,14 +720,14 @@ NSString *S3PathSeparator = @":";
 	 Worth noting, if you're intending on renaming a directory, you must call -recursivelyRenameS3Directory:to: which is implemented and handled by CKAbstractQueueConnection. You need to do this because renaming a directory in the fashion this method implements will not bring the directory's children over with it. You have been warned!
 	 */
 	
-	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:[toPath encodeLegallyForS3]];
-	[copyRequest setHeader:[fromPath encodeLegallyForS3] forKey:@"x-amz-copy-source"];
+	CKHTTPRequest *copyRequest = [CKHTTPRequest requestWithMethod:@"PUT" uri:[toPath encodeLegallyForAmazonS3URI]];
+	[copyRequest setHeader:[fromPath encodeLegallyForAmazonS3URI] forKey:@"x-amz-copy-source"];
 	CKConnectionCommand *copyCommand = [CKConnectionCommand command:copyRequest
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionRenameFromState
 											  dependant:nil
 											   userInfo:nil];
-	CKHTTPRequest *deleteRequest = [CKHTTPRequest requestWithMethod:@"DELETE" uri:[fromPath encodeLegallyForS3]];
+	CKHTTPRequest *deleteRequest = [CKHTTPRequest requestWithMethod:@"DELETE" uri:[fromPath encodeLegallyForAmazonS3URI]];
 	CKConnectionCommand *deleteCommand = [CKConnectionCommand command:deleteRequest
 													   awaitState:CKConnectionRenameToState
 														sentState:CKConnectionAwaitingRenameState
@@ -744,7 +744,7 @@ NSString *S3PathSeparator = @":";
 	NSAssert(path && ![path isEqualToString:@""], @"path is nil!");
 		
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[[self fixPathToBeFilePath:path] encodeLegallyForS3]] autorelease];
+															uri:[[self fixPathToBeFilePath:path] encodeLegallyForAmazonS3URI]] autorelease];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDeleteFileState
@@ -759,7 +759,7 @@ NSString *S3PathSeparator = @":";
 	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"dirPath is nil!");
 	
 	CKHTTPRequest *req = [[[CKHTTPRequest alloc] initWithMethod:@"DELETE" 
-															uri:[[self fixPathToBeDirectoryPath:dirPath] encodeLegallyForS3]] autorelease];
+															uri:[[self fixPathToBeDirectoryPath:dirPath] encodeLegallyForAmazonS3URI]] autorelease];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionDeleteDirectoryState
@@ -780,7 +780,7 @@ NSString *S3PathSeparator = @":";
 																   size:[[NSFileManager defaultManager] sizeOfPath:localPath] 
 															isDirectory:NO];
 	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithContentsOfFile:localPath 
-																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForS3]];
+																	   uri:[[self fixPathToBeFilePath:remotePath] encodeLegallyForAmazonS3URI]];
 	[req setHeader:@"public-read" forKey:@"x-amz-acl"];
 	
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
@@ -804,7 +804,7 @@ NSString *S3PathSeparator = @":";
 - (void)uploadFromData:(NSData *)data toFile:(NSString *)remotePath
 {
 	remotePath = [self fixPathToBeFilePath:remotePath];
-	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:[remotePath encodeLegallyForS3]];
+	CKHTTPPutRequest *req = [CKHTTPPutRequest putRequestWithData:data filename:[remotePath lastPathComponent] uri:[remotePath encodeLegallyForAmazonS3URI]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:req
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionUploadingFileState
@@ -891,7 +891,7 @@ NSString *S3PathSeparator = @":";
 		delimiterString = [@"&" stringByAppendingString:delimiterString];
 
 	NSString *uri = [NSString stringWithFormat:@"/%@%@%@", bucketName, prefixString, delimiterString];
-	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForS3]];
+	CKHTTPRequest *r = [[CKHTTPRequest alloc] initWithMethod:@"GET" uri:[uri encodeLegallyForAmazonS3URI]];
 	[myCurrentRequest autorelease];
 	myCurrentRequest = r;
 	[self sendCommand:r];
