@@ -123,7 +123,7 @@
 }
 
 #pragma mark -
-#pragma mark Instance Methods
+#pragma mark Encoding
 - (NSString *)encodeLegallyForURL
 {
 	NSString *result = (NSString *)CFURLCreateStringByAddingPercentEscapes(NULL, 
@@ -153,6 +153,7 @@
 }
 
 #pragma mark -
+#pragma mark Convenience Methods
 
 - (BOOL)containsSubstring:(NSString *)substring
 {
@@ -195,6 +196,7 @@
 	return [result stringByStandardizingPath];
 }
 
+#pragma mark -
 #pragma mark URL Cooperation
 - (NSString *)stringByStandardizingURLComponents
 {
