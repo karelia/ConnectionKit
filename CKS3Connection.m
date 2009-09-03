@@ -948,6 +948,19 @@ NSString *S3PathSeparator = @":";
 	[myCurrentDirectory release];
 	myCurrentDirectory = [[NSString alloc] initWithString:@"/"];
 	
+	BOOL canAttemptAuthentication = (!_hasAttemptedAuthentication && [[[self request] URL] user] && [[[self request] URL] originalUnescapedPassword]);
+	if (!canAttemptAuthentication)
+	{
+		//Authentication information is wrong. Send an error and disconnect.
+		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
+		NSError *error = [NSError errorWithDomain:S3ErrorDomain code:0 userInfo:userInfo];
+		[[self client] connectionDidOpenAtPath:nil error:error];
+		
+		[self disconnect];
+		
+		return;
+	}	
+	
 	_hasAttemptedAuthentication = YES;
 	[super threadedConnect];
 }
