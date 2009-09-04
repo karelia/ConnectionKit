@@ -125,7 +125,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 {
 	//Reset Digest Authentication
 	[super threadedConnect];
-	[[self client] connectionDidOpenAtPath:@"/" error:nil];
+	[[self client] connectionDidOpenAtPath:@"/" authenticated:NO error:nil];
 	[self setState:CKConnectionIdleState];
 }
 
@@ -415,7 +415,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		//Authentication information is wrong. Send an error and disconnect.
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
 		NSError *error = [NSError errorWithDomain:CKHTTPConnectionErrorDomain code:0 userInfo:userInfo];
-		[[self client] connectionDidOpenAtPath:nil error:error];
+		[[self client] connectionDidOpenAtPath:nil authenticated:NO error:error];
 		
 		[self disconnect];
 		

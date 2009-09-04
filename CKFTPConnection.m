@@ -719,7 +719,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	if (connectionJustOpened)
-		[[self client] connectionDidOpenAtPath:path error:error];
+		[[self client] connectionDidOpenAtPath:path authenticated:YES error:error];
 	else
 		[[self client] connectionDidChangeToDirectory:path error:error];
 }
@@ -3704,7 +3704,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		//Authentication information is wrong. Send an error and disconnect.
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
 		NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:0 userInfo:userInfo];
-		[[self client] connectionDidOpenAtPath:nil error:error];
+		[[self client] connectionDidOpenAtPath:nil authenticated:NO error:error];
 		
 		[self disconnect];
 		

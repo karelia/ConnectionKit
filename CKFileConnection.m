@@ -137,7 +137,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[[self client] appendLine:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	
 	[self setState:CKConnectionIdleState];
-	[[self client] connectionDidOpenAtPath:[self currentDirectory] error:nil];
+	[[self client] connectionDidOpenAtPath:[self currentDirectory] authenticated:YES error:nil];
 }
 
 - (void)threadedAbort

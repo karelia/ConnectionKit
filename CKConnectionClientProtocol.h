@@ -35,7 +35,7 @@
 
 #pragma mark Other
 
-- (void)connectionDidOpenAtPath:(NSString *)dirPath error:(NSError *)error;
+- (void)connectionDidOpenAtPath:(NSString *)dirPath authenticated:(BOOL)didAuthenticate error:(NSError *)error;
 - (void)connectionDidCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connectionDidDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connectionDidDeleteFile:(NSString *)path error:(NSError *)error;

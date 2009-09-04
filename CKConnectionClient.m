@@ -50,7 +50,7 @@
 	_flags.permissions						= [del respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)];
 	_flags.cancel							= [del respondsToSelector:@selector(connectionDidCancelTransfer:)];
 	_flags.didCancel						= [del respondsToSelector:@selector(connection:didCancelTransfer:)];
-	_flags.openAtPath						= [del respondsToSelector:@selector(connection:didOpenAtPath:error:)];
+	_flags.openAtPath						= [del respondsToSelector:@selector(connection:didOpenAtPath:authenticated:error:)];
 	_flags.changeDirectory					= [del respondsToSelector:@selector(connection:didChangeToDirectory:error:)];
 	_flags.createDirectory					= [del respondsToSelector:@selector(connection:didCreateDirectory:error:)];
 	_flags.deleteDirectory					= [del respondsToSelector:@selector(connection:didDeleteDirectory:error:)];
@@ -168,10 +168,10 @@
 #pragma mark -
 #pragma mark Other
 
-- (void)connectionDidOpenAtPath:(NSString *)dirPath error:(NSError *)error
+- (void)connectionDidOpenAtPath:(NSString *)dirPath authenticated:(BOOL)didAuthenticate error:(NSError *)error
 {
 	if (_flags.openAtPath)
-		[_forwarder connection:[self connection] didOpenAtPath:dirPath error:error];
+		[_forwarder connection:[self connection] didOpenAtPath:dirPath authenticated:didAuthenticate error:error];
 }
 
 - (void)connectionDidCreateDirectory:(NSString *)dirPath error:(NSError *)error

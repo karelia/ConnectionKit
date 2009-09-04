@@ -269,13 +269,15 @@ typedef enum
 #pragma mark Connecting / Disconnecting
 - (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
 /*!
-	@method connection:didOpenAtPath:error:
+	@method connection:didOpenAtPath:authenticated:error:
 	@abstract Indicates the connection has successfully opened at the given path.
 	@param con The connection which opened.
 	@param dirPath The directory the connection opened in. On HTTP-based connections, this is nil.
+	@param didAuthenticate NO if the connection's username and/or password were rejected. YES, otherwise.
 	@param error An error if the connection failed to open. Nil if the connection opened successfully.
+	@discussion Note that on HTTP connections (WebDAV, S3) we immediately send didOpenAtPath:, before the first request is even sent. If the first request fails to authenticate, it is sent again with didAuthenticate = NO.
  */
-- (void)connection:(id <CKConnection>)con didOpenAtPath:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKConnection>)con didOpenAtPath:(NSString *)dirPath authenticated:(BOOL)didAuthenticate error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
 
 #pragma mark Authentication
