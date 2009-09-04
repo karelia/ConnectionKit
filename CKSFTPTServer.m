@@ -57,10 +57,64 @@ char **environ;
 }
 
 #pragma mark -
-#pragma mark Actions
+#pragma mark Misc.
 - (void)forceDisconnect
 {
 	cancelflag = YES;
+}
+
++ (SFTPListingForm)SFTPListingForm
+{
+	//Ensure we have the binary to talk to.
+	NSString *SSHBinaryPath = @"/usr/bin/ssh";
+	if (![[NSFileManager defaultManager] fileExistsAtPath:SSHBinaryPath])
+		return SFTPListingUnsupported;
+	
+	//Set up the task to talk to SSH
+	NSTask *SSHTask = [NSTask new];
+	[SSHTask setLaunchPath:SSHBinaryPath];
+	[SSHTask setArguments:[NSArray arrayWithObjects:@"-V", nil]]; //SSH -V
+	
+	//Direct the output to our pipe
+	NSPipe *outputPipe = [NSPipe pipe];
+	[SSHTask setStandardOutput:outputPipe];
+	[SSHTask setStandardError:outputPipe];
+	NSFileHandle *outputFileHandle = [outputPipe fileHandleForReading];
+	
+	[SSHTask launch];
+	[SSHTask waitUntilExit];
+	
+	//Grab the output and ditch the task
+	NSData *outputData = [outputFileHandle readDataToEndOfFile];
+	[SSHTask release];
+	
+	if (!outputData || [outputData length] == 0)
+		return SFTPListingUnsupported;
+	
+	//Form the version string. i.e., OpenSSH_5.2p1, OpenSSL 0.9.8k 25 Mar 2009
+	NSString *SSHVersionString = [[[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding] autorelease];
+	if (!SSHVersionString)
+		return SFTPListingUnsupported;
+	
+	//Pull out the actual version number, which always comes after the underscore.
+	NSRange underscoreRange = [SSHVersionString rangeOfString:@"_"];
+	if (underscoreRange.location == NSNotFound)
+		return SFTPListingUnsupported;
+	
+	//Version number is the first three characters after the underscore
+	NSRange versionNumberRange = NSMakeRange(underscoreRange.location + 1, 3);
+	if ([SSHVersionString length] < NSMaxRange(versionNumberRange))
+		return SFTPListingUnsupported;
+	
+	NSString *versionNumberString = [SSHVersionString substringWithRange:versionNumberRange];
+	CGFloat versionNumber = [versionNumberString floatValue];
+	
+	if (versionNumber < 3.5)
+		return SFTPListingShortForm;
+	else if (versionNumber >= 3.9)
+		return SFTPListingExtendedLongForm;
+	
+	return SFTPListingLongForm;
 }
 
 #pragma mark -

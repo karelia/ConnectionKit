@@ -22,7 +22,6 @@
 #import "NSFileManager+Connection.h"
 #import "NSString+Connection.h"
 
-#include "sshversion.h"
 #include "fdwrite.h"
 
 @interface CKSFTPConnection (Private)
@@ -211,20 +210,20 @@ static NSString *lsform = nil;
 	}
 	[parameters addObject:[NSString stringWithFormat:@"%@@%@", username, [[[self request] URL] host]]];
 	
-	switch (sshversion())
+	switch ([CKSFTPTServer SFTPListingForm])
 	{
-		case SFTP_VERSION_UNSUPPORTED:
+		case SFTPListingUnsupported:
 			//Not Supported.
 			return;
-		case SFTP_LS_LONG_FORM:
+		case SFTPListingLongForm:
 			lsform = @"ls -l";
 			break;
 			
-		case SFTP_LS_EXTENDED_LONG_FORM:
+		case SFTPListingExtendedLongForm:
 			lsform = @"ls -la";
 			break;
 			
-		case SFTP_LS_SHORT_FORM:
+		case SFTPListingShortForm:
 		default:
 			lsform = @"ls";
 			break;
