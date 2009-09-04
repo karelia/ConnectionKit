@@ -183,8 +183,6 @@
 		D32E0B920FEDB82E0012C3DC /* CKDirectoryListingItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D32E0B900FEDB82E0012C3DC /* CKDirectoryListingItem.m */; };
 		D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B720CF3D40800C61A38 /* fdwrite.c */; };
 		D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B730CF3D40800C61A38 /* fdwrite.h */; };
-		D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B740CF3D40800C61A38 /* sshversion.c */; };
-		D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B750CF3D40800C61A38 /* sshversion.h */; };
 		D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */; };
 		D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */; };
@@ -469,8 +467,6 @@
 		D3598B710CF3D40800C61A38 /* argcargv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = argcargv.c; sourceTree = "<group>"; };
 		D3598B720CF3D40800C61A38 /* fdwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fdwrite.c; sourceTree = "<group>"; };
 		D3598B730CF3D40800C61A38 /* fdwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdwrite.h; sourceTree = "<group>"; };
-		D3598B740CF3D40800C61A38 /* sshversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshversion.c; sourceTree = "<group>"; };
-		D3598B750CF3D40800C61A38 /* sshversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sshversion.h; sourceTree = "<group>"; };
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPTServer.m; sourceTree = "<group>"; };
@@ -961,8 +957,6 @@
 				D3598B710CF3D40800C61A38 /* argcargv.c */,
 				D3598B720CF3D40800C61A38 /* fdwrite.c */,
 				D3598B730CF3D40800C61A38 /* fdwrite.h */,
-				D3598B740CF3D40800C61A38 /* sshversion.c */,
-				D3598B750CF3D40800C61A38 /* sshversion.h */,
 				D3598B780CF3D40800C61A38 /* argcargv.h */,
 			);
 			name = Other;
@@ -1019,7 +1013,6 @@
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
 				D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */,
-				D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */,
 				D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */,
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
@@ -1354,7 +1347,6 @@
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
 				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
 				D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */,
-				D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */,
 				D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
