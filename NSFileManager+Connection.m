@@ -363,7 +363,10 @@ if (![fn isEqualToString:@"."] && \
 				return nil;
 			}
             
-			NSArray *dateComponents = [dateString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+			NSMutableArray *dateComponents = [NSMutableArray arrayWithArray:[dateString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]]];
+			//If there was any double (etc) whitespace, we have empty strings in the array. Remove them
+			[dateComponents removeObject:@""];
+			
 			NSString *month = [dateComponents objectAtIndex:0];
 			NSString *day = [dateComponents objectAtIndex:1];
 			NSString *yearOrTime = [dateComponents objectAtIndex:2];			
