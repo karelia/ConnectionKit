@@ -884,7 +884,7 @@ static NSString *lsform = nil;
 	_isConnected = YES;
 	
 	[[self client] connectionDidConnectToHost:[[[self request] URL] host] error:nil];
-	[[self client] connectionDidOpenAtPath:[NSString stringWithString:rootDirectory] error:nil];
+	[[self client] connectionDidOpenAtPath:[NSString stringWithString:rootDirectory] authenticated:YES error:nil];
 }
 
 - (void)setCurrentDirectory:(NSString *)current
@@ -1108,7 +1108,7 @@ static NSString *lsform = nil;
 		//Authentication information is wrong. Send an error and disconnect.
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:LocalizedStringInConnectionKitBundle(@"The connection failed to be authenticated properly. Check the username and password.", @"Authentication Failed"), NSLocalizedDescriptionKey, nil];
 		NSError *error = [NSError errorWithDomain:CKSFTPErrorDomain code:0 userInfo:userInfo];
-		[[self client] connectionDidOpenAtPath:nil error:error];
+		[[self client] connectionDidOpenAtPath:nil authenticated:NO error:error];
 		
 		[self disconnect];
 		
