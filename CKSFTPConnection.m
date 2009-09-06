@@ -737,7 +737,7 @@ static NSString *lsform = nil;
 	NSError *error = nil;
 	if (errorResponse)
 	{
-		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"SFTP Upload error");
+		NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to set permissions for path %@", @"SFTP Upload error"), [self currentPermissionChange]];
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  localizedDescription, NSLocalizedDescriptionKey, 
 								  [self currentPermissionChange], NSFilePathErrorKey, nil];
