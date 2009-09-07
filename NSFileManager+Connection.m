@@ -145,7 +145,21 @@ if (![fn isEqualToString:@"."] && \
 	//Remove all blank spaces before the date. After the date, blank spaces (even next to each other) are _valid_ characters in a filename. They cannot be removed.
 	NSString *dateString = [self _dateStringFromListing:line];
 	if (!dateString)
+	{
+		//We may be a DOS listing. Look for a word that has the AM or PM suffix. If we find it, remove all spaces.
+		for (NSString *word in words)
+		{
+			if ([word hasSuffix:@"AM"] || [word hasSuffix:@"PM"])
+			{
+				//DOS Listing. Remove all spaces.
+				[finalWords removeObject:@""];
+				break;
+			}
+		}
+		
 		return finalWords;
+	}
+	
 	NSUInteger lastDateWordIndex = NSNotFound;
 	NSUInteger currentLocation = [dateString length] - 1;
 	while (currentLocation >= 0)
@@ -249,7 +263,7 @@ if (![fn isEqualToString:@"."] && \
 	NSArray *lines = [NSFileManager _linesFromListing:listing];
 	if (!lines)
 	{
-		//If we cna't parse the lines, we cannot continue. Parsing the rest of the listing depends on the date. Log it, and return nil
+		//If we can't parse the lines, we cannot continue. Parsing the rest of the listing depends on the date. Log it, and return nil
 		NSLog(@"Failed to parse directory listing:\"%@\"", listing);
 		return nil;
 	}
@@ -289,14 +303,15 @@ if (![fn isEqualToString:@"."] && \
 		
 		NSCalendarDate *date = nil;
 		unsigned long referenceCount = 0;
-		NSNumber *size;
+		NSNumber *size = nil;
 		
 		CKDirectoryListingItem *item = [CKDirectoryListingItem directoryListingItem];
 		
-		if ([wordOne hasSuffix:@"PM"] || [wordOne hasSuffix:@"AM"]) //Disgusting MSDOS Server
+		if ([wordOne hasSuffix:@"AM"] || [wordOne hasSuffix:@"PM"]) //Disgusting MSDOS Server
 		{
 			//11-25-05 03:42PM   <DIR>     folder/
 			//02-18-08 04:57PM          0123 file
+			
 			NSString *dateString = [NSString stringWithFormat:@"%@ %@", wordZero, wordOne];
 			date = [NSCalendarDate dateWithString:dateString calendarFormat:@"%m-%d-%y %I:%M%p"];
 			
