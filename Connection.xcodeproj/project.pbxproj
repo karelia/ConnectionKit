@@ -11,11 +11,9 @@
 			isa = PBXAggregateTarget;
 			buildConfigurationList = 7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */;
 			buildPhases = (
-				7983E7EE0B0C4F5100F5078E /* ShellScript */,
 			);
 			dependencies = (
 				7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */,
-				7983E7EC0B0C4F4600F5078E /* PBXTargetDependency */,
 			);
 			name = "Build All";
 			productName = "Build All";
@@ -32,10 +30,6 @@
 		27929DF90F7BB8870035AFCC /* CKFTPCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 27929DF70F7BB8870035AFCC /* CKFTPCommand.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
-		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
-		27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -59,8 +53,6 @@
 		792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 792CFCB70A806145001A00C6 /* CKHTTPResponse.m */; };
 		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
-		7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */; };
-		794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */; };
 		7946B0FE0AC0F4A400CAE90F /* CKS3Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */; };
 		7946B0FF0AC0F4A400CAE90F /* CKS3Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */; };
 		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -75,41 +67,17 @@
 		795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */; };
 		795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
 		795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
-		795AFF190B1157D3006905FA /* CKHostCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFF170B1157D3006905FA /* CKHostCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFF180B1157D3006905FA /* CKHostCell.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
-		795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */; };
-		795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
-		795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */; };
-		795FF5020B0C018100EA9292 /* DropletMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF5010B0C018100EA9292 /* DropletMain.m */; };
-		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
-		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782770B4745DD008DBA01 /* NSArray+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782780B4745DD008DBA01 /* NSArray+Connection.m */; };
 		797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 797782810B474765008DBA01 /* NSDictionary+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		797782840B474765008DBA01 /* NSDictionary+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 797782820B474765008DBA01 /* NSDictionary+Connection.m */; };
-		7978FC150B117D7C0048168B /* bookmark.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7978FC140B117D7C0048168B /* bookmark.tif */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
-		798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */ = {isa = PBXBuildFile; fileRef = 798300050B0D4A2600F5078E /* DropletLauncher.nib */; };
 		798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 798313C70B0D67E000F5078E /* CKTransferProgressCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 798313C80B0D67E000F5078E /* CKTransferProgressCell.m */; };
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
-		7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E0940B0C1A8500F5078E /* DropletOutlineView.m */; };
-		7983E2310B0C244700F5078E /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
-		7983E6DE0B0C4E0000F5078E /* DropletLauncher.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983E6730B0C41E300F5078E /* DropletLauncher.m */; };
-		7983E7000B0C4E2800F5078E /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */; };
-		7983E7050B0C4E4E00F5078E /* DropletLauncher in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6D20B0C4DF000F5078E /* DropletLauncher */; };
-		7983EDF90B0C802C00F5078E /* DropletIcon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */; };
-		79906BAF0B1175A800FE9681 /* host.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAD0B1175A800FE9681 /* host.png */; };
-		79906BB00B1175A800FE9681 /* bonjour.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAE0B1175A800FE9681 /* bonjour.png */; };
-		799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799174950C83962D00EFFC79 /* CKDirectoryTree.nib */; };
 		79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */; };
 		79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -169,14 +137,10 @@
 		D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */; };
 		D32E0B910FEDB82E0012C3DC /* CKDirectoryListingItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D32E0B8F0FEDB82E0012C3DC /* CKDirectoryListingItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D32E0B920FEDB82E0012C3DC /* CKDirectoryListingItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D32E0B900FEDB82E0012C3DC /* CKDirectoryListingItem.m */; };
-		D3511D23105586C6002B88F6 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3511D22105586C6002B88F6 /* LeopardFolder.tiff */; };
 		D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B720CF3D40800C61A38 /* fdwrite.c */; };
 		D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B730CF3D40800C61A38 /* fdwrite.h */; };
 		D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */; };
 		D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */; };
-		D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */; };
-		D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */; };
-		D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
 		D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -191,33 +155,12 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
-		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
-			remoteInfo = Framework;
-		};
-		7983E7030B0C4E3300F5078E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 7983E6D10B0C4DF000F5078E;
-			remoteInfo = DropletLauncher;
-		};
 		7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
-		};
-		7983E7EB0B0C4F4600F5078E /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 795FF4F00B0C013200EA9292;
-			remoteInfo = DropletHelper;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -247,13 +190,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
-		3C2A09C30D91B478002B8174 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09C60D91B485002B8174 /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09C90D91B496002B8174 /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09CC0D91B4AD002B8174 /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09CF0D91B4BE002B8174 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09D20D91B4D7002B8174 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09D50D91B4E3002B8174 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -269,8 +205,6 @@
 		792CFCB70A806145001A00C6 /* CKHTTPResponse.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = CKHTTPResponse.m; sourceTree = "<group>"; };
 		79420AD20C91CDE80002B99D /* NSNumber+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+Connection.h"; sourceTree = "<group>"; };
 		79420AD30C91CDE80002B99D /* NSNumber+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSNumber+Connection.m"; sourceTree = "<group>"; };
-		7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCollectionBasedBookmarkController.h; sourceTree = "<group>"; };
-		7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCollectionBasedBookmarkController.m; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKS3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKS3Connection.m; sourceTree = "<group>"; };
 		7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSCalendarDate+Connection.h"; sourceTree = "<group>"; };
@@ -285,16 +219,6 @@
 		795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFNSubscribeFileWatcher.m; sourceTree = "<group>"; };
 		795AFEF30B115511006905FA /* UKMainThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKMainThreadProxy.h; sourceTree = "<group>"; };
 		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
-		795AFF170B1157D3006905FA /* CKHostCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCell.h; sourceTree = "<group>"; };
-		795AFF180B1157D3006905FA /* CKHostCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCell.m; sourceTree = "<group>"; };
-		795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKBookmarkStorage.h; sourceTree = "<group>"; };
-		795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKBookmarkStorage.m; sourceTree = "<group>"; };
-		795FF4F10B0C013200EA9292 /* DropletHelper.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DropletHelper.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DropletHelper-Info.plist"; sourceTree = "<group>"; };
-		795FF5010B0C018100EA9292 /* DropletMain.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletMain.m; sourceTree = "<group>"; };
-		795FF5060B0C048700EA9292 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Droplet.nib; sourceTree = "<group>"; };
-		795FF50C0B0C05F400EA9292 /* DropletController.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = DropletController.m; sourceTree = "<group>"; };
-		795FF50D0B0C05F400EA9292 /* DropletController.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = DropletController.h; sourceTree = "<group>"; };
 		796DB21109F89DCB0065897B /* SSLStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SSLStream.h; sourceTree = "<group>"; };
 		796DB21209F89DCB0065897B /* SSLStream.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SSLStream.m; sourceTree = "<group>"; };
 		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
@@ -302,7 +226,6 @@
 		797782780B4745DD008DBA01 /* NSArray+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Connection.m"; sourceTree = "<group>"; };
 		797782810B474765008DBA01 /* NSDictionary+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDictionary+Connection.h"; sourceTree = "<group>"; };
 		797782820B474765008DBA01 /* NSDictionary+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDictionary+Connection.m"; sourceTree = "<group>"; };
-		7978FC140B117D7C0048168B /* bookmark.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = bookmark.tif; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		7981F6C30A05F6D2004D775D /* FileConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileConnectionTest.h; sourceTree = "<group>"; };
 		7981F6C40A05F6D2004D775D /* FileConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileConnectionTest.m; sourceTree = "<group>"; };
@@ -310,19 +233,10 @@
 		7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTPConnectionTest.m; sourceTree = "<group>"; };
 		7981F6F30A06006E004D775D /* WebDAVConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WebDAVConnectionTest.h; sourceTree = "<group>"; };
 		7981F6F40A06006E004D775D /* WebDAVConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WebDAVConnectionTest.m; sourceTree = "<group>"; };
-		798300060B0D4A2600F5078E /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferProgressCell.h; sourceTree = "<group>"; };
 		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferProgressCell.m; sourceTree = "<group>"; };
 		7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferRecord.h; sourceTree = "<group>"; };
 		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferRecord.m; sourceTree = "<group>"; };
-		7983E0930B0C1A8500F5078E /* DropletOutlineView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DropletOutlineView.h; sourceTree = "<group>"; };
-		7983E0940B0C1A8500F5078E /* DropletOutlineView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletOutlineView.m; sourceTree = "<group>"; };
-		7983E6730B0C41E300F5078E /* DropletLauncher.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DropletLauncher.m; sourceTree = "<group>"; };
-		7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; path = DropletIcon.icns; sourceTree = "<group>"; };
-		7983E6D20B0C4DF000F5078E /* DropletLauncher */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = DropletLauncher; sourceTree = BUILT_PRODUCTS_DIR; };
-		79906BAD0B1175A800FE9681 /* host.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = host.png; sourceTree = "<group>"; };
-		79906BAE0B1175A800FE9681 /* bonjour.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = bonjour.png; sourceTree = "<group>"; };
-		799174960C83962D00EFFC79 /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSPopUpButton+Connection.h"; sourceTree = "<group>"; };
 		79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSPopUpButton+Connection.m"; sourceTree = "<group>"; };
 		79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTabView+Connection.h"; sourceTree = "<group>"; };
@@ -392,12 +306,6 @@
 		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
 		79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMatrix+Connection.h"; sourceTree = "<group>"; };
 		79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMatrix+Connection.m"; sourceTree = "<group>"; };
-		79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHostCategory.h; sourceTree = "<group>"; };
-		79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHostCategory.m; sourceTree = "<group>"; };
-		79F54D490AC8BDA1006AD3E2 /* CKHost.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHost.h; sourceTree = "<group>"; };
-		79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHost.m; sourceTree = "<group>"; };
-		79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKBonjourCategory.h; sourceTree = "<group>"; };
-		79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKBonjourCategory.m; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		79FCA8D60AC23C25009EDAF9 /* CKHTTPPutRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPPutRequest.h; sourceTree = "<group>"; };
@@ -406,19 +314,12 @@
 		79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadRequest.m; sourceTree = "<group>"; };
 		79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKHTTPFileDownloadResponse.h; sourceTree = "<group>"; };
 		79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKHTTPFileDownloadResponse.m; sourceTree = "<group>"; };
-		CE0180830DB6C72E003E008B /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE55A6610AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CEBC056A0DB94446001BF0DF /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
-		CEBC056E0DB94548001BF0DF /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
-		CEBC056F0DB94553001BF0DF /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
-		CEBC05700DB9455A001BF0DF /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
-		CEBC05710DB9455F001BF0DF /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
-		CEBC05720DB94567001BF0DF /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CED189610AC320E4002E8A4A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189620AC320E8002E8A4A /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189630AC320EA002E8A4A /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -427,30 +328,17 @@
 		CED1897E0AC3210D002E8A4A /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+Connection.h"; sourceTree = "<group>"; };
 		CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+Connection.m"; sourceTree = "<group>"; };
-		CEF894CF0BD72A45002886AA /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF894E90BD72A55002886AA /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF894EE0BD72A5C002886AA /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF894F30BD72A62002886AA /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF894F80BD72A6A002886AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF894FD0BD72A70002886AA /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		CEF895020BD72A76002886AA /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		D305393B0DE5F30C008646CE /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
 		D305393C0DE5F30C008646CE /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = /usr/lib/libicucore.A.dylib; sourceTree = "<absolute>"; };
 		D32E0B8F0FEDB82E0012C3DC /* CKDirectoryListingItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryListingItem.h; sourceTree = "<group>"; };
 		D32E0B900FEDB82E0012C3DC /* CKDirectoryListingItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryListingItem.m; sourceTree = "<group>"; };
-		D3511D22105586C6002B88F6 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
 		D3598B710CF3D40800C61A38 /* argcargv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = argcargv.c; sourceTree = "<group>"; };
 		D3598B720CF3D40800C61A38 /* fdwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fdwrite.c; sourceTree = "<group>"; };
 		D3598B730CF3D40800C61A38 /* fdwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdwrite.h; sourceTree = "<group>"; };
 		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
 		D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPTServer.h; sourceTree = "<group>"; };
 		D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPTServer.m; sourceTree = "<group>"; };
-		D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSSHPassphrase.m; sourceTree = "<group>"; };
-		D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSSHPassphrase.h; sourceTree = "<group>"; };
-		D3A2B7A20D90A2E2002F02EF /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKLeopardSourceListTableColumn.h; sourceTree = "<group>"; };
-		D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKLeopardSourceListTableColumn.m; sourceTree = "<group>"; };
 		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
 		D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainProxy.m; sourceTree = "<group>"; };
 		D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainItem.h; sourceTree = "<group>"; };
@@ -463,23 +351,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		795FF4EF0B0C013200EA9292 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7983E24B0B0C245100F5078E /* Cocoa.framework in Frameworks */,
-				7983E2310B0C244700F5078E /* Connection.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7983E6D00B0C4DF000F5078E /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7983E7000B0C4E2800F5078E /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,8 +434,6 @@
 			children = (
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
-				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
-				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -669,7 +538,6 @@
 			children = (
 				797CC8C509F861770063FF9B /* Localizable.strings */,
 				79CFD8E709F7072100172CDD /* Interfaces */,
-				79CFD8E409F7071E00172CDD /* Images */,
 				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 				CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */,
 			);
@@ -721,16 +589,6 @@
 		795FF4EA0B0C00FF00EA9292 /* Droplet */ = {
 			isa = PBXGroup;
 			children = (
-				7983E6CB0B0C4D8800F5078E /* DropletIcon.icns */,
-				795FF50D0B0C05F400EA9292 /* DropletController.h */,
-				795FF50C0B0C05F400EA9292 /* DropletController.m */,
-				795FF5010B0C018100EA9292 /* DropletMain.m */,
-				795FF4F30B0C013200EA9292 /* DropletHelper-Info.plist */,
-				7983E0930B0C1A8500F5078E /* DropletOutlineView.h */,
-				7983E0940B0C1A8500F5078E /* DropletOutlineView.m */,
-				7983E6730B0C41E300F5078E /* DropletLauncher.m */,
-				798300050B0D4A2600F5078E /* DropletLauncher.nib */,
-				795FF5050B0C048700EA9292 /* Droplet.nib */,
 			);
 			name = Droplet;
 			sourceTree = "<group>";
@@ -738,24 +596,10 @@
 		7983E2120B0C22D600F5078E /* Bookmarks */ = {
 			isa = PBXGroup;
 			children = (
-				D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */,
-				D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */,
 				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
 				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
 				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
 				D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */,
-				795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */,
-				795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */,
-				79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */,
-				79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */,
-				79F54D490AC8BDA1006AD3E2 /* CKHost.h */,
-				79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */,
-				79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */,
-				79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */,
-				795AFF170B1157D3006905FA /* CKHostCell.h */,
-				795AFF180B1157D3006905FA /* CKHostCell.m */,
-				7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */,
-				7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */,
 			);
 			name = Bookmarks;
 			sourceTree = "<group>";
@@ -878,22 +722,9 @@
 			name = UI;
 			sourceTree = "<group>";
 		};
-		79CFD8E409F7071E00172CDD /* Images */ = {
-			isa = PBXGroup;
-			children = (
-				D3511D22105586C6002B88F6 /* LeopardFolder.tiff */,
-				7978FC140B117D7C0048168B /* bookmark.tif */,
-				79906BAD0B1175A800FE9681 /* host.png */,
-				79906BAE0B1175A800FE9681 /* bonjour.png */,
-			);
-			name = Images;
-			sourceTree = "<group>";
-		};
 		79CFD8E709F7072100172CDD /* Interfaces */ = {
 			isa = PBXGroup;
 			children = (
-				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
-				D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */,
 			);
 			name = Interfaces;
 			sourceTree = "<group>";
@@ -901,8 +732,6 @@
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
 			isa = PBXGroup;
 			children = (
-				D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */,
-				D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */,
 				79CFD84309F7048400172CDD /* CKSFTPConnection.h */,
 				79CFD84409F7048400172CDD /* CKSFTPConnection.m */,
 				D3598B590CF3D3E400C61A38 /* Other */,
@@ -954,15 +783,11 @@
 				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
 				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
 				79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */,
-				795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */,
-				795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */,
-				795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
 				795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
-				795AFF190B1157D3006905FA /* CKHostCell.h in Headers */,
 				79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */,
 				CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */,
 				797782790B4745DD008DBA01 /* NSArray+Connection.h in Headers */,
@@ -972,16 +797,12 @@
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
-				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
 				D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */,
 				D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */,
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
-				D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */,
 				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
 				27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */,
-				27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */,
-				27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */,
@@ -1014,41 +835,6 @@
 			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
-		795FF4F00B0C013200EA9292 /* DropletHelper */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 795FF4F70B0C013300EA9292 /* Build configuration list for PBXNativeTarget "DropletHelper" */;
-			buildPhases = (
-				795FF4ED0B0C013200EA9292 /* Resources */,
-				795FF4EE0B0C013200EA9292 /* Sources */,
-				795FF4EF0B0C013200EA9292 /* Frameworks */,
-				7983ED650B0C749800F5078E /* Reset Install Path */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */,
-			);
-			name = DropletHelper;
-			productName = DropletHelper;
-			productReference = 795FF4F10B0C013200EA9292 /* DropletHelper.app */;
-			productType = "com.apple.product-type.application";
-		};
-		7983E6D10B0C4DF000F5078E /* DropletLauncher */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 7983E6E20B0C4E1E00F5078E /* Build configuration list for PBXNativeTarget "DropletLauncher" */;
-			buildPhases = (
-				7983E6CF0B0C4DF000F5078E /* Sources */,
-				7983E6D00B0C4DF000F5078E /* Frameworks */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = DropletLauncher;
-			productName = DropletLauncher;
-			productReference = 7983E6D20B0C4DF000F5078E /* DropletLauncher */;
-			productType = "com.apple.product-type.tool";
-		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
@@ -1063,7 +849,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				7983E7040B0C4E3300F5078E /* PBXTargetDependency */,
 			);
 			name = Framework;
 			productName = Framework;
@@ -1095,8 +880,6 @@
 				7983E7E80B0C4F2200F5078E /* Build All */,
 				79CFD12509F702BE00172CDD /* Framework */,
 				09D6601C09FD37990000BA00 /* UnitTest */,
-				795FF4F00B0C013200EA9292 /* DropletHelper */,
-				7983E6D10B0C4DF000F5078E /* DropletLauncher */,
 			);
 		};
 /* End PBXProject section */
@@ -1109,32 +892,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		795FF4ED0B0C013200EA9292 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7983EDF90B0C802C00F5078E /* DropletIcon.icns in Resources */,
-				795FF5070B0C048700EA9292 /* Droplet.nib in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		79CFD12209F702BE00172CDD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				7983E7050B0C4E4E00F5078E /* DropletLauncher in Resources */,
 				79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */,
 				797CC8C709F861770063FF9B /* Localizable.strings in Resources */,
-				7983E6CC0B0C4D8800F5078E /* DropletIcon.icns in Resources */,
-				798300070B0D4A2600F5078E /* DropletLauncher.nib in Resources */,
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
-				79906BAF0B1175A800FE9681 /* host.png in Resources */,
-				79906BB00B1175A800FE9681 /* bonjour.png in Resources */,
-				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
-				799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */,
-				D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */,
-				D3511D23105586C6002B88F6 /* LeopardFolder.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1184,33 +949,6 @@
 			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n";
 			showEnvVarsInLog = 0;
 		};
-		7983E7EE0B0C4F5100F5078E /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "#!/bin/sh\n\n# Copy the DropletHelper application into the Resources folder of the framework\n\nLAUNCHER_PATH=$CONFIGURATION_BUILD_DIR/DropletHelper.app\nCK_FRAMEWORK_PATH=$CONFIGURATION_BUILD_DIR/Connection.framework/Versions/A/Resources\n\nrm -rf $CK_FRAMEWORK_PATH/DropletHelper.app\n\nmv $LAUNCHER_PATH $CK_FRAMEWORK_PATH\n";
-		};
-		7983ED650B0C749800F5078E /* Reset Install Path */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			name = "Reset Install Path";
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "/Developer/usr/bin/install_name_tool -change @executable_path/../Frameworks/Connection.framework/Versions/A/Connection @executable_path/../../../../Connection $CONFIGURATION_BUILD_DIR/DropletHelper.app/Contents/MacOS/DropletHelper";
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -1220,24 +958,6 @@
 			files = (
 				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
 				09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		795FF4EE0B0C013200EA9292 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				795FF5020B0C018100EA9292 /* DropletMain.m in Sources */,
-				795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */,
-				7983E0950B0C1A8500F5078E /* DropletOutlineView.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		7983E6CF0B0C4DF000F5078E /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				7983E6DE0B0C4E0000F5078E /* DropletLauncher.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1275,15 +995,11 @@
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
 				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
-				795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */,
-				795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */,
-				795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
 				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
 				795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
-				795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */,
 				79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */,
 				CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */,
 				7977827A0B4745DD008DBA01 /* NSArray+Connection.m in Sources */,
@@ -1293,17 +1009,13 @@
 				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
 				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
-				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
 				D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */,
 				D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
 				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
-				D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */,
 				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
 				27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */,
-				27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */,
-				27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */,
@@ -1322,37 +1034,14 @@
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
 		};
-		795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 79CFD12509F702BE00172CDD /* Framework */;
-			targetProxy = 795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */;
-		};
-		7983E7040B0C4E3300F5078E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 7983E6D10B0C4DF000F5078E /* DropletLauncher */;
-			targetProxy = 7983E7030B0C4E3300F5078E /* PBXContainerItemProxy */;
-		};
 		7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */;
 		};
-		7983E7EC0B0C4F4600F5078E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 795FF4F00B0C013200EA9292 /* DropletHelper */;
-			targetProxy = 7983E7EB0B0C4F4600F5078E /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
-		795FF5050B0C048700EA9292 /* Droplet.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				795FF5060B0C048700EA9292 /* en */,
-			);
-			name = Droplet.nib;
-			sourceTree = "<group>";
-		};
 		797CC8C509F861770063FF9B /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1366,36 +1055,6 @@
 				CE55A6620AD194740091C8AE /* zh_CN */,
 			);
 			name = Localizable.strings;
-			sourceTree = "<group>";
-		};
-		798300050B0D4A2600F5078E /* DropletLauncher.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				798300060B0D4A2600F5078E /* en */,
-				CEF894CF0BD72A45002886AA /* da */,
-				CEF894E90BD72A55002886AA /* de */,
-				CEF894EE0BD72A5C002886AA /* fr */,
-				CEF894F30BD72A62002886AA /* it */,
-				CEF894F80BD72A6A002886AA /* ja */,
-				CEF894FD0BD72A70002886AA /* zh_CN */,
-				CEF895020BD72A76002886AA /* zh_TW */,
-			);
-			name = DropletLauncher.nib;
-			sourceTree = "<group>";
-		};
-		799174950C83962D00EFFC79 /* CKDirectoryTree.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				799174960C83962D00EFFC79 /* en */,
-				CE0180830DB6C72E003E008B /* fr */,
-				CEBC056A0DB94446001BF0DF /* da */,
-				CEBC056E0DB94548001BF0DF /* de */,
-				CEBC056F0DB94553001BF0DF /* it */,
-				CEBC05700DB9455A001BF0DF /* ja */,
-				CEBC05710DB9455F001BF0DF /* zh_CN */,
-				CEBC05720DB94567001BF0DF /* zh_TW */,
-			);
-			name = CKDirectoryTree.nib;
 			sourceTree = "<group>";
 		};
 		79CFD8CA09F706C700172CDD /* KTLog.nib */ = {
@@ -1412,21 +1071,6 @@
 			);
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
-		};
-		D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D3A2B7A20D90A2E2002F02EF /* en */,
-				3C2A09C30D91B478002B8174 /* da */,
-				3C2A09C60D91B485002B8174 /* de */,
-				3C2A09C90D91B496002B8174 /* fr */,
-				3C2A09CC0D91B4AD002B8174 /* it */,
-				3C2A09CF0D91B4BE002B8174 /* ja */,
-				3C2A09D20D91B4D7002B8174 /* zh_CN */,
-				3C2A09D50D91B4E3002B8174 /* zh_TW */,
-			);
-			name = Passphrase.nib;
-			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
@@ -1491,102 +1135,6 @@
 			};
 			name = Release;
 		};
-		795FF4F80B0C013300EA9292 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "DropletHelper-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletHelper;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
-			};
-			name = Debug;
-		};
-		795FF4F90B0C013300EA9292 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "DropletHelper-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletHelper;
-				WRAPPER_EXTENSION = app;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
-		7983E6E30B0C4E1E00F5078E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INSTALL_PATH = "$(HOME)/bin";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletLauncher;
-				ZERO_LINK = YES;
-			};
-			name = Debug;
-		};
-		7983E6E40B0C4E1E00F5078E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INSTALL_PATH = "$(HOME)/bin";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletLauncher;
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
 		7983E7F10B0C4F6F00F5078E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1608,28 +1156,6 @@
 				ZERO_LINK = NO;
 			};
 			name = Release;
-		};
-		79A8578D0B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INSTALL_PATH = "$(HOME)/bin";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletLauncher;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
 		};
 		79A8578E0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
@@ -1665,30 +1191,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Connection;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
-		};
-		79A8578F0B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/AppKit.framework/Headers/AppKit.h";
-				INFOPLIST_FILE = "DropletHelper-Info.plist";
-				INSTALL_PATH = "$(HOME)/Applications";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Foundation,
-					"-framework",
-					AppKit,
-				);
-				PREBINDING = NO;
-				PRODUCT_NAME = DropletHelper;
-				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1865,26 +1367,6 @@
 				09D6602709FD379A0000BA00 /* Debug */,
 				09D6602809FD379A0000BA00 /* Release */,
 				79A857920B9267CA00D9C844 /* Plugin */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		795FF4F70B0C013300EA9292 /* Build configuration list for PBXNativeTarget "DropletHelper" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				795FF4F80B0C013300EA9292 /* Debug */,
-				795FF4F90B0C013300EA9292 /* Release */,
-				79A8578F0B9267CA00D9C844 /* Plugin */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7983E6E20B0C4E1E00F5078E /* Build configuration list for PBXNativeTarget "DropletLauncher" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7983E6E30B0C4E1E00F5078E /* Debug */,
-				7983E6E40B0C4E1E00F5078E /* Release */,
-				79A8578D0B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

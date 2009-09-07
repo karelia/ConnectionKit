@@ -11,7 +11,6 @@
 
 #import "CKConnectionThreadManager.h"
 #import "RunLoopForwarder.h"
-#import "CKSSHPassphrase.h"
 #import "CKTransferRecord.h"
 #import "CKInternalTransferRecord.h"
 #import "EMKeychainProxy.h"
@@ -1058,14 +1057,6 @@ static NSString *lsform = nil;
 	//We don't have it on keychain, so ask the delegate for it if we can, or ask ourselves if not.	
 	NSString *passphrase = [[self client] passphraseForHost:[[[self request] URL] host]
                                                    username:[[[self request] URL] user] publicKeyPath:pubKeyPath];
-	
-	if (!passphrase)
-	{
-		//No delegate method implemented, and it's not already on the keychain. Ask ourselves.
-		CKSSHPassphrase *passphraseFetcher = [[CKSSHPassphrase alloc] init];
-		passphrase = [passphraseFetcher passphraseForPublicKey:pubKeyPath account:[[[self request] URL] user]];
-		[passphraseFetcher release];
-	}
 	
 	if (passphrase)
 	{
