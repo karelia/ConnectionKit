@@ -169,6 +169,7 @@
 		D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */; };
 		D32E0B910FEDB82E0012C3DC /* CKDirectoryListingItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D32E0B8F0FEDB82E0012C3DC /* CKDirectoryListingItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D32E0B920FEDB82E0012C3DC /* CKDirectoryListingItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D32E0B900FEDB82E0012C3DC /* CKDirectoryListingItem.m */; };
+		D3511D23105586C6002B88F6 /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3511D22105586C6002B88F6 /* LeopardFolder.tiff */; };
 		D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B720CF3D40800C61A38 /* fdwrite.c */; };
 		D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B730CF3D40800C61A38 /* fdwrite.h */; };
 		D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */; };
@@ -438,6 +439,7 @@
 		D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = /usr/lib/libicucore.A.dylib; sourceTree = "<absolute>"; };
 		D32E0B8F0FEDB82E0012C3DC /* CKDirectoryListingItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDirectoryListingItem.h; sourceTree = "<group>"; };
 		D32E0B900FEDB82E0012C3DC /* CKDirectoryListingItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDirectoryListingItem.m; sourceTree = "<group>"; };
+		D3511D22105586C6002B88F6 /* LeopardFolder.tiff */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = LeopardFolder.tiff; sourceTree = "<group>"; };
 		D3598B710CF3D40800C61A38 /* argcargv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = argcargv.c; sourceTree = "<group>"; };
 		D3598B720CF3D40800C61A38 /* fdwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fdwrite.c; sourceTree = "<group>"; };
 		D3598B730CF3D40800C61A38 /* fdwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdwrite.h; sourceTree = "<group>"; };
@@ -879,6 +881,7 @@
 		79CFD8E409F7071E00172CDD /* Images */ = {
 			isa = PBXGroup;
 			children = (
+				D3511D22105586C6002B88F6 /* LeopardFolder.tiff */,
 				7978FC140B117D7C0048168B /* bookmark.tif */,
 				79906BAD0B1175A800FE9681 /* host.png */,
 				79906BAE0B1175A800FE9681 /* bonjour.png */,
@@ -1131,6 +1134,7 @@
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */,
 				D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */,
+				D3511D23105586C6002B88F6 /* LeopardFolder.tiff in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
