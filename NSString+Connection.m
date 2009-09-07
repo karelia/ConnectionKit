@@ -52,9 +52,9 @@
 	
 	NSInteger power = floor(log(sizeInBytes) / log(1000));
 	if (power > 1)
-		return [NSString stringWithFormat:@"%01.02lf %@", sizeInBytes / pow(1000, power), suffix[power]];
+		return [NSString stringWithFormat:@"%01.02lf %@", (sizeInBytes / pow(1000, power)), suffix[power]];
 	else
-		return [NSString stringWithFormat:@"%01.0lf %@", sizeInBytes / pow(1000, power), suffix[power]];
+		return [NSString stringWithFormat:@"%01.0lf %@", (sizeInBytes / pow(1000, power)), suffix[power]];
 }
 
 + (NSString *)UUID
