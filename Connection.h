@@ -29,8 +29,8 @@
 
 #import <Cocoa/Cocoa.h>
 
+//Connections
 #import <Connection/CKConnectionProtocol.h>
-#import <Connection/CKConnectionRegistry.h>
 #import <Connection/CKAbstractConnection.h>
 #import <Connection/CKAbstractQueueConnection.h>
 #import <Connection/CKStreamBasedConnection.h>
@@ -38,26 +38,23 @@
 #import <Connection/CKSFTPConnection.h>
 #import <Connection/CKFileConnection.h>
 
+//Utility
+#import <Connection/CKConnectionRegistry.h>
 #import <Connection/CKDirectoryListingItem.h>
-
 #import <Connection/KTLog.h>
-
 #import <Connection/RunLoopForwarder.h>
-
-#import <Connection/NSData+Connection.h>
-#import <Connection/NSObject+Connection.h>
-#import <Connection/NSString+Connection.h>
-#import <Connection/NSPopUpButton+Connection.h>
-#import <Connection/NSTabView+Connection.h>
-#import <Connection/NSNumber+Connection.h>
-#import <Connection/NSURL+Connection.h>
-
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
-
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>
 #import <Connection/CKHTTPFileDownloadRequest.h>
 #import <Connection/CKHTTPPutRequest.h>
 #import <Connection/CKHTTPResponse.h>
 #import <Connection/CKHTTPFileDownloadResponse.h>
+#import <Connection/EMKeychainItem.h>
+
+//Categories
+#import <Connection/NSData+Connection.h>
+#import <Connection/NSObject+Connection.h>
+#import <Connection/NSString+Connection.h>
+#import <Connection/NSURL+Connection.h>
