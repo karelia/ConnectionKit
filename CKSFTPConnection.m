@@ -13,7 +13,7 @@
 #import "RunLoopForwarder.h"
 #import "CKTransferRecord.h"
 #import "CKInternalTransferRecord.h"
-#import "EMKeychainProxy.h"
+#import "EMKeychainItem.h"
 #import "CKFTPConnection.h"
 #import "CKConnectionProtocol.h"
 #import "NSURL+Connection.h"
@@ -1039,7 +1039,7 @@ static NSString *lsform = nil;
 	NSString *pubKeyPath = [buffer substringWithRange:NSMakeRange(26, [buffer length]-29)];
 	
 	//Try to get it ourselves via keychain before asking client app for it
-	EMGenericKeychainItem *item = [[EMKeychainProxy sharedProxy] genericKeychainItemForService:@"SSH" withUsername:pubKeyPath];
+	EMGenericKeychainItem *item = [EMGenericKeychainItem genericKeychainItemForService:@"SSH" withUsername:pubKeyPath];
 	if (item && [item password] && [[item password] length] > 0 && ![attemptedKeychainPublicKeyAuthentications containsObject:pubKeyPath])
 	{
 		[attemptedKeychainPublicKeyAuthentications addObject:pubKeyPath];
