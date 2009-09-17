@@ -99,9 +99,8 @@ char **environ;
 
 - (BOOL)bufferContainsPasswordPrompt:(char *)buf
 {
-    // The welcome message could contain "password" somewhere in it. (Karelia #43687) Somewhat hacking around it by not searching for that.
     char *prompts[] = {
-		/*"password",*/
+		"password",
 		"Password:",
 	"PASSCODE:",
 	"Password for ",
