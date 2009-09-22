@@ -54,8 +54,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"http"];
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"webdav"];
+	[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"webdav"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:[self name] URLScheme:@"http"]; // registered preferred scheme last so it takes precedence
     [pool release];
 }
 
@@ -66,7 +66,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 
 + (NSArray *)URLSchemes
 {
-	return [NSArray arrayWithObjects:@"webdav", @"http", nil];
+	return [NSArray arrayWithObjects:@"http", @"webdav", nil];  // by default, want to use http: scheme
 }
 
 #pragma mark init methods
