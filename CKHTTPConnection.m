@@ -169,23 +169,20 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
         _currentAuth = CFHTTPAuthenticationCreateFromResponse(kCFAllocatorDefault, saneResponse);
         CFStreamError error;
         NSAssert(CFHTTPAuthenticationIsValid(_currentAuth, &error), @"Response does not contain valid authentication info");
-        NSAssert(CFHTTPAuthenticationRequiresUserNameAndPassword(_currentAuth), @"CKHTTPConnection only supports username and password authentication");
-        NSAssert(!CFHTTPAuthenticationRequiresAccountDomain(_currentAuth), @"CKHTTPConnection does not support domain authentication");
         
         CFRelease(saneResponse);
         
         
         
-        // Ask the delegate to authenticate
-        NSString *authMethod = [(NSString *)CFHTTPAuthenticationCopyMethod(_currentAuth) autorelease];
-		if ([authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeBasic])
-		{
-			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
-			return;
-		}
-		else if ([authMethod isEqualToString:(NSString *)kCFHTTPAuthenticationSchemeDigest])
+        // Ask the delegate to authenticate. Unfortunately, we have no means for coping with something like NTLM authentication, which CFHTTP prefers. The only solution right now is to fallback onto private API that forces Digest or Basic auth.
+        if (_CFHTTPAuthenticationSetPreferredScheme(_currentAuth, kCFHTTPAuthenticationSchemeDigest))
 		{
 			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPDigest];
+			return;
+		}
+		else if (_CFHTTPAuthenticationSetPreferredScheme(_currentAuth, kCFHTTPAuthenticationSchemeBasic))
+		{
+			[self authenticateConnectionWithMethod:NSURLAuthenticationMethodHTTPBasic];
 			return;
 		}
 		else
