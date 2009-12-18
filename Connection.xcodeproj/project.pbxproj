@@ -6,20 +6,6 @@
 	objectVersion = 42;
 	objects = {
 
-/* Begin PBXAggregateTarget section */
-		7983E7E80B0C4F2200F5078E /* Build All */ = {
-			isa = PBXAggregateTarget;
-			buildConfigurationList = 7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */;
-			buildPhases = (
-			);
-			dependencies = (
-				7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */,
-			);
-			name = "Build All";
-			productName = "Build All";
-		};
-/* End PBXAggregateTarget section */
-
 /* Begin PBXBuildFile section */
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
@@ -131,13 +117,6 @@
 
 /* Begin PBXContainerItemProxy section */
 		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
-			remoteInfo = Framework;
-		};
-		7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
@@ -802,7 +781,6 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				7983E7E80B0C4F2200F5078E /* Build All */,
 				79CFD12509F702BE00172CDD /* Framework */,
 				09D6601C09FD37990000BA00 /* UnitTest */,
 			);
@@ -950,11 +928,6 @@
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
 		};
-		7983E7EA0B0C4F4200F5078E /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 79CFD12509F702BE00172CDD /* Framework */;
-			targetProxy = 7983E7E90B0C4F4200F5078E /* PBXContainerItemProxy */;
-		};
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
@@ -1051,28 +1024,6 @@
 			};
 			name = Release;
 		};
-		7983E7F10B0C4F6F00F5078E /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = "Build All";
-			};
-			name = Debug;
-		};
-		7983E7F20B0C4F6F00F5078E /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Build All";
-				ZERO_LINK = NO;
-			};
-			name = Release;
-		};
 		79A8578E0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1107,17 +1058,6 @@
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = Connection;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
-		};
-		79A857900B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				COPY_PHASE_STRIP = YES;
-				GCC_ENABLE_FIX_AND_CONTINUE = NO;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				PRODUCT_NAME = "Build All";
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1283,16 +1223,6 @@
 				09D6602709FD379A0000BA00 /* Debug */,
 				09D6602809FD379A0000BA00 /* Release */,
 				79A857920B9267CA00D9C844 /* Plugin */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		7983E7F00B0C4F6F00F5078E /* Build configuration list for PBXAggregateTarget "Build All" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				7983E7F10B0C4F6F00F5078E /* Debug */,
-				7983E7F20B0C4F6F00F5078E /* Release */,
-				79A857900B9267CA00D9C844 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
