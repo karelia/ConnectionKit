@@ -546,7 +546,13 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			
 			_progress = progress;
 			
-			[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:self];
+			//Send notifications for ourselves, and all parents.
+			CKTransferRecord *record = self;
+			while (record)
+			{
+				[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordProgressChangedNotification object:record];
+				record = [record parent];
+			}
 		}
 	}
 }
