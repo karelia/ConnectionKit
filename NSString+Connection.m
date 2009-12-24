@@ -162,10 +162,11 @@
 
 - (NSString *)firstPathComponent
 {
-	for (NSString *pathComponent in [self pathComponents])
-		if (![pathComponent isEqualToString:@"/"])
-			return pathComponent;
-	return nil;	
+	//If we're empty, or just a "/", there is no first path component.
+	if ([[self pathComponents] count] < 2)
+		return nil;
+	
+	return [[self pathComponents] objectAtIndex:1];
 }
 
 - (NSString *)stringByDeletingFirstPathComponent
