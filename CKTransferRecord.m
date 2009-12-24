@@ -746,12 +746,12 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	[self setProgress:100];
 	[self setSpeed:0.0];
 
-	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
-	
 	//If parent is finished, they need notifications too.
 	CKTransferRecord *parent = [self parent];
 	if (parent && [parent transferred] == [parent size])
 		[parent transferDidFinish:parent error:error];
+	
+	[[NSNotificationCenter defaultCenter] postNotificationName:CKTransferRecordTransferDidFinishNotification object:self];
 }
 
 #pragma mark -
