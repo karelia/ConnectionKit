@@ -873,7 +873,7 @@ NSString *S3PathSeparator = @":";
 {
 	NSString *theDir = dir != nil ? dir : myCurrentDirectory;
 	
-	NSString *bucketName = [theDir firstPathComponent];
+	NSString *bucketName = ([theDir firstPathComponent] ?: @"");
 	NSString *prefixString = @"";
 	if ([bucketName length] > 1)
 	{
