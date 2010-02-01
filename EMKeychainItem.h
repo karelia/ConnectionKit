@@ -22,7 +22,7 @@
  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-//Version 1.0, Last Updated February 1st, 2010.
+//Version 1.0.1, Last Updated February 1st, 2010.
 
 
 #import <Cocoa/Cocoa.h>
@@ -93,8 +93,8 @@
 
 /*!
 	@abstract Returns, if possible, a generic keychain item that corresponds to the given service.
-	@param serviceName The service name.
-	@param username The username.
+	@param serviceName The service name. Cannot be nil.
+	@param username The username. Cannot be nil.
 	@result An EMGenericKeychainItem if the keychain item can be discovered. Otherwise, nil.
  */
 + (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceName
@@ -102,9 +102,9 @@
 
 /*!
 	@abstract Adds a keychain item for the given service.
-	@param serviceName The service name.
-	@param username The username.
-	@param password The password to associate with the username and service.
+	@param serviceName The service name. Cannot be nil.
+	@param username The username. Cannot be nil.
+	@param password The password to associate with the username and service. Cannot be nil.
 	@result An EMGenericKeychainItem if the service can be added to the keychain. Otherwise, nil.
  */
 + (EMGenericKeychainItem *)addGenericKeychainItemForService:(NSString *)serviceName
@@ -130,8 +130,8 @@
 
 /*!
 	@abstract Returns, if possible, an internet keychain item that corresponds to the given server.
-	@param server The server.
-	@param username The username.
+	@param server The server. Cannot be nil.
+	@param username The username. Cannot be nil.
 	@param path The path.
 	@param port The port.
 	@param protocol The protocol.
@@ -145,9 +145,9 @@
 
 /*!
 	@abstract Adds a keychain item for the given server.
-	@param server The server.
-	@param username The username.
-	@param password The password to associate with the server, username, path, port, and protocol.
+	@param server The server. Cannot be nil.
+	@param username The username. Cannot be nil.
+	@param password The password to associate with the server, username, path, port, and protocol. Cannot be nil.
 	@param path The path.
 	@param port The port.
 	@param protocol The protocol.

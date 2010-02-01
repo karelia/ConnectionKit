@@ -222,7 +222,7 @@ static BOOL _logsErrors;
 + (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceName 
 											withUsername:(NSString *)username
 {
-	if (!username || [username length] == 0)
+	if (!serviceName || !username)
 		return nil;
 	
 	const char *serviceNameCString = [serviceName UTF8String];
@@ -249,8 +249,9 @@ static BOOL _logsErrors;
 											   withUsername:(NSString *)username
 												   password:(NSString *)password
 {
-	if (!username || [username length] == 0 || !serviceName || [serviceName length] == 0)
+	if (!serviceName || !username || !password)
 		return nil;
+	
 	const char *serviceNameCString = [serviceName UTF8String];
 	const char *usernameCString = [username UTF8String];
 	const char *passwordCString = [password UTF8String];
@@ -343,16 +344,15 @@ static BOOL _logsErrors;
 													 port:(NSInteger)port
 												 protocol:(SecProtocolType)protocol
 {
-	if (!username || [username length] == 0 || !server || [server length] == 0)
+	if (!server || !username)
 		return nil;
+	
 	const char *serverCString = [server UTF8String];
 	const char *usernameCString = [username UTF8String];
 	const char *pathCString = [path UTF8String];
 	
 	if (!path || [path length] == 0)
-	{
 		pathCString = "";
-	}
 	
 	UInt32 passwordLength = 0;
 	char *password = nil;
@@ -387,17 +387,16 @@ static BOOL _logsErrors;
 														port:(NSInteger)port
 													protocol:(SecProtocolType)protocol
 {
-	if (!username || [username length] == 0 || !server || [server length] == 0 || !password || [password length] == 0)
+	if (!username || !server || !password)
 		return nil;
+	
 	const char *serverCString = [server UTF8String];
 	const char *usernameCString = [username UTF8String];
 	const char *passwordCString = [password UTF8String];
 	const char *pathCString = [path UTF8String];
 	
 	if (!path || [path length] == 0)
-	{
 		pathCString = "";
-	}
 	
 	SecKeychainItemRef item = nil;
 	OSStatus returnStatus = SecKeychainAddInternetPassword(NULL, strlen(serverCString), serverCString, 0, NULL, strlen(usernameCString), usernameCString, strlen(pathCString), pathCString, port, protocol, kSecAuthenticationTypeDefault, strlen(passwordCString), (void *)passwordCString, &item);
