@@ -22,13 +22,17 @@
  OTHER DEALINGS IN THE SOFTWARE.
  */
 
-//Version 1.0, Last Updated September 11th, 2009.
+//Version 1.0, Last Updated February 1st, 2010.
 
 
 #import <Cocoa/Cocoa.h>
 #import <Carbon/Carbon.h>
 #import <Security/Security.h>
 
+/*!
+	@abstract EMKeychainItem is a self-contained wrapper class for two-way communication with the keychain. You can add, retrieve, and remove both generic and internet keychain items.
+	@dicussion All keychain items have a username, password, and optionally a label.
+ */
 @interface EMKeychainItem : NSObject 
 {
 	@private
@@ -74,6 +78,10 @@
 
 #pragma mark -
 
+/*!
+	@abstract An EMGenericKeychainItem wraps the functionality and data-members associated with a generic keychain item.
+	@discussion Generic keychain items have a service name in addition to the standard keychain item properties.
+ */
 @interface EMGenericKeychainItem : EMKeychainItem
 {
 	@private
@@ -85,7 +93,7 @@
 
 /*!
 	@abstract Returns, if possible, a generic keychain item that corresponds to the given service.
-	@param serverName The service name.
+	@param serviceName The service name.
 	@param username The username.
 	@result An EMGenericKeychainItem if the keychain item can be discovered. Otherwise, nil.
  */
@@ -94,7 +102,7 @@
 
 /*!
 	@abstract Adds a keychain item for the given service.
-	@param serivceName The service name.
+	@param serviceName The service name.
 	@param username The username.
 	@param password The password to associate with the username and service.
 	@result An EMGenericKeychainItem if the service can be added to the keychain. Otherwise, nil.
@@ -106,6 +114,10 @@
 
 #pragma mark -
 
+/*!
+	@abstract An EMInternetKeychainItem wraps the functionality and data-members associated with an internet keychain item.
+	@discussion Internet keychain items can optionally have a server, path, port, and protocol in addition to the standard keychain item properties.
+ */
 @interface EMInternetKeychainItem : EMKeychainItem
 {
 	@private
@@ -122,12 +134,12 @@
 	@param username The username.
 	@param path The path.
 	@param port The port.
-	@parma protocol The protocol.
+	@param protocol The protocol.
 	@result An EMInternetKeychainItem if the keychain item can be discovered. Otherwise, nil.
  */
-+ (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)serverString
-											 withUsername:(NSString *)usernameString
-													 path:(NSString *)pathString
++ (EMInternetKeychainItem *)internetKeychainItemForServer:(NSString *)server
+											 withUsername:(NSString *)username
+													 path:(NSString *)path
 													 port:(NSInteger)port
 												 protocol:(SecProtocolType)protocol;
 
@@ -141,10 +153,10 @@
 	@param protocol The protocol.
 	@result An EMInternetKeychainItem if the item can be added to the keychain. Otherwise, nil.
  */
-+ (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)serverString
-												withUsername:(NSString *)usernameString
-													password:(NSString *)passwordString
-														path:(NSString *)pathString
++ (EMInternetKeychainItem *)addInternetKeychainItemForServer:(NSString *)server
+												withUsername:(NSString *)username
+													password:(NSString *)password
+														path:(NSString *)path
 														port:(NSInteger)port
 													protocol:(SecProtocolType)protocol;
 
