@@ -261,7 +261,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[req setHeader:@"close" forKey:@"Connection"]; // was Keep-Alive
 		[req setHeader:@"trailers" forKey:@"TE"];
 		
-		BOOL isAuthenticated = [self setAuthenticationWithRequest:req];
+		[self setAuthenticationWithRequest:req];
 		[[self client] appendString:[[req description] stringByAppendingString:@"\n"] toTranscript:CKTranscriptSent];
 		
 		NSData *headerPacket = [req serializedHeader];
@@ -274,7 +274,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 		[self sendData:headerPacket];
 		
 		//Send the actual content if there is any. We only do this if we've got some authentication (otherwise we're sending for no reason)
-		if (isAuthenticated && [req contentLength] > 0)
+		if ([req contentLength] > 0)
 			[self sendData:[req content]];
 	}
 	else 
