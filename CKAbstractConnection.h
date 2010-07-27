@@ -41,11 +41,11 @@
 
 extern NSString *CKConnectionErrorDomain;
 enum { 
-	CKConnectionErrorParsingDirectoryListing = 6000, 
-	CKConnectionStreamError, 
-	CKConnectionErrorBadPassword, 
-	CKConnectionNoConnectionsAvailable,
-	CKConnectionNoUsernameOrPassword,
+    CKConnectionErrorParsingDirectoryListing = 6000, 
+    CKConnectionStreamError, 
+    CKConnectionErrorBadPassword, 
+    CKConnectionNoConnectionsAvailable,
+    CKConnectionNoUsernameOrPassword,
 };
 
 
