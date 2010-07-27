@@ -37,16 +37,16 @@
 // Some shared Error Codes
 
 enum {
-	ConnectionErrorUploading = 49101,
-	ConnectionErrorDownloading,
-	ConnectionErrorCreatingDirectory,
-	ConnectionErrorChangingDirectory,
-	ConnectionErrorDeleting,
-	ConnectionErrorConnecting,
-	ConnectionErrorDisconnecting,
-	ConnectionErrorUnexpectedlyDisconnected,
-	ConnectionErrorListingDirectory,
-	ConnectionErrorGeneric,
+    ConnectionErrorUploading = 49101,
+    ConnectionErrorDownloading,
+    ConnectionErrorCreatingDirectory,
+    ConnectionErrorChangingDirectory,
+    ConnectionErrorDeleting,
+    ConnectionErrorConnecting,
+    ConnectionErrorDisconnecting,
+    ConnectionErrorUnexpectedlyDisconnected,
+    ConnectionErrorListingDirectory,
+    ConnectionErrorGeneric,
 };
 
 @protocol AbstractConnectionProtocol <NSObject, NSCopying>
