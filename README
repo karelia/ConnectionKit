@@ -1,5 +1,44 @@
 Notes on Using the Connection Framework
 
-Dependencies:
+BRANCHES
+
+Please consider carefully which branch you are going to use.   There are several branches that are not unified yet.
+
+LICENSING
+
+This framework is BSD-licensed.  It contains several other embedded bits of code so they should be acknowledged too.  This is what we believe to be an appropriate set of acknowledgements:
+
+ConnectionKit (Greg Hulands et al.) <https://github.com/karelia/ConnectionKit/>
+The Connection framework is © 2005-2007, Greg Hulands et al. All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+•	Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+•	Neither the name of Greg Hulands nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ConnectionKit uses SFTP code based on Fugu <http://rsug.itd.umich.edu/software/fugu/>
+Copyright © 2003-2007 Regents of The University of Michigan. All Rights Reserved. 
+Permission to use, copy, modify, and distribute this software and its documentation for any purpose and without fee is hereby granted, provided that the above copyright notice appears in all copies and that both that copyright notice and this permission notice appear in supporting documentation, and that the name of The University of Michigan not be used in advertising or publicity pertaining to distribution of the software without specific, written prior permission. This software is supplied as is without expressed or implied warranties of any kind.
+
+FTPConnection, part of ConnectionKit, makes use of
+
+Toby Paterson's InterThreadMessaging <http://www.cocoadev.com/index.pl?InterThreadMessaging>
+
+and
+
+Aaron Jacobs' OneButtonSocket <http://onebutton.org/>
+OneButtonSocket is licensed under the following terms:
+“This code derives from Aaron Jacobs' OneButton Socket, which was at the time of writing normally licensed under the terms of the GNU General Public License. You can find the "standard" version in the CVS repository of OneButton FTP (www.onebutton.org). 
+The SPECIFIC INCARNATION of OneButton Socket upon which this code is based was specially distributed to Greg Hulands on 2006-01-05 under the terms of a modified BSD-style license rather than the GPL. This does not indicate that any other version of OneButton Socket is or will be distributed under any license but the GPL.
+Copyright © 2005, Aaron Jacobs. All rights reserved.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+•	Redistributions of source code must retain the above two paragraph note about licensing of OneButton Socket, the above copyright notice, this list of conditions and the following disclaimer.
+•	Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+•	Neither the name of Aaron Jacobs nor the names of OneButton Socket or OneButton FTP may be used to endorse or promote products derived from this software without specific prior written permission from Aaron Jacobs.
+THIS SOFTWARE IS PROVIDED BY AARON JACOBS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL AARON JACOBS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+Thanks to Dustin Voss and his public domain AsyncSocket class for both the inspiration for this class and its method of listening for connections and handling communication with a delegate.”
+
+
 
 
