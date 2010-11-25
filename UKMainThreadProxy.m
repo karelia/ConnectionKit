@@ -23,18 +23,24 @@
 
 #import "UKMainThreadProxy.h"
 
-
 @implementation UKMainThreadProxy
 
 -(id)	initWithTarget: (id)targ
 {
 	self = [super init];
 	if( self )
+	{
 		target = targ;
+		waitForCompletion = YES;
+	}
 	
 	return self;
 }
 
+-(void)	setWaitForCompletion: (BOOL)state
+{
+	waitForCompletion = state;
+}
 
 // -----------------------------------------------------------------------------
 //	Introspection overrides:
@@ -47,7 +53,6 @@
 	return( does || [target respondsToSelector: itemAction] );
 }
 
-
 -(id)	performSelector: (SEL)itemAction
 {
 	BOOL	does = [super respondsToSelector: itemAction];
@@ -58,12 +63,11 @@
 		[self doesNotRecognizeSelector: itemAction];
 	
 	[target retain];
-	[target performSelectorOnMainThread: itemAction withObject: nil waitUntilDone: YES];
+	[target performSelectorOnMainThread: itemAction withObject: nil waitUntilDone: waitForCompletion];
 	[target release];
 	
 	return nil;
 }
-
 
 -(id)	performSelector: (SEL)itemAction withObject: (id)obj
 {
@@ -76,13 +80,12 @@
 	
 	[target retain];
 	[obj retain];
-	[target performSelectorOnMainThread: itemAction withObject: obj waitUntilDone: YES];
+	[target performSelectorOnMainThread: itemAction withObject: obj waitUntilDone: waitForCompletion];
 	[obj release];
 	[target release];
 	
 	return nil;
 }
-
 
 // -----------------------------------------------------------------------------
 //	Forwarding unknown methods to the target:
@@ -106,13 +109,12 @@
 	{
 		[invocation retainArguments];
 		[target retain];
-		[invocation performSelectorOnMainThread: @selector(invokeWithTarget:) withObject: target waitUntilDone: YES];
+		[invocation performSelectorOnMainThread: @selector(invokeWithTarget:) withObject: target waitUntilDone: waitForCompletion];
 		[target release];
 	}
 	else
         [self doesNotRecognizeSelector: itemAction];
 }
-
 
 // -----------------------------------------------------------------------------
 //	Safety net:
@@ -129,7 +131,6 @@
 }
 
 @end
-
 
 // -----------------------------------------------------------------------------
 //	Shorthand notation for getting a main thread proxy:

@@ -23,7 +23,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-
 // -----------------------------------------------------------------------------
 //  Categories:
 // -----------------------------------------------------------------------------
@@ -34,7 +33,6 @@
 -(id)	copyMainThreadProxy;	// Gives you a retained version.
 
 @end
-
 
 // -----------------------------------------------------------------------------
 //  Classes:
@@ -49,8 +47,11 @@
 @interface UKMainThreadProxy : NSObject
 {
 	IBOutlet id		target;
+	BOOL			waitForCompletion;
 }
 
 -(id)	initWithTarget: (id)targ;
+
+-(void)	setWaitForCompletion: (BOOL)state;
 
 @end
