@@ -175,7 +175,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				}
 				default: 
 				{
-					localizedDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"WebDAV Create Directory Error");
+					localizedDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occurred", @"WebDAV Create Directory Error");
 					break;
 				}
 			}

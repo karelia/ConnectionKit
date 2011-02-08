@@ -73,7 +73,7 @@
 #define RKLMakeString(str, hash, len, uc) ((RKLString){(str), (hash), (len), (UniChar *)(uc)})
 #define RKLClearCacheSlotLastString(ce) ({ ce->last = RKLMakeString(NULL, 0, 0, NULL); ce->lastFindRange = NSNotFoundRange; ce->lastMatchRange = NSNotFoundRange; })
 #define RKLGetRangeForCapture(regex, status, capture, range) ({ range.location = (NSUInteger)uregex_start(regex, capture, &status); range.length = (NSUInteger)uregex_end(regex, capture, &status) - range.location; status; })
-#define RKLInternalException [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"An internal error occured at %@:%d", [NSString stringWithUTF8String:__FILE__], __LINE__] userInfo:NULL]
+#define RKLInternalException [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"An internal error occurred at %@:%d", [NSString stringWithUTF8String:__FILE__], __LINE__] userInfo:NULL]
 
 // Exported symbols.  Error domains, keys, etc.
 NSString * const RKLICURegexErrorDomain          = @"RKLICURegexErrorDomain";
@@ -190,11 +190,11 @@ static NSError *RKLNSErrorForRegex(NSString *regexString, RKLRegexOptions regexO
   NSString *preContextString   = [NSString stringWithCharacters:&parseError->preContext[0]  length:u_strlen(&parseError->preContext[0])];
   NSString *postContextString  = [NSString stringWithCharacters:&parseError->postContext[0] length:u_strlen(&parseError->postContext[0])];
   NSString *errorNameString    = [NSString stringWithUTF8String:u_errorName(status)];
-  NSString *reasonString       = [NSString stringWithFormat:@"The error %@ occured at line %d, column %d: %@<<HERE>>%@", errorNameString, parseError->line, parseError->offset, preContextString, postContextString];
+  NSString *reasonString       = [NSString stringWithFormat:@"The error %@ occurred at line %d, column %d: %@<<HERE>>%@", errorNameString, parseError->line, parseError->offset, preContextString, postContextString];
 
   // If line == -1, parseError doesn't contain any useful information.  Set lineNumber to NULL,
   // which will stop adding objects to the dictionary at that point, ignoring everything after.
-  if(parseError->line == -1) { reasonString = [NSString stringWithFormat:@"The error %@ occured.", errorNameString]; lineNumber = NULL; }
+  if(parseError->line == -1) { reasonString = [NSString stringWithFormat:@"The error %@ occurred.", errorNameString]; lineNumber = NULL; }
 
   return([NSError errorWithDomain:RKLICURegexErrorDomain code:(NSInteger)status userInfo:[NSDictionary dictionaryWithObjectsAndKeys: @"There was an error compiling the regular expression.", @"NSLocalizedDescription", reasonString, @"NSLocalizedFailureReason", regexString, RKLICURegexRegexErrorKey, regexOptionsNumber, RKLICURegexRegexOptionsErrorKey, lineNumber, RKLICURegexLineErrorKey, offsetNumber, RKLICURegexOffsetErrorKey, preContextString, RKLICURegexPreContextErrorKey, postContextString, RKLICURegexPostContextErrorKey, errorNameString, RKLICURegexErrorNameErrorKey, NULL]]);
 }

@@ -187,7 +187,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			if (desc)
 				error = [NSError errorWithDomain:S3ErrorDomain code:1 userInfo:[NSDictionary dictionaryWithObject:desc forKey:NSLocalizedDescriptionKey]];
 			else
-				KTLog(S3ErrorDomain, KTLogError, @"An unknown error occured:\n%@", response);
+				KTLog(S3ErrorDomain, KTLogError, @"An unknown error occurred:\n%@", response);
 		}
 	}
 	

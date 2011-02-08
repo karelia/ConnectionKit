@@ -298,7 +298,7 @@
 				}
 				default: 
 				{
-					localizedDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occured", @"MobileMe Create Directory Error");
+					localizedDescription = LocalizedStringInConnectionKitBundle(@"An unknown error occurred", @"MobileMe Create Directory Error");
 					break;
 				}
 			}
