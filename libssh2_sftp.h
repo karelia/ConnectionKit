@@ -84,11 +84,15 @@ struct _LIBSSH2_SFTP_ATTRIBUTES {
 	/* If flags & ATTR_* bit is set, then the value in this struct will be meaningful
 	 * Otherwise it should be ignored
 	 */
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long flags;
 
 	libssh2_uint64_t filesize;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long uid, gid;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long permissions;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long atime, mtime;
 };
 
@@ -171,19 +175,22 @@ struct _LIBSSH2_SFTP_ATTRIBUTES {
 
 /* SFTP API */
 LIBSSH2_API LIBSSH2_SFTP *libssh2_sftp_init(LIBSSH2_SESSION *session);
-LIBSSH2_API int libssh2_sftp_shutdown(LIBSSH2_SFTP *sftp);
+LIBSSH2_API NSInteger libssh2_sftp_shutdown(LIBSSH2_SFTP *sftp);
+#warning 64BIT: Inspect use of unsigned long
 LIBSSH2_API unsigned long libssh2_sftp_last_error(LIBSSH2_SFTP *sftp);
 
 /* File / Directory Ops */
-LIBSSH2_API LIBSSH2_SFTP_HANDLE *libssh2_sftp_open_ex(LIBSSH2_SFTP *sftp, char *filename, unsigned int filename_len, unsigned long flags, long mode, int open_type);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of long
+LIBSSH2_API LIBSSH2_SFTP_HANDLE *libssh2_sftp_open_ex(LIBSSH2_SFTP *sftp, char *filename, NSUInteger filename_len, unsigned long flags, long mode, NSInteger open_type);
 #define libssh2_sftp_open(sftp, filename, flags, mode)			libssh2_sftp_open_ex((sftp), (char *)(filename), strlen((char *)filename), (flags), (mode), LIBSSH2_SFTP_OPENFILE)
 #define libssh2_sftp_opendir(sftp, path)						libssh2_sftp_open_ex((sftp), (char *)(path), strlen((char *)path), 0, 0, LIBSSH2_SFTP_OPENDIR)
 
 LIBSSH2_API size_t libssh2_sftp_read(LIBSSH2_SFTP_HANDLE *handle, char *buffer, size_t buffer_maxlen);
-LIBSSH2_API int libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, size_t buffer_maxlen, LIBSSH2_SFTP_ATTRIBUTES *attrs);
+LIBSSH2_API NSInteger libssh2_sftp_readdir(LIBSSH2_SFTP_HANDLE *handle, char *buffer, size_t buffer_maxlen, LIBSSH2_SFTP_ATTRIBUTES *attrs);
 LIBSSH2_API size_t libssh2_sftp_write(LIBSSH2_SFTP_HANDLE *handle, const char *buffer, size_t count);
 
-LIBSSH2_API int libssh2_sftp_close_handle(LIBSSH2_SFTP_HANDLE *handle);
+LIBSSH2_API NSInteger libssh2_sftp_close_handle(LIBSSH2_SFTP_HANDLE *handle);
 #define libssh2_sftp_close(handle)					libssh2_sftp_close_handle(handle)
 #define libssh2_sftp_closedir(handle)				libssh2_sftp_close_handle(handle)
 
@@ -192,34 +199,36 @@ LIBSSH2_API void libssh2_sftp_seek(LIBSSH2_SFTP_HANDLE *handle, size_t offset);
 
 LIBSSH2_API size_t libssh2_sftp_tell(LIBSSH2_SFTP_HANDLE *handle);
 
-LIBSSH2_API int libssh2_sftp_fstat_ex(LIBSSH2_SFTP_HANDLE *handle, LIBSSH2_SFTP_ATTRIBUTES *attrs, int setstat);
+LIBSSH2_API NSInteger libssh2_sftp_fstat_ex(LIBSSH2_SFTP_HANDLE *handle, LIBSSH2_SFTP_ATTRIBUTES *attrs, NSInteger setstat);
 #define libssh2_sftp_fstat(handle, attrs)				libssh2_sftp_fstat_ex((handle), (attrs), 0)
 #define libssh2_sftp_fsetstat(handle, attrs)			libssh2_sftp_fstat_ex((handle), (attrs), 1)
 
 
 
 /* Miscellaneous Ops */
-LIBSSH2_API int libssh2_sftp_rename_ex(LIBSSH2_SFTP *sftp,	char *source_filename,	unsigned int srouce_filename_len,
-															char *dest_filename,	unsigned int dest_filename_len,
+LIBSSH2_API NSInteger libssh2_sftp_rename_ex(LIBSSH2_SFTP *sftp,	char *source_filename,	NSUInteger srouce_filename_len,
+															char *dest_filename,	NSUInteger dest_filename_len,
+#warning 64BIT: Inspect use of long
 															long flags);
 #define libssh2_sftp_rename(sftp, sourcefile, destfile)		libssh2_sftp_rename_ex((sftp), (sourcefile), strlen(sourcefile), (destfile), strlen(destfile), \
 															LIBSSH2_SFTP_RENAME_OVERWRITE | LIBSSH2_SFTP_RENAME_ATOMIC | LIBSSH2_SFTP_RENAME_NATIVE)
 
-LIBSSH2_API int libssh2_sftp_unlink_ex(LIBSSH2_SFTP *sftp, char *filename, unsigned int filename_len);
+LIBSSH2_API NSInteger libssh2_sftp_unlink_ex(LIBSSH2_SFTP *sftp, char *filename, NSUInteger filename_len);
 #define libssh2_sftp_unlink(sftp, filename)					libssh2_sftp_unlink_ex((sftp), (filename), strlen(filename))
 
-LIBSSH2_API int libssh2_sftp_mkdir_ex(LIBSSH2_SFTP *sftp, char *path, unsigned int path_len, long mode);
+#warning 64BIT: Inspect use of long
+LIBSSH2_API NSInteger libssh2_sftp_mkdir_ex(LIBSSH2_SFTP *sftp, char *path, NSUInteger path_len, long mode);
 #define libssh2_sftp_mkdir(sftp, path, mode)				libssh2_sftp_mkdir_ex((sftp), (char *)(path), strlen((char *)path), (mode))
 
-LIBSSH2_API int libssh2_sftp_rmdir_ex(LIBSSH2_SFTP *sftp, char *path, unsigned int path_len);
+LIBSSH2_API NSInteger libssh2_sftp_rmdir_ex(LIBSSH2_SFTP *sftp, char *path, NSUInteger path_len);
 #define libssh2_sftp_rmdir(sftp, path)						libssh2_sftp_rmdir_ex((sftp), (path), strlen(path))
 
-LIBSSH2_API int libssh2_sftp_stat_ex(LIBSSH2_SFTP *sftp, char *path, unsigned int path_len, int stat_type, LIBSSH2_SFTP_ATTRIBUTES *attrs);
+LIBSSH2_API NSInteger libssh2_sftp_stat_ex(LIBSSH2_SFTP *sftp, char *path, NSUInteger path_len, NSInteger stat_type, LIBSSH2_SFTP_ATTRIBUTES *attrs);
 #define libssh2_sftp_stat(sftp, path, attrs)				libssh2_sftp_stat_ex((sftp), (path), strlen(path), LIBSSH2_SFTP_STAT, (attrs))
 #define libssh2_sftp_lstat(sftp, path, attrs)				libssh2_sftp_stat_ex((sftp), (path), strlen(path), LIBSSH2_SFTP_LSTAT, (attrs))
 #define libssh2_sftp_setstat(sftp, path, attrs)				libssh2_sftp_stat_ex((sftp), (path), strlen(path), LIBSSH2_SFTP_SETSTAT, (attrs))
 
-LIBSSH2_API int libssh2_sftp_symlink_ex(LIBSSH2_SFTP *sftp, const char *path, unsigned int path_len, char *target, unsigned int target_len, int link_type);
+LIBSSH2_API NSInteger libssh2_sftp_symlink_ex(LIBSSH2_SFTP *sftp, const char *path, NSUInteger path_len, char *target, NSUInteger target_len, NSInteger link_type);
 #define libssh2_sftp_symlink(sftp, orig, linkpath)			libssh2_sftp_symlink_ex((sftp), (orig), strlen(orig), (linkpath), strlen(linkpath), LIBSSH2_SFTP_SYMLINK)
 #define libssh2_sftp_readlink(sftp, path, target, maxlen)	libssh2_sftp_symlink_ex((sftp), (path), strlen(path), (target), (maxlen), LIBSSH2_SFTP_READLINK)
 #define libssh2_sftp_realpath(sftp, path, target, maxlen)	libssh2_sftp_symlink_ex((sftp), (path), strlen(path), (target), (maxlen), LIBSSH2_SFTP_REALPATH)

@@ -344,7 +344,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			[[self client] uploadDidFinish:[upload remotePath] error:error];
             
 			if ([upload delegateRespondsToTransferDidFinish])
-				[[upload delegate] transferDidFinish:[upload delegate] error:error];
+				[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 			
 			[upload release];
 			
@@ -420,8 +420,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[[self client] appendString:header toTranscript:CKTranscriptReceived];
 				
 				
-				unsigned start = headerRange.location + headerRange.length;
-				unsigned len = [myResponseBuffer length] - start;
+				NSUInteger start = headerRange.location + headerRange.length;
+				NSUInteger len = [myResponseBuffer length] - start;
 				NSData *fileData = [myResponseBuffer subdataWithRange:NSMakeRange(start,len)];
 				[myDownloadHandle writeData:fileData];
 				[myResponseBuffer setLength:0];
@@ -431,8 +431,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[fileData length]];
 				
 				
-				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
-				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				NSInteger percent = (bytesToTransfer == 0) ? 0 : (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
+				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		else  //add the data at the end of the file
@@ -451,13 +451,13 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[[downloadInfo delegate] transfer:record transferredDataOfLength:[data length]];
 			}
 			
-            int percent = (100 * bytesTransferred) / bytesToTransfer;
-			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+            NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
+			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			
 			if ([downloadInfo delegateRespondsToTransferProgressedTo])
 			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[[downloadInfo delegate] transfer:record progressedTo:[NSNumber numberWithInt:percent]];
+				NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
+				[[downloadInfo delegate] transfer:record progressedTo:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		
@@ -523,7 +523,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length
 {
 	[super stream:stream sentBytesOfLength:length]; // call http
 	if (length == 0) return;
@@ -539,7 +539,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 			}
 			else
 			{
-				length -= transferHeaderLength;
+				length -= (NSUInteger)transferHeaderLength;
 				transferHeaderLength = 0;
 				bytesTransferred += length;
 			}
@@ -551,15 +551,15 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 		if (bytesToTransfer > 0)
 		{
-			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
 			
 			if (percent != myLastPercent)
 			{
-				[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
                 
 				if ([upload delegateRespondsToTransferProgressedTo])
 				{
-					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInt:percent]];
+					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				myLastPercent = percent;
 			}
@@ -788,7 +788,7 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 																		  userInfo:record];
 	[record setProperty:fixedRemotePath forKey:CKQueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
+	[record setProperty:[NSNumber numberWithInteger:0] forKey:CKQueueDownloadTransferPercentReceived];
 	[self queueDownload:download];
 	
 	CKHTTPFileDownloadRequest *r = [CKHTTPFileDownloadRequest downloadRemotePath:fixedRemotePath to:dirPath];

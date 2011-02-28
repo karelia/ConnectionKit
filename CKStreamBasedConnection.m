@@ -60,7 +60,7 @@
 #import <Security/Security.h>
 #import <CoreServices/CoreServices.h>
 
-const unsigned int kStreamChunkSize = 2048;
+const NSUInteger kStreamChunkSize = 2048;
 const NSTimeInterval kStreamTimeOutValue = 10.0; // 10 second timeout
 
 NSString *StreamBasedErrorDomain = @"StreamBasedErrorDomain";
@@ -72,13 +72,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 @interface CKStreamBasedConnection (Private)
 - (void)checkQueue;
 - (void)processFileCheckingQueue;
-- (void)recalcUploadSpeedWithBytesSent:(unsigned)length;
-- (void)recalcDownloadSpeedWithBytesSent:(unsigned)length;
+- (void)recalcUploadSpeedWithBytesSent:(NSUInteger)length;
+- (void)recalcDownloadSpeedWithBytesSent:(NSUInteger)length;
 
 // SSL Stuff
 - (void)initializeSSL;
 - (void)negotiateSSLWithData:(NSData *)data;
-- (int)handshakeWithInputData:(NSMutableData *)inputData
+- (NSInteger)handshakeWithInputData:(NSMutableData *)inputData
 				   outputData:(NSMutableData *)outputData;
 
 @end
@@ -222,19 +222,19 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (NSString *)remoteIPAddress
 {
 	struct sockaddr sock;
-	socklen_t len = sizeof(sock);
+	socklen_t len = (socklen_t)sizeof(sock);
 	
 	if (getsockname([self socket], &sock, &len) >= 0) {
 		char *addr = inet_ntoa(((struct sockaddr_in *)&sock)->sin_addr);
-		return [NSString stringWithCString:addr];
+		return [NSString stringWithCString:addr encoding: NSASCIIStringEncoding];
 	}
 	return nil;
 }
 
-- (unsigned)localPort
+- (int)localPort
 {
 	struct sockaddr sock;
-	socklen_t len = sizeof(sock);
+	socklen_t len = (socklen_t)sizeof(sock);
 	
 	if (getsockname([self socket], &sock, &len) >= 0) {
 		return ntohs(((struct sockaddr_in *)&sock)->sin_port);
@@ -293,7 +293,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 #pragma mark -
 #pragma mark CKAbstractConnection Overrides
 
-- (BOOL)openStreamsToPort:(unsigned)port
+- (BOOL)openStreamsToPort:(NSUInteger)port
 {
 	NSHost *host = [CKCacheableHost hostWithName:[[[self request] URL] host]];
 	if(!host){
@@ -335,7 +335,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	// Set TCP Keep Alive
 	int opt = 1;
-	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &opt, sizeof(opt)))
+	if (setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, &opt, (socklen_t)sizeof(opt)))
 	{
 		NSLog(@"Failed to set socket keep alive setting");
 	}
@@ -348,7 +348,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	KTLog(CKTransportDomain, KTLogDebug, @"Connecting to %@:%d", [host address], port);
 	
-	if (connect(sock, (struct sockaddr *) &addr, sizeof(addr)) == 0)
+	if (connect(sock, (struct sockaddr *) &addr, (socklen_t)sizeof(addr)) == 0)
 	{
 		CFStreamCreatePairWithSocket(kCFAllocatorDefault, 
 									 sock, 
@@ -392,7 +392,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	_isForceDisconnecting = NO;
 	
-	int connectionPort = [self port];
+	NSInteger connectionPort = [self port];
 	if (0 == connectionPort)
 	{
 		connectionPort = 21;	// standard FTP control port
@@ -462,7 +462,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 #pragma mark -
 #pragma mark Stream Delegate Methods
 
-- (void)recalcUploadSpeedWithBytesSent:(unsigned)length
+- (void)recalcUploadSpeedWithBytesSent:(NSUInteger)length
 {
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval diff = now - _lastChunkSent;
@@ -470,7 +470,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	_lastChunkSent = now;
 }
 
-- (void)recalcDownloadSpeedWithBytesSent:(unsigned)length
+- (void)recalcDownloadSpeedWithBytesSent:(NSUInteger)length
 {
 	NSTimeInterval now = [NSDate timeIntervalSinceReferenceDate];
 	NSTimeInterval diff = now - _lastChunkReceived;
@@ -507,7 +507,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	return data;
 }
 
-- (int)availableData:(NSData **)dataOut ofLength:(int)length
+- (NSInteger)availableData:(NSData **)dataOut ofLength:(NSInteger)length
 {
 	if ([_receiveStream streamStatus] != NSStreamStatusOpen)
 	{
@@ -517,13 +517,13 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	struct pollfd fds;
 	fds.fd = [self socket];
 	fds.events = POLLIN;
-	int hasBytes = poll(&fds, 1, 10);
+	NSInteger hasBytes = poll(&fds, 1, 10);
 	
 	if (hasBytes > 0)
 	//if ([_receiveStream hasBytesAvailable])
 	{
 		uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * length);
-		int len = [_receiveStream read:buf maxLength:length];
+		NSInteger len = [_receiveStream read:buf maxLength:length];
 		NSData *data = nil;
 		
 		if (len >= 0)
@@ -567,7 +567,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	NSMutableData *dataBuffer = [self outputDataBuffer];
 	
 	[_sendBufferLock lock];
-	unsigned chunkLength = [dataBuffer length];
+	NSUInteger chunkLength = [dataBuffer length];
 	if ([self shouldChunkData])
 	{
 		chunkLength = MIN(kStreamChunkSize, [dataBuffer length]);
@@ -598,7 +598,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[_sendBufferLock unlock];
 }	
 
-- (unsigned)sendData:(NSData *)data // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
+- (NSUInteger)sendData:(NSData *)data // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
 {
 	if (myStreamFlags.wantsSSL)
 	{
@@ -624,7 +624,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	bufferWasEmpty = [dataBuffer length] == 0;
 	[dataBuffer appendData:data];
 	[_sendBufferLock unlock];
-	unsigned chunkLength = 0;
+	NSUInteger chunkLength = 0;
 	
 	if (bufferWasEmpty) {
 		// prime the sending
@@ -672,7 +672,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		case NSStreamEventHasBytesAvailable:
 		{
 			uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
-			int len = [_receiveStream read:buf maxLength:kStreamChunkSize];
+			NSInteger len = [_receiveStream read:buf maxLength:kStreamChunkSize];
 			if (len >= 0)
 			{
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
@@ -769,7 +769,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
 																	  target:self
 																   arguments:[NSArray array]];
-					int port = [self port];
+					NSInteger port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];
 					
@@ -941,7 +941,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 					NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(openStreamsToPort:)
 																	  target:self
 																   arguments:[NSArray array]];
-					int port = [self port];
+					NSInteger port = [self port];
 					[inv setArgument:&port atIndex:2];
 					[inv performSelector:@selector(invoke) inThread:_createdThread];
 					
@@ -1003,12 +1003,12 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length
 {
 	// we do nothing - just allow subclasses to know that something was sent
 }
 
-- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(NSUInteger)length
 {
 	// we do nothing - just allow subclasses to know that something was read
 }
@@ -1747,7 +1747,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	NSMutableData *outputData = [NSMutableData data];
 	[mySSLRawReadBuffer appendData:data];
-	int ret = [self handshakeWithInputData:mySSLRawReadBuffer outputData:outputData];
+	NSInteger ret = [self handshakeWithInputData:mySSLRawReadBuffer outputData:outputData];
 	
 	if ([outputData length])
 	{
@@ -1772,7 +1772,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	}
 }
 
-- (int)handshakeWithInputData:(NSMutableData *)inputData
+- (NSInteger)handshakeWithInputData:(NSMutableData *)inputData
 				   outputData:(NSMutableData *)outputData
 {
 	OSStatus ret;
@@ -1849,15 +1849,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	mySSLRecevieBuffer = inputData;
 	mySSLSendBuffer = [NSMutableData dataWithCapacity:2*[data length]];
-	unsigned int totalLength = [data length];
-	unsigned int processed = 0;
+	NSUInteger totalLength = [data length];
+	NSUInteger processed = 0;
 	const void *buffer = [data bytes];
 	
 	while (processed < totalLength)
 	{
 		size_t written = 0;
 		
-		int ret = SSLWrite(mySSLContext, buffer + processed, totalLength - processed, &written);
+		NSInteger ret = SSLWrite(mySSLContext, buffer + processed, totalLength - processed, &written);
 		if (noErr != ret)
 		{
 			return nil;
@@ -1877,7 +1877,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	mySSLRecevieBuffer = data;
 	mySSLSendBuffer = outputData;
 	NSMutableData *decryptedData = [NSMutableData dataWithCapacity:[data length]];
-	int ret = 0;
+	NSInteger ret = 0;
 	
 	while (! ret)
 	{

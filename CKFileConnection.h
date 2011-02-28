@@ -50,7 +50,7 @@ enum { kChangeToDirectory = 7000,
 
 @interface CKFileConnection : CKAbstractQueueConnection 
 {
-	int				myCurrentOperation;
+	NSInteger				myCurrentOperation;
 	NSString		*myCurrentDirectory;
 		
 	NSFileManager	*myFileManager;
@@ -63,8 +63,8 @@ enum { kChangeToDirectory = 7000,
  */
 - (id)init;
 
-- (int)currentOperation;
-- (void)setCurrentOperation:(int)aCurrentOperation;
+- (NSInteger)currentOperation;
+- (void)setCurrentOperation:(NSInteger)aCurrentOperation;
 
 + (CKFileConnection *)connection;
 

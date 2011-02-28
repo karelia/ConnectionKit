@@ -32,7 +32,8 @@ sshversion()
     int                 efd[ 2 ];
     char                *sshexec[] = { NULL, NULL, NULL }, *p;
     char                line[ MAXPATHLEN ], sshpath[ MAXPATHLEN ] = { 0 };
-    int                 estatus, rr;
+    int                 estatus;
+    ssize_t             rr;
     
     if (( sshbinary = CFPreferencesCopyValue( key, appID, user, host )) == NULL ) {
         strcpy( sshpath, "/usr/bin/ssh" );

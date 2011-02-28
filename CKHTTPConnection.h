@@ -48,11 +48,11 @@
 		unsigned didReceiveData:1;
 		unsigned didReceiveResponse:1;
 		unsigned didSendDataOfLength:1;
-		unsigned needsReconnection: 1;
-		unsigned isInReconnection: 1;
-		unsigned finishedReconnection: 1;
-		unsigned didFailAttemptedDigestAuthentication: 1;
-		unsigned unused: 27;
+		unsigned needsReconnection:1;
+		unsigned isInReconnection:1;
+		unsigned finishedReconnection:1;
+		unsigned didFailAttemptedDigestAuthentication:1;
+		unsigned unused:27;
 	} myHTTPFlags;
 }
 

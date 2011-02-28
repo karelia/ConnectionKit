@@ -41,14 +41,14 @@
     BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
     mem = BIO_push(b64, mem);
 	
-	BIO_write(mem, [self bytes], [self length]);
+	BIO_write(mem, [self bytes], (int)[self length]);
     BIO_flush(mem);
 	
 	char * base64Pointer;
-    long base64Length = BIO_get_mem_data(mem, &base64Pointer);
+    long base64Length __attribute__((unused)) = BIO_get_mem_data(mem, &base64Pointer);
 	
 	NSString * base64String = [NSString stringWithCString:base64Pointer
-												   length:base64Length];
+                                                 encoding:NSASCIIStringEncoding];
 	
 	BIO_free_all(mem);
     return base64String;
@@ -66,17 +66,17 @@
 
 - (NSString *)shortDescription
 {
-	unsigned int width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
-	unsigned int maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
+	NSUInteger width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
+	NSUInteger maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
 	if (!width) width = 32;
 	if (width > 64) width = 64;	// let's be reasonable people!
 	
 	if (!maxBytes) maxBytes = 1024;
 
 	unsigned char *bytes = (unsigned char *)[self bytes];
-	unsigned length = [self length];
+	NSUInteger length = [self length];
 	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %d bytes:\n", [self className], length];
-	int i, j;
+	NSInteger i, j;
 	
 	for ( i = 0 ; i < length ; i += width )
 	{
@@ -87,7 +87,7 @@
 		}
 		for ( j = 0 ; j < width ; j++ )
 		{
-			int offset = i+j;
+			NSInteger offset = i+j;
 			if (offset < length)
 			{
 				[buf appendFormat:@"%02X ",bytes[offset]];
@@ -100,7 +100,7 @@
 		[buf appendString:@"| "];
 		for ( j = 0 ; j < width ; j++ )
 		{
-			int offset = i+j;
+			NSInteger offset = i+j;
 			if (offset < length)
 			{
 				unsigned char theChar = bytes[offset];
@@ -126,16 +126,16 @@
 {
 	if ([self length] == 0) return self;
 	
-	unsigned full_length = [self length];
-	unsigned half_length = [self length] / 2;
+	NSUInteger full_length = [self length];
+	NSUInteger half_length = [self length] / 2;
 	
 	NSMutableData *decompressed = [NSMutableData dataWithLength: full_length + half_length];
 	BOOL done = NO;
-	int status;
+	NSInteger status;
 	
 	z_stream strm;
 	strm.next_in = (Bytef *)[self bytes];
-	strm.avail_in = [self length];
+	strm.avail_in = (uInt)[self length];
 	strm.total_out = 0;
 	strm.zalloc = Z_NULL;
 	strm.zfree = Z_NULL;
@@ -147,7 +147,7 @@
 		if (strm.total_out >= [decompressed length])
 			[decompressed increaseLengthBy: half_length];
 		strm.next_out = [decompressed mutableBytes] + strm.total_out;
-		strm.avail_out = [decompressed length] - strm.total_out;
+		strm.avail_out = (uInt)[decompressed length] - (uInt)strm.total_out;
 		
 		// Inflate another chunk.
 		status = inflate (&strm, Z_SYNC_FLUSH);
@@ -176,7 +176,7 @@
 	strm.opaque = Z_NULL;
 	strm.total_out = 0;
 	strm.next_in=(Bytef *)[self bytes];
-	strm.avail_in = [self length];
+	strm.avail_in = (uInt)[self length];
 	
 	if (deflateInit(&strm, Z_DEFAULT_COMPRESSION) != Z_OK) return nil;
 	
@@ -188,7 +188,7 @@
 			[compressed increaseLengthBy: 16384];
 		
 		strm.next_out = [compressed mutableBytes] + strm.total_out;
-		strm.avail_out = [compressed length] - strm.total_out;
+		strm.avail_out = (uInt)[compressed length] - (uInt)strm.total_out;
 		
 		deflate(&strm, Z_FINISH);  
 		
@@ -213,10 +213,10 @@
 	
 	uint8_t *find = (uint8_t *)[data bytes];
 	uint8_t *str = (uint8_t *)[self bytes];
-	unsigned i = 0, j = 1, start = 0; // , end = 0;
+	NSUInteger i = 0, j = 1, start = 0; // , end = 0;
 	
 	//wind it forward to the start of the range
-	unsigned offset = range.location;
+	NSUInteger offset = range.location;
 	
 	while (i + offset < [self length])
 	{
@@ -254,7 +254,7 @@
 	unsigned char md_value[EVP_MAX_MD_SIZE];
 	unsigned int md_len;
 	EVP_DigestInit(&mdctx, EVP_md5());
-	EVP_DigestUpdate(&mdctx, [self bytes], [self length]);
+	EVP_DigestUpdate(&mdctx, [self bytes], (unsigned int)[self length]);
 	EVP_DigestFinal(&mdctx, md_value, &md_len);
 	return [NSData dataWithBytes:md_value length:md_len];
 }
@@ -266,11 +266,11 @@
 	unsigned int md_len;
 	const char* k = [key cStringUsingEncoding:NSUTF8StringEncoding];
 	const unsigned char *data = [self bytes];
-	int len = [self length];
+	NSInteger len = [self length];
 	
 	HMAC_CTX_init(&mdctx);
-	HMAC_Init(&mdctx,k,strlen(k),EVP_sha1());
-	HMAC_Update(&mdctx,data, len);
+	HMAC_Init(&mdctx,k,(int)strlen(k),EVP_sha1());
+	HMAC_Update(&mdctx,data, (int)len);
 	HMAC_Final(&mdctx, md_value, &md_len);
 	HMAC_CTX_cleanup(&mdctx);
 	return [NSData dataWithBytes:md_value length:md_len];

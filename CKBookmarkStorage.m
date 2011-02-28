@@ -168,9 +168,9 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
-    return UINT_MAX;  //denotes an object that cannot be released
+    return NSUIntegerMax;  //denotes an object that cannot be released
 }
 
 - (void)release
@@ -194,7 +194,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return [NSArray arrayWithArray:myConnections];
 }
 
-- (void)insertItem:(id)item atIndex:(unsigned)index
+- (void)insertItem:(id)item atIndex:(NSUInteger)index
 {
 	[self willChangeValueForKey:@"connections"];
 	[myConnections insertObject:item atIndex:index];
@@ -213,7 +213,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 - (void)removeItem:(id)item
 {
 	[self willChangeValueForKey:@"connections"];
-	int index = [myConnections indexOfObjectIdenticalTo:item];
+	NSInteger index = [myConnections indexOfObjectIdenticalTo:item];
 	[myConnections removeObjectAtIndex:index];
 	[self didChangeValueForKey:@"connections"];
 	[self changed:nil];
@@ -260,7 +260,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return [[self allHosts] filteredArrayUsingPredicate:filter];
 }
 
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+- (void)insertHost:(CKHost *)host atIndex:(NSUInteger)index
 {
 	[self insertItem:host atIndex:index];
 }
@@ -297,7 +297,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return [self allCategoriesWithinItems:myConnections];
 }
 
-- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index
+- (void)insertCategory:(CKHostCategory *)category atIndex:(NSUInteger)index
 {
 	[self insertItem:category atIndex:index];
 }
@@ -381,10 +381,10 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 
 - (void)otherProcessChanged:(NSNotification *)notification
 {
-	if ([[NSProcessInfo processInfo] processIdentifier] != [[notification object] intValue])
+	if ([[NSProcessInfo processInfo] processIdentifier] != [[notification object] integerValue])
 	{
 		[self willChangeValueForKey:@"connections"];
-		unsigned idx = [myConnections indexOfObject:myBonjour];
+		NSUInteger idx = [myConnections indexOfObject:myBonjour];
 		[myConnections removeAllObjects];
 		NSArray *hosts = [self hostsFromDatabaseFile];
 		[myConnections addObjectsFromArray:hosts];
@@ -426,7 +426,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	}
 	
 	[fm createFileAtPath:lockPath contents:[NSData data] attributes:nil];
-	unsigned idx = 0; // clang complains that idx is uninitialized, so let's init to 0
+	NSUInteger idx = 0; // clang complains that idx is uninitialized, so let's init to 0
 	if (!myUsesLeopardStyleSourceList)
 	{
 		idx = [myConnections indexOfObject:myBonjour];
@@ -650,7 +650,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 }
 
 #pragma mark NSOutlineView DataSource
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	if (myFilter)
 	{
@@ -685,7 +685,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return 0;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 	if (myFilter)
 		return [myFilteredHosts objectAtIndex:index];
@@ -735,7 +735,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
     else if ([item isKindOfClass:[CKHost class]] || [item isKindOfClass:[CKHostCategory class]])
     {
         //We have a large icon here, we need to scale it to the nearest base 2 size, based on the rowheight of the outlineview.
-        float widthAndHeightDimension = pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
+        CGFloat widthAndHeightDimension = (CGFloat)pow(2, floor(log2([outlineView rowHeight]))); // Gets us 16, 32, 64, 128, etc.
         NSSize nearestSize = NSMakeSize(widthAndHeightDimension, widthAndHeightDimension);
         NSImage *icon = [item iconWithSize:nearestSize];
         
@@ -831,7 +831,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return [files count] > 0; //Only allow the drag if we are actually dragging something we can drag (i.e., not a BONJOUR/BOOKMARK header)
 }
 
-- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(int)proposedChildIndex
+- (NSDragOperation)outlineView:(NSOutlineView *)outlineView validateDrop:(id)dropInfo proposedItem:(id)item proposedChildIndex:(NSInteger)proposedChildIndex
 {
 	NSPasteboard *pboard = [dropInfo draggingPasteboard];
 	
@@ -879,7 +879,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	return NSDragOperationNone;
 }
 
-- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(int)index
+- (BOOL)outlineView:(NSOutlineView*)outlineView acceptDrop:(id )info item:(id)item childIndex:(NSInteger)index
 {
 	NSPasteboard *pboard = [info draggingPasteboard];
 	NSEnumerator *itemEnumerator = nil;
@@ -911,7 +911,7 @@ NSString *CKDraggedBookmarksPboardType = @"CKDraggedBookmarksPboardType";
 	while ((currentItem = [itemEnumerator nextObject]))
 	{
 		CKHostCategory *currentCategory = [currentItem category];
-		unsigned currentIndex = NSNotFound;
+		NSUInteger currentIndex = NSNotFound;
 		
 		NSArray *parentConnections = (currentCategory) ? [currentCategory hosts] : myConnections;
 		currentIndex = [parentConnections indexOfObjectIdenticalTo:currentItem];

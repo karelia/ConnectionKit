@@ -32,7 +32,7 @@
 @interface CKHTTPResponse : CKHTTPRequest 
 {	
 	CKHTTPRequest		*myRequest;
-	int					myResponseCode;
+	NSInteger					myResponseCode;
 	NSString			*myResponse;
 }
 
@@ -46,7 +46,7 @@
 + (id)responseWithRequest:(CKHTTPRequest *)request data:(NSData *)data;
 - (id)initWithRequest:(CKHTTPRequest *)request data:(NSData *)data;
 
-- (int)code;
+- (NSInteger)code;
 - (NSString *)response; //eg Multi Status
 - (NSString *)formattedResponse; // sublcasses override to format their contents
 

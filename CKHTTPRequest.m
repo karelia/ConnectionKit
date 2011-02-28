@@ -202,7 +202,7 @@
 	return [[[NSString alloc] initWithData:myContent encoding:NSUTF8StringEncoding] autorelease];
 }
 
-- (unsigned)contentLength
+- (NSUInteger)contentLength
 {
 	return [myContent length];
 }
@@ -316,7 +316,7 @@
 	
 	//if ([gzip length] < HTTPChunkSize)
 	{
-		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %u\r\n\r\n", [myContent length]];
+		NSString *contentLength = [NSString stringWithFormat:@"Content-Length: %lu\r\n\r\n", [myContent length]];
 		[packet appendData:[contentLength dataUsingEncoding:NSUTF8StringEncoding]];
 		
 		myHeaderLength = [packet length];
@@ -348,7 +348,7 @@
 	return packet;
 }
 
-- (unsigned)headerLength
+- (NSUInteger)headerLength
 {
 	return myHeaderLength;
 }

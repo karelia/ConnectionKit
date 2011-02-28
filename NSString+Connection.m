@@ -32,6 +32,7 @@
 #import <CommonCrypto/CommonDigest.h>
 
 #include <math.h>
+#include <openssl/md5.h>
 
 @implementation NSString (Connection)
 
@@ -174,7 +175,7 @@
 {
 	// toHash is an NSData
 	NSData *toHash = [self dataUsingEncoding:NSUTF8StringEncoding];
-	unsigned char *digest = (unsigned char *)MD5([toHash bytes], [toHash length], NULL);
+	unsigned char *digest = MD5([toHash bytes], [toHash length], NULL);
 	return [NSString stringWithFormat: @"%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 			digest[0], digest[1], 
 			digest[2], digest[3],
@@ -199,7 +200,7 @@
 		LocalizedStringInConnectionKitBundle(@"EB", @"filesize: exabytes")
 	};
 	
-	int power = floor(log(size) / log(1024));
+	NSInteger power = (NSInteger)floor(log(size) / log(1024));
 	if (power > 1)
 	{
 		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
@@ -273,7 +274,7 @@
 {
     NSString	*type = nil;
     char	tmp[ 11 ] = "----------";
-    int		i = 1, j = 0, len = [ self length ];
+    NSInteger		i = 1, j = 0, len = [ self length ];
     
     /*
      * if we're dealing with a server that outputs modes and types
@@ -369,9 +370,9 @@
     return( [ NSString stringWithUTF8String: tmp ] );
 }
 + ( NSString * )stringWithBytesOfUnknownExternalEncoding: ( char * )bytes
-												  length: ( unsigned )len
+												  length: (NSUInteger)len
 {
-    int                     i, enccount = 0;
+    size_t                     i, enccount = 0;
     CFStringRef             convertedString = NULL;
     CFStringEncoding        encodings[] = { kCFStringEncodingISOLatin2,
 		kCFStringEncodingISOLatin3,
@@ -417,9 +418,9 @@
 }
 
 + ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes
-										  length: ( unsigned )len
+										  length: (NSUInteger)len
 {
-    int                     i, enccount = 0;
+    size_t                     i, enccount = 0;
     CFStringRef             convertedString = NULL;
     CFStringEncoding        encodings[] = { kCFStringEncodingUTF8,
 		kCFStringEncodingISOLatin1,

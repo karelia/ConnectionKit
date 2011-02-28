@@ -398,7 +398,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 	ConnectionInterThreadMessage *msg = (ConnectionInterThreadMessage *) malloc(sizeof(struct ConnectionInterThreadMessage));
 	bzero(msg, sizeof(struct ConnectionInterThreadMessage));
 	// we have already retained our args from the initial creation of the msg
-	switch([type unsignedIntValue])
+	switch([type unsignedIntegerValue])
 	{
 		case kITMPostNotification:
 			msg->type = kITMPostNotification;
@@ -437,7 +437,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(postDelayedMessage:thread:notification:selector:receiver:arg1:arg2:)
 													  target:self
 												   arguments:[NSArray array]];
-	NSNumber *type = [NSNumber numberWithUnsignedInt:msg->type];
+	NSNumber *type = [NSNumber numberWithUnsignedInteger:msg->type];
 	[inv setArgument:&type atIndex:2];
 	[inv setArgument:&thread atIndex:3];
 	if (msg->type == kITMPostNotification)
@@ -600,7 +600,7 @@ ConnectionPostNotification (NSNotification *notification, NSThread *thread,
         {
             NSEnumerator *e = [anArgumentArray objectEnumerator];
             id argument;
-            int argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
+            NSInteger argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
             while ( argument = [e nextObject] )
             {
                 if ( [argument isMemberOfClass:[NSNull class]] )

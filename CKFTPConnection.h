@@ -77,7 +77,7 @@ typedef enum {
 	unsigned long long	_transferSize;
 	unsigned long long	_transferSent;
 	long long			_transferCursor;
-	int					_transferLastPercent;
+	NSInteger					_transferLastPercent;
 		
 	NSFileHandle		*_writeHandle;
 	NSFileHandle		*_readHandle;
@@ -91,31 +91,31 @@ typedef enum {
 	// Support for EPRT and PORT active connections
 	CFSocketRef			_activeSocket;
 	CFSocketNativeHandle _connectedActive;
-	unsigned			_lastActivePort;
+	int			_lastActivePort;
 	
 	//cache the server abilities
 	struct __dataCon {
-		unsigned canUseActive: 1;
-		unsigned canUsePASV: 1;
-		unsigned canUseEPSV: 1;
-		unsigned canUseEPRT: 1;
-		unsigned hasSize: 1;
-		unsigned hasADAT: 1;
-		unsigned hasAUTH: 1;
-		unsigned hasCCC: 1;
-		unsigned hasCONF: 1;
-		unsigned hasENC: 1;
-		unsigned hasMIC: 1;
-		unsigned hasPBSZ: 1;
-		unsigned hasPROT: 1;
-		unsigned hasMDTM: 1;
-		unsigned hasSITE: 1;
-		unsigned isActiveDataConn: 1;
-		unsigned loggedIn: 1;
-		unsigned isMicrosoft: 1;
-		unsigned setBinaryTransferMode: 1;
-		unsigned received226: 1;
-		unsigned unused: 11;
+		unsigned canUseActive:1;
+		unsigned canUsePASV:1;
+		unsigned canUseEPSV:1;
+		unsigned canUseEPRT:1;
+		unsigned hasSize:1;
+		unsigned hasADAT:1;
+		unsigned hasAUTH:1;
+		unsigned hasCCC:1;
+		unsigned hasCONF:1;
+		unsigned hasENC:1;
+		unsigned hasMIC:1;
+		unsigned hasPBSZ:1;
+		unsigned hasPROT:1;
+		unsigned hasMDTM:1;
+		unsigned hasSITE:1;
+		unsigned isActiveDataConn:1;
+		unsigned loggedIn:1;
+		unsigned isMicrosoft:1;
+		unsigned setBinaryTransferMode:1;
+		unsigned received226:1;
+		unsigned unused:11;
 	} _ftpFlags;
 	
 	NSTimer *_noopTimer;

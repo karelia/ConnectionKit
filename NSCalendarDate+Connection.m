@@ -36,7 +36,7 @@
 	// 2005-12-15T19:52:13.000Z
 	NSCalendarDate *d = [NSCalendarDate dateWithString:zulu calendarFormat:@"%Y-%m-%dT%H:%M:%S.000Z"];
 	NSTimeZone *zone = [NSTimeZone defaultTimeZone];
-	int offset = [zone secondsFromGMT];
+	NSInteger offset = [zone secondsFromGMT];
 	NSCalendarDate *newDate = [NSCalendarDate dateWithTimeIntervalSinceReferenceDate:[d timeIntervalSinceReferenceDate] + offset];
 	
 	return newDate;
@@ -106,7 +106,7 @@
 		if ([date compare:now] == NSOrderedDescending)
 		{
 			NSTimeInterval timeDifference = [date timeIntervalSinceDate:now];
-			float sixMonthsInSeconds = (3600*24*30.5*6);
+			CGFloat sixMonthsInSeconds = (CGFloat)(3600*24*30.5*6);
 			if (timeDifference > sixMonthsInSeconds) //If it's beyond 6 months in the future, it would not have been without a year. Roll it back.
 			{
 				date = [NSCalendarDate dateWithYear:[date yearOfCommonEra] - 1

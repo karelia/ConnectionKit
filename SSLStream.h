@@ -68,14 +68,14 @@ typedef enum {
 	NSStreamStatus		_status;
 	
 	struct __sslstreamflags {
-		unsigned sslEnabled: 1;
-		unsigned sslServerMode: 1;
-		unsigned isHandshaking: 1;
-		unsigned streamFailedNegotiation: 1;
-		unsigned streamAcceptedConnection: 1;
-		unsigned streamActivatedSSL: 1;
+		unsigned sslEnabled:1;
+		unsigned sslServerMode:1;
+		unsigned isHandshaking:1;
+		unsigned streamFailedNegotiation:1;
+		unsigned streamAcceptedConnection:1;
+		unsigned streamActivatedSSL:1;
 		
-		unsigned unused: 26;
+		unsigned unused:26;
 	} _flags;
 }
 
@@ -98,8 +98,8 @@ typedef enum {
 - (NSError *)streamError;
 - (NSStreamStatus)streamStatus;
 
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len;
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len;
+- (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)len;
+- (NSInteger)write:(const uint8_t *)buffer maxLength:(NSUInteger)len;
 
 @end
 

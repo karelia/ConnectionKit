@@ -162,7 +162,7 @@
 	return [_folderCreations objectAtIndex:0];
 }
 
-- (unsigned)numberOfCreateDirectories
+- (NSUInteger)numberOfCreateDirectories
 {
 	return [_folderCreations count];
 }
@@ -260,6 +260,7 @@
 	[_connections makeObjectsPerformSelector:@selector(createDirectory:) withObject:dirPath];
 }
 
+#warning 64BIT: Inspect use of unsigned long
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
 	NSEnumerator *e = [_connections objectEnumerator];
@@ -272,6 +273,7 @@
 	}
 }
 
+#warning 64BIT: Inspect use of unsigned long
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	NSAssert(path && ![path isEqualToString:@""], @"no file/path specified");
@@ -345,7 +347,7 @@
 {
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:remotePath forKey:@"file"];
-	[rec setObject:[NSNumber numberWithInt:0] forKey:@"percent"];
+	[rec setObject:[NSNumber numberWithInteger:0] forKey:@"percent"];
 	[rec setObject:[NSNumber numberWithLong:0] forKey:@"bytes"];
 	[self queueUpload:rec];
 	
@@ -378,7 +380,7 @@
 {
 	NSMutableDictionary *rec = [self newRecord];
 	[rec setObject:remotePath forKey:@"file"];
-	[rec setObject:[NSNumber numberWithInt:0] forKey:@"percent"];
+	[rec setObject:[NSNumber numberWithInteger:0] forKey:@"percent"];
 	[rec setObject:[NSNumber numberWithLong:0] forKey:@"bytes"];
 	[self queueUpload:rec];
 	
@@ -577,13 +579,13 @@
 {
 	NSMutableDictionary *rec = [self uploadWithRemotePath:remotePath];
 	NSNumber *per = [rec objectForKey:@"percent"];
-	int val = [per intValue];
-	val += [percent intValue];
-	[rec setObject:[NSNumber numberWithInt:val] forKey:@"percent"];
+	NSInteger val = [per integerValue];
+	val += [percent integerValue];
+	[rec setObject:[NSNumber numberWithInteger:val] forKey:@"percent"];
 	div_t divide = div(val, [_connections count]);
 	if (_flags.uploadPercent)
 	{
-		[_delegate connection:self upload:remotePath progressedTo:[NSNumber numberWithInt:divide.quot]];
+		[_delegate connection:self upload:remotePath progressedTo:[NSNumber numberWithInteger:divide.quot]];
 	}
 }
 

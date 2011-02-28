@@ -45,7 +45,7 @@ enum { CONNECT = 4000, COMMAND, ABORT, CANCEL_ALL, DISCONNECT, FORCE_DISCONNECT,
 @interface CKFileConnection (Private)
 - (void)processInvocations;
 - (void)fcUploadFile:(NSString *)f toFile:(NSString *)t;
-- (void)sendPortMessage:(int)message;
+- (void)sendPortMessage:(NSInteger)message;
 - (void)fcUpload:(CKInternalTransferRecord *)upload
 checkRemoteExistence:(NSNumber *)check;
 @end
@@ -62,11 +62,11 @@ checkRemoteExistence:(NSNumber *)check;
 #pragma mark -
 #pragma mark Accessors
 
-- (int)currentOperation
+- (NSInteger)currentOperation
 {
     return myCurrentOperation;
 }
-- (void)setCurrentOperation:(int)aCurrentOperation
+- (void)setCurrentOperation:(NSInteger)aCurrentOperation
 {
     myCurrentOperation = aCurrentOperation;
 }
@@ -201,7 +201,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSDictionary *fmDictionary = nil;
 	if (0 != aPermissions)
 	{
-		fmDictionary = [NSDictionary dictionaryWithObject:[NSNumber numberWithLong:aPermissions] forKey:NSFilePosixPermissions];
+		fmDictionary = [NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:aPermissions] forKey:NSFilePosixPermissions];
 	}
 	
 	NSError *error = nil;	
@@ -450,7 +450,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(to, @"path to cannot be found");
 	int fno = fileno(from), tno = fileno(to);
 	char bytes[8096];
-	int len;
+	ssize_t len;
 	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
 	unsigned long long sizeDecrementing = size;
 
@@ -477,9 +477,9 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
-		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInteger:100]];
 
-    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:100]];
+    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInteger:100]];
 	
 	
 	[upload retain];
@@ -567,9 +567,9 @@ checkRemoteExistence:(NSNumber *)check;
 		[[upload delegate] transfer:[upload userInfo] transferredDataOfLength:size];
 	// send 100%
 	if ([upload delegateRespondsToTransferProgressedTo])
-		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:100]];
+		[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInteger:100]];
 
-    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:100]];
+    [[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInteger:100]];
 	
 	NSError *error = nil;
 	if (!success)
@@ -671,10 +671,10 @@ checkRemoteExistence:(NSNumber *)check;
 		NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
         [[self client] download:remotePath didReceiveDataOfLength:[fh seekToEndOfFile]];
 		
-		[[self client] download:remotePath didProgressToPercent:[NSNumber numberWithInt:100]];
+		[[self client] download:remotePath didProgressToPercent:[NSNumber numberWithInteger:100]];
         
 		if ([download delegateRespondsToTransferProgressedTo])
-			[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:100]];
+			[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:100]];
 		
 		[download retain];
 		[self dequeueDownload];

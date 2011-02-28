@@ -233,7 +233,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
 {
 	struct timespec		nullts = { 0, 0 };
 	struct kevent		ev;
-	int					fd = open( [path fileSystemRepresentation], O_EVTONLY, 0 );
+	NSInteger					fd = open( [path fileSystemRepresentation], O_EVTONLY, 0 );
 	
     if( fd >= 0 )
     {
@@ -244,7 +244,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
         AT_SYNCHRONIZED( self )
         {
             [watchedPaths addObject: path];
-            [watchedFDs addObject: [NSNumber numberWithInt: fd]];
+            [watchedFDs addObject: [NSNumber numberWithInteger:fd]];
             kevent( queueFD, &ev, 1, NULL, 0, &nullts );
         }
     }
@@ -269,7 +269,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
 
 -(void) removePathFromQueue: (NSString*)path
 {
-    int		index = 0;
+    NSInteger		index = 0;
     int		fd = -1;
     
     AT_SYNCHRONIZED( self )
@@ -337,7 +337,7 @@ static UKKQueue * gUKKQueueSharedQueueSingleton = nil;
 
 -(void)		watcherThread: (id)sender
 {
-	int					n;
+	NSInteger					n;
     struct kevent		ev;
     struct timespec     timeout = { 5, 0 }; // 5 seconds timeout.
 	int					theFD = queueFD;	// So we don't have to risk accessing iVars when the thread is terminated.

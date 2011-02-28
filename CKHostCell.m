@@ -15,9 +15,9 @@ NSString *CKHostCellImageValueKey = @"CKHostCellImageValueKey";
 NSString *CKHostCellSecondaryStringValueKey = @"CKHostCellSecondaryStringValueKey";
 
 @interface NSImage (Omni)
-- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 - (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op;
-- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 - (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op;
 @end
 
@@ -25,10 +25,10 @@ NSString *CKHostCellSecondaryStringValueKey = @"CKHostCellSecondaryStringValueKe
 
 NSRect CKCenteredAspectRatioPreservedRect(NSRect rect, NSSize imgSize, NSSize maxCellSize)
 {
-	float ratioH = imgSize.width / NSWidth(rect);
-	float ratioV = imgSize.height / NSHeight(rect);
-	float destWidth = 0;
-	float destHeight = 0;
+	CGFloat ratioH = imgSize.width / NSWidth(rect);
+	CGFloat ratioV = imgSize.height / NSHeight(rect);
+	CGFloat destWidth = 0;
+	CGFloat destHeight = 0;
 	
 	if (ratioV > ratioH) {
 		destHeight = NSHeight(rect);
@@ -42,8 +42,8 @@ NSRect CKCenteredAspectRatioPreservedRect(NSRect rect, NSSize imgSize, NSSize ma
 		destHeight = (destWidth / imgSize.width) * imgSize.height;
 	}
 	
-	float x = NSMidX(rect);
-	float y = NSMidY(rect);
+	CGFloat x = NSMidX(rect);
+	CGFloat y = NSMidY(rect);
 	
 	return NSMakeRect(x - (destWidth / 2), y - (destHeight / 2), destWidth, destHeight);
 }
@@ -139,7 +139,7 @@ NSRect CKCenteredAspectRatioPreservedRect(NSRect rect, NSSize imgSize, NSSize ma
 {
     NSSize cellSize = [super cellSize];
     // TODO: WJS 1/31/04 -- I REALLY don't think this next line is accurate. It appears to not be used much, anyways, but still...
-    cellSize.width += [myIcon size].width + (BORDER_BETWEEN_EDGE_AND_IMAGE * 2.0) + (BORDER_BETWEEN_IMAGE_AND_TEXT * 2.0) + (SIZE_OF_TEXT_FIELD_BORDER * 2.0) + CELL_SIZE_FUDGE_FACTOR;
+    cellSize.width += (CGFloat)([myIcon size].width + (BORDER_BETWEEN_EDGE_AND_IMAGE * 2.0) + (BORDER_BETWEEN_IMAGE_AND_TEXT * 2.0) + (SIZE_OF_TEXT_FIELD_BORDER * 2.0) + CELL_SIZE_FUDGE_FACTOR);
     return cellSize;
 }
 
@@ -163,15 +163,15 @@ if (myFlags.imagePosition == NSImageLeft) { \
 \
 NSRect cellFrame = aRect, ignored; \
 if (imageSize.width > 0) \
-NSDivideRect(cellFrame, &ignored, &cellFrame, BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge); \
+NSDivideRect(cellFrame, &ignored, &cellFrame, (CGFloat)BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge); \
 \
 NSRect imageRect, textRect; \
 NSDivideRect(cellFrame, &imageRect, &textRect, imageSize.width, rectEdge); \
 \
 if (imageSize.width > 0) \
-NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
+NSDivideRect(textRect, &ignored, &textRect, (CGFloat)BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); \
 \
-textRect.origin.y += 1.0;
+textRect.origin.y += 1.0f;
 
 
 - (void)drawInteriorWithFrame:(NSRect)aRect inView:(NSView *)controlView;
@@ -196,22 +196,22 @@ textRect.origin.y += 1.0;
 	
 	NSRect cellFrame = aRect, ignored; 
 	if (imageSize.width > 0) 
-		NSDivideRect(cellFrame, &ignored, &cellFrame, BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge); 
+		NSDivideRect(cellFrame, &ignored, &cellFrame, (CGFloat)BORDER_BETWEEN_EDGE_AND_IMAGE, rectEdge); 
 				
 	NSRect imageRect, textRect; 
 	NSDivideRect(cellFrame, &imageRect, &textRect, imageSize.width, rectEdge); 
 				
 	if (imageSize.width > 0) 
-		NSDivideRect(textRect, &ignored, &textRect, BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); 
+		NSDivideRect(textRect, &ignored, &textRect, (CGFloat)BORDER_BETWEEN_IMAGE_AND_TEXT, rectEdge); 
 				
-	textRect.origin.y += 1.0;
+	textRect.origin.y += 1.0f;
 	
     
-    NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0, 0.0);
+    NSDivideRect(textRect, &ignored, &textRect, (CGFloat)SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    textRect = NSInsetRect(textRect, 1.0f, 0.0f);
 	
     if (![controlView isFlipped])
-        textRect.origin.y -= (textRect.size.height + FLIP_VERTICAL_OFFSET);
+        textRect.origin.y -= (textRect.size.height + (CGFloat)FLIP_VERTICAL_OFFSET);
 	
     // Draw the text
     NSMutableAttributedString *label = [[NSMutableAttributedString alloc] initWithAttributedString:[self attributedStringValue]];
@@ -247,7 +247,7 @@ textRect.origin.y += 1.0;
     if ([controlView isFlipped])
         [[self icon] drawFlippedInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver];
     else
-        [[self icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [[self icon] drawInRect:imageRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0f];
 }
 
 - (BOOL)trackMouse:(NSEvent *)theEvent inRect:(NSRect)cellFrame ofView:(NSView *)controlView untilMouseUp:(BOOL)flag;
@@ -261,7 +261,7 @@ textRect.origin.y += 1.0;
     [super editWithFrame:aRect inView:controlView editor:textObj delegate:anObject event:theEvent];
     myFlags.settingUpFieldEditor = NO;
 }
-- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(int)selStart length:(int)selLength;
+- (void)selectWithFrame:(NSRect)aRect inView:(NSView *)controlView editor:(NSText *)textObj delegate:(id)anObject start:(NSInteger)selStart length:(NSInteger)selLength;
 {
     _calculateDrawingRectsAndSizes;
     
@@ -272,11 +272,11 @@ textRect.origin.y += 1.0;
 	textRect.origin.y -= (textRect.size.height + FLIP_VERTICAL_OFFSET);
 	*/
 	
-	NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0, 0.0);
+	NSDivideRect(textRect, &ignored, &textRect, (CGFloat)SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    textRect = NSInsetRect(textRect, 1.0f, 0.0f);
 	
     if (![controlView isFlipped])
-        textRect.origin.y -= (textRect.size.height + FLIP_VERTICAL_OFFSET);
+        textRect.origin.y -= (textRect.size.height + (CGFloat)FLIP_VERTICAL_OFFSET);
 	
     // Draw the text
     NSMutableAttributedString *label = [[NSMutableAttributedString alloc] initWithAttributedString:[self attributedStringValue]];
@@ -354,11 +354,11 @@ textRect.origin.y += 1.0;
 {
     _calculateDrawingRectsAndSizes;
     
-	NSDivideRect(textRect, &ignored, &textRect, SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
-    textRect = NSInsetRect(textRect, 1.0, 0.0);
+	NSDivideRect(textRect, &ignored, &textRect, (CGFloat)SIZE_OF_TEXT_FIELD_BORDER, NSMinXEdge);
+    textRect = NSInsetRect(textRect, 1.0f, 0.0f);
 	
     if (![controlView isFlipped])
-        textRect.origin.y -= (textRect.size.height + FLIP_VERTICAL_OFFSET);
+        textRect.origin.y -= (textRect.size.height + (CGFloat)FLIP_VERTICAL_OFFSET);
 	
     // Draw the text
     NSMutableAttributedString *label = [[NSMutableAttributedString alloc] initWithAttributedString:[self attributedStringValue]];
@@ -379,7 +379,7 @@ textRect.origin.y += 1.0;
 
 
 @implementation NSImage (Omni)
-- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 {
     CGContextRef context;
 	
@@ -395,17 +395,17 @@ textRect.origin.y += 1.0;
 
 - (void)drawFlippedInRect:(NSRect)rect fromRect:(NSRect)sourceRect operation:(NSCompositingOperation)op;
 {
-    [self drawFlippedInRect:rect fromRect:sourceRect operation:op fraction:1.0];
+    [self drawFlippedInRect:rect fromRect:sourceRect operation:op fraction:1.0f];
 }
 
-- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(float)delta;
+- (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op fraction:(CGFloat)delta;
 {
     [self drawFlippedInRect:rect fromRect:NSZeroRect operation:op fraction:delta];
 }
 
 - (void)drawFlippedInRect:(NSRect)rect operation:(NSCompositingOperation)op;
 {
-    [self drawFlippedInRect:rect operation:op fraction:1.0];
+    [self drawFlippedInRect:rect operation:op fraction:1.0f];
 }
 @end
 
@@ -473,21 +473,21 @@ textRect.origin.y += 1.0;
 	NSPoint primaryPoint = NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, cellFrame.origin.y);
 	if (!secondaryText)
 	{
-		primaryPoint = NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, NSMidY(cellFrame) - (primarySize.height / 2.0));
+		primaryPoint = NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, NSMidY(cellFrame) - (primarySize.height / 2.0f));
 	}
 	[primaryText drawAtPoint:primaryPoint withAttributes:primaryTextAttributes];
 	
 		
-	[secondaryText drawAtPoint:NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, cellFrame.origin.y+cellFrame.size.height/2) 
+	[secondaryText drawAtPoint:NSMakePoint(cellFrame.origin.x+cellFrame.size.height+10, cellFrame.origin.y+cellFrame.size.height/2.0f) 
 				withAttributes:secondaryTextAttributes];
 	
 	
 	[[NSGraphicsContext currentContext] saveGraphicsState];
-	float yOffset = cellFrame.origin.y;
+	CGFloat yOffset = cellFrame.origin.y;
 	if ([controlView isFlipped]) {
 		NSAffineTransform* xform = [NSAffineTransform transform];
-		[xform translateXBy:0.0 yBy: cellFrame.size.height];
-		[xform scaleXBy:1.0 yBy:-1.0];
+		[xform translateXBy:0.0f yBy: cellFrame.size.height];
+		[xform scaleXBy:1.0f yBy:-1.0f];
 		[xform concat];		
 		yOffset = 0-cellFrame.origin.y;
 	}	
@@ -499,7 +499,7 @@ textRect.origin.y += 1.0;
 	[icon drawInRect:NSMakeRect(cellFrame.origin.x+5,yOffset+3,cellFrame.size.height-6, cellFrame.size.height-6)
 			fromRect:NSMakeRect(0,0,[icon size].width, [icon size].height)
 		   operation:NSCompositeSourceOver
-			fraction:1.0];
+			fraction:1.0f];
 	
 	[[NSGraphicsContext currentContext] setImageInterpolation: interpolation];
 	

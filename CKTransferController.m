@@ -691,7 +691,7 @@ static NSSize closedSize = { 452, 152 };
 
 
 // Return YES if there were problems, collecting stats into the supplied variables
-- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+- (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
 {
 	NSEnumerator *e = [myTransfers objectEnumerator];
 	CKTransferRecord *cur;
@@ -877,7 +877,7 @@ static NSSize closedSize = { 452, 152 };
 #pragma mark -
 #pragma mark Outline View Data Source
 
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	if (item == nil)
 	{
@@ -886,7 +886,7 @@ static NSSize closedSize = { 452, 152 };
 	return [[item contents] count];
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 	if (item == nil)
 	{
@@ -905,7 +905,7 @@ static NSSize closedSize = { 452, 152 };
 	NSString *ident = [tableColumn identifier];
 	if ([ident isEqualToString:@"progress"])
 	{
-		return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:[item progress]], @"progress", [item name], @"name", nil];
+		return [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:[item progress]], @"progress", [item name], @"name", nil];
 	}
 	else if ([ident isEqualToString:@"file"])
 	{
@@ -997,12 +997,12 @@ static NSSize closedSize = { 452, 152 };
 		// then consider it a fatal error.
 		if (CKSuccessStatus == myReturnStatus)
 		{
-			int countErrorUploads = 0;
-			int countSuccessUploads = 0;
+			NSInteger countErrorUploads = 0;
+			NSInteger countSuccessUploads = 0;
 			BOOL hadErrors = [self problemsTransferringCountingErrors:&countErrorUploads successes:&countSuccessUploads];
 // if this fraction (or more) of files had an error, consider it a problem uploading.
 #define ERROR_THRESHOLD 0.20
-			if (hadErrors && (float)countErrorUploads >= (ERROR_THRESHOLD * (float)countSuccessUploads) )
+			if (hadErrors && (CGFloat)countErrorUploads >= (ERROR_THRESHOLD * (CGFloat)countSuccessUploads) )
 			{
 				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 													 code:CKTooManyErrorsError

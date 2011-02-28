@@ -40,13 +40,13 @@ enum { START, STOP, TURN_ON_SSL };
 
 @interface SSLStream (Private)
 
-- (int)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output;
+- (NSInteger)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output;
 - (OSStatus)handleSSLReadToData:(void *)data size:(size_t *)size;
 - (OSStatus)handleSSLWriteFromData:(const void *)data size:(size_t *)size;
 - (NSData *)encryptData:(NSData *)data inputData:(NSMutableData *)input;
 - (NSData *)decryptData:(NSMutableData *)data outputData:(NSMutableData *)output;
 
-- (void)sendPortMessage:(int)aMessage;
+- (void)sendPortMessage:(NSInteger)aMessage;
 
 @end
 
@@ -179,7 +179,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 /*!	Send a message from the main thread to the port, to communicate with the background thread.
 */
-- (void)sendPortMessage:(int)aMessage
+- (void)sendPortMessage:(NSInteger)aMessage
 {
 	if (nil != _port)
 	{
@@ -218,7 +218,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 			_flags.isHandshaking = YES;
 			NSMutableData *output = [NSMutableData data];
 			[_receiveBufferEncrypted setData:_receiveBuffer];
-			int ret = [self performHandshakeWithData:_receiveBufferEncrypted unused:output];
+			NSInteger ret = [self performHandshakeWithData:_receiveBufferEncrypted unused:output];
 			if ([output length] > 0)
 			{
 				[_sendBufferEncrypted appendData:output];
@@ -322,9 +322,9 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	return _status;
 }
 
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len
+- (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)len
 {
-	int read = 0;
+	NSInteger read = 0;
 	if (_flags.sslEnabled)
 	{
 		
@@ -336,9 +336,9 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	return read;
 }
 
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
+- (NSInteger)write:(const uint8_t *)buffer maxLength:(NSUInteger)len
 {
-	int wrote = 0;
+	NSInteger wrote = 0;
 	if (_flags.sslEnabled)
 	{
 		
@@ -362,9 +362,9 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 
 #pragma mark SSLContext stuff
 
-- (int)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output
+- (NSInteger)performHandshakeWithData:(NSMutableData *)input unused:(NSMutableData *)output
 {
-	int ret = 0;
+	NSInteger ret = 0;
 	if (!_sslContext)
 	{
 		if (ret = SSLNewContext((Boolean)_flags.sslServerMode, &_sslContext))
@@ -429,15 +429,15 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 		
 	_inputData = input;
 	_outputData = [NSMutableData dataWithCapacity:2*[data length]];
-	unsigned int inputLength = [data length];
-	unsigned int processed = 0;
+	NSUInteger inputLength = [data length];
+	NSUInteger processed = 0;
 	const void *buffer = [data bytes];
 	
 	while (processed < inputLength)
 	{
 		size_t written = 0;
 		
-		int ret;
+		NSInteger ret;
 		if (ret = SSLWrite(_sslContext, buffer + processed, inputLength - processed, &written))
 		{
 			KTLog(CKStreamDomain, KTLogFatal, @"Failed SSLWrite with data (%d bytes)", inputLength);
@@ -459,7 +459,7 @@ void  writeStreamEventOccurred(CFWriteStreamRef stream, CFStreamEventType eventT
 	_inputData = data;
 	_outputData = output;
 	NSMutableData *decryptedData = [NSMutableData dataWithCapacity:[data length]];
-	int ret = 0;
+	NSInteger ret = 0;
 	
 	while (! ret)
 	{

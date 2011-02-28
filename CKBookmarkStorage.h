@@ -59,9 +59,9 @@
 	BOOL myIsGroupEditing;
 	BOOL myUsesLeopardStyleSourceList;
 	
-	int databaseWriteFailCount;
+	NSInteger databaseWriteFailCount;
 }
-extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
+extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 
 // you can set a custom database if you don't want to use the default shared registry.
 // I don't recommend it, but there are situations where this is needed.
@@ -76,8 +76,8 @@ extern NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 - (void)addCategory:(CKHostCategory *)category;
 - (void)removeCategory:(CKHostCategory *)category;
 
-- (void)insertCategory:(CKHostCategory *)category atIndex:(unsigned)index;
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index;
+- (void)insertCategory:(CKHostCategory *)category atIndex:(NSUInteger)index;
+- (void)insertHost:(CKHost *)host atIndex:(NSUInteger)index;
 
 - (void)addHost:(CKHost *)connection;
 - (void)removeHost:(CKHost *)connection;

@@ -12,6 +12,7 @@
 @interface ConnectionTest : NSObject {
 
 	NSMutableDictionary *myCallbackDictionary;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long 		myUniqueNumber;
 	
 	NSThread			*myMainThread;	// not retained.  Just for diagnostics.

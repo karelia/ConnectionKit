@@ -34,7 +34,7 @@ static NSImage *sErrorImage = nil;
 static NSImage *sFinishedImage = nil;
 static NSMutableParagraphStyle *sStyle = nil;
 
-NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
+NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 
 @implementation CKTransferProgressCell
 
@@ -60,12 +60,12 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 {
 	if ([value isKindOfClass:[NSDictionary class]])
 	{
-		myProgress = [[value objectForKey:@"progress"] intValue];
+		myProgress = [[value objectForKey:@"progress"] integerValue];
 		[super setObjectValue:[value objectForKey:@"name"]];
 	}
 	else if ([value isKindOfClass:[NSNumber class]])
 	{
-		myProgress = [value intValue];
+		myProgress = [value integerValue];
 	}
 }
 
@@ -112,7 +112,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		[sErrorImage drawInRect:centered
 					   fromRect:NSZeroRect
 					  operation:NSCompositeSourceOver
-					   fraction:1.0];
+					   fraction:1.0f];
 	}
 	else if (myProgress >= 0 && myProgress < 100)
 	{
@@ -130,16 +130,16 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		NSBezierPath *circle = [NSBezierPath bezierPathWithOvalInRect:imageRect];
 		NSPoint cp = NSMakePoint(NSMidX(imageRect), NSMidY(imageRect));
 		NSBezierPath *pie = [NSBezierPath bezierPath];
-		float degrees = (myProgress / 100.0) * 360.0;
+		CGFloat degrees = ((CGFloat)myProgress / 100.0f) * 360.0f;
 		
 		[pie moveToPoint:cp];
 		[pie lineToPoint:NSMakePoint(NSMidX(imageRect), NSMaxY(imageRect))];
 		
 		int i;
-		float radius = floor(NSMaxY(imageRect) - NSMidY(imageRect));
-		float x, y;
+		CGFloat radius = (CGFloat)floor(NSMaxY(imageRect) - NSMidY(imageRect));
+		CGFloat x, y;
 		for (i = 0; i <= floor(degrees); i++) {
-			float rad = i * (M_PI / 180.0);
+			float rad = i * ((float)M_PI / 180.0f);
 			x = sinf(rad) * radius;
 			y = cosf(rad) * radius;
 			[pie lineToPoint:NSMakePoint(cp.x + x, cp.y + y)];
@@ -149,13 +149,13 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		
 		[[NSColor whiteColor] set];
 		[circle fill];
-		[[sProgressColor colorWithAlphaComponent:0.5] set];
+		[[sProgressColor colorWithAlphaComponent:0.5f] set];
 		[pie fill];
 		[sProgressColor set];
-		[pie setLineWidth:1.0];
+		[pie setLineWidth:1.0f];
 		[pie stroke];
 		[sProgressColor set];
-		[circle setLineWidth:1.0];
+		[circle setLineWidth:1.0f];
 		[circle stroke];
 		
 		if ([controlView isFlipped]) 
@@ -178,15 +178,15 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		[sFinishedImage drawInRect:centered
 						  fromRect:NSZeroRect
 						 operation:NSCompositeSourceOver
-						  fraction:1.0];
+						  fraction:1.0f];
 	}
 }
 
 @end
 
-NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension)
+NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension)
 {
-	float max = fmax(ofSize.width, ofSize.height);
+	CGFloat max = (CGFloat)fmax(ofSize.width, ofSize.height);
 	if (max <= toMaxDimension)
 		return ofSize;
 	

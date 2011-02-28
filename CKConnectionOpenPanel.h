@@ -129,7 +129,7 @@ enum {
 				 modalDelegate:(id)modalDelegate 
 				didEndSelector:(SEL)didEndSelector 
                    contextInfo:(void *)contextInfo;
-- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
+- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
 
 @end
 

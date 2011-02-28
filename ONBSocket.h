@@ -181,8 +181,8 @@ typedef enum
 	
 	// The next available read/write tag.  These are to keep track of
 	// which timeout timers are old and which are current.
-	unsigned int			ONB_availableReadTag;
-	unsigned int			ONB_availableWriteTag;
+	NSUInteger			ONB_availableReadTag;
+	NSUInteger			ONB_availableWriteTag;
 	
 	// Are we currently waiting for an SSL handshake to complete?
 	BOOL					ONB_handshaking;
@@ -192,7 +192,7 @@ typedef enum
 	
 	// How many stream open events have completed?  We have to wait for
 	// both the input and the output stream to open before doing anything.
-	unsigned int			ONB_streamOpenCount;
+	NSUInteger			ONB_streamOpenCount;
 	
 	// The object used to encrypt and decrypt data
 	ONBSSLContext			*ONB_sslContext;
@@ -203,11 +203,11 @@ typedef enum
 
 	// For keeping track of read speed.
 	struct timeval			ONB_lastReadSpeedReport;
-	unsigned int			ONB_bytesReadSinceLastReadSpeedReport;
+	NSUInteger			ONB_bytesReadSinceLastReadSpeedReport;
 	
 	// For keeping track of write speed.
 	struct timeval			ONB_lastWriteSpeedReport;
-	unsigned int			ONB_bytesWrittenSinceLastWriteSpeedReport;
+	NSUInteger			ONB_bytesWrittenSinceLastWriteSpeedReport;
 	
 	// For knowing when to exit the socket thread.
 	BOOL					ONB_stopRunLoop;
@@ -297,7 +297,7 @@ typedef enum
 // it takes too long.  If timeout is negative, the read will never time out. userInfo can
 // be anything you need to keep track of (or nil).  It will be retained and then released
 // when the read fails or succeeds and is reported to the user.
-- (void)readDataOfLength:(unsigned int)length
+- (void)readDataOfLength:(NSUInteger)length
 					timeout:(NSTimeInterval)timeout
 					userInfo:(NSDictionary *)userInfo;
 

@@ -42,7 +42,7 @@
 	NSTimeInterval _lastTransferTime;
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;
-	float _speed;
+	CGFloat _speed;
 	NSUInteger _progress;
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
@@ -61,8 +61,8 @@
 - (unsigned long long)size;
 - (void)setSize:(unsigned long long)size;
 
-- (float)speed;
-- (void)setSpeed:(float)speed;	// TODO: Switch to CGFloat
+- (CGFloat)speed;
+- (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat
 
 - (NSError *)error;
 
@@ -111,7 +111,7 @@
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 + (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 
-- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+- (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
 
 @end
 

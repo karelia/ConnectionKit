@@ -78,7 +78,7 @@
 // any unused data and outputData will contain any data that needs to be written to
 // the socket.  Returns 0 if it needs to be called back when more input data arrives
 // and 1 if the handshake has completed.  Returns a negative error code on error.
-- (int)handshakeWithInputData:(NSMutableData *)inputData
+- (NSInteger)handshakeWithInputData:(NSMutableData *)inputData
 					outputData:(NSMutableData *)outputData;
 
 // Encrypt data to be written to the socket.  Data will be taken from inputData (which

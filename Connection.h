@@ -32,16 +32,21 @@
 #ifndef NSINTEGER_DEFINED
 #define NSINTEGER_DEFINED
 #ifdef __LP64__ || NS_BUILD_32_LIKE_64
+#warning 64BIT: Inspect use of long
 typedef long           NSInteger;
+#warning 64BIT: Inspect use of unsigned long
 typedef unsigned long  NSUInteger;
 #define NSIntegerMin   LONG_MIN
 #define NSIntegerMax   LONG_MAX
 #define NSUIntegerMax  ULONG_MAX
 #else
-typedef int            NSInteger;
+typedef NSInteger            NSInteger;
 typedef unsigned int   NSUInteger;
+#warning 64BIT: Inspect use of MAX/MIN constant; consider one of LONG_MAX/LONG_MIN/ULONG_MAX/DBL_MAX/DBL_MIN, or better yet, NSIntegerMax/Min, NSUIntegerMax, CGFLOAT_MAX/MIN
 #define NSIntegerMin   INT_MIN
+#warning 64BIT: Inspect use of MAX/MIN constant; consider one of LONG_MAX/LONG_MIN/ULONG_MAX/DBL_MAX/DBL_MIN, or better yet, NSIntegerMax/Min, NSUIntegerMax, CGFLOAT_MAX/MIN
 #define NSIntegerMax   INT_MAX
+#warning 64BIT: Inspect use of MAX/MIN constant; consider one of LONG_MAX/LONG_MIN/ULONG_MAX/DBL_MAX/DBL_MIN, or better yet, NSIntegerMax/Min, NSUIntegerMax, CGFLOAT_MAX/MIN
 #define NSUIntegerMax  UINT_MAX
 #endif
 #endif // NSINTEGER_DEFINED

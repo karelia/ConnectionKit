@@ -88,7 +88,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	return NO;
 }
 
-- (unsigned)hash
+- (NSUInteger)hash
 {
 	return [[self path] hash];
 }
@@ -200,7 +200,7 @@ NSString *CKDirectoryNodeDidRemoveNodesNotification = @"CKDirectoryNodeDidRemove
 	return myName;
 }
 
-int CKDirectoryContentsSort(id obj1, id obj2, void *context)
+NSInteger CKDirectoryContentsSort(id obj1, id obj2, void *context)
 {
 	CKDirectoryNode *n1 = (CKDirectoryNode *)obj1;
 	CKDirectoryNode *n2 = (CKDirectoryNode *)obj2;
@@ -334,7 +334,7 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	return myContents;
 }
 
-- (unsigned)countIncludingHiddenFiles:(BOOL)flag
+- (NSUInteger)countIncludingHiddenFiles:(BOOL)flag
 {
 	if (flag)
 	{
@@ -342,7 +342,7 @@ int CKDirectoryContentsSort(id obj1, id obj2, void *context)
 	}
 	else
 	{
-		unsigned i, c = 0;
+		NSUInteger i, c = 0;
 		CKDirectoryNode *cur;
 		
 		for (i = 0; i < [myContents count]; i++)
@@ -552,8 +552,8 @@ static NSImage *sSymFileIcon = nil;
 			[fileType setScalesWhenResized:YES];
 			[fileType setSize:NSMakeSize(128,128)];
 			[comp lockFocus];
-			[fileType drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-			[sSymFileIcon drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+			[fileType drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0f];
+			[sSymFileIcon drawInRect:NSMakeRect(0,0,128,128) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0f];
 			[comp unlockFocus];
 			[comp autorelease];
 			img = comp;
@@ -616,9 +616,9 @@ static NSImage *sSymFileIcon = nil;
 	return myCachedContents;
 }
 
-- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
+- (void)appendToDescription:(NSMutableString *)str indentation:(NSUInteger)indent
 {
-	int i;
+	NSInteger i;
 	for (i = 0; i < indent; i++)
 	{
 		[str appendString:@"\t"];

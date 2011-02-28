@@ -39,12 +39,10 @@ static NSMutableParagraphStyle *sStyle = nil;
 	return @"";
 }
 
-#define ICON_SIZE 16.0
-
 - (NSSize)cellSizeForBounds:(NSRect)aRect 
 {
     NSSize s = [super cellSizeForBounds:aRect];
-    s.height += 1.0 * 2.0;
+    s.height += 2.0f;
 	s.width += NSWidth(aRect);
     return s;
 }
@@ -54,12 +52,12 @@ static NSMutableParagraphStyle *sStyle = nil;
 	myMakingDragImage = flag;
 }
 
-#define ICON_INSET_VERT		2.0	/* The size of empty space between the icon end the top/bottom of the cell */ 
-#define ICON_SIZE			16.0/* Our Icons are ICON_SIZE x ICON_SIZE */
-#define ICON_INSET_HORIZ	4.0	/* Distance to inset the icon from the left edge. */
-#define ICON_TEXT_SPACING	2.0	/* Distance between the end of the icon and the text part */
+#define ICON_INSET_VERT		(CGFloat)2.0	/* The size of empty space between the icon end the top/bottom of the cell */ 
+#define ICON_SIZE			(CGFloat)16.0/* Our Icons are ICON_SIZE x ICON_SIZE */
+#define ICON_INSET_HORIZ	(CGFloat)4.0	/* Distance to inset the icon from the left edge. */
+#define ICON_TEXT_SPACING	(CGFloat)2.0	/* Distance between the end of the icon and the text part */
 
-#define ARROW_SIZE 7.0
+#define ARROW_SIZE (CGFloat)7.0
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {	
@@ -67,8 +65,8 @@ static NSMutableParagraphStyle *sStyle = nil;
 	{
 		NSMatrix *matrix = (NSMatrix *)controlView;
 		NSBrowser *browser = [matrix browser];
-		int row = [[matrix cells] indexOfObject:self];
-		int col = [browser columnOfMatrix:matrix]; 
+		NSInteger row = [[matrix cells] indexOfObject:self];
+		NSInteger col = [browser columnOfMatrix:matrix]; 
 		[[browser delegate] browser:browser willDisplayCell:self atRow:row column:col];
 		[self setLoaded:YES];
 	}
@@ -85,9 +83,9 @@ static NSMutableParagraphStyle *sStyle = nil;
 		
 		// Adjust the image frame top account for the fact that we may or may not be in a flipped control view, since when compositing the online documentation states: "The image will have the orientation of the base coordinate system, regardless of the destination coordinates".
         if ([controlView isFlipped]) {
-            imageFrame.origin.y += ceil((textFrame.size.height + imageFrame.size.height) / 2);
+            imageFrame.origin.y += (CGFloat)ceil((textFrame.size.height + imageFrame.size.height) / 2);
         } else {
-            imageFrame.origin.y += ceil((textFrame.size.height - imageFrame.size.height) / 2);
+            imageFrame.origin.y += (CGFloat)ceil((textFrame.size.height - imageFrame.size.height) / 2);
         }
 		
         // We don't draw the background when creating the drag and drop image
@@ -105,7 +103,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 			NSRectFill(highlightRect);
         }
 		
-        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0];
+        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0f];
 		
 		// Have NSBrowserCell kindly draw the text part, since it knows how to do that for us, no need to re-invent what it knows how to do.
 		[super drawInteriorWithFrame:textFrame inView:controlView];

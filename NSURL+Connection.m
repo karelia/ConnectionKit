@@ -40,7 +40,7 @@
     
     if (port)
     {
-        [buffer appendFormat:@":%i", [port intValue]];
+        [buffer appendFormat:@":%i", [port integerValue]];
     }
     
     self = [self initWithString:buffer];

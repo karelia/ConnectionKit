@@ -160,7 +160,7 @@
 - (void)ONB_errorWhileWriting;
 
 // Call this if an error occured while trying to perform an SSL handshake.
-- (void)ONB_errorDuringHandshake:(int)error;
+- (void)ONB_errorDuringHandshake:(NSInteger)error;
 
 // Call this if a stream reports an error.
 - (void)ONB_errorForStream:(NSStream *)stream;
@@ -209,14 +209,15 @@
 - (NSRange)rangeOfData:(NSData *)data range:(NSRange)searchRange
 {
 	const char *big = [self bytes];
-	unsigned int bigLength = [self length];
+	NSUInteger bigLength = [self length];
 	
 	const char *little = [data bytes];
-	unsigned int littleLength = [data length];
+	NSUInteger littleLength = [data length];
 	
 	if ((searchRange.location < 0) || (searchRange.location >= bigLength) ||
 		(searchRange.length < 0) || (searchRange.length + searchRange.location > bigLength))
 	{
+#warning 64BIT: Check formatting arguments
 		[NSException raise:NSRangeException
 					format:@"Invalid range (%u, %u) for rangeOfData:range:!",
 							searchRange.location,
@@ -232,8 +233,8 @@
 	if ((! data) || (! littleLength) || (! bigLength) || (littleLength > bigLength))
 		return range;
 	
-	unsigned int bigOffset;
-	unsigned int littleOffset;
+	NSUInteger bigOffset;
+	NSUInteger littleOffset;
 	for (bigOffset=0; bigOffset<bigLength - littleLength + 1; bigOffset++)
 	{
 		for (littleOffset=0; littleOffset<littleLength; littleOffset++)
@@ -348,7 +349,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 - (void)acceptConnectionsOnPort:(UInt16)port
 {
 	[self ONB_performSelectorOnOtherThread:@selector(ONB_acceptConnectionsOnPort:)
-			withObject:[NSNumber numberWithInt:port]];
+			withObject:[NSNumber numberWithInteger:port]];
 }
 
 - (void)connectToHost:(NSString *)host port:(UInt16)port
@@ -414,12 +415,12 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 // Set up a timer to time out the read if necessary, then construct a read request object and add it
 // to the queue.
-- (void)readDataOfLength:(unsigned int)length
+- (void)readDataOfLength:(NSUInteger)length
 					timeout:(NSTimeInterval)timeout
 					userInfo:(NSDictionary *)userInfo
 {
 	[self ONB_performSelectorOnOtherThread:@selector(ONB_readDataOfLength:timeout:userInfo:)
-								withObject:[NSNumber numberWithUnsignedInt:length]
+								withObject:[NSNumber numberWithUnsignedInteger:length]
 								withObject:[NSNumber numberWithDouble:timeout]
 								withObject:userInfo];
 }
@@ -526,7 +527,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 {
 	id delegate = [self delegate];
 	if ([delegate respondsToSelector:@selector(socket:acceptingConnectionsOnPort:)])
-		[delegate socket:self acceptingConnectionsOnPort:[port unsignedIntValue]];
+		[delegate socket:self acceptingConnectionsOnPort:[port unsignedIntegerValue]];
 }
 
 - (void)ONB_setLocalHost:(NSString *)host
@@ -670,13 +671,15 @@ void ONB_SocketCallback(CFSocketRef socket,
 {
 	struct sockaddr_in nativeAddr =
 	{
+#warning 64BIT: Inspect use of sizeof
 		/*sin_len*/		sizeof(struct sockaddr_in),
 		/*sin_family*/	AF_INET,
-		/*sin_port*/	htons ([port intValue]),
+		/*sin_port*/	htons ([port integerValue]),
 		/*sin_addr*/	{ htonl (INADDR_ANY) },
 		/*sin_zero*/	{ 0 }
 	};
 	
+#warning 64BIT: Inspect use of sizeof
 	NSData *address = [NSData dataWithBytes:&nativeAddr length:sizeof(nativeAddr)];
 	
 	CFSocketContext context;
@@ -698,21 +701,23 @@ void ONB_SocketCallback(CFSocketRef socket,
 	CFRunLoopAddSource(runLoop, ONB_runLoopSource, kCFRunLoopDefaultMode);
 
 	// Set the SO_REUSEADDR flag.
-	int reuseOn = 1;
-	setsockopt(CFSocketGetNative(ONB_acceptSocket), SOL_SOCKET, SO_REUSEADDR, &reuseOn, sizeof(int));
+	NSInteger reuseOn = 1;
+#warning 64BIT: Inspect use of sizeof
+	setsockopt(CFSocketGetNative(ONB_acceptSocket), SOL_SOCKET, SO_REUSEADDR, &reuseOn, sizeof(NSInteger));
 	
 	CFSocketSetAddress(ONB_acceptSocket, (CFDataRef)address);
 
 	// Find out on what port we are now listening.
 	CFSocketNativeHandle native = CFSocketGetNative(ONB_acceptSocket);
 	struct sockaddr_in addressStruct;
+#warning 64BIT: Inspect use of sizeof
 	socklen_t length = sizeof(struct sockaddr_in);
 	if (getsockname(native, (struct sockaddr *)&addressStruct, &length) == -1)
 		return;
 
-	unsigned int actualPort = addressStruct.sin_port;
+	NSUInteger actualPort = addressStruct.sin_port;
 	[self ONB_performSelectorOnOtherThread:@selector(ONB_acceptingOnPort:)
-								withObject:[NSNumber numberWithUnsignedInt:actualPort]];
+								withObject:[NSNumber numberWithUnsignedInteger:actualPort]];
 }
 
 - (void)ONB_connectToHost:(NSString *)host port:(NSNumber *)port
@@ -745,7 +750,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 - (void)ONB_readDataOfLength:(NSNumber *)length timeout:(NSNumber *)timeout userInfo:(NSDictionary *)userInfo
 {
-	NSNumber *readTag = [NSNumber numberWithUnsignedInt:ONB_availableReadTag++];
+	NSNumber *readTag = [NSNumber numberWithUnsignedInteger:ONB_availableReadTag++];
 	
 	NSMutableDictionary *readRequest = [NSMutableDictionary dictionaryWithObjectsAndKeys:length,
 																						@"terminator",
@@ -773,7 +778,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 - (void)ONB_readDataUntilData:(NSData *)terminator timeout:(NSNumber *)timeout userInfo:(NSDictionary *)userInfo
 {
-	NSNumber *readTag = [NSNumber numberWithUnsignedInt:ONB_availableReadTag++];
+	NSNumber *readTag = [NSNumber numberWithUnsignedInteger:ONB_availableReadTag++];
 	
 	NSMutableDictionary *readRequest = [NSMutableDictionary dictionaryWithObjectsAndKeys:terminator,
 																							@"terminator",
@@ -801,7 +806,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 - (void)ONB_readAllAvailableDataWithTimeout:(NSNumber *)timeout userInfo:(NSDictionary *)userInfo
 {
-	NSNumber *readTag = [NSNumber numberWithUnsignedInt:ONB_availableReadTag++];
+	NSNumber *readTag = [NSNumber numberWithUnsignedInteger:ONB_availableReadTag++];
 	
 	NSMutableDictionary *readRequest = [NSMutableDictionary dictionaryWithObjectsAndKeys:readTag,
 																							@"readTag",
@@ -827,7 +832,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 - (void)ONB_writeData:(NSData *)data timeout:(NSNumber *)timeout userInfo:(NSDictionary *)userInfo
 {
-	NSNumber *writeTag = [NSNumber numberWithUnsignedInt:ONB_availableWriteTag++];
+	NSNumber *writeTag = [NSNumber numberWithUnsignedInteger:ONB_availableWriteTag++];
 
 	NSMutableData *dataContainer = [NSMutableData dataWithData:data];
 	NSDictionary *writeRequest = [NSDictionary dictionaryWithObjectsAndKeys:dataContainer,
@@ -894,12 +899,13 @@ void ONB_SocketCallback(CFSocketRef socket,
 		
 		default:
 		{
-			NSNumber *eventCode = [NSNumber numberWithInt:streamEvent];
+			NSNumber *eventCode = [NSNumber numberWithInteger:streamEvent];
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObject:eventCode forKey:@"streamEvent"];
 			
 			[self ONB_disconnectWithError:[NSError errorWithDomain:ONBSocketErrorDomain
 																code:ONBUnhandledStreamEvent
 																userInfo:userInfo]];
+#warning 64BIT: Check formatting arguments
 			NSLog(@"Unhandled stream event: %u", streamEvent);
 		}
 		return;
@@ -938,7 +944,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 - (void)ONB_performHandshake
 {
 	NSMutableData *outputData = [NSMutableData data];
-	int ret = [ONB_sslContext handshakeWithInputData:ONB_rawReadData outputData:outputData];
+	NSInteger ret = [ONB_sslContext handshakeWithInputData:ONB_rawReadData outputData:outputData];
 	
 	if ([outputData length])
 		[self ONB_addDataToEncryptedWriteBuffer:outputData];
@@ -1065,7 +1071,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 		
 		if ([terminator isKindOfClass:[NSNumber class]])
 		{
-			unsigned int requestedLength = [(NSNumber *)terminator unsignedIntValue];
+			NSUInteger requestedLength = [(NSNumber *)terminator unsignedIntegerValue];
 
 			// Are we able to fill the request?
 			if (requestedLength <= [ONB_decryptedReadData length])
@@ -1087,18 +1093,18 @@ void ONB_SocketCallback(CFSocketRef socket,
 			// We don't need to search the entire decrypted data buffer if we've already
 			// searched part of it on a previous pass.
 			NSNumber *previouslySearchedNumber = [readRequest objectForKey:@"previouslySearched"];
-			unsigned int previouslySearched = (previouslySearchedNumber) ? [previouslySearchedNumber unsignedIntValue] : 0;
+			NSUInteger previouslySearched = (previouslySearchedNumber) ? [previouslySearchedNumber unsignedIntegerValue] : 0;
 			NSRange searchRange = NSMakeRange(previouslySearched, [ONB_decryptedReadData length] - previouslySearched);
 			NSRange terminatorRange = [ONB_decryptedReadData rangeOfData:(NSData *)terminator range:searchRange];
 			
-			unsigned int location = terminatorRange.location;
-			unsigned int length = terminatorRange.length;
+			NSUInteger location = terminatorRange.location;
+			NSUInteger length = terminatorRange.length;
 			
 			// If we didn't find the terminator, then we'll have to wait until we get more data to try again.
 			if (location == NSNotFound)
 			{
 				previouslySearched = MAX(0, [ONB_decryptedReadData length] - [(NSData *)terminator length] + 1);
-				previouslySearchedNumber = [NSNumber numberWithUnsignedInt:previouslySearched];
+				previouslySearchedNumber = [NSNumber numberWithUnsignedInteger:previouslySearched];
 				[readRequest setObject:previouslySearchedNumber forKey:@"previouslySearched"];
 				break;
 			}
@@ -1141,6 +1147,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	CFRelease(nativeData);
 	
 	struct sockaddr_in tmpaddr;
+#warning 64BIT: Inspect use of sizeof
 	socklen_t len = sizeof(struct sockaddr_in);
 	if (getsockname(native, (struct sockaddr *)&tmpaddr, &len) == -1)
 		return;
@@ -1155,7 +1162,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 {
 	NSMutableData *data = [NSMutableData dataWithLength:1024];
 	uint8_t *buffer = (uint8_t *)[data mutableBytes];
-	int ret = [ONB_inputStream read:buffer maxLength:1024];
+	NSInteger ret = [ONB_inputStream read:buffer maxLength:1024];
 	
 	if (ret < 0)
 	{
@@ -1241,7 +1248,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 
 - (void)ONB_outputStreamIsWritable
 {
-	unsigned int bufferLength = [ONB_encryptedWriteData length];
+	NSUInteger bufferLength = [ONB_encryptedWriteData length];
 	
 	// If there's no encrypted data to give, try to put some more on the buffer for next time.
 	if (! bufferLength)
@@ -1251,7 +1258,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	}
 	
 	const uint8_t *buffer = (const uint8_t *)[ONB_encryptedWriteData bytes];
-	int ret = [ONB_outputStream write:buffer maxLength:bufferLength];
+	NSInteger ret = [ONB_outputStream write:buffer maxLength:bufferLength];
 	
 	if (ret < 1)
 	{
@@ -1294,12 +1301,13 @@ void ONB_SocketCallback(CFSocketRef socket,
 		[self ONB_outputStreamIsWritable];
 }
 
-- (void)ONB_errorDuringHandshake:(int)error
+- (void)ONB_errorDuringHandshake:(NSInteger)error
 {
 	[self ONB_performSelectorOnOtherThread:@selector(ONB_sslHandshakeFailedWithError:)
 								withObject:[NSError errorWithDomain:ONBSocketSSLErrorDomain
 																code:error
 																userInfo:nil]];
+#warning 64BIT: Check formatting arguments
 	NSLog(@"Error during handshake: %d", error);
 }
 
@@ -1551,7 +1559,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	
 	NSInvocation *invocation = [array objectAtIndex:0];
 	NSMethodSignature *signature = [invocation methodSignature];
-	unsigned int argumentCount = [signature numberOfArguments];
+	NSUInteger argumentCount = [signature numberOfArguments];
 
 	NSDate *timeoutDate = [NSDate dateWithTimeIntervalSinceNow:0.01];
 	[invocation setArgument:&timeoutDate atIndex:argumentCount-1];
@@ -1573,7 +1581,7 @@ void ONB_SocketCallback(CFSocketRef socket,
 	
 	if (messageSent)
 	{
-		unsigned int i;
+		NSUInteger i;
 		for (i=3; i<argumentCount-2; i++)
 		{
 			id argument;
@@ -1634,12 +1642,12 @@ void ONB_SocketCallback(CFSocketRef socket,
 	
 }
 
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len
+- (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)len
 {
 	
 }
 
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len
+- (NSInteger)write:(const uint8_t *)buffer maxLength:(NSUInteger)len
 {
 	
 }

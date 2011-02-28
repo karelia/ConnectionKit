@@ -97,7 +97,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	NSMutableDictionary *plist = [NSMutableDictionary dictionary];
 	
 	[plist setObject:@"category" forKey:@"class"];
-	[plist setObject:[NSNumber numberWithInt:[CKHostCategory version]] forKey:@"version"];
+	[plist setObject:[NSNumber numberWithInteger:[CKHostCategory version]] forKey:@"version"];
 	[plist setObject:myName forKey:@"name"];
 	NSMutableArray *cats = [NSMutableArray array];
 	NSEnumerator *e = [myChildCategories objectEnumerator];
@@ -116,7 +116,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 {
 	if (self = [super init])
 	{
-		(void) [coder decodeIntForKey:@"version"];
+		(void) [coder decodeIntegerForKey:@"version"];
 #pragma unused (version)
 		myName = [[coder decodeObjectForKey:@"name"] copy];
 		myIsEditable = YES;
@@ -127,7 +127,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 
 - (void)encodeWithCoder:(NSCoder *)coder
 {
-	[coder encodeInt:[CKHostCategory version] forKey:@"version"];
+	[coder encodeInteger:[CKHostCategory version] forKey:@"version"];
 	[coder encodeObject:myName forKey:@"name"];
 	[coder encodeObject:myChildCategories forKey:@"categories"];
 }
@@ -161,7 +161,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[self didChange];
 }
 
-- (void)insertItem:(id)item atIndex:(unsigned)index
+- (void)insertItem:(id)item atIndex:(NSUInteger)index
 {
 	if (index >= [myChildCategories count])
 	{
@@ -189,7 +189,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[self addItem:cat];
 }
 
-- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(unsigned)index
+- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(NSUInteger)index
 {
 	[self insertItem:cat atIndex:index];
 }
@@ -209,7 +209,7 @@ NSString *CKHostCategoryChanged = @"CKHostCategoryChanged";
 	[self addItem:host];
 }
 
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index
+- (void)insertHost:(CKHost *)host atIndex:(NSUInteger)index
 {
 	[self insertItem:host atIndex:index];
 }
@@ -271,7 +271,7 @@ static NSImage *sFolderImage = nil;
 		NSString *folderIconPath = (isLeopard) ? ([bundle pathForResource:@"LeopardFolder" ofType:@"tiff"]) : ([bundle pathForResource:@"AquaFolder" ofType:@"png"]);
 		sFolderImage = [[NSImage alloc] initWithContentsOfFile:folderIconPath];
 		[sFolderImage setScalesWhenResized:YES];
-		[sFolderImage setSize:NSMakeSize(16.0, 16.0)];
+		[sFolderImage setSize:NSMakeSize(16.0f, 16.0f)];
 	}
 	return sFolderImage;
 }
@@ -304,7 +304,7 @@ static NSImage *sFolderImage = nil;
 	return [NSArray arrayWithArray:myChildCategories];
 }
 
-- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
+- (void)appendToDescription:(NSMutableString *)str indentation:(NSUInteger)indent
 {
 	[str appendFormat:@"%@:\n", myName];
 	NSEnumerator *e = [myChildCategories objectEnumerator];
@@ -314,7 +314,7 @@ static NSImage *sFolderImage = nil;
 	{
 		if ([host isKindOfClass:[CKHost class]])
 		{
-			int i;
+			NSInteger i;
 			for (i = 0; i < indent; i++)
 			{
 				[str appendString:@"\t"];

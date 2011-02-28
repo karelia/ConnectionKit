@@ -73,9 +73,9 @@
 	NSMutableArray					*_recursiveS3RenamesQueue;
 	NSMutableArray					*_recursivelyRenamedDirectoriesToDelete;
 	id <CKConnection>	_recursiveS3RenameConnection;
-	unsigned						_numberOfS3RenameListingsRemaining;
-	unsigned						_numberOfS3RenamesRemaining;
-	unsigned						_numberOfS3RenameDirectoryDeletionsRemaining;
+	NSUInteger						_numberOfS3RenameListingsRemaining;
+	NSUInteger						_numberOfS3RenamesRemaining;
+	NSUInteger						_numberOfS3RenameDirectoryDeletionsRemaining;
 	NSLock							*_recursiveS3RenameLock;
 	
 	// These peer connections are used to speed up recursive directory deletion
@@ -83,33 +83,33 @@
 	id								 previousDelegate;
 	NSString						*previousWorkingDirectory;
 	id <CKConnection> _recursiveDeletionConnection;
-	unsigned						_numberOfDeletionListingsRemaining;
-	unsigned						_numberOfDirDeletionsRemaining;
+	NSUInteger						_numberOfDeletionListingsRemaining;
+	NSUInteger						_numberOfDirDeletionsRemaining;
 	NSMutableArray					*_emptyDirectoriesToDelete;
 	NSMutableArray					*_filesToDelete;
 	NSLock							*_recursiveDeletionLock;
 	
 	// Peer connection support for recursive download
 	id <CKConnection> _recursiveDownloadConnection;
-	unsigned						_numberOfDownloadListingsRemaining;
+	NSUInteger						_numberOfDownloadListingsRemaining;
 	NSMutableArray					*_recursiveDownloadQueue;
 	NSLock							*_recursiveDownloadLock;
 	
 	struct __streamflags {
-		unsigned sendOpen : 1;
-		unsigned readOpen : 1;
-		unsigned receiveHasBytes : 1;
-		unsigned wantsSSL : 1;
-		unsigned sslOn : 1;
-		unsigned verifySSLCert : 1;
-		unsigned allowsBadCerts : 1; // for data transfer connections
-		unsigned isNegotiatingSSL : 1;
-		unsigned initializedSSL : 1;
-		unsigned reportedError : 1;
-		unsigned isDeleting: 1;
-		unsigned isDownloading: 1;
-		unsigned isRecursivelyRenamingForS3: 1;
-		unsigned unused: 22;
+		unsigned sendOpen:1;
+		unsigned readOpen:1;
+		unsigned receiveHasBytes:1;
+		unsigned wantsSSL:1;
+		unsigned sslOn:1;
+		unsigned verifySSLCert:1;
+		unsigned allowsBadCerts:1; // for data transfer connections
+		unsigned isNegotiatingSSL:1;
+		unsigned initializedSSL:1;
+		unsigned reportedError:1;
+		unsigned isDeleting:1;
+		unsigned isDownloading:1;
+		unsigned isRecursivelyRenamingForS3:1;
+		unsigned unused:22;
 	} myStreamFlags;
 	
 	// SSL Support
@@ -121,7 +121,7 @@
 	NSMutableData		*mySSLEncryptedSendBuffer;
 }
 
-- (BOOL)openStreamsToPort:(unsigned)port;
+- (BOOL)openStreamsToPort:(NSUInteger)port;
 - (void)scheduleStreamsOnRunLoop;
 
 - (void)setSendStream:(NSStream *)stream;
@@ -141,21 +141,21 @@
 
 - (void)handleSendStreamEvent:(NSStreamEvent)theEvent;
 - (void)handleReceiveStreamEvent:(NSStreamEvent)theEvent;
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length;
-- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length;
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length;
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(NSUInteger)length;
 
 // Get the local command port
 - (CFSocketNativeHandle)socket;
-- (unsigned)localPort;
+- (int)localPort;
 - (NSString *)remoteIPAddress;
 
 // Subclass needs to override these methods
 - (void)processReceivedData:(NSData *)data;
 - (void)sendCommand:(id)command;
 
-- (unsigned)sendData:(NSData *)data; // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
+- (NSUInteger)sendData:(NSData *)data; // returns how many bytes it sent. If the buffer was not empty and it was appended, then it will return 0
 - (NSData *)availableData;
-- (int)availableData:(NSData **)data ofLength:(int)length;
+- (NSInteger)availableData:(NSData **)data ofLength:(NSInteger)length;
 
 // These are called on the background thread
 - (void)threadedConnect;
@@ -172,7 +172,7 @@ extern NSString *SSLErrorDomain;
 
 enum { StreamErrorFailedSocketCreation = 7000, StreamErrorTimedOut };
 
-extern const unsigned int kStreamChunkSize;
+extern const NSUInteger kStreamChunkSize;
 
 enum { CONNECT = 0, COMMAND, ABORT, DISCONNECT, FORCE_DISCONNECT, CHECK_FILE_QUEUE, KILL_THREAD };		// port messages
 

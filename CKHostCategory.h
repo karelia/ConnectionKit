@@ -49,12 +49,12 @@
 - (NSString *)name;
 
 - (void)addChildCategory:(CKHostCategory *)cat;
-- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(unsigned)index;
+- (void)insertChildCategory:(CKHostCategory *)cat atIndex:(NSUInteger)index;
 - (void)removeChildCategory:(CKHostCategory *)cat;
 - (NSArray *)childCategories;
 
 - (void)addHost:(CKHost *)host;
-- (void)insertHost:(CKHost *)host atIndex:(unsigned)index;
+- (void)insertHost:(CKHost *)host atIndex:(NSUInteger)index;
 - (void)removeHost:(CKHost *)host;
 - (NSArray *)hosts;
 

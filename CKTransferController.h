@@ -100,17 +100,17 @@ typedef enum {
 	id									myDelegate;
 	
 	struct __cktransfercontroller_flags {
-		unsigned delegateProvidesConnection: 1; 
-		unsigned delegateProvidesContent: 1;
-		unsigned delegateHandlesDefaultButton: 1;
-		unsigned delegateHandlesAlternateButton: 1;
-		unsigned delegateFinishedContentGeneration: 1;
-		unsigned delegateDidFinish: 1;
-		unsigned useThread: 1;
+		unsigned delegateProvidesConnection:1; 
+		unsigned delegateProvidesContent:1;
+		unsigned delegateHandlesDefaultButton:1;
+		unsigned delegateHandlesAlternateButton:1;
+		unsigned delegateFinishedContentGeneration:1;
+		unsigned delegateDidFinish:1;
+		unsigned useThread:1;
 		unsigned waitForConnection:1;
-		unsigned verifyTransfers: 1;
-		unsigned stopTransfer: 1;
-		unsigned unused: 21;
+		unsigned verifyTransfers:1;
+		unsigned stopTransfer:1;
+		unsigned unused:21;
 	} myFlags;
 }
 
@@ -165,7 +165,7 @@ typedef enum {
 - (IBAction)cancelPassword:(id)sender;
 - (IBAction)connectPassword:(id)sender;
 
-- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+- (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
 
 - (NSError *)fatalError;
 - (void)setFatalError:(NSError *)aFatalError;

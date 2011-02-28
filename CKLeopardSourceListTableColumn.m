@@ -10,7 +10,7 @@
 
 @implementation CKLeopardSourceListTableColumn
 
-- (id)dataCellForRow:(int)row
+- (id)dataCellForRow:(NSInteger)row
 {
 	if (row >= 0)
 	{
@@ -18,7 +18,7 @@
 		if ([[CKBookmarkStorage sharedBookmarkStorage] itemIsLeopardSourceGroupHeader:item])
 		{
 			NSTextFieldCell *groupCell = [[[NSTextFieldCell alloc] init] autorelease];
-			[groupCell setFont:[[NSFontManager sharedFontManager] convertFont:[[self dataCell] font] toSize:11.0]];
+			[groupCell setFont:[[NSFontManager sharedFontManager] convertFont:[[self dataCell] font] toSize:11.0f]];
 			[groupCell setLineBreakMode:[[self dataCell] lineBreakMode]];
 			
 			return groupCell;

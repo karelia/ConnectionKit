@@ -57,9 +57,9 @@ static EMKeychainProxy *sharedProxy = nil;
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
-    return UINT_MAX;  //denotes an object that cannot be released
+    return NSUIntegerMax;  //denotes an object that cannot be released
 }
 
 - (void)release
@@ -94,7 +94,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	char *password = nil;
 	
 	SecKeychainItemRef item = nil;
-	OSStatus returnStatus = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(username), username, &passwordLength, (void **)&password, &item);
+	OSStatus returnStatus = SecKeychainFindGenericPassword(NULL, (UInt32)strlen(serviceName), serviceName, (UInt32)strlen(username), username, &passwordLength, (void **)&password, &item);
 	if (returnStatus != noErr || !item)
 	{
 		if (_logErrors)
@@ -103,7 +103,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithCString:password encoding: NSUTF8StringEncoding];
 	SecKeychainItemFreeContent(NULL, password);
 
 	return [EMGenericKeychainItem genericKeychainItem:item forServiceName:serviceNameString username:usernameString password:passwordString];
@@ -131,13 +131,13 @@ static EMKeychainProxy *sharedProxy = nil;
 	
 	SecKeychainItemRef item = nil;
 	//0 is kSecAuthenticationTypeAny
-	OSStatus returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
+	OSStatus returnStatus = SecKeychainFindInternetPassword(NULL, (UInt32)strlen(server), server, 0, NULL, (UInt32)strlen(username), username, (UInt32)strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
 	
 	if (returnStatus != noErr && protocol == kSecProtocolTypeFTP)
 	{
 		//Some clients (like Transmit) still save passwords with kSecProtocolTypeFTPAccount, which was deprecated.  Let's check for that.
 		protocol = kSecProtocolTypeFTPAccount;		
-		returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
+		returnStatus = SecKeychainFindInternetPassword(NULL, (UInt32)strlen(server), server, 0, NULL, (UInt32)strlen(username), username, (UInt32)strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
 	}
 	
 	if (returnStatus != noErr || !item)
@@ -148,7 +148,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithCString:password encoding: NSUTF8StringEncoding];
 	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];
@@ -167,7 +167,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	const char *password = [passwordString UTF8String];
 	
 	SecKeychainItemRef item = nil;
-	OSStatus returnStatus = SecKeychainAddGenericPassword(NULL, strlen(serviceName), serviceName, strlen(username), username, strlen(password), (void *)password, &item);
+	OSStatus returnStatus = SecKeychainAddGenericPassword(NULL, (UInt32)strlen(serviceName), serviceName, (UInt32)strlen(username), username, (UInt32)strlen(password), (void *)password, &item);
 	
 	if (returnStatus != noErr || !item)
 	{
@@ -197,7 +197,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	}
 
 	SecKeychainItemRef item = nil;
-	OSStatus returnStatus = SecKeychainAddInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, kSecAuthenticationTypeDefault, strlen(password), (void *)password, &item);
+	OSStatus returnStatus = SecKeychainAddInternetPassword(NULL, (UInt32)strlen(server), server, 0, NULL, (UInt32)strlen(username), username, (UInt32)strlen(path), path, port, protocol, kSecAuthenticationTypeDefault, (UInt32)strlen(password), (void *)password, &item);
 	
 	if (returnStatus != noErr || !item)
 	{

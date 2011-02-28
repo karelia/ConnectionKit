@@ -205,16 +205,16 @@
 		id currentObject = nil;
 		
 		while ((currentObject = [theEnum nextObject]) && !containsObject)
-			containsObject = [[currentObject objectForKey: @"fileName"] isEqualToString: [self newFolderName]];
+			containsObject = [[currentObject objectForKey: @"fileName"] isEqualToString:newFolderName];
 		
 		if (!containsObject)
 		{
-			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:[self newFolderName]];
+			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:newFolderName];
 			[[self connection] createDirectory: dir];
 		}
 		else
 		{  
-			[[self connection] changeToDirectory: [[[self connection] currentDirectory] stringByAppendingPathComponent: [self newFolderName]]];
+			[[self connection] changeToDirectory: [[[self connection] currentDirectory] stringByAppendingPathComponent:newFolderName]];
 			[[self connection] directoryContents];      
 		}
 		
@@ -224,7 +224,7 @@
 
 - (IBAction) goToFolder: (id) sender
 {
-	unsigned c = [[parentDirectories arrangedObjects] count];
+	NSUInteger c = [[parentDirectories arrangedObjects] count];
 	NSString *newPath = @"";
 	if (c > 0)
 	{
@@ -678,7 +678,7 @@
 	[[self connection] connect];
 }
 
-- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
+- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
 {
   //force the window to be loaded, to be sure tableView is set
   //
@@ -702,7 +702,7 @@
 											repeats:NO];
 	[[self connection] connect];
 	
-	int ret;
+	NSInteger ret;
 	for (;;) {
 		if (!myKeepRunning)
 		{
@@ -717,7 +717,7 @@
 	return ret;
 }
 
-- (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (int)returnCode contextInfo:(void*) contextInfo
+- (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (NSInteger)returnCode contextInfo:(void*) contextInfo
 {
 	if ([[self delegate] respondsToSelector: [self delegateSelector]])
 	{    
@@ -927,8 +927,8 @@ static NSImage *symFile = nil;
 					[icon setScalesWhenResized:YES];
 					[icon setSize:NSMakeSize(16,16)];
 					[comp lockFocus];
-					[fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-					[symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+					[fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:(CGFloat)1.0];
+					[symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:(CGFloat)1.0];
 					[comp unlockFocus];
 					[comp autorelease];
 					icon = comp;
@@ -967,7 +967,7 @@ static NSImage *symFile = nil;
 }
 
 #pragma mark ----=NStableView delegate=----
-- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
 	BOOL returnValue = YES;
 	
@@ -982,7 +982,7 @@ static NSImage *symFile = nil;
 }
 
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	//disable the cell we can't select
 	//

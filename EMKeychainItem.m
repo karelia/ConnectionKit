@@ -67,7 +67,7 @@
 	[self didChangeValueForKey:@"password"];
 	
 	const char *newPassword = [newPasswordString UTF8String];
-	OSStatus returnStatus = SecKeychainItemModifyAttributesAndData(coreKeychainItem, NULL, strlen(newPassword), (void *)newPassword);
+	OSStatus returnStatus = SecKeychainItemModifyAttributesAndData(coreKeychainItem, NULL, (UInt32)strlen(newPassword), (void *)newPassword);
 	return (returnStatus == noErr);	
 }
 
@@ -100,7 +100,7 @@
 	const char *newValue = [newStringValue UTF8String];
 	SecKeychainAttribute attributes[1];
 	attributes[0].tag = attributeTag;
-	attributes[0].length = strlen(newValue);
+	attributes[0].length = (UInt32)strlen(newValue);
 	attributes[0].data = (void *)newValue;
 	
 	SecKeychainAttributeList list;
@@ -242,8 +242,8 @@
 	
 	SecKeychainAttribute attributes[1];
 	attributes[0].tag = kSecProtocolItemAttr;
-	attributes[0].length = sizeof(newProtocol);
-	attributes[0].data = (void *)newProtocol;
+	attributes[0].length = (UInt32)sizeof(newProtocol);
+	attributes[0].data = (void *)(intptr_t)newProtocol;
 	
 	SecKeychainAttributeList list;
 	list.count = 1;

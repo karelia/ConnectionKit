@@ -12,23 +12,25 @@
 // Terminology taken from RFC 959
 
 
-typedef enum {
+enum {
     CKFTPReplyTypePositivePreliminary = 1,
     CKFTPReplyTypePositiveCompletion = 2,
     CKFTPReplyTypePositiveIntermediate = 3,
     CKFTPReplyTypeTransientNegativeCompletion = 4,
     CKFTPReplyTypePermanentNegativeCompletion = 5
-} CKFTPReplyType;
+ };
+typedef NSInteger CKFTPReplyType;
 
 
-typedef enum {
+enum {
     CKFTPReplyFunctionGroupSyntax = 0,
     CKFTPReplyFunctionGroupInformation = 1,
     CKFTPReplyFunctionGroupConnections = 2,
     CKFTPReplyFunctionGroupAuthenticationAndAccounting = 3,
     CKFTPReplyFunctionGroupUnspecified = 4,
     CKFTPReplyFunctionGroupFileSystem = 5
-} CKFTPReplyFunctionGroup;
+};
+typedef NSInteger CKFTPReplyFunctionGroup;
 
 
 @interface CKFTPReply : NSObject <NSCopying>

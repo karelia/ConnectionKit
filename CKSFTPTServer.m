@@ -147,7 +147,7 @@ char **environ;
 	if (!transferProgressStringCopy)
 		return;
 	
-	int tac;
+	NSInteger tac;
 	char **transferStringComponents;    
     if ((tac = argcargv(transferProgressStringCopy, &transferStringComponents)) < 5)
 	{
@@ -156,8 +156,8 @@ char **environ;
 		return;
     }
 	
-	int	index;
-	int percentCompleteIndex = -1;
+	NSInteger	index;
+	NSInteger percentCompleteIndex = -1;
     for (index = (tac - 1); index >= 0; index--)
 	{
 		if ((strrchr(transferStringComponents[index], '%')) != NULL)
@@ -228,7 +228,7 @@ char **environ;
     free(transferProgressStringCopy);
 }
 
-- (void)collectListingFromMaster:(int)theMaster fileStream:(FILE *)stream forWrapperConnection:(CKSFTPConnection *)wrapperConnection
+- (void)collectListingFromMaster:(NSInteger)theMaster fileStream:(FILE *)stream forWrapperConnection:(CKSFTPConnection *)wrapperConnection
 {
     char buf[MAXPATHLEN * 2] = { 0 };
     char tmp1[MAXPATHLEN * 2], tmp2[MAXPATHLEN * 2];
@@ -267,7 +267,7 @@ char **environ;
 		 * if that's the case, flag it, and append the rest of the 
 		 * text after the next read from the server. Yar!
 		 */
-		int bufferLength = strlen(buf);
+		NSInteger bufferLength = strlen(buf);
 		if (strncmp("sftp>", buf, strlen("sftp>")) != 0 && buf[bufferLength - 1] != '\n')
 		{
 			if (strlen(buf) >= sizeof(tmp1))
@@ -296,7 +296,7 @@ char **environ;
 		{
 			memset(buf, '\0', strlen(buf));
 			[wrapperConnection finishedCommand];
-			if (![directoryListingBufferString rangeOfString:@"Can't ls"].location != NSNotFound)
+			if ([directoryListingBufferString rangeOfString:@"Can't ls"].location == NSNotFound)
 			{
 				[directoryContents removeAllObjects];
 				[directoryContents addObjectsFromArray:[NSFileManager attributedFilesFromListing:directoryListingBufferString]];
@@ -386,7 +386,7 @@ char **environ;
 	BOOL wasChanging = NO;
 	BOOL wasListing = NO;
 	BOOL atSFTPPrompt = NO;
-	int numberOfPromptArrivalsToIgnore = 0;
+	NSInteger numberOfPromptArrivalsToIgnore = 0;
 	while (1)
 	{
 		NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];

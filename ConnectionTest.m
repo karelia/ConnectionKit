@@ -43,6 +43,7 @@ UKRaisesExceptionClass(exp, b)	Pass if exp does NOT raise an exception named b
 {
 	if (self = [super init])
 	{
+#warning 64BIT: Inspect use of unsigned long
 		myUniqueNumber = (unsigned long) [NSDate timeIntervalSinceReferenceDate];
 		[self setCallbackDictionary:[NSMutableDictionary dictionary]];
 	}
@@ -114,13 +115,17 @@ UKRaisesExceptionClass(exp, b)	Pass if exp does NOT raise an exception named b
 - (void)connection:(id <AbstractConnectionProtocol>)con didReceiveError:(NSError *)error { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:error forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con didRename:(NSString *)fromPath to:(NSString *)toPath { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@ -> %@",fromPath,toPath]  forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con didSetPermissionsForFile:(NSString *)path { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:path forKey:NSStringFromSelector(_cmd)]; }
+#warning 64BIT: Check formatting arguments
 - (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path progressedTo:(NSNumber *)percent { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %@%%",path,percent]  forKey:NSStringFromSelector(_cmd)]; }
-- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(int)length { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %d bytes",path,length]  forKey:NSStringFromSelector(_cmd)]; }
+#warning 64BIT: Check formatting arguments
+- (void)connection:(id <AbstractConnectionProtocol>)con download:(NSString *)path receivedDataOfLength:(NSInteger)length { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %d bytes",path,length]  forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidBegin:(NSString *)remotePath { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:remotePath forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con downloadDidFinish:(NSString *)remotePath { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:remotePath forKey:NSStringFromSelector(_cmd)]; }
 - (NSString *)connection:(id <AbstractConnectionProtocol>)con needsAccountForUsername:(NSString *)username { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:username forKey:NSStringFromSelector(_cmd)]; return @"foo"; }
+#warning 64BIT: Check formatting arguments
 - (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %@%%",remotePath,percent]  forKey:NSStringFromSelector(_cmd)]; }
-- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(int)length { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %d bytes",remotePath,length]  forKey:NSStringFromSelector(_cmd)]; }
+#warning 64BIT: Check formatting arguments
+- (void)connection:(id <AbstractConnectionProtocol>)con upload:(NSString *)remotePath sentDataOfLength:(NSInteger)length { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSString stringWithFormat:@"%@: %d bytes",remotePath,length]  forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidBegin:(NSString *)remotePath { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:remotePath forKey:NSStringFromSelector(_cmd)]; }
 - (void)connection:(id <AbstractConnectionProtocol>)con uploadDidFinish:(NSString *)remotePath { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:remotePath forKey:NSStringFromSelector(_cmd)]; }
 - (void)connectionDidCancelTransfer:(id <AbstractConnectionProtocol>)con { NSLog(@"========= CALLBACK: %@", NSStringFromSelector(_cmd)); [myCallbackDictionary setObject:[NSNumber numberWithBool:YES] forKey:NSStringFromSelector(_cmd)]; }
@@ -150,6 +155,7 @@ UKRaisesExceptionClass(exp, b)	Pass if exp does NOT raise an exception named b
 	{
 		if ([((NSObject *)aConn) isKindOfClass:[FTPConnection class]])
 		{
+#warning 64BIT: Check formatting arguments
 			NSLog(@"========= TEST: top of loop, state = %d, queue= %@", [((FTPConnection *)aConn) state], [((FTPConnection *)aConn) queueDescription]);
 		}
 		
@@ -159,6 +165,7 @@ UKRaisesExceptionClass(exp, b)	Pass if exp does NOT raise an exception named b
 			BOOL found = [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate dateWithTimeIntervalSinceNow:30.0]];
 			//[[NSRunLoop currentRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:20.0]];
 			//[[NSRunLoop currentRunLoop] run];
+#warning 64BIT: Check formatting arguments
 			NSLog(@"========= TEST: did  run NSRunLoop, found = %d dict = %@", found, [[myCallbackDictionary allKeys] description]);
 			if (!found)
 			{

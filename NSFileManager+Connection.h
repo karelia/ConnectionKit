@@ -33,7 +33,7 @@
 
 + (NSString *)_dateStringFromListing:(NSString *)listing;
 + (NSArray *)attributedFilesFromListing:(NSString *)line;
-+ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes;
++ (void)parseFilenameAndSymbolicLinksFromIndex:(NSInteger)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes;
 + (void)parsePermissions:(NSString *)perm withAttributes:(NSMutableDictionary *)attributes;
 
 - (void)recursivelyCreateDirectory:(NSString *)path attributes:(NSDictionary *)attributes;

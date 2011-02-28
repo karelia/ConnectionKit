@@ -223,7 +223,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			[[self client] uploadDidFinish:[upload remotePath] error:error];
 
 			if ([upload delegateRespondsToTransferDidFinish])
-				[[upload delegate] transferDidFinish:[upload delegate] error:error];
+				[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 			
 			[upload release];
 			
@@ -398,8 +398,8 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				
 				[[self client] appendString:header toTranscript:CKTranscriptReceived];
 				
-				unsigned start = headerRange.location + headerRange.length;
-				unsigned len = [myResponseBuffer length] - start;
+				NSUInteger start = headerRange.location + headerRange.length;
+				NSUInteger len = [myResponseBuffer length] - start;
 				NSData *fileData = [myResponseBuffer subdataWithRange:NSMakeRange(start,len)];
 				[myDownloadHandle writeData:fileData];
 				[myResponseBuffer setLength:0];
@@ -413,12 +413,12 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 					[[download delegate] transfer:[download userInfo] transferredDataOfLength:[fileData length]];
 				}
 				
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
+				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
-					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				lastPercent = percent;
 			}
@@ -436,14 +436,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 				[[download delegate] transfer:[download userInfo] transferredDataOfLength:[data length]];
 			}
 			
-			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
 			if (percent != lastPercent)
 			{
-				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				[[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
-					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				lastPercent = percent;
 			}
@@ -773,7 +773,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 #pragma mark Stream Overrides
 
 
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length
 {
 	[super stream:stream sentBytesOfLength:length]; // call http
 	if (length == 0) return;
@@ -787,7 +787,7 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 			}
 			else
 			{
-				length -= transferHeaderLength;
+				length -= (NSUInteger)transferHeaderLength;
 				transferHeaderLength = 0;
 				bytesTransferred += length;
 			}
@@ -800,14 +800,14 @@ NSString *WebDAVErrorDomain = @"WebDAVErrorDomain";
 		
 		if (bytesToTransfer > 0)
 		{
-			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			NSInteger percent = (NSInteger)((100 * bytesTransferred) / bytesToTransfer);
 			if (percent != lastPercent)
 			{
-				[[self client] upload:[[self currentUpload] remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				[[self client] upload:[[self currentUpload] remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 				
 				if ([upload delegateRespondsToTransferProgressedTo])
 				{
-					[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				lastPercent = percent;
 			}

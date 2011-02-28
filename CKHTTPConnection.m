@@ -82,7 +82,7 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	[super dealloc];
 }
 
-- (void)sendError:(NSString *)error code:(int)code
+- (void)sendError:(NSString *)error code:(NSInteger)code
 {
 	NSError *err = [NSError errorWithDomain:CKHTTPConnectionErrorDomain 
 									   code:code 
@@ -350,11 +350,11 @@ NSString *CKHTTPConnectionErrorDomain = @"CKHTTPConnectionErrorDomain";
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length
 {
 }
 
-- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(NSUInteger)length
 {
 }
 
