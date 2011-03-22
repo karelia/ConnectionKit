@@ -98,20 +98,20 @@
 	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
 	if (accountName)
 	{
-		SecKeychainItemRef item = nil;
 		OSStatus theStatus = noErr;
 		char *buffer;
 		UInt32 passwordLen;
 		
 		char *utf8 = (char *)[accountName UTF8String];
+        UInt32 utf8Len = strlen(utf8);
 		theStatus = SecKeychainFindGenericPassword(NULL,
 												   6,
 												   "iTools",
-												   strlen(utf8),
+												   utf8Len,
 												   utf8,
 												   &passwordLen,
 												   (void *)&buffer,
-												   &item);
+												   NULL);
 		
 		if (noErr == theStatus)
 		{
@@ -142,12 +142,12 @@
 	if (URL)
     {
         NSParameterAssert([[URL scheme] isEqualToString:@"http"]);
-		NSParameterAssert([[URL host] isEqualToString:@"idisk.mac.com"]);
+		NSParameterAssert([[URL host] isEqualToString:@"idisk.me.com"] || [[URL host] isEqualToString:@"idisk.mac.com"]);
     }
 	else
 	{
 		
-        URL = [NSURL URLWithString:@"http://idisk.mac.com"];
+        URL = [NSURL URLWithString:@"http://idisk.me.com"];
 	}
 	
 	// Make sure we have a username to connect
@@ -193,7 +193,7 @@
 	CKConnectionRequest *request = nil;
     if (user)
     {
-        NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"idisk.mac.com" path:user];
+        NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"idisk.me.com" path:user];
         request = [[CKConnectionRequest alloc] initWithURL:URL];
         [URL release];
     }

@@ -37,7 +37,7 @@
 
 /*!
  @method initWithUser:
- @discussion Creates a connection a user's idisk.mac.com account.
+ @discussion Creates a connection a user's idisk.me.com account.
  @param user The iDisk to connect to. Pass in nil to connect to the user's MobileMe account.
  @result An initialized CKDotMacConnection object. Nil if the MobileMe account username could not be retrieved.
  */
