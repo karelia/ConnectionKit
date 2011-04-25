@@ -94,30 +94,28 @@
 + (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
 {
 	BOOL result = NO;
-	
+    	
 	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
 	if (accountName)
 	{
-		OSStatus theStatus = noErr;
-		char *buffer;
-		UInt32 passwordLen;
+		UInt32 length;
+		void *buffer;
 		
-		char *utf8 = (char *)[accountName UTF8String];
-        UInt32 utf8Len = strlen(utf8);
-		theStatus = SecKeychainFindGenericPassword(NULL,
-												   6,
-												   "iTools",
-												   utf8Len,
-												   utf8,
-												   &passwordLen,
-												   (void *)&buffer,
-												   NULL);
+        const char *service = "iTools";
+		const char *accountKey = (char *)[accountName UTF8String];
+		OSStatus theStatus = SecKeychainFindGenericPassword(
+                                                            NULL,
+                                                            strlen(service), service,
+                                                            strlen(accountKey), accountKey,
+                                                            &length, &buffer,
+                                                            NULL
+                                                            );
 		
 		if (noErr == theStatus)
 		{
-			if (passwordLen > 0)
+			if (length > 0)
 			{
-				if (password) *password = [[[NSString alloc] initWithBytes:buffer length:passwordLen encoding:[NSString defaultCStringEncoding]] autorelease];
+				if (password) *password = [[[NSString alloc] initWithBytes:buffer length:length encoding:NSUTF8StringEncoding] autorelease];
 			}
 			else
 			{
@@ -130,6 +128,10 @@
 			*account = accountName;
 			result = YES;
 		}
+        else 
+        {
+            NSLog(@"SecKeychainFindGenericPassword failed %d", theStatus);
+        }
 	}
 	
 	return result;
