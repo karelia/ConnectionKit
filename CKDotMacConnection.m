@@ -142,7 +142,7 @@
 	if (URL)
     {
         NSParameterAssert([[URL scheme] isEqualToString:@"http"]);
-		NSParameterAssert([[URL host] isEqualToString:@"idisk.me.com"] || [[URL host] isEqualToString:@"idisk.mac.com"]);
+		NSParameterAssert([[URL host] isEqualToString:@"idisk.me.com"]);
     }
 	else
 	{
