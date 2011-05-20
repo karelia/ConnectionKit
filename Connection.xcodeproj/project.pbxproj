@@ -1215,8 +1215,10 @@
 			isa = PBXProject;
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "Connection" */;
 			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = en;
 			hasScannedForEncodings = 1;
 			knownRegions = (
+				English,
 				en,
 				ja,
 				fr,
@@ -1224,6 +1226,7 @@
 				zh_TW,
 				da,
 				it,
+				es,
 				zh_CN,
 				pt_BR,
 			);
