@@ -850,7 +850,7 @@ checkRemoteExistence:(NSNumber *)check;
 		NSString *l = [localPath stringByAppendingPathComponent:cur];
 		if ([myFileManager fileExistsAtPath:r isDirectory:&isDir] && isDir)
 		{
-			[myFileManager recursivelyCreateDirectory:r attributes:nil];
+			[myFileManager createDirectoryAtPath:r withIntermediateDirectories:YES attributes:nil error:NULL];
 		}
 		else
 		{
