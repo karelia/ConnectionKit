@@ -58,8 +58,6 @@
 		79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79318F2E0CA9F3A1005C4AB6 /* gear.tiff */; };
 		79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420AD20C91CDE80002B99D /* NSNumber+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420AD30C91CDE80002B99D /* NSNumber+Connection.m */; };
-		79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */ = {isa = PBXBuildFile; fileRef = 79420F2E0C94E3030002B99D /* CKTableBasedBrowser.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */ = {isa = PBXBuildFile; fileRef = 79420F2F0C94E3030002B99D /* CKTableBasedBrowser.m */; };
 		79420F520C94EDAD0002B99D /* browser_resizer.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79420F510C94EDAD0002B99D /* browser_resizer.tiff */; };
 		794213E70C961B510002B99D /* container_triangle_selected.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E50C961B510002B99D /* container_triangle_selected.tiff */; };
 		794213E80C961B510002B99D /* container_triangle.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E60C961B510002B99D /* container_triangle.tiff */; };
@@ -109,8 +107,6 @@
 		7983F3EE0B0D1B8B00F5078E /* DropletPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983F3ED0B0D1B8B00F5078E /* DropletPanel.m */; };
 		79906BAF0B1175A800FE9681 /* host.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAD0B1175A800FE9681 /* host.png */; };
 		79906BB00B1175A800FE9681 /* bonjour.png in Resources */ = {isa = PBXBuildFile; fileRef = 79906BAE0B1175A800FE9681 /* bonjour.png */; };
-		799173B90C83428100EFFC79 /* CKDirectoryTreeController.h in Headers */ = {isa = PBXBuildFile; fileRef = 799173B70C83428100EFFC79 /* CKDirectoryTreeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		799173BA0C83428100EFFC79 /* CKDirectoryTreeController.m in Sources */ = {isa = PBXBuildFile; fileRef = 799173B80C83428100EFFC79 /* CKDirectoryTreeController.m */; };
 		799174970C83962D00EFFC79 /* CKDirectoryTree.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799174950C83962D00EFFC79 /* CKDirectoryTree.nib */; };
 		799ED2AD0B635C3400B6F2BA /* CKTransferController.nib in Resources */ = {isa = PBXBuildFile; fileRef = 799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */; };
 		79B09AA60C85CDFD00E7F1CC /* history_forward.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 79B09AA10C85CDFD00E7F1CC /* history_forward.tiff */; };
@@ -1088,12 +1084,10 @@
 				797782830B474765008DBA01 /* NSDictionary+Connection.h in Headers */,
 				79CA054C0B852038005BED50 /* CKCacheableHost.h in Headers */,
 				79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */,
-				799173B90C83428100EFFC79 /* CKDirectoryTreeController.h in Headers */,
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
 				79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */,
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
-				79420F300C94E3030002B99D /* CKTableBasedBrowser.h in Headers */,
 				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
 				D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */,
 				D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */,
@@ -1432,12 +1426,10 @@
 				797782840B474765008DBA01 /* NSDictionary+Connection.m in Sources */,
 				79CA054D0B852038005BED50 /* CKCacheableHost.m in Sources */,
 				79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */,
-				799173BA0C83428100EFFC79 /* CKDirectoryTreeController.m in Sources */,
 				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
 				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
 				79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */,
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
-				79420F310C94E3030002B99D /* CKTableBasedBrowser.m in Sources */,
 				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
 				D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */,
 				D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */,
