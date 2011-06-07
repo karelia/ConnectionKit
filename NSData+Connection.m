@@ -248,17 +248,6 @@
 
 // these are from http://people.no-distance.net/ol/software/s3/ BSD Licensed
 
-- (NSData *)md5Digest
-{
-	EVP_MD_CTX mdctx;
-	unsigned char md_value[EVP_MAX_MD_SIZE];
-	unsigned int md_len;
-	EVP_DigestInit(&mdctx, EVP_md5());
-	EVP_DigestUpdate(&mdctx, [self bytes], [self length]);
-	EVP_DigestFinal(&mdctx, md_value, &md_len);
-	return [NSData dataWithBytes:md_value length:md_len];
-}
-
 - (NSData *)sha1HMacWithKey:(NSString*)key
 {
 	HMAC_CTX mdctx;
