@@ -30,10 +30,6 @@
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
 		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
-		27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D3F0AC8BC85006AD3E2 /* CKHostCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D400AC8BC85006AD3E2 /* CKHostCategory.m */; };
-		27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */ = {isa = PBXBuildFile; fileRef = D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */ = {isa = PBXBuildFile; fileRef = D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -87,12 +83,6 @@
 		795AFF190B1157D3006905FA /* CKHostCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFF170B1157D3006905FA /* CKHostCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		795AFF1A0B1157D3006905FA /* CKHostCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFF180B1157D3006905FA /* CKHostCell.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
-		795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */ = {isa = PBXBuildFile; fileRef = 795FF1B40B0A821600EA9292 /* CKBookmarkStorage.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF1B50B0A821600EA9292 /* CKBookmarkStorage.m */; };
-		795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F565AC0AC90C76006AD3E2 /* CKBonjourCategory.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F565AD0AC90C76006AD3E2 /* CKBonjourCategory.m */; };
-		795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F54D490AC8BDA1006AD3E2 /* CKHost.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F54D4A0AC8BDA1006AD3E2 /* CKHost.m */; };
 		795FF5020B0C018100EA9292 /* DropletMain.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF5010B0C018100EA9292 /* DropletMain.m */; };
 		795FF5070B0C048700EA9292 /* Droplet.nib in Resources */ = {isa = PBXBuildFile; fileRef = 795FF5050B0C048700EA9292 /* Droplet.nib */; };
 		795FF50E0B0C05F400EA9292 /* DropletController.m in Sources */ = {isa = PBXBuildFile; fileRef = 795FF50C0B0C05F400EA9292 /* DropletController.m */; };
@@ -1084,9 +1074,6 @@
 				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
 				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
 				79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */,
-				795FF1B60B0A821600EA9292 /* CKBookmarkStorage.h in Headers */,
-				795FF21C0B0A940B00EA9292 /* CKBonjourCategory.h in Headers */,
-				795FF21E0B0A940C00EA9292 /* CKHost.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
@@ -1117,8 +1104,6 @@
 				D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */,
 				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
 				27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */,
-				27AE2EE30ED3091600AB81E7 /* CKHostCategory.h in Headers */,
-				27AE3A310ED427F400AB81E7 /* CKLeopardSourceListTableColumn.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
@@ -1433,9 +1418,6 @@
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
 				79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */,
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
-				795FF1B70B0A821600EA9292 /* CKBookmarkStorage.m in Sources */,
-				795FF21D0B0A940B00EA9292 /* CKBonjourCategory.m in Sources */,
-				795FF21F0B0A940D00EA9292 /* CKHost.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
 				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
@@ -1467,8 +1449,6 @@
 				D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */,
 				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
 				27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */,
-				27AE2EE40ED3091600AB81E7 /* CKHostCategory.m in Sources */,
-				27AE3A320ED427F500AB81E7 /* CKLeopardSourceListTableColumn.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
