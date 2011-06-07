@@ -403,7 +403,7 @@ static NSString *lsform = nil;
 	}
 	else
 	{
-		NSDictionary *attributes = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+		NSDictionary *attributes = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:NULL];
 		uploadSize = [[attributes objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
