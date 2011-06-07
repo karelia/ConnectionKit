@@ -101,7 +101,7 @@ ConnectionCreateMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
     port = NSMapGet(pThreadMessagePorts, thread);
     if (nil == port) {
         port = [[NSPort allocWithZone:NULL] init];
-        [port setDelegate:[ConnectionInterThreadManager class]];
+        [port setDelegate:(id <NSPortDelegate>)[ConnectionInterThreadManager class]];
         [port scheduleInRunLoop:runLoop forMode:NSDefaultRunLoopMode];
 		[port scheduleInRunLoop:runLoop forMode:NSModalPanelRunLoopMode];
 		NSLock *lock = [[NSRecursiveLock alloc] init];

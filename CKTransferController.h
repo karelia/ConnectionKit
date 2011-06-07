@@ -63,7 +63,7 @@ typedef enum {
 
 @class RunLoopForwarder;
 
-@interface CKTransferController : NSWindowController 
+@interface CKTransferController : NSWindowController <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
 	id <CKConnection>		myConnection;		// may not be retained
 	id <CKConnection>		myVerificationConnection;
