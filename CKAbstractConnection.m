@@ -435,7 +435,7 @@ NSDictionary *sDataAttributes = nil;
 	//create this directory
 	[self createDirectory:remotePath];
 	
-	NSEnumerator *e = [[fm directoryContentsAtPath:localPath] objectEnumerator];
+	NSEnumerator *e = [[fm contentsOfDirectoryAtPath:localPath error:NULL] objectEnumerator];
 	NSString *path;
 	NSUInteger numberOfSubRecordsAdded = 0;
 	while ((path = [e nextObject]))
