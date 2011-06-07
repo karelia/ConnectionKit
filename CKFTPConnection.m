@@ -1114,7 +1114,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
 				
 				if ( !isResume ) {
-					[fm removeFileAtPath:[download localPath] handler:nil];
+					[fm removeItemAtPath:[download localPath] error:NULL];
 					[fm createFileAtPath:[download localPath]
 								contents:nil
 							  attributes:nil];
@@ -1301,7 +1301,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				NSAssert((nil != _readHandle), @"_readHandle is nil!");
 				
 				// Calculate size to transfer is total file size minus offset
-				_transferSize = [[[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize] longLongValue] - offset;
+				_transferSize = [[[[NSFileManager defaultManager] attributesOfItemAtPath:file error:NULL] objectForKey:NSFileSize] longLongValue] - offset;
 				
 				[_readHandle seekToFileOffset:offset]; 
 				NSData *chunk = [_readHandle readDataOfLength:kStreamChunkSize];
@@ -1382,7 +1382,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                         bytes = (uint8_t *)[chunk bytes];
                         chunkLength = [chunk length];		// actual length of bytes read
                         
-                        NSNumber *size = [[[NSFileManager defaultManager] fileAttributesAtPath:file traverseLink:YES] objectForKey:NSFileSize];
+                        NSNumber *size = [[[NSFileManager defaultManager] attributesOfItemAtPath:file error:NULL] objectForKey:NSFileSize];
                         _transferSize = [size unsignedLongLongValue];
                     }
                     else
@@ -2125,7 +2125,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						bool isResume = ( fileOffset > 0 && [fm fileExistsAtPath:[download localPath]] );
 						
 						if ( !isResume ) {
-							[fm removeFileAtPath:[download localPath] handler:nil];
+							[fm removeItemAtPath:[download localPath] error:NULL];
 							[fm createFileAtPath:[download localPath]
 										contents:nil
 									  attributes:nil];
@@ -3488,7 +3488,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else
 	{
-		NSDictionary *attribs = [[NSFileManager defaultManager] fileAttributesAtPath:localPath traverseLink:YES];
+		NSDictionary *attribs = [[NSFileManager defaultManager] attributesOfItemAtPath:localPath error:NULL];
 		uploadSize = [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
 	}
 	
