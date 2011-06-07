@@ -47,7 +47,7 @@
  */
 @protocol OutputStream, InputStream;
 
-@interface CKStreamBasedConnection : CKAbstractQueueConnection 
+@interface CKStreamBasedConnection : CKAbstractQueueConnection <NSStreamDelegate>
 {
 	NSThread			*_createdThread;
 	
