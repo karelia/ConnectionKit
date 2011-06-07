@@ -205,7 +205,7 @@ checkRemoteExistence:(NSNumber *)check;
 	}
 	
 	NSError *error = nil;	
-	if (![myFileManager createDirectoryAtPath:aName attributes:fmDictionary])
+	if (![myFileManager createDirectoryAtPath:aName withIntermediateDirectories:NO attributes:fmDictionary error:NULL])
 	{
 		BOOL exists;
 		[myFileManager fileExistsAtPath:aName isDirectory:&exists];
@@ -241,11 +241,11 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kSetPermissions];
 	
-	NSMutableDictionary *attribs = [[myFileManager fileAttributesAtPath:path traverseLink:NO] mutableCopy];
+	NSMutableDictionary *attribs = [[myFileManager attributesOfItemAtPath:path error:NULL] mutableCopy];
 	[attribs setObject:perms forKey:NSFilePosixPermissions];
 	
 	NSError *error = nil;
-	if (![myFileManager changeFileAttributes:attribs atPath:path])
+	if (![myFileManager setAttributes:attribs ofItemAtPath:path error:NULL])
 	{
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
 								  LocalizedStringInConnectionKitBundle(@"Could not change file permissions", @"FileConnection set permissions error"), NSLocalizedDescriptionKey,
@@ -281,7 +281,7 @@ checkRemoteExistence:(NSNumber *)check;
                    toTranscript:CKTranscriptSent, fromPath, toPath];
 	
 	NSError *error = nil;	
-	if (![myFileManager movePath:fromPath toPath:toPath handler:self])
+	if (![myFileManager moveItemAtPath:fromPath toPath:toPath error:NULL])
 	{
 		NSString *localizedDescription = LocalizedStringInConnectionKitBundle(@"Failed to rename file.", @"Failed to rename file.");
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:localizedDescription, NSLocalizedDescriptionKey, nil];
@@ -318,7 +318,7 @@ checkRemoteExistence:(NSNumber *)check;
 	
 	
 	NSError *error = nil;	
-	if (![myFileManager removeFileAtPath:path handler:self])
+	if (![myFileManager removeItemAtPath:path error:NULL])
 	{
 		NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete file: %@", @"error for deleting a file"), path];
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -352,7 +352,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kDeleteDirectory];
 	
 	NSError *error = nil;
-	if (![myFileManager removeFileAtPath:dirPath handler:self])
+	if (![myFileManager removeItemAtPath:dirPath error:NULL])
 	{
 		NSString *localizedDescription = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to delete directory: %@", @"error for deleting a directory"), dirPath];
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -435,7 +435,7 @@ checkRemoteExistence:(NSNumber *)check;
 		}
 	}
 	
-	[fm removeFileAtPath:[upload remotePath] handler:nil];
+	[fm removeItemAtPath:[upload remotePath] error:NULL];
 	
 	if ([upload delegateRespondsToTransferDidBegin])
 		[[upload delegate] transferDidBegin:[upload userInfo]];
@@ -451,7 +451,7 @@ checkRemoteExistence:(NSNumber *)check;
 	int fno = fileno(from), tno = fileno(to);
 	char bytes[8096];
 	int len;
-	unsigned long long size = [[[fm fileAttributesAtPath:[upload localPath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
+	unsigned long long size = [[[fm attributesOfItemAtPath:[upload localPath] error:NULL] objectForKey:NSFileSize] unsignedLongLongValue];
 	unsigned long long sizeDecrementing = size;
 
 	clearerr(from);
@@ -503,7 +503,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
 	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
 	
-	NSDictionary *attribs = [myFileManager fileAttributesAtPath:localPath traverseLink:YES];
+	NSDictionary *attribs = [myFileManager attributesOfItemAtPath:localPath error:NULL];
 	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
 																			data:nil
@@ -548,7 +548,7 @@ checkRemoteExistence:(NSNumber *)check;
 			return;
 		}
 	}
-	(void) [myFileManager removeFileAtPath:[upload remotePath] handler:nil];
+	(void) [myFileManager removeItemAtPath:[upload remotePath] error:NULL];
 	BOOL success = [myFileManager createFileAtPath:[upload remotePath]
 										  contents:[upload data]
 										attributes:nil];
@@ -559,7 +559,7 @@ checkRemoteExistence:(NSNumber *)check;
     [[self client] uploadDidBegin:[upload remotePath]];
     
 	//need to send the amount of bytes transferred.
-	unsigned long long size = [[[myFileManager fileAttributesAtPath:[upload remotePath] traverseLink:YES] objectForKey:NSFileSize] unsignedLongLongValue];
+	unsigned long long size = [[[myFileManager attributesOfItemAtPath:[upload remotePath] error:NULL] objectForKey:NSFileSize] unsignedLongLongValue];
 
     [[self client] upload:[upload remotePath] didSendDataOfLength:size];
     
@@ -648,9 +648,9 @@ checkRemoteExistence:(NSNumber *)check;
 		{
 			tempPath = [dirPath stringByAppendingPathComponent: [[NSProcessInfo processInfo] globallyUniqueString]];
 			
-			if (![myFileManager movePath: destinationPath
-												   toPath: tempPath
-												  handler: nil])
+			if (![myFileManager moveItemAtPath:destinationPath
+                                        toPath:tempPath
+                                         error:NULL])
 			{
 				//we failed to move it, we'll fail to copy...
 				//
@@ -659,13 +659,13 @@ checkRemoteExistence:(NSNumber *)check;
 		}
   }
 	
-	BOOL success = [myFileManager copyPath:remotePath toPath: destinationPath handler:self];
+	BOOL success = [myFileManager copyItemAtPath:remotePath toPath: destinationPath error:NULL];
 	if (success)
 	{
 		//we can delete the old file if one was present
 		//
 		if (tempPath)
-			[myFileManager removeFileAtPath: tempPath handler: nil];
+			[myFileManager removeItemAtPath:tempPath error:NULL];
 
 		//need to send the amount of bytes transferred.
 		NSFileHandle *fh = [NSFileHandle fileHandleForReadingAtPath:remotePath];
@@ -691,7 +691,7 @@ checkRemoteExistence:(NSNumber *)check;
 		if (tempPath)
 		{
 			//restore the file, hopefully this will work:-)
-			[myFileManager movePath:tempPath toPath:destinationPath handler:nil];
+			[myFileManager moveItemAtPath:tempPath toPath:destinationPath error:NULL];
 		}
 		
 		NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
@@ -759,15 +759,15 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDirectoryContents];
 	
-	NSArray *array = [myFileManager directoryContentsAtPath:dirPath];
+	NSArray *array = [myFileManager contentsOfDirectoryAtPath:dirPath error:NULL];
 	NSMutableArray *packaged = [NSMutableArray arrayWithCapacity:[array count]];
 	NSEnumerator *e = [array objectEnumerator];
 	NSString *cur;
 	
 	while (cur = [e nextObject]) {
 		NSString *file = [NSString stringWithFormat:@"%@/%@", dirPath, cur];
-		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[myFileManager fileAttributesAtPath:file
-																								 traverseLink:NO]];
+		NSMutableDictionary *attribs = [NSMutableDictionary dictionaryWithDictionary:[myFileManager attributesOfItemAtPath:file
+                                                                                                                     error:NULL]];
 		[attribs setObject:cur forKey:cxFilenameKey];
 		if ([[attribs objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink]) {
 			NSString *target = [file stringByResolvingSymlinksInPath];
