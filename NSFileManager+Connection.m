@@ -498,7 +498,7 @@ if (![fn isEqualToString:@"."] && \
 
 - (unsigned long long)sizeOfPath:(NSString *)path
 {
-	NSDictionary *attribs = [self fileAttributesAtPath:path traverseLink:NO];
+	NSDictionary *attribs = [self attributesOfItemAtPath:path error:NULL];
 	if (attribs)
 	{
 		return [[attribs objectForKey:NSFileSize] unsignedLongLongValue];
