@@ -40,7 +40,7 @@ typedef enum {
 	CKCoverFlowStyle // not implemented
 } CKDirectoryViewStyle;
 
-@interface CKDirectoryTreeController : NSObject 
+@interface CKDirectoryTreeController : NSObject <NSBrowserDelegate, NSOutlineViewDelegate, NSOutlineViewDataSource>
 {
 	IBOutlet NSView *oView;
 	IBOutlet NSOutlineView *oOutlineView;

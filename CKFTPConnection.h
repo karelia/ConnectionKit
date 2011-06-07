@@ -60,7 +60,7 @@ typedef enum {
 } FTPState;
 
 
-@interface CKFTPConnection : CKStreamBasedConnection
+@interface CKFTPConnection : CKStreamBasedConnection <NSStreamDelegate>
 {
 @private
 	NSMutableData		*_buffer;

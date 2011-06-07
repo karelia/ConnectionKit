@@ -61,7 +61,7 @@ typedef enum {
 
 #define DEFAULT_LEVEL KTLogWarn
 
-@interface KTLogger : NSObject 
+@interface KTLogger : NSObject <NSTableViewDataSource>
 {
 	NSLock			*myLock;
 	NSFileHandle	*myLog;
