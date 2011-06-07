@@ -192,7 +192,7 @@ static NSString *KTLevelMap[] = {
 	
 	if (!([fm fileExistsAtPath:logPath isDirectory:&isDir] && isDir))
 	{
-		if (![fm createDirectoryAtPath:logPath attributes:nil])
+		if (![fm createDirectoryAtPath:logPath withIntermediateDirectories:NO attributes:nil error:NULL])
 		{
 			NSLog(@"Failed to create log directory: %@", logPath);
 		}
@@ -240,13 +240,13 @@ static NSString *KTLevelMap[] = {
 		from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i - 1]];
 		to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
 		
-		[fm movePath:from toPath:to handler:nil];
+		[fm moveItemAtPath:from toPath:to error:NULL];
 		i--;
 	}
 	
 	from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.ktlog", processName]];
 	to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
-	[fm movePath:from toPath:to handler:nil];
+	[fm moveItemAtPath:from toPath:to error:NULL];
 }
 
 
@@ -301,7 +301,7 @@ static NSString *KTLevelMap[] = {
 	{
 		[_loggingDelegate logger:self logged:rec];
 	}
-	NSDictionary *logAttribs = [[NSFileManager defaultManager] fileAttributesAtPath:[self logfileName] traverseLink:YES];
+	NSDictionary *logAttribs = [[NSFileManager defaultManager] attributesOfItemAtPath:[self logfileName] error:NULL];
 	if ([[logAttribs objectForKey:NSFileSize] unsignedLongLongValue] > KTLogMaximumLogSize)
 	{
 		[self rotateLogs];
