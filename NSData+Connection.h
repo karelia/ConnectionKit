@@ -39,9 +39,6 @@
 - (NSData *)inflate;
 - (NSData *)deflate;
 
-// openssl
-- (NSData *)sha1HMacWithKey:(NSString*)key;
-
 - (NSRange)rangeOfData:(NSData *)data;
 - (NSRange)rangeOfData:(NSData *)data range:(NSRange)range;
 
