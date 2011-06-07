@@ -69,8 +69,6 @@
 		794213E80C961B510002B99D /* container_triangle.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 794213E60C961B510002B99D /* container_triangle.tiff */; };
 		7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */ = {isa = PBXBuildFile; fileRef = 7944991D0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h */; };
 		794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */ = {isa = PBXBuildFile; fileRef = 7944991E0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m */; };
-		7946B0FE0AC0F4A400CAE90F /* CKS3Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */; };
-		7946B0FF0AC0F4A400CAE90F /* CKS3Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */; };
 		7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 7946B5DB0AC1F76800CAE90F /* NSCalendarDate+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */; };
 		794DC3270A5A0EDC007157BE /* CKConnectionThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */; };
@@ -1082,7 +1080,6 @@
 				792CFCB80A806145001A00C6 /* CKHTTPConnection.h in Headers */,
 				792CFCBA0A806145001A00C6 /* CKHTTPRequest.h in Headers */,
 				792CFCBC0A806145001A00C6 /* CKHTTPResponse.h in Headers */,
-				7946B0FE0AC0F4A400CAE90F /* CKS3Connection.h in Headers */,
 				7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */,
 				79FCA8D80AC23C25009EDAF9 /* CKHTTPPutRequest.h in Headers */,
 				79FCA9E90AC26440009EDAF9 /* CKHTTPFileDownloadRequest.h in Headers */,
@@ -1431,7 +1428,6 @@
 				792CFCB90A806145001A00C6 /* CKHTTPConnection.m in Sources */,
 				792CFCBB0A806145001A00C6 /* CKHTTPRequest.m in Sources */,
 				792CFCBD0A806145001A00C6 /* CKHTTPResponse.m in Sources */,
-				7946B0FF0AC0F4A400CAE90F /* CKS3Connection.m in Sources */,
 				7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */,
 				79FCA8D90AC23C25009EDAF9 /* CKHTTPPutRequest.m in Sources */,
 				79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */,
