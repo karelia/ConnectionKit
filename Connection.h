@@ -76,7 +76,7 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKTransferProgressCell.h>
 //#import <Connection/CKDirectoryTreeController.h>
 #import <Connection/CKDirectoryNode.h>
-#import <Connection/CKTableBasedBrowser.h>
+//#import <Connection/CKTableBasedBrowser.h>
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>
