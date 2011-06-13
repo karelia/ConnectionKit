@@ -67,7 +67,6 @@
 		7946B5DE0AC1F76800CAE90F /* NSCalendarDate+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */; };
 		794DC3270A5A0EDC007157BE /* CKConnectionThreadManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */; };
 		794DC3280A5A0EDC007157BE /* CKConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */; };
-		794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD10A5CD6CA00913151 /* libcrypto.dylib */; };
 		794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 794EFDD40A5CD6F900913151 /* libssl.dylib */; };
 		795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
 		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
@@ -178,6 +177,7 @@
 		79FCA9EA0AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9E80AC26440009EDAF9 /* CKHTTPFileDownloadRequest.m */; };
 		79FCA9F30AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = 79FCA9F10AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79FCA9F40AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m in Sources */ = {isa = PBXBuildFile; fileRef = 79FCA9F20AC264CD009EDAF9 /* CKHTTPFileDownloadResponse.m */; };
+		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
 		D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */ = {isa = PBXBuildFile; fileRef = D305393B0DE5F30C008646CE /* RegexKitLite.h */; };
@@ -301,7 +301,6 @@
 		7946B5DC0AC1F76800CAE90F /* NSCalendarDate+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSCalendarDate+Connection.m"; sourceTree = "<group>"; };
 		794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionThreadManager.h; sourceTree = "<group>"; };
 		794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionThreadManager.m; sourceTree = "<group>"; };
-		794EFDD10A5CD6CA00913151 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = /usr/lib/libcrypto.dylib; sourceTree = "<absolute>"; };
 		794EFDD40A5CD6F900913151 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = /usr/lib/libssl.dylib; sourceTree = "<absolute>"; };
 		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
 		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
@@ -486,6 +485,7 @@
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CEB6FA0A13A696B200C8059F /* libsasl2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsasl2.dylib; path = /usr/lib/libsasl2.dylib; sourceTree = "<absolute>"; };
 		CEBC056A0DB94446001BF0DF /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CEBC056E0DB94548001BF0DF /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CEBC056F0DB94553001BF0DF /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
@@ -568,9 +568,9 @@
 				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
 				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
-				794EFDD20A5CD6CA00913151 /* libcrypto.dylib in Frameworks */,
 				794EFDD50A5CD6F900913151 /* libssl.dylib in Frameworks */,
 				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
+				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -612,9 +612,9 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
 				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				794EFDD40A5CD6F900913151 /* libssl.dylib */,
-				794EFDD10A5CD6CA00913151 /* libcrypto.dylib */,
 				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
 				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
 				79FB807109F74185006E7D11 /* Carbon.framework */,
