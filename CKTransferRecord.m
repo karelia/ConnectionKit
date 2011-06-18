@@ -559,18 +559,17 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path
 {
-	if ([[record name] isEqualToString:[path firstPathComponent]]) 
+    NSArray *components = [path pathComponents];
+	if ([[record name] isEqualToString:[components objectAtIndex:0]]) 
 	{
-		NSEnumerator *e = [[record contents] objectEnumerator];
-		CKTransferRecord *cur;
-		CKTransferRecord *child;
-		
-		NSString *newPath = [path stringByDeletingFirstPathComponent2];
+		NSString *newPath = [NSString pathWithComponents:
+                             [components subarrayWithRange:NSMakeRange(1, [components count]-1)]];
+        
 		if ([newPath isEqualToString:@""]) return record; // matched
 		
-		while ((cur = [e nextObject])) 
+		for (CKTransferRecord *cur in [record contents]) 
 		{
-			child = [CKTransferRecord recursiveRecord:cur forPath:newPath];
+			CKTransferRecord *child = [CKTransferRecord recursiveRecord:cur forPath:newPath];
 			if (child)
 			{
 				return child;
