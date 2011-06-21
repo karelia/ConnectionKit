@@ -1138,7 +1138,7 @@ LocalizedStringInConnectionKitBundle(@"Too many files had transfer problems", @"
 			if (!didFind)
 			{
 				KTLog(ControllerDomain, KTLogDebug, @"Failed to verify file transferred %@", [cur path]);
-				NSString *msg = [NSString stringWithFormat:LocalizedStringInConnectionKitBundle(@"Failed to verify file transferred successfully", @"error transferring")]; 
+				NSString *msg = LocalizedStringInConnectionKitBundle(@"Failed to verify file transferred successfully", @"error transferring"); 
 				NSError *error = [NSError errorWithDomain:CKTransferControllerDomain
 													 code:CKFailedVerificationError
 												 userInfo:[NSDictionary dictionaryWithObjectsAndKeys:msg, NSLocalizedDescriptionKey, nil]];

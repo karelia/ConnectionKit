@@ -428,7 +428,7 @@
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(unsigned)length
 {
 	if (length == 0) return;
 	if (GET_STATE == CKConnectionDownloadingFileState)

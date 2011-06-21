@@ -77,7 +77,7 @@
 	[super dealloc];
 }
 
-- (CKDAVResponse *)responseWithData:(NSData *)data
+- (CKHTTPResponse *)responseWithData:(NSData *)data
 {
 	NSRange r = [CKDAVResponse canConstructResponseWithData:data];
 	if (r.location != NSNotFound)

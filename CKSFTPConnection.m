@@ -46,6 +46,8 @@
 			checkRemoteExistence:(BOOL)flag
 						delegate:(id)delegate;
 - (void)uploadDidBegin:(CKInternalTransferRecord *)uploadInfo;
+- (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo;
+
 //
 - (void)passwordErrorOccurred;
 @end

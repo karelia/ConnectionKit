@@ -63,13 +63,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CKTransferRecord *)parent { return _parent; }
 
-+ (void)initialize
-{
-	[CKTransferRecord setKeys:[NSArray arrayWithObject:@"progress"] triggerChangeNotificationsForDependentKey:@"nameWithProgress"];
-    [CKTransferRecord setKeys:[NSArray arrayWithObjects:@"progress", @"name", @"size", nil]
-triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
-}
-
 + (id)recordWithName:(NSString *)name size:(unsigned long long)size
 {
 	return [[[CKTransferRecord alloc] initWithName:name size:size] autorelease];
@@ -706,6 +699,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	}
 	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
 }
++ (NSSet *)keyPathsForValuesAffectingNameWithProgress;
+{
+    return [NSSet setWithObject:@"progress"];
+}
 
 - (void)setNameWithProgress:(id)notused
 {
@@ -745,6 +742,10 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
     }
     
     return result;
+}
++ (NSSet *)keyPathsForValuesAffectingNameWithProgressAndFileSize
+{
+    return [NSSet setWithObjects:@"progress", @"name", @"size", nil];
 }
 
 @end

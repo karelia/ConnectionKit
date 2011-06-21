@@ -226,7 +226,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	
 	if (getsockname([self socket], &sock, &len) >= 0) {
 		char *addr = inet_ntoa(((struct sockaddr_in *)&sock)->sin_addr);
-		return [NSString stringWithCString:addr];
+		return [NSString stringWithCString:addr
+                                  encoding:CFStringConvertEncodingToNSStringEncoding(CFStringGetSystemEncoding())];
 	}
 	return nil;
 }
