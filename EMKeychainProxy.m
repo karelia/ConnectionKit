@@ -148,7 +148,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCharacters:password length:passwordLength];
+	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
 	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];
