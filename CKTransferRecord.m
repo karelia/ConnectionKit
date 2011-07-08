@@ -469,7 +469,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 		[self didChangeValueForKey:@"speed"];
 	}
     
-    [self setProgress:(100 * [self transferred] / [self size])];
+    if ([self size]) [self setProgress:(100 * [self transferred] / [self size])];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent
