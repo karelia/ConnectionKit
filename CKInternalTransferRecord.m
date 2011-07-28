@@ -178,7 +178,7 @@
 	
 	[str appendFormat:@"Local: %@\n", myLocalPath];
 	[str appendFormat:@"Remote: %@\n", myRemotePath];
-	[str appendFormat:@"Data: %@\n", [myData shortDescription]];
+	[str appendFormat:@"Data length: %u\n", [myData length]];
 	[str appendFormat:@"Offset: %lld", myOffset];
 	
 	return str;
