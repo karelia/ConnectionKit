@@ -1827,8 +1827,6 @@
 					Foundation,
 					"-framework",
 					AppKit,
-					"-seg1addr",
-					0xcf200000,
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
@@ -1948,8 +1946,6 @@
 					Foundation,
 					"-framework",
 					AppKit,
-					"-seg1addr",
-					0xcf200000,
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
@@ -1988,8 +1984,6 @@
 					Foundation,
 					"-framework",
 					AppKit,
-					"-seg1addr",
-					0xcf200000,
 					"-header-pad_max_install_names",
 				);
 				PREBINDING = NO;
