@@ -1626,6 +1626,7 @@
 					SenTestingKit,
 				);
 				PRODUCT_NAME = UnitTest;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 				ZERO_LINK = NO;
 			};
@@ -1634,6 +1635,7 @@
 		09D6602809FD379A0000BA00 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(value)",
@@ -1653,6 +1655,7 @@
 					SenTestingKit,
 				);
 				PRODUCT_NAME = UnitTest;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 				ZERO_LINK = NO;
 			};
@@ -1677,6 +1680,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletHelper;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1685,6 +1689,7 @@
 		795FF4F90B0C013300EA9292 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1699,6 +1704,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletHelper;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1722,6 +1728,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				VALID_ARCHS = i386;
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -1729,6 +1736,7 @@
 		7983E6E40B0C4E1E00F5078E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1742,6 +1750,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1754,15 +1763,18 @@
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				PRODUCT_NAME = "Build All";
+				VALID_ARCHS = i386;
 			};
 			name = Debug;
 		};
 		7983E7F20B0C4F6F00F5078E /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Build All";
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1770,6 +1782,7 @@
 		79A8578D0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1783,6 +1796,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1790,6 +1804,7 @@
 		79A8578E0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -1817,6 +1832,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1824,6 +1840,7 @@
 		79A8578F0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
@@ -1838,6 +1855,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletHelper;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = app;
 				ZERO_LINK = NO;
 			};
@@ -1846,9 +1864,11 @@
 		79A857900B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				PRODUCT_NAME = "Build All";
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1856,6 +1876,7 @@
 		79A857920B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(value)",
@@ -1875,6 +1896,7 @@
 					SenTestingKit,
 				);
 				PRODUCT_NAME = UnitTest;
+				VALID_ARCHS = i386;
 				WRAPPER_EXTENSION = octest;
 				ZERO_LINK = NO;
 			};
@@ -1883,16 +1905,13 @@
 		79A857940B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				SDKROOT = macosx;
-				VALID_ARCHS = "i386 ppc";
+				VALID_ARCHS = i386;
 			};
 			name = Plugin;
 		};
@@ -1919,6 +1938,7 @@
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-falign-loops=16";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1928,6 +1948,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1935,6 +1956,7 @@
 		79CFD12A09F702BF00172CDD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				COPY_PHASE_STRIP = YES;
 				DEPLOYMENT_POSTPROCESSING = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
@@ -1964,6 +1986,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
 			name = Release;
@@ -1977,24 +2000,21 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				SDKROOT = macosx;
-				VALID_ARCHS = "i386 ppc";
+				VALID_ARCHS = i386;
 			};
 			name = Debug;
 		};
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = (
-					i386,
-					ppc,
-				);
+				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.5;
 				SDKROOT = macosx;
-				VALID_ARCHS = "i386 ppc";
+				VALID_ARCHS = i386;
 			};
 			name = Release;
 		};
