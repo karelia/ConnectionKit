@@ -1728,6 +1728,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = YES;
 			};
@@ -1750,6 +1751,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
@@ -1796,6 +1798,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = DropletLauncher;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
