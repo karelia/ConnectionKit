@@ -1835,6 +1835,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
@@ -1951,6 +1952,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
@@ -1989,6 +1991,7 @@
 					"-header-pad_max_install_names",
 				);
 				PRODUCT_NAME = Connection;
+				SKIP_INSTALL = YES;
 				VALID_ARCHS = i386;
 				ZERO_LINK = NO;
 			};
