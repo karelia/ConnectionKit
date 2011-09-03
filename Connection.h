@@ -87,4 +87,5 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
+#import <Connection/CKURLProtectionSpace.h>
 
