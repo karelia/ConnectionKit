@@ -47,6 +47,10 @@
  */
 @protocol OutputStream, InputStream;
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@protocol NSStreamDelegate <NSObject> @end
+#endif
+
 @interface CKStreamBasedConnection : CKAbstractQueueConnection <NSStreamDelegate>
 {
 	NSThread			*_createdThread;

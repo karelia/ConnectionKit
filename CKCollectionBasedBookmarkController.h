@@ -12,6 +12,11 @@
    table on the left and the bookmarks on the right. It uses the ConnectionRegistry class to populate
    the views
 */
+
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@protocol NSOutlineViewDataSource <NSObject> @end
+#endif
+
 @interface CKCollectionBasedBookmarkController : NSObject <NSTableViewDataSource, NSOutlineViewDataSource>
 {
 	NSTableView *oCollections;
