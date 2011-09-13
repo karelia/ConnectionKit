@@ -63,6 +63,11 @@ typedef enum {
 
 @class RunLoopForwarder;
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@protocol NSOutlineViewDataSource <NSObject> @end
+@protocol NSOutlineViewDelegate <NSObject> @end
+#endif
+
 @interface CKTransferController : NSWindowController <NSOutlineViewDataSource, NSOutlineViewDelegate>
 {
 	id <CKConnection>		myConnection;		// may not be retained

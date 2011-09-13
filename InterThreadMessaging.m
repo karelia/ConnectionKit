@@ -83,6 +83,11 @@ static pthread_mutex_t pGate = { 0 };
 
 @end
 
+#if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_5
+@protocol NSPortDelegate <NSObject> @end
+#endif
+
+
 static void
 ConnectionCreateMessagePortForThread (NSThread *thread, NSRunLoop *runLoop)
 {
