@@ -76,7 +76,7 @@
     {
         [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(connection:didDisconnectFromHost:)
                                                               target:[self delegate]
-                                                           arguments:NSARRAY([_URL host])]];
+                                                           arguments:NSARRAY(self, [_URL host])]];
     }
 }
 
@@ -116,7 +116,7 @@
     [self enqueueRequest:request];
     [request release];
     
-    return nil;
+    return [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
