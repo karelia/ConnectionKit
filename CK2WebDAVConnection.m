@@ -68,6 +68,16 @@
     }
 }
 
+- (void)disconnect;
+{
+    if ([[self delegate] respondsToSelector:@selector(connection:didDisconnectFromHost:)])
+    {
+        [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(connection:didDisconnectFromHost:)
+                                                              target:[self delegate]
+                                                           arguments:NSARRAY([_URL host])]];
+    }
+}
+
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     OBPRECONDITION(challenge == _challenge);
@@ -105,6 +115,15 @@
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path; { /* ignore! */ }
+
+- (void)deleteFile:(NSString *)path
+{
+    DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path];
+    [self enqueueRequest:request];
+    [request release];
+}
+
+#pragma mark Current Directory
 
 @synthesize currentDirectoryPath = _currentDirectory;
 - (void)setCurrentDirectoryPath:(NSString *)path;
@@ -146,6 +165,13 @@
         if ([[self delegate] respondsToSelector:@selector(connection:didCreateDirectory:error:)])
         {
             [[self delegate] connection:self didCreateDirectory:[aRequest path] error:nil];
+        }
+    }
+    else if ([aRequest isKindOfClass:[DAVDeleteRequest class]])
+    {
+        if ([[self delegate] respondsToSelector:@selector(connection:didDeleteFile:error:)])
+        {
+            [[self delegate] connection:self didDeleteFile:[aRequest path] error:error];
         }
     }
     
