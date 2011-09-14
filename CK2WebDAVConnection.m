@@ -46,6 +46,8 @@
 
 - (void)enqueueRequest:(DAVRequest *)request;
 {
+    [self connect];
+    
     [request setDelegate:self];
     
     NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(enqueueRequest:)
