@@ -87,7 +87,10 @@
     
     _session = [[DAVSession alloc] initWithRootURL:_URL credentials:credential];
     
-    [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
+    if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:)])
+    {
+        [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
+    }
 }
 
 - (void)forceDisconnect { }
