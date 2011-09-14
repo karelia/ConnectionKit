@@ -7,20 +7,25 @@
 //
 
 #import <Connection/Connection.h>
+#import <DAVKit/DAVKit.h>
+
 
 @class DAVSession;
-@protocol DAVRequestDelegate;
 
 @interface CK2WebDAVConnection : NSObject <CKConnection, DAVRequestDelegate, NSURLAuthenticationChallengeSender>
 {
   @private
-    NSURL       *_URL;
+    NSURL                           *_URL;
     NSURLAuthenticationChallenge    *_challenge;
-    DAVSession  *_session;
+    DAVSession                      *_session;
+    NSMutableArray                  *_queue;
+    NSString                        *_currentDirectory;
     
     NSObject    *_delegate;
 }
 
 @property(nonatomic, assign) NSObject *delegate;
+@property(nonatomic, copy) NSString *currentDirectoryPath;
+
 
 @end

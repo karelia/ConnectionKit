@@ -8,7 +8,6 @@
 
 #import "CK2WebDAVConnection.h"
 
-#import <DAVKit/DAVKit.h>
 
 
 @implementation CK2WebDAVConnection
@@ -25,11 +24,36 @@
     if (self = [self init])
     {
         _URL = [[request URL] copy];
+        _queue = [[NSMutableArray alloc] init];
     }
     return self;
 }
 
 @synthesize delegate = _delegate;
+
+- (void)enqueueInvocation:(NSInvocation *)invocation;
+{
+    // Assume that only _session targeted invocations are async
+    BOOL runNow = [_queue count] == 0;
+    
+    if (!runNow || [invocation target] == _session)
+    {
+        [_queue addObject:invocation];
+    }
+    
+    if (runNow) [invocation invoke];
+}
+
+- (void)enqueueRequest:(DAVRequest *)request;
+{
+    [request setDelegate:self];
+    
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(enqueueRequest:)
+                                                             target:_session
+                                                          arguments:NSARRAY(request)];
+    
+    [self enqueueInvocation:invocation];
+}
 
 - (void)connect;
 {
@@ -50,13 +74,23 @@
     [_challenge release]; _challenge = nil;
     
     _session = [[DAVSession alloc] initWithRootURL:_URL credentials:credential];
-    [_session setMaxConcurrentRequests:1];
     
     [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
 }
 
-- (void)cancelAll { }
 - (void)forceDisconnect { }
+
+#pragma mark Requests
+
+- (void)cancelAll { }
+
+- (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
+{
+    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath];
+    [request setData:[NSData dataWithContentsOfFile:localPath]];
+    [self enqueueRequest:request];
+    return nil;
+}
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
 {
@@ -66,13 +100,32 @@
 - (void)createDirectory:(NSString *)dirPath;
 {
     DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath];
-    [request setDelegate:self];
-    [_session enqueueRequest:request];
+    [self enqueueRequest:request];
     [request release];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path; { /* ignore! */ }
-- (void)changeToDirectory:(NSString *)dirPath { }
+
+@synthesize currentDirectoryPath = _currentDirectory;
+- (void)setCurrentDirectoryPath:(NSString *)path;
+{
+    path = [path copy];
+    [_currentDirectory release]; _currentDirectory = path;
+    
+    [[self delegate] connection:self didChangeToDirectory:path error:nil];
+}
+
+- (void)changeToDirectory:(NSString *)dirPath
+{
+    if ([_queue count])
+    {
+        return [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(setCurrentDirectoryPath:)
+                                                                     target:self
+                                                                  arguments:NSARRAY(dirPath)]];
+    }
+    
+    [self setCurrentDirectoryPath:dirPath];
+}
 
 - (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
 {
@@ -81,12 +134,36 @@
 
 - (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
 {
-    if ([aRequest isKindOfClass:[DAVMakeCollectionRequest class]])
+    if ([aRequest isKindOfClass:[DAVPutRequest class]])
+    {
+        if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
+        {
+            [[self delegate] connection:self uploadDidFinish:[aRequest path] error:error];
+        }
+    }
+    else if ([aRequest isKindOfClass:[DAVMakeCollectionRequest class]])
     {
         if ([[self delegate] respondsToSelector:@selector(connection:didCreateDirectory:error:)])
         {
             [[self delegate] connection:self didCreateDirectory:[aRequest path] error:nil];
         }
+    }
+    
+    
+    // Move onto next request
+    [_queue removeObjectAtIndex:0];
+    while ([_queue count])
+    {
+        NSInvocation *next = [_queue objectAtIndex:0];
+        [next invoke];
+        if ([next target] == _session)
+        {
+            break;   // async
+        }
+        else
+        {
+            [_queue removeObjectAtIndex:0];
+        }    
     }
 }
 
