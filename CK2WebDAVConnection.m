@@ -81,6 +81,7 @@
 }
 
 - (void)forceDisconnect { }
+- (BOOL)isConnected { return NO; }
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
