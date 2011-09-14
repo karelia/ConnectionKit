@@ -80,6 +80,8 @@
     }
 }
 
+- (void)forceDisconnect { }
+
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     OBPRECONDITION(challenge == _challenge);
@@ -93,17 +95,27 @@
     }
 }
 
-- (void)forceDisconnect { }
-
 #pragma mark Requests
 
 - (void)cancelAll { }
 
 - (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
 {
+    return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
+                         toFile:remotePath
+           checkRemoteExistence:flag
+                       delegate:delegate];
+}
+
+- (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
+{
+    OBPRECONDITION(data);
+    
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath];
-    [request setData:[NSData dataWithContentsOfFile:localPath]];
+    [request setData:data];
     [self enqueueRequest:request];
+    [request release];
+    
     return nil;
 }
 
@@ -151,9 +163,11 @@
     [self setCurrentDirectoryPath:dirPath];
 }
 
+#pragma mark Request Delegate
+
 - (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
 {
-    [self request:aRequest didFailWithError:nil];   // CK uses nil errors to indiciate success because it's dumb
+    [self request:aRequest didFailWithError:nil];   // CK uses nil errors to indicate success because it's dumb
 }
 
 - (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
