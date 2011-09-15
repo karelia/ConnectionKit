@@ -49,9 +49,9 @@
 
 - (void)runInvocation:(NSInvocation *)invocation
 {
+    DAVRequest *target = [invocation target];
     [invocation invoke];
     
-    DAVRequest *target = [invocation target];
     if ([target isKindOfClass:[DAVRequest class]])
     {
         if ([target isKindOfClass:[DAVPutRequest class]] &&
