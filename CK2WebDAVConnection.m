@@ -20,6 +20,8 @@
 
 + (NSArray *)URLSchemes { return NSARRAY(@"http", @"https"); }
 
+#pragma mark Lifecycle
+
 - (id)initWithRequest:(CKConnectionRequest *)request;
 {
     if (self = [self init])
@@ -30,6 +32,19 @@
     }
     return self;
 }
+
+- (void)dealloc;
+{
+    [_URL release];
+    [_session release];
+    [_transferRecordsByRequest release];
+    [_queue release];
+    [_currentDirectory release];
+    
+    [super dealloc];
+}
+
+#pragma mark Delegate
 
 @synthesize delegate = _delegate;
 
