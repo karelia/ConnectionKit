@@ -262,7 +262,7 @@
         }
         else
         {
-            [_queue removeObjectAtIndex:0];
+            if ([_queue count]) [_queue removeObjectAtIndex:0]; // running the invocation might empty the queue if it's a disconnect
         }    
     }
 }
