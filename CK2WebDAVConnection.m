@@ -90,6 +90,8 @@
 {
     if (!_connected)
     {
+        _connected = YES;
+        
         if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
         {
             [[self delegate] connection:self didConnectToHost:[[_session rootURL] host] error:nil];
