@@ -256,9 +256,12 @@
     [_queue removeObjectAtIndex:0];
     while ([_queue count])
     {
-        NSInvocation *next = [_queue objectAtIndex:0];
+        NSInvocation *next = [[_queue objectAtIndex:0] retain];
         [self runInvocation:next];
-        if ([[next target] isKindOfClass:[DAVRequest class]])
+        id target = [next target];
+        [next release];
+        
+        if ([target isKindOfClass:[DAVRequest class]])
         {
             break;   // async
         }
