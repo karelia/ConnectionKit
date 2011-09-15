@@ -61,12 +61,12 @@
 {
     if (!_session)
     {
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[_URL host] port:[[_URL port] integerValue] protocol:[_URL scheme] realm:nil authenticationMethod:nil];
+        _session = [[DAVSession alloc] initWithRootURL:_URL delegate:self];
         
-        _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space proposedCredential:nil previousFailureCount:0 failureResponse:nil error:nil sender:self];
-        [space release];
-        
-        [[self delegate] connection:self didReceiveAuthenticationChallenge:_challenge];
+        if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
+        {
+            [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
+        }
     }
 }
 
@@ -83,17 +83,14 @@
 - (void)forceDisconnect { }
 - (BOOL)isConnected { return NO; }
 
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    OBPRECONDITION(challenge == _challenge);
-    [_challenge release]; _challenge = nil;
-    
-    _session = [[DAVSession alloc] initWithRootURL:_URL credentials:credential];
-    
-    if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:)])
-    {
-        [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
-    }
+    [[self delegate] connection:self didReceiveAuthenticationChallenge:challenge];
+}
+
+- (void)webDAVSession:(DAVSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
 #pragma mark Requests

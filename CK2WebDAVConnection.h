@@ -12,7 +12,7 @@
 
 @class DAVSession;
 
-@interface CK2WebDAVConnection : NSObject <CKConnection, DAVRequestDelegate, NSURLAuthenticationChallengeSender>
+@interface CK2WebDAVConnection : NSObject <CKConnection, DAVRequestDelegate, DAVSessionDelegate>
 {
   @private
     NSURL                           *_URL;
