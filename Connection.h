@@ -77,13 +77,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKDirectoryNode.h>
 //#import <Connection/CKTableBasedBrowser.h>
 
-#import <Connection/CKHTTPConnection.h>
-#import <Connection/CKHTTPRequest.h>
-#import <Connection/CKHTTPFileDownloadRequest.h>
-#import <Connection/CKHTTPPutRequest.h>
-#import <Connection/CKHTTPResponse.h>
-#import <Connection/CKHTTPFileDownloadResponse.h>
-
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
 #import <Connection/CKURLProtectionSpace.h>
