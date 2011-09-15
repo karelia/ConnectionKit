@@ -26,6 +26,7 @@
     {
         _URL = [[request URL] copy];
         _queue = [[NSMutableArray alloc] init];
+        _transferRecordsByRequest = [[NSMutableDictionary alloc] init];
     }
     return self;
 }
@@ -116,7 +117,9 @@
     [self enqueueRequest:request];
     [request release];
     
-    return [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
+    CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
+    return result;
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
@@ -170,6 +173,10 @@
 {
     if ([aRequest isKindOfClass:[DAVPutRequest class]])
     {
+        CKTransferRecord *record = [_transferRecordsByRequest objectForKey:aRequest];
+        [record transferDidFinish:record error:error];
+        [_transferRecordsByRequest removeObjectForKey:aRequest];
+        
         if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
         {
             [[self delegate] connection:self uploadDidFinish:[aRequest path] error:error];
