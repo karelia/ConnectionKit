@@ -80,8 +80,6 @@
 
 - (void)enqueueRequest:(DAVRequest *)request;
 {
-    [self connect];
-    
     NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(start)
                                                              target:request
                                                           arguments:nil];
@@ -104,16 +102,25 @@
 
 - (void)disconnect;
 {
-    if ([[self delegate] respondsToSelector:@selector(connection:didDisconnectFromHost:)])
+    [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(forceDisconnect)
+                                                          target:self
+                                                       arguments:nil]];
+}
+
+- (void)forceDisconnect
+{
+    if (_connected)
     {
-        [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(connection:didDisconnectFromHost:)
-                                                              target:[self delegate]
-                                                           arguments:NSARRAY(self, [[_session rootURL] host])]];
+        _connected = NO;
+        
+        if ([[self delegate] respondsToSelector:@selector(connection:didDisconnectFromHost:)])
+        {
+            [[self delegate] connection:self didDisconnectFromHost:[[[self webDAVSession] rootURL] host]];
+        }
     }
 }
 
-- (void)forceDisconnect { }
-- (BOOL)isConnected { return NO; }
+- (BOOL)isConnected { return _connected; }
 
 - (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
