@@ -48,6 +48,24 @@
 
 @synthesize delegate = _delegate;
 
+- (void)runInvocation:(NSInvocation *)invocation
+{
+    [invocation invoke];
+    
+    if ([invocation target] == _session &&
+        [invocation selector] == @selector(enqueueRequest:))
+    {
+        DAVRequest *request;
+        [invocation getArgument:&request atIndex:2];
+        
+        if ([request isKindOfClass:[DAVPutRequest class]] &&
+            [[self delegate] respondsToSelector:@selector(connection:uploadDidBegin:)])
+        {
+            [[self delegate] connection:self uploadDidBegin:[request path]];
+        }
+    }
+}
+
 - (void)enqueueInvocation:(NSInvocation *)invocation;
 {
     // Assume that only _session targeted invocations are async
@@ -58,7 +76,7 @@
         [_queue addObject:invocation];
     }
     
-    if (runNow) [invocation invoke];
+    if (runNow) [self runInvocation:invocation];
 }
 
 - (void)enqueueRequest:(DAVRequest *)request;
@@ -218,7 +236,7 @@
     while ([_queue count])
     {
         NSInvocation *next = [_queue objectAtIndex:0];
-        [next invoke];
+        [self runInvocation:next];
         if ([next target] == _session)
         {
             break;   // async
@@ -227,15 +245,6 @@
         {
             [_queue removeObjectAtIndex:0];
         }    
-    }
-}
-
-- (void)requestDidBegin:(DAVRequest *)aRequest;
-{
-    if ([aRequest isKindOfClass:[DAVPutRequest class]] &&
-        [[self delegate] respondsToSelector:@selector(connection:uploadDidBegin:)])
-    {
-        [[self delegate] connection:self uploadDidBegin:[aRequest path]];
     }
 }
 
