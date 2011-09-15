@@ -51,16 +51,13 @@
 {
     [invocation invoke];
     
-    if ([[invocation target] isKindOfClass:[DAVRequest class]] &&
-        [invocation selector] == @selector(enqueueRequest:))
+    DAVRequest *target = [invocation target];
+    if ([target isKindOfClass:[DAVRequest class]])
     {
-        DAVRequest *request;
-        [invocation getArgument:&request atIndex:2];
-        
-        if ([request isKindOfClass:[DAVPutRequest class]] &&
+        if ([target isKindOfClass:[DAVPutRequest class]] &&
             [[self delegate] respondsToSelector:@selector(connection:uploadDidBegin:)])
         {
-            [[self delegate] connection:self uploadDidBegin:[request path]];
+            [[self delegate] connection:self uploadDidBegin:[target path]];
         }
     }
 }
