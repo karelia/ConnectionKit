@@ -208,6 +208,15 @@
     }
 }
 
+- (void)requestDidBegin:(DAVRequest *)aRequest;
+{
+    if ([aRequest isKindOfClass:[DAVPutRequest class]] &&
+        [[self delegate] respondsToSelector:@selector(connection:uploadDidBegin:)])
+    {
+        [[self delegate] connection:self uploadDidBegin:[aRequest path]];
+    }
+}
+
 - commandQueue { return nil; }
 
 #pragma mark iDisk
