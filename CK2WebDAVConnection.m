@@ -8,6 +8,7 @@
 
 #import "CK2WebDAVConnection.h"
 
+#import "KSPathUtilities.h"
 
 
 @implementation CK2WebDAVConnection
@@ -109,6 +110,7 @@
 {
     OBPRECONDITION(data);
     
+    remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectoryPath]];
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath];
     [request setData:data];
     [self enqueueRequest:request];
@@ -124,6 +126,7 @@
 
 - (void)createDirectory:(NSString *)dirPath;
 {
+    dirPath = [NSString ks_stringWithPath:dirPath relativeToDirectory:[self currentDirectoryPath]];
     DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath];
     [self enqueueRequest:request];
     [request release];
@@ -133,6 +136,7 @@
 
 - (void)deleteFile:(NSString *)path
 {
+    path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectoryPath]];
     DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path];
     [self enqueueRequest:request];
     [request release];
@@ -141,21 +145,15 @@
 #pragma mark Current Directory
 
 @synthesize currentDirectoryPath = _currentDirectory;
-- (void)setCurrentDirectoryPath:(NSString *)path;
-{
-    path = [path copy];
-    [_currentDirectory release]; _currentDirectory = path;
-    
-    [[self delegate] connection:self didChangeToDirectory:path error:nil];
-}
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
     if ([_queue count])
     {
-        return [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(setCurrentDirectoryPath:)
-                                                                     target:self
-                                                                  arguments:NSARRAY(dirPath)]];
+        [self enqueueInvocation:[NSInvocation
+                                 invocationWithSelector:@selector(connection:didChangeToDirectory:error:)
+                                 target:[self delegate]
+                                 arguments:NSARRAY(self, dirPath, nil)]];
     }
     
     [self setCurrentDirectoryPath:dirPath];
