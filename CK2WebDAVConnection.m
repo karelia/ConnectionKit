@@ -106,6 +106,20 @@
 
 - (void)forceDisconnect
 {
+    // Cancel all in queue
+    if ([_queue count])
+    {
+        NSInvocation *firstInvocation = [_queue objectAtIndex:0];
+        id target = [firstInvocation target];
+        if ([target isKindOfClass:[DAVRequest class]])
+        {
+            [target cancel];
+        }
+        
+        [_queue removeAllObjects];
+    }
+    
+    
     if (_connected)
     {
         _connected = NO;
