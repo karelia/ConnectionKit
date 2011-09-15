@@ -26,7 +26,7 @@
 {
     if (self = [self init])
     {
-        _URL = [[request URL] copy];
+        _session = [[DAVSession alloc] initWithRootURL:[request URL] delegate:self];
         _queue = [[NSMutableArray alloc] init];
         _transferRecordsByRequest = [[NSMutableDictionary alloc] init];
     }
@@ -35,7 +35,6 @@
 
 - (void)dealloc;
 {
-    [_URL release];
     [_session release];
     [_transferRecordsByRequest release];
     [_queue release];
@@ -52,7 +51,7 @@
 {
     [invocation invoke];
     
-    if ([invocation target] == _session &&
+    if ([[invocation target] isKindOfClass:[DAVRequest class]] &&
         [invocation selector] == @selector(enqueueRequest:))
     {
         DAVRequest *request;
@@ -71,7 +70,7 @@
     // Assume that only _session targeted invocations are async
     BOOL runNow = [_queue count] == 0;
     
-    if (!runNow || [invocation target] == _session)
+    if (!runNow || [[invocation target] isKindOfClass:[DAVRequest class]])
     {
         [_queue addObject:invocation];
     }
@@ -83,24 +82,22 @@
 {
     [self connect];
     
-    [request setDelegate:self];
-    
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(enqueueRequest:)
-                                                             target:_session
-                                                          arguments:NSARRAY(request)];
-    
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(start)
+                                                             target:request
+                                                          arguments:nil];
+    [invocation retainArguments];
     [self enqueueInvocation:invocation];
 }
 
+- (DAVSession *)webDAVSession; { return _session; }
+
 - (void)connect;
 {
-    if (!_session)
+    if (!_connected)
     {
-        _session = [[DAVSession alloc] initWithRootURL:_URL delegate:self];
-        
         if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
         {
-            [[self delegate] connection:self didConnectToHost:[_URL host] error:nil];
+            [[self delegate] connection:self didConnectToHost:[[_session rootURL] host] error:nil];
         }
     }
 }
@@ -111,7 +108,7 @@
     {
         [self enqueueInvocation:[NSInvocation invocationWithSelector:@selector(connection:didDisconnectFromHost:)
                                                               target:[self delegate]
-                                                           arguments:NSARRAY(self, [_URL host])]];
+                                                           arguments:NSARRAY(self, [[_session rootURL] host])]];
     }
 }
 
@@ -145,13 +142,13 @@
     OBPRECONDITION(data);
     
     remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectoryPath]];
-    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath];
+    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
     [request setData:data];
     [self enqueueRequest:request];
-    [request release];
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
     CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
+    [request release];
     return result;
 }
 
@@ -163,7 +160,11 @@
 - (void)createDirectory:(NSString *)dirPath;
 {
     dirPath = [NSString ks_stringWithPath:dirPath relativeToDirectory:[self currentDirectoryPath]];
-    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath];
+    
+    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath
+                                                                               session:[self webDAVSession]
+                                                                              delegate:self];
+    
     [self enqueueRequest:request];
     [request release];
 }
@@ -173,7 +174,7 @@
 - (void)deleteFile:(NSString *)path
 {
     path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectoryPath]];
-    DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path];
+    DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
     [self enqueueRequest:request];
     [request release];
 }
@@ -237,7 +238,7 @@
     {
         NSInvocation *next = [_queue objectAtIndex:0];
         [self runInvocation:next];
-        if ([next target] == _session)
+        if ([[next target] isKindOfClass:[DAVRequest class]])
         {
             break;   // async
         }

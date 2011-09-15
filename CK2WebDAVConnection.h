@@ -15,7 +15,7 @@
 @interface CK2WebDAVConnection : NSObject <CKConnection, DAVRequestDelegate, DAVSessionDelegate>
 {
   @private
-    NSURL                           *_URL;
+    BOOL                            _connected;
     NSURLAuthenticationChallenge    *_challenge;
     DAVSession                      *_session;
     
