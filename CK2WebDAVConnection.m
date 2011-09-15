@@ -210,4 +210,6 @@
     }
 }
 
+- commandQueue { return nil; }
+
 @end
