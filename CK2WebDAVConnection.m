@@ -210,4 +210,52 @@
 
 - commandQueue { return nil; }
 
+#pragma mark iDisk
+
++ (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password
+{
+	BOOL result = NO;
+    
+	NSString *accountName = [[NSUserDefaults standardUserDefaults] objectForKey:@"iToolsMember"];
+	if (accountName)
+	{
+		UInt32 length;
+		void *buffer;
+		
+        const char *service = "iTools";
+		const char *accountKey = (char *)[accountName UTF8String];
+		OSStatus theStatus = SecKeychainFindGenericPassword(
+                                                            NULL,
+                                                            strlen(service), service,
+                                                            strlen(accountKey), accountKey,
+                                                            &length, &buffer,
+                                                            NULL
+                                                            );
+		
+		if (noErr == theStatus)
+		{
+			if (length > 0)
+			{
+				if (password) *password = [[[NSString alloc] initWithBytes:buffer length:length encoding:NSUTF8StringEncoding] autorelease];
+			}
+			else
+			{
+				if (password) *password = @""; // if we have noErr but also no length, password is empty
+			}
+            
+			// release buffer allocated by SecKeychainFindGenericPassword
+			theStatus = SecKeychainItemFreeContent(NULL, buffer);
+			
+			*account = accountName;
+			result = YES;
+		}
+        else 
+        {
+            NSLog(@"SecKeychainFindGenericPassword failed %d", theStatus);
+        }
+	}
+	
+	return result;
+}
+
 @end
