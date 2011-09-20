@@ -161,7 +161,7 @@
 {
     OBPRECONDITION(data);
     
-    remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectoryPath]];
+    remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectory]];
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
     [request setData:data];
     [self enqueueRequest:request];
@@ -179,7 +179,7 @@
 
 - (void)createDirectory:(NSString *)dirPath;
 {
-    dirPath = [NSString ks_stringWithPath:dirPath relativeToDirectory:[self currentDirectoryPath]];
+    dirPath = [NSString ks_stringWithPath:dirPath relativeToDirectory:[self currentDirectory]];
     
     DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath
                                                                                session:[self webDAVSession]
@@ -193,7 +193,7 @@
 
 - (void)deleteFile:(NSString *)path
 {
-    path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectoryPath]];
+    path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectory]];
     DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
     [self enqueueRequest:request];
     [request release];
@@ -201,7 +201,7 @@
 
 #pragma mark Current Directory
 
-@synthesize currentDirectoryPath = _currentDirectory;
+@synthesize currentDirectory = _currentDirectory;
 
 - (void)changeToDirectory:(NSString *)dirPath
 {
@@ -213,7 +213,7 @@
                                  arguments:NSARRAY(self, dirPath, nil)]];
     }
     
-    [self setCurrentDirectoryPath:dirPath];
+    [self setCurrentDirectory:dirPath];
 }
 
 #pragma mark Request Delegate

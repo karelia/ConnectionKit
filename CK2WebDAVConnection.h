@@ -27,7 +27,7 @@
 }
 
 @property(nonatomic, assign) NSObject *delegate;
-@property(nonatomic, copy) NSString *currentDirectoryPath;
+@property(nonatomic, copy) NSString *currentDirectory;
 
 + (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
 
