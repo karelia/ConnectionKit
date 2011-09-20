@@ -267,7 +267,7 @@
                 if (!attributes) attributes = [[NSMutableDictionary alloc] initWithCapacity:1];
                 
                 NSString *path = [aResponseItem href];
-                path = [path ks_pathRelativeToDirectory:directory];
+                path = [[path ks_pathRelativeToDirectory:directory] ks_standardizedPOSIXPath];
                 [attributes setObject:path forKey:cxFilenameKey];
                 
                 [contents addObject:attributes];
