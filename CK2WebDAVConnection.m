@@ -314,6 +314,7 @@
 }
 
 - commandQueue { return nil; }
+- (void)cleanupConnection { }
 
 #pragma mark iDisk
 
