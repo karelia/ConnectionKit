@@ -264,6 +264,7 @@
             for (DAVResponseItem *aResponseItem in result)
             {
                 NSMutableDictionary *attributes = [[aResponseItem fileAttributes] mutableCopy];
+                if (!attributes) attributes = [[NSMutableDictionary alloc] initWithCapacity:1];
                 
                 NSString *path = [aResponseItem href];
                 path = [path ks_pathRelativeToDirectory:directory];
