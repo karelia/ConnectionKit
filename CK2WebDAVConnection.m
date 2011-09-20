@@ -199,6 +199,15 @@
     [request release];
 }
 
+- (void)directoryContents
+{
+    DAVListingRequest *request = [[DAVListingRequest alloc] initWithPath:[self currentDirectory]
+                                                                 session:[self webDAVSession]
+                                                                delegate:self];
+    [self enqueueRequest:request];
+    [request release];
+}
+
 #pragma mark Current Directory
 
 @synthesize currentDirectory = _currentDirectory;
@@ -218,12 +227,7 @@
 
 #pragma mark Request Delegate
 
-- (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
-{
-    [self request:aRequest didFailWithError:nil];   // CK uses nil errors to indicate success because it's dumb
-}
-
-- (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
+- (void)webDAVRequest:(DAVRequest *)aRequest didFinishWithResult:(id)result error:(NSError *)error;
 {
     if ([aRequest isKindOfClass:[DAVPutRequest class]])
     {
@@ -250,6 +254,33 @@
             [[self delegate] connection:self didDeleteFile:[aRequest path] error:error];
         }
     }
+    else if ([aRequest isKindOfClass:[DAVListingRequest class]])
+    {
+        if ([[self delegate] respondsToSelector:@selector(connection:didReceiveContents:ofDirectory:error:)])
+        {
+            NSString *directory = [aRequest path];
+            NSMutableArray *contents = [[NSMutableArray alloc] initWithCapacity:[result count]];
+            
+            for (DAVResponseItem *aResponseItem in result)
+            {
+                NSMutableDictionary *attributes = [[aResponseItem fileAttributes] mutableCopy];
+                
+                NSString *path = [aResponseItem href];
+                path = [path ks_pathRelativeToDirectory:directory];
+                [attributes setObject:path forKey:cxFilenameKey];
+                
+                [contents addObject:attributes];
+                [attributes release];
+            }
+            
+            [[self delegate] connection:self
+                     didReceiveContents:contents
+                            ofDirectory:[aRequest path]
+                                  error:nil];
+            
+            [contents release];
+        }
+    }
     
     
     // Move onto next request
@@ -270,6 +301,16 @@
             if ([_queue count]) [_queue removeObjectAtIndex:0]; // running the invocation might empty the queue if it's a disconnect
         }    
     }
+}
+
+- (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
+{
+    [self webDAVRequest:aRequest didFinishWithResult:result error:nil];   // CK uses nil errors to indicate success because it's dumb
+}
+
+- (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
+{
+    [self webDAVRequest:aRequest didFinishWithResult:nil error:error];
 }
 
 - commandQueue { return nil; }
