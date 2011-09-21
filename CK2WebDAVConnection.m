@@ -9,6 +9,7 @@
 #import "CK2WebDAVConnection.h"
 
 #import "KSPathUtilities.h"
+#import "KSWorkspaceUtilities.h"
 
 
 @implementation CK2WebDAVConnection
@@ -164,6 +165,10 @@
     remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectory]];
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
     [request setData:data];
+    
+    NSString *type = [KSWORKSPACE ks_typeForFilenameExtension:[remotePath pathExtension]];
+    [request setDataMIMEType:[KSWORKSPACE ks_MIMETypeForType:type]];
+    
     [self enqueueRequest:request];
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
