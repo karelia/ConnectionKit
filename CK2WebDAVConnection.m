@@ -321,9 +321,8 @@
 
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
 {
-    NSInteger progress = (100 * totalBytesWritten) / totalBytesExpectedToWrite;
     CKTransferRecord *record = [_transferRecordsByRequest objectForKey:request];
-    [record transfer:record progressedTo:[NSNumber numberWithInteger:progress]];
+    [record transfer:record transferredDataOfLength:bytesWritten];
 }
 
 - commandQueue { return nil; }
