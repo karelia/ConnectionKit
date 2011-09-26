@@ -297,7 +297,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 - (BOOL)openStreamsToPort:(unsigned)port
 {
 	NSHost *host = [CKCacheableHost hostWithName:[[[self request] URL] host]];
-	if(!host){
+	NSString *address = [host address];
+	
+    if (!address)
+    {
 		KTLog(CKTransportDomain, KTLogError, @"Cannot find the host: %@", [[[self request] URL] host]);
 		
         NSError *error = [NSError errorWithDomain:CKConnectionErrorDomain 
@@ -309,6 +312,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		
 		return NO;
 	}
+    
 	/* If the host has multiple names it can screw up the order in the list of name */
 	if ([[host names] count] > 1) {
 		[host setValue:[NSArray arrayWithObject:[[[self request] URL] host]] forKey:@"names"]; // KVC hack
@@ -345,7 +349,8 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	bzero((char *) &addr, sizeof(addr));
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(port);
-	addr.sin_addr.s_addr = inet_addr([[host address] UTF8String]);
+    
+    addr.sin_addr.s_addr = inet_addr([address UTF8String]);
 	
 	KTLog(CKTransportDomain, KTLogDebug, @"Connecting to %@:%d", [host address], port);
 	
