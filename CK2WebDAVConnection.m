@@ -54,8 +54,12 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)runOperation:(NSOperation *)operation
 {
-    [operation addObserver:self forKeyPath:@"isFinished" options:0 context:sOpFinishObservationContext];
-    [operation start];
+    [operation retain]; // disconnecting removes the disconnect op from queue, potentially deallocating it
+    {{
+        [operation addObserver:self forKeyPath:@"isFinished" options:0 context:sOpFinishObservationContext];
+        [operation start];
+    }}
+    [operation release];
 }
 
 - (void)enqueueOperation:(NSOperation *)operation;
