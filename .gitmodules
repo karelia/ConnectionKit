@@ -1,0 +1,3 @@
+[submodule "DAVKit"]
+	path = DAVKit
+	url = git@github.com:karelia/DAVKit.git
