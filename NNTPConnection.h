@@ -45,9 +45,9 @@ typedef enum {
 	NSString *_currentNewsGroup;
 	
 	struct __newsflags {
-		unsigned canPost: 1;
-		unsigned isSlave: 1;
-		unsigned unused: 30;
+		unsigned canPost:1;
+		unsigned isSlave:1;
+		unsigned unused:30;
 	} _newsflags;
 }
 

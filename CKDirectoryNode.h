@@ -57,7 +57,7 @@
 - (void)mergeContents:(NSArray *)contents;
 - (NSArray *)contents;
 
-- (unsigned)countIncludingHiddenFiles:(BOOL)flag;
+- (NSUInteger)countIncludingHiddenFiles:(BOOL)flag;
 - (NSArray *)contentsIncludingHiddenFiles:(BOOL)flag;
 - (NSArray *)filteredContentsWithNamesLike:(NSString *)match includeHiddenFiles:(BOOL)flag;
 

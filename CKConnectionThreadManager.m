@@ -108,7 +108,7 @@ static NSLock *_initLock = nil;
 #pragma mark -
 #pragma mark Threading Support
 
-- (void)sendPortMessage:(int)aMessage
+- (void)sendPortMessage:(uint32_t)aMessage
 {
 	if (nil != myPort)
 	{
@@ -132,7 +132,7 @@ static NSLock *_initLock = nil;
 		} @catch (NSException *ex) {
 			KTLog(CKThreadingDomain, KTLogError, @"%@", ex);
 			// if we fail to send it is usually because the queueing is occurring on the main thread. so we can actually just use the runloop to repost
-			[self performSelector:@selector(runloopResend:) withObject:[NSNumber numberWithInt:aMessage] afterDelay:0.0];
+			[self performSelector:@selector(runloopResend:) withObject:[NSNumber numberWithInteger:aMessage] afterDelay:0.0];
 		} @finally {
 			[message release];
 		} 

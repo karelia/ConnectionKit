@@ -32,7 +32,7 @@
 	
 	[oPanel center];
 	[oPanel makeKeyAndOrderFront:self];
-	int rc = [NSApp runModalForWindow:oPanel];
+	NSInteger rc = [NSApp runModalForWindow:oPanel];
 	[oPanel orderOut:self];
 	
 	if (rc == NSOKButton)

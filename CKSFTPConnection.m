@@ -107,10 +107,10 @@ static NSString *lsform = nil;
 - (void)_setupConnectTimeOut
 {
 	//Set up a timeout for connecting. If we're not connected in 10 seconds, error!
-	unsigned timeout = 10;
+	NSUInteger timeout = 10;
 	NSNumber *defaultsValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKFTPDataConnectionTimeoutValue"];
 	if (defaultsValue) {
-		timeout = [defaultsValue unsignedIntValue];
+		timeout = [defaultsValue unsignedIntegerValue];
 	}
 	
 	_connectTimeoutTimer = [[NSTimer scheduledTimerWithTimeInterval:timeout
@@ -135,9 +135,9 @@ static NSString *lsform = nil;
 #pragma mark -
 #pragma mark Accessors
 
-- (int)masterProxy { return masterProxy; }
+- (int32_t)masterProxy { return masterProxy; }
 
-- (void)setMasterProxy:(int)proxy
+- (void)setMasterProxy:(int32_t)proxy
 {
 	masterProxy = proxy;
 }
@@ -394,7 +394,7 @@ static NSString *lsform = nil;
 		NSString *temporaryParentPath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"ConnectionKitTemporary"];
 		[[NSFileManager defaultManager] recursivelyCreateDirectory:temporaryParentPath attributes:nil];
 		
-		static unsigned filenameCounter = 0;	// TODO: Make this counter threadsafe
+		static uint32_t filenameCounter = 0;	// TODO: Make this counter threadsafe
 		filenameCounter++;
 		NSString *fileName = [NSString stringWithFormat:@"%u-%@", filenameCounter, [remotePath lastPathComponent]];
 		
@@ -465,7 +465,7 @@ static NSString *lsform = nil;
 	CKTransferRecord *record = [CKTransferRecord recordWithName:remotePath size:0];
 	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
+	[record setProperty:[NSNumber numberWithInteger:0] forKey:CKQueueDownloadTransferPercentReceived];
 	
 	CKInternalTransferRecord *internalTransferRecord = [CKInternalTransferRecord recordWithLocal:localPath
 																							data:nil
@@ -1119,7 +1119,7 @@ static NSString *lsform = nil;
 
 - (NSUInteger)SFTPLoggingLevel;
 {
-    return [[self propertyForKey:@"CKSFTPLoggingLevel"] unsignedIntValue];
+    return [[self propertyForKey:@"CKSFTPLoggingLevel"] unsignedIntegerValue];
 }
 
 @end
@@ -1133,7 +1133,7 @@ static NSString *lsform = nil;
 
 - (void)setSFTPLoggingLevel:(NSUInteger)level;
 {
-    [self setProperty:[NSNumber numberWithUnsignedInt:level] forKey:@"CKSFTPLoggingLevel"];
+    [self setProperty:[NSNumber numberWithUnsignedInteger:level] forKey:@"CKSFTPLoggingLevel"];
 }
 
 @end

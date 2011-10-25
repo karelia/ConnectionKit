@@ -42,13 +42,13 @@
 	NSMutableDictionary *myProperties;
 	
 	struct __ckinternaltransferrecordflags {
-		unsigned didBegin: 1;
-		unsigned didFinish: 1;
-		unsigned error: 1;
-		unsigned percent: 1;
-		unsigned progressed: 1;
+		unsigned didBegin:1;
+		unsigned didFinish:1;
+		unsigned error:1;
+		unsigned percent:1;
+		unsigned progressed:1;
 		
-		unsigned unused: 27;
+		unsigned unused:27;
 	} myFlags;
 }
 

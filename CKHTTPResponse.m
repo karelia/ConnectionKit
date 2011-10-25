@@ -69,7 +69,7 @@ static NSMutableDictionary *responseMap = nil;
 				[headers setObject:response forKey:@"Server-Response"];
 				
 				// now enumerate over the headers which will be if the line is empty
-				int i, lineCount = [lines count];
+				NSInteger i, lineCount = [lines count];
 				for (i = 1; i < lineCount; i++)
 				{
 					NSString *line = [lines objectAtIndex:i];
@@ -143,7 +143,7 @@ static NSMutableDictionary *responseMap = nil;
 			}
 			
 			// now enumerate over the headers which will be if the line is empty
-			int i, lineCount = [headerLines count];
+			NSInteger i, lineCount = [headerLines count];
 			for (i = 1; i < lineCount; i++)
 			{
 				NSString *line = [headerLines objectAtIndex:i];
@@ -189,15 +189,15 @@ static NSMutableDictionary *responseMap = nil;
 			}
 		}
 		// now get the data range for the content
-		unsigned start = NSMaxRange(headerRange);
+		NSUInteger start = NSMaxRange(headerRange);
 		if (!isChunkedTransfer)
 		{
-			unsigned contentLength = [[headers objectForKey:@"Content-Length"] intValue];
+			NSUInteger contentLength = [[headers objectForKey:@"Content-Length"] integerValue];
 			//S3 sends responses which are valid and complete but have Content-Length = 0. Confirmations of upload, delete, etc.
 			BOOL isAmazonS3 = ([headers objectForKey:@"Server"] && [[headers objectForKey:@"Server"] isEqualToString:@"AmazonS3"]);
 			if (contentLength > 0 || isAmazonS3) 
 			{
-				unsigned end = start + contentLength;
+				NSUInteger end = start + contentLength;
 				
 				if (end <= [data length]) //only update the packet range if it is all there
 				{
@@ -217,7 +217,7 @@ static NSMutableDictionary *responseMap = nil;
 			NSRange lengthRange = [data rangeOfData:newLineData range:NSMakeRange(start, [data length] - start)];
 			NSString *lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
 			NSScanner *scanner = [NSScanner scannerWithString:lengthString];
-			unsigned chunkLength = 0;
+			unsigned int chunkLength = 0;
 			[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
 			[scanner scanHexInt:&chunkLength];
 			
@@ -278,7 +278,7 @@ static NSMutableDictionary *responseMap = nil;
 		NSArray *headerLines = [headerString componentsSeparatedByString:@"\r\n"];
 		
 		NSArray *response = [[headerLines objectAtIndex:0] componentsSeparatedByString:@" "]; // HTTP/1.1 CODE NAME
-		myResponseCode = [[response objectAtIndex:1] intValue];
+		myResponseCode = [[response objectAtIndex:1] integerValue];
 		if ([response count] >= 3)
 		{
 			NSString *msg = [[response subarrayWithRange:NSMakeRange(2, [response count] - 2)] componentsJoinedByString:@" "];
@@ -286,7 +286,7 @@ static NSMutableDictionary *responseMap = nil;
 		}
 		
 		// now enumerate over the headers which will be if the line is empty
-		int i, lineCount = [headerLines count];
+		NSInteger i, lineCount = [headerLines count];
 		for (i = 1; i < lineCount; i++)
 		{
 			NSString *line = [headerLines objectAtIndex:i];
@@ -330,11 +330,11 @@ static NSMutableDictionary *responseMap = nil;
 			}
 		}
 		// now get the data range for the content
-		unsigned start = NSMaxRange(headerRange);
+		NSUInteger start = NSMaxRange(headerRange);
 		
 		if (!isChunkedTransfer)
 		{
-			unsigned contentLength = [[myHeaders objectForKey:@"Content-Length"] intValue];
+			NSUInteger contentLength = [[myHeaders objectForKey:@"Content-Length"] integerValue];
 			if (contentLength > 0)
 			{
 				[self setContent:[data subdataWithRange:NSMakeRange(start, contentLength)]];
@@ -351,7 +351,7 @@ static NSMutableDictionary *responseMap = nil;
 											  range:NSMakeRange(start, [data length] - start)];
 			NSString *lengthString = [[[NSString alloc] initWithData:[data subdataWithRange:NSMakeRange(lengthRange.location - 4, 4)] encoding:NSUTF8StringEncoding] autorelease];
 			NSScanner *scanner = [NSScanner scannerWithString:lengthString];
-			unsigned chunkLength = 0;
+			unsigned int chunkLength = 0;
 			[scanner scanUpToCharactersFromSet:hexSet intoString:nil];
 			[scanner scanHexInt:&chunkLength];
 			
@@ -407,7 +407,7 @@ static NSMutableDictionary *responseMap = nil;
 	return myRequest;
 }
 
-- (int)code
+- (NSInteger)code
 {
 	return myResponseCode;
 }

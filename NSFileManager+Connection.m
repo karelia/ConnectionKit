@@ -41,7 +41,7 @@
 NSString *CKFailedToParseDirectoryListingException = @"CKFailedToParseDirectoryListingException";
 
 
-int filenameSort(id obj1, id obj2, void *context)
+NSInteger filenameSort(id obj1, id obj2, void *context)
 {
     NSString *f1 = [obj1 objectForKey:[cxFilenameKey lastPathComponent]];
 	NSString *f2 = [obj2 objectForKey:[cxFilenameKey lastPathComponent]];
@@ -114,10 +114,10 @@ if (![fn isEqualToString:@"."] && \
 
 + (BOOL)wordIsInteger:(NSString *)word
 {
-	return [word isEqualToString:[[NSNumber numberWithInt:[word intValue]] stringValue]];
+	return [word isEqualToString:[[NSNumber numberWithInteger:[word integerValue]] stringValue]];
 }
 
-+ (NSString *)filenameFromIndex:(int)index inWords:(NSArray *)words attributes:(NSMutableDictionary *)attributes
++ (NSString *)filenameFromIndex:(NSInteger)index inWords:(NSArray *)words attributes:(NSMutableDictionary *)attributes
 {
 	NSMutableString *tempStr = [NSMutableString string];
 	while (index < [words count])
@@ -205,13 +205,13 @@ if (![fn isEqualToString:@"."] && \
     
 	return [listing substringWithRange:dateRange];
 }
-+ (int)_filenameColumnIndexFromLine:(NSString *)line
++ (NSInteger)_filenameColumnIndexFromLine:(NSString *)line
 {
 	/*
      * Look for the date, and base the filename column index as the column after that.
      * If we can't find the date or "." or "..", use popular-assumptions about the filename column index based on the number of columns we have.
      */
-	int filenameColumnIndex = -1;
+	NSInteger filenameColumnIndex = -1;
 	NSString *date = [self _dateStringFromListing:line];
 	NSArray *words = [self _wordsFromLine:line];
 	
@@ -219,7 +219,7 @@ if (![fn isEqualToString:@"."] && \
 	{
 		//Filename is after the date column.
 		NSString *lastColumnStringOfDate = [[date componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceCharacterSet]] lastObject];
-		int lastDateColumnIndex = [words indexOfObject:lastColumnStringOfDate];
+		NSInteger lastDateColumnIndex = [words indexOfObject:lastColumnStringOfDate];
 		if (lastDateColumnIndex != NSNotFound)
 			filenameColumnIndex = lastDateColumnIndex + 1;
 	}
@@ -311,7 +311,7 @@ if (![fn isEqualToString:@"."] && \
 			}
 			else
 			{
-				size = [NSNumber numberWithInt:[wordTwo intValue]];
+				size = [NSNumber numberWithInteger:[wordTwo integerValue]];
 				[attributes setObject:NSFileTypeRegular forKey:NSFileType];
 			}
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:3 ofWords:words withAttributes:attributes];
@@ -319,24 +319,24 @@ if (![fn isEqualToString:@"."] && \
 		else if ([wordOne isEqualToString:@"folder"]) //netprez folder
 		{
 			[self parsePermissions:wordZero withAttributes:attributes];
-			referenceCount = [NSNumber numberWithInt:[wordTwo intValue]];
+			referenceCount = [NSNumber numberWithInteger:[wordTwo integerValue]];
 			date = [NSCalendarDate getDateFromMonth:wordThree day:wordFour yearOrTime:wordFive];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:6 ofWords:words withAttributes:attributes];
 		}
-		else if ([NSFileManager wordIsInteger:wordTwo] && [NSFileManager wordIsInteger:wordFour] && [wordFive intValue] >= 0 && [wordSix intValue] <= 31 && [wordSix intValue] > 0)
+		else if ([NSFileManager wordIsInteger:wordTwo] && [NSFileManager wordIsInteger:wordFour] && [wordFive integerValue] >= 0 && [wordSix integerValue] <= 31 && [wordSix integerValue] > 0)
 		{
 			/* "drwxr-xr-x    2 32224    bainbrid     4096 Nov  8 20:56 aFolder" */ 
 			[self parsePermissions:wordZero withAttributes:attributes];
-			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
+			referenceCount = [NSNumber numberWithInteger:[wordOne integerValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFive day:wordSix yearOrTime:wordSeven];
 			size = [NSNumber numberWithDouble:[wordFour doubleValue]];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:8 ofWords:words withAttributes:attributes];
 		}
-		else if ([NSFileManager wordIsInteger:wordTwo] && [wordFive intValue] <= 31 && [wordFive intValue] > 0) // netprez file
+		else if ([NSFileManager wordIsInteger:wordTwo] && [wordFive integerValue] <= 31 && [wordFive integerValue] > 0) // netprez file
 		{
 			/* "-------r--         326  1391972  1392298 Nov 22  1995 MegaPhone.sit" */ 
 			[self parsePermissions:wordZero withAttributes:attributes];
-			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
+			referenceCount = [NSNumber numberWithInteger:[wordOne integerValue]];
 			date = [NSCalendarDate getDateFromMonth:wordFour day:wordFive yearOrTime:wordSix];
 			size = [NSNumber numberWithDouble:[wordThree doubleValue]];
 			[NSFileManager parseFilenameAndSymbolicLinksFromIndex:7 ofWords:words withAttributes:attributes];
@@ -354,7 +354,7 @@ if (![fn isEqualToString:@"."] && \
 			[self parsePermissions:wordZero withAttributes:attributes];
 			
 			//Reference Count
-			referenceCount = [NSNumber numberWithInt:[wordOne intValue]];
+			referenceCount = [NSNumber numberWithInteger:[wordOne integerValue]];
 			
 			//Account
 			[attributes setObject:wordTwo forKey:NSFileOwnerAccountName]; //Account
@@ -376,13 +376,13 @@ if (![fn isEqualToString:@"."] && \
 			date = [NSCalendarDate getDateFromMonth:month day:day yearOrTime:yearOrTime];
 			
 			//Size
-			int monthColumnIndex = [words indexOfObject:month];
-			int sizeColumnIndex = monthColumnIndex - 1;
+			NSInteger monthColumnIndex = [words indexOfObject:month];
+			NSInteger sizeColumnIndex = monthColumnIndex - 1;
 			size = [NSNumber numberWithDouble:[[words objectAtIndex:sizeColumnIndex] doubleValue]];
 			
 			//Group
 			NSString *group = [NSString string];
-			int currentIndex = 3; //Account's columnIndex is 2. Everything in between account and size is group.
+			NSInteger currentIndex = 3; //Account's columnIndex is 2. Everything in between account and size is group.
 			while (currentIndex < sizeColumnIndex)
 			{
 				group = [group stringByAppendingString:[words objectAtIndex:currentIndex]];
@@ -391,7 +391,7 @@ if (![fn isEqualToString:@"."] && \
 			[attributes setObject:group forKey:NSFileGroupOwnerAccountName];
 			
 			//Filename
-			int filenameColumnIndex = [NSFileManager _filenameColumnIndexFromLine:line];
+			NSInteger filenameColumnIndex = [NSFileManager _filenameColumnIndexFromLine:line];
 			[self parseFilenameAndSymbolicLinksFromIndex:filenameColumnIndex ofWords:words withAttributes:attributes];
 		}
 		
@@ -406,7 +406,7 @@ if (![fn isEqualToString:@"."] && \
 	
 	return [attributedLines sortedArrayUsingFunction:filenameSort context:NULL];
 }
-+ (void)parseFilenameAndSymbolicLinksFromIndex:(int)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes
++ (void)parseFilenameAndSymbolicLinksFromIndex:(NSInteger)index ofWords:(NSArray *)words withAttributes:(NSMutableDictionary *)attributes
 {
 	NSString *fileType = [attributes objectForKey:NSFileType];
 	if ([fileType isEqualToString:NSFileTypeCharacterSpecial] || [fileType isEqualToString:NSFileTypeBlockSpecial])

@@ -72,8 +72,8 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 @end
 
 @interface CKTableBasedBrowser (Private)
-- (void)setDefaultColumnWidth:(float)width;
-- (void)refreshColumn:(unsigned)col;
+- (void)setDefaultColumnWidth:(CGFloat)width;
+- (void)refreshColumn:(NSUInteger)col;
 - (void)setPath:(NSString *)path checkPath:(BOOL)flag;
 @end
 
@@ -197,7 +197,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	// we need to keep the myHistoryIndex correct
 	NSMutableArray *invalidHistory = [NSMutableArray array];
 	NSDictionary *cur;
-	unsigned i;
+	NSUInteger i;
 	
 	for (i = 0; i < [myHistory count]; i++)
 	{
@@ -311,7 +311,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)_updateHistoryButtons
 {
 	[oHistory setEnabled:(myHistoryIndex > 0) forSegment:CKBackButton];
-	[oHistory setEnabled:(myHistoryIndex < (int)[myHistory count] - 1) forSegment:CKForwardButton];
+	[oHistory setEnabled:(myHistoryIndex < (NSInteger)[myHistory count] - 1) forSegment:CKForwardButton];
 }
 
 - (NSString *)_cellDisplayNameWithNode:(CKDirectoryNode *)node
@@ -601,7 +601,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 
 - (void)setupBrowserDefaultColumnWidth
 {
-	[oBrowser setDefaultColumnWidth:(NSWidth([oBrowser bounds])/(float)MAX_VISIBLE_COLUMNS) - 1];
+	[oBrowser setDefaultColumnWidth:(NSWidth([oBrowser bounds])/(CGFloat)MAX_VISIBLE_COLUMNS) - 1];
 }
 
 - (void)setDelegate:(id)delegate
@@ -913,12 +913,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 		
 		if ([selectedPathBeforeRemoval hasPrefix:parentPath])
 		{
-			unsigned col = [[[self _browserPathForPath:parentPath] pathComponents] count] - 1;
+			NSUInteger col = [[[self _browserPathForPath:parentPath] pathComponents] count] - 1;
 			
 			if (col >= 0 && col <= [oStandardBrowser lastColumn])
 			{
 				[self performSelector:@selector(delayedColumnRefresh:) 
-						   withObject:[NSNumber numberWithUnsignedInt:col] 
+						   withObject:[NSNumber numberWithUnsignedInteger:col] 
 						   afterDelay:0 
 							  inModes:[NSArray arrayWithObjects:NSDefaultRunLoopMode, NSModalPanelRunLoopMode, nil]];		  
 				
@@ -933,14 +933,14 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (void)delayedColumnRefresh:(NSNumber *)col
 {
 	@try {
-		[oBrowser refreshColumn:[col unsignedIntValue]];
-		if ([col intValue] == 0)
+		[oBrowser refreshColumn:[col unsignedIntegerValue]];
+		if ([col integerValue] == 0)
 		{
 			[oStandardBrowser loadColumnZero];
 		}
 		else
 		{
-			[oStandardBrowser reloadColumn:[col unsignedIntValue]];
+			[oStandardBrowser reloadColumn:[col unsignedIntegerValue]];
 		}
 	}
 	@catch (NSException *ex) {
@@ -1046,12 +1046,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			if (myFlags.firstTimeWithOutlineView)
 			{
 				myFlags.firstTimeWithOutlineView = NO;
-				float width = NSWidth([oOutlineView bounds]);
+				CGFloat width = NSWidth([oOutlineView bounds]);
 				NSArray *cols = [oOutlineView tableColumns];
-				[[cols objectAtIndex:0] setWidth:width * 0.403426791277259];
-				[[cols objectAtIndex:1] setWidth:width * 0.124610591900312];
-				[[cols objectAtIndex:2] setWidth:width * 0.233644859813084];
-				[[cols objectAtIndex:3] setWidth:width * 0.228317757009346];
+				[[cols objectAtIndex:0] setWidth:width * (CGFloat)0.403426791277259];
+				[[cols objectAtIndex:1] setWidth:width * (CGFloat)0.124610591900312];
+				[[cols objectAtIndex:2] setWidth:width * (CGFloat)0.233644859813084];
+				[[cols objectAtIndex:3] setWidth:width * (CGFloat)0.228317757009346];
 			}
 			if ([oOutlineView selectedRow] != NSNotFound)
 			{
@@ -1129,7 +1129,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	
 	while ((cur = [e nextObject]))
 	{
-		CKDirectoryNode *node = [oOutlineView itemAtRow:[cur intValue]];
+		CKDirectoryNode *node = [oOutlineView itemAtRow:[cur integerValue]];
 		[selection addObject:node];
 		fullPath = [node path];
 	}
@@ -1339,9 +1339,9 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark NSOutlineView Data Source
 
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-	int result = 0;
+	NSInteger result = 0;
 	
 	if ([self _isFiltering])
 	{
@@ -1365,7 +1365,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return result;
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 	id child = nil;
 	
@@ -1561,7 +1561,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark NSBrowser Delegate DataSource
 
-- (int)browser:(NSBrowser *)sender numberOfRowsInColumn:(int)column 
+- (NSInteger)browser:(NSBrowser *)sender numberOfRowsInColumn:(NSInteger)column 
 {
 	CKDirectoryNode *node = nil;
 	if (column == 0)
@@ -1576,7 +1576,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	return [node countIncludingHiddenFiles:myFlags.showsHiddenFiles];
 }
 
-- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(int)row column:(int)column 
+- (void)browser:(NSBrowser *)sender willDisplayCell:(id)cell atRow:(NSInteger)row column:(NSInteger)column 
 {
 	CKDirectoryNode *parent = nil;
 	
@@ -1601,7 +1601,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 	}
 }
 
-- (BOOL)browser:(NSBrowser *)sender shouldShowCellExpansionForRow:(int)rowIndex column:(int)columnIndex
+- (BOOL)browser:(NSBrowser *)sender shouldShowCellExpansionForRow:(NSInteger)rowIndex column:(NSInteger)columnIndex
 {
 	return NO;
 }
@@ -1609,12 +1609,12 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 #pragma mark -
 #pragma mark CKTableBasedBrowser DataSource Methods
 
-- (unsigned)tableBrowser:(CKTableBasedBrowser *)browser numberOfChildrenOfItem:(id)item
+- (NSUInteger)tableBrowser:(CKTableBasedBrowser *)browser numberOfChildrenOfItem:(id)item
 {
 	return [self outlineView:nil numberOfChildrenOfItem:item];
 }
 
-- (id)tableBrowser:(CKTableBasedBrowser *)browser child:(unsigned)index ofItem:(id)item
+- (id)tableBrowser:(CKTableBasedBrowser *)browser child:(NSUInteger)index ofItem:(id)item
 {
     return [self outlineView:nil child:index ofItem:item];
 }
@@ -1891,28 +1891,28 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 - (NSSize)cellSizeForBounds:(NSRect)aRect 
 {
     NSSize s = [super cellSizeForBounds:aRect];
-    s.height += 1.0 * 2.0;
+    s.height += 2.0f;
 	s.width += NSWidth(aRect);
     return s;
 }
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-	NSImage *iconImage = [[self objectValue] iconWithSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
+	NSImage *iconImage = [[self objectValue] iconWithSize:NSMakeSize((CGFloat)ICON_SIZE, (CGFloat)ICON_SIZE)];
 	if (iconImage != nil) {
         NSSize imageSize = [iconImage size];
         NSRect imageFrame, highlightRect, textFrame;
 		
 		// Divide the cell into 2 parts, the image part (on the left) and the text part.
-		NSDivideRect(cellFrame, &imageFrame, &textFrame, ICON_INSET_HORIZ + ICON_TEXT_SPACING + imageSize.width, NSMinXEdge);
-        imageFrame.origin.x += ICON_INSET_HORIZ;
+		NSDivideRect(cellFrame, &imageFrame, &textFrame, (CGFloat)ICON_INSET_HORIZ + (CGFloat)ICON_TEXT_SPACING + imageSize.width, NSMinXEdge);
+        imageFrame.origin.x += (CGFloat)ICON_INSET_HORIZ;
         imageFrame.size = imageSize;
 		
 		// Adjust the image frame top account for the fact that we may or may not be in a flipped control view, since when compositing the online documentation states: "The image will have the orientation of the base coordinate system, regardless of the destination coordinates".
         if ([controlView isFlipped]) {
-            imageFrame.origin.y += ceil((textFrame.size.height + imageFrame.size.height) / 2);
+            imageFrame.origin.y += (CGFloat)ceil((textFrame.size.height + imageFrame.size.height) / 2.0f);
         } else {
-            imageFrame.origin.y += ceil((textFrame.size.height - imageFrame.size.height) / 2);
+            imageFrame.origin.y += (CGFloat)ceil((textFrame.size.height - imageFrame.size.height) / 2.0f);
         }
 		
         // We don't draw the background when creating the drag and drop image
@@ -1930,7 +1930,7 @@ NSString *cxLocalFilenamesPBoardType = @"cxLocalFilenamesPBoardType";
 			NSRectFill(highlightRect);
         }
 		
-        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0];
+        [iconImage compositeToPoint:imageFrame.origin operation:NSCompositeSourceOver fraction:1.0f];
 		
 		// Have NSBrowserCell kindly draw the text part, since it knows how to do that for us, no need to re-invent what it knows how to do.
 		[super drawInteriorWithFrame:textFrame inView:controlView];
@@ -2030,7 +2030,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 	[myIcon drawInRect:imageRect
 			  fromRect:NSZeroRect
 			 operation:NSCompositeSourceOver
-			  fraction:1.0];
+			  fraction:1.0f];
 	
 	if ([controlView isFlipped]) 
 	{
@@ -2294,7 +2294,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 	}
 }
 
-- (void)scrollToRow:(int)row selectRow:(BOOL)select 
+- (void)scrollToRow:(NSInteger)row selectRow:(BOOL)select 
 {
 	if (select) 
 	{
@@ -2305,7 +2305,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)scrollLineUp:(id)sender 
 {
-	int row = [self selectedRow];
+	NSInteger row = [self selectedRow];
 	if (row < 0) 
 	{
 		row = [self numberOfRows];
@@ -2318,7 +2318,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)scrollLineDown:(id)sender 
 {
-	int row = [self selectedRow];
+	NSInteger row = [self selectedRow];
 	if (++row < [self numberOfRows]) 
 	{
 		[self scrollToRow:row selectRow:YES];
@@ -2327,7 +2327,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)scrollToBeginningOfDocument:(id)sender 
 {
-	int rows = [self numberOfRows];
+	NSInteger rows = [self numberOfRows];
 	if (rows) 
 	{
 		[self scrollToRow:rows selectRow:NO];
@@ -2336,7 +2336,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)scrollToEndOfDocument:(id)sender 
 {
-	int rows = [self numberOfRows];
+	NSInteger rows = [self numberOfRows];
 	if (rows) 
 	{
 		[self scrollToRow:rows-1 selectRow:NO];
@@ -2356,7 +2356,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 	
 	while (row = [enumerator nextObject]) 
 	{
-		[self expandItem:[self itemAtRow:[row intValue]]];
+		[self expandItem:[self itemAtRow:[row integerValue]]];
 	}
 }
 
@@ -2367,7 +2367,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 	
 	while (row = [enumerator nextObject]) 
 	{
-		[self collapseItem:[self itemAtRow:[row intValue]]];
+		[self collapseItem:[self itemAtRow:[row integerValue]]];
 	}
 }
 
@@ -2444,7 +2444,7 @@ static NSMutableParagraphStyle *sStyle = nil;
 
 - (void)scrollItemToTop:(id)item
 {
-	int row = [self rowForItem:item];
+	NSInteger row = [self rowForItem:item];
 	[self selectRow:row byExtendingSelection:NO];
 	//scrolling the row only moves it to the bottom of the scroll view, but we want it to go to the top so you can see the folders contents
 	if (!NSIntersectsRect([[self enclosingScrollView] documentVisibleRect], [self rectOfRow:row]))

@@ -71,9 +71,9 @@ typedef enum {
 	CKDirectoryNode *mySelectedNode; // not retained
 	NSMutableSet *mySelection;
 	NSMutableArray *myHistory;
-	int myHistoryIndex;
+	NSInteger myHistoryIndex;
 	NSString *myFilter;
-	unsigned myDirectoriesLoading;
+	NSUInteger myDirectoriesLoading;
 	unsigned long long myCachedContentsThresholdSize;
 	NSString *mySearchString;
 	NSMutableSet *myExpandedOutlineItems;
@@ -83,21 +83,21 @@ typedef enum {
 	SEL myAction;
 	
 	struct __ckdtc_flags {
-		unsigned isRemote: 1;
-		unsigned allowsDrags: 1;
-		unsigned allowsDrops: 1;
-		unsigned isEnabled: 1;
-		unsigned showsHiddenFiles: 1;
-		unsigned outlineViewDoubleCallback: 1;
-		unsigned isNavigatingToPath: 1;
-		unsigned filePackages: 1;
-		unsigned showsFilePackageExtensions: 1;
-		unsigned canCreateFolders: 1;
-		unsigned isReloading: 1;
-		unsigned firstTimeWithOutlineView: 1;
-		unsigned outlineViewFullReload: 1;
-		unsigned wasHistoryOperation: 1;
-		unsigned unused: 18;
+		unsigned isRemote:1;
+		unsigned allowsDrags:1;
+		unsigned allowsDrops:1;
+		unsigned isEnabled:1;
+		unsigned showsHiddenFiles:1;
+		unsigned outlineViewDoubleCallback:1;
+		unsigned isNavigatingToPath:1;
+		unsigned filePackages:1;
+		unsigned showsFilePackageExtensions:1;
+		unsigned canCreateFolders:1;
+		unsigned isReloading:1;
+		unsigned firstTimeWithOutlineView:1;
+		unsigned outlineViewFullReload:1;
+		unsigned wasHistoryOperation:1;
+		unsigned unused:18;
 	} myFlags;
 }
 

@@ -46,7 +46,7 @@
     NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
     [formatter setFormatterBehavior:NSNumberFormatterBehavior10_4];
     [formatter setNumberStyle:NSNumberFormatterNoStyle];
-    NSString *result = [formatter stringFromNumber:[NSNumber numberWithUnsignedInt:[self replyCode]]];
+    NSString *result = [formatter stringFromNumber:[NSNumber numberWithUnsignedInteger:[self replyCode]]];
     
     [formatter release];
     return result;

@@ -15,7 +15,7 @@ extern NSString *SFTPErrorDomain;
 
 @interface CKSFTPConnection : CKAbstractQueueConnection
 {
-	int masterProxy;
+	int32_t masterProxy;
 	CKSFTPTServer *theSFTPTServer;
 	
 	NSString *rootDirectory;
@@ -30,8 +30,8 @@ extern NSString *SFTPErrorDomain;
     NSString                        *_currentPassword;
 }
 
-- (int)masterProxy;
-- (void)setMasterProxy:(int)proxy;
+- (int32_t)masterProxy;
+- (void)setMasterProxy:(int32_t)proxy;
 
 @end
 
@@ -54,6 +54,7 @@ extern NSString *SFTPErrorDomain;
 //
 - (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
 - (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
+- (void)downloadDidBegin:(CKInternalTransferRecord *)downloadInfo;
 //
 - (void)finishedCommand;
 - (void)receivedErrorInServerResponse:(NSString *)serverResponse;

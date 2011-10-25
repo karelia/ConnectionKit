@@ -75,10 +75,10 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	[super dealloc];
 }
 
-- (int)handshakeWithInputData:(NSMutableData *)inputData
+- (NSInteger)handshakeWithInputData:(NSMutableData *)inputData
 					outputData:(NSMutableData *)outputData
 {
-	int ret;
+	NSInteger ret;
 
 	// If we haven't yet set up the SSL context, we should do so now.
 	if (! ONB_sslContext)
@@ -120,6 +120,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 			
 			if (ret)
 			{
+#warning 64BIT: Check formatting arguments
 				NSLog(@"Error setting certificates: %d", ret);
 				return ret;
 			}
@@ -148,15 +149,15 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 	ONB_inputData = inputData;
 	ONB_outputData = [NSMutableData dataWithCapacity:2*[data length]];
-	unsigned int totalLength = [data length];
-	unsigned int processed = 0;
+	NSUInteger totalLength = [data length];
+	NSUInteger processed = 0;
 	const void *buffer = [data bytes];
 	
 	while (processed < totalLength)
 	{
 		size_t written = 0;
 		
-		int ret;
+		NSInteger ret;
 		if (ret = SSLWrite(ONB_sslContext, buffer + processed, totalLength - processed, &written))
 			return nil;
 
@@ -174,7 +175,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	ONB_inputData = data;
 	ONB_outputData = outputData;
 	NSMutableData *decryptedData = [NSMutableData dataWithCapacity:[data length]];
-	int ret = 0;
+	NSInteger ret = 0;
 	
 	while (! ret)
 	{
@@ -184,6 +185,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		ret = SSLRead(ONB_sslContext, buf, 1024, &read);
 		if (ret && (ret != errSSLWouldBlock) && (ret != errSSLClosedGraceful))
 		{
+#warning 64BIT: Check formatting arguments
 			NSLog(@"Error in SSLRead: %d", ret);
 			return nil;
 		}

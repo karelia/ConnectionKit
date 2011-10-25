@@ -96,8 +96,8 @@ extern NSString *CKQueueDomain;
 @interface CKAbstractQueueConnection : CKAbstractConnection 
 {
 	NSRecursiveLock		*_queueLock;
-	int					_checkQueueCount;
-	int					_openBulkCommands;
+	NSInteger					_checkQueueCount;
+	NSInteger					_openBulkCommands;
 	// Queue Support
 	NSMutableArray		*_commandHistory;
 	NSMutableArray		*_commandQueue;
@@ -110,8 +110,8 @@ extern NSString *CKQueueDomain;
 	NSMutableDictionary	*_filesNeedingOverwriteConfirmation;
 	
 	struct __aqc_flags {
-		unsigned isCheckingQueue: 1;
-		unsigned usued: 29;
+		unsigned isCheckingQueue:1;
+		unsigned usued:29;
 	} myQueueFlags;
     BOOL                _isRecursiveUploading;
 }
@@ -155,13 +155,13 @@ extern NSString *CKQueueDomain;
 - (id)currentPermissionChange;
 - (id)currentFileCheck;
 
-- (unsigned)numberOfCommands;
-- (unsigned)numberOfDownloads;
-- (unsigned)numberOfUploads;
-- (unsigned)numberOfDeletions;
-- (unsigned)numberOfRenames;
-- (unsigned)numberOfPermissionChanges;
-- (unsigned)numberOfFileChecks;
+- (NSUInteger)numberOfCommands;
+- (NSUInteger)numberOfDownloads;
+- (NSUInteger)numberOfUploads;
+- (NSUInteger)numberOfDeletions;
+- (NSUInteger)numberOfRenames;
+- (NSUInteger)numberOfPermissionChanges;
+- (NSUInteger)numberOfFileChecks;
 
 - (void)emptyCommandQueue;
 - (void)emptyDownloadQueue;

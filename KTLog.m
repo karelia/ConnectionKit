@@ -34,7 +34,7 @@
 
 - (id)init;
 + (id)sharedLogger;
-- (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level message:(NSString *)log;
+- (void)logFile:(char *)file lineNumber:(NSInteger)line loggingDomain:(NSString *)domain loggingLevel:(NSInteger)level message:(NSString *)log;
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain;
 
 @end
@@ -149,18 +149,18 @@ static NSString *KTLevelMap[] = {
 	}
 	cur = [NSMutableDictionary dictionary];
 	[cur setObject:domain forKey:@"domain"];
-	[cur setObject:[NSNumber numberWithInt:KTLogOff] forKey:@"level"];
+	[cur setObject:[NSNumber numberWithInteger:KTLogOff] forKey:@"level"];
 	[myLoggingLevels addObject:cur];
 	return cur;
 }
 
-- (int)loggingLevelForDomain:(NSString *)domain
+- (NSInteger)loggingLevelForDomain:(NSString *)domain
 {
 	NSNumber *level = [[NSUserDefaults standardUserDefaults] objectForKey:[KTLogKeyPrefix stringByAppendingString:domain]];
 	
 	if (level)
 	{
-		return [level intValue];
+		return [level integerValue];
 	}
 	else if ([domain isEqualToString:KTLogWildcardDomain])
 	{
@@ -172,13 +172,13 @@ static NSString *KTLevelMap[] = {
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain
 {
 	[myLock lock];
-	int currentLevel = [self loggingLevelForDomain:domain];
+	NSInteger currentLevel = [self loggingLevelForDomain:domain];
 	
 	if (currentLevel != level)
 	{
-		[[self recordForDomain:domain] setObject:[NSNumber numberWithInt:level]
+		[[self recordForDomain:domain] setObject:[NSNumber numberWithInteger:level]
 										  forKey:@"level"];
-		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInt:level]
+		[[NSUserDefaults standardUserDefaults] setObject:[NSNumber numberWithInteger:level]
 												  forKey:[KTLogKeyPrefix stringByAppendingString:domain]];
 	}
 	[myLock unlock];
@@ -222,7 +222,7 @@ static NSString *KTLevelMap[] = {
 	myLog = nil;
 	
 	NSString *processName = [[NSProcessInfo processInfo] processName];
-	int i = 0;
+	NSInteger i = 0;
 	NSString *logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
 	
 	while ([fm fileExistsAtPath:logName])
@@ -252,16 +252,16 @@ static NSString *KTLevelMap[] = {
 
 // Support for logFile: ... assumes that lock has been acquired.
 - (void)_logFile:(char *)file
-	  lineNumber:(int)line
+	  lineNumber:(NSInteger)line
    loggingDomain:(NSString *)domain
-	loggingLevel:(int)level
+	loggingLevel:(NSInteger)level
 		  thread:(NSString *)thread
 		 message:(NSString *)log
 {
 	NSDate *now = [NSDate date];
-	NSString *filename = [NSString stringWithCString:file];
-	NSNumber *lineNumber = [NSNumber numberWithInt:line];
-	NSNumber *thisLevel = [NSNumber numberWithInt:level];
+	NSString *filename = [NSString stringWithCString:file encoding: NSUTF8StringEncoding];
+	NSNumber *lineNumber = [NSNumber numberWithInteger:line];
+	NSNumber *thisLevel = [NSNumber numberWithInteger:level];
 
 	NSDictionary *rec = [NSDictionary dictionaryWithObjectsAndKeys:now, @"t", filename, @"f", lineNumber, @"n", thisLevel, @"l", domain, @"d", log, @"m", thread, @"th", nil];
 	NSData *recData = [NSArchiver archivedDataWithRootObject:rec];
@@ -274,9 +274,9 @@ static NSString *KTLevelMap[] = {
 
 	[myLog seekToEndOfFile];
 
-	unsigned len = CFSwapInt32HostToLittle([recData length]);
+	uint32_t len = CFSwapInt32HostToLittle((uint32_t)[recData length]);
 	NSMutableData *entry = [NSMutableData data];
-	[entry appendBytes:&len length:sizeof(unsigned)];
+	[entry appendBytes:&len length:sizeof(len)];
 	[entry appendData:recData];
 
 	[myLog writeData:entry];
@@ -310,9 +310,9 @@ static NSString *KTLevelMap[] = {
 
 
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		message:(NSString *)log
 {
@@ -328,9 +328,9 @@ static NSString *KTLevelMap[] = {
 
 // Similar to above, but with a format and arguments.  Don't construct the string unless we want to use it.
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		 format:(NSString *)log
 	  arguments:(va_list)argList
@@ -353,9 +353,9 @@ static NSString *KTLevelMap[] = {
 
 // Similar to above, but with a format
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		 format:(NSString *)log, ...
 {
@@ -376,9 +376,9 @@ static NSString *KTLevelMap[] = {
 // Class method to log.  Accepts a format.  Thread argument is generated here, not passed in.
 
 + (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 format:(NSString *)log, ...
 {
 	va_list ap;
@@ -388,7 +388,7 @@ static NSString *KTLevelMap[] = {
 						  lineNumber:line
 					   loggingDomain:domain
 						loggingLevel:level
-							  thread:[NSString stringWithFormat:@"0x%06x",[NSThread currentThread]]
+							  thread:[NSString stringWithFormat:@"0x%06p",[NSThread currentThread]]
 							 format:log
 						   arguments:ap];
 
@@ -404,8 +404,8 @@ static NSString *KTLevelMap[] = {
 		// keep going until we throw an exception for being out of bounds
 		while (1)
 		{
-			unsigned len;
-			NSData *lenData = [log readDataOfLength:sizeof(unsigned)];
+			uint32_t len;
+			NSData *lenData = [log readDataOfLength:sizeof(len)];
 			[lenData getBytes:&len];
 			len = CFSwapInt32LittleToHost(len);
 			NSData *archive = [log readDataOfLength:len];
@@ -481,12 +481,12 @@ static NSString *KTLevelMap[] = {
 #pragma mark -
 #pragma mark NSTableView Datasource
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	return [myLoggingLevels count];
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];
@@ -500,7 +500,7 @@ static NSString *KTLevelMap[] = {
 	}
 }
 
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSMutableDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];
@@ -521,7 +521,7 @@ static NSString *KTLevelMap[] = {
 {
 	NSMutableDictionary *cur = [NSMutableDictionary dictionary];
 	[cur setObject:@"New Domain" forKey:@"domain"];
-	[cur setObject:[NSNumber numberWithInt:KTLogOff] forKey:@"level"];
+	[cur setObject:[NSNumber numberWithInteger:KTLogOff] forKey:@"level"];
 	[myLoggingLevels addObject:cur];
 	[oDomains reloadData];
 }

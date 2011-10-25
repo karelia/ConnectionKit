@@ -42,7 +42,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 {
 	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ [%d items]\n(\n", [self className], [self count]];
 	
-	unsigned i, c = MIN([self count], NSARRAY_MAXIMUM_DESCRIBED);
+	NSUInteger i, c = MIN([self count], NSARRAY_MAXIMUM_DESCRIBED);
 	
 	for (i = 0; i < c; i++)
 	{
@@ -57,10 +57,10 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 /*The following are from Fugu (for SFTP usage)
  * Copyright (c) 2003 Regents of The University of Michigan. 
  */
-- ( int )createArgv: ( char *** )argv
+- ( NSInteger )createArgv: ( char *** )argv
 {
     char			**av;
-    int				i, ac = 0, actotal;
+    NSInteger				i, ac = 0, actotal;
     
     if ( self == nil || [ self count ] == 0 ) {
         *argv = NULL;
@@ -69,7 +69,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
     
     actotal = [ self count ];
     
-    if (( av = ( char ** )malloc( sizeof( char * ) * actotal )) == NULL ) {
+    if (( av = ( char ** )malloc( sizeof(char *) * actotal )) == NULL ) {
         NSLog( @"malloc: %s", strerror( errno ));
         exit( 2 );
     }
@@ -79,7 +79,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
         ac++;
         
         if ( ac >= actotal ) {
-            if (( av = ( char ** )realloc( av, sizeof( char * ) * ( actotal + 10 ))) == NULL ) {
+            if (( av = ( char ** )realloc( av, sizeof(char *) * ( actotal + 10 ))) == NULL ) {
                 NSLog( @"realloc: %s", strerror( errno ));
                 exit( 2 );
             }
@@ -88,7 +88,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
     }
     
     if ( ac >= actotal ) {
-        if (( av = ( char ** )realloc( av, sizeof( char * ) * ( actotal + 10 ))) == NULL ) {
+        if (( av = ( char ** )realloc( av, sizeof(char *) * ( actotal + 10 ))) == NULL ) {
             NSLog( @"realloc: %s", strerror( errno ));
             exit( 2 );
         }

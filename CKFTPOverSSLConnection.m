@@ -14,7 +14,7 @@
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:990], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:990], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"ftps://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	[CKAbstractConnection registerConnectionClass:[CKFTPOverSSLConnection class] forTypes:[NSArray arrayWithObjects:port, url, nil]];
 	[pool release];
@@ -82,7 +82,7 @@
 		[host setValue:[NSArray arrayWithObject:_connectionHost] forKey:@"names"];
 	}
 	
-	int connectionPort = [_connectionPort intValue];
+	NSInteger connectionPort = [_connectionPort integerValue];
 	if (0 == connectionPort)
 	{
 		connectionPort = 990;	// standard FTP over SSL control port
@@ -132,7 +132,7 @@
 	[self sendPortMessage:CONNECT];	// finish the job -- scheduling in the runloop -- in the background thread
 }
 
-- (void)openDataStreamsToHost:(NSHost *)aHost port:(int)aPort
+- (void)openDataStreamsToHost:(NSHost *)aHost port:(NSInteger)aPort
 {
 	[NSStream getStreamsToHost:aHost
 						  port:aPort

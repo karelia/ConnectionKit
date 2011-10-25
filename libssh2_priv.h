@@ -87,14 +87,16 @@ struct _LIBSSH2_PACKET {
 
 	/* Unencrypted Payload (no type byte, no padding, just the facts ma'am) */
 	unsigned char *data;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long data_len;
 
 	/* Where to start reading data from,
 	 * used for channel data that's been partially consumed */
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long data_head;
 
 	/* Can the message be confirmed? */
-	int mac;
+	NSInteger mac;
 
 	LIBSSH2_PACKET_BRIGADE *brigade;
 
@@ -107,9 +109,11 @@ struct _LIBSSH2_PACKET_BRIGADE {
 
 typedef struct _libssh2_channel_data {
 	/* Identifier */
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long id;
 
 	/* Limits and restrictions */
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long window_size_initial, window_size, packet_size;
 
 	/* Set to 1 when CHANNEL_CLOSE / CHANNEL_EOF sent/received */
@@ -118,14 +122,15 @@ typedef struct _libssh2_channel_data {
 
 struct _LIBSSH2_CHANNEL {
 	unsigned char *channel_type;
-	unsigned channel_type_len;
+	NSUInteger channel_type_len;
 
-	int blocking;
+	NSInteger blocking;
 
 	/* channel's program exit status */
-	int exit_status;
+	NSInteger exit_status;
 
 	libssh2_channel_data local, remote;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long adjust_queue; /* Amount of bytes to be refunded to receive window (but not yet sent) */
 
 	LIBSSH2_SESSION *session;
@@ -144,11 +149,11 @@ struct _LIBSSH2_LISTENER {
 	LIBSSH2_SESSION *session;
 
 	char *host;
-	int port;
+	NSInteger port;
 
 	LIBSSH2_CHANNEL *queue;
-	int queue_size;
-	int queue_maxsize;
+	NSInteger queue_size;
+	NSInteger queue_maxsize;
 
 	LIBSSH2_LISTENER *prev, *next;
 };
@@ -157,12 +162,14 @@ typedef struct _libssh2_endpoint_data {
 	unsigned char *banner;
 
 	unsigned char *kexinit;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long kexinit_len;
 
 	LIBSSH2_CRYPT_METHOD *crypt;
 	void *crypt_abstract;
 
 	LIBSSH2_MAC_METHOD *mac;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long seqno;
 	void *mac_abstract;
 
@@ -199,14 +206,15 @@ struct _LIBSSH2_SESSION {
 	char *kex_prefs;
 	char *hostkey_prefs;
 
-	int state;
-	int flags;
+	NSInteger state;
+	NSInteger flags;
 
 	/* Agreed Key Exchange Method */
 	LIBSSH2_KEX_METHOD *kex;
 	int burn_optimistic_kexinit:1;
 
 	unsigned char *session_id;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long session_id_len;
 
 	/* Server's public key */
@@ -217,6 +225,7 @@ struct _LIBSSH2_SESSION {
 	 * Or read from server in (eg) KEXDH_INIT (for client mode)
 	 */
 	unsigned char *server_hostkey;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long server_hostkey_len;
 #if LIBSSH2_MD5
 	unsigned char server_hostkey_md5[MD5_DIGEST_LENGTH];
@@ -234,20 +243,22 @@ struct _LIBSSH2_SESSION {
 
 	/* Active connection channels */
 	LIBSSH2_CHANNEL_BRIGADE channels;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long next_channel;
 
 	LIBSSH2_LISTENER *listeners;
 
 	/* Actual I/O socket */
-	int socket_fd;
-	int socket_block;
-	int socket_state;
+	NSInteger socket_fd;
+	NSInteger socket_block;
+	NSInteger socket_state;
 
 	/* Error tracking */
 	char *err_msg;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long err_msglen;
-	int err_should_free;
-	int err_code;
+	NSInteger err_should_free;
+	NSInteger err_code;
 };
 
 /* session.state bits */
@@ -271,37 +282,47 @@ struct _LIBSSH2_KEX_METHOD {
 	const char *name;
 
 	/* Key exchange, populates session->* and returns 0 on success, non-0 on error */
-	int (*exchange_keys)(LIBSSH2_SESSION *session);
+	NSInteger (*exchange_keys)(LIBSSH2_SESSION *session);
 
+#warning 64BIT: Inspect use of long
 	long flags;
 };
 
 struct _LIBSSH2_HOSTKEY_METHOD {
 	const char *name;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long hash_len;
 
-	int (*init)(LIBSSH2_SESSION *session, unsigned char *hostkey_data, unsigned long hostkey_data_len, void **abstract);
-	int (*initPEM)(LIBSSH2_SESSION *session, const char *privkeyfile, unsigned const char *passphrase, void **abstract);
-	int (*sig_verify)(LIBSSH2_SESSION *session, const unsigned char *sig, unsigned long sig_len, const unsigned char *m, unsigned long m_len, void **abstract);
-	int (*signv)(LIBSSH2_SESSION *session, unsigned char **signature, unsigned long *signature_len, unsigned long veccount, const struct iovec datavec[], void **abstract);
-	int (*encrypt)(LIBSSH2_SESSION *session, unsigned char **dst, unsigned long *dst_len, const unsigned char *src, unsigned long src_len, void **abstract);
-	int (*dtor)(LIBSSH2_SESSION *session, void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*init)(LIBSSH2_SESSION *session, unsigned char *hostkey_data, unsigned long hostkey_data_len, void **abstract);
+	NSInteger (*initPEM)(LIBSSH2_SESSION *session, const char *privkeyfile, unsigned const char *passphrase, void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*sig_verify)(LIBSSH2_SESSION *session, const unsigned char *sig, unsigned long sig_len, const unsigned char *m, unsigned long m_len, void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*signv)(LIBSSH2_SESSION *session, unsigned char **signature, unsigned long *signature_len, unsigned long veccount, const struct iovec datavec[], void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*encrypt)(LIBSSH2_SESSION *session, unsigned char **dst, unsigned long *dst_len, const unsigned char *src, unsigned long src_len, void **abstract);
+	NSInteger (*dtor)(LIBSSH2_SESSION *session, void **abstract);
 };
 
 struct _LIBSSH2_CRYPT_METHOD {
 	const char *name;
 
-	int blocksize;
+	NSInteger blocksize;
 
 	/* iv and key sizes (-1 for variable length) */
-	int iv_len;
-	int secret_len;
+	NSInteger iv_len;
+	NSInteger secret_len;
 
+#warning 64BIT: Inspect use of long
 	long flags;
 
-	int (*init)(LIBSSH2_SESSION *session, LIBSSH2_CRYPT_METHOD *method, unsigned char *iv, int *free_iv, unsigned char *secret, int *free_secret, int encrypt, void **abstract);
-	int (*crypt)(LIBSSH2_SESSION *session, unsigned char *block, void **abstract);
-	int (*dtor)(LIBSSH2_SESSION *session, void **abstract);
+	NSInteger (*init)(LIBSSH2_SESSION *session, LIBSSH2_CRYPT_METHOD *method, unsigned char *iv, NSInteger *free_iv, unsigned char *secret, NSInteger *free_secret, NSInteger encrypt, void **abstract);
+	NSInteger (*crypt)(LIBSSH2_SESSION *session, unsigned char *block, void **abstract);
+	NSInteger (*dtor)(LIBSSH2_SESSION *session, void **abstract);
 
 	_libssh2_cipher_type(algo);
 };
@@ -309,25 +330,31 @@ struct _LIBSSH2_CRYPT_METHOD {
 struct _LIBSSH2_COMP_METHOD {
 	const char *name;
 
-	int (*init)(LIBSSH2_SESSION *session, int compress, void **abstract);
-	int (*comp)(LIBSSH2_SESSION *session, int compress, unsigned char **dest, unsigned long *dest_len, unsigned long payload_limit, int *free_dest,
+	NSInteger (*init)(LIBSSH2_SESSION *session, NSInteger compress, void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*comp)(LIBSSH2_SESSION *session, NSInteger compress, unsigned char **dest, unsigned long *dest_len, unsigned long payload_limit, NSInteger *free_dest,
+#warning 64BIT: Inspect use of unsigned long
 												  const unsigned char *src, unsigned long src_len, void **abstract);
-	int (*dtor)(LIBSSH2_SESSION *session, int compress, void **abstract);
+	NSInteger (*dtor)(LIBSSH2_SESSION *session, NSInteger compress, void **abstract);
 };
 
 struct _LIBSSH2_MAC_METHOD {
 	const char *name;
 
 	/* The length of a given MAC packet */
-	int mac_len;
+	NSInteger mac_len;
 
 	/* integrity key length */
-	int key_len;
+	NSInteger key_len;
 
 	/* Message Authentication Code Hashing algo */
-	int (*init)(LIBSSH2_SESSION *session, unsigned char *key, int *free_key, void **abstract);
-	int (*hash)(LIBSSH2_SESSION *session, unsigned char *buf, unsigned long seqno, const unsigned char *packet, unsigned long packet_len, const unsigned char *addtl, unsigned long addtl_len, void **abstract);
-	int (*dtor)(LIBSSH2_SESSION *session, void **abstract);
+	NSInteger (*init)(LIBSSH2_SESSION *session, unsigned char *key, NSInteger *free_key, void **abstract);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+	NSInteger (*hash)(LIBSSH2_SESSION *session, unsigned char *buf, unsigned long seqno, const unsigned char *packet, unsigned long packet_len, const unsigned char *addtl, unsigned long addtl_len, void **abstract);
+	NSInteger (*dtor)(LIBSSH2_SESSION *session, void **abstract);
 };
 
 #if defined(LIBSSH2_DEBUG_TRANSPORT) || defined(LIBSSH2_DEBUG_KEX) || defined(LIBSSH2_DEBUG_USERAUTH) || defined(LIBSSH2_DEBUG_CONNECTION) || defined(LIBSSH2_DEBUG_SCP) || defined(LIBSSH2_DEBUG_SFTP) || defined(LIBSSH2_DEBUG_ERRORS)
@@ -343,7 +370,7 @@ struct _LIBSSH2_MAC_METHOD {
 #define LIBSSH2_DBG_ERROR						7
 #define LIBSSH2_DBG_PUBLICKEY					8
 
-void _libssh2_debug(LIBSSH2_SESSION *session, int context, const char *format, ...);
+void _libssh2_debug(LIBSSH2_SESSION *session, NSInteger context, const char *format, ...);
 
 #endif /* LIBSSH2_DEBUG_ENABLED */
 
@@ -443,28 +470,45 @@ void _libssh2_debug(LIBSSH2_SESSION *session, int context, const char *format, .
 
 void libssh2_session_shutdown(LIBSSH2_SESSION *session);
 
+#warning 64BIT: Inspect use of unsigned long
 unsigned long libssh2_ntohu32(const unsigned char *buf);
 libssh2_uint64_t libssh2_ntohu64(const unsigned char *buf);
+#warning 64BIT: Inspect use of unsigned long
 void libssh2_htonu32(unsigned char *buf, unsigned long val);
 void libssh2_htonu64(unsigned char *buf, libssh2_uint64_t val);
 
-int libssh2_packet_read(LIBSSH2_SESSION *session, int block);
-int libssh2_packet_ask_ex(LIBSSH2_SESSION *session, unsigned char packet_type, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len, int poll_socket);
+NSInteger libssh2_packet_read(LIBSSH2_SESSION *session, NSInteger block);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+NSInteger libssh2_packet_ask_ex(LIBSSH2_SESSION *session, unsigned char packet_type, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len, NSInteger poll_socket);
 #define libssh2_packet_ask(session, packet_type, data, data_len, poll_socket)	\
 		libssh2_packet_ask_ex((session), (packet_type), (data), (data_len), 0, NULL, 0, (poll_socket))
-int libssh2_packet_askv_ex(LIBSSH2_SESSION *session, unsigned char *packet_types, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len, int poll_socket);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+NSInteger libssh2_packet_askv_ex(LIBSSH2_SESSION *session, unsigned char *packet_types, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len, NSInteger poll_socket);
 #define libssh2_packet_askv(session, packet_types, data, data_len, poll_socket)	\
 		libssh2_packet_askv_ex((session), (packet_types), (data), (data_len), 0, NULL, 0, (poll_socket))
-int libssh2_packet_require_ex(LIBSSH2_SESSION *session, unsigned char packet_type, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+NSInteger libssh2_packet_require_ex(LIBSSH2_SESSION *session, unsigned char packet_type, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len);
 #define libssh2_packet_require(session, packet_type, data, data_len)			\
 		libssh2_packet_require_ex((session), (packet_type), (data), (data_len), 0, NULL, 0)
-int libssh2_packet_requirev_ex(LIBSSH2_SESSION *session, unsigned char *packet_types, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len);
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+#warning 64BIT: Inspect use of unsigned long
+NSInteger libssh2_packet_requirev_ex(LIBSSH2_SESSION *session, unsigned char *packet_types, unsigned char **data, unsigned long *data_len, unsigned long match_ofs, const unsigned char *match_buf, unsigned long match_len);
 #define libssh2_packet_requirev(session, packet_types, data, data_len)			\
 		libssh2_packet_requirev_ex((session), (packet_types), (data), (data_len), 0, NULL, 0)
-int libssh2_packet_burn(LIBSSH2_SESSION *session);
-int libssh2_packet_write(LIBSSH2_SESSION *session, unsigned char *data, unsigned long data_len);
-int libssh2_kex_exchange(LIBSSH2_SESSION *session, int reexchange);
+NSInteger libssh2_packet_burn(LIBSSH2_SESSION *session);
+#warning 64BIT: Inspect use of unsigned long
+NSInteger libssh2_packet_write(LIBSSH2_SESSION *session, unsigned char *data, unsigned long data_len);
+NSInteger libssh2_kex_exchange(LIBSSH2_SESSION *session, NSInteger reexchange);
+#warning 64BIT: Inspect use of unsigned long
 unsigned long libssh2_channel_nextid(LIBSSH2_SESSION *session);
+#warning 64BIT: Inspect use of unsigned long
 LIBSSH2_CHANNEL *libssh2_channel_locate(LIBSSH2_SESSION *session, unsigned long channel_id);
 
 /* Let crypt.c/hostkey.c/comp.c/mac.c expose their method structs */
@@ -477,13 +521,13 @@ LIBSSH2_MAC_METHOD **libssh2_mac_methods(void);
 #define libssh2_kex_agree_lang(session, endpoint, str, str_len)	0
 
 /* pem.c */
-int _libssh2_pem_parse (LIBSSH2_SESSION *session,
+NSInteger _libssh2_pem_parse (LIBSSH2_SESSION *session,
 			const char *headerbegin,
 			const char *headerend,
 			FILE *fp,
-			char **data, unsigned int *datalen);
-int _libssh2_pem_decode_sequence (unsigned char **data, unsigned int *datalen);
-int _libssh2_pem_decode_integer (unsigned char **data, unsigned int *datalen,
-				 unsigned char **i, unsigned int *ilen);
+			char **data, NSUInteger *datalen);
+NSInteger _libssh2_pem_decode_sequence (unsigned char **data, NSUInteger *datalen);
+NSInteger _libssh2_pem_decode_integer (unsigned char **data, NSUInteger *datalen,
+				 unsigned char **i, NSUInteger *ilen);
 
 #endif /* LIBSSH2_H */

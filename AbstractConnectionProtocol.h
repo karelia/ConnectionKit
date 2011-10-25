@@ -106,7 +106,9 @@ enum {
 
 - (NSString *)rootDirectory;
 - (void)createDirectory:(NSString *)dirPath;
+#warning 64BIT: Inspect use of unsigned long
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+#warning 64BIT: Inspect use of unsigned long
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
@@ -191,7 +193,7 @@ enum {
 
 - (void)checkExistenceOfPath:(NSString *)path;
 
-- (unsigned)numberOfTransfers;
+- (NSUInteger)numberOfTransfers;
 - (void)cancelTransfer;
 - (void)cancelAll;
 
@@ -309,7 +311,7 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (NSError *)streamError;
 - (NSStreamStatus)streamStatus;
 - (BOOL)hasBytesAvailable;
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len;
+- (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)len;
 @end
 
 @protocol OutputStream <NSObject>
@@ -325,5 +327,5 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (NSStreamStatus)streamStatus;
 - (BOOL) hasSpaceAvailable;
 
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len;
+- (NSInteger)write:(const uint8_t *)buffer maxLength:(NSUInteger)len;
 @end

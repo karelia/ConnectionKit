@@ -217,7 +217,7 @@ typedef enum {
 
 - (void)checkExistenceOfPath:(NSString *)path;
 
-- (unsigned)numberOfTransfers;
+- (NSUInteger)numberOfTransfers;
 - (void)cancelTransfer;
 - (void)cancelAll;
 
@@ -356,7 +356,7 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (NSError *)streamError;
 - (NSStreamStatus)streamStatus;
 - (BOOL)hasBytesAvailable;
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len;
+- (NSInteger)read:(uint8_t *)buffer maxLength:(NSUInteger)len;
 @end
 
 @protocol OutputStream <NSObject>
@@ -372,5 +372,5 @@ extern NSString *ConnectionDirectoryExistsFilenameKey;
 - (NSStreamStatus)streamStatus;
 - (BOOL) hasSpaceAvailable;
 
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len;
+- (NSInteger)write:(const uint8_t *)buffer maxLength:(NSUInteger)len;
 @end

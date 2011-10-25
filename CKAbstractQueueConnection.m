@@ -201,7 +201,7 @@ NSString *CKQueueDomain = @"Queuing";
 #pragma mark -
 #pragma mark Queue Support
 
-- (void)setState:(int)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
+- (void)setState:(NSInteger)aState		// Safe "setter" -- do NOT just change raw variable.  Called by EITHER thread.
 {
 	KTLog(CKStateMachineDomain, KTLogDebug, @"Changing State from %@ to %@", [self stateName:_state], [self stateName:aState]);
 	
@@ -483,44 +483,44 @@ NSString *CKQueueDomain = @"Queuing";
 	CURRENT_QUEUE(_fileCheckQueue);
 }
 
-#define COUNT_QUEUE(q) [_queueLock lock]; unsigned count = [q count]; [_queueLock unlock]; return count;
+#define COUNT_QUEUE(q) [_queueLock lock]; NSUInteger count = [q count]; [_queueLock unlock]; return count;
 
-- (unsigned)numberOfCommands
+- (NSUInteger)numberOfCommands
 {
 	COUNT_QUEUE(_commandQueue)
 }
 
-- (unsigned)numberOfDownloads
+- (NSUInteger)numberOfDownloads
 {
 	COUNT_QUEUE(_downloadQueue)
 }
 
-- (unsigned)numberOfUploads
+- (NSUInteger)numberOfUploads
 {
 	COUNT_QUEUE(_uploadQueue)
 }
 
-- (unsigned)numberOfDeletions
+- (NSUInteger)numberOfDeletions
 {
 	COUNT_QUEUE(_fileDeletes)
 }
 
-- (unsigned)numberOfRenames
+- (NSUInteger)numberOfRenames
 {
 	COUNT_QUEUE(_fileRenames)
 }
 
-- (unsigned)numberOfPermissionChanges
+- (NSUInteger)numberOfPermissionChanges
 {
 	COUNT_QUEUE(_filePermissions)
 }
 
-- (unsigned)numberOfTransfers
+- (NSUInteger)numberOfTransfers
 {
 	return [self numberOfUploads] + [self numberOfDownloads];
 }
 
-- (unsigned)numberOfFileChecks
+- (NSUInteger)numberOfFileChecks
 {
 	COUNT_QUEUE(_fileCheckQueue);
 }

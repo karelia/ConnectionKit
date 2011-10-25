@@ -1,0 +1,10 @@
+build
+*.mode*
+*.pbxuser
+*.perspectivev?
+project.xcworkspace
+xcuserdata
+*.tmproj
+*.svn
+~*
+.DS_Store

@@ -63,7 +63,7 @@ extern NSString *CKSSLDomain;
 extern NSString *CKEditingDomain;
 
 
-typedef enum {
+enum {
 	CKConnectionNotConnectedState = 0,
 	CKConnectionIdleState,
 	CKConnectionSentUsernameState,
@@ -89,8 +89,8 @@ typedef enum {
 	CKConnectionChangedDirectoryState,
 	CKConnectionSentDisconnectState, 
 	CKConnectionCheckingFileExistenceState // 25
-} CKConnectionState;
-
+};
+typedef NSInteger CKConnectionState;
 
 @class UKKQueue, CKConnectionClient;
 
@@ -138,7 +138,7 @@ typedef enum {
 - (CKConnectionState)state;
 // convience method to access the state
 #define GET_STATE _state
-- (NSString *)stateName:(int)state;
+- (NSString *)stateName:(NSInteger)state;
 
 
 // we cache directory contents so when changing to an existing directory we show the 

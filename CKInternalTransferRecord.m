@@ -174,7 +174,7 @@
 
 - (NSString *)description
 {
-	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ <0x%06x>\n", [self className], self];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ <0x%06p>\n", [self className], self];
 	
 	[str appendFormat:@"Local: %@\n", myLocalPath];
 	[str appendFormat:@"Remote: %@\n", myRemotePath];

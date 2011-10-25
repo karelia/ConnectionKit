@@ -128,7 +128,7 @@
 		else 
 		{
 			//we need to get the return value
-			unsigned int length = [[anInvocation methodSignature] methodReturnLength];
+			NSUInteger length = [[anInvocation methodSignature] methodReturnLength];
 			void * buffer = (void *)malloc(length);
 			[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:) 
 										   withObject:myDelegate 

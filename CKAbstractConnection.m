@@ -191,7 +191,7 @@ NSDictionary *sDataAttributes = nil;
 - (NSInteger)port
 {
 	NSNumber *port = [[[self request] URL] port];
-    return (port) ? [port intValue] : [[self class] defaultPort];
+    return (port) ? [port integerValue] : [[self class] defaultPort];
 }
 
 - (void)setState:(CKConnectionState)state
@@ -204,7 +204,7 @@ NSDictionary *sDataAttributes = nil;
 	return _state;
 }
 
-- (NSString *)stateName:(int)state
+- (NSString *)stateName:(NSInteger)state
 {
 	switch (state) {
 		case CKConnectionNotConnectedState: return @"ConnectionNotConnectedState";
@@ -603,7 +603,7 @@ NSDictionary *sDataAttributes = nil;
 	return NO;
 }
 
-- (unsigned)numberOfTransfers
+- (NSUInteger)numberOfTransfers
 {
 	return 0;
 }
@@ -832,7 +832,7 @@ NSDictionary *sDataAttributes = nil;
         {
             NSEnumerator *e = [anArgumentArray objectEnumerator];
             id argument;
-            int argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
+            NSInteger argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
             while ( argument = [e nextObject] )
             {
                 if ( [argument isMemberOfClass:[NSNull class]] )

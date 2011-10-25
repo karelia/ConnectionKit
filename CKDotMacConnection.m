@@ -107,7 +107,7 @@
 		theStatus = SecKeychainFindGenericPassword(NULL,
 												   6,
 												   "iTools",
-												   strlen(utf8),
+												   (UInt32)strlen(utf8),
 												   utf8,
 												   &passwordLen,
 												   (void *)&buffer,
@@ -125,7 +125,8 @@
 			}
 
 			// release buffer allocated by SecKeychainFindGenericPassword
-			theStatus = SecKeychainItemFreeContent(NULL, buffer);
+			//theStatus = SecKeychainItemFreeContent(NULL, buffer);
+			SecKeychainItemFreeContent(NULL, buffer);
 			
 			*account = accountName;
 			result = YES;
@@ -346,7 +347,7 @@
             [[self client] uploadDidFinish:[upload remotePath] error:error];
 			
 			if ([upload delegateRespondsToTransferDidFinish])
-				[[upload delegate] transferDidFinish:[upload delegate] error:error];
+				[[upload delegate] transferDidFinish:[upload userInfo] error:error];
 			
 			[upload release];
 			
@@ -426,7 +427,7 @@
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream readBytesOfLength:(unsigned)length
+- (void)stream:(id<InputStream>)stream readBytesOfLength:(NSUInteger)length
 {
 	if (length == 0) return;
 	if (GET_STATE == CKConnectionDownloadingFileState)
@@ -435,14 +436,14 @@
 		bytesTransferred += length;
 		if (bytesToTransfer > 0) // intel gives a crash for div by 0
 		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
+			NSInteger percent = (NSInteger)((bytesTransferred * 100) / bytesToTransfer);
 			
 			[[self client] download:[self iDiskPathForWebDAVPath:[download remotePath]]
-               didProgressToPercent:[NSNumber numberWithInt:percent]];
+               didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			
 			if ([download delegateRespondsToTransferProgressedTo])
 			{
-				[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		
@@ -456,7 +457,7 @@
 	}
 }
 
-- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(unsigned)length
+- (void)stream:(id<OutputStream>)stream sentBytesOfLength:(NSUInteger)length
 {
 	if (length == 0) return;
 	if (GET_STATE == CKConnectionUploadingFileState)
@@ -469,7 +470,7 @@
 			}
 			else
 			{
-				length -= transferHeaderLength;
+				length -= (NSUInteger)transferHeaderLength;
 				transferHeaderLength = 0;
 				bytesTransferred += length;
 			}
@@ -483,12 +484,12 @@
 		
 		if (bytesToTransfer > 0) // intel gives a crash for div by 0
 		{
-			int percent = (bytesTransferred * 100) / bytesToTransfer;
-			[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+			NSInteger percent = (NSInteger)((bytesTransferred * 100) / bytesToTransfer);
+			[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			
 			if ([upload delegateRespondsToTransferProgressedTo])
 			{
-				[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+				[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		

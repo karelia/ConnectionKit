@@ -39,7 +39,7 @@
 	
 	NSMutableDictionary *myHeaders;
 	NSMutableData		*myContent;
-	unsigned			myHeaderLength;
+	NSUInteger			myHeaderLength;
 	
 	NSMutableDictionary *myPost;
 	NSMutableDictionary *myUploads;
@@ -71,11 +71,11 @@
 - (NSString *)method;
 - (NSString *)uri;
 
-- (unsigned)contentLength;
+- (NSUInteger)contentLength;
 
 - (void)serializeContentWithPacket:(NSMutableData *)packet; // subclasses override. packet is still in the header section at this point. only append your own headers if required, not your content
 - (NSData *)serialized;
-- (unsigned)headerLength; //only will contain a valid value after serialized is called
+- (NSUInteger)headerLength; //only will contain a valid value after serialized is called
 
 - (CKHTTPResponse *)responseWithData:(NSData *)data;
 

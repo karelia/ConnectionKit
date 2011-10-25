@@ -50,8 +50,10 @@ typedef struct _LIBSSH2_PUBLICKEY				LIBSSH2_PUBLICKEY;
 
 typedef struct _libssh2_publickey_attribute {
 	char *name;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long name_len;
 	char *value;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long value_len;
 	char mandatory;
 } libssh2_publickey_attribute;
@@ -60,15 +62,20 @@ typedef struct _libssh2_publickey_list {
 	unsigned char *packet; /* For freeing */
 
 	unsigned char *name;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long name_len;
 	unsigned char *blob;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long blob_len;
+#warning 64BIT: Inspect use of unsigned long
 	unsigned long num_attrs;
 	libssh2_publickey_attribute *attrs; /* free me */
 } libssh2_publickey_list;
 
 /* Generally use the first macro here, but if both name and value are string literals, you can use _fast() to take advantage of preprocessing */
 #define libssh2_publickey_attribute(name, value, mandatory) 		{ (name), strlen(name), (value), strlen(value), (mandatory) },
+#warning 64BIT: Inspect use of sizeof
+#warning 64BIT: Inspect use of sizeof
 #define libssh2_publickey_attribute_fast(name, value, mandatory)	{ (name), sizeof(name) - 1, (value), sizeof(value) - 1, (mandatory) },
 
 #ifdef __cplusplus
@@ -78,18 +85,24 @@ extern "C" {
 /* Publickey Subsystem */
 LIBSSH2_API LIBSSH2_PUBLICKEY *libssh2_publickey_init(LIBSSH2_SESSION *session);
 
-LIBSSH2_API int libssh2_publickey_add_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned char *name, unsigned long name_len,
+#warning 64BIT: Inspect use of unsigned long
+LIBSSH2_API NSInteger libssh2_publickey_add_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned char *name, unsigned long name_len,
+#warning 64BIT: Inspect use of unsigned long
 															const unsigned char *blob, unsigned long blob_len, char overwrite,
+#warning 64BIT: Inspect use of unsigned long
 															unsigned long num_attrs, libssh2_publickey_attribute attrs[]);
 #define libssh2_publickey_add(pkey, name, blob, blob_len, overwrite, num_attrs, attrs) \
 		libssh2_publickey_add_ex((pkey), (name), strlen(name), (blob), (blob_len), (overwrite), (num_attrs), (attrs))
 
-LIBSSH2_API int libssh2_publickey_remove_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned char *name, unsigned long name_len,
+#warning 64BIT: Inspect use of unsigned long
+LIBSSH2_API NSInteger libssh2_publickey_remove_ex(LIBSSH2_PUBLICKEY *pkey, const unsigned char *name, unsigned long name_len,
+#warning 64BIT: Inspect use of unsigned long
 															const unsigned char *blob, unsigned long blob_len);
 #define libssh2_publickey_remove(pkey, name, blob, blob_len) \
 		libssh2_publickey_remove_ex((pkey), (name), strlen(name), (blob), (blob_len))
 
-LIBSSH2_API int libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned long *num_keys, libssh2_publickey_list **pkey_list);
+#warning 64BIT: Inspect use of unsigned long
+LIBSSH2_API NSInteger libssh2_publickey_list_fetch(LIBSSH2_PUBLICKEY *pkey, unsigned long *num_keys, libssh2_publickey_list **pkey_list);
 LIBSSH2_API void libssh2_publickey_list_free(LIBSSH2_PUBLICKEY *pkey, libssh2_publickey_list *pkey_list);
 
 LIBSSH2_API void libssh2_publickey_shutdown(LIBSSH2_PUBLICKEY *pkey);

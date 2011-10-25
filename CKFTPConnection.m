@@ -317,7 +317,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	
 	KTLog(CKProtocolDomain, KTLogDebug, @"<<# %@", [reply description]);	/// use <<# to help find commands
 	
-	int stateToHandle = GET_STATE;
+	NSInteger stateToHandle = GET_STATE;
 	//State independent handling	
 	switch ([reply replyCode])
 	{
@@ -1085,7 +1085,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			//start to read in the data to kick start it
 			uint8_t *buf = (uint8_t *)malloc(sizeof(uint8_t) * kStreamChunkSize);
-			int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
+			NSInteger len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
 			if (len >= 0) {
 				[_writeHandle writeData:[NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO]];
 				_transferSent += len;
@@ -1096,13 +1096,13 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				{
 					[[download delegate] transfer:[download userInfo] transferredDataOfLength:len];
 				}
-				int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
+				NSInteger percent = (NSInteger)(100.0 * (CGFloat)_transferSent / ((CGFloat)_transferSize * 1.0));
 
-                [[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+                [[self client] download:[download remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 				
 				if ([download delegateRespondsToTransferProgressedTo])
 				{
-					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				_transferLastPercent = percent;
 			}
@@ -1233,7 +1233,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			NSString *remoteFile = [d remotePath];
 			unsigned long long offset = [d offset];
 			NSData *data = [d data];
-			unsigned chunkLength = 0;
+			NSUInteger chunkLength = 0;
 			const uint8_t bytes [kStreamChunkSize];
 			_transferSent = 0;
 			_transferCursor = offset;
@@ -1247,8 +1247,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				// Calculate size to transfer is total data size minus offset
 				_transferSize = [data length] - offset;
 				
-				chunkLength = MAX([data length] - offset, kStreamChunkSize);						
-				[data getBytes:&bytes range:NSMakeRange(offset, chunkLength)];
+				chunkLength = MAX([data length] - (NSUInteger)offset, kStreamChunkSize);						
+				[data getBytes:&bytes range:NSMakeRange((NSUInteger)offset, chunkLength)];
 			}
 			else	// use file
 			{
@@ -1277,14 +1277,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				[[d delegate] transfer:[d userInfo] transferredDataOfLength:chunkLength];
 			}
 			
-			int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+			NSInteger percent = (NSInteger)((CGFloat)_transferSent / ((CGFloat)_transferSize * 1.0));
 			if (percent > _transferLastPercent)
 			{
-				[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+				[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInteger:percent]];	// send message if we have increased %
 				
 				if ([d delegateRespondsToTransferProgressedTo])
 				{
-					[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+					[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 			}
 			_transferLastPercent = percent;			
@@ -1310,7 +1310,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			}
 			else
 			{
-				unsigned chunkLength = 0;
+				NSUInteger chunkLength = 0;
 				const uint8_t *bytes;
 				_transferLastPercent = 0;
 				_transferSent = 0;
@@ -1322,7 +1322,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					[self setReadHandle:nil];		// make sure we're not also trying to read from file
 					
 					_transferSize = [data length];
-					chunkLength = MIN(_transferSize, kStreamChunkSize);						
+					chunkLength = MIN((unsigned int)_transferSize, kStreamChunkSize);						
 					bytes = (uint8_t *)[data bytes];
 				}
 				else	// use file
@@ -1361,14 +1361,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				
 				[[self client] upload:remoteFile didSendDataOfLength:chunkLength];
 				
-				int percent = (float)_transferSent / ((float)_transferSize * 1.0);
+				NSInteger percent = (NSInteger)((CGFloat)_transferSent / ((CGFloat)_transferSize * 1.0));
 				if (percent > _transferLastPercent)
 				{
-					[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+					[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInteger:percent]];	// send message if we have increased %
 					
 					if ([d delegateRespondsToTransferProgressedTo])
 					{
-						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+						[[d delegate] transfer:[d userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 					}
 				}
 				_transferLastPercent = percent;
@@ -1808,7 +1808,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 227: //Entering Passive Mode
 		{
 			int i[6];
-			int j;
+			NSInteger j;
 			unsigned char n[6];
 			char *buf = (char *)[[reply description] UTF8String];
 			char *start = strchr(buf,'(');
@@ -2055,7 +2055,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case NSStreamEventHasBytesAvailable:
 		{
 			uint8_t *buf = (uint8_t *)malloc(sizeof (uint8_t) * kStreamChunkSize);
-			int len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
+			NSInteger len = [_dataReceiveStream read:buf maxLength:kStreamChunkSize];
 			if (len >= 0)
 			{	
 				NSData *data = [NSData dataWithBytesNoCopy:buf length:len freeWhenDone:NO];
@@ -2098,15 +2098,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					{
 						if (_transferSize > 0)
 						{
-							int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
+							NSInteger percent = (NSInteger)(100.0 * (CGFloat)_transferSent / ((CGFloat)_transferSize * 1.0));
 							if (percent > _transferLastPercent)
 							{
 								if ([download delegateRespondsToTransferProgressedTo])
 								{
-									[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+									[[download delegate] transfer:[download userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 								}
 								
-                                [[self client] download:file didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+                                [[self client] download:file didProgressToPercent:[NSNumber numberWithInteger:percent]];	// send message if we have increased %
 								
 								_transferLastPercent = percent;
 							}
@@ -2448,7 +2448,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		{
 			if (GET_STATE == CKConnectionUploadingFileState)
 			{
-				unsigned chunkLength = 0;
+				NSUInteger chunkLength = 0;
 				const uint8_t *bytes = NULL;
 				CKInternalTransferRecord *upload = [self currentUpload];
 				NSString *remoteFile = [upload remotePath];
@@ -2461,8 +2461,8 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 				}
 				else if (nil != _readData)
 				{
-					chunkLength = MIN([_readData length] - _transferCursor, kStreamChunkSize);	
-					bytes = (uint8_t *)[[_readData subdataWithRange:NSMakeRange(_transferCursor, chunkLength)] bytes];
+					chunkLength = MIN((NSUInteger)([_readData length] - _transferCursor), kStreamChunkSize);	
+					bytes = (uint8_t *)[[_readData subdataWithRange:NSMakeRange((NSInteger)_transferCursor, chunkLength)] bytes];
 				}
 
 				if (0 != _transferSize && (chunkLength > 0 || _transferSent == _transferSize)) //should only send 0 bytes to initiate a connection shutdown.  Do nothing if nothing to transfer yet.
@@ -2479,14 +2479,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 						[[self client] upload:remoteFile didSendDataOfLength:chunkLength];
                     
 					//}
-					int percent = 100.0 * (float)_transferSent / ((float)_transferSize * 1.0);
+					NSInteger percent = (NSInteger)(100.0 * (CGFloat)_transferSent / ((CGFloat)_transferSize * 1.0));
 					if (percent > _transferLastPercent)
 					{
-						[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInt:percent]];	// send message if we have increased %
+						[[self client] upload:remoteFile didProgressToPercent:[NSNumber numberWithInteger:percent]];	// send message if we have increased %
 						
 						if ([upload delegateRespondsToTransferProgressedTo])
 						{
-							[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInt:percent]];
+							[[upload delegate] transfer:[upload userInfo] progressedTo:[NSNumber numberWithInteger:percent]];
 						}
 					}
 					_transferLastPercent = percent;
@@ -2646,10 +2646,10 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	[_dataReceiveStream open];
 	[_dataSendStream open];
 	
-	unsigned dataConnectionTimeout = 10;
+	NSUInteger dataConnectionTimeout = 10;
 	NSNumber *defaultsValue = [[NSUserDefaults standardUserDefaults] objectForKey:@"CKFTPDataConnectionTimeoutValue"];
 	if (defaultsValue) {
-		dataConnectionTimeout = [defaultsValue unsignedIntValue];
+		dataConnectionTimeout = [defaultsValue unsignedIntegerValue];
 	}
 	
 	KTLog(CKTransportDomain, KTLogDebug, @"Setting data connection timeout to %u seconds", dataConnectionTimeout);
@@ -3043,7 +3043,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																		  userInfo:record];
 	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
+	[record setProperty:[NSNumber numberWithInteger:0] forKey:CKQueueDownloadTransferPercentReceived];
 
 	[self queueDownload:download];
 	
@@ -3118,7 +3118,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 																		  userInfo:record];
 	[record setProperty:remotePath forKey:CKQueueDownloadRemoteFileKey];
 	[record setProperty:localPath forKey:CKQueueDownloadDestinationFileKey];
-	[record setProperty:[NSNumber numberWithInt:0] forKey:CKQueueDownloadTransferPercentReceived];
+	[record setProperty:[NSNumber numberWithInteger:0] forKey:CKQueueDownloadTransferPercentReceived];
 
 	[self queueDownload:download];
 	
@@ -3254,7 +3254,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 #pragma mark Queue Support
 
-- (NSString *)stateName:(int)state
+- (NSString *)stateName:(NSInteger)state
 {
 	switch (state) {
 		case FTPSettingActiveState: return @"FTPSettingActiveState";
@@ -3389,7 +3389,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CFRelease(s);
 }
 
-- (BOOL)setupActiveConnectionWithPort:(unsigned)port
+- (BOOL)setupActiveConnectionWithPort:(NSUInteger)port
 {
 	CFOptionFlags cbTypes = kCFSocketAcceptCallBack; //once accepted we will tear down the _activeSocket
 	CFSocketContext ctx = {0, self, NULL, NULL, NULL};
@@ -3407,9 +3407,9 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	
 	CFSocketSetSocketFlags(_activeSocket,kCFSocketCloseOnInvalidate);
-	int on = 1;
-	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEPORT, &on, sizeof(on));
-	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on));
+	NSInteger on = 1;
+	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEPORT, &on, (socklen_t)sizeof(on));
+	setsockopt(CFSocketGetNative(_activeSocket), SOL_SOCKET, SO_REUSEADDR, &on, (socklen_t)sizeof(on));
 	
 	//add to the runloop
 	CFRunLoopSourceRef src = CFSocketCreateRunLoopSource(kCFAllocatorDefault, _activeSocket, 0);
@@ -3428,7 +3428,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	my_addr.sin_addr.s_addr = inet_addr([[[NSHost currentHost] ipv4Address] UTF8String]);
 	bzero(&(my_addr.sin_zero), 8);
 	
-	CFDataRef addrData = CFDataCreate(kCFAllocatorDefault,(const UInt8 *)&my_addr,sizeof(my_addr));
+	CFDataRef addrData = CFDataCreate(kCFAllocatorDefault,(const UInt8 *)&my_addr,(CFIndex)sizeof(my_addr));
 	if (addrData)
 	{
 		err = CFSocketSetAddress(_activeSocket,addrData);
@@ -3466,7 +3466,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	CFDataGetBytes(addrData,CFRangeMake(0,CFDataGetLength(addrData)),(UInt8 *)&active_addr);
 	if (addrData) CFRelease(addrData);
     
-	unsigned port = ntohs(active_addr.sin_port); //Do I need to convert from network byte order? YES
+	short int port = ntohs(active_addr.sin_port); //Do I need to convert from network byte order? YES
 	
     return [CKFTPCommand commandWithCode:@"EPRT" argumentField:[NSString stringWithFormat:
                                                                 @"|1|%@|%u|",
@@ -3488,7 +3488,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	{
 		KTLog(CKTransportDomain, KTLogError, @"Failed to setup PORT socket, trying PASV");
 		_state = FTPSettingPassiveState;
-		return @"PASV";
+		return [CKFTPCommand commandWithCode: @"PASV" argumentField: nil];
 	}
 	div_t portDiv = div(_lastActivePort, 256);
 	NSString *ip = [[[[NSHost currentHost] ipv4Address] componentsSeparatedByString:@"."] componentsJoinedByString:@","];

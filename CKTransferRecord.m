@@ -175,7 +175,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	return _transferred;
 }
 
-- (float)speed
+- (CGFloat)speed
 {
 	if ([self isDirectory]) 
 	{
@@ -193,12 +193,12 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 			if (elapsedTime == 0.0)
 			{
 				//If we don't catch this, we are effectively dividing by zero below. This would leave _speed as NaN.
-				_speed = 0.0;
+				_speed = 0.0f;
 			}
 			else
 			{
 				unsigned long long transferred = [self transferred];
-				_speed = transferred / elapsedTime;
+				_speed = (CGFloat)(transferred / elapsedTime);
 			}
 			[self didChangeValueForKey:@"speed"];
 		}
@@ -206,7 +206,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	return _speed;
 }
 
-- (void)setSpeed:(float)speed
+- (void)setSpeed:(CGFloat)speed
 {
 	if (speed != _speed)
 	{
@@ -382,7 +382,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	return [[_contents copy] autorelease];
 }
 
-- (void)appendToDescription:(NSMutableString *)str indentation:(unsigned)indent
+- (void)appendToDescription:(NSMutableString *)str indentation:(NSUInteger)indent
 {
 	NSInteger i;
 	for (i = 0; i < indent; i++)
@@ -465,11 +465,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 		[self willChangeValueForKey:@"speed"];
 		if (_transferred == _size)
 		{
-			[self setSpeed:0.0];
+			[self setSpeed:0.0f];
 		}
 		else
 		{
-			[self setSpeed:((double)_intermediateTransferred) / difference];
+			[self setSpeed:(CGFloat)((CGFloat)_intermediateTransferred / difference)];
 		}
 		_intermediateTransferred = 0;
 		_lastTransferTime = now;
@@ -479,7 +479,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 
 - (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent
 {
-	[self setProgress:[percent intValue]];
+	[self setProgress:[percent integerValue]];
 }
 
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error
@@ -517,7 +517,7 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
         [result setName:[[path pathComponents] objectAtIndex:0]];  // -firstPathComponent ignores the root dir for absolute paths
         CKTransferRecord *thisNode, *subNode = result;
         
-        int i;
+        NSInteger i;
         for (i = 1; i < [pathComponents count]; i++)
         {
             thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
@@ -699,11 +699,11 @@ triggerChangeNotificationsForDependentKey:@"nameWithProgressAndFileSize"];
 	NSNumber *progress = nil;
 	if ([self hasError])
 	{
-		progress = [NSNumber numberWithInt:-1];
+		progress = [NSNumber numberWithInteger:-1];
 	}
 	else
 	{
-		progress = [NSNumber numberWithInt:[self progress]];
+		progress = [NSNumber numberWithInteger:[self progress]];
 	}
 	return [NSDictionary dictionaryWithObjectsAndKeys:progress, @"progress", [self name], @"name", nil];
 }

@@ -32,7 +32,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 + (void)load	// registration of this class
 {
 	NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInt:119], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
+	NSDictionary *port = [NSDictionary dictionaryWithObjectsAndKeys:[NSNumber numberWithInteger:119], ACTypeValueKey, ACPortTypeKey, ACTypeKey, nil];
 	NSDictionary *url = [NSDictionary dictionaryWithObjectsAndKeys:@"news://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url2 = [NSDictionary dictionaryWithObjectsAndKeys:@"usenet://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
 	NSDictionary *url3 = [NSDictionary dictionaryWithObjectsAndKeys:@"nntp://", ACTypeValueKey, ACURLTypeKey, ACTypeKey, nil];
@@ -103,7 +103,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 - (void)parseCommand:(NSString *)command
 {
 	NSScanner *scanner = [NSScanner scannerWithString:command];
-	int code;
+	NSInteger code;
+#warning 64BIT: scanInt: argument is pointer to int, not NSInteger; you can use scanInteger:
 	[scanner scanInt:&code];
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
@@ -276,11 +277,13 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 	
 }
 
+#warning 64BIT: Inspect use of unsigned long
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
 {
 	
 }
 
+#warning 64BIT: Inspect use of unsigned long
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path
 {
 	if (_flags.error) {
@@ -421,6 +424,7 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 				NSMutableString *groupsListing = [NSMutableString string];
 				NSRange newLinePosition;
 				NSAutoreleasePool *pool;
+#warning 64BIT: Inspect use of long
 				long groupCount = 0;
 				NSMutableString *tempGroups = [NSMutableString string];
 				
