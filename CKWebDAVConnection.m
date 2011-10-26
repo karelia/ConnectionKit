@@ -9,7 +9,6 @@
 #import "CKWebDAVConnection.h"
 
 #import "KSPathUtilities.h"
-#import "KSWorkspaceUtilities.h"
 
 
 @implementation CKWebDAVConnection
@@ -172,8 +171,21 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
     [request setData:data];
     
-    NSString *type = [KSWORKSPACE ks_typeForFilenameExtension:[remotePath pathExtension]];
-    [request setDataMIMEType:[KSWORKSPACE ks_MIMETypeForType:type]];
+    
+    CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                             (CFStringRef)[remotePath pathExtension],
+                                                             NULL
+                                                             );
+    CFStringRef mimeType;
+    if (type)
+    {
+        mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
+        CFRelease(type);
+        if (mimeType) CFRelease(mimeType);
+    }
+    if (!mimeType) mimeType = CFSTR("application/octet-stream");
+    [request setDataMIMEType:(NSString *)mimeType];
+
     
     [self enqueueOperation:request];
     
