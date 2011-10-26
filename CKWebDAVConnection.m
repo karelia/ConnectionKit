@@ -178,7 +178,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
 {
-    OBPRECONDITION(data);
+    NSParameterAssert(data);
     
     remotePath = [self canonicalPathForPath:remotePath];
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
