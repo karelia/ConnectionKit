@@ -187,21 +187,21 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* DAVKit.framework */;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = DAVKit;
 		};
 		27448C2E14580F7500EB086F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 			proxyType = 2;
-			remoteGlobalIDString = C9FF77EC121C6F51001250C7 /* Tests.octest */;
+			remoteGlobalIDString = C9FF77EC121C6F51001250C7;
 			remoteInfo = Tests;
 		};
 		27448C3314580FD500EB086F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* DAVKit */;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = DAVKit;
 		};
 		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
@@ -374,8 +374,6 @@
 		79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAbstractQueueConnection.m; sourceTree = "<group>"; };
 		79CFD81109F7048400172CDD /* CKConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionOpenPanel.h; sourceTree = "<group>"; };
 		79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOpenPanel.m; sourceTree = "<group>"; };
-		79CFD82B09F7048400172CDD /* CKDotMacConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDotMacConnection.h; sourceTree = "<group>"; };
-		79CFD82C09F7048400172CDD /* CKDotMacConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDotMacConnection.m; sourceTree = "<group>"; };
 		79CFD82D09F7048400172CDD /* CKFileConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileConnection.h; sourceTree = "<group>"; };
 		79CFD82E09F7048400172CDD /* CKFileConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileConnection.m; sourceTree = "<group>"; };
 		79CFD82F09F7048400172CDD /* CKFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPConnection.h; sourceTree = "<group>"; };
@@ -676,15 +674,6 @@
 			name = Other;
 			sourceTree = "<group>";
 		};
-		27FD90C90ED5C0070068D634 /* iDisk */ = {
-			isa = PBXGroup;
-			children = (
-				79CFD82B09F7048400172CDD /* CKDotMacConnection.h */,
-				79CFD82C09F7048400172CDD /* CKDotMacConnection.m */,
-			);
-			name = iDisk;
-			sourceTree = "<group>";
-		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
@@ -727,13 +716,6 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		792CFCA70A806108001A00C6 /* HTTP */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = HTTP;
 			sourceTree = "<group>";
 		};
 		795AFEE50B1154E2006905FA /* UKKQueue */ = {
@@ -802,10 +784,8 @@
 				27FD90C10ED5BF640068D634 /* Abstract */,
 				27FD90C60ED5BFC00068D634 /* FTP */,
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
-				792CFCA70A806108001A00C6 /* HTTP */,
-				79CFD11D09F7023D00172CDD /* DAV */,
+				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C70ED5BFDB0068D634 /* File System */,
-				27FD90C90ED5C0070068D634 /* iDisk */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
@@ -813,14 +793,14 @@
 			name = Connections;
 			sourceTree = "<group>";
 		};
-		79CFD11D09F7023D00172CDD /* DAV */ = {
+		79CFD11D09F7023D00172CDD /* WebDAV */ = {
 			isa = PBXGroup;
 			children = (
 				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
 				27447AA61458075600EB086F /* CKWebDAVConnection.h */,
 				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
-			name = DAV;
+			name = WebDAV;
 			sourceTree = "<group>";
 		};
 		79CFD12009F7024000172CDD /* Socket with SSL Capabilities */ = {
