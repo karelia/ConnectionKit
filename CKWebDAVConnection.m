@@ -189,7 +189,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
                                                              (CFStringRef)[remotePath pathExtension],
                                                              NULL
                                                              );
-    CFStringRef mimeType;
+    CFStringRef mimeType = NULL;
     if (type)
     {
         mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
