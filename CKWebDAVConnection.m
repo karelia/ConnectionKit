@@ -8,8 +8,6 @@
 
 #import "CKWebDAVConnection.h"
 
-#import "KSPathUtilities.h"
-
 
 @implementation CKWebDAVConnection
 
@@ -315,10 +313,20 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
                 if (!attributes) attributes = [[NSMutableDictionary alloc] initWithCapacity:1];
                 
                 NSString *path = [aResponseItem href];
-                path = [[path ks_pathRelativeToDirectory:directory] ks_standardizedPOSIXPath];
-                [attributes setObject:path forKey:cxFilenameKey];
                 
-                [contents addObject:attributes];
+                // Strup out trailing slashes
+                while ([path hasSuffix:@"/"])
+                {
+                    path = [path substringToIndex:[path length] - 1];
+                }
+                
+                if (![path isEqualToString:directory])
+                {
+                    path = [path lastPathComponent];
+                    [attributes setObject:path forKey:cxFilenameKey];
+                    
+                    [contents addObject:attributes];
+                }
                 [attributes release];
             }
             
