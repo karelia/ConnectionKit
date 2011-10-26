@@ -18,7 +18,7 @@
     [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"WebDAV" URLScheme:@"http"];
 }
 
-+ (NSArray *)URLSchemes { return NSARRAY(@"http", @"https"); }
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"http", @"https", nil]; }
 
 #pragma mark Lifecycle
 
@@ -255,7 +255,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
         NSInvocation *invocation = [NSInvocation
                                     invocationWithSelector:@selector(connection:didChangeToDirectory:error:)
                                     target:[self delegate]
-                                    arguments:NSARRAY(self, dirPath, nil)];
+                                    arguments:[NSArray arrayWithObjects:self, dirPath, nil, nil]];
         NSOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
         [self enqueueOperation:op];
         [op release];
