@@ -155,6 +155,19 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)cancelAll { }
 
+- (NSString *)canonicalPathForPath:(NSString *)path;
+{
+    // Heavily based on +ks_stringWithPath:relativeToDirectory: in KSFileUtilities
+    
+    if ([path isAbsolutePath]) return path;
+    
+    NSString *directory = [self currentDirectory];
+    if (!directory) return path;
+    
+    NSString *result = [directory stringByAppendingPathComponent:path];
+    return result;
+}
+
 - (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
 {
     return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
@@ -167,7 +180,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 {
     OBPRECONDITION(data);
     
-    remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectory]];
+    remotePath = [self canonicalPathForPath:remotePath];
     DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
     [request setData:data];
     
@@ -202,7 +215,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)createDirectory:(NSString *)dirPath;
 {
-    dirPath = [NSString ks_stringWithPath:dirPath relativeToDirectory:[self currentDirectory]];
+    dirPath = [self canonicalPathForPath:dirPath];
     
     DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath
                                                                                session:[self webDAVSession]
@@ -216,7 +229,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)deleteFile:(NSString *)path
 {
-    path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectory]];
+    path = [self canonicalPathForPath:path];
     DAVRequest *request = [[DAVDeleteRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
     [self enqueueOperation:request];
     [request release];
