@@ -1,5 +1,5 @@
 //
-//  CK2WebDAVConnection.h
+//  CKWebDAVConnection.h
 //  Sandvox
 //
 //  Created by Mike on 14/09/2011.
@@ -12,7 +12,7 @@
 
 @class DAVSession;
 
-@interface CK2WebDAVConnection : NSObject <CKConnection, DAVPutRequestDelegate, DAVSessionDelegate>
+@interface CKWebDAVConnection : NSObject <CKConnection, DAVPutRequestDelegate, DAVSessionDelegate>
 {
   @private
     BOOL                            _connected;

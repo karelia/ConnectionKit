@@ -1,18 +1,18 @@
 //
-//  CK2WebDAVConnection.m
+//  CKWebDAVConnection.m
 //  Sandvox
 //
 //  Created by Mike on 14/09/2011.
 //  Copyright 2011 Karelia Software. All rights reserved.
 //
 
-#import "CK2WebDAVConnection.h"
+#import "CKWebDAVConnection.h"
 
 #import "KSPathUtilities.h"
 #import "KSWorkspaceUtilities.h"
 
 
-@implementation CK2WebDAVConnection
+@implementation CKWebDAVConnection
 
 + (void)load
 {
