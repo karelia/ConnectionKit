@@ -26,6 +26,9 @@
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
+		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
+		27448C381458100D00EB086F /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
@@ -180,6 +183,27 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
+		27448C2C14580F7500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216 /* DAVKit.framework */;
+			remoteInfo = DAVKit;
+		};
+		27448C2E14580F7500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C9FF77EC121C6F51001250C7 /* Tests.octest */;
+			remoteInfo = Tests;
+		};
+		27448C3314580FD500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216 /* DAVKit */;
+			remoteInfo = DAVKit;
+		};
 		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -219,6 +243,10 @@
 		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
+		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
+		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
+		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
@@ -503,6 +531,7 @@
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
+				27448C381458100D00EB086F /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +571,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				27448C371458100D00EB086F /* DAVKit.framework */,
 				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
 				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
@@ -572,6 +602,15 @@
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
 				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
 				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		27448C2514580F7500EB086F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				27448C2D14580F7500EB086F /* DAVKit.framework */,
+				27448C2F14580F7500EB086F /* Tests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -777,6 +816,9 @@
 		79CFD11D09F7023D00172CDD /* DAV */ = {
 			isa = PBXGroup;
 			children = (
+				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
+				27447AA61458075600EB086F /* CKWebDAVConnection.h */,
+				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
 			name = DAV;
 			sourceTree = "<group>";
@@ -987,6 +1029,7 @@
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
 				27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
+				27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1062,6 +1105,7 @@
 			);
 			dependencies = (
 				7983E7040B0C4E3300F5078E /* PBXTargetDependency */,
+				27448C3414580FD500EB086F /* PBXTargetDependency */,
 			);
 			name = Framework;
 			productName = Framework;
@@ -1092,6 +1136,12 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 27448C2514580F7500EB086F /* Products */;
+					ProjectRef = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				7983E7E80B0C4F2200F5078E /* Build All */,
@@ -1102,6 +1152,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		27448C2D14580F7500EB086F /* DAVKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = DAVKit.framework;
+			remoteRef = 27448C2C14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		27448C2F14580F7500EB086F /* Tests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = Tests.octest;
+			remoteRef = 27448C2E14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		09D6601809FD37990000BA00 /* Resources */ = {
@@ -1312,6 +1379,7 @@
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
 				27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
+				27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1322,6 +1390,11 @@
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
+		27448C3414580FD500EB086F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DAVKit;
+			targetProxy = 27448C3314580FD500EB086F /* PBXContainerItemProxy */;
 		};
 		795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
