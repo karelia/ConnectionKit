@@ -192,11 +192,10 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     {
         mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
         CFRelease(type);
-        if (mimeType) CFRelease(mimeType);
     }
-    if (!mimeType) mimeType = CFSTR("application/octet-stream");
+    if (!mimeType) mimeType = CFRetain(CFSTR("application/octet-stream"));
     [request setDataMIMEType:(NSString *)mimeType];
-
+    CFRelease(mimeType);
     
     [self enqueueOperation:request];
     
