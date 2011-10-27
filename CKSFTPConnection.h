@@ -1,5 +1,5 @@
 //
-//  CK2SFTPConnection.h
+//  CKSFTPConnection.h
 //  Sandvox
 //
 //  Created by Mike on 25/10/2011.
@@ -10,7 +10,7 @@
 #import "CK2SFTPSession.h"
 
 
-@interface CK2SFTPConnection : NSObject <CKConnection, CK2SFTPSessionDelegate>
+@interface CKSFTPConnection : NSObject <CKConnection, CK2SFTPSessionDelegate>
 {
  @private
     CK2SFTPSession      *_session;

@@ -1,18 +1,18 @@
 //
-//  CK2SFTPConnection.m
+//  CKSFTPConnection.m
 //  Sandvox
 //
 //  Created by Mike on 25/10/2011.
 //  Copyright 2011 Karelia Software. All rights reserved.
 //
 
-#import "CK2SFTPConnection.h"
+#import "CKSFTPConnection.h"
 
 #import "KSPathUtilities.h"
 #import "KSThreadProxy.h"
 
 
-@implementation CK2SFTPConnection
+@implementation CKSFTPConnection
 
 + (void)load
 {
