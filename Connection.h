@@ -58,7 +58,9 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKSFTPConnection.h>
 #import <Connection/CKFileConnection.h>
 #import <Connection/CKDotMacConnection.h>
+
 #import <Connection/CKSFTPConnection.h>
+#import <Connection/CK2SSHCredential.h>
 
 #import <Connection/KTLog.h>
 
@@ -79,9 +81,6 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKDirectoryNode.h>
 //#import <Connection/CKTableBasedBrowser.h>
 
-#import <Connection/CK2SFTPSession.h>
-#import <Connection/CK2SFTPFileHandle.h>
-#import <Connection/CK2SSHCredential.h>
 
 #import <Connection/CKHTTPConnection.h>
 #import <Connection/CKHTTPRequest.h>

@@ -7,10 +7,12 @@
 //
 
 #import <Connection/Connection.h>
-#import "CK2SFTPSession.h"
 
 
-@interface CKSFTPConnection : NSObject <CKConnection, CK2SFTPSessionDelegate>
+@class CK2SFTPSession;
+
+
+@interface CKSFTPConnection : NSObject <CKConnection>
 {
  @private
     CK2SFTPSession      *_session;

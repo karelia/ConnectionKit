@@ -7,8 +7,16 @@
 //
 
 #import "CKSFTPConnection.h"
+#import "CK2SFTPSession.h"
 
 #import "UKMainThreadProxy.h"
+
+
+@interface CKSFTPConnection () <CK2SFTPSessionDelegate>
+@end
+
+
+#pragma mark -
 
 
 @implementation CKSFTPConnection
