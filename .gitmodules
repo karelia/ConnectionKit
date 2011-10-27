@@ -1,0 +1,3 @@
+[submodule "SFTP"]
+	path = SFTP
+	url = git@github.com:karelia/libssh2_sftp-Cocoa-wrapper.git
