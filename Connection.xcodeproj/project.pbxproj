@@ -26,13 +26,13 @@
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
-		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; };
+		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3E21459CAFC0085BBC4 /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */; };
-		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; };
+		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
-		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; };
+		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
-		2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */; };
+		2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */; };
 		2702E3FA1459CBB10085BBC4 /* libssh2_publickey.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */; };
 		2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */; };
