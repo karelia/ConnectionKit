@@ -18,7 +18,7 @@
     NSOperationQueue    *_queue;
     NSString            *_currentDirectory;
     
-    NSObject    *_delegate;
+    NSObject            *_delegate;
 }
 
 @property(nonatomic, assign) NSObject *delegate;

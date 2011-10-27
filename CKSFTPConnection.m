@@ -8,8 +8,9 @@
 
 #import "CKSFTPConnection.h"
 
+#import "UKMainThreadProxy.h"
+
 #import "KSPathUtilities.h"
-#import "KSThreadProxy.h"
 
 
 @implementation CKSFTPConnection
@@ -100,7 +101,9 @@
 {
     if ([[self delegate] respondsToSelector:@selector(connection:didDisconnectFromHost:)])
     {
-        [[[self delegate] ks_proxyOnThread:nil] connection:self didDisconnectFromHost:[_url host]];
+        id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+        [proxy connection:self didDisconnectFromHost:[_url host]];
+        [proxy release];
     }
 }
 
@@ -111,8 +114,9 @@
 
 - (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string;
 {
-    [[[self delegate] ks_proxyOnThread:nil waitUntilDone:NO]
-     connection:self appendString:string toTranscript:CKTranscriptReceived];
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self appendString:string toTranscript:CKTranscriptReceived];
+    [proxy release];
 }
 
 #pragma mark Requests
@@ -165,7 +169,11 @@
     }
     
     if (handle) error = nil;    // don't confuse CK!
-    [[[self delegate] ks_proxyOnThread:nil] connection:self uploadDidFinish:path error:error];
+    
+    
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self uploadDidFinish:path error:error];
+    [proxy release];
 }
 
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
@@ -207,7 +215,9 @@
     BOOL result = [[self SFTPSession] removeFileAtPath:path error:&error];
     if (result) error = nil;
     
-    [[[self delegate] ks_proxyOnThread:nil] connection:self didDeleteFile:path error:error];
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self didDeleteFile:path error:error];
+    [proxy release];
 }
 
 - (void)directoryContents
@@ -225,7 +235,9 @@
     NSArray *result = [[self SFTPSession] attributesOfContentsOfDirectoryAtPath:path error:&error];
     if (result) error = nil;    // cause CK handles errors in a crazy way
     
-    [[[self delegate] ks_proxyOnThread:nil] connection:self didReceiveContents:result ofDirectory:path error:error];
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self didReceiveContents:result ofDirectory:path error:error];
+    [proxy release];
 }
 
 #pragma mark Current Directory
@@ -245,7 +257,9 @@
 {
     if ([[self delegate] respondsToSelector:@selector(connection:didChangeToDirectory:error:)])
     {
-        [[[self delegate] ks_proxyOnThread:nil] connection:self didChangeToDirectory:dirPath error:nil];
+        id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+        [proxy connection:self didChangeToDirectory:dirPath error:nil];
+        [proxy release];
     }
 }
 
