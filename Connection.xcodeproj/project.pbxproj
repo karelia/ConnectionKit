@@ -37,6 +37,7 @@
 		2702E3FA1459CBB10085BBC4 /* libssh2_publickey.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */; };
 		2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */; };
 		2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F91459CBB10085BBC4 /* libssh2.h */; };
+		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -255,6 +256,7 @@
 		2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2_publickey.h; path = SFTP/libssh2/include/libssh2_publickey.h; sourceTree = "<group>"; };
 		2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2_sftp.h; path = SFTP/libssh2/include/libssh2_sftp.h; sourceTree = "<group>"; };
 		2702E3F91459CBB10085BBC4 /* libssh2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2.h; path = SFTP/libssh2/include/libssh2.h; sourceTree = "<group>"; };
+		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = SFTP/libssh2.dylib; sourceTree = "<group>"; };
 		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
@@ -556,6 +558,7 @@
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
+				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,6 +609,7 @@
 				79FB807109F74185006E7D11 /* Carbon.framework */,
 				79CFD93609F7084000172CDD /* Security.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -1787,6 +1791,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				OTHER_CFLAGS = "-falign-loops=16";
@@ -1908,6 +1913,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				OTHER_CFLAGS = "-falign-loops=16";
@@ -1948,6 +1954,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				OTHER_CFLAGS = "-falign-loops=16";
