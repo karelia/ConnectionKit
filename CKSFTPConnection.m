@@ -144,7 +144,7 @@
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
 {
-    OBPRECONDITION(data);
+    NSParameterAssert(data);
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
     //CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
@@ -167,7 +167,7 @@
 - (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
-    OBPRECONDITION(sftpSession);
+    NSAssert(sftpSession, @"Trying to write data without having started session");
     
     NSError *error;
     CK2SFTPFileHandle *handle = [sftpSession openHandleAtPath:path flags:(LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT) mode:0644 error:&error];
@@ -203,7 +203,7 @@
 - (void)threaded_createDirectoryAtPath:(NSString *)path;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
-    OBPRECONDITION(sftpSession);
+    NSAssert(sftpSession, @"Trying to write data without having started session");
     
     NSError *error;
     [sftpSession createDirectoryAtPath:path mode:(0644 | 0111) error:&error];
