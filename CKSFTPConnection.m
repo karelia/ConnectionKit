@@ -10,8 +10,6 @@
 
 #import "UKMainThreadProxy.h"
 
-#import "KSPathUtilities.h"
-
 
 @implementation CKSFTPConnection
 
@@ -123,6 +121,19 @@
 
 - (void)cancelAll { }
 
+- (NSString *)canonicalPathForPath:(NSString *)path;
+{
+    // Heavily based on +ks_stringWithPath:relativeToDirectory: in KSFileUtilities
+    
+    if ([path isAbsolutePath]) return path;
+    
+    NSString *directory = [self currentDirectory];
+    if (!directory) return path;
+    
+    NSString *result = [directory stringByAppendingPathComponent:path];
+    return result;
+}
+
 - (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
 {
     return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
@@ -138,7 +149,7 @@
     CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
     //CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
     
-    remotePath = [NSString ks_stringWithPath:remotePath relativeToDirectory:[self currentDirectory]];
+    remotePath = [self canonicalPathForPath:remotePath];
     
     
     NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
@@ -202,7 +213,7 @@
 
 - (void)deleteFile:(NSString *)path
 {
-    path = [NSString ks_stringWithPath:path relativeToDirectory:[self currentDirectory]];
+    path = [self canonicalPathForPath:path];
     
     NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_removeFileAtPath:) object:path];
     [self enqueueOperation:op];
