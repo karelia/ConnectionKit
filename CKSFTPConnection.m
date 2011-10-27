@@ -20,7 +20,7 @@
     [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"SFTP" URLScheme:@"ssh"];
 }
 
-+ (NSArray *)URLSchemes { return NSARRAY(@"ssh", @"sftp"); }
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"ssh", @"sftp", nil]; }
 
 #pragma mark Lifecycle
 
@@ -143,7 +143,7 @@
     
     NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
                                                              target:self
-                                                          arguments:NSARRAY(data, remotePath, result)];
+                                                          arguments:[NSArray arrayWithObjects:data, remotePath, result, nil]];
     
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
