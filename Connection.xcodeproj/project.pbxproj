@@ -26,10 +26,23 @@
 		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
 		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
-		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2702E3E21459CAFC0085BBC4 /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */; };
+		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
+		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
+		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
+		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
+		2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */; };
+		2702E3FA1459CBB10085BBC4 /* libssh2_publickey.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */; };
+		2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */; settings = {ATTRIBUTES = (); }; };
+		2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F91459CBB10085BBC4 /* libssh2.h */; };
+		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
+		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
+		27448C381458100D00EB086F /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
+		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
-		27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B710CF3D40800C61A38 /* argcargv.c */; };
-		27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B780CF3D40800C61A38 /* argcargv.h */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -39,7 +52,6 @@
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* CKFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		3C231A5E0A66ECBB00951F9E /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84309F7048400172CDD /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7909996B0CA8376B00A22156 /* gear_disabled.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999680CA8376B00A22156 /* gear_disabled.tiff */; };
 		7909996C0CA8376C00A22156 /* gear_normal.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 790999690CA8376B00A22156 /* gear_normal.tiff */; };
 		7909996D0CA8376C00A22156 /* gear_pressed.tiff in Resources */ = {isa = PBXBuildFile; fileRef = 7909996A0CA8376B00A22156 /* gear_pressed.tiff */; };
@@ -130,7 +142,6 @@
 		79CFD87709F7048500172CDD /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
 		79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84109F7048400172CDD /* RunLoopForwarder.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84209F7048400172CDD /* RunLoopForwarder.m */; };
-		79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84409F7048400172CDD /* CKSFTPConnection.m */; };
 		79CFD88909F7048500172CDD /* CKStreamBasedConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */; };
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD8C809F7069100172CDD /* ConnectionOpenPanel.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */; };
@@ -155,15 +166,6 @@
 		D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */ = {isa = PBXBuildFile; fileRef = D305393B0DE5F30C008646CE /* RegexKitLite.h */; };
 		D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = D305393C0DE5F30C008646CE /* RegexKitLite.m */; };
 		D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */; };
-		D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B720CF3D40800C61A38 /* fdwrite.c */; };
-		D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B730CF3D40800C61A38 /* fdwrite.h */; };
-		D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */ = {isa = PBXBuildFile; fileRef = D3598B740CF3D40800C61A38 /* sshversion.c */; };
-		D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B750CF3D40800C61A38 /* sshversion.h */; };
-		D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */ = {isa = PBXBuildFile; fileRef = D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */; };
-		D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */ = {isa = PBXBuildFile; fileRef = D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */; };
-		D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */ = {isa = PBXBuildFile; fileRef = D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */; };
-		D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */ = {isa = PBXBuildFile; fileRef = D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */; };
-		D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */ = {isa = PBXBuildFile; fileRef = D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */; };
 		D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D3020D3BFF72008F6C35 /* LeopardFolder.tiff */; };
 		D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */ = {isa = PBXBuildFile; fileRef = D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -179,6 +181,27 @@
 			proxyType = 1;
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
+		};
+		27448C2C14580F7500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = DAVKit;
+		};
+		27448C2E14580F7500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C9FF77EC121C6F51001250C7;
+			remoteInfo = Tests;
+		};
+		27448C3314580FD500EB086F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = DAVKit;
 		};
 		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -219,6 +242,22 @@
 		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
+		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
+		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
+		2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = SFTP/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
+		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = SFTP/CK2SFTPSession.h; sourceTree = "<group>"; };
+		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = SFTP/CK2SFTPSession.m; sourceTree = "<group>"; };
+		2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SSHCredential.h; path = SFTP/CK2SSHCredential.h; sourceTree = "<group>"; };
+		2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SSHCredential.m; path = SFTP/CK2SSHCredential.m; sourceTree = "<group>"; };
+		2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2_publickey.h; path = SFTP/libssh2/include/libssh2_publickey.h; sourceTree = "<group>"; };
+		2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2_sftp.h; path = SFTP/libssh2/include/libssh2_sftp.h; sourceTree = "<group>"; };
+		2702E3F91459CBB10085BBC4 /* libssh2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2.h; path = SFTP/libssh2/include/libssh2.h; sourceTree = "<group>"; };
+		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = SFTP/libssh2.dylib; sourceTree = "<group>"; };
+		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
+		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
+		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
+		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRegistry.h; sourceTree = "<group>"; };
@@ -234,13 +273,6 @@
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32CA4F630368D1EE00C91783 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection_Prefix.pch; sourceTree = "<group>"; };
-		3C2A09C30D91B478002B8174 /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09C60D91B485002B8174 /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09C90D91B496002B8174 /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09CC0D91B4AD002B8174 /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09CF0D91B4BE002B8174 /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09D20D91B4D7002B8174 /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/Passphrase.nib; sourceTree = "<group>"; };
-		3C2A09D50D91B4E3002B8174 /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -346,8 +378,6 @@
 		79CFD81009F7048400172CDD /* CKAbstractQueueConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKAbstractQueueConnection.m; sourceTree = "<group>"; };
 		79CFD81109F7048400172CDD /* CKConnectionOpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionOpenPanel.h; sourceTree = "<group>"; };
 		79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionOpenPanel.m; sourceTree = "<group>"; };
-		79CFD82B09F7048400172CDD /* CKDotMacConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKDotMacConnection.h; sourceTree = "<group>"; };
-		79CFD82C09F7048400172CDD /* CKDotMacConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKDotMacConnection.m; sourceTree = "<group>"; };
 		79CFD82D09F7048400172CDD /* CKFileConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFileConnection.h; sourceTree = "<group>"; };
 		79CFD82E09F7048400172CDD /* CKFileConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFileConnection.m; sourceTree = "<group>"; };
 		79CFD82F09F7048400172CDD /* CKFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPConnection.h; sourceTree = "<group>"; };
@@ -366,8 +396,6 @@
 		79CFD83C09F7048400172CDD /* ONBSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ONBSocket.m; sourceTree = "<group>"; };
 		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
 		79CFD84209F7048400172CDD /* RunLoopForwarder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunLoopForwarder.m; sourceTree = "<group>"; };
-		79CFD84309F7048400172CDD /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
-		79CFD84409F7048400172CDD /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		79CFD84709F7048500172CDD /* CKStreamBasedConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKStreamBasedConnection.h; sourceTree = "<group>"; };
 		79CFD84809F7048500172CDD /* CKStreamBasedConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKStreamBasedConnection.m; sourceTree = "<group>"; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
@@ -410,7 +438,6 @@
 		CE953A05102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CE953A06102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE953A07102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
-		CE953A08102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		CE953A0B102BAD0E0066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CE953A13102BAD1B0066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "Framework-Info.plist"; sourceTree = "<group>"; };
@@ -445,17 +472,6 @@
 		D305393B0DE5F30C008646CE /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
 		D305393C0DE5F30C008646CE /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = /usr/lib/libicucore.A.dylib; sourceTree = "<absolute>"; };
-		D3598B710CF3D40800C61A38 /* argcargv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = argcargv.c; sourceTree = "<group>"; };
-		D3598B720CF3D40800C61A38 /* fdwrite.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = fdwrite.c; sourceTree = "<group>"; };
-		D3598B730CF3D40800C61A38 /* fdwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdwrite.h; sourceTree = "<group>"; };
-		D3598B740CF3D40800C61A38 /* sshversion.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = sshversion.c; sourceTree = "<group>"; };
-		D3598B750CF3D40800C61A38 /* sshversion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = sshversion.h; sourceTree = "<group>"; };
-		D3598B780CF3D40800C61A38 /* argcargv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = argcargv.h; sourceTree = "<group>"; };
-		D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPTServer.h; sourceTree = "<group>"; };
-		D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPTServer.m; sourceTree = "<group>"; };
-		D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSSHPassphrase.m; sourceTree = "<group>"; };
-		D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSSHPassphrase.h; sourceTree = "<group>"; };
-		D3A2B7A20D90A2E2002F02EF /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/Passphrase.nib; sourceTree = "<group>"; };
 		D3C04AE20D4C1BA900C83775 /* CKLeopardSourceListTableColumn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKLeopardSourceListTableColumn.h; sourceTree = "<group>"; };
 		D3C04AE30D4C1BA900C83775 /* CKLeopardSourceListTableColumn.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKLeopardSourceListTableColumn.m; sourceTree = "<group>"; };
 		D3F1D2FF0D3BFF6A008F6C35 /* AquaFolder.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = AquaFolder.png; sourceTree = "<group>"; };
@@ -503,6 +519,8 @@
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
+				27448C381458100D00EB086F /* DAVKit.framework in Frameworks */,
+				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -542,6 +560,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				27448C371458100D00EB086F /* DAVKit.framework */,
 				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
 				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
@@ -551,6 +570,7 @@
 				79FB807109F74185006E7D11 /* Carbon.framework */,
 				79CFD93609F7084000172CDD /* Security.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
+				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -572,6 +592,15 @@
 				09D6601D09FD37990000BA00 /* UnitTest.octest */,
 				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
 				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		27448C2514580F7500EB086F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				27448C2D14580F7500EB086F /* DAVKit.framework */,
+				27448C2F14580F7500EB086F /* Tests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -637,15 +666,6 @@
 			name = Other;
 			sourceTree = "<group>";
 		};
-		27FD90C90ED5C0070068D634 /* iDisk */ = {
-			isa = PBXGroup;
-			children = (
-				79CFD82B09F7048400172CDD /* CKDotMacConnection.h */,
-				79CFD82C09F7048400172CDD /* CKDotMacConnection.m */,
-			);
-			name = iDisk;
-			sourceTree = "<group>";
-		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
@@ -688,13 +708,6 @@
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		792CFCA70A806108001A00C6 /* HTTP */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = HTTP;
 			sourceTree = "<group>";
 		};
 		795AFEE50B1154E2006905FA /* UKKQueue */ = {
@@ -763,10 +776,8 @@
 				27FD90C10ED5BF640068D634 /* Abstract */,
 				27FD90C60ED5BFC00068D634 /* FTP */,
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
-				792CFCA70A806108001A00C6 /* HTTP */,
-				79CFD11D09F7023D00172CDD /* DAV */,
+				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C70ED5BFDB0068D634 /* File System */,
-				27FD90C90ED5C0070068D634 /* iDisk */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
@@ -774,11 +785,14 @@
 			name = Connections;
 			sourceTree = "<group>";
 		};
-		79CFD11D09F7023D00172CDD /* DAV */ = {
+		79CFD11D09F7023D00172CDD /* WebDAV */ = {
 			isa = PBXGroup;
 			children = (
+				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
+				27447AA61458075600EB086F /* CKWebDAVConnection.h */,
+				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
-			name = DAV;
+			name = WebDAV;
 			sourceTree = "<group>";
 		};
 		79CFD12009F7024000172CDD /* Socket with SSL Capabilities */ = {
@@ -898,7 +912,6 @@
 				799ED2AB0B635C3400B6F2BA /* CKTransferController.nib */,
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
 				799174950C83962D00EFFC79 /* CKDirectoryTree.nib */,
-				D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */,
 			);
 			name = Interfaces;
 			sourceTree = "<group>";
@@ -906,10 +919,17 @@
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
 			isa = PBXGroup;
 			children = (
-				D3A2B7660D909F40002F02EF /* CKSSHPassphrase.m */,
-				D3A2B7670D909F40002F02EF /* CKSSHPassphrase.h */,
-				79CFD84309F7048400172CDD /* CKSFTPConnection.h */,
-				79CFD84409F7048400172CDD /* CKSFTPConnection.m */,
+				2702E3F71459CBB10085BBC4 /* libssh2_publickey.h */,
+				2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */,
+				2702E3F91459CBB10085BBC4 /* libssh2.h */,
+				2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */,
+				2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */,
+				2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */,
+				2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */,
+				2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */,
+				2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */,
+				2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */,
+				2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */,
 				D3598B590CF3D3E400C61A38 /* Other */,
 			);
 			name = SFTP;
@@ -918,14 +938,6 @@
 		D3598B590CF3D3E400C61A38 /* Other */ = {
 			isa = PBXGroup;
 			children = (
-				D3598B810CF3D41000C61A38 /* CKSFTPTServer.h */,
-				D3598B820CF3D41000C61A38 /* CKSFTPTServer.m */,
-				D3598B710CF3D40800C61A38 /* argcargv.c */,
-				D3598B720CF3D40800C61A38 /* fdwrite.c */,
-				D3598B730CF3D40800C61A38 /* fdwrite.h */,
-				D3598B740CF3D40800C61A38 /* sshversion.c */,
-				D3598B750CF3D40800C61A38 /* sshversion.h */,
-				D3598B780CF3D40800C61A38 /* argcargv.h */,
 			);
 			name = Other;
 			sourceTree = "<group>";
@@ -952,7 +964,6 @@
 				79FB6A4D09F71867006E7D11 /* CKFileConnection.h in Headers */,
 				794DC3270A5A0EDC007157BE /* CKConnectionThreadManager.h in Headers */,
 				3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */,
-				3C231A5E0A66ECBB00951F9E /* CKSFTPConnection.h in Headers */,
 				7946B5DD0AC1F76800CAE90F /* NSCalendarDate+Connection.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
@@ -973,20 +984,23 @@
 				79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */,
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
-				D3598B7B0CF3D40800C61A38 /* fdwrite.h in Headers */,
-				D3598B7D0CF3D40800C61A38 /* sshversion.h in Headers */,
-				D3598B830CF3D41000C61A38 /* CKSFTPTServer.h in Headers */,
 				79F18AB60CFF1D5B009F0324 /* CKDirectoryBrowserCell.h in Headers */,
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
-				D3A2B7690D909F40002F02EF /* CKSSHPassphrase.h in Headers */,
 				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
-				27AE2E280ED2FD4800AB81E7 /* argcargv.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
 				27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */,
 				27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */,
+				27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */,
+				2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */,
+				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
+				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
+				2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */,
+				2702E3FA1459CBB10085BBC4 /* libssh2_publickey.h in Headers */,
+				2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */,
+				2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1062,6 +1076,7 @@
 			);
 			dependencies = (
 				7983E7040B0C4E3300F5078E /* PBXTargetDependency */,
+				27448C3414580FD500EB086F /* PBXTargetDependency */,
 			);
 			name = Framework;
 			productName = Framework;
@@ -1095,6 +1110,12 @@
 			);
 			mainGroup = 29B97314FDCFA39411CA2CEA /* Connection */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 27448C2514580F7500EB086F /* Products */;
+					ProjectRef = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				7983E7E80B0C4F2200F5078E /* Build All */,
@@ -1105,6 +1126,23 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		27448C2D14580F7500EB086F /* DAVKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = DAVKit.framework;
+			remoteRef = 27448C2C14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		27448C2F14580F7500EB086F /* Tests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = Tests.octest;
+			remoteRef = 27448C2E14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		09D6601809FD37990000BA00 /* Resources */ = {
@@ -1155,7 +1193,6 @@
 				79318F2F0CA9F3A2005C4AB6 /* gear.tiff in Resources */,
 				D3EEAE380D41B42700D43A7A /* LeopardFolder.tiff in Resources */,
 				D3EEAE390D41B42B00D43A7A /* AquaFolder.png in Resources */,
-				D3A2B7A30D90A2E2002F02EF /* Passphrase.nib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1275,7 +1312,6 @@
 				79CFD87509F7048500172CDD /* InterThreadMessaging.m in Sources */,
 				79CFD87709F7048500172CDD /* KTLog.m in Sources */,
 				79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */,
-				79CFD88509F7048500172CDD /* CKSFTPConnection.m in Sources */,
 				79CFD88909F7048500172CDD /* CKStreamBasedConnection.m in Sources */,
 				79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */,
 				794DC3280A5A0EDC007157BE /* CKConnectionThreadManager.m in Sources */,
@@ -1300,21 +1336,21 @@
 				79B09C6D0C85E35100E7F1CC /* CKDirectoryNode.m in Sources */,
 				79420AD50C91CDE80002B99D /* NSNumber+Connection.m in Sources */,
 				794499200CA36F1C00F381DC /* CKCollectionBasedBookmarkController.m in Sources */,
-				D3598B7A0CF3D40800C61A38 /* fdwrite.c in Sources */,
-				D3598B7C0CF3D40800C61A38 /* sshversion.c in Sources */,
-				D3598B840CF3D41000C61A38 /* CKSFTPTServer.m in Sources */,
 				79F18AB70CFF1D5B009F0324 /* CKDirectoryBrowserCell.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
 				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
-				D3A2B7680D909F40002F02EF /* CKSSHPassphrase.m in Sources */,
 				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
-				27AE2E270ED2FD4700AB81E7 /* argcargv.c in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
 				27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */,
 				27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */,
+				27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */,
+				2702E3E21459CAFC0085BBC4 /* CKSFTPConnection.m in Sources */,
+				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
+				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
+				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1325,6 +1361,11 @@
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
+		};
+		27448C3414580FD500EB086F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = DAVKit;
+			targetProxy = 27448C3314580FD500EB086F /* PBXContainerItemProxy */;
 		};
 		795FF4FC0B0C014B00EA9292 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1452,22 +1493,6 @@
 			);
 			name = KTLog.nib;
 			sourceTree = SOURCE_ROOT;
-		};
-		D3A2B7A10D90A2E2002F02EF /* Passphrase.nib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D3A2B7A20D90A2E2002F02EF /* en */,
-				3C2A09C30D91B478002B8174 /* da */,
-				3C2A09C60D91B485002B8174 /* de */,
-				3C2A09C90D91B496002B8174 /* fr */,
-				3C2A09CC0D91B4AD002B8174 /* it */,
-				3C2A09CF0D91B4BE002B8174 /* ja */,
-				3C2A09D20D91B4D7002B8174 /* zh_CN */,
-				3C2A09D50D91B4E3002B8174 /* zh_TW */,
-				CE953A08102BAD030066C08F /* pt_BR */,
-			);
-			name = Passphrase.nib;
-			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
 
@@ -1694,6 +1719,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				OTHER_CFLAGS = "-falign-loops=16";
@@ -1810,6 +1836,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				ONLY_ACTIVE_ARCH = YES;
@@ -1850,6 +1877,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
+					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
 				OTHER_CFLAGS = "-falign-loops=16";

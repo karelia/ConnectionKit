@@ -57,6 +57,10 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKFTPConnection.h>
 #import <Connection/CKSFTPConnection.h>
 #import <Connection/CKFileConnection.h>
+#import <Connection/CKWebDAVConnection.h>
+
+#import <Connection/CKSFTPConnection.h>
+#import <Connection/CK2SSHCredential.h>
 
 #import <Connection/KTLog.h>
 
@@ -79,5 +83,4 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/EMKeychainProxy.h>
 #import <Connection/EMKeychainItem.h>
-#import <Connection/CKURLProtectionSpace.h>
 

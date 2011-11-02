@@ -1,72 +1,29 @@
 //
-//  SFTPConnection.h
-//  CocoaSFTP
+//  CKSFTPConnection.h
+//  Sandvox
 //
-//  Created by Brian Amerige on 11/4/07.
-//  Copyright 2007 Extendmac, LLC.. All rights reserved.
+//  Created by Mike on 25/10/2011.
+//  Copyright 2011 Karelia Software. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-#import "CKStreamBasedConnection.h"
+#import <Connection/Connection.h>
 
-extern NSString *SFTPErrorDomain;
 
-@class CKSFTPTServer, CKInternalTransferRecord;
+@class CK2SFTPSession;
 
-@interface CKSFTPConnection : CKAbstractQueueConnection
+
+@interface CKSFTPConnection : NSObject <CKConnection>
 {
-	int masterProxy;
-	CKSFTPTServer *theSFTPTServer;
-	
-	NSString *rootDirectory;
-	NSMutableString *currentDirectory;
-
-	NSMutableArray *attemptedKeychainPublicKeyAuthentications;
-	NSMutableArray *connectToQueue;
-	NSTimer *_connectTimeoutTimer;
-
-@private
-    NSURLAuthenticationChallenge    *_lastAuthenticationChallenge;
-    NSString                        *_currentPassword;
+ @private
+    CK2SFTPSession      *_session;
+    NSURL               *_url;
+    NSOperationQueue    *_queue;
+    NSString            *_currentDirectory;
+    
+    NSObject            *_delegate;
 }
 
-- (int)masterProxy;
-- (void)setMasterProxy:(int)proxy;
+@property(nonatomic, assign) NSObject *delegate;
+@property(nonatomic, copy) NSString *currentDirectory;
 
 @end
-
-
-@interface CKConnectionRequest (CKSFTPConnection)
-- (NSString *)SFTPPublicKeyPath;
-- (NSUInteger)SFTPLoggingLevel;
-@end
-
-@interface CKMutableConnectionRequest (CKSFTPConnection)
-- (void)setSFTPPublicKeyPath:(NSString *)path;
-- (void)setSFTPLoggingLevel:(NSUInteger)level;
-@end
-
-
-@interface CKSFTPConnection (SFTPTServerCallback)
-//
-- (void)setServerObject:(id)serverObject;
-- (void)_setupConnectTimeOut;
-//
-- (void)upload:(CKInternalTransferRecord *)uploadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
-- (void)download:(CKInternalTransferRecord *)downloadInfo didProgressTo:(double)progressPercentage withEstimatedCompletionIn:(NSString *)estimatedCompletion givenTransferRateOf:(NSString *)rate amountTransferred:(unsigned long long)amountTransferred;
-//
-- (void)finishedCommand;
-- (void)receivedErrorInServerResponse:(NSString *)serverResponse;
-//
-- (void)getContinueQueryForUnknownHost:(NSDictionary *)hostInfo;
-- (void)requestPasswordWithPrompt:(char *)header;
-- (void)passwordErrorOccurred;
-- (void)passphraseRequested:(NSString *)buffer;
-- (void)didConnect;
-- (void)didDisconnect;
-- (void)didSetRootDirectory;
-- (void)setCurrentDirectory:(NSString *)current;
-- (void)didReceiveDirectoryContents:(NSArray*)items;
-
-@end
-
