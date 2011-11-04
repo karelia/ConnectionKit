@@ -44,7 +44,7 @@ enum {
 
 @interface CKConnectionOpenPanel : NSWindowController 
 {
-	id <CKConnection> _connection;
+	id <CKPublishingConnection> _connection;
 	BOOL canChooseDirectories;
 	BOOL canChooseFiles;
 	BOOL canCreateDirectories;
@@ -80,7 +80,7 @@ enum {
 - (IBAction) goToFolder: (id) sender;
 - (IBAction) createNewFolder: (id) sender;
 
-- (id <CKConnection>)connection;
+- (id <CKPublishingConnection>)connection;
 
 - (BOOL)canChooseDirectories;
 - (void)setCanChooseDirectories:(BOOL)flag;

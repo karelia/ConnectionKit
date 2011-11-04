@@ -37,7 +37,7 @@
 
 
 @interface CKConnectionOpenPanel (Private)
-- (void)setConnection:(id <CKConnection>)aConnection;
+- (void)setConnection:(id <CKPublishingConnection>)aConnection;
 @end
 
 
@@ -54,7 +54,7 @@
     
     if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
-		id <CKConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
+		id <CKPublishingConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
         if (connection)
         {
             [self setConnection:connection];
@@ -254,14 +254,14 @@
 //=========================================================== 
 //  connection 
 //=========================================================== 
-- (id <CKConnection>)connection
+- (id <CKPublishingConnection>)connection
 {
 	//NSLog(@"in -connection, returned connection = %@", connection);
 	
 	return [[_connection retain] autorelease]; 
 }
 
-- (void)setConnection:(id <CKConnection>)aConnection
+- (void)setConnection:(id <CKPublishingConnection>)aConnection
 {
 	//NSLog(@"in -setConnection:, old value of connection: %@, changed to: %@", connection, aConnection);
 	
@@ -275,7 +275,7 @@
 	if (_connection != aConnection) {
 		[_connection setDelegate: nil];
 		[_connection forceDisconnect];
-		[_connection cleanupConnection];
+		if ([_connection conformsToProtocol:@protocol(CKConnection)]) [(id <CKConnection>)_connection cleanupConnection];
 		[_connection release];
 		_connection = [aConnection retain];
 		[_connection setDelegate: self];
@@ -748,7 +748,7 @@
 	return NO;
 }
 
-- (void)connection:(id <CKConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)connection:(id <CKPublishingConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
 	// Hopefully we can pass off responsibility to the delegate
     id delegate = [self delegate];
@@ -958,7 +958,7 @@ static NSImage *symFile = nil;
 
 /*	Forward on to our delegate if supported
  */
-- (void)connection:(id <CKConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)connection:(id <CKPublishingConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 {
 	if ([[self delegate] respondsToSelector:@selector(connectionOpenPanel:appendString:toTranscript:)])
 	{
