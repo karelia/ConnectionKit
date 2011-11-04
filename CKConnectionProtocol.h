@@ -85,7 +85,7 @@ typedef enum {
 /*!
  @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
  */
-@property(assign) id delegate;
+@property(nonatomic, assign) NSObject *delegate;
 
 /*!
  @method connect
