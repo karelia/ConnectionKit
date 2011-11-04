@@ -12,7 +12,7 @@
 
 @class DAVSession;
 
-@interface CKWebDAVConnection : NSObject <CKConnection, DAVPutRequestDelegate, DAVSessionDelegate>
+@interface CKWebDAVConnection : NSObject <CKPublishingConnection, DAVPutRequestDelegate, DAVSessionDelegate>
 {
   @private
     BOOL                            _connected;
@@ -26,7 +26,6 @@
     NSObject    *_delegate;
 }
 
-@property(nonatomic, assign) NSObject *delegate;
 @property(nonatomic, copy) NSString *currentDirectory;
 
 + (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
