@@ -62,23 +62,15 @@ typedef enum {
 } CKTranscriptType;
 
 
-@protocol CKConnection <NSObject>
-
-+ (NSString *)name;
+/*  A lightweight version of CKConnection, selfishly for Sandvox's benefit
+ */
+@protocol CKPublishingConnection <NSObject>
 
 /*!
  @method URLSchemes
  @result An array of the URL schemes supported by the connection.
  */
 + (NSArray *)URLSchemes;
-
-/*!
- @method port
- @discussion Return 0 for abstract classes or connections that do not use a port.
- @result The default port for connections of the receiver's class.
- */
-+ (NSInteger)defaultPort;
-
 
 /*!
  @method initWithRequest:
@@ -89,6 +81,77 @@ typedef enum {
  @result Returns an initialized connection object or nil if the request was unsuitable.
  */
 - (id)initWithRequest:(CKConnectionRequest *)request;
+
+/*!
+ @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
+ */
+@property(assign) id delegate;
+
+/*!
+ @method connect
+ @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
+ */
+- (void)connect;
+/*!
+ @method isConnected
+ @result Returns YES once the connection has successfully connected to the server
+ */
+- (BOOL)isConnected;
+
+/*!
+ @method disconnect
+ @abstract Ends the connection after any other items in the queue have been processed.
+ */
+- (void)disconnect;
+/*!
+ @method forceDisconnect
+ @abstract Ends the connection at the next available opportunity.
+ */
+- (void)forceDisconnect;
+
+/* 
+	New method that allows you to set a custom delegate for the upload.
+	You must implement the ConnectionTransferDelegate informal protocol.
+	By default the transfer record returned is the delegate of the transfer.
+*/
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate;
+
+/* 
+ New method that allows you to set a custom delegate for the upload.
+ You must implement the ConnectionTransferDelegate informal protocol.
+ By default the transfer record returned is the delegate of the transfer.
+ */
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate;
+
+- (void)deleteFile:(NSString *)path;
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+
+- (void)createDirectory:(NSString *)dirPath;
+- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)changeToDirectory:(NSString *)dirPath;
+- (NSString *)currentDirectory;
+- (void)directoryContents;
+
+@end
+
+
+@protocol CKConnection <CKPublishingConnection>
+
++ (NSString *)name;
+
+/*!
+ @method port
+ @discussion Return 0 for abstract classes or connections that do not use a port.
+ @result The default port for connections of the receiver's class.
+ */
++ (NSInteger)defaultPort;
 
 
 /*!
@@ -104,69 +167,20 @@ typedef enum {
 - (NSString *)name; 
 - (void)setName:(NSString *)name;
 
-/*!
- @method delegate:
- @result Returns the receiver's delegate.
- */
-- (id)delegate;
-/*!
- @method setDelegate:
- @abstract Sets the receiver's delegate.
- @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
- */
-- (void)setDelegate:(id)delegate;
-
-
-/*!
- @method connect
- @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
- */
-- (void)connect;
-/*!
- @method isConnected
- @result Returns YES once the connection has successfully connected to the server
- */
-- (BOOL)isConnected;
 - (BOOL)isBusy;
 
  
-/*!
- @method disconnect
- @abstract Ends the connection after any other items in the queue have been processed.
- */
-- (void)disconnect;
-/*!
- @method forceDisconnect
- @abstract Ends the connection at the next available opportunity.
- */
-- (void)forceDisconnect;
 - (void)cleanupConnection;
 
-- (void)changeToDirectory:(NSString *)dirPath;
-- (NSString *)currentDirectory;
-
 - (NSString *)rootDirectory;
-- (void)createDirectory:(NSString *)dirPath;
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)recursivelyRenameS3Directory:(NSString *)fromDirectoryPath to:(NSString *)toDirectoryPath;
 
-- (void)deleteFile:(NSString *)path;
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
 
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate;
 /* 
 	returns CKTransferRecord as a heirarchy of what will be upload, remote and local files 
 	can be found in the records node properties
@@ -179,16 +193,6 @@ typedef enum {
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate;
 
-
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate;
 
 - (CKTransferRecord *)resumeUploadFromData:(NSData *)data
 									toFile:(NSString *)remotePath 
@@ -221,7 +225,6 @@ typedef enum {
 - (void)cancelTransfer;
 - (void)cancelAll;
 
-- (void)directoryContents;
 - (void)contentsOfDirectory:(NSString *)dirPath;
 
 - (double)uploadSpeed; // bytes per second
