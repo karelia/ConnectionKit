@@ -246,10 +246,10 @@ typedef enum {
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
 #pragma mark Overall connection
-- (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
-- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
+- (void)connection:(id <CKPublishingConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+- (void)connection:(id <CKPublishingConnection>)con didDisconnectFromHost:(NSString *)host;
 
-- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didReceiveError:(NSError *)error;
 
 #pragma mark Authentication
 /*!
@@ -258,23 +258,23 @@ typedef enum {
  @param connection The connection for which authentication is needed
  @param challenge The NSURLAuthenticationChallenge to start authentication for
  */
-- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connection:(id <CKPublishingConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 /*!
  @method connection:didCancelAuthenticationChallenge:
  @abstract Operates exactly the same as its NSURLConnection counterpart.
  @param connection The connection sending the message.
  @param challenge The challenge that was canceled.
  */
-- (void)connection:(id <CKConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connection:(id <CKPublishingConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 
 
 #pragma mark Other
 
-- (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
 
 
 // recursivelyDeleteDirectory
@@ -285,8 +285,8 @@ typedef enum {
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 
-- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
@@ -300,8 +300,8 @@ typedef enum {
 
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
-- (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath;
-- (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con uploadDidBegin:(NSString *)remotePath;
+- (void)connection:(id <CKPublishingConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
 - (void)connectionDidCancelTransfer:(id <CKConnection>)con; // this is deprecated. Use method below
 - (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
 
@@ -317,7 +317,7 @@ typedef enum {
  @param string The string to add to the transcript
  @param transcript The nature of the string that is to be transcribed. CKAbstractConnection has class methods to apply formatting to the transcript.
  */
-- (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)connection:(id <CKPublishingConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end
 
