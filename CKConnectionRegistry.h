@@ -30,7 +30,7 @@
  @param connectionClass The class implementing the CKConnection protocol to register.
  @param URLScheme Optional. The URL scheme to register the connection for. Call this method agin if you need to register more than one URL scheme.
  */
-- (void)registerClass:(Class <CKConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
+- (void)registerClass:(Class <CKPublishingConnection>)connectionClass forName:(NSString *)name URLScheme:(NSString *)URLScheme;
 
 - (CKConnectionRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
 
@@ -43,7 +43,7 @@
  @param delegate The initial delegate for the connection.
  @result An initialized connection, or nil if no suitable class could be found.
  */
-- (id <CKConnection>)connectionWithRequest:(CKConnectionRequest *)request;
+- (id <CKPublishingConnection>)connectionWithRequest:(CKConnectionRequest *)request;
 
 // These 2 methods are for compatibility with legacy code
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
