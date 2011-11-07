@@ -2919,20 +2919,24 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 /*!	Upload file to the given directory
 */
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	if (![url isFileURL]) return [self uploadFromData:[NSData dataWithContentsOfURL:url] toFile:path checkRemoteExistence:NO delegate:nil];
+    
+    
+	NSAssert(url && ![[url path] isEqualToString:@""], @"localPath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
 	
-	return [self uploadFile:localPath
-					 orData:nil
-					 offset:0
-				 remotePath:remotePath
-	   checkRemoteExistence:flag
-				   delegate:delegate];
+	CKTransferRecord *result = [self uploadFile:[url path]
+                                         orData:nil
+                                         offset:0
+                                     remotePath:path
+                           checkRemoteExistence:NO
+                                       delegate:nil];
+    
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
+    return result;
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data

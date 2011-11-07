@@ -114,10 +114,7 @@ typedef enum {
 	You must implement the ConnectionTransferDelegate informal protocol.
 	By default the transfer record returned is the delegate of the transfer.
 */
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 
 /* 
  New method that allows you to set a custom delegate for the upload.
@@ -130,8 +127,6 @@ typedef enum {
 							delegate:(id)delegate;
 
 - (void)deleteFile:(NSString *)path;
-
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)createDirectory:(NSString *)dirPath;
 - (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
@@ -218,6 +213,7 @@ typedef enum {
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag;
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)checkExistenceOfPath:(NSString *)path;
 

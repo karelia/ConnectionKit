@@ -369,10 +369,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
@@ -457,10 +454,9 @@ NSDictionary *sDataAttributes = nil;
 		else
 		{
 			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
-			record = [self uploadFile:path
-							   toFile:remote
-				 checkRemoteExistence:NO
-							 delegate:nil];
+			record = [self uploadFileAtURL:[NSURL fileURLWithPath:path]
+                                    toPath:remote
+                          posixPermissions:nil];
 			if (![[root path] isEqualToString:@"/"])
 			{
 				[self _mergeRecord:record into:root];
@@ -517,10 +513,9 @@ NSDictionary *sDataAttributes = nil;
 	if ([fm fileExistsAtPath:localPath isDirectory:&isDir] && !isDir)
 	{
 		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
-		record = [self uploadFile:localPath
-						   toFile:remote
-			 checkRemoteExistence:NO
-						 delegate:nil];
+		record = [self uploadFileAtURL:[NSURL fileURLWithPath:localPath]
+                                toPath:remote
+                      posixPermissions:nil];
 		if (![[root path] isEqualToString:@"/"])
 		{
 			[self _mergeRecord:record into:root];
@@ -710,7 +705,7 @@ NSDictionary *sDataAttributes = nil;
 	if ([nm isEqualToString:UKFileWatcherAttributeChangeNotification]) //UKFileWatcherWriteNotification does not get called because of atomicity of file writing (i believe)
 	{
 		KTLog(CKEditingDomain, KTLogDebug, @"File changed: %@... uploading to server", fpath);
-		[self uploadFile:fpath toFile:[_edits objectForKey:fpath] checkRemoteExistence:NO delegate:nil];
+		[self uploadFileAtURL:[NSURL fileURLWithPath:fpath] toPath:[_edits objectForKey:fpath] posixPermissions:nil];
 	}
 }
 

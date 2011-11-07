@@ -149,12 +149,12 @@
     return result;
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
-                         toFile:remotePath
-           checkRemoteExistence:flag
-                       delegate:delegate];
+    return [self uploadFromData:[NSData dataWithContentsOfURL:url]
+                         toFile:path
+           checkRemoteExistence:NO
+                       delegate:nil];
 }
 
 - (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
