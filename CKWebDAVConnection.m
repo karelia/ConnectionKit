@@ -219,8 +219,6 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     [request release];
 }
 
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path; { /* ignore! */ }
-
 - (void)deleteFile:(NSString *)path
 {
     path = [self canonicalPathForPath:path];
