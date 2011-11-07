@@ -2921,7 +2921,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 */
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	if (![url isFileURL]) return [self uploadFromData:[NSData dataWithContentsOfURL:url] toFile:path checkRemoteExistence:NO delegate:nil];
+	if (![url isFileURL]) return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
     
     
 	NSAssert(url && ![[url path] isEqualToString:@""], @"localPath is nil!");
@@ -2939,20 +2939,21 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     return result;
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
 	
-	return [self uploadFile:nil
-					 orData:data
-					 offset:0
-				 remotePath:remotePath
-	   checkRemoteExistence:flag
-				   delegate:delegate];
+	CKTransferRecord *result = [self uploadFile:nil
+                                         orData:data
+                                         offset:0
+                                     remotePath:path
+                           checkRemoteExistence:NO
+                                       delegate:nil];
+    
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
+    return result;
 }
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 

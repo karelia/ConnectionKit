@@ -549,10 +549,7 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;

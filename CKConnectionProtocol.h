@@ -121,10 +121,7 @@ typedef enum {
  You must implement the ConnectionTransferDelegate informal protocol.
  By default the transfer record returned is the delegate of the transfer.
  */
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 
 - (void)deleteFile:(NSString *)path;
 

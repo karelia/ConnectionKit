@@ -168,23 +168,20 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self uploadFromData:[NSData dataWithContentsOfURL:url]
-                         toFile:path
-           checkRemoteExistence:NO
-                       delegate:nil];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
     NSParameterAssert(data);
     
-    remotePath = [self canonicalPathForPath:remotePath];
-    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
+    path = [self canonicalPathForPath:path];
+    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
     [request setData:data];
     
     
     CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                             (CFStringRef)[remotePath pathExtension],
+                                                             (CFStringRef)[path pathExtension],
                                                              NULL
                                                              );
     CFStringRef mimeType = NULL;
@@ -199,7 +196,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     
     [self enqueueOperation:request];
     
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
     CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
     [request release];
     return result;
