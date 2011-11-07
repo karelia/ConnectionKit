@@ -334,7 +334,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 }

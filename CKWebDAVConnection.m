@@ -202,16 +202,11 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     return result;
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self createDirectory:dirPath];
-}
-
-- (void)createDirectory:(NSString *)dirPath;
-{
-    dirPath = [self canonicalPathForPath:dirPath];
+    path = [self canonicalPathForPath:path];
     
-    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath
+    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:path
                                                                                session:[self webDAVSession]
                                                                               delegate:self];
     

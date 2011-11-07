@@ -184,7 +184,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	[self createDirectory:dirPath permissions:0755];
+	[self createDirectoryAtPath:dirPath posixPermissions:[NSNumber numberWithUnsignedLong:0755]];
 }
 
 - (void)fcCreateDirectory:(NSString *)aName permissions:(NSNumber *)perms
@@ -222,13 +222,13 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)aPermissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	NSAssert(path && ![path isEqualToString:@""], @"no directory specified");
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCreateDirectory:permissions:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:dirPath, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
+												   arguments:[NSArray arrayWithObjects:path, permissions, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionCreateDirectoryState

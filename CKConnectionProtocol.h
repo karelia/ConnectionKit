@@ -125,8 +125,7 @@ typedef enum {
 
 - (void)deleteFile:(NSString *)path;
 
-- (void)createDirectory:(NSString *)dirPath;
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;
 - (void)directoryContents;

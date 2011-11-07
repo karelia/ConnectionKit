@@ -201,26 +201,26 @@
     [proxy release];
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self createDirectory:dirPath];
-}
-
-- (void)createDirectory:(NSString *)dirPath;
-{
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_createDirectoryAtPath:) object:dirPath];
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_createDirectoryAtPath:permissions:)
+                                                             target:self
+                                                          arguments:[NSArray arrayWithObjects:path, permissions, nil]];
     
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
     [op release];
 }
 
-- (void)threaded_createDirectoryAtPath:(NSString *)path;
+- (void)threaded_createDirectoryAtPath:(NSString *)path permissions:(NSNumber *)permissions;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
     NSAssert(sftpSession, @"Trying to write data without having started session");
     
+    unsigned long mode = (permissions ? [permissions unsignedLongValue] : (0644 | 0111));
+    
     NSError *error;
-    [sftpSession createDirectoryAtPath:path mode:(0644 | 0111) error:&error];
+    [sftpSession createDirectoryAtPath:path mode:mode error:&error];
 }
 
 - (void)deleteFile:(NSString *)path

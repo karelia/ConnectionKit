@@ -2831,24 +2831,27 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}*/
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	NSAssert(path && ![path isEqualToString:@""], @"no directory specified");
 	
+    if (!permissions) return [self createDirectory:path];
+    
+    
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
+												   arguments:[NSArray arrayWithObjects: permissions, path, nil]];
 	CKConnectionCommand *chmod = [CKConnectionCommand command:inv
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionSettingPermissionsState
 												dependant:nil
 												 userInfo:nil];
-	CKConnectionCommand *mkdir = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", dirPath]
+	CKConnectionCommand *mkdir = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", path]
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionCreateDirectoryState
 												dependant:chmod
 												 userInfo:nil];
-	[self queuePermissionChange:dirPath];
+	[self queuePermissionChange:path];
 	[self queueCommand:mkdir];
 	[self queueCommand:chmod];
 }
