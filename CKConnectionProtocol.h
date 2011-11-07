@@ -62,23 +62,15 @@ typedef enum {
 } CKTranscriptType;
 
 
-@protocol CKConnection <NSObject>
-
-+ (NSString *)name;
+/*  A lightweight version of CKConnection, selfishly for Sandvox's benefit
+ */
+@protocol CKPublishingConnection <NSObject>
 
 /*!
  @method URLSchemes
  @result An array of the URL schemes supported by the connection.
  */
 + (NSArray *)URLSchemes;
-
-/*!
- @method port
- @discussion Return 0 for abstract classes or connections that do not use a port.
- @result The default port for connections of the receiver's class.
- */
-+ (NSInteger)defaultPort;
-
 
 /*!
  @method initWithRequest:
@@ -89,6 +81,77 @@ typedef enum {
  @result Returns an initialized connection object or nil if the request was unsuitable.
  */
 - (id)initWithRequest:(CKConnectionRequest *)request;
+
+/*!
+ @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
+ */
+@property(nonatomic, assign) NSObject *delegate;
+
+/*!
+ @method connect
+ @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
+ */
+- (void)connect;
+/*!
+ @method isConnected
+ @result Returns YES once the connection has successfully connected to the server
+ */
+- (BOOL)isConnected;
+
+/*!
+ @method disconnect
+ @abstract Ends the connection after any other items in the queue have been processed.
+ */
+- (void)disconnect;
+/*!
+ @method forceDisconnect
+ @abstract Ends the connection at the next available opportunity.
+ */
+- (void)forceDisconnect;
+
+/* 
+	New method that allows you to set a custom delegate for the upload.
+	You must implement the ConnectionTransferDelegate informal protocol.
+	By default the transfer record returned is the delegate of the transfer.
+*/
+- (CKTransferRecord *)uploadFile:(NSString *)localPath 
+						  toFile:(NSString *)remotePath 
+			checkRemoteExistence:(BOOL)flag 
+						delegate:(id)delegate;
+
+/* 
+ New method that allows you to set a custom delegate for the upload.
+ You must implement the ConnectionTransferDelegate informal protocol.
+ By default the transfer record returned is the delegate of the transfer.
+ */
+- (CKTransferRecord *)uploadFromData:(NSData *)data
+							  toFile:(NSString *)remotePath 
+				checkRemoteExistence:(BOOL)flag
+							delegate:(id)delegate;
+
+- (void)deleteFile:(NSString *)path;
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+
+- (void)createDirectory:(NSString *)dirPath;
+- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)changeToDirectory:(NSString *)dirPath;
+- (NSString *)currentDirectory;
+- (void)directoryContents;
+
+@end
+
+
+@protocol CKConnection <CKPublishingConnection>
+
++ (NSString *)name;
+
+/*!
+ @method port
+ @discussion Return 0 for abstract classes or connections that do not use a port.
+ @result The default port for connections of the receiver's class.
+ */
++ (NSInteger)defaultPort;
 
 
 /*!
@@ -104,69 +167,20 @@ typedef enum {
 - (NSString *)name; 
 - (void)setName:(NSString *)name;
 
-/*!
- @method delegate:
- @result Returns the receiver's delegate.
- */
-- (id)delegate;
-/*!
- @method setDelegate:
- @abstract Sets the receiver's delegate.
- @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
- */
-- (void)setDelegate:(id)delegate;
-
-
-/*!
- @method connect
- @abstract Causes the receiver to start the connection, if it has not already. This is generally asynchronous.
- */
-- (void)connect;
-/*!
- @method isConnected
- @result Returns YES once the connection has successfully connected to the server
- */
-- (BOOL)isConnected;
 - (BOOL)isBusy;
 
  
-/*!
- @method disconnect
- @abstract Ends the connection after any other items in the queue have been processed.
- */
-- (void)disconnect;
-/*!
- @method forceDisconnect
- @abstract Ends the connection at the next available opportunity.
- */
-- (void)forceDisconnect;
 - (void)cleanupConnection;
 
-- (void)changeToDirectory:(NSString *)dirPath;
-- (NSString *)currentDirectory;
-
 - (NSString *)rootDirectory;
-- (void)createDirectory:(NSString *)dirPath;
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)rename:(NSString *)fromPath to:(NSString *)toPath;
 - (void)recursivelyRenameS3Directory:(NSString *)fromDirectoryPath to:(NSString *)toDirectoryPath;
 
-- (void)deleteFile:(NSString *)path;
 - (void)deleteDirectory:(NSString *)dirPath;
 - (void)recursivelyDeleteDirectory:(NSString *)path;
 
 
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate;
 /* 
 	returns CKTransferRecord as a heirarchy of what will be upload, remote and local files 
 	can be found in the records node properties
@@ -179,16 +193,6 @@ typedef enum {
 							fileOffset:(unsigned long long)offset
 							  delegate:(id)delegate;
 
-
-/* 
-	New method that allows you to set a custom delegate for the upload.
-	You must implement the ConnectionTransferDelegate informal protocol.
-	By default the transfer record returned is the delegate of the transfer.
-*/
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate;
 
 - (CKTransferRecord *)resumeUploadFromData:(NSData *)data
 									toFile:(NSString *)remotePath 
@@ -221,7 +225,6 @@ typedef enum {
 - (void)cancelTransfer;
 - (void)cancelAll;
 
-- (void)directoryContents;
 - (void)contentsOfDirectory:(NSString *)dirPath;
 
 - (double)uploadSpeed; // bytes per second
@@ -243,10 +246,10 @@ typedef enum {
 // Need to keep NSObject Category, __flags list, setDelegate: updated
 
 #pragma mark Overall connection
-- (void)connection:(id <CKConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
-- (void)connection:(id <CKConnection>)con didDisconnectFromHost:(NSString *)host;
+- (void)connection:(id <CKPublishingConnection>)con didConnectToHost:(NSString *)host error:(NSError *)error; // this only guarantees that the socket connected.
+- (void)connection:(id <CKPublishingConnection>)con didDisconnectFromHost:(NSString *)host;
 
-- (void)connection:(id <CKConnection>)con didReceiveError:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didReceiveError:(NSError *)error;
 
 #pragma mark Authentication
 /*!
@@ -255,23 +258,23 @@ typedef enum {
  @param connection The connection for which authentication is needed
  @param challenge The NSURLAuthenticationChallenge to start authentication for
  */
-- (void)connection:(id <CKConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connection:(id <CKPublishingConnection>)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 /*!
  @method connection:didCancelAuthenticationChallenge:
  @abstract Operates exactly the same as its NSURLConnection counterpart.
  @param connection The connection sending the message.
  @param challenge The challenge that was canceled.
  */
-- (void)connection:(id <CKConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)connection:(id <CKPublishingConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
 - (NSString *)connection:(id <CKConnection>)con passphraseForHost:(NSString *)host username:(NSString *)username publicKeyPath:(NSString *)publicKeyPath;   //SFTP Passphrase Support
 
 
 #pragma mark Other
 
-- (void)connection:(id <CKConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
 
 
 // recursivelyDeleteDirectory
@@ -282,8 +285,8 @@ typedef enum {
 - (void)connection:(id <CKConnection>)con didDeleteFile:(NSString *)path inAncestorDirectory:(NSString *)ancestorDirPath error:(NSError *)error;
 
 
-- (void)connection:(id <CKConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didChangeToDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
@@ -297,8 +300,8 @@ typedef enum {
 
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)percent;
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath sentDataOfLength:(unsigned long long)length;
-- (void)connection:(id <CKConnection>)con uploadDidBegin:(NSString *)remotePath;
-- (void)connection:(id <CKConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con uploadDidBegin:(NSString *)remotePath;
+- (void)connection:(id <CKPublishingConnection>)con uploadDidFinish:(NSString *)remotePath error:(NSError *)error;
 - (void)connectionDidCancelTransfer:(id <CKConnection>)con; // this is deprecated. Use method below
 - (void)connection:(id <CKConnection>)con didCancelTransfer:(NSString *)remotePath;
 
@@ -314,7 +317,7 @@ typedef enum {
  @param string The string to add to the transcript
  @param transcript The nature of the string that is to be transcribed. CKAbstractConnection has class methods to apply formatting to the transcript.
  */
-- (void)connection:(id <CKConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+- (void)connection:(id <CKPublishingConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end
 

@@ -12,7 +12,7 @@
 @class CK2SFTPSession;
 
 
-@interface CKSFTPConnection : NSObject <CKConnection>
+@interface CKSFTPConnection : NSObject <CKPublishingConnection>
 {
  @private
     CK2SFTPSession      *_session;
@@ -23,7 +23,6 @@
     NSObject            *_delegate;
 }
 
-@property(nonatomic, assign) NSObject *delegate;
 @property(nonatomic, copy) NSString *currentDirectory;
 
 @end
