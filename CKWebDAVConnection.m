@@ -149,6 +149,11 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
+- (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
+{
+    [[self delegate] connection:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
+}
+
 #pragma mark Requests
 
 - (void)cancelAll { }
@@ -265,12 +270,6 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)requestDidBegin:(DAVRequest *)aRequest;
 {
-    // It would be nice to include HTTP version too, but I don't know a good way to do that
-    NSURLRequest *urlRequest = [aRequest request];
-    NSString *requestDescription = [NSString stringWithFormat:@"%@ %@", [urlRequest HTTPMethod], [[urlRequest URL] path]];
-    [[self delegate] connection:self appendString:requestDescription toTranscript:CKTranscriptSent];
-    
-    
     if ([aRequest isKindOfClass:[DAVPutRequest class]] &&
         [[self delegate] respondsToSelector:@selector(connection:uploadDidBegin:)])
     {
