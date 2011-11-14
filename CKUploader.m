@@ -74,7 +74,7 @@
 /*  Creates the specified directory including any parent directories that haven't already been queued for creation.
  *  Returns a CKTransferRecord used to represent the directory during publishing.
  */
-- (CKTransferRecord *)createDirectoryAtPath:(NSString *)path
+- (CKTransferRecord *)createDirectoryAtPath:(NSString *)path;
 {
     NSParameterAssert(path);
     
@@ -234,6 +234,11 @@
         
         [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
     }
+}
+
+- (void)connection:(id <CKPublishingConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
+{
+	[[self delegate] uploader:self appendString:string toTranscript:transcript];
 }
 
 @end
