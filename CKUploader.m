@@ -55,11 +55,6 @@
     [super dealloc];
 }
 
-- (void)finishPublishing;
-{
-    // Inform the delegate
-}
-
 #pragma mark Properties
 
 @synthesize delegate = _delegate;
@@ -166,6 +161,12 @@
 - (void)finishUploading;
 {
     [_connection disconnect];
+}
+
+- (void)cancel;
+{
+    [_connection forceDisconnect];
+    [_connection setDelegate:nil];
 }
 
 #pragma mark Connection Delegate
