@@ -49,6 +49,8 @@
 		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
 		27C98D5D0F1C1E5B0079A84F /* CKConnectionRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C98D5B0F1C1E5B0079A84F /* CKConnectionRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C98D5E0F1C1E5B0079A84F /* CKConnectionRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C98D5C0F1C1E5B0079A84F /* CKConnectionRequest.m */; };
+		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		27D03B431471787000FEA588 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		3C231A5D0A66ECB600951F9E /* CKFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD82F09F7048400172CDD /* CKFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -265,6 +267,8 @@
 		27C604830F1FA82800B58822 /* CKConnectionClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionClient.m; sourceTree = "<group>"; };
 		27C98D5B0F1C1E5B0079A84F /* CKConnectionRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionRequest.h; sourceTree = "<group>"; };
 		27C98D5C0F1C1E5B0079A84F /* CKConnectionRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRequest.m; sourceTree = "<group>"; };
+		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKUploader.h; sourceTree = "<group>"; };
+		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploader.m; sourceTree = "<group>"; };
 		27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Connection.h"; sourceTree = "<group>"; };
 		27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Connection.m"; sourceTree = "<group>"; };
 		29B97316FDCFA39411CA2CEA /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -628,6 +632,8 @@
 				27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */,
 				27C604820F1FA82800B58822 /* CKConnectionClient.h */,
 				27C604830F1FA82800B58822 /* CKConnectionClient.m */,
+				27D03B401471787000FEA588 /* CKUploader.h */,
+				27D03B411471787000FEA588 /* CKUploader.m */,
 			);
 			name = Abstract;
 			sourceTree = "<group>";
@@ -984,6 +990,7 @@
 				79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */,
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
+				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				79B09C6C0C85E35100E7F1CC /* CKDirectoryNode.h in Headers */,
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				7944991F0CA36F1C00F381DC /* CKCollectionBasedBookmarkController.h in Headers */,
@@ -1350,6 +1357,7 @@
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
+				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
