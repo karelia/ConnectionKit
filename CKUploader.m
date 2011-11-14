@@ -27,6 +27,8 @@
         _options = options;
         
         _connection = [[[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request] retain];
+        [_connection setDelegate:self];
+        
         _rootRecord = [[CKTransferRecord rootRecordWithPath:[[request URL] path]] retain];
         _baseRecord = [_rootRecord retain];
     }
