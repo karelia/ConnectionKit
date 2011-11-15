@@ -125,6 +125,11 @@
 - (void)willUploadToPath:(NSString *)path;
 {
     [self createDirectoryAtPath:[path stringByDeletingLastPathComponent]];
+    
+    if (_options & CKUploadingDeleteExistingFileFirst)
+	{
+		[_connection deleteFile:path];
+	}
 }
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
