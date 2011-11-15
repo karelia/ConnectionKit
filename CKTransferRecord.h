@@ -105,11 +105,12 @@
 						   withRoot:(CKTransferRecord *)root 
 						   rootPath:(NSString *)rootPath;
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path;
-+ (CKTransferRecord *)recordForFullPath:(NSString *)path withRoot:(CKTransferRecord *)root;
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path;
 + (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root;
 + (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
 + (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;
+
+// If the path is absolute, searches from root of tree, otherwise searches from receiver
+- (CKTransferRecord *)recordForPath:(NSString *)path;
 
 - (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
 

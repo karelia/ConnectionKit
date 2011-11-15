@@ -504,7 +504,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
+	CKTransferRecord *result = [CKTransferRecord recordWithName:nil size:0];
     
 	NSArray *pathComponents = [path pathComponents];
 	if ([pathComponents count] > 0)
@@ -547,31 +547,34 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return nil;
 }
 
-+ (CKTransferRecord *)recordForFullPath:(NSString *)path withRoot:(CKTransferRecord *)root
+- (CKTransferRecord *)recordForPath:(NSString *)path;
 {
-	return [self recursiveRecord:root forPath:path];
-}	
-
-+ (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forPath:(NSString *)path
-{
+    NSParameterAssert(path);
+    
+    if ([path length] == 0) return self;
+    
+    if ([path isAbsolutePath])
+    {
+        path = [path substringFromIndex:1]; // should make it relative, if not we'll go round again
+        return [[self root] recordForPath:path];
+    }
+    
+    
     NSArray *components = [path pathComponents];
-	if ([[record name] isEqualToString:[components objectAtIndex:0]]) 
-	{
-		NSString *newPath = [NSString pathWithComponents:
-                             [components subarrayWithRange:NSMakeRange(1, [components count]-1)]];
-        
-		if ([newPath isEqualToString:@""]) return record; // matched
-		
-		for (CKTransferRecord *cur in [record contents]) 
-		{
-			CKTransferRecord *child = [CKTransferRecord recursiveRecord:cur forPath:newPath];
-			if (child)
-			{
-				return child;
-			}
-		}
-	}
-	return nil;
+    NSString *name = [components objectAtIndex:0];
+    
+    for (CKTransferRecord *aRecord in [self contents]) 
+    {
+        if ([[aRecord name] isEqualToString:name])
+        {
+            NSString *newPath = [NSString pathWithComponents:
+                                 [components subarrayWithRange:NSMakeRange(1, [components count]-1)]];
+            
+            return [aRecord recordForPath:newPath];
+        }
+    }
+	
+    return nil;
 }
 
 + (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root
