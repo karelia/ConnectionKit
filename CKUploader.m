@@ -58,7 +58,8 @@
 {
     NSParameterAssert(request);
     
-    Class class = ([[[request URL] scheme] isEqualToString:@"sftp"] ? [CKSFTPUploader class] : [self class]);
+    NSString *scheme = [[request URL] scheme];
+    Class class = ([scheme isEqualToString:@"sftp"] || [scheme isEqualToString:@"ssh"] ? [CKSFTPUploader class] : [self class]);
     
     return [[[class alloc] initWithRequest:request
                       filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
@@ -299,6 +300,9 @@
 {
     if (self = [super initWithRequest:request filePosixPermissions:customPermissions options:options])
     {
+        // HACK clear out super's connection ref
+        [self setValue:nil forKey:@"connection"];
+        
         _queue = [[NSOperationQueue alloc] init];
         [_queue setMaxConcurrentOperationCount:1];
         [_queue setSuspended:YES];  // we'll resume once authenticated
@@ -365,9 +369,20 @@
 
 #pragma mark Upload
 
-- (void)didEnqueueUpload:(CKTransferRecord *)record toDirectory:(CKTransferRecord *)parent;
+- (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
-    [parent addContent:record];
+    if (!_sessionStarted)
+    {
+        NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+        NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:[self SFTPSession] selector:@selector(start) object:nil];
+        [queue addOperation:op];
+        [op release];
+        [queue release];
+        
+        _sessionStarted = YES;
+    }
+    
+    [super didEnqueueUpload:record toPath:path];
 }
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
@@ -395,7 +410,7 @@
     return result;
 }
 
-- (CKTransferRecord *)uploadContentsOfURL:(NSURL *)localURL toPath:(NSString *)path
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path
 {
     // Cheat and send non-file URLs direct
     if (![localURL isFileURL]) return [self uploadData:[NSData dataWithContentsOfURL:localURL] toPath:path];
@@ -433,8 +448,6 @@
     CK2SFTPSession *sftpSession = [self SFTPSession];
     NSParameterAssert(sftpSession);
     
-    
-    [sftpSession start];
     
     NSError *error;
     BOOL result = [sftpSession createDirectoryAtPath:path
@@ -484,7 +497,6 @@
 - (CK2SFTPFileHandle *)threaded_openHandleAtPath:(NSString *)path error:(NSError **)outError;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
-    [sftpSession start];
     NSParameterAssert(sftpSession);
     
     
