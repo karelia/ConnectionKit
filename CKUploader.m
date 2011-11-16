@@ -275,7 +275,7 @@
 #pragma mark -
 
 
-@interface SVWriteContentsOfURLToSFTPHandleOperation : NSOperation
+@interface CKWriteContentsOfURLToSFTPHandleOperation : NSOperation
 {
 @private
     NSURL               *_URL;
@@ -428,7 +428,7 @@
             [self didEnqueueUpload:result toPath:path];  // so record has correct path
             
             
-            NSOperation *op = [[SVWriteContentsOfURLToSFTPHandleOperation alloc] initWithURL:localURL
+            NSOperation *op = [[CKWriteContentsOfURLToSFTPHandleOperation alloc] initWithURL:localURL
                                                                                         path:path
                                                                                     uploader:self
                                                                               transferRecord:result];
@@ -596,7 +596,7 @@
 #pragma mark -
 
 
-@implementation SVWriteContentsOfURLToSFTPHandleOperation
+@implementation CKWriteContentsOfURLToSFTPHandleOperation
 
 - (id)initWithURL:(NSURL *)URL path:(NSString *)path uploader:(CKSFTPUploader *)uploader transferRecord:(CKTransferRecord *)record;
 {
