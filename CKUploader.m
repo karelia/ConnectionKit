@@ -155,6 +155,8 @@
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
+    _hasUploads = YES;
+    
     // Need to use -setName: otherwise the record will have the full path as its name
     [record setName:[path lastPathComponent]];
     
@@ -188,7 +190,12 @@
 
 - (void)finishUploading;
 {
-    [_connection disconnect];
+    if (!_hasUploads)   // tell the delegate right away since there's nothing to do
+    {
+        [[self delegate] uploaderDidFinishUploading:self];
+    }
+    
+    [_connection disconnect];   // will inform delegate once disconnected
 }
 
 - (void)cancel;
@@ -221,7 +228,12 @@
         NSLog(@"%@ delegate method received, but connection still appears to be publishing", NSStringFromSelector(_cmd));
     }*/
     
-    [[self delegate] uploaderDidFinishUploading:self];
+    
+    // If no uploads, delegate has already been informed. And if so, the connection is unlikely to need to disconnect. But you never know, it might have been connected accidentally
+    if (_hasUploads)    
+    {
+        [[self delegate] uploaderDidFinishUploading:self];
+    }
 }
 
 - (void)connection:(id<CKPublishingConnection>)con didReceiveError:(NSError *)error;

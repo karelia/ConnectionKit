@@ -32,6 +32,7 @@ typedef NSUInteger CKUploadingOptions;
     id <CKPublishingConnection> _connection;
     CKTransferRecord            *_rootRecord;
     CKTransferRecord            *_baseRecord;
+    BOOL                        _hasUploads;
     
     id <CKUploaderDelegate> _delegate;
 }
