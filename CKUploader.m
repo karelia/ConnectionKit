@@ -203,6 +203,24 @@
 {
     if (!_connection) return; // we've already finished in which case
     
+    
+    // Case 39234: It looks like ConnectionKit is sending this delegate method in the event of the
+    // data connection closing (or it might even be the command connection), probably due to a
+    // period of inactivity. In such a case, it's really not a cause to consider publishing
+    // finished! To see if I am right on this, we will log that such a scenario occurred for now.
+    // Mike.
+    
+    /*if ([self status] == KTPublishingEngineStatusUploading &&
+                                                            ![con isConnected] &&
+                                                            [[(CKAbstractQueueConnection *)con commandQueue] count] == 0)
+    {
+        [self finishPublishing:YES error:nil];
+    }
+    else
+    {
+        NSLog(@"%@ delegate method received, but connection still appears to be publishing", NSStringFromSelector(_cmd));
+    }*/
+    
     [[self delegate] uploaderDidFinishUploading:self];
 }
 
