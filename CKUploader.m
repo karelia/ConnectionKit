@@ -35,7 +35,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(CKConnectionRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
 {
     if (self = [self init])
     {
@@ -52,7 +52,7 @@
     return self;
 }
 
-+ (CKUploader *)uploaderWithRequest:(CKConnectionRequest *)request
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 {
@@ -326,7 +326,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(CKConnectionRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
 {
     if (self = [super initWithRequest:request filePosixPermissions:customPermissions options:options])
     {

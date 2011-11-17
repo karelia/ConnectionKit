@@ -31,8 +31,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "CKConnectionRequest.h"
-
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
@@ -80,7 +78,7 @@ typedef enum {
  that is used for the loading process.
  @result Returns an initialized connection object or nil if the request was unsuitable.
  */
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 
 /*!
  @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
@@ -150,7 +148,7 @@ typedef enum {
  @discussion Please do NOT modify this request in any way!
  @result Returns the request supplied when creating the connection.
  */
-- (CKConnectionRequest *)request;
+- (NSURLRequest *)request;
 
 
 // you can set a name on a connection to help with debugging.

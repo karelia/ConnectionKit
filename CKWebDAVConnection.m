@@ -20,7 +20,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 {
     if (self = [self init])
     {

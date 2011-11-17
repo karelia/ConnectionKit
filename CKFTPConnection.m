@@ -158,7 +158,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return [NSArray arrayWithObject:@"ftp"];
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{
@@ -3740,23 +3740,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 
 
-@implementation CKConnectionRequest (CKFTPConnection)
+@implementation NSURLRequest (CKFTPConnection)
 
-- (NSString *)FTPDataConnectionType { return [self propertyForKey:@"CKFTPDataConnectionType"]; }
+- (NSString *)FTPDataConnectionType { return [NSURLProtocol propertyForKey:@"CKFTPDataConnectionType" inRequest:self]; }
 
 @end
 
-@implementation CKMutableConnectionRequest (CKFTPConnection)
+@implementation NSMutableURLRequest (CKFTPConnection)
 
 - (void)setFTPDataConnectionType:(NSString *)type
 {
     if (type)
     {
-        [self setProperty:type forKey:@"CKFTPDataConnectionType"];
+        [NSURLProtocol setProperty:type forKey:@"CKFTPDataConnectionType" inRequest:self];
     }
     else
     {
-        [self removePropertyForKey:@"CKFTPDataConnectionType"];
+        [NSURLProtocol removePropertyForKey:@"CKFTPDataConnectionType" inRequest:self];
     }
 }
 

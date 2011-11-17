@@ -136,7 +136,7 @@ NSDictionary *sDataAttributes = nil;
 #pragma mark -
 #pragma mark Inheritable methods
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	NSParameterAssert(request);
     
@@ -186,7 +186,7 @@ NSDictionary *sDataAttributes = nil;
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
-- (CKConnectionRequest *)request { return _request; }
+- (NSURLRequest *)request { return _request; }
 
 - (NSInteger)port
 {

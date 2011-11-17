@@ -64,13 +64,13 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 #pragma mark init methods
 
-- (id)initWithRequest:(CKConnectionRequest *)request delegate:(id)delegate
+- (id)initWithRequest:(NSURLRequest *)request delegate:(id)delegate
 {     
     // allow for subdomains of s3
 	if ([[[request URL] host] rangeOfString:@"s3.amazonaws.com"].location == NSNotFound)
 	{
 		NSURL *URL = [[NSURL alloc] initWithScheme:@"http" host:@"s3.amazonaws.com" path:nil];
-        CKMutableConnectionRequest *newRequest = [request mutableCopy];
+        NSMutableURLRequest *newRequest = [request mutableCopy];
         [newRequest setURL:URL];
         [URL release];
         

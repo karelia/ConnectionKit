@@ -128,12 +128,13 @@ typedef enum {
 @end
 
 
-@interface CKConnectionRequest (CKFTPConnection)
+@interface NSURLRequest (CKFTPConnection)
 // nil signifies the usual fallback chain of connection types
+// Only applies to CKFTPConnection, not NSURLConnection
 - (NSString *)FTPDataConnectionType;
 @end
 
-@interface CKMutableConnectionRequest (CKFTPConnection)
+@interface NSMutableURLRequest (CKFTPConnection)
 - (void)setFTPDataConnectionType:(NSString *)type;
 @end
 

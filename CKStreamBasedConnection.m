@@ -85,7 +85,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 @implementation CKStreamBasedConnection
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if ([[[request URL] host] length] == 0) // our subclasses need a hostname to connect to
     {

@@ -9,7 +9,6 @@
 #import <Foundation/Foundation.h>
 
 #import "CKConnectionProtocol.h"
-#import "CKConnectionRequest.h"
 #import "CKTransferRecord.h"
 
 
@@ -25,7 +24,7 @@ typedef NSUInteger CKUploadingOptions;
 @interface CKUploader : NSObject
 {
   @private
-	CKConnectionRequest                 *_request;
+	NSURLRequest                 *_request;
     unsigned long                       _permissions;
     CKUploadingOptions                 _options;
     
@@ -38,7 +37,7 @@ typedef NSUInteger CKUploadingOptions;
 }
 
 // File permissions default to 0644. Supply a non-nil value if you want something different, or override -posixPermissionsForPath:isDirectory:
-+ (CKUploader *)uploaderWithRequest:(CKConnectionRequest *)request
++ (CKUploader *)uploaderWithRequest:(NSURLRequest *)request
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 

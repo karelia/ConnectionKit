@@ -89,7 +89,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{
@@ -100,7 +100,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (id)init
 {
-	return [self initWithRequest:[CKConnectionRequest requestWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]]];
+	return [self initWithRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]]];
 }
 
 - (void)dealloc
