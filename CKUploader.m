@@ -100,6 +100,7 @@
 - (CKTransferRecord *)createDirectoryAtPath:(NSString *)path;
 {
     NSParameterAssert(path);
+    NSAssert([NSThread isMainThread], @"CKUploader can only be used on main thread");
     
     
     if ([path isEqualToString:@"/"] || [path isEqualToString:@""]) // The root for absolute and relative paths
