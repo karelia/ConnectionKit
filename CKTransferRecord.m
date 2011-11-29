@@ -504,7 +504,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path
 {
-	CKTransferRecord *result = [CKTransferRecord recordWithName:nil size:0];
+	CKTransferRecord *result = [CKTransferRecord recordWithName:@"" size:0];
     
 	NSArray *pathComponents = [path pathComponents];
 	if ([pathComponents count] > 0)
