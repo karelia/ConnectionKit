@@ -66,6 +66,8 @@ typedef NSUInteger CKUploadingOptions;
 - (void)uploader:(CKUploader *)uploader didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)uploader:(CKUploader *)uploader didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
+- (void)uploader:(CKUploader *)uploader didBeginUploadToPath:(NSString *)path;
+
 - (void)uploader:(CKUploader *)uploader appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 
 @end

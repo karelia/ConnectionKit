@@ -295,6 +295,11 @@
     }
 }
 
+- (void)connection:(id <CKPublishingConnection>)con uploadDidBegin:(NSString *)remotePath;
+{
+    [[self delegate] uploader:self didBeginUploadToPath:remotePath];
+}
+
 - (void)connection:(id <CKPublishingConnection>)connection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 {
 	[[self delegate] uploader:self appendString:string toTranscript:transcript];
