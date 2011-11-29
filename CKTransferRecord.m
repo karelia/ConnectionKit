@@ -387,7 +387,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	{
 		[str appendString:@"/"];
 	}
-	[str appendFormat:@"\t(%lld of %lld bytes - %@%%)\n", [self transferred], [self size], [self progress]];
+	[str appendFormat:@"\t(%lld of %lld bytes - %i%%)\n", [self transferred], [self size], [self progress]];
 
 	NSEnumerator *e = [[self contents] objectEnumerator];
 	CKTransferRecord *cur;
