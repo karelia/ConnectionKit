@@ -563,6 +563,11 @@
         }
     }
     
+    if (result)
+    {
+        [[(id)[self delegate] mainThreadProxy] uploader:self didBeginUploadToPath:path];
+    }
+    
     return result;
 }
 
