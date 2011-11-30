@@ -86,54 +86,6 @@ NSDictionary *sDataAttributes = nil;
 + (NSArray *)URLSchemes { return nil; }
 
 #pragma mark -
-#pragma mark Transcript
-
-/*	The string attributes to use for the different types of transcript logging
- */
-
-+ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript
-{
-	NSDictionary *attributes = nil;
-	
-	switch (transcript)
-	{
-		case CKTranscriptSent:
-			attributes = [self sentTranscriptStringAttributes];
-			break;
-		case CKTranscriptReceived:
-			attributes = [self receivedTranscriptStringAttributes];
-			break;
-		case CKTranscriptData:
-			attributes = [self dataTranscriptStringAttributes];
-			break;
-	}
-	
-	NSAttributedString *result = [NSAttributedString attributedStringWithString:string attributes:attributes];
-	return result;
-}
-
-+ (NSDictionary *)sentTranscriptStringAttributes
-{
-    if (!sSentAttributes)
-        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
-    return sSentAttributes;
-}
-
-+ (NSDictionary *)receivedTranscriptStringAttributes
-{
-    if (!sReceivedAttributes)
-        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
-    return sReceivedAttributes;
-}
-
-+ (NSDictionary *)dataTranscriptStringAttributes
-{
-    if (!sDataAttributes)
-        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
-    return sDataAttributes;
-}
-
-#pragma mark -
 #pragma mark Inheritable methods
 
 - (id)initWithRequest:(NSURLRequest *)request

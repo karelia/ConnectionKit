@@ -121,11 +121,6 @@ typedef enum {
     CKConnectionClient  *_client;
 }
 
-+ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
-+ (NSDictionary *)sentTranscriptStringAttributes;
-+ (NSDictionary *)receivedTranscriptStringAttributes;
-+ (NSDictionary *)dataTranscriptStringAttributes;
-
 /*!
  @method port
  @abstract If the connection's URL has a port defined, it will be used. Otherwise,
