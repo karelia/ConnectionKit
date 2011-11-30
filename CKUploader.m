@@ -372,6 +372,8 @@
 
 - (void)threaded_finish;
 {
+    [[(id)[self delegate] mainThreadProxy] uploaderDidFinishUploading:self];
+    
     [_session cancel];
     [_session release]; _session = nil;
 }
