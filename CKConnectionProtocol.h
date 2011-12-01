@@ -57,6 +57,7 @@ typedef enum {
 	CKTranscriptSent,
 	CKTranscriptReceived,
 	CKTranscriptData,
+    CKTranscriptInfo,
 } CKTranscriptType;
 
 
