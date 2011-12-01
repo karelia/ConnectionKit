@@ -113,7 +113,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (!_isConnecting && ![self isConnected])
 	{
-		[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
+		//[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
 		[super connect];
 	}
 }
@@ -128,7 +128,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[super threadedConnect];
 	
     myFileManager = [[NSFileManager alloc] init];
-	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
+	//[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	[self setState:CKConnectionIdleState];
 }
 
@@ -192,7 +192,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kCreateDirectory];
 	unsigned long aPermissions = [perms unsignedLongValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"mkdir %@ (%lo)", @"file transcript")
                    toTranscript:CKTranscriptSent,
                                 aName,
 								aPermissions];
@@ -313,7 +313,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteFile];
 	
-    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@", @"file transcript")
+    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"rm(dir) %@", @"file transcript")
                    toTranscript:CKTranscriptSent, path];
 	
 	
@@ -391,7 +391,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSFileManager *fm = myFileManager;
 	BOOL flag = [check boolValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"cp %@ %@", @"file transcript")
                    toTranscript:CKTranscriptSent, [upload localPath], [upload remotePath]];
 		
     if (![fm fileExistsAtPath:[upload localPath]])
@@ -535,7 +535,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	BOOL flag = [check boolValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Writing > %@", @"file transcript")
                    toTranscript:CKTranscriptSent, [upload remotePath]];
 	
 	if (flag)
