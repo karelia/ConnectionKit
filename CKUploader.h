@@ -14,6 +14,7 @@
 
 enum {
     CKUploadingDeleteExistingFileFirst = 1 << 0,
+    CKUploadingDryRun = 1 << 1,
 };
 typedef NSUInteger CKUploadingOptions;
 
@@ -24,9 +25,9 @@ typedef NSUInteger CKUploadingOptions;
 @interface CKUploader : NSObject
 {
   @private
-	NSURLRequest                 *_request;
-    unsigned long                       _permissions;
-    CKUploadingOptions                 _options;
+	NSURLRequest        *_request;
+    unsigned long       _permissions;
+    CKUploadingOptions  _options;
     
     id <CKPublishingConnection> _connection;
     CKTransferRecord            *_rootRecord;
@@ -41,6 +42,7 @@ typedef NSUInteger CKUploadingOptions;
                filePosixPermissions:(NSNumber *)customPermissions
                             options:(CKUploadingOptions)options;
 
+@property (nonatomic, assign, readonly) CKUploadingOptions options;
 @property (nonatomic, assign) id <CKUploaderDelegate> delegate;
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;

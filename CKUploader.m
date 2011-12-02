@@ -82,6 +82,7 @@
 
 @synthesize delegate = _delegate;
 
+@synthesize options = _options;
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
 
@@ -109,7 +110,7 @@
     }
     
     
-    [_connection connect];	// ensure we're connected
+    if (!(_options & CKUploadingDryRun)) [_connection connect];	// ensure we're connected
     
     
     // Ensure the parent directory is created first
@@ -409,7 +410,7 @@
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
-    if (!_sessionStarted)
+    if (!_sessionStarted && !([self options] & CKUploadingDryRun))
     {
         NSOperationQueue *queue = [[NSOperationQueue alloc] init];
         NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:[self SFTPSession] selector:@selector(start) object:nil];
