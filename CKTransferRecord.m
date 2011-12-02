@@ -152,12 +152,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	if ([self isDirectory]) 
 	{
 		unsigned long long rem = 0;
-		NSEnumerator *e = [[self contents] objectEnumerator];
-		CKTransferRecord *cur;
-		
-		while ((cur = [e nextObject])) 
+        for (CKTransferRecord *aRecord in _contents)    // -contents is too slow as copies the internal storage
 		{
-			rem += [cur transferred];
+			rem += [aRecord transferred];
 		}
 		return rem;
 	}
