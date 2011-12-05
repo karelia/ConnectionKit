@@ -149,6 +149,11 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
+- (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
+{
+    [[self delegate] connection:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
+}
+
 #pragma mark Requests
 
 - (void)cancelAll { }
