@@ -15,12 +15,14 @@
 #import "CK2SFTPSession.h"
 
 
-@interface CKSFTPUploader : CKUploader <CK2SFTPSessionDelegate>
+@interface CKSFTPUploader : CKUploader <CK2SFTPSessionDelegate, NSURLAuthenticationChallengeSender>
 {
 @private
     CK2SFTPSession      *_session;
     NSOperationQueue    *_queue;
-    BOOL                _sessionStarted;
+    NSOperationQueue    *_startupQueue;
+    
+    NSURLAuthenticationChallenge    *_challenge;
 }
 
 @property(nonatomic, retain, readonly) CK2SFTPSession *SFTPSession;
@@ -402,6 +404,7 @@
 {
     [_session release];
     [_queue release];
+    [_startupQueue release];
     
     [super dealloc];
 }
@@ -410,15 +413,12 @@
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
-    if (!_sessionStarted && !([self options] & CKUploadingDryRun))
+    if (!_startupQueue && !([self options] & CKUploadingDryRun))
     {
-        NSOperationQueue *queue = [[NSOperationQueue alloc] init];
+        _startupQueue = [[NSOperationQueue alloc] init];
         NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:[self SFTPSession] selector:@selector(start) object:nil];
-        [queue addOperation:op];
+        [_startupQueue addOperation:op];
         [op release];
-        [queue release];
-        
-        _sessionStarted = YES;
     }
     
     [super didEnqueueUpload:record toPath:path];
@@ -626,12 +626,56 @@
                                                             fingerprint]];
     }
     
+    _challenge = [challenge retain];
+    
+    challenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
     [[self mainThreadProxy] connection:nil didReceiveAuthenticationChallenge:challenge];
+    [challenge release];
 }
 
 - (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string;
 {
     [[(NSObject *)[self delegate] mainThreadProxy] uploader:self appendString:string toTranscript:CKTranscriptSent];
+}
+
+#pragma mark NSURLAuthenticationChallengeSender
+
+- (void)threaded_useCredentialForCurrentAuthenticationChallenge:(NSURLCredential *)credential;
+{
+    NSURLAuthenticationChallenge *realChallenge = [_challenge retain];
+    [_challenge release]; _challenge = nil;
+    
+    [[realChallenge sender] useCredential:credential forAuthenticationChallenge:realChallenge];
+    [realChallenge release];
+}
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_useCredentialForCurrentAuthenticationChallenge:) object:credential];
+    
+    NSOperationQueue *queue = ([_queue isSuspended] ? _startupQueue : _queue);
+    [queue addOperation:op];
+    [op release];
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:[_challenge sender] selector:_cmd object:_challenge];
+    NSOperationQueue *queue = ([_queue isSuspended] ? _startupQueue : _queue);
+    [queue addOperation:op];
+    [op release];
+    
+    [_challenge release]; _challenge = nil;
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:[_challenge sender] selector:_cmd object:_challenge];
+    NSOperationQueue *queue = ([_queue isSuspended] ? _startupQueue : _queue);
+    [queue addOperation:op];
+    [op release];
+    
+    [_challenge release]; _challenge = nil;
 }
 
 @end
