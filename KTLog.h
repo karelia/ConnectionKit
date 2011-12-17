@@ -92,7 +92,7 @@ typedef enum {
 // we do retain the delegate
 + (void)setDelegate:(id)delegate;
 
-+ (IBAction)configure:(id)sender;
+- (IBAction)configure:(id)sender;
 
 // Private Methods
 - (NSArray *)levelNames;
