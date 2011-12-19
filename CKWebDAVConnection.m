@@ -239,7 +239,10 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)directoryContents
 {
-    DAVListingRequest *request = [[DAVListingRequest alloc] initWithPath:[self currentDirectory]
+    NSString *path = [self currentDirectory];
+    if (!path) path = @"/";
+    
+    DAVListingRequest *request = [[DAVListingRequest alloc] initWithPath:path
                                                                  session:[self webDAVSession]
                                                                 delegate:self];
     [self enqueueOperation:request];
