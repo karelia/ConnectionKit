@@ -587,7 +587,7 @@
 				<integer>240</integer>
 			</dict>
 		</dict>
-		<string>プリント...</string>
+		<string>プリント…</string>
 		<string>p</string>
 		<dict>
 			<key>$class</key>
@@ -651,7 +651,7 @@
 				<integer>37</integer>
 			</dict>
 		</dict>
-		<string>ページ設定...</string>
+		<string>ページ設定…</string>
 		<string>P</string>
 		<dict>
 			<key>$class</key>
@@ -1756,7 +1756,7 @@
 				<integer>117</integer>
 			</dict>
 		</dict>
-		<string>スペル...</string>
+		<string>スペル…</string>
 		<string>:</string>
 		<dict>
 			<key>$class</key>
@@ -2132,7 +2132,7 @@
 				<integer>197</integer>
 			</dict>
 		</dict>
-		<string>検索...</string>
+		<string>検索…</string>
 		<string>f</string>
 		<string>performFindPanelAction:</string>
 		<dict>
@@ -2994,7 +2994,7 @@
 				<integer>190</integer>
 			</dict>
 		</dict>
-		<string>環境設定...</string>
+		<string>環境設定…</string>
 		<string>,</string>
 		<string>編集</string>
 		<dict>
@@ -3872,7 +3872,7 @@
 				<integer>232</integer>
 			</dict>
 		</dict>
-		<string>別名で保存...</string>
+		<string>別名で保存…</string>
 		<string>S</string>
 		<dict>
 			<key>$class</key>
@@ -3910,7 +3910,7 @@
 				<integer>235</integer>
 			</dict>
 		</dict>
-		<string>開く...</string>
+		<string>開く…</string>
 		<string>o</string>
 		<string>ドロップレットランチャー</string>
 		<dict>
