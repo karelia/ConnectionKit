@@ -1,1 +1,307 @@
-��
+/* authorise */
+"%@\nWhat would you like to do?" = "%@\n¿Qué desea hacer?";
+
+/* ConnectionOpenPanel */
+"A Connection Error Occurred" = "Ha ocurrido un error de conexión";
+
+/* FTP Abort */
+"Action Aborted. Local Error" = "Acción abortada. Error local";
+
+/* FTP no data stream types available */
+"All data connection modes have been exhausted. Check with the server administrator." = "Se han agotado todos los modos de conexión de datos posibles. Comuníquese con el administrador del servidor.";
+
+/* multiple connection joiner */
+"and" = "y";
+
+/* close window */
+"Are you sure you want to stop the upload?" = "¿Está seguro que desea detener la carga del archivo en el servidor?";
+
+/* authorise */
+"Authorize" = "Autorizar";
+
+/* authorise */
+"Authorize Connection?" = "¿Autorizar conexión?";
+
+/* connection type */
+"auto" = "automático";
+
+/* config */
+"Bad Configuration" = "Error de configuración";
+
+/* error */
+"Bad Droplet" = "Gotero dañado";
+
+/* context menu
+   tree controller action gear */
+
+"Browse Packages" = "Explorar paquetes";
+
+/* filesize: bytes */
+"bytes" = "bytes";
+
+/* authorise */
+"Cancel" = "Cancelar";
+
+/* FTP upload error */
+"Cannot Upload File. Storage quota on server exceeded" = "No se puede cargar el archivo en el servidor. Se ha excedido la cuota de almacenamiento en el servidor.";
+
+/* connected message
+   transfer controller */
+
+"Connected to %@" = "Conectado a %@";
+
+/* file transcript */
+"Connected to File System" = "Conectado al sistema de archivos";
+
+/* connection string */
+"Connecting to %@" = "Conectado a %@";
+
+/* file transcript */
+"Connecting..." = "Conectando...";
+
+/* close window */
+"Continue Upload" = "Continuar la carga del archivo.";
+
+/* file transcript */
+"Copying %@ to %@" = "Copiando del %1$@ al %2$@";
+
+/* FileConnection set permissions error */
+"Could not change file permissions" = "No se pudieron cambiar los permisos del archivo";
+
+/* FileConnection create directory error */
+"Could not create directory" = "No se puedo crear el directorio";
+
+/* config */
+"Couldn't find configuration file specified\n %@" = "No se pudo encontrar el archivo de configuración especificado\n %@";
+
+/* file transcript */
+"Create Directory %@ (%lo)" = "Crear directorio %1$@ (%2$lo)";
+
+/* FTP Create directory error */
+"Create directory operation failed" = "La operación para crear el directorio ha fallado.";
+
+/* Failed to open a data stream connection */
+"Data Stream Timed Out" = "El flujo de datos ha expirado";
+
+/* outline view column context menu item
+   outline view column header name */
+
+"Date Modified" = "Modificación";
+
+/* file transcript */
+"Deleting File %@" = "Borrando el archivo %@";
+
+/* status */
+"Disconnected" = "Desconectado";
+
+/* transfer controller */
+"Disconnected from %@" = "Desconectado de %@";
+
+/* unknown UTI name */
+"Document" = "Documento";
+
+/* filesize: exabytes */
+"EB" = "EB";
+
+/* Directory Parsing Error */
+"Error parsing directory listing" = "Error al procesar la lista de directorios";
+
+/* FTP no data streams available */
+"Exhausted all connection types to server. Please contact server administrator" = "Se han agotado todos los tipos de conexión con el servidor. Por favor, pongase en contacto con el administrador del servidor";
+
+/* Bad ftp command */
+"Failed to change to directory" = "Fallo al cambiar al directorio";
+
+/* couldn't delete the file */
+"Failed to delete directory" = "Fallo al borrar el directorio";
+
+/* error for deleting a directory */
+"Failed to delete directory: %@" = "Fallo al borrar el directorio: %@";
+
+/* couldn't delete the file */
+"Failed to delete file" = "Fallo al borrar el archivo";
+
+/* error for deleting a file */
+"Failed to delete file: %@" = "Fallo al borrar el archivo: %@";
+
+/* Failed to rename file. */
+"Failed to rename file." = "Fallo al renombrar el archivo.";
+
+/* FTP Upload error */
+"Failed to set permissions for path %@" = "Fallo al establecer permisos a la ruta %@";
+
+/* FileConnection copy data error */
+"Failed to upload data" = "Fallo al subir los datos";
+
+/* error transferring */
+"Failed to verify file transferred successfully" = "Fallo al verificar la transferencia satisfactoria del archivo";
+
+/* FTP file download error */
+"File %@ does not exist on server" = "El archivo %@ no existe en el servidor";
+
+/* FileConnection error */
+"File Already Exists" = "El archivo ya existe";
+
+/* FileConnection error */
+"File does not exist" = "El archivo no existe";
+
+/* FTP file in use */
+"File in Use" = "Archivo en uso";
+
+/* directory kind */
+"Folder" = "Carpeta";
+
+/* FTP service timed out */
+"FTP service not available; Remote server has closed connection" = "El servicio FTP no está disponible; el servidor remoto ha cerrado la conexión";
+
+/* FTP no service */
+"FTP Service Unavailable" = "Servicio FTP no disponible";
+
+/* filesize: gigabytes */
+"GB" = "GB";
+
+/* transfer controller */
+"Hide Files" = "Ocultar archivos";
+
+/* Couldn't open the port to the host
+   Host Unavailable */
+
+"Host Unavailable" = "Servidor no disponible";
+
+/* FTP Error */
+"Invalid Account name" = "Nombre de cuenta invalido";
+
+/* Stream Error before opening */
+"Is the service running on the server" = "Está el servicio corriendo en el servidor";
+
+/* filesize: kilobytes */
+"KB" = "KB";
+
+/* outline view column context menu item
+   outline view column header name */
+
+"Kind" = "Clase";
+
+/* File doesn't exist */
+"Local file %@ doesn't exist" = "El archivo local %@ no existe";
+
+/* FTP download error */
+"Local File already exists" = "El archivo local ya existe";
+
+/* filesize: megabytes */
+"MB" = "MB";
+
+/* outline view column context menu item
+   outline view column header name */
+
+"Name" = "Nombre";
+
+/* tree controller action gear */
+"New Folder" = "Carpeta nueva";
+
+/* config */
+"No configuration file specified" = "No se especificó un archivo de configuración";
+
+/* failed to find a connection class */
+"No connection available for requested connection type" = "No hay una conexión disponible para el tipo requerido";
+
+/* FTP Error */
+"No Storage Space Available" = "No hay espacio de almacenamiento disponible";
+
+/* No such file */
+"No such file" = "No existe este archivo";
+
+/* FTP Error */
+"Not Logged In" = "No está conectado";
+
+/* OK */
+"OK" = "Aceptar";
+
+/* filesize: petabytes */
+"PB" = "PB";
+
+/* Permission Denied */
+"Permission Denied" = "Permiso denegado";
+
+/* mimic Finder naming conventions */
+"Plain text document" = "Documento de texto simple";
+
+/* config
+   error */
+
+"Quit" = "Salir";
+
+/* tree controller action gear */
+"Refresh" = "Actualizar";
+
+/* file transcript */
+"Renaming %@ to %@" = "Renombrando del %1$@ al %2$@";
+
+/* abbreviation for seconds, e.g. 12 MB/s */
+"s" = "s";
+
+/* transfer controller */
+"Show Files" = "Mostrar archivos";
+
+/* context menu
+   tree controller action gear */
+
+"Show Hidden Files" = "Mostrar archivos ocultos";
+
+/* context menu
+   tree controller action gear */
+
+"Show Package Extensions" = "Mostrar extensiones de los paquetes";
+
+/* outline view column context menu item
+   outline view column header name */
+
+"Size" = "Tamaño";
+
+/* close window */
+"Stop Upload" = "Detener la carga del archivo";
+
+/* close window */
+"Stop Upload?" = "¿Detener la carga?";
+
+/* Error creating stream */
+"Stream Unavailable" = "Flujo no disponible";
+
+/* filesize: terabytes */
+"TB" = "TB";
+
+/* error transferring */
+"The transferred file has a size of 0." = "El archivo transferido tiene tamaño de 0.";
+
+/* error */
+"This droplet is missing the original application that created it. You will need to reinstall the original application." = "Este gotero no encuentra la aplicación original con el que fue creado; necesitará reinstalarla.";
+
+/* time out */
+"Timed Out waiting for remote host." = "Tiempo expirado mientras se esperaba al servidor remoto.";
+
+/* Transfer Controller */
+"Too many files had transfer problems" = "Demasiados archivos han tenido problemas en la transferencia";
+
+/* FileConnection failed to copy file */
+"Unable to store data in file" = "Imposible almacenar datos en el archivo";
+
+/* status message */
+"Uploading" = "Cargando";
+
+/* status */
+"Uploading %@" = "Cargando %@";
+
+/* file transcript */
+"Writing data to %@" = "Escribiendo datos a %@";
+
+/* Bonjour Error */
+"You can not add a child collection to the Bonjour category." = "No puede añadir una colección hija a la categoría de Bonjour.";
+
+/* Bonjour Error */
+"You can not add a new server to the Bonjour category." = "No puede añadir un nuevo servidor a la categoría de Bonjour.";
+
+/* FTP file upload error */
+"You do not have access to write file %@" = "No tiene acceso de escritura al archivo %@";
+
+/* FTP Error */
+"You need an Account to Upload Files" = "Necesita una cuenta para poder subir los archivos";
