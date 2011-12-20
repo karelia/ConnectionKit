@@ -106,13 +106,13 @@
     NSAssert([NSThread isMainThread], @"CKUploader can only be used on main thread");
     
     
+    if (!(_options & CKUploadingDryRun)) [_connection connect];	// ensure we're connected
+    
+    
     if ([path isEqualToString:@"/"] || [path isEqualToString:@""]) // The root for absolute and relative paths
     {
         return [self rootTransferRecord];
     }
-    
-    
-    if (!(_options & CKUploadingDryRun)) [_connection connect];	// ensure we're connected
     
     
     // Ensure the parent directory is created first
