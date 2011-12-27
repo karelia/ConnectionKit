@@ -23,6 +23,7 @@
     NSOperationQueue    *_startupQueue;
     
     NSURLAuthenticationChallenge    *_challenge;
+    NSURLAuthenticationChallenge    *_mainThreadChallenge;
 }
 
 @property(nonatomic, retain, readonly) CK2SFTPSession *SFTPSession;
@@ -296,6 +297,11 @@
         
         [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
     }
+}
+
+- (void)connection:(id<CKPublishingConnection>)connection didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [[self delegate] uploader:self didCancelAuthenticationChallenge:challenge];
 }
 
 - (void)connection:(id <CKPublishingConnection>)con uploadDidBegin:(NSString *)remotePath;
@@ -628,9 +634,14 @@
     
     _challenge = [challenge retain];
     
-    challenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
+    _mainThreadChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
     [[self mainThreadProxy] connection:nil didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
+    [_mainThreadChallenge release]; // delegate will hold onto it we hope!
+}
+
+- (void)SFTPSession:(CK2SFTPSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [[self mainThreadProxy] connection:nil didCancelAuthenticationChallenge:_mainThreadChallenge];
 }
 
 - (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string;
