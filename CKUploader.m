@@ -644,9 +644,11 @@
     [[self mainThreadProxy] connection:nil didCancelAuthenticationChallenge:_mainThreadChallenge];
 }
 
-- (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string;
+- (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string received:(BOOL)received;
 {
-    [[(NSObject *)[self delegate] mainThreadProxy] uploader:self appendString:string toTranscript:CKTranscriptSent];
+    [[(NSObject *)[self delegate] mainThreadProxy] uploader:self
+                                               appendString:string
+                                               toTranscript:(received ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
