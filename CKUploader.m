@@ -612,7 +612,7 @@
 
 - (void)SFTPSession:(CK2SFTPSession *)session didFailWithError:(NSError *)error;
 {
-    [[self delegate] uploader:self didFailWithError:error];
+    [[self mainThreadProxy] connectionDidReceiveError:error];
 }
 
 - (void)SFTPSession:(CK2SFTPSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
