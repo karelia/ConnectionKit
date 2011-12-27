@@ -629,7 +629,8 @@
         
         [self SFTPSession:session appendStringToTranscript:[NSString stringWithFormat:
                                                             @"Fingerprint: %@",
-                                                            fingerprint]];
+                                                            fingerprint]
+                 received:YES];
     }
     
     _challenge = [challenge retain];
