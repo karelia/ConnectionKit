@@ -128,6 +128,11 @@
     [[self delegate] connection:self didReceiveAuthenticationChallenge:challenge];
 }
 
+- (void)SFTPSession:(CK2SFTPSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
+}
+
 - (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string received:(BOOL)received;
 {
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
