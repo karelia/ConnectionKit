@@ -636,7 +636,7 @@
     _challenge = [challenge retain];
     
     _mainThreadChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
-    [[self mainThreadProxy] connection:nil didReceiveAuthenticationChallenge:challenge];
+    [[self mainThreadProxy] connection:nil didReceiveAuthenticationChallenge:_mainThreadChallenge];
     [_mainThreadChallenge release]; // delegate will hold onto it we hope!
 }
 
