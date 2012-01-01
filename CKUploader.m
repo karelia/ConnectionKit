@@ -656,8 +656,8 @@
 
 - (void)threaded_useCredentialForCurrentAuthenticationChallenge:(NSURLCredential *)credential;
 {
-    NSURLAuthenticationChallenge *realChallenge = [_challenge retain];
-    [_challenge release]; _challenge = nil;
+    NSURLAuthenticationChallenge *realChallenge = _challenge;
+    _challenge = nil;   // gets released in a moment; just want to clear out the ivar right now
     
     [[realChallenge sender] useCredential:credential forAuthenticationChallenge:realChallenge];
     [realChallenge release];
