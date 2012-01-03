@@ -78,6 +78,9 @@
 
 - (void)SFTPSessionDidInitialize:(CK2SFTPSession *)session;
 {
+    // Store current directory ready for when somebody (*cough* open panel) asks for it
+    [self setCurrentDirectory:[session currentDirectoryPath:NULL]];
+    
     if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
     {
         [[self delegate] connection:self didConnectToHost:[_url host] error:nil];
@@ -125,10 +128,15 @@
     [[self delegate] connection:self didReceiveAuthenticationChallenge:challenge];
 }
 
-- (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string;
+- (void)SFTPSession:(CK2SFTPSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
+}
+
+- (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string received:(BOOL)received;
 {
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self appendString:string toTranscript:CKTranscriptReceived];
+    [proxy connection:self appendString:string toTranscript:(received ? CKTranscriptReceived : CKTranscriptSent)];
     [proxy release];
 }
 
