@@ -437,8 +437,8 @@
 		CE94B90D1463124A00F90408 /* es */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = es; path = es.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE94B90E1463124A00F90408 /* es */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = es; path = es.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CE94B90F1463124A00F90408 /* es */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = es; path = es.lproj/KTLog.nib; sourceTree = "<group>"; };
-		CE94B9101463124A00F90408 /* es */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CE953A04102BACE70066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = pt_BR; path = pt_BR.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE94B9101463124A00F90408 /* es */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		CE953A04102BACE70066C08F /* pt_BR */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = pt_BR; path = pt_BR.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE953A05102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKDirectoryTree.nib; sourceTree = "<group>"; };
 		CE953A06102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/CKTransferController.nib; sourceTree = "<group>"; };
 		CE953A07102BAD030066C08F /* pt_BR */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = pt_BR; path = pt_BR.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
