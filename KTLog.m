@@ -447,7 +447,7 @@ static NSString *KTLevelMap[] = {
 	[oDomains setDataSource:self];
 }
 
-+ (IBAction)configure:(id)sender
++ (void)configure:(id)sender;
 {
 	[[KTLogger sharedLogger] configure:sender];
 }
