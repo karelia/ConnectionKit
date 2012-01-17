@@ -73,7 +73,7 @@ enum {
 	NSString *lastDirectory;
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;

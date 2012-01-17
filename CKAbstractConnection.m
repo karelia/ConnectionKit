@@ -86,57 +86,9 @@ NSDictionary *sDataAttributes = nil;
 + (NSArray *)URLSchemes { return nil; }
 
 #pragma mark -
-#pragma mark Transcript
-
-/*	The string attributes to use for the different types of transcript logging
- */
-
-+ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript
-{
-	NSDictionary *attributes = nil;
-	
-	switch (transcript)
-	{
-		case CKTranscriptSent:
-			attributes = [self sentTranscriptStringAttributes];
-			break;
-		case CKTranscriptReceived:
-			attributes = [self receivedTranscriptStringAttributes];
-			break;
-		case CKTranscriptData:
-			attributes = [self dataTranscriptStringAttributes];
-			break;
-	}
-	
-	NSAttributedString *result = [NSAttributedString attributedStringWithString:string attributes:attributes];
-	return result;
-}
-
-+ (NSDictionary *)sentTranscriptStringAttributes
-{
-    if (!sSentAttributes)
-        sSentAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor redColor], NSForegroundColorAttributeName, nil];
-    return sSentAttributes;
-}
-
-+ (NSDictionary *)receivedTranscriptStringAttributes
-{
-    if (!sReceivedAttributes)
-        sReceivedAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier-Bold" size:11], NSFontAttributeName, [NSColor blackColor], NSForegroundColorAttributeName, nil];
-    return sReceivedAttributes;
-}
-
-+ (NSDictionary *)dataTranscriptStringAttributes
-{
-    if (!sDataAttributes)
-        sDataAttributes = [[NSDictionary alloc] initWithObjectsAndKeys:[NSFont fontWithName:@"Courier" size:11], NSFontAttributeName, [NSColor blueColor], NSForegroundColorAttributeName, nil];
-    return sDataAttributes;
-}
-
-#pragma mark -
 #pragma mark Inheritable methods
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	NSParameterAssert(request);
     
@@ -186,7 +138,7 @@ NSDictionary *sDataAttributes = nil;
 	return [NSString stringWithFormat:@"%@ - %@", [super description], _name];
 }
 
-- (CKConnectionRequest *)request { return _request; }
+- (NSURLRequest *)request { return _request; }
 
 - (NSInteger)port
 {
@@ -334,7 +286,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 }
@@ -369,10 +321,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
@@ -457,10 +406,9 @@ NSDictionary *sDataAttributes = nil;
 		else
 		{
 			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
-			record = [self uploadFile:path
-							   toFile:remote
-				 checkRemoteExistence:NO
-							 delegate:nil];
+			record = [self uploadFileAtURL:[NSURL fileURLWithPath:path]
+                                    toPath:remote
+                          posixPermissions:nil];
 			if (![[root path] isEqualToString:@"/"])
 			{
 				[self _mergeRecord:record into:root];
@@ -517,10 +465,9 @@ NSDictionary *sDataAttributes = nil;
 	if ([fm fileExistsAtPath:localPath isDirectory:&isDir] && !isDir)
 	{
 		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
-		record = [self uploadFile:localPath
-						   toFile:remote
-			 checkRemoteExistence:NO
-						 delegate:nil];
+		record = [self uploadFileAtURL:[NSURL fileURLWithPath:localPath]
+                                toPath:remote
+                      posixPermissions:nil];
 		if (![[root path] isEqualToString:@"/"])
 		{
 			[self _mergeRecord:record into:root];
@@ -554,10 +501,7 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
@@ -710,7 +654,7 @@ NSDictionary *sDataAttributes = nil;
 	if ([nm isEqualToString:UKFileWatcherAttributeChangeNotification]) //UKFileWatcherWriteNotification does not get called because of atomicity of file writing (i believe)
 	{
 		KTLog(CKEditingDomain, KTLogDebug, @"File changed: %@... uploading to server", fpath);
-		[self uploadFile:fpath toFile:[_edits objectForKey:fpath] checkRemoteExistence:NO delegate:nil];
+		[self uploadFileAtURL:[NSURL fileURLWithPath:fpath] toPath:[_edits objectForKey:fpath] posixPermissions:nil];
 	}
 }
 

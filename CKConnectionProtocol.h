@@ -31,8 +31,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import "CKConnectionRequest.h"
-
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
@@ -59,6 +57,7 @@ typedef enum {
 	CKTranscriptSent,
 	CKTranscriptReceived,
 	CKTranscriptData,
+    CKTranscriptInfo,
 } CKTranscriptType;
 
 
@@ -80,7 +79,7 @@ typedef enum {
  that is used for the loading process.
  @result Returns an initialized connection object or nil if the request was unsuitable.
  */
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 
 /*!
  @discussion The delegate is not retained. The delegate should implement any of the methods in the CKConnectionDelegate informal protocol to receive callbacks when connection events occur.
@@ -114,27 +113,18 @@ typedef enum {
 	You must implement the ConnectionTransferDelegate informal protocol.
 	By default the transfer record returned is the delegate of the transfer.
 */
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 
 /* 
  New method that allows you to set a custom delegate for the upload.
  You must implement the ConnectionTransferDelegate informal protocol.
  By default the transfer record returned is the delegate of the transfer.
  */
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 
 - (void)deleteFile:(NSString *)path;
 
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
-
-- (void)createDirectory:(NSString *)dirPath;
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 - (void)changeToDirectory:(NSString *)dirPath;
 - (NSString *)currentDirectory;
 - (void)directoryContents;
@@ -159,7 +149,7 @@ typedef enum {
  @discussion Please do NOT modify this request in any way!
  @result Returns the request supplied when creating the connection.
  */
-- (CKConnectionRequest *)request;
+- (NSURLRequest *)request;
 
 
 // you can set a name on a connection to help with debugging.
@@ -218,6 +208,7 @@ typedef enum {
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag;
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
 - (void)checkExistenceOfPath:(NSString *)path;
 

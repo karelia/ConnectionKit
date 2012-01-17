@@ -1756,7 +1756,7 @@
 				<integer>117</integer>
 			</dict>
 		</dict>
-		<string>拼写...</string>
+		<string>拼写…</string>
 		<string>:</string>
 		<dict>
 			<key>$class</key>
@@ -2132,7 +2132,7 @@
 				<integer>194</integer>
 			</dict>
 		</dict>
-		<string>查找...</string>
+		<string>查找…</string>
 		<string>f</string>
 		<string>performFindPanelAction:</string>
 		<dict>
@@ -2830,7 +2830,7 @@
 				<integer>181</integer>
 			</dict>
 		</dict>
-		<string>偏好设置...</string>
+		<string>偏好设置…</string>
 		<string>,</string>
 		<dict>
 			<key>$class</key>

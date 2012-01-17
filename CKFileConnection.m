@@ -89,7 +89,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObject:@"file"]; }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{
@@ -100,7 +100,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (id)init
 {
-	return [self initWithRequest:[CKConnectionRequest requestWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]]];
+	return [self initWithRequest:[NSURLRequest requestWithURL:[NSURL fileURLWithPath:NSHomeDirectory()]]];
 }
 
 - (void)dealloc
@@ -113,7 +113,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (!_isConnecting && ![self isConnected])
 	{
-		[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting...", @"file transcript") toTranscript:CKTranscriptSent];
+		//[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting…", @"file transcript") toTranscript:CKTranscriptSent];
 		[super connect];
 	}
 }
@@ -128,7 +128,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[super threadedConnect];
 	
     myFileManager = [[NSFileManager alloc] init];
-	[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
+	//[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connected to File System", @"file transcript") toTranscript:CKTranscriptSent];
 	[self setState:CKConnectionIdleState];
 }
 
@@ -184,7 +184,7 @@ checkRemoteExistence:(NSNumber *)check;
 
 - (void)createDirectory:(NSString *)dirPath
 {
-	[self createDirectory:dirPath permissions:0755];
+	[self createDirectoryAtPath:dirPath posixPermissions:[NSNumber numberWithUnsignedLong:0755]];
 }
 
 - (void)fcCreateDirectory:(NSString *)aName permissions:(NSNumber *)perms
@@ -192,7 +192,7 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setCurrentOperation:kCreateDirectory];
 	unsigned long aPermissions = [perms unsignedLongValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Create Directory %@ (%lo)", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"mkdir %@ (%lo)", @"file transcript")
                    toTranscript:CKTranscriptSent,
                                 aName,
 								aPermissions];
@@ -222,13 +222,13 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)aPermissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	NSAssert(path && ![path isEqualToString:@""], @"no directory specified");
 	
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcCreateDirectory:permissions:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:dirPath, [NSNumber numberWithUnsignedLong:aPermissions], nil]];
+												   arguments:[NSArray arrayWithObjects:path, permissions, nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionCreateDirectoryState
@@ -313,7 +313,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	[self setCurrentOperation:kDeleteFile];
 	
-    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Deleting File %@", @"file transcript")
+    [[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"rm(dir) %@", @"file transcript")
                    toTranscript:CKTranscriptSent, path];
 	
 	
@@ -391,7 +391,7 @@ checkRemoteExistence:(NSNumber *)check;
 	NSFileManager *fm = myFileManager;
 	BOOL flag = [check boolValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Copying %@ to %@", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"cp %@ %@", @"file transcript")
                    toTranscript:CKTranscriptSent, [upload localPath], [upload remotePath]];
 		
     if (![fm fileExistsAtPath:[upload localPath]])
@@ -495,25 +495,26 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+    if (![url isFileURL]) return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
+    
+    
+	NSAssert(url && ![[url absoluteString] isEqualToString:@""], @"localPath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
+    
 	
-	NSDictionary *attribs = [myFileManager attributesOfItemAtPath:localPath error:NULL];
-	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
-	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:localPath
+	NSDictionary *attribs = [myFileManager attributesOfItemAtPath:[url path] error:NULL];
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:path size:[[attribs objectForKey:NSFileSize] unsignedLongLongValue]];
+	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:[url path]
 																			data:nil
 																		  offset:0
-																		  remote:remotePath
-																		delegate:(delegate) ? delegate : rec
+																		  remote:path
+																		delegate:rec
 																		userInfo:rec];
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUpload:checkRemoteExistence:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
+												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:NO], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionUploadingFileState
@@ -521,6 +522,12 @@ checkRemoteExistence:(NSNumber *)check;
 											   userInfo:nil];
 	[self queueUpload:upload];
 	[self queueCommand:cmd];
+    
+    
+    // Enqueue permissions
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
+    
 	return rec;
 }
 
@@ -528,7 +535,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	BOOL flag = [check boolValue];
 	
-	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Writing data to %@", @"file transcript")
+	[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Writing > %@", @"file transcript")
                    toTranscript:CKTranscriptSent, [upload remotePath]];
 	
 	if (flag)
@@ -589,31 +596,31 @@ checkRemoteExistence:(NSNumber *)check;
 	[self setState:CKConnectionIdleState];
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
 	
-	CKTransferRecord *rec = [CKTransferRecord recordWithName:remotePath
+	CKTransferRecord *rec = [CKTransferRecord recordWithName:path
 														size:[data length]];
 	CKInternalTransferRecord *upload = [CKInternalTransferRecord recordWithLocal:nil
 																			data:data
 																		  offset:0
-																		  remote:remotePath
-																		delegate:delegate ? delegate : rec
+																		  remote:path
+																		delegate:rec
 																		userInfo:rec];
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(fcUploadData:checkRemoteExistence:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:flag], nil]];
+												   arguments:[NSArray arrayWithObjects:upload, [NSNumber numberWithBool:NO], nil]];
 	CKConnectionCommand *cmd = [CKConnectionCommand command:inv
 											 awaitState:CKConnectionIdleState
 											  sentState:CKConnectionUploadingFileState
 											  dependant:nil
 											   userInfo:nil];
 	[self queueCommand:cmd];
+    
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
 	return rec;
 }
 

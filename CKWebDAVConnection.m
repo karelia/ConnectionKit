@@ -20,7 +20,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 {
     if (self = [self init])
     {
@@ -171,25 +171,22 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     return result;
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
-                         toFile:remotePath
-           checkRemoteExistence:flag
-                       delegate:delegate];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
     NSParameterAssert(data);
     
-    remotePath = [self canonicalPathForPath:remotePath];
-    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:remotePath session:[self webDAVSession] delegate:self];
+    path = [self canonicalPathForPath:path];
+    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
     [request setData:data];
     
     
     CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                             (CFStringRef)[remotePath pathExtension],
+                                                             (CFStringRef)[path pathExtension],
                                                              NULL
                                                              );
     CFStringRef mimeType = NULL;
@@ -204,30 +201,23 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     
     [self enqueueOperation:request];
     
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
     CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
     [request release];
     return result;
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self createDirectory:dirPath];
-}
-
-- (void)createDirectory:(NSString *)dirPath;
-{
-    dirPath = [self canonicalPathForPath:dirPath];
+    path = [self canonicalPathForPath:path];
     
-    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:dirPath
+    DAVMakeCollectionRequest *request = [[DAVMakeCollectionRequest alloc] initWithPath:path
                                                                                session:[self webDAVSession]
                                                                               delegate:self];
     
     [self enqueueOperation:request];
     [request release];
 }
-
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path; { /* ignore! */ }
 
 - (void)deleteFile:(NSString *)path
 {

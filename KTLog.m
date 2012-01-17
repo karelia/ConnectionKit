@@ -425,7 +425,7 @@ static NSString *KTLevelMap[] = {
 #pragma mark -
 #pragma mark Configuration UI
 
-- (IBAction)configure:(id)sender
+- (void)configure:(id)sender;
 {
 	if (!oPanel)
 	{
@@ -447,7 +447,7 @@ static NSString *KTLevelMap[] = {
 	[oDomains setDataSource:self];
 }
 
-+ (IBAction)configure:(id)sender
++ (void)configure:(id)sender;
 {
 	[[KTLogger sharedLogger] configure:sender];
 }

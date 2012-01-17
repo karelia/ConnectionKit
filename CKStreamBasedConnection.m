@@ -85,7 +85,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 
 @implementation CKStreamBasedConnection
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if ([[[request URL] host] length] == 0) // our subclasses need a hostname to connect to
     {
@@ -1543,7 +1543,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 		NSString *fromRootPath = [[_recursiveS3RenamesQueue objectAtIndex:0] objectForKey:@"FromDirectoryPath"];
 		NSString *toRootPath = [[_recursiveS3RenamesQueue objectAtIndex:0] objectForKey:@"ToDirectoryPath"];
 		NSString *toDirPath = [toRootPath stringByAppendingPathComponent:[dirPath substringFromIndex:[fromRootPath length]]];
-		[con createDirectory:toDirPath];
+		[con createDirectory:toDirPath posixPermissions:nil];
 		
 		NSEnumerator *contentsEnumerator = [contents objectEnumerator];
 		NSDictionary *itemDict;

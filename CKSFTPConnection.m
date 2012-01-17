@@ -30,7 +30,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(CKConnectionRequest *)request;
+- (id)initWithRequest:(NSURLRequest *)request;
 {
     if (self = [self init])
     {
@@ -157,27 +157,24 @@
     return result;
 }
 
-- (CKTransferRecord *)uploadFile:(NSString *)localPath toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self uploadFromData:[NSData dataWithContentsOfFile:localPath]
-                         toFile:remotePath
-           checkRemoteExistence:flag
-                       delegate:delegate];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data toFile:(NSString *)remotePath checkRemoteExistence:(BOOL)flag delegate:(id)delegate;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
     NSParameterAssert(data);
     
-    CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
     //CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
     
-    remotePath = [self canonicalPathForPath:remotePath];
+    path = [self canonicalPathForPath:path];
     
     
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:permissions:)
                                                              target:self
-                                                          arguments:[NSArray arrayWithObjects:data, remotePath, result, nil]];
+                                                          arguments:[NSArray arrayWithObjects:data, path, result, permissions, nil]];
     
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
@@ -187,13 +184,15 @@
     return result;
 }
 
-- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record;
+- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
     NSAssert(sftpSession, @"Trying to write data without having started session");
     
+    unsigned long mode = (permissions ? [permissions unsignedLongValue] : 0644);
+    
     NSError *error;
-    CK2SFTPFileHandle *handle = [sftpSession openHandleAtPath:path flags:(LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT) mode:0644 error:&error];
+    CK2SFTPFileHandle *handle = [sftpSession openHandleAtPath:path flags:(LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT) mode:mode error:&error];
     
     if (handle)
     {
@@ -210,29 +209,27 @@
     [proxy release];
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions;
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    return [self createDirectory:dirPath];
-}
-
-- (void)createDirectory:(NSString *)dirPath;
-{
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_createDirectoryAtPath:) object:dirPath];
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_createDirectoryAtPath:permissions:)
+                                                             target:self
+                                                          arguments:[NSArray arrayWithObjects:path, permissions, nil]];
     
+    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
     [op release];
 }
 
-- (void)threaded_createDirectoryAtPath:(NSString *)path;
+- (void)threaded_createDirectoryAtPath:(NSString *)path permissions:(NSNumber *)permissions;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
     NSAssert(sftpSession, @"Trying to write data without having started session");
     
+    unsigned long mode = (permissions ? [permissions unsignedLongValue] : (0644 | 0111));
+    
     NSError *error;
-    [sftpSession createDirectoryAtPath:path mode:(0644 | 0111) error:&error];
+    [sftpSession createDirectoryAtPath:path mode:mode error:&error];
 }
-
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path; { /* ignore! */ }
 
 - (void)deleteFile:(NSString *)path
 {

@@ -158,7 +158,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return [NSArray arrayWithObject:@"ftp"];
 }
 
-- (id)initWithRequest:(CKConnectionRequest *)request
+- (id)initWithRequest:(NSURLRequest *)request
 {
 	if (self = [super initWithRequest:request])
 	{
@@ -2831,24 +2831,27 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}*/
 }
 
-- (void)createDirectory:(NSString *)dirPath permissions:(unsigned long)permissions
+- (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(dirPath && ![dirPath isEqualToString:@""], @"no directory specified");
+	NSAssert(path && ![path isEqualToString:@""], @"no directory specified");
 	
+    if (!permissions) return [self createDirectory:path];
+    
+    
 	NSInvocation *inv = [NSInvocation invocationWithSelector:@selector(threadedSetPermissions:forFile:)
 													  target:self
-												   arguments:[NSArray arrayWithObjects: [NSNumber numberWithUnsignedLong:permissions], dirPath, nil]];
+												   arguments:[NSArray arrayWithObjects: permissions, path, nil]];
 	CKConnectionCommand *chmod = [CKConnectionCommand command:inv
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionSettingPermissionsState
 												dependant:nil
 												 userInfo:nil];
-	CKConnectionCommand *mkdir = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", dirPath]
+	CKConnectionCommand *mkdir = [CKConnectionCommand command:[NSString stringWithFormat:@"MKD %@", path]
 											   awaitState:CKConnectionIdleState 
 												sentState:CKConnectionCreateDirectoryState
 												dependant:chmod
 												 userInfo:nil];
-	[self queuePermissionChange:dirPath];
+	[self queuePermissionChange:path];
 	[self queueCommand:mkdir];
 	[self queueCommand:chmod];
 }
@@ -2919,36 +2922,41 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 /*!	Upload file to the given directory
 */
-- (CKTransferRecord *)uploadFile:(NSString *)localPath 
-						  toFile:(NSString *)remotePath 
-			checkRemoteExistence:(BOOL)flag 
-						delegate:(id)delegate
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-	NSAssert(localPath && ![localPath isEqualToString:@""], @"localPath is nil!");
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	if (![url isFileURL]) return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
+    
+    
+	NSAssert(url && ![[url path] isEqualToString:@""], @"localPath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
 	
-	return [self uploadFile:localPath
-					 orData:nil
-					 offset:0
-				 remotePath:remotePath
-	   checkRemoteExistence:flag
-				   delegate:delegate];
+	CKTransferRecord *result = [self uploadFile:[url path]
+                                         orData:nil
+                                         offset:0
+                                     remotePath:path
+                           checkRemoteExistence:NO
+                                       delegate:nil];
+    
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
+    return result;
 }
 
-- (CKTransferRecord *)uploadFromData:(NSData *)data
-							  toFile:(NSString *)remotePath 
-				checkRemoteExistence:(BOOL)flag
-							delegate:(id)delegate
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
 	NSAssert(data, @"no data");	// data should not be nil, but it shoud be OK to have zero length!
-	NSAssert(remotePath && ![remotePath isEqualToString:@""], @"remotePath is nil!");
+	NSAssert(path && ![path isEqualToString:@""], @"remotePath is nil!");
 	
-	return [self uploadFile:nil
-					 orData:data
-					 offset:0
-				 remotePath:remotePath
-	   checkRemoteExistence:flag
-				   delegate:delegate];
+	CKTransferRecord *result = [self uploadFile:nil
+                                         orData:data
+                                         offset:0
+                                     remotePath:path
+                           checkRemoteExistence:NO
+                                       delegate:nil];
+    
+    if (permissions) [self setPermissions:[permissions unsignedLongValue] forFile:path];
+    
+    return result;
 }
 
 - (CKTransferRecord *)downloadFile:(NSString *)remotePath 
@@ -3732,23 +3740,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 #pragma mark -
 
 
-@implementation CKConnectionRequest (CKFTPConnection)
+@implementation NSURLRequest (CKFTPConnection)
 
-- (NSString *)FTPDataConnectionType { return [self propertyForKey:@"CKFTPDataConnectionType"]; }
+- (NSString *)FTPDataConnectionType { return [NSURLProtocol propertyForKey:@"CKFTPDataConnectionType" inRequest:self]; }
 
 @end
 
-@implementation CKMutableConnectionRequest (CKFTPConnection)
+@implementation NSMutableURLRequest (CKFTPConnection)
 
 - (void)setFTPDataConnectionType:(NSString *)type
 {
     if (type)
     {
-        [self setProperty:type forKey:@"CKFTPDataConnectionType"];
+        [NSURLProtocol setProperty:type forKey:@"CKFTPDataConnectionType" inRequest:self];
     }
     else
     {
-        [self removePropertyForKey:@"CKFTPDataConnectionType"];
+        [NSURLProtocol removePropertyForKey:@"CKFTPDataConnectionType" inRequest:self];
     }
 }
 

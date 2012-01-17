@@ -115,16 +115,11 @@ typedef enum {
     
 @private
     NSString            *_name;
-    CKConnectionRequest *_request;
+    NSURLRequest *_request;
     id                  _delegate;
     
     CKConnectionClient  *_client;
 }
-
-+ (NSAttributedString *)attributedStringForString:(NSString *)string transcript:(CKTranscriptType)transcript;
-+ (NSDictionary *)sentTranscriptStringAttributes;
-+ (NSDictionary *)receivedTranscriptStringAttributes;
-+ (NSDictionary *)dataTranscriptStringAttributes;
 
 /*!
  @method port
