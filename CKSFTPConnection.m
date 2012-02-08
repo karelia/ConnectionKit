@@ -135,6 +135,8 @@
 
 - (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string received:(BOOL)received;
 {
+    if (![self delegate]) return;
+    
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
     [proxy connection:self appendString:string toTranscript:(received ? CKTranscriptReceived : CKTranscriptSent)];
     [proxy release];
