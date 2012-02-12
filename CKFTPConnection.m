@@ -481,11 +481,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
             NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
             [[self client] connectionDidReceiveError:error];
             
-			if (GET_STATE != CKConnectionSentQuitState)
-			{
-				[self sendCommand:@"QUIT"];
-				[self setState:CKConnectionSentQuitState];
-			}
 			break;
 		}			
 		default:
