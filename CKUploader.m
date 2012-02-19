@@ -739,8 +739,7 @@
             while (YES)
             {
                 NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-                @try
-                {
+                {{
                     if ([self isCancelled]) break;
                     
                     NSData *data = [handle readDataOfLength:CK2SFTPPreferredChunkSize];
@@ -751,15 +750,17 @@
                     {
                         [sftpHandle closeFile]; // don't care if it fails
                         sftpHandle = nil;   // so error gets sent
+                        
+                        // clean up memory stuff
+                        [error retain];
+                        [pool release];
+                        [error autorelease];
                         break;
                     }
                     
                     [[_record mainThreadProxy] transfer:_record transferredDataOfLength:[data length]];
-                }
-                @finally
-                {
-                    [pool release];
-                }
+                }}
+                [pool release];
             }
         }
         
