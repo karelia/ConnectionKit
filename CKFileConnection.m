@@ -113,7 +113,7 @@ checkRemoteExistence:(NSNumber *)check;
 {
 	if (!_isConnecting && ![self isConnected])
 	{
-		//[[self client] appendString:LocalizedStringInConnectionKitBundle(@"Connecting…", @"file transcript") toTranscript:CKTranscriptSent];
+		[[self client] appendFormat:LocalizedStringInConnectionKitBundle(@"Starting connection for %@", @"file transcript") toTranscript:CKTranscriptSent, [[[self request] URL] absoluteString]];
 		[super connect];
 	}
 }
