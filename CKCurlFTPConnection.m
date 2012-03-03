@@ -196,10 +196,17 @@
     return result;
 }
 
-- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
+- (NSMutableURLRequest *)newMutableRequestWithPath:(NSString *)path isDirectory:(BOOL)isDirectory;
 {
     NSMutableURLRequest *request = [_request mutableCopy];
-    [request setURL:[[request URL] URLByAppendingPathComponent:path]];
+    [request setURL:[[request URL] URLByAppendingPathComponent:path isDirectory:isDirectory]];
+    
+    return request;
+}
+
+- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
+{
+    NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:NO];
     [request setHTTPBody:data];
     
     [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
@@ -264,8 +271,7 @@
 {
     if (!path) path = @".";
     
-    NSMutableURLRequest *request = [_request mutableCopy];
-    [request setURL:[[request URL] URLByAppendingPathComponent:path isDirectory:YES]];
+    NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:YES];
     
     [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
     [[self handle] setString:[_credential password] forKey:CURLOPT_PASSWORD];
