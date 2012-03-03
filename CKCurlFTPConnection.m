@@ -319,4 +319,9 @@
     
 }
 
+- (void)handle:(CURLHandle *)handle appendStringToTranscript:(NSString *)string;
+{
+    [[self delegate] connection:self appendString:string toTranscript:CKTranscriptSent];
+}
+
 @end
