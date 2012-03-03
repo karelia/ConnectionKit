@@ -1,0 +1,3 @@
+[submodule "CurlHandle"]
+	path = CurlHandle
+	url = git@github.com:karelia/CurlHandle.git
