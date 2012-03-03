@@ -143,12 +143,12 @@
     [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
-- (void)SFTPSession:(CK2SFTPSession *)session appendStringToTranscript:(NSString *)string received:(BOOL)received;
+- (void)handle:(CURLHandle *)handle appendStringToTranscript:(NSString *)string;
 {
     if (![self delegate]) return;
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self appendString:string toTranscript:(received ? CKTranscriptReceived : CKTranscriptSent)];
+    [proxy connection:self appendString:string toTranscript:CKTranscriptSent];
     [proxy release];
 }
 
@@ -333,11 +333,6 @@
 - (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
 {
     
-}
-
-- (void)handle:(CURLHandle *)handle appendStringToTranscript:(NSString *)string;
-{
-    [[self delegate] connection:self appendString:string toTranscript:CKTranscriptSent];
 }
 
 @end
