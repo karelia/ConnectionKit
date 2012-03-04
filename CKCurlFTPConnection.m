@@ -143,12 +143,12 @@
     [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
-- (void)handle:(CURLHandle *)handle appendStringToTranscript:(NSString *)string;
+- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
     if (![self delegate]) return;
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self appendString:string toTranscript:CKTranscriptSent];
+    [proxy connection:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
     [proxy release];
 }
 
