@@ -252,16 +252,15 @@
 
 - (void)threaded_removeFileAtPath:(NSString *)path;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:NO];
-    
-    // My research suggests that the only way to delete a file is to pretend kinda like you're going to download it, but use Curl's QUOTE option to subsitute in an FTP deletion command instead
-    // Unfortunately, that's then immediately uploading an empty file in its place
-    // On the plus-side, there's no need to reauthenticate
-    [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[path lastPathComponent]]]
-                                    forKey:CURLOPT_PREQUOTE];   // needed so we're in the correct directory when command runs
-    
-    // Stop Curl opening data connection since we just want to delete the damn file!
+    // Navigate to the directory containing the file
+    // CURLOPT_NOBODY stops libcurl from trying to list the directory's contents
+    NSMutableURLRequest *request = [self newMutableRequestWithPath:[path stringByDeletingLastPathComponent] isDirectory:YES];
     [[self handle] setStringOrNumberObject:[NSNumber numberWithBool:YES] forKey:CURLOPT_NOBODY];
+    
+    // Custom command to delete the file once we're in the correct directory
+    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the delete command twice in my testing
+    [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[path lastPathComponent]]]
+                                    forKey:CURLOPT_POSTQUOTE];
     
     NSError *error;
     BOOL result = [[self handle] loadRequest:request error:&error];
