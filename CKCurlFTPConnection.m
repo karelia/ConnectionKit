@@ -33,8 +33,13 @@
 {
     if (self = [self init])
     {
-        _handle = [[CURLHandle alloc] init];
-        [_handle setDelegate:self];
+        _session = [[CURLFTPSession alloc] initWithRequest:request];
+        if (!_session)
+        {
+            [self release]; return nil;
+        }
+        [_session setDelegate:self];
+        
         _request = [request copy];
         
         _queue = [[NSOperationQueue alloc] init];
@@ -47,7 +52,7 @@
 {
     [_request release];
     [_credential release];
-    [_handle release];
+    [_session release];
     [_queue release];
     [_currentDirectory release];
     
@@ -68,8 +73,6 @@
 
 #pragma mark Connection
 
-- (CURLHandle *)handle; { return _handle; }
-
 - (void)connect;
 {
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[[_request URL] host]
@@ -88,8 +91,7 @@
 {
     if (challenge != _challenge) return;
     
-    [_challenge release];
-    _credential = [credential retain];
+    [_session useCredential:credential];
     
     if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
     {
@@ -143,7 +145,7 @@
     [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
 }
 
-- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
+- (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
 {
     if (![self delegate]) return;
     
@@ -196,24 +198,11 @@
     return result;
 }
 
-- (NSMutableURLRequest *)newMutableRequestWithPath:(NSString *)path isDirectory:(BOOL)isDirectory;
-{
-    NSMutableURLRequest *request = [_request mutableCopy];
-    [request setURL:[[request URL] URLByAppendingPathComponent:path isDirectory:isDirectory]];
-    
-    return request;
-}
-
 - (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:NO];
-    [request setHTTPBody:data];
-    
     NSError *error;
-    BOOL result = [_handle loadRequest:request error:&error];
-    
-    [request release];
-    
+    BOOL result = [_session createFileAtPath:path contents:data permissions:permissions error:&error];
+        
     if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
     {
         id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
@@ -235,28 +224,12 @@
 
 - (void)threaded_createDirectoryAtPath:(NSString *)path permissions:(NSNumber *)permissions;
 {
-    // Navigate to the directory above the one to be created
-    // CURLOPT_NOBODY stops libcurl from trying to list the directory's contents
-    NSMutableURLRequest *request = [self newMutableRequestWithPath:[path stringByDeletingLastPathComponent] isDirectory:YES];
-    [[self handle] setStringOrNumberObject:[NSNumber numberWithBool:YES] forKey:CURLOPT_NOBODY];
-    
-    // Custom command to delete the file once we're in the correct directory
-    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the delete command twice in my testing
-    [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[path lastPathComponent]]]
-                                    forKey:CURLOPT_POSTQUOTE];
-    
-    if (_credential)
-    {
-        [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
-        [[self handle] setString:[_credential password] forKey:CURLOPT_PASSWORD];
-        [_credential release]; _credential = nil;
-    }
-    
-    
     NSError *error;
-    BOOL result = [[self handle] loadRequest:request error:&error];
-    if (result) error = nil;
-    
+    BOOL result = [_session createDirectoryAtPath:path error:&error];
+    if (result)
+    {
+        error = nil;
+    }
 }
 
 - (void)deleteFile:(NSString *)path
@@ -270,21 +243,9 @@
 
 - (void)threaded_removeFileAtPath:(NSString *)path;
 {
-    // Navigate to the directory containing the file
-    // CURLOPT_NOBODY stops libcurl from trying to list the directory's contents
-    NSMutableURLRequest *request = [self newMutableRequestWithPath:[path stringByDeletingLastPathComponent] isDirectory:YES];
-    [[self handle] setStringOrNumberObject:[NSNumber numberWithBool:YES] forKey:CURLOPT_NOBODY];
-    
-    // Custom command to delete the file once we're in the correct directory
-    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the delete command twice in my testing
-    [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[path lastPathComponent]]]
-                                    forKey:CURLOPT_POSTQUOTE];
-    
     NSError *error;
-    BOOL result = [[self handle] loadRequest:request error:&error];
+    BOOL result = [_session removeFileAtPath:path error:&error];
     if (result) error = nil;
-    
-    [request release];
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
     [proxy connection:self didDeleteFile:path error:error];
@@ -299,12 +260,9 @@
 }
 - (void)threaded_directoryContents:(NSString *)path;
 {
-    if (!path) path = @".";
+    /*if (!path) path = @".";
     
     NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:YES];
-    
-    [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
-    [[self handle] setString:[_credential password] forKey:CURLOPT_PASSWORD];
     
     NSError *error;
     BOOL result = [_handle loadRequest:request error:&error];
@@ -314,7 +272,7 @@
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
     [proxy connection:self didReceiveContents:nil ofDirectory:path error:error];
-    [proxy release];
+    [proxy release];*/
 }
 
 #pragma mark Current Directory

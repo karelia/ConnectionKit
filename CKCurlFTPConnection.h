@@ -7,13 +7,13 @@
 //
 
 #import <Connection/Connection.h>
-#import <CURLHandle/CURLHandle.h>
+#import <CURLHandle/CURLFTPSession.h>
 
 
-@interface CKCurlFTPConnection : NSObject <CKPublishingConnection>
+@interface CKCurlFTPConnection : NSObject <CKPublishingConnection, CURLFTPSessionDelegate>
 {
  @private
-    CURLHandle          *_handle;
+    CURLFTPSession      *_session;
     NSURLRequest        *_request;
     NSURLCredential     *_credential;
     NSOperationQueue    *_queue;
