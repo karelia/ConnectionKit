@@ -209,9 +209,6 @@
     NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:NO];
     [request setHTTPBody:data];
     
-    [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
-    [[self handle] setString:[_credential password] forKey:CURLOPT_PASSWORD];
-    
     NSError *error;
     BOOL result = [_handle loadRequest:request error:&error];
     
@@ -238,7 +235,28 @@
 
 - (void)threaded_createDirectoryAtPath:(NSString *)path permissions:(NSNumber *)permissions;
 {
-    // Don't bother for now
+    // Navigate to the directory above the one to be created
+    // CURLOPT_NOBODY stops libcurl from trying to list the directory's contents
+    NSMutableURLRequest *request = [self newMutableRequestWithPath:[path stringByDeletingLastPathComponent] isDirectory:YES];
+    [[self handle] setStringOrNumberObject:[NSNumber numberWithBool:YES] forKey:CURLOPT_NOBODY];
+    
+    // Custom command to delete the file once we're in the correct directory
+    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the delete command twice in my testing
+    [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[path lastPathComponent]]]
+                                    forKey:CURLOPT_POSTQUOTE];
+    
+    if (_credential)
+    {
+        [[self handle] setString:[_credential user] forKey:CURLOPT_USERNAME];
+        [[self handle] setString:[_credential password] forKey:CURLOPT_PASSWORD];
+        [_credential release]; _credential = nil;
+    }
+    
+    
+    NSError *error;
+    BOOL result = [[self handle] loadRequest:request error:&error];
+    if (result) error = nil;
+    
 }
 
 - (void)deleteFile:(NSString *)path
