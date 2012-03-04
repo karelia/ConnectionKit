@@ -260,6 +260,9 @@
     [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[path lastPathComponent]]]
                                     forKey:CURLOPT_PREQUOTE];   // needed so we're in the correct directory when command runs
     
+    // Stop Curl opening data connection since we just want to delete the damn file!
+    [[self handle] setStringOrNumberObject:[NSNumber numberWithBool:YES] forKey:CURLOPT_NOBODY];
+    
     NSError *error;
     BOOL result = [[self handle] loadRequest:request error:&error];
     if (result) error = nil;
