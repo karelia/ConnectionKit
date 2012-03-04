@@ -258,7 +258,7 @@
     // Unfortunately, that's then immediately uploading an empty file in its place
     // On the plus-side, there's no need to reauthenticate
     [[self handle] setStringOrNumberObject:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[path lastPathComponent]]]
-                                    forKey:CURLOPT_QUOTE];
+                                    forKey:CURLOPT_PREQUOTE];   // needed so we're in the correct directory when command runs
     
     NSError *error;
     BOOL result = [[self handle] loadRequest:request error:&error];
