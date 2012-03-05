@@ -45,7 +45,7 @@
 
 - (void)dealloc;
 {
-    [_url copy];
+    [_url release];
     [_session release];
     [_queue release];
     [_currentDirectory release];
