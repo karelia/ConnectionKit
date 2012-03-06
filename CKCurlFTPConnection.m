@@ -10,6 +10,8 @@
 
 #import "UKMainThreadProxy.h"
 
+#import <sys/dirent.h>
+
 
 @interface CKCurlFTPConnection () <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 @end
@@ -260,19 +262,51 @@
 }
 - (void)threaded_directoryContents:(NSString *)path;
 {
-    /*if (!path) path = @".";
-    
-    NSMutableURLRequest *request = [self newMutableRequestWithPath:path isDirectory:YES];
-    
     NSError *error;
-    BOOL result = [_handle loadRequest:request error:&error];
+    NSMutableArray *result = [[_session parsedResourceListingsOfDirectory:path error:&error] mutableCopy];
     
-    [request release];
+    // Convert from CFFTP's format to ours
+    for (NSUInteger i = 0; i < [result count]; i++)
+    {
+        NSDictionary *aListing = [result objectAtIndex:i];
+        
+        NSString *type = NSFileTypeUnknown;
+        switch ([[aListing objectForKey:(NSString *)kCFFTPResourceType] integerValue])
+        {
+            case DT_CHR:
+                type = NSFileTypeCharacterSpecial;
+                break;
+            case DT_DIR:
+                type = NSFileTypeDirectory;
+                break;
+            case DT_BLK:
+                type = NSFileTypeBlockSpecial;
+                break;
+            case DT_REG:
+                type = NSFileTypeRegular;
+                break;
+            case DT_LNK:
+                type = NSFileTypeSymbolicLink;
+                break;
+            case DT_SOCK:
+                type = NSFileTypeSocket;
+                break;
+        }
+        
+        NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                    [aListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
+                                    type, NSFileType,
+                                    nil];
+        [result replaceObjectAtIndex:i withObject:attributes];
+        [attributes release];
+    }
+    
     if (result) error = nil;    // cause CK handles errors in a crazy way
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self didReceiveContents:nil ofDirectory:path error:error];
-    [proxy release];*/
+    [proxy connection:self didReceiveContents:result ofDirectory:path error:error];
+    [proxy release];
+    [result release];
 }
 
 #pragma mark Current Directory
