@@ -302,6 +302,7 @@
     }
     
     if (result) error = nil;    // cause CK handles errors in a crazy way
+    if (!path) path = @"";      // so Open Panel has something to go on initially
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
     [proxy connection:self didReceiveContents:result ofDirectory:path error:error];
