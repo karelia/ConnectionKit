@@ -154,4 +154,20 @@
     }
 }
 
+- (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+{
+    // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    if ([[URL scheme] isEqualToString:@"ftp"])
+    {
+        CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
+        NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        if (strictPath) CFRelease(strictPath);
+        return result;
+    }
+    else
+    {
+        return [URL path];
+    }
+}
+
 @end
