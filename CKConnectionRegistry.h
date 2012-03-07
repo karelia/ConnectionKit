@@ -56,4 +56,7 @@
 // For FTP, absolute paths, the URL path starts with an extra slash to satsify CURL etc. e.g. ftp://example.com//foo/
 - (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 
+// The reverse of the above. Pulls out the path from the URL, accounting for FTP's oddities
+- (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+
 @end
