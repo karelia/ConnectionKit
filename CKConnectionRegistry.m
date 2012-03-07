@@ -136,4 +136,22 @@
     return result;
 }
 
+#pragma mark URLs
+
+- (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+{
+    // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    if ([[baseURL scheme] isEqualToString:@"ftp"] && [path isAbsolutePath])
+    {
+        // Get to host's URL, including single trailing slash
+        // -absoluteURL has to be called so that the real path can be properly appended
+        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
+        return [baseURL URLByAppendingPathComponent:path isDirectory:YES];
+    }
+    else
+    {
+        return [NSURL URLWithString:path relativeToURL:baseURL];
+    }
+}
+
 @end

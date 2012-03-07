@@ -49,4 +49,11 @@
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port;
 - (id <CKConnection>)connectionWithName:(NSString *)name host:(NSString *)host port:(NSNumber *)port user:(NSString *)username password:(NSString *)password error:(NSError **)error;
 
+
+#pragma mark URLs
+
+// Does pretty much as you'd expect for most URLs
+// For FTP, absolute paths, the URL path starts with an extra slash to satsify CURL etc. e.g. ftp://example.com//foo/
+- (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+
 @end
