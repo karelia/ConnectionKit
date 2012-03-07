@@ -93,12 +93,19 @@
 {
     if (challenge != _challenge) return;
     
-    [_session useCredential:credential];
-    
-    if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
-    {
-        [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
-    }
+    // Try an empty request to see how far we get, and learn starting directory
+    [_queue addOperationWithBlock:^{
+        
+        [_session useCredential:credential];
+        
+        NSString *path = [_session homeDirectoryPath];
+        [self setCurrentDirectory:path];
+        
+        if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
+        {
+            [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
+        }
+    }];
 }
 
 - (void)disconnect;
