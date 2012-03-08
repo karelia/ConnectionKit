@@ -140,34 +140,50 @@
 
 - (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
+    NSString *scheme = [baseURL scheme];
+    
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([[baseURL scheme] isEqualToString:@"ftp"] && [path isAbsolutePath])
+    if ([scheme isEqualToString:@"ftp"] && [path isAbsolutePath])
     {
         // Get to host's URL, including single trailing slash
         // -absoluteURL has to be called so that the real path can be properly appended
         baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
         return [baseURL URLByAppendingPathComponent:path isDirectory:YES];
     }
-    else
+    
+    // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    if (![path isAbsolutePath] &&
+        ([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"]) &&
+        [[baseURL path] length] <= 1)
     {
-        return [NSURL URLWithString:path relativeToURL:baseURL];
+        path = [@"/~" stringByAppendingPathComponent:path];
     }
+    
+    return [NSURL URLWithString:path relativeToURL:baseURL];
 }
 
 - (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 {
+    NSString *scheme = [URL scheme];
+    
     // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([[URL scheme] isEqualToString:@"ftp"])
+    if ([scheme isEqualToString:@"ftp"])
     {
         CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
         NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
         if (strictPath) CFRelease(strictPath);
         return result;
     }
-    else
+    
+    NSString *result = [URL path];
+    
+    // SCP and SFTP represent the home directory using ~/ at the start of the path
+    if ([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"])
     {
-        return [URL path];
+        if ([result hasPrefix:@"/~/"]) result = [result substringFromIndex:3];
     }
+    
+    return result;
 }
 
 @end
