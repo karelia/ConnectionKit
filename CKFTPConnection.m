@@ -479,6 +479,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
                                       command, NSLocalizedFailureReasonErrorKey,
                                       [[[self request] URL] host], ConnectionHostKey, nil];
             NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
+            
+            userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                        error, NSUnderlyingErrorKey,
+                        [error localizedDescription], NSLocalizedDescriptionKey,
+                        nil];
+            
+            error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserAuthenticationRequired userInfo:userInfo];
+            
             [[self client] connectionDidReceiveError:error];
             
 			break;
