@@ -23,10 +23,10 @@
 
 + (void)load
 {
-    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"SFTP" URLScheme:@"ssh"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"SFTP" URLScheme:@"sftp"];
 }
 
-+ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"ssh", @"sftp", nil]; }
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"sftp", @"ssh", nil]; }
 
 #pragma mark Lifecycle
 
