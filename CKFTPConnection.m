@@ -474,20 +474,23 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		}		
 		case 530: //User not logged in
 		{
-            NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                                      LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
-                                      command, NSLocalizedFailureReasonErrorKey,
-                                      [[[self request] URL] host], ConnectionHostKey, nil];
-            NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
-            
-            userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-                        error, NSUnderlyingErrorKey,
-                        [error localizedDescription], NSLocalizedDescriptionKey,
-                        nil];
-            
-            error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserAuthenticationRequired userInfo:userInfo];
-            
-            [[self client] connectionDidReceiveError:error];
+            if (stateToHandle != CKConnectionSentPasswordState) // in that state, want to retry auth
+            {
+                NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                                          LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error"), NSLocalizedDescriptionKey,
+                                          command, NSLocalizedFailureReasonErrorKey,
+                                          [[[self request] URL] host], ConnectionHostKey, nil];
+                NSError *error = [NSError errorWithDomain:CKFTPErrorDomain code:code userInfo:userInfo];
+                
+                userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
+                            error, NSUnderlyingErrorKey,
+                            [error localizedDescription], NSLocalizedDescriptionKey,
+                            nil];
+                
+                error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserAuthenticationRequired userInfo:userInfo];
+                
+                [[self client] connectionDidReceiveError:error];
+            }
             
 			break;
 		}			
