@@ -251,10 +251,6 @@
 
 /* Begin PBXFileReference section */
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
-		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
-		09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractConnectionTest.m; sourceTree = "<group>"; };
-		09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPConnectionTest.h; sourceTree = "<group>"; };
-		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -348,12 +344,6 @@
 		7978FC240B1183DE0048168B /* CKController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKController.h; sourceTree = "<group>"; };
 		7978FC250B1183DE0048168B /* CKController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKController.m; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		7981F6C30A05F6D2004D775D /* FileConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileConnectionTest.h; sourceTree = "<group>"; };
-		7981F6C40A05F6D2004D775D /* FileConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileConnectionTest.m; sourceTree = "<group>"; };
-		7981F6C50A05F6D2004D775D /* FTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPConnectionTest.h; sourceTree = "<group>"; };
-		7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTPConnectionTest.m; sourceTree = "<group>"; };
-		7981F6F80A060084004D775D /* DotMacConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotMacConnectionTest.h; sourceTree = "<group>"; };
-		7981F6F90A060084004D775D /* DotMacConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotMacConnectionTest.m; sourceTree = "<group>"; };
 		798300060B0D4A2600F5078E /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferProgressCell.h; sourceTree = "<group>"; };
 		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferProgressCell.m; sourceTree = "<group>"; };
@@ -570,16 +560,6 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
-				09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */,
-				09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */,
-				7981F6C30A05F6D2004D775D /* FileConnectionTest.h */,
-				7981F6C40A05F6D2004D775D /* FileConnectionTest.m */,
-				7981F6C50A05F6D2004D775D /* FTPConnectionTest.h */,
-				7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */,
-				09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */,
-				09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */,
-				7981F6F80A060084004D775D /* DotMacConnectionTest.h */,
-				7981F6F90A060084004D775D /* DotMacConnectionTest.m */,
 				22CC56F81509048E00F94154 /* PathTests.m */,
 			);
 			name = "Unit Tests";
