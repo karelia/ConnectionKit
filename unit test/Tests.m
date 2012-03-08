@@ -7,6 +7,7 @@
 //
 
 #import "Tests.h"
+#import "CKConnectionRegistry.h"
 
 @implementation Tests
 
@@ -26,6 +27,8 @@
 
 - (void)testExample
 {
+    NSString* path = [[CKConnectionRegistry sharedConnectionRegistry] pathOfURLRelativeToHomeDirectory:[[self uploadRequest] URL]];
+
     STFail(@"Unit tests are not implemented yet in Tests");
 }
 
