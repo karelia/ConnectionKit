@@ -92,8 +92,13 @@
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
     unsigned long result = _permissions;
-    if (directory) result = (result | 0111);
+    if (directory) result = [[self class] posixPermissionsForDirectoryFromFilePermissions:result];
     return result;
+}
+
++ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
+{
+    return (filePermissions | 0111);
 }
 
 #pragma mark Publishing

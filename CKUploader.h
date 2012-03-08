@@ -56,6 +56,7 @@ typedef NSUInteger CKUploadingOptions;
 
 // The permissions given to uploaded files
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
++ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
 
 @end
 
