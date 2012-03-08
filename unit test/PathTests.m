@@ -20,14 +20,14 @@
 {
     NSURL* testURL = [NSURL URLWithString:@"ftp://test.ftp.com"];
     NSString* path = [[CKConnectionRegistry sharedConnectionRegistry] pathOfURLRelativeToHomeDirectory:testURL];
-    STAssertTrue([path isEqualToString:@""], @"path should be empty");
+    STAssertTrue([path length] == 0, @"path should be empty");
 }
 
 - (void)testEmptyTrailingSlash
 {
     NSURL* testURL = [NSURL URLWithString:@"ftp://test.ftp.com/"];
     NSString* path = [[CKConnectionRegistry sharedConnectionRegistry] pathOfURLRelativeToHomeDirectory:testURL];
-    STAssertTrue([path isEqualToString:@""], @"path should be empty");
+    STAssertTrue([path length] == 0, @"path should be empty");
 }
 
 - (void)testRelative
