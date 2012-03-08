@@ -3704,10 +3704,16 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if (challenge == _lastAuthenticationChallenge)
-    {
-        [self disconnect];
-    }
+    NSParameterAssert(challenge == _lastAuthenticationChallenge);
+    
+    NSDictionary *userInfo = [NSDictionary dictionaryWithObject:LocalizedStringInConnectionKitBundle(@"Not Logged In", @"FTP Error")
+                                                         forKey:NSLocalizedDescriptionKey];
+    
+    [[self client] connectionDidReceiveError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                 code:NSURLErrorUserCancelledAuthentication
+                                                             userInfo:userInfo]];
+    
+    [self forceDisconnect];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
