@@ -146,7 +146,7 @@
         // Get to host's URL, including single trailing slash
         // -absoluteURL has to be called so that the real path can be properly appended
         baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path isDirectory:YES];
+        return [baseURL URLByAppendingPathComponent:path];
     }
     else
     {
