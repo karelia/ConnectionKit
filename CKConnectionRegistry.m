@@ -148,7 +148,7 @@
         // Get to host's URL, including single trailing slash
         // -absoluteURL has to be called so that the real path can be properly appended
         baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path isDirectory:YES];
+        return [baseURL URLByAppendingPathComponent:path];
     }
     
     // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
