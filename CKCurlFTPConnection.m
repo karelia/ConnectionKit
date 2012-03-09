@@ -210,7 +210,14 @@
 - (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
 {
     NSError *error;
-    BOOL result = [_session createFileAtPath:path contents:data permissions:permissions withIntermediateDirectories:NO error:&error];
+    BOOL result = [_session createFileAtPath:path contents:data withIntermediateDirectories:NO error:&error];
+    
+    if (result && permissions)
+    {
+        result = [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
+                            ofItemAtPath:path
+                                   error:&error];
+    }
         
     if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
     {
@@ -235,6 +242,14 @@
 {
     NSError *error;
     BOOL result = [_session createDirectoryAtPath:path withIntermediateDirectories:NO error:&error];
+    
+    if (result && permissions)
+    {
+        result = [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
+                            ofItemAtPath:path
+                                   error:&error];
+    }
+    
     if (result)
     {
         error = nil;
