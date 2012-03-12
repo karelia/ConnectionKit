@@ -2202,7 +2202,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if (GET_STATE == FTPAwaitingDataConnectionToOpen)
 			{
 				CKConnectionCommand *lastCommand = [[self commandHistory] objectAtIndex:0];
-				CKConnectionState lastState = [lastCommand sentState];
+				FTPState lastState = (FTPState) [lastCommand sentState];
 				switch (lastState)
 				{
 					case FTPSettingEPSVState:
@@ -2217,6 +2217,14 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 					case FTPSettingPassiveState:
 						_ftpFlags.canUsePASV = NO;
 						break;
+                          
+                    case FTPDeterminingDataConnectionType:
+                    case FTPAwaitingDataConnectionToOpen:
+                    case FTPModeChangeState:
+                    case FTPAwaitingRemoteSystemTypeState:
+                    case FTPChangeDirectoryListingStyle:
+                    case FTPNoOpState:
+                        break;
 				}
 				[self closeDataStreams];
 				[self sendCommand:@"DATA_CON"];
