@@ -182,7 +182,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (stream != _sendStream) {
 		[_sendStream autorelease];
-		_sendStream = [stream retain];
+		_sendStream = (id<OutputStream>) [stream retain];
 	}
 }
 
@@ -190,7 +190,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (stream != _receiveStream) {
 		[_receiveStream autorelease];
-		_receiveStream = [stream retain];
+		_receiveStream = (id<InputStream>) [stream retain];
 	}
 }
 
