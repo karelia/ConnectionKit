@@ -1284,7 +1284,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			unsigned long long offset = [d offset];
 			NSData *data = [d data];
 			unsigned chunkLength = 0;
-			const uint8_t bytes [kStreamChunkSize];
+			uint8_t bytes [kStreamChunkSize];
 			_transferSent = 0;
 			_transferCursor = offset;
 			_transferLastPercent = 0;
