@@ -31,7 +31,7 @@
 #import "CKAbstractConnection.h"
 
 static NSMutableDictionary *sCachedHosts = nil;
-static NSLock *sCacheLock = nil;
+static NSRecursiveLock *sCacheLock = nil;
 
 @implementation CKCacheableHost
 
