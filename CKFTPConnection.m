@@ -47,6 +47,7 @@
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
+#import <arpa/inet.h>
 
 NSString *CKFTPErrorDomain = @"FTPErrorDomain";
 
