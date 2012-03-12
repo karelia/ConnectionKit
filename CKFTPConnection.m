@@ -643,7 +643,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
 			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
 																				awaitState:CKConnectionIdleState
-																				 sentState:FTPAwaitingRemoteSystemTypeState
+																				 sentState:(CKConnectionState) FTPAwaitingRemoteSystemTypeState
 																				 dependant:nil
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
@@ -712,7 +712,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[self pushCommandOnCommandQueue:getCurrentDirectoryCommand];
 			CKConnectionCommand *getRemoteSystemTypeCommand = [CKConnectionCommand command:@"SYST"
 																				awaitState:CKConnectionIdleState
-																				 sentState:FTPAwaitingRemoteSystemTypeState
+																				 sentState:(CKConnectionState) FTPAwaitingRemoteSystemTypeState
 																				 dependant:nil
 																				  userInfo:nil];
 			[self pushCommandOnCommandQueue:getRemoteSystemTypeCommand];
@@ -1899,7 +1899,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[host setValue:[NSArray arrayWithObject:[[[self request] URL] host]] forKey:@"names"]; // KVC hack
 			
 			[self closeDataStreams];
-			[self setState:FTPAwaitingDataConnectionToOpen];
+			[self setState:(CKConnectionState) FTPAwaitingDataConnectionToOpen];
 			[self openDataStreamsToHost:host port:port];			
 			break;
 		}
@@ -1938,7 +1938,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			[host setValue:[NSArray arrayWithObject:[[[self request] URL] host]] forKey:@"names"]; // KVC hack
 			
 			[self closeDataStreams];
-			[self setState:FTPAwaitingDataConnectionToOpen];
+			[self setState:(CKConnectionState) FTPAwaitingDataConnectionToOpen];
 			[self openDataStreamsToHost:host port:port];			
 			break;
 		}
@@ -2000,7 +2000,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 			if ([[command lowercaseString] rangeOfString:@"windows"].location != NSNotFound)
 			{
 				_ftpFlags.isMicrosoft = YES;
-				[self setState:FTPChangeDirectoryListingStyle];
+				[self setState:(CKConnectionState) FTPChangeDirectoryListingStyle];
 				[self sendCommand:@"SITE DIRSTYLE"];
 				break;
 			}
@@ -3037,7 +3037,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (!_ftpFlags.setBinaryTransferMode) {
 		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
 											 awaitState:CKConnectionIdleState
-											  sentState:FTPModeChangeState
+											  sentState:(CKConnectionState) FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
@@ -3112,7 +3112,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (!_ftpFlags.setBinaryTransferMode) {
 		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
 												 awaitState:CKConnectionIdleState
-												  sentState:FTPModeChangeState
+												  sentState:(CKConnectionState) FTPModeChangeState
 												  dependant:nil
 												   userInfo:nil];
 		[self queueCommand:bin];
@@ -3258,22 +3258,22 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (prefersPASV || (!explicitlySetConnectionType && _ftpFlags.canUsePASV))
 	{
 		connectionTypeString = @"PASV";
-		sendState = FTPSettingPassiveState;
+		sendState = (CKConnectionState) FTPSettingPassiveState;
 	}
 	else if (prefersEPSV || (!explicitlySetConnectionType && _ftpFlags.canUseEPSV))
 	{
 		connectionTypeString = @"EPSV";
-		sendState = FTPSettingEPSVState;
+		sendState = (CKConnectionState) FTPSettingEPSVState;
 	}
 	else if (prefersEPRT || (!explicitlySetConnectionType && _ftpFlags.canUseEPRT))
 	{
 		connectionTypeString = @"EPRT";
-		sendState = FTPSettingEPRTState;
+		sendState = (CKConnectionState) FTPSettingEPRTState;
 	}
 	else if (prefersPORT || (!explicitlySetConnectionType && _ftpFlags.canUseActive))
 	{
 		connectionTypeString = @"PORT";
-		sendState = FTPSettingActiveState;
+		sendState = (CKConnectionState) FTPSettingActiveState;
 	}
 	else
 	{
@@ -3312,7 +3312,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 {
 	return [CKConnectionCommand command:@"DATA_CON"
 						   awaitState:CKConnectionIdleState
-							sentState:FTPDeterminingDataConnectionType
+							sentState:(CKConnectionState) FTPDeterminingDataConnectionType
 							dependant:nil
 							 userInfo:nil];
 }
@@ -3412,7 +3412,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		KTLog(CKTransportDomain, KTLogError, @"Failed to setup EPRT socket, trying PORT");
 		//try doing a port command
 		_ftpFlags.canUseEPRT = NO;
-		_state = FTPSettingActiveState;
+		_state = (CKConnectionState) FTPSettingActiveState;
 		return [self setupActiveConnection];
 	}
 	
@@ -3439,7 +3439,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (![self setupActiveConnectionWithPort:_lastActivePort])
 	{
 		KTLog(CKTransportDomain, KTLogError, @"Failed to setup PORT socket, trying PASV");
-		_state = FTPSettingPassiveState;
+		_state = (CKConnectionState) FTPSettingPassiveState;
 		return @"PASV";
 	}
 	div_t portDiv = div(_lastActivePort, 256);
@@ -3538,7 +3538,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	if (!_ftpFlags.setBinaryTransferMode) {
 		CKConnectionCommand *bin = [CKConnectionCommand command:@"TYPE I"
 											 awaitState:CKConnectionIdleState
-											  sentState:FTPModeChangeState
+											  sentState:(CKConnectionState) FTPModeChangeState
 											  dependant:nil
 											   userInfo:nil];
 		[self queueCommand:bin];
