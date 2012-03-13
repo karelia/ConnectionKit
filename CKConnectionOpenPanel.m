@@ -904,7 +904,7 @@
             }
             
             NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
-            if ([target characterAtIndex:[target length] - 1] == '/' || [target characterAtIndex:[target length] - 1] == '\\')
+            if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
             {
                 icon = symFolder;
             }
