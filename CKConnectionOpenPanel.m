@@ -855,14 +855,9 @@
             NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
         }
         
-        BOOL isLeaf = NO;
         BOOL isDirectory = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
-        if (!isDirectory || 
-            (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
-        {
-            isLeaf = YES;
-        }
         
+        BOOL isLeaf = (!isDirectory || (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]));
         [currentItem setObject:[NSNumber numberWithBool:isLeaf] forKey:@"isLeaf"];
         
         [currentItem setObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
