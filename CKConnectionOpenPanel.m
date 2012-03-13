@@ -85,6 +85,17 @@
 	[openButton setHidden:!shouldDisplayOpenButton];
     [openCancelButton setHidden:!shouldDisplayOpenCancelButton];
     
+    // Sort directories like the Finder
+    if ([NSString instancesRespondToSelector:@selector(localizedStandardCompare:)])
+    {
+        NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"fileName"
+                                                                       ascending:YES
+                                                                        selector:@selector(localizedStandardCompare:)];
+        
+        [directoryContents setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+        [sortDescriptor release];
+    }
+    
     //observe the selection from the tree controller
 	//
 	[directoryContents addObserver: self
@@ -825,133 +836,118 @@
 	
 }
 
-static NSImage *folder = nil;
-static NSImage *symFolder = nil;
-static NSImage *symFile = nil;
 - (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
-	contents = [contents filteredArrayByRemovingHiddenFiles];
-	//set the parent directory (in reverse order)
-	//
-  if ([dirPath hasSuffix:@"/"] && ([dirPath length] > 1))
+    // Populate the popup button used for navigating back to ancestor directories.
+    NSArray *pathComponents = [dirPath pathComponents];
+    if ([pathComponents count] > 1 &&
+        [[pathComponents lastObject] isAbsolutePath])   // ignore trailing slash (-isAbsolutePath avoids hardcoding it)
 	{
-		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
-	}
-	NSMutableArray *reverseArray = [NSMutableArray array];
-	NSEnumerator *theEnum = [[dirPath pathComponents] reverseObjectEnumerator];
-	id currentItem;
+        pathComponents = [pathComponents subarrayWithRange:NSMakeRange(0, [pathComponents count] - 1)];
+    }
+    
+    [parentDirectories setContent:[[pathComponents reverseObjectEnumerator] allObjects]];   // reverse order to match NSSavePanel etc.
+	[parentDirectories setSelectionIndex:0];
+    
 	
-	while (currentItem = [theEnum nextObject])
+    // Populate the file list
+    [directoryContents setContent:nil];
+	
+	for (NSDictionary *cur in [contents filteredArrayByRemovingHiddenFiles])
 	{
-		[reverseArray addObject: currentItem];
+        NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
+        [currentItem setObject:cur forKey:@"allProperties"];
+        [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
+        
+        NSString *filename = [cur objectForKey:cxFilenameKey];
+        [currentItem setObject:filename forKey:@"fileName"];
+        
+        BOOL isSymlink = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
+        if (isSymlink)
+        {
+            NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
+        }
+        
+        BOOL isDirectory = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
+        
+        BOOL isLeaf = (!isDirectory || (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]));
+        [currentItem setObject:[NSNumber numberWithBool:isLeaf] forKey:@"isLeaf"];
+        
+        [currentItem setObject:[dirPath stringByAppendingPathComponent:filename] forKey:@"path"];
+        
+        BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
+        [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
+        
+        //get the icon
+        NSImage *icon;
+        if (isDirectory)
+        {
+            static NSImage *folder;
+            if (!folder)
+            {
+                folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
+                [folder setSize:NSMakeSize(16,16)];
+            }
+            
+            icon = folder;
+        }
+        else if (isSymlink)
+        {
+            static NSImage *symFolder;
+            if (!symFolder)
+            {
+                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
+                [symFolder setSize:NSMakeSize(16,16)];
+            }
+            static NSImage *symFile;
+            if (!symFile)
+            {
+                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
+                [symFile setSize:NSMakeSize(16,16)];
+            }
+            
+            NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
+            if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
+            {
+                icon = symFolder;
+            }
+            else
+            {
+                NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
+                NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
+                [icon setScalesWhenResized:YES];
+                [icon setSize:NSMakeSize(16,16)];
+                [comp lockFocus];
+                [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                [comp unlockFocus];
+                [comp autorelease];
+                icon = comp;
+            }
+        }
+        else
+        {
+            NSString *extension = [filename pathExtension];
+            icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
+            [icon setSize:NSMakeSize(16,16)];
+        }
+        
+        if (icon) [currentItem setObject:icon forKey:@"image"];
+        
+        
+        // Select the directory that was just created (if there is one)
+        if ([filename isEqualToString:createdDirectory]) [directoryContents setSelectsInsertedObjects:YES];
+        
+        // Actually insert the listed item
+        [directoryContents addObject:currentItem];
+        [directoryContents setSelectsInsertedObjects:NO];
 	}
-	
-	[parentDirectories setContent: reverseArray];
-	[parentDirectories setSelectionIndex: 0];
-	
-	NSEnumerator *e = [contents objectEnumerator];
-	NSDictionary *cur;
-	
-	[directoryContents removeObjects: [directoryContents content]];
-	NSDictionary *selected = nil;
-	
-	while (cur = [e nextObject])
-	{
-		if ([[cur objectForKey:cxFilenameKey] characterAtIndex:0] != '.')
-		{
-			NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
-			[currentItem setObject: cur
-							forKey: @"allProperties"];
-			[currentItem setObject: [cur objectForKey:cxFilenameKey] 
-							forKey: @"fileName"];
-			[currentItem setObject: [NSMutableArray array] 
-							forKey: @"subItems"];
-			if (createdDirectory)
-			{
-				if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory])
-				{
-					selected = currentItem;
-				}
-			}
-			BOOL isLeaf = NO;
-			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-			{
-				NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
-			}
-			if (![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory] || 
-				([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
-			{
-				isLeaf = YES;
-			}
-			[currentItem setObject: [NSNumber numberWithBool:isLeaf ]
-							forKey: @"isLeaf"];
-			[currentItem setObject: [dirPath stringByAppendingPathComponent: [cur objectForKey:cxFilenameKey]]
-							forKey: @"path"];
-			
-			BOOL enabled = YES;
-			if ([cur objectForKey:NSFileTypeDirectory])
-				enabled = [self canChooseDirectories];
-			else
-			{
-				enabled = [self canChooseFiles];
-			}
-			
-			[currentItem setObject: [NSNumber numberWithBool: enabled]
-							forKey: @"isEnabled"];
-			
-			//get the icon
-			//
-			NSImage *icon = nil;
-			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
-			{
-				if (!folder)
-					folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
-				icon = folder;
-			}
-			else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
-			{
-				if (!symFolder || !symFile)
-				{
-					symFolder = [[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"symlink_folder"
-																														   ofType:@"tif"]];
-					symFile = [[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"symlink_file"
-																														 ofType:@"tif"]];
-				}
-				NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
-				if ([target characterAtIndex:[target length] - 1] == '/' || [target characterAtIndex:[target length] - 1] == '\\')
-					icon = symFolder;
-				else
-				{
-					NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
-					NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
-					[icon setScalesWhenResized:YES];
-					[icon setSize:NSMakeSize(16,16)];
-					[comp lockFocus];
-					[fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-					[symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-					[comp unlockFocus];
-					[comp autorelease];
-					icon = comp;
-				}
-			}
-			else
-			{
-				icon = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
-			}
-			[icon setSize:NSMakeSize(16,16)];
-			
-			if (icon)
-				[currentItem setObject: icon
-								forKey: @"image"];
-			
-			
-			[directoryContents addObject: currentItem];
-		}
-		if (selected)
-		{
-			[directoryContents setSelectedObjects:[NSArray arrayWithObject:selected]];
-		}
-	}
+    
+    
+    // Want the list sorted like the Finder does
+    [directoryContents rearrangeObjects];
 	
 	[self setIsLoading: NO];
 }
