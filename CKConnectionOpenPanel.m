@@ -885,7 +885,12 @@
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
         {
             static NSImage *folder;
-            if (!folder) folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
+            if (!folder)
+            {
+                folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
+                [folder setSize:NSMakeSize(16,16)];
+            }
+            
             icon = folder;
         }
         else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
@@ -895,12 +900,14 @@
             {
                 NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
                 symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
+                [symFolder setSize:NSMakeSize(16,16)];
             }
             static NSImage *symFile;
             if (!symFile)
             {
                 NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
                 symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
+                [symFile setSize:NSMakeSize(16,16)];
             }
             
             NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
@@ -924,10 +931,10 @@
         }
         else
         {
-            icon = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
+            NSString *extension = [[cur objectForKey:cxFilenameKey] pathExtension];
+            icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
+            [icon setSize:NSMakeSize(16,16)];
         }
-        
-        [icon setSize:NSMakeSize(16,16)];
         
         if (icon) [currentItem setObject:icon forKey:@"image"];
         
