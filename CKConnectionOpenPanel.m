@@ -833,22 +833,16 @@ static NSImage *symFile = nil;
 	contents = [contents filteredArrayByRemovingHiddenFiles];
 	//set the parent directory (in reverse order)
 	//
-  if ([dirPath hasSuffix:@"/"] && ([dirPath length] > 1))
+    if ([dirPath hasSuffix:@"/"] && ([dirPath length] > 1))
 	{
 		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
 	}
-	NSMutableArray *reverseArray = [NSMutableArray array];
-	NSEnumerator *theEnum = [[dirPath pathComponents] reverseObjectEnumerator];
-	id currentItem;
 	
-	while (currentItem = [theEnum nextObject])
-	{
-		[reverseArray addObject: currentItem];
-	}
-	
-	[parentDirectories setContent: reverseArray];
+    // Populate the popup button used for navigating back to ancestor directories
+    [parentDirectories setContent:[[[dirPath pathComponents] reverseObjectEnumerator] allObjects]];
 	[parentDirectories setSelectionIndex: 0];
 	
+    
 	NSEnumerator *e = [contents objectEnumerator];
 	NSDictionary *cur;
 	
