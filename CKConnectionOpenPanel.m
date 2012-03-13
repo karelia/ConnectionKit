@@ -841,7 +841,6 @@
 	
     // Populate the file list
     [directoryContents setContent:nil];
-	NSDictionary *selected = nil;
 	
 	for (NSDictionary *cur in [contents filteredArrayByRemovingHiddenFiles])
 	{
@@ -849,14 +848,6 @@
         [currentItem setObject:cur forKey:@"allProperties"];
         [currentItem setObject:[cur objectForKey:cxFilenameKey] forKey:@"fileName"];
         [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
-        
-        if (createdDirectory)
-        {
-            if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory])
-            {
-                selected = currentItem;
-            }
-        }
         
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
         {
@@ -939,12 +930,12 @@
         if (icon) [currentItem setObject:icon forKey:@"image"];
         
         
-        [directoryContents addObject:currentItem];
+        // Select the directory that was just created (if there is one)
+        if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory]) [directoryContents setSelectsInsertedObjects:YES];
         
-		if (selected)
-		{
-			[directoryContents setSelectedObjects:[NSArray arrayWithObject:selected]];
-		}
+        // Actually insert the listed item
+        [directoryContents addObject:currentItem];
+        [directoryContents setSelectsInsertedObjects:NO];
 	}
 	
 	[self setIsLoading: NO];
