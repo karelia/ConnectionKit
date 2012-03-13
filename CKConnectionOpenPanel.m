@@ -855,7 +855,8 @@
         }
         
         BOOL isLeaf = NO;
-        if (![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory] || 
+        BOOL isDirectory = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
+        if (!isDirectory || 
             ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
         {
             isLeaf = YES;
@@ -866,12 +867,12 @@
         [currentItem setObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
                         forKey:@"path"];
         
-        BOOL enabled = ([cur objectForKey:NSFileTypeDirectory] ? [self canChooseDirectories] : [self canChooseFiles]);
+        BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
         [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
         
         //get the icon
         NSImage *icon;
-        if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
+        if (isDirectory)
         {
             static NSImage *folder;
             if (!folder)
