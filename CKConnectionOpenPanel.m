@@ -891,11 +891,14 @@
         else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
         {
             static NSImage *symFolder;
-            static NSImage *symFile;
-            if (!symFolder || !symFile)
+            if (!symFolder)
             {
                 symFolder = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_folder"
                                                                                                                      ofType:@"tif"]];
+            }
+            static NSImage *symFile;
+            if (!symFile)
+            {
                 symFile = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_file"
                                                                                                                    ofType:@"tif"]];
             }
