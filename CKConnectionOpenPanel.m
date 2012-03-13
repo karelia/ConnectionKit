@@ -844,13 +844,11 @@ static NSImage *symFile = nil;
 	
     // Populate the file list
     contents = [contents filteredArrayByRemovingHiddenFiles];
-	NSEnumerator *e = [contents objectEnumerator];
-	NSDictionary *cur;
-	
+		
 	[directoryContents removeObjects: [directoryContents content]];
 	NSDictionary *selected = nil;
 	
-	while (cur = [e nextObject])
+	for (NSDictionary *cur in contents)
 	{
 		if ([[cur objectForKey:cxFilenameKey] characterAtIndex:0] != '.')
 		{
