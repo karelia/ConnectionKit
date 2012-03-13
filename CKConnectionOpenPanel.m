@@ -870,9 +870,7 @@
         [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
         
         //get the icon
-        //
-        NSImage *icon = nil;
-        
+        NSImage *icon;
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
         {
             static NSImage *folder;
