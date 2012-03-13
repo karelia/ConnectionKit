@@ -849,7 +849,8 @@
         [currentItem setObject:[cur objectForKey:cxFilenameKey] forKey:@"fileName"];
         [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
         
-        if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+        BOOL isSymlink = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
+        if (isSymlink)
         {
             NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
         }
@@ -857,7 +858,7 @@
         BOOL isLeaf = NO;
         BOOL isDirectory = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
         if (!isDirectory || 
-            ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
+            (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
         {
             isLeaf = YES;
         }
@@ -883,7 +884,7 @@
             
             icon = folder;
         }
-        else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
+        else if (isSymlink)
         {
             static NSImage *symFolder;
             if (!symFolder)
