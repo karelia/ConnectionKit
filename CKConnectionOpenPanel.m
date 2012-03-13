@@ -85,6 +85,17 @@
 	[openButton setHidden:!shouldDisplayOpenButton];
     [openCancelButton setHidden:!shouldDisplayOpenCancelButton];
     
+    // Sort directories like the Finder
+    if ([NSString instancesRespondToSelector:@selector(localizedStandardCompare:)])
+    {
+        NSSortDescriptor *sortDescriptor = [[NSSortDescriptor alloc] initWithKey:@"fileName"
+                                                                       ascending:YES
+                                                                        selector:@selector(localizedStandardCompare:)];
+        
+        [directoryContents setSortDescriptors:[NSArray arrayWithObject:sortDescriptor]];
+        [sortDescriptor release];
+    }
+    
     //observe the selection from the tree controller
 	//
 	[directoryContents addObserver: self
@@ -933,6 +944,10 @@
         [directoryContents addObject:currentItem];
         [directoryContents setSelectsInsertedObjects:NO];
 	}
+    
+    
+    // Want the list sorted like the Finder does
+    [directoryContents rearrangeObjects];
 	
 	[self setIsLoading: NO];
 }
