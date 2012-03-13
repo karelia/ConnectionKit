@@ -846,8 +846,10 @@
 	{
         NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
         [currentItem setObject:cur forKey:@"allProperties"];
-        [currentItem setObject:[cur objectForKey:cxFilenameKey] forKey:@"fileName"];
         [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
+        
+        NSString *filename = [cur objectForKey:cxFilenameKey];
+        [currentItem setObject:filename forKey:@"fileName"];
         
         BOOL isSymlink = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
         if (isSymlink)
@@ -860,8 +862,7 @@
         BOOL isLeaf = (!isDirectory || (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]));
         [currentItem setObject:[NSNumber numberWithBool:isLeaf] forKey:@"isLeaf"];
         
-        [currentItem setObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
-                        forKey:@"path"];
+        [currentItem setObject:[dirPath stringByAppendingPathComponent:filename] forKey:@"path"];
         
         BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
         [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
@@ -903,7 +904,7 @@
             }
             else
             {
-                NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
+                NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
                 NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
                 [icon setScalesWhenResized:YES];
                 [icon setSize:NSMakeSize(16,16)];
@@ -917,7 +918,7 @@
         }
         else
         {
-            NSString *extension = [[cur objectForKey:cxFilenameKey] pathExtension];
+            NSString *extension = [filename pathExtension];
             icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
             [icon setSize:NSMakeSize(16,16)];
         }
@@ -926,7 +927,7 @@
         
         
         // Select the directory that was just created (if there is one)
-        if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory]) [directoryContents setSelectsInsertedObjects:YES];
+        if ([filename isEqualToString:createdDirectory]) [directoryContents setSelectsInsertedObjects:YES];
         
         // Actually insert the listed item
         [directoryContents addObject:currentItem];
