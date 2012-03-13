@@ -830,19 +830,20 @@ static NSImage *symFolder = nil;
 static NSImage *symFile = nil;
 - (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
-	contents = [contents filteredArrayByRemovingHiddenFiles];
-	//set the parent directory (in reverse order)
-	//
-    if ([dirPath hasSuffix:@"/"] && ([dirPath length] > 1))
+    // Populate the popup button used for navigating back to ancestor directories.
+    NSArray *pathComponents = [dirPath pathComponents];
+    if ([pathComponents count] > 1 &&
+        [[pathComponents lastObject] isAbsolutePath])   // ignore trailing slash (-isAbsolutePath avoids hardcoding it)
 	{
-		dirPath = [dirPath substringToIndex:[dirPath length] - 1];
-	}
-	
-    // Populate the popup button used for navigating back to ancestor directories
-    [parentDirectories setContent:[[[dirPath pathComponents] reverseObjectEnumerator] allObjects]];
-	[parentDirectories setSelectionIndex: 0];
-	
+        pathComponents = [pathComponents subarrayWithRange:NSMakeRange(0, [pathComponents count] - 1)];
+    }
     
+    [parentDirectories setContent:[[pathComponents reverseObjectEnumerator] allObjects]];   // reverse order to match NSSavePanel etc.
+	[parentDirectories setSelectionIndex:0];
+    
+	
+    // Populate the file list
+    contents = [contents filteredArrayByRemovingHiddenFiles];
 	NSEnumerator *e = [contents objectEnumerator];
 	NSDictionary *cur;
 	
