@@ -846,12 +846,10 @@
 	for (NSDictionary *cur in [contents filteredArrayByRemovingHiddenFiles])
 	{
         NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
-        [currentItem setObject: cur
-                        forKey: @"allProperties"];
-        [currentItem setObject: [cur objectForKey:cxFilenameKey] 
-                        forKey: @"fileName"];
-        [currentItem setObject: [NSMutableArray array] 
-                        forKey: @"subItems"];
+        [currentItem setObject:cur forKey:@"allProperties"];
+        [currentItem setObject:[cur objectForKey:cxFilenameKey] forKey:@"fileName"];
+        [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
+        
         if (createdDirectory)
         {
             if ([[cur objectForKey:cxFilenameKey] isEqualToString:createdDirectory])
@@ -859,57 +857,54 @@
                 selected = currentItem;
             }
         }
-        BOOL isLeaf = NO;
+        
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
         {
             NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
         }
+        
+        BOOL isLeaf = NO;
         if (![[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory] || 
             ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink] && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]))
         {
             isLeaf = YES;
         }
-        [currentItem setObject: [NSNumber numberWithBool:isLeaf ]
-                        forKey: @"isLeaf"];
-        [currentItem setObject: [dirPath stringByAppendingPathComponent: [cur objectForKey:cxFilenameKey]]
-                        forKey: @"path"];
         
-        BOOL enabled = YES;
-        if ([cur objectForKey:NSFileTypeDirectory])
-            enabled = [self canChooseDirectories];
-        else
-        {
-            enabled = [self canChooseFiles];
-        }
+        [currentItem setObject:[NSNumber numberWithBool:isLeaf] forKey:@"isLeaf"];
         
-        [currentItem setObject: [NSNumber numberWithBool: enabled]
-                        forKey: @"isEnabled"];
+        [currentItem setObject:[dirPath stringByAppendingPathComponent:[cur objectForKey:cxFilenameKey]]
+                        forKey:@"path"];
+        
+        BOOL enabled = ([cur objectForKey:NSFileTypeDirectory] ? [self canChooseDirectories] : [self canChooseFiles]);
+        [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
         
         //get the icon
         //
-        static NSImage *folder = nil;
-        static NSImage *symFolder = nil;
-        static NSImage *symFile = nil;
         NSImage *icon = nil;
         
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
         {
-            if (!folder)
-                folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
+            static NSImage *folder = nil;
+            if (!folder) folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
             icon = folder;
         }
         else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
         {
+            static NSImage *symFolder = nil;
+            static NSImage *symFile = nil;
             if (!symFolder || !symFile)
             {
-                symFolder = [[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"symlink_folder"
-                                                                                                                       ofType:@"tif"]];
-                symFile = [[NSImage alloc] initWithContentsOfFile: [[NSBundle bundleForClass: [self class]] pathForResource: @"symlink_file"
+                symFolder = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_folder"
                                                                                                                      ofType:@"tif"]];
+                symFile = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_file"
+                                                                                                                   ofType:@"tif"]];
             }
+            
             NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
             if ([target characterAtIndex:[target length] - 1] == '/' || [target characterAtIndex:[target length] - 1] == '\\')
+            {
                 icon = symFolder;
+            }
             else
             {
                 NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
@@ -928,14 +923,13 @@
         {
             icon = [[NSWorkspace sharedWorkspace] iconForFileType:[[cur objectForKey:cxFilenameKey] pathExtension]];
         }
+        
         [icon setSize:NSMakeSize(16,16)];
         
-        if (icon)
-            [currentItem setObject: icon
-                            forKey: @"image"];
+        if (icon) [currentItem setObject:icon forKey:@"image"];
         
         
-        [directoryContents addObject: currentItem];
+        [directoryContents addObject:currentItem];
         
 		if (selected)
 		{
