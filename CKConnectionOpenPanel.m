@@ -825,9 +825,6 @@
 	
 }
 
-static NSImage *folder = nil;
-static NSImage *symFolder = nil;
-static NSImage *symFile = nil;
 - (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
     // Populate the popup button used for navigating back to ancestor directories.
@@ -892,7 +889,11 @@ static NSImage *symFile = nil;
 			
 			//get the icon
 			//
-			NSImage *icon = nil;
+			static NSImage *folder = nil;
+            static NSImage *symFolder = nil;
+            static NSImage *symFile = nil;
+            NSImage *icon = nil;
+            
 			if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
 			{
 				if (!folder)
