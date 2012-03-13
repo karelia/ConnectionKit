@@ -893,14 +893,14 @@
             static NSImage *symFolder;
             if (!symFolder)
             {
-                symFolder = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_folder"
-                                                                                                                     ofType:@"tif"]];
+                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
             }
             static NSImage *symFile;
             if (!symFile)
             {
-                symFile = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_file"
-                                                                                                                   ofType:@"tif"]];
+                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
             }
             
             NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
