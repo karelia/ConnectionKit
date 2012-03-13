@@ -884,14 +884,14 @@
         
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
         {
-            static NSImage *folder = nil;
+            static NSImage *folder;
             if (!folder) folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
             icon = folder;
         }
         else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
         {
-            static NSImage *symFolder = nil;
-            static NSImage *symFile = nil;
+            static NSImage *symFolder;
+            static NSImage *symFile;
             if (!symFolder || !symFile)
             {
                 symFolder = [[NSImage alloc] initWithContentsOfFile:[[NSBundle bundleForClass:[self class]] pathForResource: @"symlink_folder"
