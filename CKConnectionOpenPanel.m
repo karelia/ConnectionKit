@@ -885,7 +885,7 @@
         if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory])
         {
             static NSImage *folder;
-            if (!folder) folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] retain];
+            if (!folder) folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
             icon = folder;
         }
         else if ([[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink])
