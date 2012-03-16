@@ -4,3 +4,6 @@
 [submodule "DAVKit"]
 	path = DAVKit
 	url = git@github.com:karelia/DAVKit.git
+[submodule "CurlHandle"]
+	path = CurlHandle
+	url = git@github.com:karelia/CurlHandle.git

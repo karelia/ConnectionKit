@@ -38,6 +38,7 @@
 		2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F91459CBB10085BBC4 /* libssh2.h */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
+		270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */; };
 		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
 		27448C381458100D00EB086F /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
@@ -45,6 +46,8 @@
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
+		27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */; };
+		27BFFEE315027F7000EFA319 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27BFFEE215027F4200EFA319 /* CURLHandle.framework */; };
 		27C604760F1FA20900B58822 /* CKConnectionClientProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27C604850F1FA82800B58822 /* CKConnectionClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 27C604830F1FA82800B58822 /* CKConnectionClient.m */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -201,6 +204,13 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = DAVKit;
 		};
+		27BFFEE115027F4200EFA319 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = CURLHandle;
+		};
 		795FF4FB0B0C014B00EA9292 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -260,6 +270,9 @@
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CKConnectionRegistry.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
+		27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCurlFTPConnection.h; sourceTree = "<group>"; };
+		27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKCurlFTPConnection.m; sourceTree = "<group>"; };
+		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
 		27C604750F1FA20900B58822 /* CKConnectionClientProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClientProtocol.h; sourceTree = "<group>"; };
 		27C604820F1FA82800B58822 /* CKConnectionClient.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKConnectionClient.h; sourceTree = "<group>"; };
 		27C604830F1FA82800B58822 /* CKConnectionClient.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionClient.m; sourceTree = "<group>"; };
@@ -516,6 +529,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				27BFFEE315027F7000EFA319 /* CURLHandle.framework in Frameworks */,
 				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
 				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
 				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
@@ -609,6 +623,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		27BFFEDB15027F4100EFA319 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				27BFFEE215027F4200EFA319 /* CURLHandle.framework */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		27FD90C10ED5BF640068D634 /* Abstract */ = {
 			isa = PBXGroup;
 			children = (
@@ -648,6 +670,9 @@
 				79CFD83009F7048400172CDD /* CKFTPConnection.m */,
 				79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */,
 				79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */,
+				27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */,
+				27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */,
+				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
 			);
 			name = FTP;
 			sourceTree = "<group>";
@@ -1004,6 +1029,7 @@
 				2702E3FA1459CBB10085BBC4 /* libssh2_publickey.h in Headers */,
 				2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */,
 				2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */,
+				27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1115,6 +1141,10 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = 27BFFEDB15027F4100EFA319 /* Products */;
+					ProjectRef = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+				},
+				{
 					ProductGroup = 27448C2514580F7500EB086F /* Products */;
 					ProjectRef = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 				},
@@ -1143,6 +1173,13 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 27448C2E14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		27BFFEE215027F4200EFA319 /* CURLHandle.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = CURLHandle.framework;
+			remoteRef = 27BFFEE115027F4200EFA319 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1353,6 +1390,7 @@
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
+				270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
