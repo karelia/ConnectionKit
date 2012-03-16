@@ -13,6 +13,7 @@
 #import "UKMainThreadProxy.h"
 
 #import "CK2SFTPSession.h"
+#import "CKWebDAVConnection.h"
 
 
 @interface CKSFTPUploader : CKUploader <CK2SFTPSessionDelegate, NSURLAuthenticationChallengeSender>
@@ -248,24 +249,27 @@
 
 - (void)connection:(id<CKPublishingConnection>)con didReceiveError:(NSError *)error;
 {
+    NSInteger code = [error code];
+    
     if ([[error userInfo] objectForKey:ConnectionDirectoryExistsKey]) 
 	{
 		return; //don't alert users to the fact it already exists, silently fail
 	}
-	else if ([error code] == 550 || [[[error userInfo] objectForKey:@"protocol"] isEqualToString:@"createDirectory:"] )
+	else if (code == 550 || [[[error userInfo] objectForKey:@"protocol"] isEqualToString:@"createDirectory:"] )
 	{
 		return;
 	}
-	else if ([con isKindOfClass:NSClassFromString(@"WebDAVConnection")] && 
-			 ([[[error userInfo] objectForKey:@"directory"] isEqualToString:@"/"] || [error code] == 409 || [error code] == 204 || [error code] == 404))
+	else if ([con isKindOfClass:[CKWebDAVConnection class]] && 
+			 ([[[error userInfo] objectForKey:@"directory"] isEqualToString:@"/"] || code == 409 || code == 204 || code == 404 || code == 405))
 	{
 		// web dav returns a 409 if we try to create / .... which is fair enough!
 		// web dav returns a 204 if a file to delete is missing.
 		// 404 if the file to delete doesn't exist
+        // 405 if creating a directory that already exists
 		
 		return;
 	}
-	else if ([error code] == kSetPermissions) // File connection set permissions failed ... ignore this (why?)
+	else if (code == kSetPermissions) // File connection set permissions failed ... ignore this (why?)
 	{
 		return;
 	}
