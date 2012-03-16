@@ -132,6 +132,20 @@
     }];
 }
 
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [self useCredential:nil forAuthenticationChallenge:challenge];
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSParameterAssert(challenge == _challenge);
+    [_challenge release]; _challenge = nil;
+    
+    [[self delegate] connection:self
+                didReceiveError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserCancelledAuthentication userInfo:nil]];
+}
+
 - (void)disconnect;
 {
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self
