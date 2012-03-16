@@ -23,9 +23,13 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */; };
-		09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */ = {isa = PBXBuildFile; fileRef = 7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */; };
+		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
+		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
+		22CC56F91509048E00F94154 /* PathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* PathTests.m */; };
+		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		22FA97FA1509090A001728B8 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
+		22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
+		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3E21459CAFC0085BBC4 /* CKSFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */; };
 		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
@@ -176,7 +180,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */ = {
+		220AD7AD1509021A00748655 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
 			proxyType = 1;
@@ -241,15 +245,28 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		22FA97F715090855001728B8 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */,
+				22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
-		09D6601D09FD37990000BA00 /* UnitTest.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTest.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
-		09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AbstractConnectionTest.h; sourceTree = "<group>"; };
-		09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AbstractConnectionTest.m; sourceTree = "<group>"; };
-		09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SFTPConnectionTest.h; sourceTree = "<group>"; };
-		09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SFTPConnectionTest.m; sourceTree = "<group>"; };
 		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
 		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
+		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		22CC56F81509048E00F94154 /* PathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PathTests.m; sourceTree = "<group>"; };
 		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
 		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
@@ -340,12 +357,6 @@
 		7978FC240B1183DE0048168B /* CKController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKController.h; sourceTree = "<group>"; };
 		7978FC250B1183DE0048168B /* CKController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKController.m; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		7981F6C30A05F6D2004D775D /* FileConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileConnectionTest.h; sourceTree = "<group>"; };
-		7981F6C40A05F6D2004D775D /* FileConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FileConnectionTest.m; sourceTree = "<group>"; };
-		7981F6C50A05F6D2004D775D /* FTPConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FTPConnectionTest.h; sourceTree = "<group>"; };
-		7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FTPConnectionTest.m; sourceTree = "<group>"; };
-		7981F6F80A060084004D775D /* DotMacConnectionTest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DotMacConnectionTest.h; sourceTree = "<group>"; };
-		7981F6F90A060084004D775D /* DotMacConnectionTest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DotMacConnectionTest.m; sourceTree = "<group>"; };
 		798300060B0D4A2600F5078E /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferProgressCell.h; sourceTree = "<group>"; };
 		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferProgressCell.m; sourceTree = "<group>"; };
@@ -500,11 +511,14 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		09D6601A09FD37990000BA00 /* Frameworks */ = {
+		220AD7941509019B00748655 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09D6603A09FD37CD0000BA00 /* Connection.framework in Frameworks */,
+				22FA97FA1509090A001728B8 /* DAVKit.framework in Frameworks */,
+				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
+				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
+				220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -560,16 +574,7 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
-				09D6603009FD37B70000BA00 /* AbstractConnectionTest.h */,
-				09D6603109FD37B70000BA00 /* AbstractConnectionTest.m */,
-				7981F6C30A05F6D2004D775D /* FileConnectionTest.h */,
-				7981F6C40A05F6D2004D775D /* FileConnectionTest.m */,
-				7981F6C50A05F6D2004D775D /* FTPConnectionTest.h */,
-				7981F6C60A05F6D2004D775D /* FTPConnectionTest.m */,
-				09D6603409FD37B70000BA00 /* SFTPConnectionTest.h */,
-				09D6603509FD37B70000BA00 /* SFTPConnectionTest.m */,
-				7981F6F80A060084004D775D /* DotMacConnectionTest.h */,
-				7981F6F90A060084004D775D /* DotMacConnectionTest.m */,
+				22CC56F81509048E00F94154 /* PathTests.m */,
 			);
 			name = "Unit Tests";
 			path = "unit test";
@@ -607,9 +612,9 @@
 			isa = PBXGroup;
 			children = (
 				79CFD12609F702BE00172CDD /* Connection.framework */,
-				09D6601D09FD37990000BA00 /* UnitTest.octest */,
 				795FF4F10B0C013200EA9292 /* DropletHelper.app */,
 				7983E6D20B0C4DF000F5078E /* DropletLauncher */,
+				220AD7981509019B00748655 /* UnitTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -734,6 +739,8 @@
 			isa = PBXGroup;
 			children = (
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				220AD7991509019B00748655 /* SenTestingKit.framework */,
+				220AD79B1509019B00748655 /* Cocoa.framework */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -1036,23 +1043,24 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		09D6601C09FD37990000BA00 /* UnitTest */ = {
+		220AD7971509019B00748655 /* UnitTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */;
+			buildConfigurationList = 220AD7A71509019B00748655 /* Build configuration list for PBXNativeTarget "UnitTests" */;
 			buildPhases = (
-				09D6601809FD37990000BA00 /* Resources */,
-				09D6601909FD37990000BA00 /* Sources */,
-				09D6601A09FD37990000BA00 /* Frameworks */,
-				09D6601B09FD37990000BA00 /* ShellScript */,
+				220AD7931509019B00748655 /* Sources */,
+				220AD7941509019B00748655 /* Frameworks */,
+				220AD7951509019B00748655 /* Resources */,
+				22FA97F715090855001728B8 /* CopyFiles */,
+				220AD7961509019B00748655 /* ShellScript */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				09D6604709FD37DD0000BA00 /* PBXTargetDependency */,
+				220AD7AE1509021A00748655 /* PBXTargetDependency */,
 			);
-			name = UnitTest;
-			productName = UnitTest;
-			productReference = 09D6601D09FD37990000BA00 /* UnitTest.octest */;
+			name = UnitTests;
+			productName = Tests;
+			productReference = 220AD7981509019B00748655 /* UnitTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
 		795FF4F00B0C013200EA9292 /* DropletHelper */ = {
@@ -1153,9 +1161,9 @@
 			targets = (
 				7983E7E80B0C4F2200F5078E /* Build All */,
 				79CFD12509F702BE00172CDD /* Framework */,
-				09D6601C09FD37990000BA00 /* UnitTest */,
 				795FF4F00B0C013200EA9292 /* DropletHelper */,
 				7983E6D10B0C4DF000F5078E /* DropletLauncher */,
+				220AD7971509019B00748655 /* UnitTests */,
 			);
 		};
 /* End PBXProject section */
@@ -1185,7 +1193,7 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
-		09D6601809FD37990000BA00 /* Resources */ = {
+		220AD7951509019B00748655 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1239,7 +1247,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		09D6601B09FD37990000BA00 /* ShellScript */ = {
+		220AD7961509019B00748655 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -1312,12 +1320,11 @@
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		09D6601909FD37990000BA00 /* Sources */ = {
+		220AD7931509019B00748655 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				09B5F7660A01D1BF001F8961 /* AbstractConnectionTest.m in Sources */,
-				09EB32BA0A15B801008A5C3D /* FTPConnectionTest.m in Sources */,
+				22CC56F91509048E00F94154 /* PathTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1397,10 +1404,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		09D6604709FD37DD0000BA00 /* PBXTargetDependency */ = {
+		220AD7AE1509021A00748655 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
-			targetProxy = 09D6604609FD37DD0000BA00 /* PBXContainerItemProxy */;
+			targetProxy = 220AD7AD1509021A00748655 /* PBXContainerItemProxy */;
 		};
 		27448C3414580FD500EB086F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1543,64 +1550,81 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		09D6602709FD379A0000BA00 /* Debug */ = {
+		220AD7A81509019B00748655 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = NO;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(value)",
-					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
-				);
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
-				GCC_MODEL_TUNING = G5;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
-				INFOPLIST_FILE = "UnitTest-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
 				);
-				PRODUCT_NAME = UnitTest;
-				VALID_ARCHS = i386;
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
 			};
 			name = Debug;
 		};
-		09D6602809FD379A0000BA00 /* Release */ = {
+		220AD7A91509019B00748655 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(value)",
-					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
-				);
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
+				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTest-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
-				);
-				PRODUCT_NAME = UnitTest;
-				VALID_ARCHS = i386;
+				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
 			};
 			name = Release;
+		};
+		220AD7AA1509019B00748655 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_ENABLE_OBJC_GC = supported;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "UnitTest-Info.plist";
+				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Plugin;
 		};
 		795FF4F80B0C013300EA9292 /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -1819,39 +1843,10 @@
 			};
 			name = Plugin;
 		};
-		79A857920B9267CA00D9C844 /* Plugin */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
-				COPY_PHASE_STRIP = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(value)",
-					"$(DEVELOPER_FRAMEWORKS_DIR_QUOTED)",
-				);
-				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
-				GCC_MODEL_TUNING = G5;
-				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "$(SYSTEM_LIBRARY_DIR)/Frameworks/Cocoa.framework/Headers/Cocoa.h";
-				INFOPLIST_FILE = "UnitTest-Info.plist";
-				INSTALL_PATH = "$(USER_LIBRARY_DIR)/Bundles";
-				OTHER_LDFLAGS = (
-					"-framework",
-					Cocoa,
-					"-framework",
-					SenTestingKit,
-				);
-				PRODUCT_NAME = UnitTest;
-				VALID_ARCHS = i386;
-				WRAPPER_EXTENSION = octest;
-				ZERO_LINK = NO;
-			};
-			name = Plugin;
-		};
 		79A857940B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1870,7 +1865,6 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -1885,7 +1879,6 @@
 					"\"$(SRCROOT)/SFTP\"",
 				);
 				LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1 = "\"$(SRCROOT)\"";
-				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = "-falign-loops=16";
 				OTHER_LDFLAGS = (
 					"-framework",
@@ -1912,7 +1905,6 @@
 				FRAMEWORK_VERSION = A;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = unsupported;
 				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
 				GCC_MODEL_TUNING = G5;
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
@@ -1944,7 +1936,7 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
@@ -1957,7 +1949,7 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_INCREASE_PRECOMPILED_HEADER_SHARING = NO;
 				GCC_TREAT_WARNINGS_AS_ERRORS = NO;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
@@ -1971,12 +1963,12 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		09D6602609FD379A0000BA00 /* Build configuration list for PBXNativeTarget "UnitTest" */ = {
+		220AD7A71509019B00748655 /* Build configuration list for PBXNativeTarget "UnitTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				09D6602709FD379A0000BA00 /* Debug */,
-				09D6602809FD379A0000BA00 /* Release */,
-				79A857920B9267CA00D9C844 /* Plugin */,
+				220AD7A81509019B00748655 /* Debug */,
+				220AD7A91509019B00748655 /* Release */,
+				220AD7AA1509019B00748655 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

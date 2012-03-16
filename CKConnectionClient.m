@@ -269,9 +269,6 @@
 {
     if (challenge == _currentAuthenticationChallenge)
     {
-        // All CKConnections should behave like this for now
-        [[self connection] forceDisconnect];
-        
         // Forward the message on to the original sender
         [(NSObject *)[_originalAuthenticationChallenge sender] performSelector:_cmd
          withObject:_originalAuthenticationChallenge

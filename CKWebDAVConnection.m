@@ -344,6 +344,8 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
 {
+    [[self retain] autorelease];    // hack to keep us alive long enough for full error handling
+    [[self delegate] connection:self didReceiveError:error];
     [self webDAVRequest:aRequest didFinishWithResult:nil error:error];
 }
 
