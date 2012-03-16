@@ -175,32 +175,6 @@
     }
 }
 
-- (void)SFTPSession:(CK2SFTPSession *)session didFailWithError:(NSError *)error;
-{
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self didReceiveError:error];
-    [proxy release];
-}
-
-- (void)SFTPSession:(CK2SFTPSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    [[self delegate] connection:self didReceiveAuthenticationChallenge:challenge];
-}
-
-- (void)SFTPSession:(CK2SFTPSession *)session didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    [[self delegate] connection:self didCancelAuthenticationChallenge:challenge];
-}
-
-- (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
-{
-    if (![self delegate]) return;
-    
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
-    [proxy release];
-}
-
 #pragma mark Requests
 
 - (void)cancelAll { }
@@ -398,14 +372,13 @@
 
 #pragma mark Delegate
 
-- (void)handle:(CURLHandle *)handle didReceiveResponse:(NSURLResponse *)response;
+- (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
 {
+    if (![self delegate]) return;
     
-}
-
-- (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
-{
-    
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    [proxy release];
 }
 
 @end
