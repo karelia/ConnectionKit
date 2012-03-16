@@ -93,18 +93,42 @@
 {
     if (challenge != _challenge) return;
     
+    _challenge = nil;   // will release in a bit
+    
     // Try an empty request to see how far we get, and learn starting directory
     [_queue addOperationWithBlock:^{
         
         [_session useCredential:credential];
         
-        NSString *path = [_session homeDirectoryPath];
-        [self setCurrentDirectory:path];
+        NSError *error;
+        NSString *path = [_session homeDirectoryPath:&error];
         
-        if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
+        if (path)
         {
-            [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
+            [self setCurrentDirectory:path];
+            
+            if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
+            {
+                [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
+            }
         }
+        else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
+        {
+            _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace]
+                                                                    proposedCredential:credential
+                                                                  previousFailureCount:([challenge previousFailureCount] + 1)
+                                                                       failureResponse:nil
+                                                                                 error:error
+                                                                                sender:self];
+            
+            [[self delegate] connection:self didReceiveAuthenticationChallenge:_challenge];
+        }
+        else
+        {
+            [[self delegate] connection:self didReceiveError:error];
+        }
+        
+        [challenge release];
     }];
 }
 
