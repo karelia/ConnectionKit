@@ -296,16 +296,14 @@
 }
 - (void)threaded_directoryContents:(NSString *)path;
 {
-    NSError *error;
-    NSMutableArray *result = [[_session parsedResourceListingsOfDirectory:path error:&error] mutableCopy];
+    NSMutableArray *result = [[NSMutableArray alloc] init];
     
-    // Convert from CFFTP's format to ours
-    for (NSUInteger i = 0; i < [result count]; i++)
-    {
-        NSDictionary *aListing = [result objectAtIndex:i];
+    NSError *error;
+    BOOL success = [_session enumerateContentsOfDirectoryAtPath:path error:&error usingBlock:^(NSDictionary *parsedResourceListing) {
         
+        // Convert from CFFTP's format to ours
         NSString *type = NSFileTypeUnknown;
-        switch ([[aListing objectForKey:(NSString *)kCFFTPResourceType] integerValue])
+        switch ([[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceType] integerValue])
         {
             case DT_CHR:
                 type = NSFileTypeCharacterSpecial;
@@ -328,14 +326,22 @@
         }
         
         NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                    [aListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
+                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
                                     type, NSFileType,
                                     nil];
-        [result replaceObjectAtIndex:i withObject:attributes];
+        [result addObject:attributes];
         [attributes release];
+    }];
+    
+    if (success)
+    {
+        error = nil;    // so garbage doesn't get passed across threads
+    }
+    else
+    {
+        result = nil;
     }
     
-    if (result) error = nil;    // cause CK handles errors in a crazy way
     if (!path) path = @"";      // so Open Panel has something to go on initially
     
     id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
