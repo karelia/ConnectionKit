@@ -12,6 +12,8 @@
 
 #import "NSURL+Connection.h"
 
+#import <CurlHandle/CURLFTPSession.h>
+
 
 @implementation CKConnectionRegistry
 
@@ -141,12 +143,9 @@
 - (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([[baseURL scheme] isEqualToString:@"ftp"] && [path isAbsolutePath])
+    if ([[baseURL scheme] isEqualToString:@"ftp"])
     {
-        // Get to host's URL, including single trailing slash
-        // -absoluteURL has to be called so that the real path can be properly appended
-        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path];
+        return [CURLFTPSession URLWithPath:path relativeToURL:baseURL];
     }
     else
     {
@@ -159,10 +158,7 @@
     // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
     if ([[URL scheme] isEqualToString:@"ftp"])
     {
-        CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
-        NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        if (strictPath) CFRelease(strictPath);
-        return result;
+        return [CURLFTPSession pathOfURLRelativeToHomeDirectory:URL];
     }
     else
     {
