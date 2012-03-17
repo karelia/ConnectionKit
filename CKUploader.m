@@ -877,8 +877,9 @@
 
 - (void)cancel;
 {
-    // Stop any pending ops
+    // Stop any ops
     [_queue cancelAllOperations];
+    [_session cancel];
     
     // Clear out ivars, the actual objects will get torn down as the queue finishes its work
     [_queue release]; _queue = nil;
