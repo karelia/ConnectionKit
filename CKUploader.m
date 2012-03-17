@@ -12,6 +12,7 @@
 #import "CKFileConnection.h"
 #import "UKMainThreadProxy.h"
 
+#import <CURLHandle/CURLFTPSession.h>
 #import "CK2SFTPSession.h"
 #import "CKWebDAVConnection.h"
 
@@ -28,6 +29,25 @@
 }
 
 @property(nonatomic, retain, readonly) CK2SFTPSession *SFTPSession;
+
+@end
+
+
+#pragma mark -
+
+
+@interface CKFTPUploader : CKUploader <CURLFTPSessionDelegate, NSURLAuthenticationChallengeSender>
+{
+@private
+    CURLFTPSession      *_session;
+    NSURL               *_URL;
+    NSOperationQueue    *_queue;
+    BOOL                _started;
+    
+    NSURLAuthenticationChallenge    *_challenge;
+}
+
+@property(nonatomic, retain, readonly) CURLFTPSession *FTPSession;
 
 @end
 
@@ -63,7 +83,20 @@
     NSParameterAssert(request);
     
     NSString *scheme = [[request URL] scheme];
-    Class class = ([scheme isEqualToString:@"sftp"] || [scheme isEqualToString:@"ssh"] ? [CKSFTPUploader class] : [self class]);
+    
+    Class class;
+    if ([scheme isEqualToString:@"sftp"] || [scheme isEqualToString:@"ssh"])
+    {
+        class = [CKSFTPUploader class];
+    }
+    else if ([scheme isEqualToString:@"ftp"])
+    {
+        class = [CKFTPUploader class];
+    }
+    else
+    {
+        class = [self class];
+    }
     
     return [[[class alloc] initWithRequest:request
                       filePosixPermissions:(customPermissions ? [customPermissions unsignedLongValue] : 0644)
@@ -782,6 +815,255 @@
     {
         [[_record mainThreadProxy] transferDidFinish:_record error:nil];
     }
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CKFTPUploader
+
+#pragma mark Lifecycle
+
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+{
+    if (self = [super initWithRequest:request filePosixPermissions:customPermissions options:options])
+    {
+        // HACK clear out super's connection ref
+        [self setValue:nil forKey:@"connection"];
+        
+        _URL = [[request URL] copy];
+        
+        _queue = [[NSOperationQueue alloc] init];
+        [_queue setMaxConcurrentOperationCount:1];
+        [_queue setSuspended:YES];  // we'll resume once authenticated
+        
+        _session = [[CURLFTPSession alloc] initWithRequest:request];
+        [_session setDelegate:self];
+    }
+    
+    return self;
+}
+
+- (void)finishUploading;
+{
+    [super finishUploading];
+    
+    
+    // Disconnect once all else is done
+    NSOperation *closeOp = [[NSInvocationOperation alloc] initWithTarget:self
+                                                                selector:@selector(threaded_finish)
+                                                                  object:nil];
+    
+    NSArray *operations = [_queue operations];
+    for (NSOperation *anOp in operations)
+    {
+        [closeOp addDependency:anOp];
+    }
+    
+    [_queue addOperation:closeOp];
+    [closeOp release];
+    
+}
+
+- (void)threaded_finish;
+{
+    [[(id)[self delegate] mainThreadProxy] uploaderDidFinishUploading:self];
+    
+    [_session release]; _session = nil;
+}
+
+- (void)cancel;
+{
+    // Stop any pending ops
+    [_queue cancelAllOperations];
+    
+    // Clear out ivars, the actual objects will get torn down as the queue finishes its work
+    [_queue release]; _queue = nil;
+    [_session release]; _session = nil;
+}
+
+- (void)dealloc;
+{
+    [_session setDelegate:nil];
+    [_session release];
+    [_URL release];
+    [_queue release];
+    
+    [super dealloc];
+}
+
+#pragma mark Upload
+
+- (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
+{
+    if (!_started && !([self options] & CKUploadingDryRun))
+    {
+        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[_URL host]
+                                                                            port:[[_URL port] integerValue]
+                                                                        protocol:[_URL scheme]
+                                                                           realm:nil
+                                                            authenticationMethod:nil];
+        
+        _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                proposedCredential:nil
+                                                              previousFailureCount:0
+                                                                   failureResponse:nil
+                                                                             error:nil
+                                                                            sender:self];
+        [space release];
+        
+        [[self delegate] uploader:self didReceiveAuthenticationChallenge:_challenge];
+        _started = YES;
+    }
+    
+    [super didEnqueueUpload:record toPath:path];
+}
+
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
+{
+    CKTransferRecord *result = nil;
+    
+    if ([self FTPSession])
+    {
+        result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
+        
+        
+        NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
+                                                                 target:self
+                                                              arguments:[NSArray arrayWithObjects:data, path, result, nil]];
+        
+        NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+        [_queue addOperation:op];
+        [op release];
+        
+        
+        
+        [self didEnqueueUpload:result toPath:path];
+    }
+    
+    return result;
+}
+
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path
+{
+    // Cheat and send non-file URLs direct
+    return [self uploadData:[NSData dataWithContentsOfURL:localURL] toPath:path];
+    
+    /*
+    CKTransferRecord *result = nil;
+    
+    if ([self FTPSession])
+    {
+        NSNumber *size = [[[NSFileManager defaultManager] attributesOfItemAtPath:[localURL path] error:NULL] objectForKey:NSFileSize];
+        
+        if (size)   // if size can't be determined, no chance of being able to upload
+        {
+            result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[size unsignedLongLongValue]];
+            [self didEnqueueUpload:result toPath:path];  // so record has correct path
+            
+            
+            NSOperation *op = [[CKWriteContentsOfURLToSFTPHandleOperation alloc] initWithURL:localURL
+                                                                                        path:path
+                                                                                    uploader:self
+                                                                              transferRecord:result];
+            [_queue addOperation:op];
+            [op release];
+            
+            
+            
+        }
+    }
+    
+    return result;*/
+}
+
+- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record;
+{
+    CURLFTPSession *ftpSession = [self FTPSession];
+    NSParameterAssert(ftpSession);
+    
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [record transferDidBegin:record];
+    }];
+    
+    NSError *error;
+    BOOL result = [ftpSession createFileAtPath:path contents:data withIntermediateDirectories:YES error:&error];
+    
+    [[record mainThreadProxy] transferDidFinish:record
+                                          error:(result ? nil : error)];
+}
+
+#pragma mark FTP Session
+
+@synthesize FTPSession = _session;
+
+- (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
+{
+    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        [[self delegate] uploader:self
+                     appendString:string
+                     toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    }];
+}
+
+#pragma mark NSURLAuthenticationChallengeSender
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    NSParameterAssert(challenge == _challenge);
+    _challenge = nil;   // will release in a bit
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        [_session useCredential:credential];
+        
+        NSError *error;
+        NSString *path = [_session homeDirectoryPath:&error];
+        
+        if (path)
+        {
+            [_queue setSuspended:NO];
+        }
+        else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
+        {
+            _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace]
+                                                                    proposedCredential:credential
+                                                                  previousFailureCount:([challenge previousFailureCount] + 1)
+                                                                       failureResponse:nil
+                                                                                 error:error
+                                                                                sender:self];
+            
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [[self delegate] uploader:self didReceiveAuthenticationChallenge:_challenge];
+            }];
+        }
+        else
+        {
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [[self delegate] uploader:self didFailWithError:error];
+            }];
+        }
+        
+        [challenge release];
+    });
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [self useCredential:nil forAuthenticationChallenge:challenge];
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    NSParameterAssert(challenge == _challenge);
+    [_challenge release]; _challenge = nil;
+    
+    [[self delegate] uploader:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                        code:NSURLErrorUserCancelledAuthentication
+                                                                    userInfo:nil]];
 }
 
 @end
