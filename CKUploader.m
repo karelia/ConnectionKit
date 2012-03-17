@@ -922,6 +922,33 @@
     [super didEnqueueUpload:record toPath:path];
 }
 
+- (void)uploadToPath:(NSString *)path
+              record:(CKTransferRecord *)record
+          usingBlock:(BOOL (^)(NSError **outError, void (^progressBlock)(NSUInteger bytesWritten)))uploadBlock;
+{
+    [_queue addOperationWithBlock:^{
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [record transferDidBegin:record];
+        }];
+        
+        NSError *error;
+        BOOL result = uploadBlock(&error, ^(NSUInteger bytesWritten) {
+            
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [record transfer:record transferredDataOfLength:bytesWritten];
+            }];
+        });
+        
+        if (result) error = nil;    // so block can reference it
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [record transferDidFinish:record error:error];
+        }];
+    }];
+        
+    [self didEnqueueUpload:record toPath:path];
+}
+
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
     CKTransferRecord *result = nil;
@@ -930,18 +957,13 @@
     {
         result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
         
-        
-        NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
-                                                                 target:self
-                                                              arguments:[NSArray arrayWithObjects:data, path, result, nil]];
-        
-        NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
-        [_queue addOperation:op];
-        [op release];
-        
-        
-        
-        [self didEnqueueUpload:result toPath:path];
+        [self uploadToPath:path record:result usingBlock:^BOOL(NSError **outError, void (^progressBlock)(NSUInteger bytesWritten)) {
+            
+            return [[self FTPSession] createFileAtPath:path
+                                              contents:data
+                           withIntermediateDirectories:YES
+                                                 error:outError];
+        }];
     }
     
     return result;
@@ -958,43 +980,13 @@
         
         record = [CKTransferRecord recordWithName:[path lastPathComponent] size:[size unsignedLongLongValue]];
         
-        [_queue addOperationWithBlock:^{
+        [self uploadToPath:path record:record usingBlock:^BOOL(NSError **outError, void (^progressBlock)(NSUInteger bytesWritten)) {
             
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                [record transferDidBegin:record];
-            }];
-            
-            NSError *error;
-            BOOL result = [[self FTPSession] createFileAtPath:path withContentsOfURL:localURL withIntermediateDirectories:YES error:&error progressBlock:^(NSUInteger bytesWritten) {
-                
-                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    [record transfer:record transferredDataOfLength:bytesWritten];
-                }];
-            }];
-            
-            [[record mainThreadProxy] transferDidFinish:record error:(result ? nil : error)];
+            return [[self FTPSession] createFileAtPath:path withContentsOfURL:localURL withIntermediateDirectories:YES error:outError progressBlock:progressBlock];
         }];
-        
-        [self didEnqueueUpload:record toPath:path];
     }
     
     return record;
-}
-
-- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record;
-{
-    CURLFTPSession *ftpSession = [self FTPSession];
-    NSParameterAssert(ftpSession);
-    
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-        [record transferDidBegin:record];
-    }];
-    
-    NSError *error;
-    BOOL result = [ftpSession createFileAtPath:path contents:data withIntermediateDirectories:YES error:&error];
-    
-    [[record mainThreadProxy] transferDidFinish:record
-                                          error:(result ? nil : error)];
 }
 
 #pragma mark FTP Session
