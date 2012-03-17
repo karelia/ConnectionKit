@@ -949,35 +949,36 @@
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path
 {
-    // Cheat and send non-file URLs direct
-    return [self uploadData:[NSData dataWithContentsOfURL:localURL] toPath:path];
-    
-    /*
-    CKTransferRecord *result = nil;
+    CKTransferRecord *record = nil;
     
     if ([self FTPSession])
     {
-        NSNumber *size = [[[NSFileManager defaultManager] attributesOfItemAtPath:[localURL path] error:NULL] objectForKey:NSFileSize];
+        NSNumber *size;
+        if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) return nil;
         
-        if (size)   // if size can't be determined, no chance of being able to upload
-        {
-            result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[size unsignedLongLongValue]];
-            [self didEnqueueUpload:result toPath:path];  // so record has correct path
+        record = [CKTransferRecord recordWithName:[path lastPathComponent] size:[size unsignedLongLongValue]];
+        
+        [_queue addOperationWithBlock:^{
             
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [record transferDidBegin:record];
+            }];
             
-            NSOperation *op = [[CKWriteContentsOfURLToSFTPHandleOperation alloc] initWithURL:localURL
-                                                                                        path:path
-                                                                                    uploader:self
-                                                                              transferRecord:result];
-            [_queue addOperation:op];
-            [op release];
+            NSError *error;
+            BOOL result = [[self FTPSession] createFileAtPath:path withContentsOfURL:localURL withIntermediateDirectories:YES error:&error progressBlock:^(NSUInteger bytesWritten) {
+                
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    [record transfer:record transferredDataOfLength:bytesWritten];
+                }];
+            }];
             
-            
-            
-        }
+            [[record mainThreadProxy] transferDidFinish:record error:(result ? nil : error)];
+        }];
+        
+        [self didEnqueueUpload:record toPath:path];
     }
     
-    return result;*/
+    return record;
 }
 
 - (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record;
