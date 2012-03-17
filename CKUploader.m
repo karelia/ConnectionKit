@@ -930,6 +930,7 @@
     [_queue addOperationWithBlock:^{
         
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [[self delegate] uploader:self didBeginUploadToPath:path];
             [record transferDidBegin:record];
         }];
         
