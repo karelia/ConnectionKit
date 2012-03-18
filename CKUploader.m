@@ -89,7 +89,7 @@
     {
         class = [CKSFTPUploader class];
     }
-    else if ([scheme isEqualToString:@"ftp"])
+    else if ([scheme isEqualToString:@"ftp"] && [[NSUserDefaults standardUserDefaults] boolForKey:@"useCURLForFTP"])
     {
         class = [CKFTPUploader class];
     }
