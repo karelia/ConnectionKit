@@ -9,6 +9,7 @@
 #import "CKConnectionRegistry.h"
 
 #import "CKAbstractConnection.h"
+#import "CKCurlFTPConnection.h"
 
 #import "NSURL+Connection.h"
 
@@ -61,11 +62,19 @@
 
 - (Class <CKConnection>)connectionClassForURLScheme:(NSString *)URLScheme
 {
+    if ([URLScheme isEqualToString:@"ftp"] && [[NSUserDefaults standardUserDefaults] boolForKey:@"useCURLForFTP"])
+    {
+        return [CKCurlFTPConnection class];
+    }
     return [_connectionClassesByURLScheme objectForKey:URLScheme];
 }
 
 - (Class <CKConnection>)connectionClassForName:(NSString *)connectionName
 {
+    if ([connectionName isEqualToString:@"FTP"] && [[NSUserDefaults standardUserDefaults] boolForKey:@"useCURLForFTP"])
+    {
+        return [CKCurlFTPConnection class];
+    }
     return [_connectionClassesByName objectForKey:connectionName];
 }
 
