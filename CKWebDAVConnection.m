@@ -55,6 +55,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     {{
         [operation addObserver:self forKeyPath:@"isFinished" options:0 context:sOpFinishObservationContext];
         [operation start];
+        [self retain];  // so can't be deallocated mid-operation. I have seen this happen
     }}
     [operation release];
 }
@@ -82,6 +83,8 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
             {
                 [self runOperation:[_queue objectAtIndex:0]];
             }
+            
+            [self release]; // balance out the -retain when the op was started
         }
     }
     else
