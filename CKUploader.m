@@ -55,6 +55,25 @@
 #pragma mark -
 
 
+@interface CKLocalFileUploader : CKUploader <NSStreamDelegate>
+{
+  @private
+    NSURL   *_baseURL;
+    
+    NSMutableArray  *_queue;
+    
+    CKTransferRecord    *_currentTransferRecord;
+    NSOutputStream      *_writingStream;
+    NSInputStream       *_inputStream;
+    NSMutableData       *_buffer;
+    NSURL               *_URLForWritingTo;
+}
+@end
+
+
+#pragma mark -
+
+
 @implementation CKUploader
 
 #pragma mark Lifecycle
@@ -92,6 +111,10 @@
     else if ([scheme isEqualToString:@"ftp"] && [[NSUserDefaults standardUserDefaults] boolForKey:@"useCURLForFTP"])
     {
         class = [CKFTPUploader class];
+    }
+    else if ([scheme isEqualToString:@"file"])
+    {
+        class = [CKLocalFileUploader class];
     }
     else
     {
@@ -1059,6 +1082,250 @@
     [[self delegate] uploader:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                         code:NSURLErrorUserCancelledAuthentication
                                                                     userInfo:nil]];
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CKLocalFileUploader
+
+#pragma mark Lifecycle
+
+- (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;
+{
+    if (self = [super initWithRequest:request filePosixPermissions:customPermissions options:options])
+    {
+        // HACK clear out super's connection ref
+        [self setValue:nil forKey:@"connection"];
+        
+        _baseURL = [[request URL] copy];
+        _queue = [[NSMutableArray alloc] init];
+    }
+    
+    return self;
+}
+
+- (void)finishUploading;
+{
+    [super finishUploading];
+    
+    
+    // Disconnect once all else is done
+    NSOperation *closeOp = [[NSInvocationOperation alloc] initWithTarget:self
+                                                                selector:@selector(threaded_finish)
+                                                                  object:nil];
+    
+    [self addOperation:closeOp];
+}
+
+- (void)threaded_finish;
+{
+    [[(id)[self delegate] mainThreadProxy] uploaderDidFinishUploading:self];
+}
+
+- (void)cancel;
+{
+    // Stop any ops
+    [_writingStream close];
+    [_inputStream close];
+    
+    [_writingStream release]; _writingStream = nil;
+    [_inputStream release]; _inputStream = nil;
+}
+
+- (void)dealloc;
+{
+    [_baseURL release];
+    [_queue release];
+    [_inputStream release];
+    [_writingStream release];
+    
+    [super dealloc];
+}
+
+#pragma mark Queue
+
+- (void)addOperation:(NSOperation *)operation
+{
+    if ([_queue count] == 0) [operation start];
+    [_queue addObject:operation];
+}
+
+#pragma mark Upload
+
+- (void)prepareToWriteToURL:(NSURL *)url;
+{
+    [_writingStream release]; _writingStream = [[NSOutputStream alloc] initWithURL:url append:NO];
+    [_writingStream setDelegate:self];
+    [_writingStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+    [_writingStream open];
+}
+
+- (CKTransferRecord *)createFileAtPath:(NSString *)path withDataStream:(NSInputStream *)stream size:(unsigned long long)size;
+{
+    NSParameterAssert(stream);
+    
+    CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:size];
+    
+    [self addOperation:[NSBlockOperation blockOperationWithBlock:^{
+        
+        NSAssert(_inputStream == nil, @"Can only create one file at a time");
+        
+        _currentTransferRecord = [result retain];
+        
+        _inputStream = [stream retain];
+        [_inputStream setDelegate:self];
+        [_inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
+        [_inputStream open];
+        
+        _URLForWritingTo = [[[[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL] absoluteURL] copy];
+        [self prepareToWriteToURL:_URLForWritingTo];
+        
+        [[self delegate] uploader:self didBeginUploadToPath:path];
+        [result transferDidBegin:result];
+    }]];
+    
+    [self didEnqueueUpload:result toPath:path];
+    return result;
+}
+
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
+{
+    return [self createFileAtPath:path withDataStream:[NSInputStream inputStreamWithData:data] size:[data length]];
+}
+
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path
+{
+    NSNumber *size;
+    if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) return nil;
+    
+    NSInputStream *stream = [[NSInputStream alloc] initWithURL:localURL];
+    if (!stream)
+    {
+        NSData *data = [[NSData alloc] initWithContentsOfURL:localURL];
+        if (!data) return nil;
+        
+        stream = [[NSInputStream alloc] initWithData:data];
+        [data release];
+    }
+    
+    return [self createFileAtPath:path withDataStream:stream size:[size unsignedLongLongValue]];
+}
+
+- (BOOL)writeAsMuchOfBufferAsSpaceAvailableAllows
+{
+    NSInteger written = [_writingStream write:[_buffer bytes] maxLength:[_buffer length]];
+    if (written < 0)
+    {
+        // TODO: bail out with error
+        NSLog(@"write error");
+        return NO;
+    }
+    
+    [_buffer replaceBytesInRange:NSMakeRange(0, written) withBytes:NULL length:0];
+    
+    [_currentTransferRecord transfer:_currentTransferRecord transferredDataOfLength:written];
+    
+    return YES;
+}
+
+- (BOOL)finishCurrentOperationIfWritingIsFinished
+{
+    if (_inputStream == nil && [_buffer length] == 0)
+    {
+        [_writingStream close];
+        [_writingStream release]; _writingStream = nil;
+        
+        [_currentTransferRecord transferDidFinish:_currentTransferRecord error:nil];
+        [_currentTransferRecord release]; _currentTransferRecord = nil;
+        
+        [_queue removeObjectAtIndex:0];
+        if ([_queue count]) [[_queue objectAtIndex:0] start];
+        return YES;
+    }
+    
+    return NO;
+}
+
+- (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
+{
+    if (eventCode & NSStreamEventErrorOccurred)
+    {
+        if (aStream == _writingStream)
+        {
+            // If it's because the parent folder doesn't exist yet, create it and retry
+            NSError *error = [aStream streamError];
+            if ([[error domain] isEqualToString:NSPOSIXErrorDomain] && [error code] == ENOENT)
+            {
+                NSDictionary *attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                                            [NSNumber numberWithUnsignedLong:[self posixPermissionsForPath:nil isDirectory:YES]],
+                                            NSFilePosixPermissions,
+                                            nil];
+                
+                BOOL success = [[NSFileManager defaultManager] createDirectoryAtURL:[_URLForWritingTo URLByDeletingLastPathComponent]
+                                                        withIntermediateDirectories:YES
+                                                                         attributes:attributes
+                                                                              error:NULL];
+                
+                if (success)
+                {
+                    [self prepareToWriteToURL:_URLForWritingTo];
+                    return;
+                }
+            }
+        }
+        
+        
+        // TODO: report error
+        NSLog(@"error");
+        return;
+    }
+    
+    // Write out any remainder of the buffer
+    if ([_writingStream hasSpaceAvailable] && [_buffer length])
+    {
+        [self writeAsMuchOfBufferAsSpaceAvailableAllows];
+        
+        // If the buffer is still full, write again when ready
+        if ([_buffer length]) return;
+        
+        // That might have been the end of the file being written. If so, onto the next op!
+        if ([self finishCurrentOperationIfWritingIsFinished]) return;
+    }
+    
+    if ([_inputStream hasBytesAvailable] && [_writingStream hasSpaceAvailable])
+    {
+        // Prepare the buffer
+        if (!_buffer) _buffer = [[NSMutableData alloc] init];
+        [_buffer setLength:1024*1024];
+        
+        // Read a chunk of data
+        NSInteger read = [_inputStream read:[_buffer mutableBytes] maxLength:[_buffer length]];
+        if (read > 0)
+        {
+            // Clear out any wasted space in the buffer, then write it
+            [_buffer replaceBytesInRange:NSMakeRange(read, [_buffer length] - read)
+                               withBytes:NULL length:0];
+            
+            [self writeAsMuchOfBufferAsSpaceAvailableAllows];
+        }
+        else if (read == 0)
+        {
+            // Finished reading
+            [_buffer setLength:0];
+            [_inputStream close];
+            [_inputStream release]; _inputStream = nil;
+            [self finishCurrentOperationIfWritingIsFinished];
+        }
+        else
+        {
+            // TODO: bail with error
+            NSLog(@"read error");
+        }
+    }
 }
 
 @end
