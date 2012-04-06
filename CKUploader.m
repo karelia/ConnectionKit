@@ -1185,7 +1185,7 @@
         [self prepareToWriteToURL:_URLForWritingTo];
         
         [[self delegate] uploader:self didBeginUploadToPath:path];
-        [result transferDidBegin:result];
+        [_currentTransferRecord transferDidBegin:_currentTransferRecord];
     }]];
     
     [self didEnqueueUpload:result toPath:path];
@@ -1248,6 +1248,14 @@
     }
     
     return NO;
+}
+
+- (void)finishReading;
+{
+    [_buffer setLength:0];
+    [_inputStream close];
+    [_inputStream release]; _inputStream = nil;
+    [self finishCurrentOperationIfWritingIsFinished];
 }
 
 - (void)stream:(NSStream *)aStream handleEvent:(NSStreamEvent)eventCode
@@ -1314,17 +1322,18 @@
         }
         else if (read == 0)
         {
-            // Finished reading
-            [_buffer setLength:0];
-            [_inputStream close];
-            [_inputStream release]; _inputStream = nil;
-            [self finishCurrentOperationIfWritingIsFinished];
+            [self finishReading];
         }
         else
         {
             // TODO: bail with error
             NSLog(@"read error");
         }
+    }
+    else if (aStream == _inputStream && [aStream streamStatus] == NSStreamStatusAtEnd)
+    {
+        // Streaming from NSData doesn't seem to ever give us a read return value of 0; instead get notified of the stream ending
+        [self finishReading];
     }
 }
 
