@@ -1182,6 +1182,7 @@
         [_inputStream open];
         
         _URLForWritingTo = [[[[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL] absoluteURL] copy];
+        NSAssert(_URLForWritingTo, @"Can't write to nil!");
         [self prepareToWriteToURL:_URLForWritingTo];
         
         [[self delegate] uploader:self didBeginUploadToPath:path];
