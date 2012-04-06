@@ -1218,13 +1218,27 @@
     return [self createFileAtPath:path withDataStream:stream size:[size unsignedLongLongValue]];
 }
 
+#pragma mark Queue
+
+- (void)finishCurrentOperationWithError:(NSError *)error;
+{
+    [_writingStream close];
+    [_writingStream release]; _writingStream = nil;
+    
+    [_currentTransferRecord transferDidFinish:_currentTransferRecord error:error];
+    [_currentTransferRecord release]; _currentTransferRecord = nil;
+    
+    [_queue removeObjectAtIndex:0];
+    if ([_queue count]) [[_queue objectAtIndex:0] start];
+}
+
 - (BOOL)writeAsMuchOfBufferAsSpaceAvailableAllows
 {
     NSInteger written = [_writingStream write:[_buffer bytes] maxLength:[_buffer length]];
     if (written < 0)
     {
-        // TODO: bail out with error
-        NSLog(@"write error");
+        // Bail out with error
+        [self finishCurrentOperationWithError:[_writingStream streamError]];
         return NO;
     }
     
@@ -1239,14 +1253,7 @@
 {
     if (_inputStream == nil && [_buffer length] == 0)
     {
-        [_writingStream close];
-        [_writingStream release]; _writingStream = nil;
-        
-        [_currentTransferRecord transferDidFinish:_currentTransferRecord error:nil];
-        [_currentTransferRecord release]; _currentTransferRecord = nil;
-        
-        [_queue removeObjectAtIndex:0];
-        if ([_queue count]) [[_queue objectAtIndex:0] start];
+        [self finishCurrentOperationWithError:nil];
         return YES;
     }
     
@@ -1290,8 +1297,8 @@
         }
         
         
-        // TODO: report error
-        NSLog(@"error");
+        // Report error
+        [self finishCurrentOperationWithError:[aStream streamError]];
         return;
     }
     
@@ -1329,8 +1336,7 @@
         }
         else
         {
-            // TODO: bail with error
-            NSLog(@"read error");
+            [self finishCurrentOperationWithError:[_inputStream streamError]];
         }
     }
     else if (aStream == _inputStream && [aStream streamStatus] == NSStreamStatusAtEnd)
