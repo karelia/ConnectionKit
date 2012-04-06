@@ -1194,11 +1194,14 @@
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
 {
+    NSParameterAssert(data);
     return [self createFileAtPath:path withDataStream:[NSInputStream inputStreamWithData:data] size:[data length]];
 }
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)localURL toPath:(NSString *)path
 {
+    NSParameterAssert(localURL);
+    
     NSNumber *size;
     if (![localURL getResourceValue:&size forKey:NSURLFileSizeKey error:NULL]) return nil;
     
