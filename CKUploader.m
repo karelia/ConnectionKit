@@ -1140,8 +1140,10 @@
 {
     [_baseURL release];
     [_queue release];
+    [_currentTransferRecord release];
     [_inputStream release];
     [_writingStream release];
+    [_URLForWritingTo release];
     
     [super dealloc];
 }
@@ -1156,9 +1158,11 @@
 
 #pragma mark Upload
 
-- (void)prepareToWriteToURL:(NSURL *)url;
+- (void)setupOutputStream;
 {
-    [_writingStream release]; _writingStream = [[NSOutputStream alloc] initWithURL:url append:NO];
+    NSAssert(_URLForWritingTo, @"Can't write to nil!");
+    [_writingStream release]; _writingStream = [[NSOutputStream alloc] initWithURL:_URLForWritingTo append:NO];
+    
     [_writingStream setDelegate:self];
     [_writingStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
     [_writingStream open];
@@ -1181,9 +1185,9 @@
         [_inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         [_inputStream open];
         
-        _URLForWritingTo = [[[[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL] absoluteURL] copy];
-        NSAssert(_URLForWritingTo, @"Can't write to nil!");
-        [self prepareToWriteToURL:_URLForWritingTo];
+        NSURL *outputURL = [[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL];
+        [_URLForWritingTo release]; _URLForWritingTo = [[outputURL absoluteURL] copy];
+        [self setupOutputStream];
         
         [[self delegate] uploader:self didBeginUploadToPath:path];
         [_currentTransferRecord transferDidBegin:_currentTransferRecord];
@@ -1291,7 +1295,7 @@
                 
                 if (success)
                 {
-                    [self prepareToWriteToURL:_URLForWritingTo];
+                    [self setupOutputStream];
                     return;
                 }
             }
