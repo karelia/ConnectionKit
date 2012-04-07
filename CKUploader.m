@@ -326,10 +326,6 @@
 		
 		return;
 	}
-	else if (code == kSetPermissions) // File connection set permissions failed ... ignore this (why?)
-	{
-		return;
-	}
 	else
 	{
 		[[self delegate] uploader:self didFailWithError:error];
