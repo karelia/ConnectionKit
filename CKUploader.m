@@ -68,6 +68,8 @@
     NSMutableData       *_buffer;
     NSURL               *_URLForWritingTo;
 }
+
+- (void)addOperation:(NSOperation *)operation;
 @end
 
 
@@ -1110,20 +1112,9 @@
 
 - (void)finishUploading;
 {
-    [super finishUploading];
-    
-    
-    // Disconnect once all else is done
-    NSOperation *closeOp = [[NSInvocationOperation alloc] initWithTarget:self
-                                                                selector:@selector(threaded_finish)
-                                                                  object:nil];
-    
-    [self addOperation:closeOp];
-}
-
-- (void)threaded_finish;
-{
-    [[(id)[self delegate] mainThreadProxy] uploaderDidFinishUploading:self];
+    [self addOperation:[NSBlockOperation blockOperationWithBlock:^{
+        [[self delegate] uploaderDidFinishUploading:self];
+    }]];
 }
 
 - (void)cancelCurrentOperation;
@@ -1152,14 +1143,6 @@
     [_URLForWritingTo release];
     
     [super dealloc];
-}
-
-#pragma mark Queue
-
-- (void)addOperation:(NSOperation *)operation
-{
-    [_queue addObject:operation];
-    if ([_queue count] == 1) [operation start];
 }
 
 #pragma mark Upload
@@ -1230,6 +1213,12 @@
 }
 
 #pragma mark Queue
+
+- (void)addOperation:(NSOperation *)operation;
+{
+    [_queue addObject:operation];
+    if ([_queue count] == 1) [operation start];
+}
 
 - (void)finishCurrentOperationWithError:(NSError *)error;
 {
