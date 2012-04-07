@@ -1252,6 +1252,17 @@
 {
     if (_inputStream == nil && [_buffer length] == 0)
     {
+        unsigned long permissions = [self posixPermissionsForPath:nil isDirectory:NO];
+        
+        NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSNumber numberWithUnsignedLong:permissions]
+                                                               forKey:NSFilePosixPermissions];
+        
+        NSError *error;
+        BOOL permissionsSuccess = [[NSFileManager defaultManager] setAttributes:attributes
+                                                                   ofItemAtPath:[_URLForWritingTo path]
+                                                                          error:&error];
+        
+        if (permissionsSuccess) error = nil;
         [self finishCurrentOperationWithError:nil];
         return YES;
     }
