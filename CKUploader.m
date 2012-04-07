@@ -9,7 +9,6 @@
 #import "CKUploader.h"
 
 #import "CKConnectionRegistry.h"
-#import "CKFileConnection.h"
 #import "UKMainThreadProxy.h"
 
 #import <CURLHandle/CURLFTPSession.h>
