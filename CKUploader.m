@@ -1149,8 +1149,9 @@
 
 - (void)setupOutputStream;
 {
+    // Need to pass an absolute URL to NSOutputStream for it to work proper-like. http://openradar.appspot.com/radar?id=1643404
     NSAssert(_URLForWritingTo, @"Can't write to nil!");
-    [_writingStream release]; _writingStream = [[NSOutputStream alloc] initWithURL:_URLForWritingTo append:NO];
+    [_writingStream release]; _writingStream = [[NSOutputStream alloc] initWithURL:[_URLForWritingTo absoluteURL] append:NO];
     
     [_writingStream setDelegate:self];
     [_writingStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
@@ -1175,7 +1176,7 @@
         [_inputStream open];
         
         NSURL *outputURL = [[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL];
-        [_URLForWritingTo release]; _URLForWritingTo = [[outputURL absoluteURL] copy];
+        [_URLForWritingTo release]; _URLForWritingTo = [outputURL copy];
         [self setupOutputStream];
         
         [[self delegate] uploader:self didBeginUploadToPath:path];
