@@ -1126,7 +1126,7 @@
     [[(id)[self delegate] mainThreadProxy] uploaderDidFinishUploading:self];
 }
 
-- (void)cancel;
+- (void)cancelCurrentOperation;
 {
     // Stop any ops
     [_writingStream close];
@@ -1134,6 +1134,12 @@
     
     [_writingStream release]; _writingStream = nil;
     [_inputStream release]; _inputStream = nil;
+}
+
+- (void)cancel;
+{
+    [self cancelCurrentOperation];
+    [_queue release]; _queue = nil;
 }
 
 - (void)dealloc;
@@ -1152,8 +1158,8 @@
 
 - (void)addOperation:(NSOperation *)operation
 {
-    if ([_queue count] == 0) [operation start];
     [_queue addObject:operation];
+    if ([_queue count] == 1) [operation start];
 }
 
 #pragma mark Upload
@@ -1227,8 +1233,7 @@
 
 - (void)finishCurrentOperationWithError:(NSError *)error;
 {
-    [_writingStream close];
-    [_writingStream release]; _writingStream = nil;
+    [self cancelCurrentOperation];
     
     [_currentTransferRecord transferDidFinish:_currentTransferRecord error:error];
     [_currentTransferRecord release]; _currentTransferRecord = nil;
