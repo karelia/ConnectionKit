@@ -180,10 +180,6 @@
     {
         return [CURLFTPSession pathOfURLRelativeToHomeDirectory:URL];
     }
-    else
-    {
-        return [URL path];
-    }
     
     NSString *result = [URL path];
     
