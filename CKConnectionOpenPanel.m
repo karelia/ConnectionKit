@@ -239,7 +239,8 @@
 	NSString *newPath = @"";
 	if (c > 0)
 	{
-		newPath = [[[[[[self connection] currentDirectory] pathComponents] subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))] componentsJoinedByString: @"/"] substringFromIndex: 1];
+        NSArray *currentPathComponents = [[[self connection] currentDirectory] pathComponents];
+		newPath = [[currentPathComponents subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))] componentsJoinedByString: @"/"];
 	}
 	
 	if ([newPath isEqualToString: @""])
