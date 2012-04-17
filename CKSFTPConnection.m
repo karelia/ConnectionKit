@@ -120,9 +120,12 @@
 
 - (void)SFTPSession:(CK2SFTPSession *)session didFailWithError:(NSError *)error;
 {
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self didReceiveError:error];
-    [proxy release];
+    if ([self delegate])
+    {
+        id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+        [proxy connection:self didReceiveError:error];
+        [proxy release];
+    }
 }
 
 - (void)SFTPSession:(CK2SFTPSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
