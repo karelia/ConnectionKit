@@ -107,6 +107,8 @@
         {
             [self setCurrentDirectory:path];
             
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
+            
             if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
             {
                 [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
