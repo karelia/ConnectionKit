@@ -908,8 +908,10 @@
                                                                            realm:nil
                                                             authenticationMethod:nil];
         
+        NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+        
         _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                proposedCredential:nil
+                                                                proposedCredential:credential
                                                               previousFailureCount:0
                                                                    failureResponse:nil
                                                                              error:nil
