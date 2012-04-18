@@ -1022,6 +1022,7 @@
         
         if (path)
         {
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
             [_queue setSuspended:NO];
         }
         else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
