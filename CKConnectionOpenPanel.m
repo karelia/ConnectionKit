@@ -918,8 +918,6 @@
             {
                 NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
                 NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
-                [icon setScalesWhenResized:YES];
-                [icon setSize:NSMakeSize(16,16)];
                 [comp lockFocus];
                 [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
                 [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
