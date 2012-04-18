@@ -904,9 +904,9 @@
     {
         NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[_URL host]
                                                                             port:[[_URL port] integerValue]
-                                                                        protocol:[_URL scheme]
+                                                                        protocol:NSURLProtectionSpaceFTP
                                                                            realm:nil
-                                                            authenticationMethod:nil];
+                                                            authenticationMethod:NSURLAuthenticationMethodDefault];
         
         NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
         
