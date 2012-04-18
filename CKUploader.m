@@ -924,12 +924,14 @@
     {
         NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[_URL host]
                                                                             port:[[_URL port] integerValue]
-                                                                        protocol:[_URL scheme]
+                                                                        protocol:NSURLProtectionSpaceFTP
                                                                            realm:nil
-                                                            authenticationMethod:nil];
+                                                            authenticationMethod:NSURLAuthenticationMethodDefault];
+        
+        NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
         
         _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                proposedCredential:nil
+                                                                proposedCredential:credential
                                                               previousFailureCount:0
                                                                    failureResponse:nil
                                                                              error:nil
@@ -1040,6 +1042,7 @@
         
         if (path)
         {
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
             [_queue setSuspended:NO];
         }
         else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
