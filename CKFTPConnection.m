@@ -122,6 +122,7 @@ const double kDelegateNotificationTheshold = 0.5;
 @end
 
 @interface CKFTPConnection (Authentication) <NSURLAuthenticationChallengeSender>
+@property(nonatomic, copy) NSURLCredential *currentAuthenticationCredential;
 - (void)authenticateConnection;
 - (void)sendPassword;
 @end
@@ -690,7 +691,15 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 230: //User logged in, proceed
 		{
 			_ftpFlags.loggedIn = YES;
-			
+            
+            
+            // Appropriately store the credentials once the password has been sent
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:[self currentAuthenticationCredential]
+                                                                forProtectionSpace:[_lastAuthenticationChallenge protectionSpace]];
+            
+            [self setCurrentAuthenticationCredential:nil];
+            
+             
 			// We get the current directory -- and we're notified of a change directory ... so we'll know what directory
 			// we are starting in.
 			CKConnectionCommand *getCurrentDirectoryCommand = [CKConnectionCommand command:@"PWD"
@@ -3675,9 +3684,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
     NSString *password = [[[self currentAuthenticationCredential] password] copy];
     NSAssert(password, @"Somehow a password-less credential has entered the FTP system");
     
-    // Dispose of the credentials once the password has been sent
-    [self setCurrentAuthenticationCredential:nil];
-       
     [self sendCommand:[NSString stringWithFormat:@"PASS %@", password]];
     [self setState:CKConnectionSentPasswordState];
     [password release];
