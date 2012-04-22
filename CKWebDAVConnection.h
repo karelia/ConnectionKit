@@ -19,7 +19,7 @@
     NSURLAuthenticationChallenge    *_challenge;
     DAVSession                      *_session;
     
-    NSMutableDictionary             *_transferRecordsByRequest;
+    NSMapTable                      *_transferRecordsByRequest;
     NSMutableArray                  *_queue;
     NSString                        *_currentDirectory;
     
