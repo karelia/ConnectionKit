@@ -26,7 +26,7 @@
     {
         _session = [[DAVSession alloc] initWithRootURL:[request URL] delegate:self];
         _queue = [[NSMutableArray alloc] init];
-        _transferRecordsByRequest = [[NSMutableDictionary alloc] init];
+        _transferRecordsByRequest = [[NSMapTable mapTableWithStrongToStrongObjects] retain];
     }
     return self;
 }
@@ -208,7 +208,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     [self enqueueOperation:request];
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:[remotePath lastPathComponent] size:[data length]];
-    CFDictionarySetValue((CFMutableDictionaryRef)_transferRecordsByRequest, request, result);
+    [_transferRecordsByRequest setObject:result forKey:request];
     [request release];
     return result;
 }
