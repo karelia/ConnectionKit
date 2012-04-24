@@ -531,7 +531,7 @@
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
-				7983E2120B0C22D600F5078E /* Bookmarks */,
+				7983E2120B0C22D600F5078E /* Keychain */,
 				79CFD8A509F705FF00172CDD /* UI */,
 			);
 			name = Framework;
@@ -747,7 +747,7 @@
 			name = Droplet;
 			sourceTree = "<group>";
 		};
-		7983E2120B0C22D600F5078E /* Bookmarks */ = {
+		7983E2120B0C22D600F5078E /* Keychain */ = {
 			isa = PBXGroup;
 			children = (
 				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
@@ -755,7 +755,7 @@
 				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
 				D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */,
 			);
-			name = Bookmarks;
+			name = Keychain;
 			sourceTree = "<group>";
 		};
 		79CFD11A09F7022900172CDD /* Connections */ = {
