@@ -1292,10 +1292,23 @@
                                             NSFilePosixPermissions,
                                             nil];
                 
-                BOOL success = [[NSFileManager defaultManager] createDirectoryAtURL:[_URLForWritingTo URLByDeletingLastPathComponent]
+                NSURL *directoryURL = [_URLForWritingTo URLByDeletingLastPathComponent];
+                BOOL success = NO;
+                
+                if ([NSFileManager instancesRespondToSelector:@selector(createDirectoryAtURL:withIntermediateDirectories:attributes:error:)])
+                {
+                    success = [[NSFileManager defaultManager] createDirectoryAtURL:directoryURL
+                                                       withIntermediateDirectories:YES
+                                                                        attributes:attributes
+                                                                             error:NULL];
+                }
+                else if ([directoryURL isFileURL])
+                {
+                    success = [[NSFileManager defaultManager] createDirectoryAtPath:[directoryURL path]
                                                         withIntermediateDirectories:YES
                                                                          attributes:attributes
                                                                               error:NULL];
+                }
                 
                 if (success)
                 {
