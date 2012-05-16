@@ -1208,7 +1208,9 @@
         [data release];
     }
     
-    return [self createFileAtPath:path withDataStream:stream size:[size unsignedLongLongValue]];
+    CKTransferRecord *result = [self createFileAtPath:path withDataStream:stream size:[size unsignedLongLongValue]];
+    [stream release];
+    return result;
 }
 
 #pragma mark Queue
