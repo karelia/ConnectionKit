@@ -402,7 +402,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 		}
         else 
         {
-            NSLog(@"SecKeychainFindGenericPassword failed %d", theStatus);
+            NSLog(@"SecKeychainFindGenericPassword failed %ld", theStatus);
         }
 	}
 	

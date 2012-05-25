@@ -1,7 +1,7 @@
 // For Mac OS X < 10.5.
 #ifndef NSINTEGER_DEFINED
 #define NSINTEGER_DEFINED
-#ifdef __LP64__ || NS_BUILD_32_LIKE_64
+#if defined(__LP64__) || defined(NS_BUILD_32_LIKE_64)
 typedef long           NSInteger;
 typedef unsigned long  NSUInteger;
 #define NSIntegerMin   LONG_MIN

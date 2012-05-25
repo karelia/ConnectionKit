@@ -182,7 +182,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (stream != _sendStream) {
 		[_sendStream autorelease];
-		_sendStream = [stream retain];
+		_sendStream = (id<OutputStream>) [stream retain];
 	}
 }
 
@@ -190,7 +190,7 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 {
 	if (stream != _receiveStream) {
 		[_receiveStream autorelease];
-		_receiveStream = [stream retain];
+		_receiveStream = (id<InputStream>) [stream retain];
 	}
 }
 
@@ -1786,26 +1786,26 @@ OSStatus SSLWriteFunction(SSLConnectionRef connection, const void *data, size_t 
 	// If we haven't yet set up the SSL context, we should do so now.
 	if (!mySSLContext)
 	{
-		if (ret = SSLNewContext((Boolean)NO, &mySSLContext))
+		if ((ret = SSLNewContext((Boolean)NO, &mySSLContext)) != noErr)
 		{
 			KTLog(CKSSLDomain, KTLogError, @"Error creating new context");
 			return ret;
 		}
 		
-		if (ret = SSLSetIOFuncs(mySSLContext, SSLReadFunction, SSLWriteFunction))
+		if ((ret = SSLSetIOFuncs(mySSLContext, SSLReadFunction, SSLWriteFunction)) != noErr)
 		{
 			KTLog(CKSSLDomain, KTLogError, @"Error setting IO Functions");
 			return ret;
 		}
 		
-		if (ret = SSLSetConnection(mySSLContext, self))
+		if ((ret = SSLSetConnection(mySSLContext, self)) != noErr)
 		{
 			KTLog(CKSSLDomain, KTLogError, @"Error setting connection");
 			return ret;
 		}
 		
 		// we need to manually verify the certificates so that if they aren't valid, the connection isn't terminated straight away
-		if (ret = SSLSetEnableCertVerify(mySSLContext, (Boolean)NO))
+		if ((ret = SSLSetEnableCertVerify(mySSLContext, (Boolean)NO)) != noErr)
 		{
 			KTLog(CKSSLDomain, KTLogError, @"Error calling SSLSetEnableCertVerify");
 			return ret;
