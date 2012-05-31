@@ -574,25 +574,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     return nil;
 }
 
-+ (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root
-{
-	if ([path isEqualToString:@""])
-		return root;
-	NSEnumerator *e = [[root contents] objectEnumerator];
-	CKTransferRecord *cur;
-	CKTransferRecord *child;
-	
-	while (cur = [e nextObject]) 
-	{
-		child = [self recursiveRecord:cur forPath:path];
-		if (child)
-		{
-			return child;
-		}
-	}
-	return nil;
-}
-
 + (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
 	NSString *first = [path firstPathComponent];
