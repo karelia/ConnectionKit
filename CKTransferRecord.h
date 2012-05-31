@@ -100,10 +100,6 @@
 // Helper methods for working with the recursive data structure
 
 + (CKTransferRecord *)rootRecordWithPath:(NSString *)path;
-+ (CKTransferRecord *)addFileRecord:(NSString *)file 
-							   size:(unsigned long long)size 
-						   withRoot:(CKTransferRecord *)root 
-						   rootPath:(NSString *)rootPath;
 + (CKTransferRecord *)recursiveRecord:(CKTransferRecord *)record forFullPath:(NSString *)path;
 + (CKTransferRecord *)recordForPath:(NSString *)path withRoot:(CKTransferRecord *)root;
 + (void)mergeTextPathRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root;

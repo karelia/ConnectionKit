@@ -593,42 +593,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return nil;
 }
 
-+ (CKTransferRecord *)addFileRecord:(NSString *)file size:(unsigned long long)size withRoot:(CKTransferRecord *)root rootPath:(NSString *)rootPath
-{
-	NSString *chompedStoragePath = [file substringFromIndex:[rootPath length]];
-	NSString *path = [chompedStoragePath stringByDeletingLastPathComponent];
-	NSString *filename = [file lastPathComponent];
-	
-	NSEnumerator *pathCompEnum = [[path componentsSeparatedByString:@"/"] objectEnumerator];
-	NSString *builtupPath = [NSString stringWithString:@""];
-	NSString *cur;
-	CKTransferRecord *rec = nil, *lastRec = root;
-	
-	while ((cur = [pathCompEnum nextObject]))
-	{
-		builtupPath = [builtupPath stringByAppendingPathComponent:cur];
-		rec = [CKTransferRecord recordForPath:builtupPath withRoot:root];
-		if (!rec) 
-		{ 
-			//create a new record for the path
-			rec = [CKTransferRecord recordWithName:[builtupPath lastPathComponent] size:0];
-			if (lastRec == nil) 
-			{
-				//we are at the root
-				[root addContent:rec];
-			} else 
-			{
-				[lastRec addContent:rec];
-			}
-		}
-		lastRec = rec;
-	}
-	//last rec will be the directory to add the file name to
-	rec = [CKTransferRecord recordWithName:filename size:size];
-	[lastRec addContent:rec];
-	return rec;
-}
-
 + (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
 	NSString *first = [path firstPathComponent];
