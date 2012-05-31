@@ -629,14 +629,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return rec;
 }
 
-+ (void)mergeRecord:(CKTransferRecord *)record withRoot:(CKTransferRecord *)root
-{
-	CKTransferRecord *parent = [CKTransferRecord recordForPath:[[record name] stringByDeletingLastPathComponent]
-													  withRoot:root];
-	[record setName:[[record name] lastPathComponent]];
-	[parent addContent:record];
-}
-
 + (CKTransferRecord *)recursiveMergeRecordWithPath:(NSString *)path root:(CKTransferRecord *)root
 {
 	NSString *first = [path firstPathComponent];
