@@ -28,6 +28,4 @@
 
 @property(nonatomic, copy) NSString *currentDirectory;
 
-+ (BOOL)getDotMacAccountName:(NSString **)account password:(NSString **)password;
-
 @end
