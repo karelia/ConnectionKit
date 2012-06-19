@@ -70,8 +70,6 @@
 		794DC3280A5A0EDC007157BE /* CKConnectionThreadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */; };
 		795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
 		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
-		795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */; };
-		795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */; };
 		795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */ = {isa = PBXBuildFile; fileRef = 795AFEF00B115511006905FA /* UKKQueue Readme.txt */; };
 		795AFEFA0B115511006905FA /* UKKQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF10B115511006905FA /* UKKQueue.h */; };
 		795AFEFB0B115511006905FA /* UKKQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF20B115511006905FA /* UKKQueue.m */; };
@@ -290,8 +288,6 @@
 		794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionThreadManager.m; sourceTree = "<group>"; };
 		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
 		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
-		795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFNSubscribeFileWatcher.h; sourceTree = "<group>"; };
-		795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFNSubscribeFileWatcher.m; sourceTree = "<group>"; };
 		795AFEF00B115511006905FA /* UKKQueue Readme.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "UKKQueue Readme.txt"; sourceTree = "<group>"; };
 		795AFEF10B115511006905FA /* UKKQueue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKKQueue.h; sourceTree = "<group>"; };
 		795AFEF20B115511006905FA /* UKKQueue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKKQueue.m; sourceTree = "<group>"; };
@@ -650,8 +646,6 @@
 			children = (
 				795AFEEC0B115511006905FA /* UKFileWatcher.h */,
 				795AFEED0B115511006905FA /* UKFileWatcher.m */,
-				795AFEEE0B115511006905FA /* UKFNSubscribeFileWatcher.h */,
-				795AFEEF0B115511006905FA /* UKFNSubscribeFileWatcher.m */,
 				795AFEF00B115511006905FA /* UKKQueue Readme.txt */,
 				795AFEF10B115511006905FA /* UKKQueue.h */,
 				795AFEF20B115511006905FA /* UKKQueue.m */,
@@ -857,7 +851,6 @@
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
-				795AFEF70B115511006905FA /* UKFNSubscribeFileWatcher.h in Headers */,
 				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */,
@@ -1197,7 +1190,6 @@
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
 				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
-				795AFEF80B115511006905FA /* UKFNSubscribeFileWatcher.m in Sources */,
 				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */,
