@@ -140,8 +140,6 @@
 		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
 		CEE367BD0B46F73400FE4838 /* NSObject+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = CEE367B90B46F71B00FE4838 /* NSObject+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CEE367BE0B46F73400FE4838 /* NSObject+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = CEE367BA0B46F71B00FE4838 /* NSObject+Connection.m */; };
-		D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */ = {isa = PBXBuildFile; fileRef = D305393B0DE5F30C008646CE /* RegexKitLite.h */; };
-		D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */ = {isa = PBXBuildFile; fileRef = D305393C0DE5F30C008646CE /* RegexKitLite.m */; };
 		D3053AAD0DE60D6B008646CE /* libicucore.A.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */; };
 		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
@@ -405,8 +403,6 @@
 		CEF894F80BD72A6A002886AA /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CEF894FD0BD72A70002886AA /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
 		CEF895020BD72A76002886AA /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/DropletLauncher.nib; sourceTree = "<group>"; };
-		D305393B0DE5F30C008646CE /* RegexKitLite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RegexKitLite.h; sourceTree = "<group>"; };
-		D305393C0DE5F30C008646CE /* RegexKitLite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RegexKitLite.m; sourceTree = "<group>"; };
 		D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libicucore.A.dylib; path = /usr/lib/libicucore.A.dylib; sourceTree = "<absolute>"; };
 		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
 		D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainProxy.m; sourceTree = "<group>"; };
@@ -723,8 +719,6 @@
 		79CFD8A009F705B400172CDD /* Utility */ = {
 			isa = PBXGroup;
 			children = (
-				D305393B0DE5F30C008646CE /* RegexKitLite.h */,
-				D305393C0DE5F30C008646CE /* RegexKitLite.m */,
 				795AFEE50B1154E2006905FA /* UKKQueue */,
 				794DC3250A5A0EDC007157BE /* CKConnectionThreadManager.h */,
 				794DC3260A5A0EDC007157BE /* CKConnectionThreadManager.m */,
@@ -865,7 +859,6 @@
 				79420AD40C91CDE80002B99D /* NSNumber+Connection.h in Headers */,
 				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
 				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
-				D305393D0DE5F30C008646CE /* RegexKitLite.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */,
@@ -1204,7 +1197,6 @@
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
 				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
-				D305393E0DE5F30C008646CE /* RegexKitLite.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */,
