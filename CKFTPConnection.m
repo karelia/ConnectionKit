@@ -44,6 +44,7 @@
 #import "CKConnectionProtocol.h"
 #import "CKURLProtectionSpace.h"
 
+#import <sys/dirent.h>
 #import <sys/types.h> 
 #import <sys/socket.h> 
 #import <netinet/in.h>
@@ -59,7 +60,6 @@ const double kDelegateNotificationTheshold = 0.5;
 
 @interface CKFTPConnection (Private)
 
-- (NSArray *)parseLines:(NSString *)line;
 - (void)closeDataConnection;
 - (void)handleDataReceivedEvent:(NSStreamEvent)eventCode;
 - (void)handleDataSendStreamEvent:(NSStreamEvent)eventCode;
@@ -2619,28 +2619,73 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	}
 	else if (GET_STATE == CKConnectionAwaitingDirectoryContentsState)
 	{
-		NSString *results = [[NSString alloc] initWithData:_dataBuffer encoding:NSUTF8StringEncoding];
-		if (!results)
-		{
-			//Try ASCII
-			results = [[NSString alloc] initWithData:_dataBuffer encoding:NSASCIIStringEncoding];
-			if (!results)
-			{
-				//We failed!
-				return;
-			}
-		}
-		[[self client] appendString:results toTranscript:CKTranscriptData];
-
-		NSArray *contents = [self parseLines:results];
-		
+        // Parse the directory listing. Code shamelessly cadged from CKCurlFTPConnection
+        NSMutableArray *contents = [[NSMutableArray alloc] init];
+        
+        while (YES)
+        {
+            CFDictionaryRef parsedDict = NULL;
+            CFIndex bytesConsumed = CFFTPCreateParsedResourceListing(NULL,
+                                                                     [_dataBuffer bytes], [_dataBuffer length],
+                                                                     &parsedDict);
+            
+            if (bytesConsumed > 0)
+            {
+                // Make sure CFFTPCreateParsedResourceListing was able to properly
+                // parse the incoming data
+                if (parsedDict)
+                {
+                    // Convert from CFFTP's format to ours
+                    NSString *type = NSFileTypeUnknown;
+                    switch ([(NSNumber *)CFDictionaryGetValue(parsedDict, kCFFTPResourceType) integerValue])
+                    {
+                        case DT_CHR:
+                            type = NSFileTypeCharacterSpecial;
+                            break;
+                        case DT_DIR:
+                            type = NSFileTypeDirectory;
+                            break;
+                        case DT_BLK:
+                            type = NSFileTypeBlockSpecial;
+                            break;
+                        case DT_REG:
+                            type = NSFileTypeRegular;
+                            break;
+                        case DT_LNK:
+                            type = NSFileTypeSymbolicLink;
+                            break;
+                        case DT_SOCK:
+                            type = NSFileTypeSocket;
+                            break;
+                    }
+                    
+                    NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                                CFDictionaryGetValue(parsedDict, kCFFTPResourceName), cxFilenameKey,
+                                                type, NSFileType,
+                                                nil];
+                    [contents addObject:attributes];
+                    [attributes release];
+                    
+                    CFRelease(parsedDict);
+                }
+                
+                [_dataBuffer replaceBytesInRange:NSMakeRange(0, bytesConsumed) withBytes:NULL length:0];
+            }
+            else
+            {
+                // error or finished! This is ConnectionKit, so just bail out
+                break;
+            }
+        }
+        
+        
 		KTLog(CKParsingDomain, KTLogDebug, @"Contents of Directory %@:\n%@", _currentPath, [contents shortDescription]);
 		
 		[self cacheDirectory:_currentPath withContents:contents];
 		
 		[[self client] connectionDidReceiveContents:contents ofDirectory:_currentPath error:nil];
+        [contents release];
 		
-		[results release];
 		[_dataBuffer setLength:0];
 
 		if (_ftpFlags.received226)
@@ -3448,11 +3493,6 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	return [NSString stringWithFormat:@"PORT %@,%d,%d", ip, portDiv.quot, portDiv.rem];
 }
 
-- (NSArray *)parseLines:(NSString *)line
-{
-	return [NSFileManager attributedFilesFromListing:line];
-}
- 
 /*!	Deal with quoted string. Quotes are doubled.... 257 "/he said ""yo"" to me" created
 */
 - (NSString *)scanBetweenQuotes:(NSString *)aString
