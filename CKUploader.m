@@ -656,6 +656,13 @@
         
         BOOL result = [handle writeData:data error:&error];
         [handle closeFile];         // don't really care if this fails
+        
+        if (result)
+        {
+            // Handle servers which ignore initial permissions
+            result = [sftpSession setPermissions:[self posixPermissionsForPath:path isDirectory:NO] forItemAtPath:path error:&error];
+        }
+        
         if (!result) handle = nil;  // so error gets sent
     }
     
@@ -828,6 +835,13 @@
         
         [handle closeFile];
         [sftpHandle closeFile];
+        
+        if (sftpHandle)
+        {
+            // Handle servers which ignore initial permissions setting
+            BOOL result = [[_engine SFTPSession] setPermissions:[_engine posixPermissionsForPath:_path isDirectory:NO] forItemAtPath:_path error:&error];
+            if (!result) sftpHandle = nil;
+        }
         
         [[_record mainThreadProxy] transferDidFinish:_record error:(sftpHandle ? nil : error)];
     }
