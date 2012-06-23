@@ -205,6 +205,13 @@
     {
         BOOL result = [handle writeData:data error:&error];
         [handle closeFile];         // don't really care if this fails
+        
+        if (result)
+        {
+            // Some servers ignore the mode when opening a handle, so correct them
+            result = [sftpSession setPermissions:mode forItemAtPath:path error:&error];
+        }
+        
         if (!result) handle = nil;  // so error gets sent
     }
     
