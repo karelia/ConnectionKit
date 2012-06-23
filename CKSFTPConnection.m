@@ -242,7 +242,11 @@
     unsigned long mode = (permissions ? [permissions unsignedLongValue] : (0644 | 0111));
     
     NSError *error;
-    [sftpSession createDirectoryAtPath:path mode:mode error:&error];
+    if ([sftpSession createDirectoryAtPath:path mode:mode error:&error])
+    {
+        // Some servers ignore the mode when creating a directory, so correct them
+        [sftpSession setPermissions:mode forItemAtPath:path error:&error];
+    }
 }
 
 - (void)deleteFile:(NSString *)path
