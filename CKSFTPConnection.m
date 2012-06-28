@@ -205,6 +205,13 @@
     {
         BOOL result = [handle writeData:data error:&error];
         [handle closeFile];         // don't really care if this fails
+        
+        if (result)
+        {
+            // Some servers ignore the mode when opening a handle, so correct them
+            result = [sftpSession setPermissions:mode forItemAtPath:path error:&error];
+        }
+        
         if (!result) handle = nil;  // so error gets sent
     }
     
@@ -235,7 +242,11 @@
     unsigned long mode = (permissions ? [permissions unsignedLongValue] : (0644 | 0111));
     
     NSError *error;
-    [sftpSession createDirectoryAtPath:path mode:mode error:&error];
+    if ([sftpSession createDirectoryAtPath:path mode:mode error:&error])
+    {
+        // Some servers ignore the mode when creating a directory, so correct them
+        [sftpSession setPermissions:mode forItemAtPath:path error:&error];
+    }
 }
 
 - (void)deleteFile:(NSString *)path
