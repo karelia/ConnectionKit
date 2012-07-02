@@ -836,7 +836,7 @@
         [handle closeFile];
         [sftpHandle closeFile];
         
-        if (sftpHandle)
+        if (![self isCancelled] && sftpHandle)
         {
             // Handle servers which ignore initial permissions setting
             CK2SFTPSession *session = [_engine SFTPSession];
