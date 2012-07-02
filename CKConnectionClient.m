@@ -9,7 +9,6 @@
 #import "CKConnectionClient.h"
 
 #import "CKAbstractConnection.h"
-#import "CKFTPConnection.h"
 #import "InterThreadMessaging.h"
 #import "RunLoopForwarder.h"
 
