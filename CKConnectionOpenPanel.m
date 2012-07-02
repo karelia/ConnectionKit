@@ -32,9 +32,9 @@
 
 #import "CKConnectionOpenPanel.h"
 #import "CKConnectionProtocol.h"
+#import "CKConnectionRegistry.h"
 
 #import "NSArray+Connection.h"
-
 
 @interface CKConnectionOpenPanel (Private)
 - (void)setConnection:(id <CKPublishingConnection>)aConnection;
@@ -451,14 +451,15 @@
 		
 		//check that we are past the root directory
 		//
-		if (([pathToAdd rangeOfString: [[self connection] rootDirectory]].location == 0) && 
-			(![pathToAdd isEqualToString: [[self connection] rootDirectory]]))
-			[returnValue addObject: [pathToAdd substringFromIndex: [[[self connection] rootDirectory] length] + 1]];  
-		else if ([pathToAdd isEqualToString: [[self connection] rootDirectory]])
+        id<CKPublishingConnection> connection = [self connection];
+        NSString *rootDirectory = [connection rootDirectory];
+		if (([pathToAdd rangeOfString: rootDirectory].location == 0) &&
+			(![pathToAdd isEqualToString: rootDirectory]))
+			[returnValue addObject: [pathToAdd substringFromIndex: [rootDirectory length] + 1]];
+		else if ([pathToAdd isEqualToString: rootDirectory])
 			[returnValue addObject: @""];
 		else  //we have up back to before the root directory path needs ../ added
 		{
-			NSString *rootDirectory = [[self connection] rootDirectory];
 			NSString *pathPrefix = @"";
 			while ([pathToAdd rangeOfString: rootDirectory].location == NSNotFound)
 			{
@@ -467,7 +468,7 @@
 			}
 			pathToAdd = [pathPrefix stringByAppendingPathComponent: pathToAdd];
 			
-			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[[self connection] request] URL]]];
+			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[connection request] URL]]];
 		}
 	}
 	
@@ -493,12 +494,15 @@
 	NSMutableArray *returnValue = [NSMutableArray array];
 	
 	while (currentItem = [theEnum nextObject])
-	{  
-		if ([[self connection] rootDirectory] &&
-			[[currentItem objectForKey: @"path"] rangeOfString: [[self connection] rootDirectory]].location == 0 &&
+	{
+        id<CKPublishingConnection> connection = [self connection];
+        NSString *rootDirectory = [connection rootDirectory];
+        
+		if (rootDirectory &&
+			[[currentItem objectForKey: @"path"] rangeOfString: rootDirectory].location == 0 &&
 			![[currentItem objectForKey: @"path"] isEqualToString: [currentItem objectForKey: @"path"]])
 		{
-			[returnValue addObject: [[currentItem objectForKey: @"path"] substringFromIndex: [[[self connection] rootDirectory] length] + 1]];  
+			[returnValue addObject: [[currentItem objectForKey: @"path"] substringFromIndex: [rootDirectory length] + 1]];
 		}
 		else
 		{
@@ -783,7 +787,7 @@
     }
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didConnectToHost:(NSString *)host error:(NSError *)error
+- (void)connection:(id<CKPublishingConnection>)aConn didConnectToHost:(NSString *)host error:(NSError *)error
 {
 	[timer invalidate];
 	timer = nil;
@@ -793,12 +797,12 @@
 	[aConn directoryContents];
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didDisconnectFromHost:(NSString *)host
+- (void)connection:(id<CKPublishingConnection>)aConn didDisconnectFromHost:(NSString *)host
 {
 	NSLog (@"disconnect");
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didReceiveError:(NSError *)error
+- (void)connection:(id<CKPublishingConnection>)aConn didReceiveError:(NSError *)error
 {
 	if ([_delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
 	{
@@ -813,7 +817,7 @@
 									 defaultButton:LocalizedStringInConnectionKitBundle(@"OK", @"OK")
 								   alternateButton:nil
 									   otherButton:nil
-						 informativeTextWithFormat: informativeText];
+						 informativeTextWithFormat: @"%@", informativeText];
 		[a runModal];
 	}
 	
@@ -825,19 +829,19 @@
 	[self closePanel: nil];
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
+- (void)connection:(id<CKPublishingConnection>)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
 {
 	[aConn changeToDirectory:dirPath];
 	createdDirectory = [[dirPath lastPathComponent] retain]; 
 	[aConn directoryContents];
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didSetPermissionsForFile:(NSString *)path error:(NSError *)error
+- (void)connection:(id<CKPublishingConnection>)aConn didSetPermissionsForFile:(NSString *)path error:(NSError *)error
 {
 	
 }
 
-- (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
+- (void)connection:(id<CKPublishingConnection>)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
     // Populate the popup button used for navigating back to ancestor directories.
     NSArray *pathComponents = [dirPath pathComponents];

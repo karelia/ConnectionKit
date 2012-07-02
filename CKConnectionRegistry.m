@@ -8,13 +8,25 @@
 
 #import "CKConnectionRegistry.h"
 
-#import "CKAbstractConnection.h"
 #import "CKCurlFTPConnection.h"
 
 #import "NSURL+Connection.h"
 
 #import <CurlHandle/CURLFTPSession.h>
 
+NSString *CKConnectionErrorDomain = @"ConnectionErrorDomain";
+NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";
+NSString *ConnectionDirectoryExistsFilenameKey = @"ConnectionDirectoryExistsFilenameKey";
+NSString *cxFilenameKey = @"cxFilenameKey";
+NSString *cxSymbolicLinkTargetKey = @"cxSymbolicLinkTargetKey";
+
+enum {
+    CKConnectionErrorParsingDirectoryListing = 6000,
+    CKConnectionStreamError,
+    CKConnectionErrorBadPassword,
+    CKConnectionNoConnectionsAvailable,
+    CKConnectionNoUsernameOrPassword,
+};
 
 @implementation CKConnectionRegistry
 

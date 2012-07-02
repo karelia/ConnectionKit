@@ -15,6 +15,8 @@
 #import "CK2SFTPSession.h"
 #import "CKWebDAVConnection.h"
 
+#import "NSInvocation+Connection.h"
+
 
 @interface CKSFTPUploader : CKUploader <CK2SFTPSessionDelegate, NSURLAuthenticationChallengeSender>
 {

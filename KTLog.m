@@ -389,7 +389,7 @@ static NSString *KTLevelMap[] = {
 						  lineNumber:line
 					   loggingDomain:domain
 						loggingLevel:level
-							  thread:[NSString stringWithFormat:@"0x%06x",[NSThread currentThread]]
+							  thread:[NSString stringWithFormat:@"%p",[NSThread currentThread]]
 							 format:log
 						   arguments:ap];
 
@@ -482,12 +482,12 @@ static NSString *KTLevelMap[] = {
 #pragma mark -
 #pragma mark NSTableView Datasource
 
-- (int)numberOfRowsInTableView:(NSTableView *)aTableView
+- (NSInteger)numberOfRowsInTableView:(NSTableView *)aTableView
 {
 	return [myLoggingLevels count];
 }
 
-- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (id)tableView:(NSTableView *)aTableView objectValueForTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];
@@ -501,7 +501,7 @@ static NSString *KTLevelMap[] = {
 	}
 }
 
-- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView setObjectValue:(id)anObject forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	NSString *ident = [aTableColumn identifier];
 	NSMutableDictionary *rec = [myLoggingLevels objectAtIndex:rowIndex];

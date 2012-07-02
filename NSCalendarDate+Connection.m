@@ -100,7 +100,7 @@
 	else 
 	{
 		NSCalendarDate *now = [NSCalendarDate date];
-		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %d %@", month, day, [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
+		date = [NSCalendarDate dateWithString:[NSString stringWithFormat:@"%@ %@ %ld %@", month, day, (long) [now yearOfCommonEra], yearOrTime] calendarFormat:@"%b %d %Y %H:%M"];
 		
 		//Is the date in the future?
 		if ([date compare:now] == NSOrderedDescending)

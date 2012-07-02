@@ -9,6 +9,7 @@
 #import "CKCurlFTPConnection.h"
 
 #import "UKMainThreadProxy.h"
+#import "NSInvocation+Connection.h"
 
 #import <sys/dirent.h>
 

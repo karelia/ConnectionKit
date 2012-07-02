@@ -35,7 +35,7 @@
 @protocol CKConnection;
 
 #import <Cocoa/Cocoa.h>
-#import "CKAbstractConnection.h"
+#import "CKConnectionProtocol.h"
 
 enum {
 	connectionBadPasswordUserName = -1

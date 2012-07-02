@@ -57,12 +57,12 @@ static EMKeychainProxy *sharedProxy = nil;
     return self;
 }
 
-- (unsigned)retainCount
+- (NSUInteger)retainCount
 {
     return UINT_MAX;  //denotes an object that cannot be released
 }
 
-- (void)release
+- (oneway void)release
 {
     //do nothing
 }
@@ -148,7 +148,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
-	NSString *passwordString = [NSString stringWithCString:password length:passwordLength];
+	NSString *passwordString = [[[NSString alloc] initWithBytes:password length:passwordLength encoding:[NSString defaultCStringEncoding]] autorelease];
 	SecKeychainItemFreeContent(NULL, password);
 	
 	return [EMInternetKeychainItem internetKeychainItem:item forServer:serverString username:usernameString password:passwordString path:pathString port:port protocol:protocol];

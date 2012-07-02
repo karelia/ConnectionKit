@@ -106,7 +106,7 @@
 // If the path is absolute, searches from root of tree, otherwise searches from receiver
 - (CKTransferRecord *)recordForPath:(NSString *)path;
 
-- (BOOL)problemsTransferringCountingErrors:(int *)outErrors successes:(int *)outSuccesses;
+- (BOOL)problemsTransferringCountingErrors:(NSInteger *)outErrors successes:(NSInteger *)outSuccesses;
 
 @end
 
