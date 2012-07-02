@@ -838,10 +838,15 @@
         [handle closeFile];
         [sftpHandle closeFile];
         
-        if (sftpHandle)
+        if (![self isCancelled] && sftpHandle)
         {
             // Handle servers which ignore initial permissions setting
-            BOOL result = [[_engine SFTPSession] setPermissions:[_engine posixPermissionsForPath:_path isDirectory:NO] forItemAtPath:_path error:&error];
+            CK2SFTPSession *session = [_engine SFTPSession];
+            NSAssert(session, @"Need session to set permissions");
+            
+            BOOL result = [session setPermissions:[_engine posixPermissionsForPath:_path isDirectory:NO]
+                                    forItemAtPath:_path
+                                            error:&error];
             if (!result) sftpHandle = nil;
         }
         
