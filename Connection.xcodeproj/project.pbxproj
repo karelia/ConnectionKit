@@ -336,8 +336,6 @@
 		79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CKConnectionOpenPanel.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		79CFD82F09F7048400172CDD /* CKFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPConnection.h; sourceTree = "<group>"; };
 		79CFD83009F7048400172CDD /* CKFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPConnection.m; sourceTree = "<group>"; };
-		79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKFTPOverSSLConnection.h; sourceTree = "<group>"; };
-		79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKFTPOverSSLConnection.m; sourceTree = "<group>"; };
 		79CFD83309F7048400172CDD /* InterThreadMessaging.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = InterThreadMessaging.h; sourceTree = "<group>"; };
 		79CFD83409F7048400172CDD /* InterThreadMessaging.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = InterThreadMessaging.m; sourceTree = "<group>"; };
 		79CFD83509F7048400172CDD /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
@@ -573,8 +571,6 @@
 			children = (
 				79CFD82F09F7048400172CDD /* CKFTPConnection.h */,
 				79CFD83009F7048400172CDD /* CKFTPConnection.m */,
-				79CFD83109F7048400172CDD /* CKFTPOverSSLConnection.h */,
-				79CFD83209F7048400172CDD /* CKFTPOverSSLConnection.m */,
 				27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */,
 				27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */,
 				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
