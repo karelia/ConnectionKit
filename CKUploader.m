@@ -983,7 +983,19 @@
             }];
         });
         
-        if (result) error = nil;    // so block can reference it
+        if (result)
+        {
+            error = nil;    // so block can reference it
+        }
+        else
+        {
+            NSString *description = ([error respondsToSelector:@selector(debugDescription)] ?
+                                     [error performSelector:@selector(debugDescription)] :
+                                     [error description]);
+            
+            [[self delegate] uploader:self appendString:description toTranscript:CKTranscriptReceived];
+        }
+        
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             [record transferDidFinish:record error:error];
         }];
