@@ -83,7 +83,7 @@
 
 	unsigned char *bytes = (unsigned char *)[self bytes];
 	NSUInteger length = [self length];
-	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %d bytes:\n", [self className], length];
+	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %ld bytes:\n", [self className], (unsigned long) length];
 	for (NSUInteger i = 0 ; i < length ; i += width )
 	{
 		if (i > maxBytes)		// don't print too much!

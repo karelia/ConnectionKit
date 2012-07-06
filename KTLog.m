@@ -223,12 +223,12 @@ static NSString *KTLevelMap[] = {
 	
 	NSString *processName = [[NSProcessInfo processInfo] processName];
 	NSInteger i = 0;
-	NSString *logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
+	NSString *logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%ld.ktlog", processName, (long) i]];
 	
 	while ([fm fileExistsAtPath:logName])
 	{
 		i++;
-		logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
+		logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%ld.ktlog", processName, (long) i]];
 	}
 	
 	i++;
@@ -237,15 +237,15 @@ static NSString *KTLevelMap[] = {
 	
 	while (i > 0)
 	{
-		from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i - 1]];
-		to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
+		from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%ld.ktlog", processName, (long) i - 1]];
+		to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%ld.ktlog", processName, (long) i]];
 		
 		[fm moveItemAtPath:from toPath:to error:NULL];
 		i--;
 	}
 	
 	from = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.ktlog", processName]];
-	to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
+	to = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%ld.ktlog", processName, (long) i]];
 	[fm moveItemAtPath:from toPath:to error:NULL];
 }
 
@@ -291,9 +291,9 @@ static NSString *KTLevelMap[] = {
 															   locale:nil];
 		NSString *logLevelString = (level >= 0 && level <= 5) ? KTLevelMap[level] : @"UNKNOWN";
 		
-		NSString *console = [NSString stringWithFormat:@"%@ %@[%d][%@:%@][%@:%d] %@\n",
+		NSString *console = [NSString stringWithFormat:@"%@ %@[%d][%@:%@][%@:%ld] %@\n",
 			nowDescription, processName, [pi processIdentifier], logLevelString, domain,
-			[filename lastPathComponent], line, log];
+			[filename lastPathComponent], (long) line, log];
 		const char *utf8String = [console UTF8String];
 		fprintf(stderr, "%s", utf8String);
 	}
