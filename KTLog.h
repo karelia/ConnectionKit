@@ -84,7 +84,7 @@ typedef enum {
 + (void)setMaximumLogSize:(unsigned long long)bytes;
 + (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain;
 
-+ (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level format:(NSString *)log, ...;
++ (void)logFile:(char *)file lineNumber:(NSInteger)line loggingDomain:(NSString *)domain loggingLevel:(NSInteger)level format:(NSString *)log, ...;
 
 + (NSArray *)entriesWithLogFile:(NSString *)file;
 

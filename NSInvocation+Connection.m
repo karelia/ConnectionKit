@@ -25,7 +25,7 @@
         {
             NSEnumerator *e = [anArgumentArray objectEnumerator];
             id argument;
-            int argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
+            NSInteger argumentIndex = 2; // arguments start at index 2 per NSInvocation.h
             while ( argument = [e nextObject] )
             {
                 if ( [argument isMemberOfClass:[NSNull class]] )

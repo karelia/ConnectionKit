@@ -34,7 +34,7 @@
 
 - (id)init;
 + (id)sharedLogger;
-- (void)logFile:(char *)file lineNumber:(int)line loggingDomain:(NSString *)domain loggingLevel:(int)level message:(NSString *)log;
+- (void)logFile:(char *)file lineNumber:(NSInteger)line loggingDomain:(NSString *)domain loggingLevel:(NSInteger)level message:(NSString *)log;
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain;
 
 @end
@@ -154,13 +154,13 @@ static NSString *KTLevelMap[] = {
 	return cur;
 }
 
-- (int)loggingLevelForDomain:(NSString *)domain
+- (NSInteger)loggingLevelForDomain:(NSString *)domain
 {
 	NSNumber *level = [[NSUserDefaults standardUserDefaults] objectForKey:[KTLogKeyPrefix stringByAppendingString:domain]];
 	
 	if (level)
 	{
-		return [level intValue];
+		return [level integerValue];
 	}
 	else if ([domain isEqualToString:KTLogWildcardDomain])
 	{
@@ -172,7 +172,7 @@ static NSString *KTLevelMap[] = {
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain
 {
 	[myLock lock];
-	int currentLevel = [self loggingLevelForDomain:domain];
+	NSInteger currentLevel = [self loggingLevelForDomain:domain];
 	
 	if (currentLevel != level)
 	{
@@ -222,7 +222,7 @@ static NSString *KTLevelMap[] = {
 	myLog = nil;
 	
 	NSString *processName = [[NSProcessInfo processInfo] processName];
-	int i = 0;
+	NSInteger i = 0;
 	NSString *logName = [logPath stringByAppendingPathComponent:[NSString stringWithFormat:@"%@.%d.ktlog", processName, i]];
 	
 	while ([fm fileExistsAtPath:logName])
@@ -252,9 +252,9 @@ static NSString *KTLevelMap[] = {
 
 // Support for logFile: ... assumes that lock has been acquired.
 - (void)_logFile:(char *)file
-	  lineNumber:(int)line
+	  lineNumber:(NSInteger)line
    loggingDomain:(NSString *)domain
-	loggingLevel:(int)level
+	loggingLevel:(NSInteger)level
 		  thread:(NSString *)thread
 		 message:(NSString *)log
 {
@@ -311,9 +311,9 @@ static NSString *KTLevelMap[] = {
 
 
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		message:(NSString *)log
 {
@@ -329,9 +329,9 @@ static NSString *KTLevelMap[] = {
 
 // Similar to above, but with a format and arguments.  Don't construct the string unless we want to use it.
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		 format:(NSString *)log
 	  arguments:(va_list)argList
@@ -354,9 +354,9 @@ static NSString *KTLevelMap[] = {
 
 // Similar to above, but with a format
 - (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 thread:(NSString *)thread
 		 format:(NSString *)log, ...
 {
@@ -377,9 +377,9 @@ static NSString *KTLevelMap[] = {
 // Class method to log.  Accepts a format.  Thread argument is generated here, not passed in.
 
 + (void)logFile:(char *)file
-	 lineNumber:(int)line
+	 lineNumber:(NSInteger)line
   loggingDomain:(NSString *)domain
-   loggingLevel:(int)level
+   loggingLevel:(NSInteger)level
 		 format:(NSString *)log, ...
 {
 	va_list ap;

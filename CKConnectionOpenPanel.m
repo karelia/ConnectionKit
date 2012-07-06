@@ -694,7 +694,7 @@
 	[[self connection] connect];
 }
 
-- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
+- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
 {
   //force the window to be loaded, to be sure tableView is set
   //
@@ -718,7 +718,7 @@
 											repeats:NO];
 	[[self connection] connect];
 	
-	int ret;
+	NSInteger ret;
 	for (;;) {
 		if (!myKeepRunning)
 		{
@@ -733,7 +733,7 @@
 	return ret;
 }
 
-- (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (int)returnCode contextInfo:(void*) contextInfo
+- (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (NSInteger)returnCode contextInfo:(void*) contextInfo
 {
 	if ([[self delegate] respondsToSelector: [self delegateSelector]])
 	{    
@@ -966,7 +966,7 @@
 }
 
 #pragma mark ----=NStableView delegate=----
-- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(int)rowIndex
+- (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
 	BOOL returnValue = YES;
 	
@@ -981,7 +981,7 @@
 }
 
 
-- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(int)rowIndex
+- (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	//disable the cell we can't select
 	//

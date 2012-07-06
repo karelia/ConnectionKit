@@ -47,7 +47,7 @@
 	 * Returns SASL_OK on success, SASL_BUFOVER if result won't fit
 	 */
 	
-	int bufSize = 4 * [self length] / 3 + 100;
+	NSUInteger bufSize = 4 * [self length] / 3 + 100;
 	char *buffer = malloc(bufSize);
 	unsigned actualLength = 0;
 	int status = sasl_encode64([self bytes], [self length], buffer, bufSize, &actualLength); 	
@@ -74,26 +74,24 @@
 
 - (NSString *)shortDescription
 {
-	unsigned int width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
-	unsigned int maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
+	NSUInteger width = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionWidth"];
+	NSUInteger maxBytes = [[NSUserDefaults standardUserDefaults] integerForKey:@"NSDataDescriptionBytes"];
 	if (!width) width = 32;
 	if (width > 64) width = 64;	// let's be reasonable people!
 	
 	if (!maxBytes) maxBytes = 1024;
 
 	unsigned char *bytes = (unsigned char *)[self bytes];
-	unsigned length = [self length];
+	NSUInteger length = [self length];
 	NSMutableString *buf = [NSMutableString stringWithFormat:@"%@ %d bytes:\n", [self className], length];
-	int i, j;
-	
-	for ( i = 0 ; i < length ; i += width )
+	for (NSUInteger i = 0 ; i < length ; i += width )
 	{
 		if (i > maxBytes)		// don't print too much!
 		{
 			[buf appendString:@"\n...\n"];
 			break;
 		}
-		for ( j = 0 ; j < width ; j++ )
+		for (NSUInteger j = 0 ; j < width ; j++ )
 		{
 			int offset = i+j;
 			if (offset < length)
@@ -106,9 +104,9 @@
 			}
 		}
 		[buf appendString:@"| "];
-		for ( j = 0 ; j < width ; j++ )
+		for (NSUInteger j = 0 ; j < width ; j++ )
 		{
-			int offset = i+j;
+			NSUInteger offset = i+j;
 			if (offset < length)
 			{
 				unsigned char theChar = bytes[offset];

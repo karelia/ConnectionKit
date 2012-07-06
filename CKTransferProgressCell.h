@@ -37,7 +37,7 @@
 
 @interface CKTransferProgressCell : NSCell
 {
-	int myProgress;
+	NSInteger myProgress;
 }
 
 @end

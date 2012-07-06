@@ -165,7 +165,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return _transferred;
 }
 
-- (float)speed
+- (CGFloat)speed
 {
 	if ([self isDirectory]) 
 	{
@@ -196,7 +196,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return _speed;
 }
 
-- (void)setSpeed:(float)speed
+- (void)setSpeed:(CGFloat)speed
 {
 	if (speed != _speed)
 	{
@@ -509,8 +509,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         [result setName:[[path pathComponents] objectAtIndex:0]];  // -firstPathComponent ignores the root dir for absolute paths
         CKTransferRecord *thisNode, *subNode = result;
         
-        int i;
-        for (i = 1; i < [pathComponents count]; i++)
+        for (NSUInteger i = 1; i < [pathComponents count]; i++)
         {
             thisNode = [CKTransferRecord recordWithName:[pathComponents objectAtIndex:i] size:0];
             [subNode addContent:thisNode];

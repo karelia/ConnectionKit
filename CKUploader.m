@@ -188,8 +188,7 @@
     
     // Create the directory if it hasn't been already
     CKTransferRecord *result = nil;
-    int i;
-    for (i = 0; i < [[parent contents] count]; i++)
+    for (NSUInteger i = 0; i < [[parent contents] count]; i++)
     {
         CKTransferRecord *aRecord = [[parent contents] objectAtIndex:i];
         if ([[aRecord name] isEqualToString:[path lastPathComponent]])
