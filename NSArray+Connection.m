@@ -42,7 +42,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 {
 	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ [%ld items]\n(\n", [self className], (long) [self count]];
 	
-	unsigned i, c = MIN([self count], NSARRAY_MAXIMUM_DESCRIBED);
+	NSUInteger i, c = MIN([self count], NSARRAY_MAXIMUM_DESCRIBED);
 	
 	for (i = 0; i < c; i++)
 	{

@@ -25,7 +25,7 @@
 
 - (void)drawInteriorWithFrame:(NSRect)cellFrame inView:(NSView *)controlView
 {
-	float percent = [[self objectValue] intValue] / 100.0;
+	CGFloat percent = [[self objectValue] intValue] / 100.0;
 	
 	if (percent < 0 || percent >= 1)
 	{		

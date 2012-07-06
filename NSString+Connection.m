@@ -369,9 +369,9 @@
     return( [ NSString stringWithUTF8String: tmp ] );
 }
 + ( NSString * )stringWithBytesOfUnknownExternalEncoding: ( char * )bytes
-												  length: ( unsigned )len
+												  length: ( NSUInteger )len
 {
-    int                     i, enccount = 0;
+    NSInteger               i, enccount = 0;
     CFStringRef             convertedString = NULL;
     CFStringEncoding        encodings[] = { kCFStringEncodingISOLatin2,
 		kCFStringEncodingISOLatin3,
@@ -417,9 +417,9 @@
 }
 
 + ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes
-										  length: ( unsigned )len
+										  length: ( NSUInteger )len
 {
-    int                     i, enccount = 0;
+    NSInteger               i, enccount = 0;
     CFStringRef             convertedString = NULL;
     CFStringEncoding        encodings[] = { kCFStringEncodingUTF8,
 		kCFStringEncodingISOLatin1,

@@ -34,7 +34,7 @@
 
 @implementation NSTabView (Connection)
 
-- (unsigned)indexOfSelectedTabViewItem
+- (NSUInteger)indexOfSelectedTabViewItem
 {
 	NSTabViewItem *item = [self selectedTabViewItem];
 	return [[self tabViewItems] indexOfObject:item];
