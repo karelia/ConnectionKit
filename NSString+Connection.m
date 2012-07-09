@@ -143,11 +143,6 @@
 	}
 }
 
-+ (NSString *)formattedSpeed:(double)speed
-{
-	return [NSString stringWithFormat:@"%@/%@", [NSString formattedFileSize:speed], LocalizedStringInConnectionKitBundle(@"s", @"abbreviation for seconds, e.g. 12 MB/s")];
-}
-
 @end
 
 @implementation NSAttributedString (Connection)

@@ -42,7 +42,6 @@
 - (NSString *)stringByDeletingFirstPathComponent2;
 
 + (NSString *)formattedFileSize:(double)size;
-+ (NSString *)formattedSpeed:(double)speed;
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;
 - (BOOL)containsSubstring:(NSString *)substring;
 
