@@ -41,8 +41,6 @@
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
 
-- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
-- (NSString *)stringByStandardizingURLComponents;
 + (NSString *)formattedFileSize:(double)size;
 + (NSString *)formattedSpeed:(double)speed;
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;

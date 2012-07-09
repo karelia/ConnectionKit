@@ -91,37 +91,6 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
-- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent
-{
-	URLComponent = [URLComponent stringByStandardizingURLComponents];
-	
-	if ([URLComponent hasPrefix:@"/"])
-		URLComponent = [URLComponent substringFromIndex:1];
-	if ([URLComponent hasSuffix:@"/"])
-		URLComponent = [URLComponent substringToIndex:[URLComponent length] - 1];
-	
-	if (![self hasSuffix:@"/"])
-		URLComponent = [@"/" stringByAppendingString:URLComponent];
-	return [self stringByAppendingString:URLComponent];	
-}
-
-- (NSString *)stringByStandardizingURLComponents
-{
-	NSString *returnString = [NSString stringWithString:self];
-	
-	//Make sure we've got one (and only one) leading slash
-	while ([returnString hasPrefix:@"//"])
-	{
-		returnString = [returnString substringFromIndex:1];
-	}
-	
-	//Make sure we've got no tailing slashes
-	while ([returnString hasSuffix:@"/"] && ![returnString isEqualToString:@"/"])
-	{
-		returnString = [returnString substringToIndex:[returnString length] - 1];
-	}
-	return returnString;
-}
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set  //10.5 adds this to NSString, but we are 10.4+
 { 
 	NSMutableArray *result = [NSMutableArray array]; 
