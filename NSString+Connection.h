@@ -52,11 +52,6 @@
 - (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;
 - (BOOL)containsSubstring:(NSString *)substring;
 
-//SFTP
-+ ( NSString * )pathForExecutable: ( NSString * )executable;
-- ( char )objectTypeFromOctalRepresentation: ( NSString * )octalRep;
-- ( NSString * )stringRepresentationOfOctalMode;
-+ ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes length: ( unsigned )len;
 @end
 
 @interface NSAttributedString (Connection)
