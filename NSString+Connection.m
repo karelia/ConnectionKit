@@ -91,11 +91,6 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
-- (BOOL)containsSubstring:(NSString *)substring
-{
-	return [[self lowercaseString] rangeOfString:[substring lowercaseString]].location != NSNotFound;
-}
-
 + (NSString *)formattedFileSize:(double)size
 {
 	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];
