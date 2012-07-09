@@ -40,8 +40,6 @@
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
-- (NSString *)stringByStandardizingHTTPPath;
-- (NSString *)stringByAppendingDirectoryTerminator;
 
 - (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
 - (NSString *)stringByStandardizingURLComponents;

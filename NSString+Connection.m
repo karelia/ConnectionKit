@@ -91,26 +91,6 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
-- (NSString *)stringByStandardizingHTTPPath
-{
-	NSString *result = [NSString stringWithString:self];
-	if (![result hasPrefix:@"/"])
-		result = [@"/" stringByAppendingPathComponent:result];
-	return [result stringByStandardizingPath];
-}
-
-- (NSString *)stringByAppendingDirectoryTerminator
-{
-    if ( ![self hasSuffix:@"/"] )
-    {
-        return [self stringByAppendingString:@"/"];
-    }
-    else
-    {
-        return self;
-    }
-}
-
 - (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent
 {
 	URLComponent = [URLComponent stringByStandardizingURLComponents];
