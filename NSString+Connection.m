@@ -50,11 +50,6 @@
 	return [result autorelease];
 }	
 
-+ (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding
-{
-	return [[[NSString alloc] initWithData:data encoding:encoding] autorelease];
-}
-
 - (NSString *)firstPathComponent
 {
 	NSString *str = self;

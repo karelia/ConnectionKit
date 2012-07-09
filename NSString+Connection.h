@@ -34,7 +34,6 @@
 
 - (NSString *)encodeLegally;
 - (NSString *)encodeLegallyForS3;
-+ (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
 
 // Paths
 - (NSString *)firstPathComponent;
