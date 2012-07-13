@@ -85,6 +85,7 @@ enum {
 - (NSURLRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port
 {
     Class connectionClass = [self connectionClassForName:name];
+    if (!connectionClass) return nil;
     
     NSURL *URL = [[NSURL alloc] initWithScheme:[[connectionClass URLSchemes] objectAtIndex:0]
                                           host:host
