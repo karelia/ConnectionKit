@@ -221,7 +221,7 @@
 		if (!containsObject)
 		{
 			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:[self newFolderName]];
-			[[self connection] createDirectory: dir];
+			[[self connection] createDirectoryAtPath:dir posixPermissions:nil];
 		}
 		else
 		{  
