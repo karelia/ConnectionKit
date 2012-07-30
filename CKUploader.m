@@ -1249,7 +1249,13 @@
 - (void)addOperation:(NSOperation *)operation;
 {
     [_queue addObject:operation];
-    if ([_queue count] == 1) [operation start];
+    if ([_queue count] == 1)
+    {
+        // Defer starting the op so that caller can process the transfer record
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [operation start];
+        }];
+    }
 }
 
 - (void)finishCurrentOperationWithError:(NSError *)error;
