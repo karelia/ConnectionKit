@@ -993,7 +993,7 @@
                                      [error performSelector:@selector(debugDescription)] :
                                      [error description]);
             
-            [[self delegate] uploader:self appendString:description toTranscript:CKTranscriptReceived];
+            [self FTPSession:[self FTPSession] didReceiveDebugInfo:description ofType:CKTranscriptReceived];
         }
         
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
