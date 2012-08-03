@@ -994,7 +994,7 @@
                                      [error performSelector:@selector(debugDescription)] :
                                      [error description]);
             
-            [[self delegate] uploader:self appendString:description toTranscript:CKTranscriptReceived];
+            [self FTPSession:[self FTPSession] didReceiveDebugInfo:description ofType:CKTranscriptReceived];
         }
         
         [[NSOperationQueue mainQueue] addOperationWithBlock:^{
@@ -1250,7 +1250,13 @@
 - (void)addOperation:(NSOperation *)operation;
 {
     [_queue addObject:operation];
-    if ([_queue count] == 1) [operation start];
+    if ([_queue count] == 1)
+    {
+        // Defer starting the op so that caller can process the transfer record
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [operation start];
+        }];
+    }
 }
 
 - (void)finishCurrentOperationWithError:(NSError *)error;

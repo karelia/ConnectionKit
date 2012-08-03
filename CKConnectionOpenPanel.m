@@ -221,7 +221,7 @@
 		if (!containsObject)
 		{
 			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:[self newFolderName]];
-			[[self connection] createDirectory: dir];
+			[[self connection] createDirectoryAtPath:dir posixPermissions:nil];
 		}
 		else
 		{  
@@ -813,12 +813,12 @@
 		
 		NSString *informativeText = [error localizedDescription];
 		
-		NSAlert *a = [NSAlert alertWithMessageText:LocalizedStringInConnectionKitBundle(@"A Connection Error Occurred", @"ConnectionOpenPanel")
-									 defaultButton:LocalizedStringInConnectionKitBundle(@"OK", @"OK")
-								   alternateButton:nil
-									   otherButton:nil
-						 informativeTextWithFormat: @"%@", informativeText];
+		NSAlert *a = [[NSAlert alloc] init];
+        [a setMessageText:informativeText];
+        [a setInformativeText:LocalizedStringInConnectionKitBundle(@"Please check your settings.", @"ConnectionOpenPanel")];
+        
 		[a runModal];
+        [a release];
 	}
 	
 	if ([[self window] isSheet])
