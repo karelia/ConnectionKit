@@ -51,10 +51,6 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/CKConnectionProtocol.h>
 #import <Connection/CKConnectionRegistry.h>
-#import <Connection/CKAbstractConnection.h>
-#import <Connection/CKAbstractQueueConnection.h>
-#import <Connection/CKStreamBasedConnection.h>
-#import <Connection/CKFTPConnection.h>
 #import <Connection/CKSFTPConnection.h>
 #import <Connection/CKWebDAVConnection.h>
 
@@ -65,7 +61,6 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
-#import <Connection/InterThreadMessaging.h>
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSObject+Connection.h>
 #import <Connection/NSString+Connection.h>

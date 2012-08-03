@@ -229,7 +229,7 @@
 	_port = newPort;
 	[self didChangeValueForKey:@"port"];
 	
-	return [self _modifyAttributeWithTag:kSecPortItemAttr toBeString:[NSString stringWithFormat:@"%i", newPort]];
+	return [self _modifyAttributeWithTag:kSecPortItemAttr toBeString:[NSString stringWithFormat:@"%li", (long) newPort]];
 }
 
 - (SecProtocolType)protocol { return _protocol; }

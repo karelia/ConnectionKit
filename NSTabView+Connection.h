@@ -34,6 +34,6 @@
 
 @interface NSTabView (Connection) 
 
-- (unsigned)indexOfSelectedTabViewItem;
+- (NSUInteger)indexOfSelectedTabViewItem;
 
 @end

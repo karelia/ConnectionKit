@@ -431,8 +431,8 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didReceiveDataOfLength:[fileData length]];
 				
 				
-				int percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
-				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				NSInteger percent = (bytesToTransfer == 0) ? 0 : (100 * bytesTransferred) / bytesToTransfer;
+				[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		else  //add the data at the end of the file
@@ -451,13 +451,13 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 				[[downloadInfo delegate] transfer:record transferredDataOfLength:[data length]];
 			}
 			
-            int percent = (100 * bytesTransferred) / bytesToTransfer;
-			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInt:percent]];
+            NSInteger percent = (100 * bytesTransferred) / bytesToTransfer;
+			[[self client] download:[record propertyForKey:CKQueueDownloadRemoteFileKey] didProgressToPercent:[NSNumber numberWithInteger:percent]];
 			
 			if ([downloadInfo delegateRespondsToTransferProgressedTo])
 			{
-				int percent = (100 * bytesTransferred) / bytesToTransfer;
-				[[downloadInfo delegate] transfer:record progressedTo:[NSNumber numberWithInt:percent]];
+				NSInteger percent = (100 * bytesTransferred) / bytesToTransfer;
+				[[downloadInfo delegate] transfer:record progressedTo:[NSNumber numberWithInteger:percent]];
 			}
 		}
 		
@@ -551,15 +551,15 @@ NSString *S3PathSeparator = @":"; //@"0xKhTmLbOuNdArY";
 
 		if (bytesToTransfer > 0)
 		{
-			int percent = (100 * bytesTransferred) / bytesToTransfer;
+			NSInteger percent = (100 * bytesTransferred) / bytesToTransfer;
 			
 			if (percent != myLastPercent)
 			{
-				[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInt:percent]];
+				[[self client] upload:[upload remotePath] didProgressToPercent:[NSNumber numberWithInteger:percent]];
                 
 				if ([upload delegateRespondsToTransferProgressedTo])
 				{
-					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInt:percent]];
+					[[upload delegate] transfer:[upload delegate] progressedTo:[NSNumber numberWithInteger:percent]];
 				}
 				myLastPercent = percent;
 			}

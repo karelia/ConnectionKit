@@ -11,7 +11,7 @@
 
 @implementation CKURLProtectionSpace
 
-- (id)initWithHost:(NSString *)host port:(int)port protocol:(NSString *)protocol realm:(NSString *)realm authenticationMethod:(NSString *)authenticationMethod;
+- (id)initWithHost:(NSString *)host port:(NSInteger)port protocol:(NSString *)protocol realm:(NSString *)realm authenticationMethod:(NSString *)authenticationMethod;
 {
     if (self = [super initWithHost:host port:port protocol:protocol realm:realm authenticationMethod:authenticationMethod])
     {

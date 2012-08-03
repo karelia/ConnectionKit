@@ -9,6 +9,7 @@
 #import "CKCurlFTPConnection.h"
 
 #import "UKMainThreadProxy.h"
+#import "NSInvocation+Connection.h"
 
 #import <sys/dirent.h>
 
@@ -24,7 +25,7 @@
 
 + (void)load
 {
-    //[[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"FTP" URLScheme:@"ftp"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"FTP" URLScheme:@"ftp"];
 }
 
 + (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"ftp", @"ftp", nil]; }
