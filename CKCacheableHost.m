@@ -28,10 +28,11 @@
  */
 
 #import "CKCacheableHost.h"
-#import "CKAbstractConnection.h"
 
 static NSMutableDictionary *sCachedHosts = nil;
 static NSRecursiveLock *sCacheLock = nil;
+
+NSString *CKTransportDomain = @"Transport";
 
 @implementation CKCacheableHost
 

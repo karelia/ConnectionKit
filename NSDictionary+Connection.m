@@ -34,7 +34,7 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
 
 - (NSString *)shortDescription
 {
-	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ [%d keys]\n(\n", [self className], [[self allKeys] count]];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ [%ld keys]\n(\n", [self className], (long) [[self allKeys] count]];
 	NSEnumerator *e = [self keyEnumerator];
 	id key;
 	

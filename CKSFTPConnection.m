@@ -10,6 +10,7 @@
 #import "CK2SFTPSession.h"
 
 #import "UKMainThreadProxy.h"
+#import "NSInvocation+Connection.h"
 
 
 @interface CKSFTPConnection () <CK2SFTPSessionDelegate>

@@ -34,29 +34,14 @@
 
 - (NSString *)encodeLegally;
 - (NSString *)encodeLegallyForS3;
-+ (NSString *)stringWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
 
 // Paths
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
-- (NSString *)stringByStandardizingHTTPPath;
-- (NSString *)stringByAppendingDirectoryTerminator;
 
-- (NSString *)stringByAppendingURLComponent:(NSString *)URLComponent;
-- (NSString *)stringByStandardizingURLComponents;
-- (NSString *)md5Hash;
 + (NSString *)formattedFileSize:(double)size;
-+ (NSString *)formattedSpeed:(double)speed;
-+ (id)uuid;
-- (NSArray *)componentsSeparatedByCharactersInSet:(NSCharacterSet *)set;
-- (BOOL)containsSubstring:(NSString *)substring;
 
-//SFTP
-+ ( NSString * )pathForExecutable: ( NSString * )executable;
-- ( char )objectTypeFromOctalRepresentation: ( NSString * )octalRep;
-- ( NSString * )stringRepresentationOfOctalMode;
-+ ( NSString * )stringWithBytesOfUnknownEncoding: ( char * )bytes length: ( unsigned )len;
 @end
 
 @interface NSAttributedString (Connection)

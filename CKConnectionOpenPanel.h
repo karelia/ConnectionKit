@@ -35,7 +35,7 @@
 @protocol CKConnection;
 
 #import <Cocoa/Cocoa.h>
-#import "CKAbstractConnection.h"
+#import "CKConnectionProtocol.h"
 
 enum {
 	connectionBadPasswordUserName = -1
@@ -129,7 +129,7 @@ enum {
 				 modalDelegate:(id)modalDelegate 
 				didEndSelector:(SEL)didEndSelector 
                    contextInfo:(void *)contextInfo;
-- (int)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
+- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
 
 @end
 
