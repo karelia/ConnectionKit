@@ -1057,6 +1057,13 @@
     return record;
 }
 
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_queue addOperationWithBlock:^{
+        [[self FTPSession] removeFileAtPath:path error:NULL];
+    }];
+}
+
 #pragma mark FTP Session
 
 @synthesize FTPSession = _session;
