@@ -218,8 +218,13 @@
     
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
-		[_connection deleteFile:path];
+        [self removeFileAtPath:path];
 	}
+}
+
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_connection deleteFile:path];
 }
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
