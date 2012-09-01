@@ -556,6 +556,13 @@
     return result;
 }
 
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_queue addOperationWithBlock:^{
+        [[self SFTPSession] removeFileAtPath:path error:NULL];
+    }];
+}
+
 - (BOOL)threaded_createDirectoryAtPath:(NSString *)path error:(NSError **)outError;
 {
     CK2SFTPSession *sftpSession = [self SFTPSession];
