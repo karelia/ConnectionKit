@@ -26,9 +26,10 @@
 + (void)load
 {
     [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"FTP" URLScheme:@"ftp"];
+    [[CKConnectionRegistry sharedConnectionRegistry] registerClass:self forName:@"FTPS" URLScheme:@"ftps"];
 }
 
-+ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"ftp", @"ftp", nil]; }
++ (NSArray *)URLSchemes { return [NSArray arrayWithObjects:@"ftp", @"ftps", nil]; }
 
 #pragma mark Lifecycle
 
