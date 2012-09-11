@@ -1071,6 +1071,20 @@
         NSError *error;
         NSString *path = [_session homeDirectoryPath:&error];
         
+        // Somewhat of a HACK: if the error is with SSL, log it and then carry on
+        if (!path && [error code] == CURLE_SSL_CACERT && [[error domain] isEqualToString:CURLcodeErrorDomain])
+        {
+            [self FTPSession:_session
+         didReceiveDebugInfo:[NSString stringWithFormat:@"Ignoring SSL error: %@", [error localizedDescription]]
+                      ofType:CURLINFO_HEADER_IN];
+            
+            NSMutableURLRequest *request = [[_session baseRequest] mutableCopy];
+            [request curl_setShouldVerifySSLCertificate:NO];
+            [_session setBaseRequest:request];
+            
+            path = [_session homeDirectoryPath:&error];
+        }
+        
         if (path)
         {
             [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
