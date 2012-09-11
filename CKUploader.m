@@ -1075,11 +1075,11 @@
         if (!path && [error code] == CURLE_SSL_CACERT && [[error domain] isEqualToString:CURLcodeErrorDomain])
         {
             [self FTPSession:_session
-         didReceiveDebugInfo:[NSString stringWithFormat:@"Ignoring SSL error: %@", [error localizedDescription]]
+         didReceiveDebugInfo:[NSString stringWithFormat:@"Falling back to plain FTP after TLS/SSL error: %@", [error localizedDescription]]
                       ofType:CURLINFO_HEADER_IN];
             
             NSMutableURLRequest *request = [[_session baseRequest] mutableCopy];
-            [request curl_setShouldVerifySSLCertificate:NO];
+            [request curl_setDesiredSSLLevel:CURLUSESSL_NONE];
             [_session setBaseRequest:request];
             
             path = [_session homeDirectoryPath:&error];
