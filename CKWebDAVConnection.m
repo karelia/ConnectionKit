@@ -222,6 +222,16 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     [request release];
 }
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+{
+    // Basically ignore it
+    id delegate = [self delegate];
+    if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+    {
+        [delegate connection:self didSetPermissionsForFile:path error:nil];
+    }
+}
+
 - (void)deleteFile:(NSString *)path
 {
     path = [self canonicalPathForPath:path];

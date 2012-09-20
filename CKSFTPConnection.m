@@ -259,6 +259,25 @@
     }
 }
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+{
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        NSError *error;
+        BOOL result = [[self SFTPSession] setPermissions:permissions forItemAtPath:path error:&error];
+        
+        id delegate = [self delegate];
+        if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+        {
+            id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+            [proxy connection:self didSetPermissionsForFile:path error:(result ? nil : error)];
+            [proxy release];
+        }
+    }];
+    
+    [self enqueueOperation:op];
+}
+
 - (void)deleteFile:(NSString *)path
 {
     path = [self canonicalPathForPath:path];

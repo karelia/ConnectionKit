@@ -122,6 +122,8 @@ typedef enum {
  */
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+
 - (void)deleteFile:(NSString *)path;
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
@@ -208,8 +210,6 @@ typedef enum {
 									   to:(NSString *)localPath
 								overwrite:(BOOL)flag;
 
-- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
-
 - (void)checkExistenceOfPath:(NSString *)path;
 
 - (unsigned)numberOfTransfers;
@@ -280,7 +280,7 @@ typedef enum {
 - (void)connection:(id <CKPublishingConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKConnection>)con didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath moreComing:(BOOL)flag;
 - (void)connection:(id <CKConnection>)con didRename:(NSString *)fromPath to:(NSString *)toPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didSetPermissionsForFile:(NSString *)path error:(NSError *)error;
 
 
 - (void)connection:(id <CKConnection>)con download:(NSString *)path progressedTo:(NSNumber *)percent;
