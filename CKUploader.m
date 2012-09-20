@@ -238,7 +238,7 @@
     
     CKTransferRecord *result = [_connection uploadData:data
                                                 toPath:path
-                                      posixPermissions:[NSNumber numberWithUnsignedLong:[self posixPermissionsForPath:path isDirectory:NO]]];
+                               openingPosixPermissions:[self posixPermissionsForPath:path isDirectory:NO]];
     
     [self didEnqueueUpload:result toPath:path];
     return result;
@@ -250,7 +250,7 @@
     
     CKTransferRecord *result = [_connection uploadFileAtURL:url
                                                 toPath:path
-                                           posixPermissions:[NSNumber numberWithUnsignedLong:[self posixPermissionsForPath:path isDirectory:NO]]];
+                                    openingPosixPermissions:[self posixPermissionsForPath:path isDirectory:NO]];
     
     [self didEnqueueUpload:result toPath:path];
     return result;

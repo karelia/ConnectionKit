@@ -321,7 +321,7 @@ NSDictionary *sDataAttributes = nil;
 	SUBCLASS_RESPONSIBLE
 }
 
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
@@ -408,7 +408,7 @@ NSDictionary *sDataAttributes = nil;
 			NSString *remote = [remotePath stringByAppendingPathComponent:[path lastPathComponent]];
 			record = [self uploadFileAtURL:[NSURL fileURLWithPath:path]
                                     toPath:remote
-                          posixPermissions:nil];
+                   openingPosixPermissions:0644];
 			if (![[root path] isEqualToString:@"/"])
 			{
 				[self _mergeRecord:record into:root];
@@ -467,7 +467,7 @@ NSDictionary *sDataAttributes = nil;
 		NSString *remote = [remotePath stringByAppendingPathComponent:[localPath lastPathComponent]];
 		record = [self uploadFileAtURL:[NSURL fileURLWithPath:localPath]
                                 toPath:remote
-                      posixPermissions:nil];
+               openingPosixPermissions:0644];
 		if (![[root path] isEqualToString:@"/"])
 		{
 			[self _mergeRecord:record into:root];
@@ -501,7 +501,7 @@ NSDictionary *sDataAttributes = nil;
 	return nil;
 }
 
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
 	SUBCLASS_RESPONSIBLE
 	return nil;
@@ -654,7 +654,7 @@ NSDictionary *sDataAttributes = nil;
 	if ([nm isEqualToString:UKFileWatcherAttributeChangeNotification]) //UKFileWatcherWriteNotification does not get called because of atomicity of file writing (i believe)
 	{
 		KTLog(CKEditingDomain, KTLogDebug, @"File changed: %@... uploading to server", fpath);
-		[self uploadFileAtURL:[NSURL fileURLWithPath:fpath] toPath:[_edits objectForKey:fpath] posixPermissions:nil];
+		[self uploadFileAtURL:[NSURL fileURLWithPath:fpath] toPath:[_edits objectForKey:fpath] openingPosixPermissions:0644];
 	}
 }
 

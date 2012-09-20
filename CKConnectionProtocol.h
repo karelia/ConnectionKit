@@ -112,15 +112,19 @@ typedef enum {
 	New method that allows you to set a custom delegate for the upload.
 	You must implement the ConnectionTransferDelegate informal protocol.
 	By default the transfer record returned is the delegate of the transfer.
+ 
+ SFTP connections require permissions to be explicitly specified up-front as part of creating a file. (in practice some servers then ignore them). Other connection types tend to apply default permissions of their own. You should generally pass in 0644 for broad compatibility. Importantly the connection makes NO GUARANTEE the permissions will be respected; they're just an attempt for SFTP and similar
 */
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 
 /* 
  New method that allows you to set a custom delegate for the upload.
  You must implement the ConnectionTransferDelegate informal protocol.
  By default the transfer record returned is the delegate of the transfer.
+ 
+ See openingPosixPermissions advice above
  */
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 
