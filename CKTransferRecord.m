@@ -292,7 +292,9 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (void)setError:(NSError *)error
 {
-	if (error != _error)
+	[self retain];  // seeing some baffling crashes which suggest self gets deallocated during this routine
+    
+    if (error != _error)
 	{
 		[self willChangeValueForKey:@"progress"]; // we use this because we return -1 on an error
 		[_error autorelease];
@@ -304,6 +306,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	//Set the error on all parents, too.
 	if ([self parent])
 		[[self parent] setError:error];
+    
+    [self release];
 }
 
 - (void)setParent:(CKTransferRecord *)parent

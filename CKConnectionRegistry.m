@@ -86,8 +86,16 @@ enum {
 {
     Class connectionClass = [self connectionClassForName:name];
     if (!connectionClass) return nil;
-    
-    NSURL *URL = [[NSURL alloc] initWithScheme:[[connectionClass URLSchemes] objectAtIndex:0]
+
+    // if the name we passed in is in the supported schemes, use it, otherwise use the first scheme
+    NSArray* schemes = [connectionClass URLSchemes];
+    NSString* scheme = [name lowercaseString];
+    if (![schemes containsObject:scheme])
+    {
+        scheme = [schemes objectAtIndex:0];
+    }
+
+    NSURL *URL = [[NSURL alloc] initWithScheme:scheme
                                           host:host
                                           port:port
                                           user:nil
