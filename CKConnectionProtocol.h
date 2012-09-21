@@ -264,7 +264,7 @@ typedef enum {
 #pragma mark Other
 
 - (void)connection:(id <CKPublishingConnection>)con didCreateDirectory:(NSString *)dirPath error:(NSError *)error;
-- (void)connection:(id <CKConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
+- (void)connection:(id <CKPublishingConnection>)con didDeleteDirectory:(NSString *)dirPath error:(NSError *)error;
 - (void)connection:(id <CKPublishingConnection>)con didDeleteFile:(NSString *)path error:(NSError *)error;
 
 
