@@ -165,12 +165,12 @@
     return result;
 }
 
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
-    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path openingPosixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
     NSParameterAssert(data);
     
@@ -182,7 +182,7 @@
     
     NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:permissions:)
                                                              target:self
-                                                          arguments:[NSArray arrayWithObjects:data, path, result, permissions, nil]];
+                                                          arguments:[NSArray arrayWithObjects:data, path, result, @(permissions), nil]];
     
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
@@ -197,7 +197,8 @@
     CK2SFTPSession *sftpSession = [self SFTPSession];
     NSAssert(sftpSession, @"Trying to write data without having started session");
     
-    unsigned long mode = (permissions ? [permissions unsignedLongValue] : 0644);
+    NSParameterAssert(permissions);
+    unsigned long mode = [permissions unsignedLongValue];
     
     NSError *error;
     CK2SFTPFileHandle *handle = [sftpSession openHandleAtPath:path flags:(LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT) mode:mode error:&error];
@@ -210,6 +211,7 @@
         if (result)
         {
             // Some servers ignore the mode when opening a handle, so correct them
+            // TODO: Remove this code and have the client take responsibility for asking us to set permissions afterwards
             result = [sftpSession setPermissions:mode forItemAtPath:path error:&error];
         }
         
@@ -258,6 +260,25 @@
         [proxy connection:self didCreateDirectory:path error:(ok ? nil : error)];
         [proxy release];
     }
+}
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+{
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        NSError *error;
+        BOOL result = [[self SFTPSession] setPermissions:permissions forItemAtPath:path error:&error];
+        
+        id delegate = [self delegate];
+        if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+        {
+            id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+            [proxy connection:self didSetPermissionsForFile:path error:(result ? nil : error)];
+            [proxy release];
+        }
+    }];
+    
+    [self enqueueOperation:op];
 }
 
 - (void)deleteFile:(NSString *)path
