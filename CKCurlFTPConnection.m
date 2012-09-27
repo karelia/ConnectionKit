@@ -315,65 +315,71 @@
 }
 
 - (void)directoryContents
-{ 
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_directoryContents:) object:[self currentDirectory]];
-    [self enqueueOperation:op];
-    [op release];
-}
-- (void)threaded_directoryContents:(NSString *)path;
 {
-    NSMutableArray *result = [[NSMutableArray alloc] init];
+    NSString *path = [self currentDirectory];
     
-    NSError *error;
-    BOOL success = [_session enumerateContentsOfDirectoryAtPath:path error:&error usingBlock:^(NSDictionary *parsedResourceListing) {
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
         
-        // Convert from CFFTP's format to ours
-        NSString *type = NSFileTypeUnknown;
-        switch ([[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceType] integerValue])
-        {
-            case DT_CHR:
-                type = NSFileTypeCharacterSpecial;
-                break;
-            case DT_DIR:
-                type = NSFileTypeDirectory;
-                break;
-            case DT_BLK:
-                type = NSFileTypeBlockSpecial;
-                break;
-            case DT_REG:
-                type = NSFileTypeRegular;
-                break;
-            case DT_LNK:
-                type = NSFileTypeSymbolicLink;
-                break;
-            case DT_SOCK:
-                type = NSFileTypeSocket;
-                break;
-        }
+        [_queue setSuspended:YES];
         
-        NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
-                                    type, NSFileType,
-                                    nil];
-        [result addObject:attributes];
-        [attributes release];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            
+            NSMutableArray *result = [[NSMutableArray alloc] init];
+            
+            [_session enumerateContentsOfDirectoryAtPath:path usingBlock:^(NSDictionary *parsedResourceListing, NSError *error) {
+                
+                if (parsedResourceListing)
+                {
+                    // Convert from CFFTP's format to ours
+                    NSString *type = NSFileTypeUnknown;
+                    switch ([[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceType] integerValue])
+                    {
+                        case DT_CHR:
+                            type = NSFileTypeCharacterSpecial;
+                            break;
+                        case DT_DIR:
+                            type = NSFileTypeDirectory;
+                            break;
+                        case DT_BLK:
+                            type = NSFileTypeBlockSpecial;
+                            break;
+                        case DT_REG:
+                            type = NSFileTypeRegular;
+                            break;
+                        case DT_LNK:
+                            type = NSFileTypeSymbolicLink;
+                            break;
+                        case DT_SOCK:
+                            type = NSFileTypeSocket;
+                            break;
+                    }
+                    
+                    NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                                [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
+                                                type, NSFileType,
+                                                nil];
+                    [result addObject:attributes];
+                    [attributes release];
+                }
+                else
+                {
+                    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+                    
+                    [proxy connection:self
+                   didReceiveContents:(error ? nil : result)
+                          ofDirectory:(path ? path : @"")   // so Open Panel has something to go on initially
+                                error:error];
+                    
+                    [proxy release];
+                    [result release];
+                    
+                    [_queue setSuspended:NO];
+                }
+            }];
+        }];
     }];
     
-    if (success)
-    {
-        error = nil;    // so garbage doesn't get passed across threads
-    }
-    else
-    {
-        result = nil;
-    }
-    
-    if (!path) path = @"";      // so Open Panel has something to go on initially
-    
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self didReceiveContents:result ofDirectory:path error:error];
-    [proxy release];
-    [result release];
+    [self enqueueOperation:op];
 }
 
 #pragma mark Current Directory
