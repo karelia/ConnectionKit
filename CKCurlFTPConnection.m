@@ -69,10 +69,10 @@
 
 #pragma mark Queue
 
-- (void)enqueueOperation:(NSOperation *)operation;
+- (void)enqueueOperationWithBlock:(void (^)(void))block;
 {
     // Assume that only _session targeted invocations are async
-    [_queue addOperation:operation];
+    [_queue addOperationWithBlock:block];
 }
 
 #pragma mark Connection
@@ -148,11 +148,9 @@
 
 - (void)disconnect;
 {
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithTarget:self
-                                                                     selector:@selector(forceDisconnect)
-                                                                       object:nil];
-    [self enqueueOperation:op];
-    [op release];
+    [self enqueueOperationWithBlock:^{
+        [self forceDisconnect];
+    }];
 }
 
 - (void)forceDisconnect
@@ -160,9 +158,9 @@
     // Cancel all in queue
     [_queue cancelAllOperations];
     
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_disconnect) object:nil];
-    [self enqueueOperation:op];
-    [op release];
+    [self enqueueOperationWithBlock:^{
+        [self threaded_disconnect];
+    }];
 }
 
 - (void)threaded_disconnect;
@@ -206,8 +204,7 @@
     
     path = [self canonicalPathForPath:path];
     
-    
-    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    [self enqueueOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -229,14 +226,12 @@
         }];
     }];
     
-    [self enqueueOperation:op];
-    
     return result;
 }
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    [self enqueueOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -279,13 +274,11 @@
             }];
         }];
     }];
-    
-    [self enqueueOperation:op];
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 {
-    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    [self enqueueOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -307,15 +300,13 @@
             }];
         }];
     }];
-    
-    [self enqueueOperation:op];
 }
 
 - (void)deleteFile:(NSString *)path
 {
     path = [self canonicalPathForPath:path];
     
-    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    [self enqueueOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -331,15 +322,13 @@
             }];
         }];
     }];
-    
-    [self enqueueOperation:op];
 }
 
 - (void)directoryContents
 {
     NSString *path = [self currentDirectory];
     
-    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    [self enqueueOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -399,8 +388,6 @@
             }];
         }];
     }];
-    
-    [self enqueueOperation:op];
 }
 
 #pragma mark Current Directory
@@ -411,9 +398,9 @@
 {
     [self setCurrentDirectory:dirPath];
     
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_changedToDirectory:) object:dirPath];
-    [self enqueueOperation:op];
-    [op release];
+    [self enqueueOperationWithBlock:^{
+        [self threaded_changedToDirectory:dirPath];
+    }];
 }
 
 - (void)threaded_changedToDirectory:(NSString *)dirPath;
