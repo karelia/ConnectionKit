@@ -246,20 +246,23 @@
                 
                 if (!error && permissions)
                 {
-                    [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
-                               ofItemAtPath:path
-                          completionHandler:^(NSError *error) {
-                              
-                              id delegate = [self delegate];
-                              if ([delegate respondsToSelector:@selector(connection:didCreateDirectory:error:)])
-                              {
-                                  id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
-                                  [proxy connection:self didCreateDirectory:path error:error];
-                                  [proxy release];
-                              }
-                              
-                              [_queue setSuspended:NO];
-                          }];
+                    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                        
+                        [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
+                                   ofItemAtPath:path
+                              completionHandler:^(NSError *error) {
+                                  
+                                  id delegate = [self delegate];
+                                  if ([delegate respondsToSelector:@selector(connection:didCreateDirectory:error:)])
+                                  {
+                                      id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+                                      [proxy connection:self didCreateDirectory:path error:error];
+                                      [proxy release];
+                                  }
+                                  
+                                  [_queue setSuspended:NO];
+                              }];
+                    }];
                     
                     return;
                 }
