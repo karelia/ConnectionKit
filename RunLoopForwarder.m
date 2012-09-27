@@ -33,7 +33,8 @@
  */
 
 #import "RunLoopForwarder.h"
-#import "InterThreadMessaging.h"
+#import "NSInvocation+Connection.h"
+#import "NSObject+Connection.h"
 
 @implementation RunLoopForwarder
 
@@ -42,7 +43,6 @@
 	if (self = [super init]) {
 		lock = [[NSRecursiveLock alloc] init];
 		createdOnThread = [NSThread currentThread];
-		[NSThread prepareForConnectionInterThreadMessages];
 		[[NSNotificationCenter defaultCenter] addObserver:self
 												 selector:@selector(threadWillDie:)
 													 name:NSThreadWillExitNotification
@@ -128,7 +128,7 @@
 		else 
 		{
 			//we need to get the return value
-			unsigned int length = [[anInvocation methodSignature] methodReturnLength];
+			NSUInteger length = [[anInvocation methodSignature] methodReturnLength];
 			void * buffer = (void *)malloc(length);
 			[anInvocation performSelectorOnMainThread:@selector(invokeWithTarget:) 
 										   withObject:myDelegate 

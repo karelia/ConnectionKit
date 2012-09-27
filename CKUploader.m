@@ -15,6 +15,8 @@
 #import "CK2SFTPSession.h"
 #import "CKWebDAVConnection.h"
 
+#import "NSInvocation+Connection.h"
+
 
 @interface CKSFTPUploader : CKUploader <CK2SFTPSessionDelegate, NSURLAuthenticationChallengeSender>
 {
@@ -186,8 +188,7 @@
     
     // Create the directory if it hasn't been already
     CKTransferRecord *result = nil;
-    int i;
-    for (i = 0; i < [[parent contents] count]; i++)
+    for (NSUInteger i = 0; i < [[parent contents] count]; i++)
     {
         CKTransferRecord *aRecord = [[parent contents] objectAtIndex:i];
         if ([[aRecord name] isEqualToString:[path lastPathComponent]])
@@ -217,8 +218,13 @@
     
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
-		[_connection deleteFile:path];
+        [self removeFileAtPath:path];
 	}
+}
+
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_connection deleteFile:path];
 }
 
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
@@ -548,6 +554,13 @@
     }
     
     return result;
+}
+
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_queue addOperationWithBlock:^{
+        [[self SFTPSession] removeFileAtPath:path error:NULL];
+    }];
 }
 
 - (BOOL)threaded_createDirectoryAtPath:(NSString *)path error:(NSError **)outError;
@@ -1042,6 +1055,13 @@
     }
     
     return record;
+}
+
+- (void)removeFileAtPath:(NSString *)path;
+{
+    [_queue addOperationWithBlock:^{
+        [[self FTPSession] removeFileAtPath:path error:NULL];
+    }];
 }
 
 #pragma mark FTP Session

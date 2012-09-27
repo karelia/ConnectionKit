@@ -174,11 +174,11 @@
 
 - (NSString *)description
 {
-	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ <0x%06x>\n", [self className], self];
+	NSMutableString *str = [NSMutableString stringWithFormat:@"%@ <%p>\n", [self className], self];
 	
 	[str appendFormat:@"Local: %@\n", myLocalPath];
 	[str appendFormat:@"Remote: %@\n", myRemotePath];
-	[str appendFormat:@"Data length: %u\n", [myData length]];
+	[str appendFormat:@"Data length: %lu\n", (unsigned long) [myData length]];
 	[str appendFormat:@"Offset: %lld", myOffset];
 	
 	return str;

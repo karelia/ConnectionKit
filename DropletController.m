@@ -137,7 +137,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 {
 	NSRect frame = [oWindow frame];
 	NSRect contentRect = [oWindow contentRectForFrameRect:frame];
-	float titlebarHeight = NSHeight(frame) - NSHeight(contentRect);
+	CGFloat titlebarHeight = NSHeight(frame) - NSHeight(contentRect);
 	NSSize newSize = [sender state] == NSOnState ? sFilesExpandedSize : sFilesCollapsedSize;
 	frame.origin.y -= newSize.height - contentRect.size.height;
 	frame.size = newSize;
@@ -272,12 +272,12 @@ static NSSize sFilesCollapsedSize = {375, 105};
 - (void)connection:(id <CKConnection>)con upload:(NSString *)remotePath progressedTo:(NSNumber *)aPercent
 {
 	CKTransferRecord *record = [self recordWithPath:remotePath];
-	int oldValue = [record progress];
-	int percent = [aPercent intValue];
+	NSInteger oldValue = [record progress];
+	NSInteger percent = [aPercent integerValue];
 	
 	if (oldValue == 1 && percent == 100)
 	{
-		int i;
+		NSInteger i;
 		for (i = 1; i <= 10; i++) {
 			[record setProgress:i*10];
 			if ([oToggleFiles state] == NSOnState)
@@ -329,7 +329,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 #pragma mark -
 #pragma mark Outline View Data Source Methods
 
-- (int)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
+- (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
 	if (item == nil)
 	{
@@ -343,7 +343,7 @@ static NSSize sFilesCollapsedSize = {375, 105};
 	return [item isDirectory];
 }
 
-- (id)outlineView:(NSOutlineView *)outlineView child:(int)index ofItem:(id)item
+- (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item
 {
 
 	if (item == nil)

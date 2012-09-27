@@ -7,7 +7,7 @@
 //
 
 #import "CKWebDAVConnection.h"
-
+#import "NSInvocation+Connection.h"
 
 @implementation CKWebDAVConnection
 

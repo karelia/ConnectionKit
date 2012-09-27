@@ -34,7 +34,7 @@ static NSImage *sErrorImage = nil;
 static NSImage *sFinishedImage = nil;
 static NSMutableParagraphStyle *sStyle = nil;
 
-NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
+NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension);
 
 @implementation CKTransferProgressCell
 
@@ -65,7 +65,7 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 	}
 	else if ([value isKindOfClass:[NSNumber class]])
 	{
-		myProgress = [value intValue];
+		myProgress = [value integerValue];
 	}
 }
 
@@ -130,16 +130,16 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 		NSBezierPath *circle = [NSBezierPath bezierPathWithOvalInRect:imageRect];
 		NSPoint cp = NSMakePoint(NSMidX(imageRect), NSMidY(imageRect));
 		NSBezierPath *pie = [NSBezierPath bezierPath];
-		float degrees = (myProgress / 100.0) * 360.0;
+		CGFloat degrees = (myProgress / 100.0) * 360.0;
 		
 		[pie moveToPoint:cp];
 		[pie lineToPoint:NSMakePoint(NSMidX(imageRect), NSMaxY(imageRect))];
 		
 		int i;
-		float radius = floor(NSMaxY(imageRect) - NSMidY(imageRect));
-		float x, y;
+		CGFloat radius = floor(NSMaxY(imageRect) - NSMidY(imageRect));
+		CGFloat x, y;
 		for (i = 0; i <= floor(degrees); i++) {
-			float rad = i * (M_PI / 180.0);
+			CGFloat rad = i * (M_PI / 180.0);
 			x = sinf(rad) * radius;
 			y = cosf(rad) * radius;
 			[pie lineToPoint:NSMakePoint(cp.x + x, cp.y + y)];
@@ -184,9 +184,9 @@ NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension);
 
 @end
 
-NSSize CKLimitMaxWidthHeight(NSSize ofSize, float toMaxDimension)
+NSSize CKLimitMaxWidthHeight(NSSize ofSize, CGFloat toMaxDimension)
 {
-	float max = fmax(ofSize.width, ofSize.height);
+	CGFloat max = fmax(ofSize.width, ofSize.height);
 	if (max <= toMaxDimension)
 		return ofSize;
 	

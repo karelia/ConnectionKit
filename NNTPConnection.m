@@ -103,8 +103,8 @@ NSString *NNTPCanPostToGroupKey = @"NNTPCanPostToGroupKey";
 - (void)parseCommand:(NSString *)command
 {
 	NSScanner *scanner = [NSScanner scannerWithString:command];
-	int code;
-	[scanner scanInt:&code];
+	NSInteger code;
+	[scanner scanInteger:&code];
 	
 	[self appendToTranscript:[[[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@\n", command] 
 															  attributes:[CKAbstractConnection receivedAttributes]] autorelease]];
