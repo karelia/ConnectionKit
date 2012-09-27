@@ -236,57 +236,73 @@
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_createDirectoryAtPath:permissions:)
-                                                             target:self
-                                                          arguments:[NSArray arrayWithObjects:path, permissions, nil]];
+    NSInvocationOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        [_queue setSuspended:YES];
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            
+            [_session createDirectoryAtPath:path withIntermediateDirectories:NO completionHandler:^(NSError *error) {
+                
+                if (!error && permissions)
+                {
+                    [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
+                               ofItemAtPath:path
+                          completionHandler:^(NSError *error) {
+                              
+                              id delegate = [self delegate];
+                              if ([delegate respondsToSelector:@selector(connection:didCreateDirectory:error:)])
+                              {
+                                  id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+                                  [proxy connection:self didCreateDirectory:path error:error];
+                                  [proxy release];
+                              }
+                              
+                              [_queue setSuspended:NO];
+                          }];
+                    
+                    return;
+                }
+                
+                id delegate = [self delegate];
+                if ([delegate respondsToSelector:@selector(connection:didCreateDirectory:error:)])
+                {
+                    id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+                    [proxy connection:self didCreateDirectory:path error:error];
+                    [proxy release];
+                }
+                
+                [_queue setSuspended:NO];
+            }];
+        }];
+    }];
     
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
-    [op release];
-}
-
-- (void)threaded_createDirectoryAtPath:(NSString *)path permissions:(NSNumber *)permissions;
-{
-    NSError *error;
-    BOOL result = [_session createDirectoryAtPath:path withIntermediateDirectories:NO error:&error];
-    
-    if (result && permissions)
-    {
-        result = [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
-                            ofItemAtPath:path
-                                   error:&error];
-    }
-    
-    if (result)
-    {
-        error = nil;
-    }
-    
-    id delegate = [self delegate];
-    if ([delegate respondsToSelector:@selector(connection:didCreateDirectory:error:)])
-    {
-        id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
-        [proxy connection:self didCreateDirectory:path error:error];
-        [proxy release];
-    }
 }
 
 - (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
 {
     NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
         
-        NSError *error;
-        BOOL result = [_session setAttributes:[NSDictionary dictionaryWithObject:@(permissions) forKey:NSFilePosixPermissions]
-                                 ofItemAtPath:path
-                                        error:&error];
+        [_queue setSuspended:YES];
         
-        id delegate = [self delegate];
-        if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
-        {
-            id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
-            [proxy connection:self didSetPermissionsForFile:path error:(result ? nil : error)];
-            [proxy release];
-        }
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            
+            NSDictionary *attributes = [NSDictionary dictionaryWithObject:@(permissions) forKey:NSFilePosixPermissions];
+            
+            [_session setAttributes:attributes ofItemAtPath:path completionHandler:^(NSError *error) {
+                
+                id delegate = [self delegate];
+                if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+                {
+                    id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+                    [proxy connection:self didSetPermissionsForFile:path error:error];
+                    [proxy release];
+                }
+                
+                [_queue setSuspended:NO];
+            }];
+        }];
     }];
     
     [self enqueueOperation:op];
@@ -296,20 +312,24 @@
 {
     path = [self canonicalPathForPath:path];
     
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_removeFileAtPath:) object:path];
-    [self enqueueOperation:op];
-    [op release];
-}
-
-- (void)threaded_removeFileAtPath:(NSString *)path;
-{
-    NSError *error;
-    BOOL result = [_session removeFileAtPath:path error:&error];
-    if (result) error = nil;
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        [_queue setSuspended:YES];
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            
+            [_session removeFileAtPath:path completionHandler:^(NSError *error) {
+                
+                id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+                [proxy connection:self didDeleteFile:path error:error];
+                [proxy release];
+                
+                [_queue setSuspended:NO];
+            }];
+        }];
+    }];
     
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self didDeleteFile:path error:error];
-    [proxy release];
+    [self enqueueOperation:op];
 }
 
 - (void)directoryContents
