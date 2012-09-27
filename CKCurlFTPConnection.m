@@ -207,7 +207,7 @@
     path = [self canonicalPathForPath:path];
     
     
-    NSInvocationOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
@@ -236,7 +236,7 @@
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    NSInvocationOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
         
         [_queue setSuspended:YES];
         
