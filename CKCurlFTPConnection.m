@@ -95,15 +95,11 @@
 {
     if (challenge != _challenge) return;
     
+    [_session useCredential:credential];
     _challenge = nil;   // will release in a bit
     
     // Try an empty request to see how far we get, and learn starting directory
-    [_queue addOperationWithBlock:^{
-        
-        [_session useCredential:credential];
-        
-        NSError *error;
-        NSString *path = [_session homeDirectoryPath:&error];
+    [_session findHomeDirectoryWithCompletionHandler:^(NSString *path, NSError *error) {
         
         if (path)
         {
