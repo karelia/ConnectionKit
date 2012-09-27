@@ -207,29 +207,31 @@
     path = [self canonicalPathForPath:path];
     
     
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
-                                                             target:self
-                                                          arguments:[NSArray arrayWithObjects:data, path, result, nil]];
+    NSInvocationOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        [_queue setSuspended:YES];
+        
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            
+            [_session createFileAtPath:path contents:data withIntermediateDirectories:NO progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+                
+                if (bytesWritten != 0) return;  // don't care about progress updates
+                
+                if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
+                {
+                    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+                    [proxy connection:self uploadDidFinish:path error:(result ? nil : error)];
+                    [proxy release];
+                }
+                
+                [_queue setSuspended:NO];
+            }];
+        }];
+    }];
     
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
-    [op release];
-    
     
     return result;
-}
-
-- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record
-{
-    NSError *error;
-    BOOL result = [_session createFileAtPath:path contents:data withIntermediateDirectories:NO error:&error];
-    
-    if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
-    {
-        id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-        [proxy connection:self uploadDidFinish:path error:(result ? nil : error)];
-        [proxy release];
-    }
 }
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
