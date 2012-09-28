@@ -14,7 +14,7 @@
 #import <sys/dirent.h>
 
 
-@interface CKCurlFTPConnection () <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
+@interface CKCurlFTPConnection () <CURLHandleDelegate>
 @end
 
 
@@ -79,71 +79,23 @@
 
 - (void)connect;
 {
-    NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[[_request URL] host]
-                                                                        port:[[[_request URL] port] integerValue]
-                                                                    protocol:[[_request URL] scheme]
-                                                                       realm:nil
-                                                        authenticationMethod:nil];
-    
-    _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space proposedCredential:nil previousFailureCount:0 failureResponse:nil error:nil sender:self];
-    [space release];
-    
-    [[self delegate] connection:self didReceiveAuthenticationChallenge:_challenge];
-}
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (challenge != _challenge) return;
-    
-    [_session useCredential:credential];
-    _challenge = nil;   // will release in a bit
-    
     // Try an empty request to see how far we get, and learn starting directory
     [_session findHomeDirectoryWithCompletionHandler:^(NSString *path, NSError *error) {
         
         if (path)
         {
             [self setCurrentDirectory:path];
-            
-            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
-            
+                        
             if ([[self delegate] respondsToSelector:@selector(connection:didConnectToHost:error:)])
             {
                 [[self delegate] connection:self didConnectToHost:[[_request URL] host] error:nil];
             }
         }
-        else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
-        {
-            _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:[challenge protectionSpace]
-                                                                    proposedCredential:credential
-                                                                  previousFailureCount:([challenge previousFailureCount] + 1)
-                                                                       failureResponse:nil
-                                                                                 error:error
-                                                                                sender:self];
-            
-            [[self delegate] connection:self didReceiveAuthenticationChallenge:_challenge];
-        }
         else
         {
             [[self delegate] connection:self didReceiveError:error];
         }
-        
-        [challenge release];
     }];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    [self useCredential:nil forAuthenticationChallenge:challenge];
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    NSParameterAssert(challenge == _challenge);
-    [_challenge release]; _challenge = nil;
-    
-    [[self delegate] connection:self
-                didReceiveError:[NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserCancelledAuthentication userInfo:nil]];
 }
 
 - (void)disconnect;
@@ -417,6 +369,11 @@
 - (void)cleanupConnection { }
 
 #pragma mark Delegate
+
+- (void)FTPSession:(CURLFTPSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [[self delegate] connection:self didReceiveAuthenticationChallenge:challenge];
+}
 
 - (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
 {
