@@ -245,11 +245,18 @@
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_createDirectoryAtPath:permissions:)
-                                                             target:self
-                                                          arguments:[NSArray arrayWithObjects:path, permissions, nil]];
+    path = [self canonicalPathForPath:path];
     
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:
+                                [self methodSignatureForSelector:@selector(threaded_createDirectoryAtPath:permissions:)]];
+    [invocation setTarget:self];
+    [invocation setSelector:@selector(threaded_createDirectoryAtPath:permissions:)];
+    [invocation setArgument:&path atIndex:2];
+    [invocation setArgument:&permissions atIndex:3];
+    [invocation retainArguments];
+    
+    NSOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+    
     [self enqueueOperation:op];
     [op release];
 }
@@ -359,7 +366,7 @@
 }
 
 - (void)directoryContents
-{ 
+{
     NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_directoryContents:) object:[self currentDirectory]];
     [self enqueueOperation:op];
     [op release];
@@ -367,7 +374,6 @@
 - (void)threaded_directoryContents:(NSString *)path;
 {
     NSMutableArray *result = [[NSMutableArray alloc] init];
-    
     NSError *error;
     BOOL success = [_session enumerateContentsOfDirectoryAtPath:path error:&error usingBlock:^(NSDictionary *parsedResourceListing) {
         
