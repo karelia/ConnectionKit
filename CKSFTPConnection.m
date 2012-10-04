@@ -309,7 +309,7 @@
 
 - (void)threaded_directoryContents:(NSString *)path;
 {
-    if (!path) path = @".";
+    if ([path length] == 0) path = @".";
     
     NSError *error;
     NSArray *result = [[self SFTPSession] attributesOfContentsOfDirectoryAtPath:path error:&error];
