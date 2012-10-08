@@ -345,10 +345,32 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(void (^)(NSError *error))handler;
 {
-    return [self executeCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[url lastPathComponent]]]
-                      inDirectoryAtURL:[url URLByDeletingLastPathComponent]
-         createIntermediateDirectories:createIntermediates
-                     completionHandler:handler];
+    if ([url ck2_isFTPURL])
+    {
+        return [self executeCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[url lastPathComponent]]]
+                          inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+             createIntermediateDirectories:createIntermediates
+                         completionHandler:handler];
+    }
+    else
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSFileManager *manager = [[NSFileManager alloc] init];
+            
+            NSError *error;
+            if ([manager createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
+            {
+                error = nil;
+            }
+            else if (!error)
+            {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
+            }
+            
+            handler(error);
+        });
+    }
 }
 
 - (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
