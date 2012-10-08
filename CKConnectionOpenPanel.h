@@ -98,7 +98,6 @@ enum {
 - (void)setAllowsMultipleSelection:(BOOL)flag;
 
 - (BOOL)isLoading;
-- (void)setIsLoading:(BOOL)flag;
 
 - (NSArray *)URLs;
 - (NSString *)prompt;
