@@ -13,6 +13,8 @@
 #import <CURLHandle/CURLHandle.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
+#import <sys/dirent.h>
+
 
 @interface CK2Transfer : NSObject <CURLHandleDelegate>
 {
@@ -252,7 +254,10 @@ createIntermediateDirectories:(BOOL)createIntermediates
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
                         if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                         {
-                            block([url URLByAppendingPathComponent:name]); // TODO: resolve url if relative
+                            NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
+                            BOOL isDirectory = [type intValue] == DT_DIR;
+                            
+                            block([url URLByAppendingPathComponent:name isDirectory:isDirectory]);
                         }
                         
                         CFRelease(parsedDict);
