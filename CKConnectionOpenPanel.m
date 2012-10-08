@@ -246,17 +246,29 @@
     url = [url copy];
     [_directory release]; _directory = url;
     
+    
     // Update UI
     // Need to add icons
     [pathControl setURL:url];
     
-    NSArray *componentCells = [pathControl pathComponentCells];
+    NSMutableArray *componentCells = [[pathControl pathComponentCells] mutableCopy];
+    
+    // Add in cell for root/home
+    NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
+    NSURL *rootURL = ([componentCells count] > 0 ? [[[componentCells objectAtIndex:0] URL] URLByDeletingLastPathComponent] : url);
+    [rootCell setURL:rootURL];
+    [componentCells insertObject:rootCell atIndex:0];
+    [rootCell release];
+    
     NSImage *folderIcon = [[NSWorkspace sharedWorkspace] iconForFileType:(NSString *)kUTTypeFolder];
     
     for (NSPathComponentCell *aCell in componentCells)
     {
         [aCell setImage:folderIcon];
     }
+    
+    [pathControl setPathComponentCells:componentCells];
+    [componentCells release];
 }
 
 //=========================================================== 
