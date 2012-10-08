@@ -47,6 +47,8 @@ typedef unsigned int   NSUInteger;
 #endif // NSINTEGER_DEFINED
 
 
+#import <Connection/CK2FileTransferSession.h>
+
 #import <Cocoa/Cocoa.h>
 
 #import <Connection/CKConnectionProtocol.h>

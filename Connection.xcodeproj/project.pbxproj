@@ -44,6 +44,8 @@
 		2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3F91459CBB10085BBC4 /* libssh2.h */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */; };
+		2743E8091622E47600019979 /* CK2FileTransferSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileTransferSession.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2743E80A1622E47600019979 /* CK2FileTransferSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileTransferSession.m */; };
 		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
@@ -141,6 +143,13 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
+		2743E80D1622E47600019979 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223FD092160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
+		};
 		27448C2C14580F7500EB086F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
@@ -235,6 +244,8 @@
 		2702E3F81459CBB10085BBC4 /* libssh2_sftp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2_sftp.h; path = SFTP/libssh2/include/libssh2_sftp.h; sourceTree = "<group>"; };
 		2702E3F91459CBB10085BBC4 /* libssh2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = libssh2.h; path = SFTP/libssh2/include/libssh2.h; sourceTree = "<group>"; };
 		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = SFTP/libssh2.dylib; sourceTree = "<group>"; };
+		2743E8071622E47600019979 /* CK2FileTransferSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileTransferSession.h; sourceTree = "<group>"; };
+		2743E8081622E47600019979 /* CK2FileTransferSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferSession.m; sourceTree = "<group>"; };
 		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
 		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
@@ -499,6 +510,7 @@
 			isa = PBXGroup;
 			children = (
 				27BFFEE215027F4200EFA319 /* CURLHandle.framework */,
+				2743E80E1622E47600019979 /* CURLHandleTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -643,6 +655,8 @@
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
+				2743E8071622E47600019979 /* CK2FileTransferSession.h */,
+				2743E8081622E47600019979 /* CK2FileTransferSession.m */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -813,6 +827,7 @@
 				2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */,
 				2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */,
 				27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */,
+				2743E8091622E47600019979 /* CK2FileTransferSession.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -945,6 +960,13 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
+		2743E80E1622E47600019979 /* CURLHandleTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CURLHandleTests.octest;
+			remoteRef = 2743E80D1622E47600019979 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		27448C2D14580F7500EB086F /* DAVKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -1142,6 +1164,7 @@
 				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */,
+				2743E80A1622E47600019979 /* CK2FileTransferSession.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
