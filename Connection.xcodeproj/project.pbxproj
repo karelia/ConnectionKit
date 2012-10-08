@@ -1104,7 +1104,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\n";
+			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\nmv en.lproj/Localizable.strings.utf8 en.lproj/Localizable.strings\n";
 			showEnvVarsInLog = 0;
 		};
 		7983E7EE0B0C4F5100F5078E /* ShellScript */ = {
