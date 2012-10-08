@@ -250,8 +250,11 @@ createIntermediateDirectories:(BOOL)createIntermediates
                     if (parsedDict)
                     {
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
+                        if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+                        {
+                            block([url URLByAppendingPathComponent:name]); // TODO: resolve url if relative
+                        }
                         
-                        block([url URLByAppendingPathComponent:name]); // TODO: resolve url if relative
                         CFRelease(parsedDict);
                     }
                     
