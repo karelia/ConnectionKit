@@ -54,8 +54,15 @@
 
 #pragma mark Requests
 
-- (NSMutableURLRequest *)newMutableRequestWithURL:(NSURL *)url;
+- (NSMutableURLRequest *)newMutableRequestWithURL:(NSURL *)url isDirectory:(BOOL)directory;
 {
+    // CURL is very particular about whether URLs passed to it have directory terminator or not
+    if (directory != CFURLHasDirectoryPath((CFURLRef)url))
+    {
+        NSString *lastComponent = [url lastPathComponent];
+        url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:lastComponent isDirectory:directory];
+    }
+    
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setCachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
     return request;
@@ -71,7 +78,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
     // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:directory];
+    NSMutableURLRequest *request = [self newMutableRequestWithURL:directory isDirectory:YES];
     [request setHTTPMethod:@"HEAD"];
     [request curl_setCreateIntermediateDirectories:createIntermediates];
     
@@ -218,7 +225,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 {
     NSParameterAssert(url);
     
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:url];
+    NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:YES];
     
     NSMutableData *totalData = [[NSMutableData alloc] init];
     
@@ -303,7 +310,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:url];
+    NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:NO];
     [request setHTTPBody:data];
     [request curl_setCreateIntermediateDirectories:createIntermediates];
     
@@ -313,7 +320,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:destinationURL];
+    NSMutableURLRequest *request = [self newMutableRequestWithURL:destinationURL isDirectory:NO];
     
     // Read the data using an input stream if possible
     NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
