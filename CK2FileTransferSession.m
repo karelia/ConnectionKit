@@ -369,6 +369,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
             }
             
             handler(error);
+            [manager release];
         });
     }
 }
@@ -493,10 +494,17 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
-    return [self executeCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[url lastPathComponent]]]
-                      inDirectoryAtURL:[url URLByDeletingLastPathComponent]
-         createIntermediateDirectories:NO
-                     completionHandler:handler];
+    if ([url ck2_isFTPURL])
+    {
+        return [self executeCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[url lastPathComponent]]]
+                          inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+             createIntermediateDirectories:NO
+                         completionHandler:handler];
+    }
+    else
+    {
+        
+    }
 }
 
 #pragma mark Getting and Setting Attributes
