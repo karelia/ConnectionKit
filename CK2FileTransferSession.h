@@ -79,3 +79,11 @@
 - (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)fileTransferSession:(CK2FileTransferSession *)session appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end
+
+
+#pragma mark -
+
+
+@interface NSURL (ConnectionKit)
+- (BOOL)ck2_isFTPURL;   // YES if the scheme is ftp or ftps
+@end

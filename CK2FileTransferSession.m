@@ -225,77 +225,120 @@ createIntermediateDirectories:(BOOL)createIntermediates
 {
     NSParameterAssert(url);
     
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:YES];
-    
-    NSMutableData *totalData = [[NSMutableData alloc] init];
-    
-    [self sendRequest:request dataHandler:^(NSData *data) {
-        [totalData appendData:data];
-    } completionHandler:^(CURLHandle *handle, NSError *error) {
+    if ([url ck2_isFTPURL])
+    {
+        NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:YES];
         
-        if (error)
-        {
-            completionBlock(error);
-        }
-        else
-        {
-            // Report directory itself
-            // TODO: actually resolve it
-            block(url);
+        NSMutableData *totalData = [[NSMutableData alloc] init];
+        
+        [self sendRequest:request dataHandler:^(NSData *data) {
+            [totalData appendData:data];
+        } completionHandler:^(CURLHandle *handle, NSError *error) {
             
-            
-            // Process the data to make a directory listing
-            while (1)
+            if (error)
             {
-                CFDictionaryRef parsedDict = NULL;
-                CFIndex bytesConsumed = CFFTPCreateParsedResourceListing(NULL,
-                                                                         [totalData bytes], [totalData length],
-                                                                         &parsedDict);
+                completionBlock(error);
+            }
+            else
+            {
+                // Report directory itself
+                // TODO: actually resolve it
+                block(url);
                 
-                if (bytesConsumed > 0)
+                
+                // Process the data to make a directory listing
+                while (1)
                 {
-                    // Make sure CFFTPCreateParsedResourceListing was able to properly
-                    // parse the incoming data
-                    if (parsedDict)
+                    CFDictionaryRef parsedDict = NULL;
+                    CFIndex bytesConsumed = CFFTPCreateParsedResourceListing(NULL,
+                                                                             [totalData bytes], [totalData length],
+                                                                             &parsedDict);
+                    
+                    if (bytesConsumed > 0)
                     {
-                        NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
-                        if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+                        // Make sure CFFTPCreateParsedResourceListing was able to properly
+                        // parse the incoming data
+                        if (parsedDict)
                         {
-                            NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
-                            BOOL isDirectory = [type intValue] == DT_DIR;
+                            NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
+                            if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+                            {
+                                NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
+                                BOOL isDirectory = [type intValue] == DT_DIR;
+                                
+                                block([url URLByAppendingPathComponent:name isDirectory:isDirectory]);
+                            }
                             
-                            block([url URLByAppendingPathComponent:name isDirectory:isDirectory]);
+                            CFRelease(parsedDict);
                         }
                         
-                        CFRelease(parsedDict);
+                        [totalData replaceBytesInRange:NSMakeRange(0, bytesConsumed) withBytes:NULL length:0];
                     }
-                    
-                    [totalData replaceBytesInRange:NSMakeRange(0, bytesConsumed) withBytes:NULL length:0];
-                }
-                else if (bytesConsumed < 0)
-                {
-                    // error!
-                    NSDictionary *userInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                              [request URL], NSURLErrorFailingURLErrorKey,
-                                              [[request URL] absoluteString], NSURLErrorFailingURLStringErrorKey,
-                                              nil];
-                    
-                    NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotParseResponse userInfo:userInfo];
-                    [userInfo release];
-                    
-                    completionBlock(error);
-                    break;
-                }
-                else
-                {
-                    completionBlock(nil);
-                    break;
+                    else if (bytesConsumed < 0)
+                    {
+                        // error!
+                        NSDictionary *userInfo = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                                  [request URL], NSURLErrorFailingURLErrorKey,
+                                                  [[request URL] absoluteString], NSURLErrorFailingURLStringErrorKey,
+                                                  nil];
+                        
+                        NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotParseResponse userInfo:userInfo];
+                        [userInfo release];
+                        
+                        completionBlock(error);
+                        break;
+                    }
+                    else
+                    {
+                        completionBlock(nil);
+                        break;
+                    }
                 }
             }
-        }
-    }];
-    
-    [request release];
+        }];
+        
+        [request release];
+    }
+    else if ([url isFileURL])
+    {
+        // Fall back to standard file manager
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSFileManager *manager = [[NSFileManager alloc] init];
+            
+            // Enumerate contents
+            NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
+                
+                NSLog(@"enumeration error: %@", error);
+                return YES;
+            }];
+            
+            BOOL reportedDirectory = NO;
+            
+            NSURL *aURL;
+            while (aURL = [enumerator nextObject])
+            {
+                // Report the main directory first
+                if (!reportedDirectory)
+                {
+                    block(url);
+                    reportedDirectory = YES;
+                }
+                
+                block(aURL);
+            }
+            
+            [manager release];
+            completionBlock(nil);
+        });
+    }
+    else
+    {
+        // I thought NSFileManager would give us back a nice NSURLErrorUnsupportedURL error or similar if fed a non-file URL, but in practice it just reports that the file doesn't exist, which isn't ideal. So do our own handling instead
+        NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+        NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
+        completionBlock(error);
+    }
 }
 
 #pragma mark Creating and Deleting Items
@@ -546,6 +589,20 @@ createIntermediateDirectories:(BOOL)createIntermediates
     [_progressBlock release];
     
     [super dealloc];
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation NSURL (ConnectionKit)
+
+- (BOOL)ck2_isFTPURL;
+{
+    NSString *scheme = [self scheme];
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 @end
