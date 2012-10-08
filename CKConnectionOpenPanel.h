@@ -59,7 +59,7 @@ enum {
 	NSString *newFolderName;
 	NSMutableArray *allowedFileTypes;
 	IBOutlet NSArrayController *directoryContents;
-	IBOutlet NSArrayController *parentDirectories;
+    IBOutlet NSPathControl  *pathControl;
 	IBOutlet NSWindow *createFolder;
 	IBOutlet NSTableView *tableView;
     IBOutlet NSButton *openButton;
@@ -73,7 +73,7 @@ enum {
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
-- (IBAction) goToFolder: (id) sender;
+- (IBAction)goToFolder:(NSPathControl *)sender;
 - (IBAction) createNewFolder: (id) sender;
 
 @property(nonatomic, readonly) CK2FileTransferSession *session;

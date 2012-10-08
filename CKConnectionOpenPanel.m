@@ -219,19 +219,10 @@
 	}
 }
 
-- (IBAction) goToFolder: (id) sender
+- (IBAction)goToFolder:(NSPathControl *)sender
 {
-	unsigned c = [[parentDirectories arrangedObjects] count];
-	NSURL *url = nil;
-	if (c > 0)
-	{
-        NSArray *currentPathComponents = [[CK2FileTransferSession pathOfURLRelativeToHomeDirectory:[self directoryURL]] pathComponents];
-		NSString *newPath = [NSString pathWithComponents:[currentPathComponents subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))]];
-        url = [CK2FileTransferSession URLWithPath:newPath relativeToURL:[NSURL URLWithString:@"/" relativeToURL:[self directoryURL]]];
-	}
-	
-	if (!url) url = [self directoryURL];
-	[self setDirectoryURL:url selectFile:nil completionHandler:nil];
+    NSPathComponentCell *cell = [sender clickedPathComponentCell];
+    [self setDirectoryURL:[cell URL] selectFile:nil completionHandler:nil];
 }
 
 - (IBAction) openFolder: (id) sender
@@ -251,8 +242,21 @@
 - (void)setDirectoryURL:(NSURL *)url;
 {
     NSParameterAssert(url);
+    
     url = [url copy];
     [_directory release]; _directory = url;
+    
+    // Update UI
+    // Need to add icons
+    [pathControl setURL:url];
+    
+    NSArray *componentCells = [pathControl pathComponentCells];
+    NSImage *folderIcon = [[NSWorkspace sharedWorkspace] iconForFileType:(NSString *)kUTTypeFolder];
+    
+    for (NSPathComponentCell *aCell in componentCells)
+    {
+        [aCell setImage:folderIcon];
+    }
 }
 
 //=========================================================== 
@@ -558,12 +562,6 @@
         
         
         [self setDirectoryURL:dir];
-        
-        // Populate the popup button used for navigating back to ancestor directories.
-        NSArray *pathComponents = [[CK2FileTransferSession pathOfURLRelativeToHomeDirectory:dir] pathComponents];
-        
-        [parentDirectories setContent:[[pathComponents reverseObjectEnumerator] allObjects]];   // reverse order to match NSSavePanel etc.
-        [parentDirectories setSelectionIndex:0];
         
         
         // Populate the file list
