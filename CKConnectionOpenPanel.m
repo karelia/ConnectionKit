@@ -571,6 +571,16 @@
             [self setDirectoryURL:[NSURL URLWithString:@"/" relativeToURL:url] selectFile:nil completionHandler:block];
             return;
         }
+        else if (error)
+        {
+            if (block) block(error);
+            
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [self presentError:error];
+            }];
+            
+            return;
+        }
         
         
         [self setDirectoryURL:dir];
