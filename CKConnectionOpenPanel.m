@@ -222,19 +222,16 @@
 - (IBAction) goToFolder: (id) sender
 {
 	unsigned c = [[parentDirectories arrangedObjects] count];
-	NSString *newPath = @"";
+	NSURL *url = nil;
 	if (c > 0)
 	{
-        NSArray *currentPathComponents = [[[self connection] currentDirectory] pathComponents];
-		newPath = [[currentPathComponents subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))] componentsJoinedByString: @"/"];
+        NSArray *currentPathComponents = [[CK2FileTransferSession pathOfURLRelativeToHomeDirectory:[self directoryURL]] pathComponents];
+		NSString *newPath = [NSString pathWithComponents:[currentPathComponents subarrayWithRange: NSMakeRange (0, ([[parentDirectories arrangedObjects] count] - [sender indexOfSelectedItem]))]];
+        url = [CK2FileTransferSession URLWithPath:newPath relativeToURL:[NSURL URLWithString:@"/" relativeToURL:[self directoryURL]]];
 	}
 	
-	if ([newPath isEqualToString: @""])
-		newPath = @"/";
-  
-	[self setIsLoading: YES];
-	[[self connection] changeToDirectory: newPath];
-	[[self connection] directoryContents];
+	if (!url) url = [self directoryURL];
+	[self setDirectoryURL:url selectFile:nil completionHandler:nil];
 }
 
 - (IBAction) openFolder: (id) sender
