@@ -242,9 +242,7 @@
 	if ([sender count])
 		if (![[[sender objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])
 		{
-			[self setIsLoading: YES];
-			[[self connection] changeToDirectory: [[sender objectAtIndex: 0] valueForKey: @"path"]];
-			[[self connection] directoryContents];
+            [self setDirectoryURL:[[sender objectAtIndex:0] valueForKey:@"URL"] selectFile:nil completionHandler:nil];
 		}
 }
 
@@ -550,6 +548,8 @@
 
 - (void)setDirectoryURL:(NSURL *)url selectFile:(NSURL *)file completionHandler:(void (^)(NSError *error))block;
 {
+    [self setIsLoading: YES];
+    
     [[self session] contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles completionHandler:^(NSArray *contents, NSURL *dir, NSError *error) {
         
         // An error is most likely the folder not existing, so try loading up the home directory
