@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+#import "CKConnectionProtocol.h"
+
 
 @protocol CK2FileTransferSessionDelegate;
 
@@ -71,5 +73,5 @@
 
 @protocol CK2FileTransferSessionDelegate <NSObject>
 - (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveDebugInfo:(NSString *)info;
+- (void)fileTransferSession:(CK2FileTransferSession *)session appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end

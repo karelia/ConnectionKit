@@ -398,7 +398,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
         string = @"PASS ####";
     }
     
-    [[self delegate] fileTransferSession:self didReceiveDebugInfo:string];
+    [[self delegate] fileTransferSession:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 #pragma mark FTP URL helpers
@@ -509,7 +509,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
-    [[_session delegate] fileTransferSession:_session didReceiveDebugInfo:string];
+    [[_session delegate] fileTransferSession:_session appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 - (void)dealloc;
