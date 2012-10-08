@@ -14,7 +14,7 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
 
-@interface CURLFTPTransfer : NSObject <CURLHandleDelegate>
+@interface CK2Transfer : NSObject <CURLHandleDelegate>
 {
   @private
     CK2FileTransferSession  *_session;
@@ -123,7 +123,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 - (void)sendRequest:(NSURLRequest *)request dataHandler:(void (^)(NSData *data))dataBlock completionHandler:(void (^)(CURLHandle *handle, NSError *error))handler;
 {
     [self doAuthForURL:[request URL] completionHandler:^{
-        CURLFTPTransfer *transfer = [[CURLFTPTransfer alloc] initWithRequest:request session:self dataHandler:dataBlock completionHandler:^(CURLHandle *handle, NSError *error) {
+        CK2Transfer *transfer = [[CK2Transfer alloc] initWithRequest:request session:self dataHandler:dataBlock completionHandler:^(CURLHandle *handle, NSError *error) {
             
             handler(handle, error);
         }];
@@ -134,7 +134,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 - (void)sendRequest:(NSURLRequest *)request progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(CURLHandle *handle, NSError *error))handler;
 {
     [self doAuthForURL:[request URL] completionHandler:^{
-        CURLFTPTransfer *transfer = [[CURLFTPTransfer alloc] initWithRequest:request session:self progressBlock:progressBlock completionHandler:^(CURLHandle *handle, NSError *error) {
+        CK2Transfer *transfer = [[CK2Transfer alloc] initWithRequest:request session:self progressBlock:progressBlock completionHandler:^(CURLHandle *handle, NSError *error) {
             
             handler(handle, error);
         }];
@@ -457,7 +457,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 #pragma mark -
 
 
-@implementation CURLFTPTransfer
+@implementation CK2Transfer
 
 - (id)initWithRequest:(NSURLRequest *)request session:(CK2FileTransferSession *)session completionHandler:(void (^)(CURLHandle *, NSError *))handler;
 {
