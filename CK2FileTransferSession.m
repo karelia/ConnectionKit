@@ -530,23 +530,43 @@ createIntermediateDirectories:(BOOL)createIntermediates
     NSParameterAssert(keyedValues);
     NSParameterAssert(url);
     
-    NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
-    if (permissions)
+    if ([url ck2_isFTPURL])
     {
-        NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
-                                                      @"SITE CHMOD %lo %@",
-                                                      [permissions unsignedLongValue],
-                                                      [url lastPathComponent]]];
+        NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
+        if (permissions)
+        {
+            NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
+                                                          @"SITE CHMOD %lo %@",
+                                                          [permissions unsignedLongValue],
+                                                          [url lastPathComponent]]];
+            
+            [self executeCustomCommands:commands
+                       inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+          createIntermediateDirectories:NO
+                      completionHandler:handler];
+            
+            return;
+        }
         
-        [self executeCustomCommands:commands
-                   inDirectoryAtURL:[url URLByDeletingLastPathComponent]
-      createIntermediateDirectories:NO
-                  completionHandler:handler];
-        
-        return;
+        handler(nil);
     }
-    
-    handler(nil);
+    else
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSError *error;
+            if ([url setResourceValues:keyedValues error:&error])
+            {
+                error = nil;
+            }
+            else if (!error)
+            {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+            }
+            
+            handler(error);
+        });
+    }
 }
 
 #pragma mark Delegate
