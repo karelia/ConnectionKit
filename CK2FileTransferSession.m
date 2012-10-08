@@ -375,48 +375,98 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 - (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:NO];
-    [request setHTTPBody:data];
-    [request curl_setCreateIntermediateDirectories:createIntermediates];
-    
-    [self createFileWithRequest:request progressBlock:progressBlock];
-    [request release];
+    if ([url ck2_isFTPURL])
+    {
+        NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:NO];
+        [request setHTTPBody:data];
+        [request curl_setCreateIntermediateDirectories:createIntermediates];
+        
+        [self createFileWithRequest:request progressBlock:progressBlock];
+        [request release];
+    }
+    else
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            // TODO: Use a stream or similar to write incrementally and report progress
+            NSError *error;
+            if ([data writeToURL:url options:0 error:&error])
+            {
+                error = nil;
+            }
+            else if (!error)
+            {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+            }
+            
+            progressBlock((error ? 0 : [data length]), error);
+        });
+    }
 }
 
 - (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    NSMutableURLRequest *request = [self newMutableRequestWithURL:destinationURL isDirectory:NO];
-    
-    // Read the data using an input stream if possible
-    NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
-    if (stream)
+    if ([destinationURL ck2_isFTPURL])
     {
-        [request setHTTPBodyStream:stream];
-        [stream release];
-    }
-    else
-    {
-        NSError *error;
-        NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
+        NSMutableURLRequest *request = [self newMutableRequestWithURL:destinationURL isDirectory:NO];
         
-        if (data)
+        // Read the data using an input stream if possible
+        NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
+        if (stream)
         {
-            [request setHTTPBody:data];
-            [data release];
+            [request setHTTPBodyStream:stream];
+            [stream release];
         }
         else
         {
-            [request release];
-            if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-            progressBlock(0, error);
-            return;
+            NSError *error;
+            NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
+            
+            if (data)
+            {
+                [request setHTTPBody:data];
+                [data release];
+            }
+            else
+            {
+                [request release];
+                if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
+                progressBlock(0, error);
+                return;
+            }
         }
+        
+        [request curl_setCreateIntermediateDirectories:createIntermediates];
+        
+        [self createFileWithRequest:request progressBlock:progressBlock];
+        [request release];
     }
-    
-    [request curl_setCreateIntermediateDirectories:createIntermediates];
-    
-    [self createFileWithRequest:request progressBlock:progressBlock];
-    [request release];
+    else
+    {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSError *error;
+            NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
+            
+            if (data)
+            {
+                if ([data writeToURL:destinationURL options:0 error:&error])
+                {
+                    error = nil;
+                }
+                else if (!error)
+                {
+                    error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+                }
+            }
+            else if (!error)
+            {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
+            }
+            
+            progressBlock((error ? 0 : [data length]), error);
+        });
+    }
 }
 
 - (void)createFileWithRequest:(NSURLRequest *)request progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
