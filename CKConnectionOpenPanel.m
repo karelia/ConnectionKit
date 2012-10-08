@@ -36,45 +36,27 @@
 
 #import "NSArray+Connection.h"
 
-@interface CKConnectionOpenPanel (Private)
-- (void)setConnection:(id <CKPublishingConnection>)aConnection;
-@end
-
-
-#pragma mark -
-
 
 @implementation CKConnectionOpenPanel
 
-- (id)initWithRequest:(NSURLRequest *)request;
+- (id)initWithFileTransferSession:(CK2FileTransferSession *)session directoryURL:(NSURL *)url;
 {
-	NSParameterAssert(request);
-    NSParameterAssert([request URL]);
-    
+	NSParameterAssert(session);
     
     if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
-		id <CKPublishingConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
-        if (connection)
-        {
-            [self setConnection:connection];
-            
-            shouldDisplayOpenButton = YES;
-            shouldDisplayOpenCancelButton = YES;
-            [self setTimeout:30];
-            [self setAllowsMultipleSelection: NO];
-            [self setCanChooseFiles: YES];
-            [self setCanChooseDirectories: YES];
-            
-            [self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
-                                                                                      value: @"Open"
-                                                                                      table: @"localizable"]];
-        }
-        else
-        {
-            [self release];
-            self = nil;
-        }
+		_session = [session retain];
+        [self setDirectoryURL:url];
+        
+        shouldDisplayOpenButton = YES;
+        shouldDisplayOpenCancelButton = YES;
+        [self setAllowsMultipleSelection: NO];
+        [self setCanChooseFiles: YES];
+        [self setCanChooseDirectories: YES];
+        
+        [self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
+                                                                                  value: @"Open"
+                                                                                  table: @"localizable"]];
 	}
 	
 	return self;
@@ -166,23 +148,16 @@
 }
 
 #pragma mark ----=actions=----
+
 - (IBAction) closePanel: (id) sender
 {
   //invalidate the timer in case the user dismiss the panel before the connection happened
   //
-	[timer invalidate];
-	timer = nil;
-  
-	[[self connection] setDelegate:nil];
-	[self setConnection:nil];
-	
 	if ([sender tag] && 
 		([[directoryContents selectedObjects] count] == 1) && 
 		![[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue] &&
 		![self canChooseDirectories])
 	{
-		[[self connection] changeToDirectory: [[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"path"]];
-		[[self connection] directoryContents];
 	}
 	else
 	{
@@ -212,7 +187,9 @@
 		//
 		BOOL containsObject = NO;
 		
-		NSEnumerator *theEnum = [[directoryContents arrangedObjects] objectEnumerator];
+		NSURL *url = [[self directoryURL] URLByAppendingPathComponent:[self newFolderName] isDirectory:YES];
+        
+        NSEnumerator *theEnum = [[directoryContents arrangedObjects] objectEnumerator];
 		id currentObject = nil;
 		
 		while ((currentObject = [theEnum nextObject]) && !containsObject)
@@ -220,16 +197,25 @@
 		
 		if (!containsObject)
 		{
-			NSString *dir = [[[self connection] currentDirectory] stringByAppendingPathComponent:[self newFolderName]];
-			[[self connection] createDirectoryAtPath:dir posixPermissions:nil];
+            [[self session] createDirectoryAtURL:url withIntermediateDirectories:NO completionHandler:^(NSError *error) {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    if (error)
+                    {
+                        [self presentError:error];
+                    }
+                    else
+                    {
+                        [self setDirectoryURL:url selectFile:url completionHandler:nil];
+                    }
+                }];
+            }];
 		}
 		else
 		{  
-			[[self connection] changeToDirectory: [[[self connection] currentDirectory] stringByAppendingPathComponent: [self newFolderName]]];
-			[[self connection] directoryContents];      
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [self setDirectoryURL:url selectFile:nil completionHandler:nil];
+            }];
 		}
-		
-		[self setIsLoading: YES];
 	}
 }
 
@@ -263,35 +249,15 @@
 }
 
 #pragma mark ----=accessors=----
-//=========================================================== 
-//  connection 
-//=========================================================== 
-- (id <CKPublishingConnection>)connection
-{
-	//NSLog(@"in -connection, returned connection = %@", connection);
-	
-	return [[_connection retain] autorelease]; 
-}
 
-- (void)setConnection:(id <CKPublishingConnection>)aConnection
+@synthesize session = _session;
+
+@synthesize directoryURL = _directory;
+- (void)setDirectoryURL:(NSURL *)url;
 {
-	//NSLog(@"in -setConnection:, old value of connection: %@, changed to: %@", connection, aConnection);
-	
-	if (aConnection == nil)
-	{
-		//store last directory
-		[lastDirectory autorelease];
-		lastDirectory = [[_connection currentDirectory] copy];
-	}
-	
-	if (_connection != aConnection) {
-		[_connection setDelegate: nil];
-		[_connection forceDisconnect];
-		if ([_connection conformsToProtocol:@protocol(CKConnection)]) [(id <CKConnection>)_connection cleanupConnection];
-		[_connection release];
-		_connection = [aConnection retain];
-		[_connection setDelegate: self];
-	}
+    NSParameterAssert(url);
+    url = [url copy];
+    [_directory release]; _directory = url;
 }
 
 //=========================================================== 
@@ -475,45 +441,7 @@
 	return [[returnValue copy] autorelease]; 
 }
 
-//=========================================================== 
-//  fileNames 
-//=========================================================== 
-- (NSArray *)filenames
-{
-	NSArray *selectedFiles = [directoryContents selectedObjects];
-	
-	if ([selectedFiles count] == 0)
-	{
-		if (!lastDirectory) lastDirectory = [[NSString alloc] initWithString:@""];
-		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: lastDirectory
-																			  forKey: @"path"]];
-	}
-		
-	NSEnumerator *theEnum = [selectedFiles objectEnumerator];
-	NSDictionary* currentItem;
-	NSMutableArray *returnValue = [NSMutableArray array];
-	
-	while (currentItem = [theEnum nextObject])
-	{
-        id<CKPublishingConnection> connection = [self connection];
-        NSString *rootDirectory = [connection rootDirectory];
-        
-		if (rootDirectory &&
-			[[currentItem objectForKey: @"path"] rangeOfString: rootDirectory].location == 0 &&
-			![[currentItem objectForKey: @"path"] isEqualToString: [currentItem objectForKey: @"path"]])
-		{
-			[returnValue addObject: [[currentItem objectForKey: @"path"] substringFromIndex: [rootDirectory length] + 1]];
-		}
-		else
-		{
-			[returnValue addObject: [currentItem objectForKey: @"path"]];  
-		}
-	}
-	
-	return [[returnValue copy] autorelease]; 
-}
-
-//=========================================================== 
+//===========================================================
 //  prompt 
 //=========================================================== 
 - (NSString *)prompt
@@ -555,26 +483,6 @@
 
 
 //=========================================================== 
-//  initialDirectory 
-//=========================================================== 
-- (NSString *)initialDirectory
-{
-	//NSLog(@"in -initialDirectory, returned initialDirectory = %@", initialDirectory);
-	
-	return [[initialDirectory retain] autorelease]; 
-}
-
-- (void)setInitialDirectory:(NSString *)anInitialDirectory
-{
-	//NSLog(@"in -setInitialDirectory:, old value of initialDirectory: %@, changed to: %@", initialDirectory, anInitialDirectory);
-	
-	if (initialDirectory != anInitialDirectory) {
-		[initialDirectory release];
-		initialDirectory = [anInitialDirectory retain];
-	}
-}
-
-//=========================================================== 
 //  newFolderName 
 //=========================================================== 
 - (NSString *)newFolderName
@@ -594,52 +502,6 @@
 	}
 }
 
-//=========================================================== 
-//  delegate 
-//=========================================================== 
-- (id)delegate
-{
-	//NSLog(@"in -delegate, returned delegate = %@", delegate);
-	
-	return [[_delegate retain] autorelease]; 
-}
-
-- (void)setDelegate:(id)aDelegate
-{
-	//NSLog(@"in -setDelegate:, old value of delegate: %@, changed to: %@", delegate, aDelegate);
-	
-	if (_delegate != aDelegate) {
-		_delegate = aDelegate;
-	}
-}
-
-//=========================================================== 
-//  delegateSelector 
-//=========================================================== 
-- (SEL)delegateSelector
-{
-	//NSLog(@"in -delegateSelector, returned delegateSelector = (null)", delegateSelector);
-	
-	return delegateSelector;
-}
-
-- (void)setDelegateSelector:(SEL)aDelegateSelector
-{
-	//NSLog(@"in -setDelegateSelector, old value of delegateSelector: (null), changed to: (null)", delegateSelector, aDelegateSelector);
-	
-	delegateSelector = aDelegateSelector;
-}
-
-- (void)setTimeout:(NSTimeInterval)to
-{
-	timeout = to;
-}
-
-- (NSTimeInterval)timeout
-{
-	return timeout;
-}
-
 - (void)timedOut:(NSTimer *)timer
 {
 	[self closePanel: nil];
@@ -650,51 +512,169 @@
 //=========================================================== 
 - (void)dealloc
 {
-	[timer invalidate];
-	timer = nil;
 	[tableView setDelegate: nil];
-	[self setDelegate:nil];
 	[self setNewFolderName:nil];
-	[self setInitialDirectory:nil];
 	[self setPrompt:nil];
 	[self setAllowedFileTypes:nil];
-	[self setConnection:nil];
-	[lastDirectory release];
+    
+    [_session release];
+    [_directory release];
 	
 	[super dealloc];
 }
 
 #pragma mark ----=running the dialog=----
-- (void)beginSheetForDirectory:(NSString *)path file:(NSString *)name modalForWindow:(NSWindow *)docWindow modalDelegate:(id)modalDelegate didEndSelector:(SEL)didEndSelector contextInfo:(void *)contextInfo
+
+- (void)beginSheetModalForWindow:(NSWindow *)docWindow completionHandler:(void (^)(NSInteger))handler;
 {
-  //force the window to be loaded, to be sure tableView is set
-  //
-  [self window];
-  
+    //force the window to be loaded, to be sure tableView is set
+    //
+    [self window];
+    
 	[directoryContents setAvoidsEmptySelection: ![self canChooseDirectories]];
 	[tableView setAllowsMultipleSelection: [self allowsMultipleSelection]];
 	
-	[self setDelegate: modalDelegate];
-	[self setDelegateSelector: didEndSelector];
 	[self retain];
 	
-	[[NSApplication sharedApplication] beginSheet: [self window]
-                                 modalForWindow: docWindow
-                                  modalDelegate: self
-                                 didEndSelector: @selector(directorySheetDidEnd:returnCode:contextInfo:)
-                                    contextInfo: contextInfo];
-	[self setInitialDirectory: path];
+	[[NSApplication sharedApplication] beginSheet:[self window]
+                                   modalForWindow:docWindow
+                                    modalDelegate:self
+                                   didEndSelector:@selector(directorySheetDidEnd:returnCode:contextInfo:)
+                                      contextInfo:[handler copy]];
+    
 	
 	[self setIsLoading: YES];
-	timer = [NSTimer scheduledTimerWithTimeInterval:timeout
-											 target:self
-										   selector:@selector(timedOut:)
-										   userInfo:nil
-											repeats:NO];
-	[[self connection] connect];
+    
+    [self setDirectoryURL:[self directoryURL] selectFile:nil completionHandler:nil];
 }
 
-- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes
+- (void)setDirectoryURL:(NSURL *)url selectFile:(NSURL *)file completionHandler:(void (^)(NSError *error))block;
+{
+    [[self session] contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles completionHandler:^(NSArray *contents, NSURL *dir, NSError *error) {
+        
+        // An error is most likely the folder not existing, so try loading up the home directory
+        if ([contents count] == 0 && error && [[dir path] length] > 0)
+        {
+            [self setDirectoryURL:[NSURL URLWithString:@"/" relativeToURL:url] selectFile:nil completionHandler:block];
+            return;
+        }
+        
+        
+        [self setDirectoryURL:dir];
+        
+        // Populate the popup button used for navigating back to ancestor directories.
+        NSArray *pathComponents = [[CK2FileTransferSession pathOfURLRelativeToHomeDirectory:dir] pathComponents];
+        
+        [parentDirectories setContent:[[pathComponents reverseObjectEnumerator] allObjects]];   // reverse order to match NSSavePanel etc.
+        [parentDirectories setSelectionIndex:0];
+        
+        
+        // Populate the file list
+        [directoryContents setContent:nil];
+        
+        for (NSURL *aURL in contents)
+        {
+            NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
+            [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
+            
+            NSString *filename = [aURL lastPathComponent];
+            [currentItem setObject:filename forKey:@"fileName"];
+            
+            NSNumber *isSymlink;
+            if ([aURL getResourceValue:&isSymlink forKey:NSURLIsSymbolicLinkKey error:NULL] && [isSymlink boolValue])
+            {
+                //NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
+            }
+            else
+            {
+                isSymlink = nil;
+            }
+            
+            BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)aURL);   // TODO: use proper resource value
+            
+            [currentItem setObject:aURL forKey:@"URL"];
+            
+            BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
+            [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
+            
+            //get the icon
+            NSImage *icon;
+            if (isDirectory)
+            {
+                static NSImage *folder;
+                if (!folder)
+                {
+                    folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
+                    [folder setSize:NSMakeSize(16,16)];
+                }
+                
+                icon = folder;
+            }
+            else if (isSymlink)
+            {
+                static NSImage *symFolder;
+                if (!symFolder)
+                {
+                    NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                    symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
+                    [symFolder setSize:NSMakeSize(16,16)];
+                }
+                static NSImage *symFile;
+                if (!symFile)
+                {
+                    NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                    symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
+                    [symFile setSize:NSMakeSize(16,16)];
+                }
+                
+                NSString *target = nil;//[cur objectForKey:cxSymbolicLinkTargetKey];
+                if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
+                {
+                    icon = symFolder;
+                }
+                else
+                {
+                    NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
+                    NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
+                    [comp lockFocus];
+                    [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                    [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                    [comp unlockFocus];
+                    [comp autorelease];
+                    icon = comp;
+                }
+            }
+            else
+            {
+                NSString *extension = [filename pathExtension];
+                icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
+                [icon setSize:NSMakeSize(16,16)];
+            }
+            
+            if (icon) [currentItem setObject:icon forKey:@"image"];
+            
+            
+            // Select the directory that was just created (if there is one)
+            if ([filename isEqualToString:[file lastPathComponent]]) [directoryContents setSelectsInsertedObjects:YES];
+            
+            // Actually insert the listed item
+            [directoryContents addObject:currentItem];
+            [directoryContents setSelectsInsertedObjects:NO];
+        }
+        
+        
+        // Want the list sorted like the Finder does
+        [directoryContents rearrangeObjects];
+        
+        [self setIsLoading: NO];
+        
+        
+        // Callback
+        if (block) block(error);
+    }];
+}
+
+- (NSInteger)runModal
 {
   //force the window to be loaded, to be sure tableView is set
   //
@@ -707,16 +687,8 @@
 	
 	myKeepRunning = YES;
 	myModalSession = [[NSApplication sharedApplication] beginModalSessionForWindow:[self window]];
-	
-	[self setInitialDirectory: directory];
-	
+		
 	[self setIsLoading: YES];
-	timer = [NSTimer scheduledTimerWithTimeInterval:timeout
-											 target:self
-										   selector:@selector(timedOut:)
-										   userInfo:nil
-											repeats:NO];
-	[[self connection] connect];
 	
 	NSInteger ret;
 	for (;;) {
@@ -733,248 +705,21 @@
 	return ret;
 }
 
-- (void) directorySheetDidEnd:(NSWindow*) inSheet returnCode: (NSInteger)returnCode contextInfo:(void*) contextInfo
+- (void)directorySheetDidEnd:(NSWindow *)inSheet returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
 {
-	if ([[self delegate] respondsToSelector: [self delegateSelector]])
-	{    
-		NSInvocation *callBackInvocation = [NSInvocation invocationWithMethodSignature: [[self delegate] methodSignatureForSelector: [self delegateSelector]]];
-		
-		[callBackInvocation setTarget: [self delegate]];
-		[callBackInvocation setArgument: &self 
-								atIndex: 2];
-		[callBackInvocation setArgument: &returnCode 
-								atIndex: 3];
-		[callBackInvocation setArgument: &contextInfo 
-								atIndex: 4];
-		[callBackInvocation setSelector: [self delegateSelector]];
-		
-		[callBackInvocation retainArguments];
-		[callBackInvocation performSelector:@selector(invoke) withObject:nil afterDelay:0.0];
-	}
+    void (^block)(NSInteger result) = contextInfo;
+    
+    if (block)
+    {
+        block(returnCode);
+        [block release];
+    }
+    
 	[self autorelease];
 }
 
-#pragma mark ----=connection callback=----
-- (BOOL)connection:(id <CKConnection>)con authorizeConnectionToHost:(NSString *)host message:(NSString *)message;
-{
-	[timer invalidate];
-	timer = nil;
-	if (NSRunAlertPanel(@"Authorize Connection?", @"%@", @"Yes", @"No", nil, message) == NSOKButton)
-		return YES;
-	return NO;
-}
-
-- (void)connection:(id <CKPublishingConnection>)aConnection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-	// Hopefully we can pass off responsibility to the delegate
-    id delegate = [self delegate];
-    if (delegate && [delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveAuthenticationChallenge:)])
-    {
-        [delegate connectionOpenPanel:self didReceiveAuthenticationChallenge:challenge];
-    }
-    else
-    {
-        // Fallback to the default credentials if possible
-        NSURLCredential *credential = [challenge proposedCredential];
-        if (credential && [credential user] && [credential hasPassword] && [challenge previousFailureCount] == 0)
-        {
-            [[challenge sender] useCredential:credential forAuthenticationChallenge:challenge];
-        }
-        else
-        {
-            [[challenge sender] continueWithoutCredentialForAuthenticationChallenge:challenge];
-        }
-    }
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didConnectToHost:(NSString *)host error:(NSError *)error
-{
-	[timer invalidate];
-	timer = nil;
-	NSString *dir = [self initialDirectory];
-	if (dir && [dir length] > 0) 
-		[aConn changeToDirectory: dir];
-	[aConn directoryContents];
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didDisconnectFromHost:(NSString *)host
-{
-	NSLog (@"disconnect");
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didReceiveError:(NSError *)error
-{
-	if ([_delegate respondsToSelector:@selector(connectionOpenPanel:didReceiveError:)])
-	{
-		[_delegate connectionOpenPanel:self didReceiveError:error];
-	}
-	else
-	{
-		
-		NSString *informativeText = [error localizedDescription];
-		
-		NSAlert *a = [[NSAlert alloc] init];
-        [a setMessageText:informativeText];
-        [a setInformativeText:LocalizedStringInConnectionKitBundle(@"Please check your settings.", @"ConnectionOpenPanel")];
-        
-		[a runModal];
-        [a release];
-	}
-	
-	if ([[self window] isSheet])
-		[[NSApplication sharedApplication] endSheet:[self window] returnCode: [error code]];
-	else
-		[[NSApplication sharedApplication] stopModalWithCode: [error code]];
-	
-	[self closePanel: nil];
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didCreateDirectory:(NSString *)dirPath error:(NSError *)error
-{
-	[aConn changeToDirectory:dirPath];
-	createdDirectory = [[dirPath lastPathComponent] retain]; 
-	[aConn directoryContents];
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didSetPermissionsForFile:(NSString *)path error:(NSError *)error
-{
-	
-}
-
-- (void)connection:(id<CKPublishingConnection>)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
-{
-    // An error is most likely the folder not existing, so try loading up the home directory
-    if (!contents && error && [dirPath length] > 0)
-    {
-        [aConn changeToDirectory:@""];
-        [aConn directoryContents];
-        return;
-    }
-    
-    
-    // Populate the popup button used for navigating back to ancestor directories.
-    NSArray *pathComponents = [dirPath pathComponents];
-    if ([pathComponents count] > 1 &&
-        [[pathComponents lastObject] isAbsolutePath])   // ignore trailing slash (-isAbsolutePath avoids hardcoding it)
-	{
-        pathComponents = [pathComponents subarrayWithRange:NSMakeRange(0, [pathComponents count] - 1)];
-    }
-    
-    [parentDirectories setContent:[[pathComponents reverseObjectEnumerator] allObjects]];   // reverse order to match NSSavePanel etc.
-	[parentDirectories setSelectionIndex:0];
-    
-	
-    // Populate the file list
-    [directoryContents setContent:nil];
-	
-	for (NSDictionary *cur in [contents filteredArrayByRemovingHiddenFiles])
-	{
-        NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
-        [currentItem setObject:cur forKey:@"allProperties"];
-        [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
-        
-        NSString *filename = [cur objectForKey:cxFilenameKey];
-        [currentItem setObject:filename forKey:@"fileName"];
-        
-        BOOL isSymlink = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeSymbolicLink];
-        if (isSymlink)
-        {
-            NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
-        }
-        
-        BOOL isDirectory = [[cur objectForKey:NSFileType] isEqualToString:NSFileTypeDirectory];
-        
-        BOOL isLeaf = (!isDirectory || (isSymlink && ![[cur objectForKey:cxSymbolicLinkTargetKey] hasSuffix:@"/"]));
-        [currentItem setObject:[NSNumber numberWithBool:isLeaf] forKey:@"isLeaf"];
-        
-        [currentItem setObject:[dirPath stringByAppendingPathComponent:filename] forKey:@"path"];
-        
-        BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
-        [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
-        
-        //get the icon
-        NSImage *icon;
-        if (isDirectory)
-        {
-            static NSImage *folder;
-            if (!folder)
-            {
-                folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
-                [folder setSize:NSMakeSize(16,16)];
-            }
-            
-            icon = folder;
-        }
-        else if (isSymlink)
-        {
-            static NSImage *symFolder;
-            if (!symFolder)
-            {
-                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
-                symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
-                [symFolder setSize:NSMakeSize(16,16)];
-            }
-            static NSImage *symFile;
-            if (!symFile)
-            {
-                NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
-                symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
-                [symFile setSize:NSMakeSize(16,16)];
-            }
-            
-            NSString *target = [cur objectForKey:cxSymbolicLinkTargetKey];
-            if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
-            {
-                icon = symFolder;
-            }
-            else
-            {
-                NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
-                NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
-                [comp lockFocus];
-                [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                [comp unlockFocus];
-                [comp autorelease];
-                icon = comp;
-            }
-        }
-        else
-        {
-            NSString *extension = [filename pathExtension];
-            icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
-            [icon setSize:NSMakeSize(16,16)];
-        }
-        
-        if (icon) [currentItem setObject:icon forKey:@"image"];
-        
-        
-        // Select the directory that was just created (if there is one)
-        if ([filename isEqualToString:createdDirectory]) [directoryContents setSelectsInsertedObjects:YES];
-        
-        // Actually insert the listed item
-        [directoryContents addObject:currentItem];
-        [directoryContents setSelectsInsertedObjects:NO];
-	}
-    
-    
-    // Want the list sorted like the Finder does
-    [directoryContents rearrangeObjects];
-	
-	[self setIsLoading: NO];
-}
-
-/*	Forward on to our delegate if supported
- */
-- (void)connection:(id <CKPublishingConnection>)aConnection appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
-{
-	if ([[self delegate] respondsToSelector:@selector(connectionOpenPanel:appendString:toTranscript:)])
-	{
-		[[self delegate] connectionOpenPanel:self appendString:string toTranscript:transcript];
-	}
-}
-
 #pragma mark ----=NStableView delegate=----
+
 - (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
 	BOOL returnValue = YES;

@@ -35,7 +35,8 @@
 @protocol CKConnection;
 
 #import <Cocoa/Cocoa.h>
-#import "CKConnectionProtocol.h"
+#import "CK2FileTransferSession.h"
+
 
 enum {
 	connectionBadPasswordUserName = -1
@@ -44,7 +45,9 @@ enum {
 
 @interface CKConnectionOpenPanel : NSWindowController 
 {
-	id <CKPublishingConnection> _connection;
+	CK2FileTransferSession  *_session;
+    NSURL                   *_directory;
+    
 	BOOL canChooseDirectories;
 	BOOL canChooseFiles;
 	BOOL canCreateDirectories;
@@ -55,32 +58,26 @@ enum {
 	NSString *prompt;
 	NSString *newFolderName;
 	NSMutableArray *allowedFileTypes;
-	NSString *initialDirectory;
 	IBOutlet NSArrayController *directoryContents;
 	IBOutlet NSArrayController *parentDirectories;
 	IBOutlet NSWindow *createFolder;
 	IBOutlet NSTableView *tableView;
     IBOutlet NSButton *openButton;
     IBOutlet NSButton *openCancelButton;
-	id _delegate;
-	SEL delegateSelector;
 	BOOL isSelectionValid;
-	NSTimeInterval timeout;
-	NSTimer *timer;
-	NSString *createdDirectory;
 	NSModalSession myModalSession;
 	BOOL myKeepRunning;
-	NSString *lastDirectory;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request;
+- (id)initWithFileTransferSession:(CK2FileTransferSession *)session directoryURL:(NSURL *)url;
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
 - (IBAction) goToFolder: (id) sender;
 - (IBAction) createNewFolder: (id) sender;
 
-- (id <CKPublishingConnection>)connection;
+@property(nonatomic, readonly) CK2FileTransferSession *session;
+@property(nonatomic, copy) NSURL *directoryURL;
 
 - (BOOL)canChooseDirectories;
 - (void)setCanChooseDirectories:(BOOL)flag;
@@ -104,59 +101,17 @@ enum {
 - (void)setIsLoading:(BOOL)flag;
 
 - (NSArray *)URLs;
-- (NSArray *)filenames;
 - (NSString *)prompt;
 - (void)setPrompt:(NSString *)aPrompt;
 - (NSMutableArray *)allowedFileTypes;
 - (void)setAllowedFileTypes:(NSMutableArray *)anAllowedFileTypes;
-- (NSString *)initialDirectory;
-- (void)setInitialDirectory:(NSString *)anInitialDirectory;
 - (NSString *)newFolderName;
 - (void)setNewFolderName:(NSString *)aNewFolderName;
-- (id)delegate;
-- (void)setDelegate:(id)aDelegate;
-- (SEL)delegateSelector;
-- (void)setDelegateSelector:(SEL)aDelegateSelector;
 - (BOOL)isSelectionValid;
 - (void)setIsSelectionValid:(BOOL)flag;
 
-- (void)setTimeout:(NSTimeInterval)to;
-- (NSTimeInterval)timeout;
+- (void)beginSheetModalForWindow:(NSWindow *)docWindow completionHandler:(void (^)(NSInteger))handler;
+- (NSInteger)runModal;
 
-- (void)beginSheetForDirectory:(NSString *)path 
-						  file:(NSString *)name 
-				modalForWindow:(NSWindow *)docWindow 
-				 modalDelegate:(id)modalDelegate 
-				didEndSelector:(SEL)didEndSelector 
-                   contextInfo:(void *)contextInfo;
-- (NSInteger)runModalForDirectory:(NSString *)directory file:(NSString *)filename types:(NSArray *)fileTypes;
-
-@end
-
-
-@interface NSObject (CKConnectionOpenPanelDelegate)
-
-/*!
- @method connectionOpenPanel:didReceiveAuthenticationChallenge:
- @abstract Sent when the connection panel must authenticate a challenge in order to browse the connection.
- @discussion Operates just like the CKConnection delegate method -connection:didReceiveAuthenticationChallenge:
- See that for full documentation.
- @param panel The connection panel object sending the message.
- @param challenge The authentication challenge that must be authenticated in order to make the connection.
- */
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-
-/*!
- @method connection:didCancelAuthenticationChallenge:
- @abstract Operates exactly the same as its NSURLConnection counterpart.
- @param panel The panel sending the message.
- @param challenge The challenge that was canceled.
- */
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didCancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-
-
-// Do the same as their CKConnection counterparts
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel didReceiveError:(NSError *)error;
-- (void)connectionOpenPanel:(CKConnectionOpenPanel *)panel appendString:(NSString *)string toTranscript:(CKTranscriptType)transcript;
 @end
 

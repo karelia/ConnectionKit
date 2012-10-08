@@ -33,10 +33,14 @@
                          options:(NSDirectoryEnumerationOptions)mask    // none supported just yet
                completionHandler:(void (^)(NSArray *contents, NSURL *dir, NSError *error))block;   // directory URL tries to resolve relative paths
 
+// More advanced version of directory listing
+//  * listing results are delivered as they arrive over the wire, if possible
+//  * FIRST result is the directory itself, with relative path resolved if possible
+//  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
 - (void)enumerateContentsOfURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
-                       options:(NSDirectoryEnumerationOptions)mask  // none supported just yet
-                    usingBlock:(void (^)(NSURL *aURL, NSURL *dir))block  // aURL is nil for empty directories. dir tries to resolve relative paths
+                       options:(NSDirectoryEnumerationOptions)mask
+                    usingBlock:(void (^)(NSURL *url))block
              completionHandler:(void (^)(NSError *error))completionBlock;
 
 

@@ -193,10 +193,16 @@ createIntermediateDirectories:(BOOL)createIntermediates
     NSMutableArray *contents = [[NSMutableArray alloc] init];
     __block NSURL *resolved = nil;
     
-    [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:mask usingBlock:^(NSURL *aURL, NSURL *dir) {
+    [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
-        [contents addObject:aURL];
-        if (!resolved) resolved = [dir copy];
+        if (resolved)
+        {
+            [contents addObject:aURL];
+        }
+        else
+        {
+            resolved = [aURL copy];
+        }
         
     } completionHandler:^(NSError *error) {
         
@@ -206,7 +212,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     }];
 }
 
-- (void)enumerateContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask usingBlock:(void (^)(NSURL *, NSURL *))block completionHandler:(void (^)(NSError *))completionBlock;
+- (void)enumerateContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask usingBlock:(void (^)(NSURL *))block completionHandler:(void (^)(NSError *))completionBlock;
 {
     NSParameterAssert(url);
     
@@ -224,6 +230,11 @@ createIntermediateDirectories:(BOOL)createIntermediates
         }
         else
         {
+            // Report directory itself
+            // TODO: actually resolve it
+            block(url);
+            
+            
             // Process the data to make a directory listing
             while (1)
             {
@@ -240,7 +251,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                     {
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
                         
-                        block([url URLByAppendingPathComponent:name], url); // TODO: resolve url if relative
+                        block([url URLByAppendingPathComponent:name]); // TODO: resolve url if relative
                         CFRelease(parsedDict);
                     }
                     
