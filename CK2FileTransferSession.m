@@ -503,7 +503,23 @@ createIntermediateDirectories:(BOOL)createIntermediates
     }
     else
     {
-        
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
+            NSFileManager *manager = [[NSFileManager alloc] init];
+            
+            NSError *error;
+            if ([manager removeItemAtURL:url error:&error])
+            {
+                error = nil;
+            }
+            else if (!error)
+            {
+                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
+            }
+            
+            handler(error);
+            [manager release];
+        });
     }
 }
 
