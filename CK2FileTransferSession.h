@@ -31,7 +31,7 @@
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
                          options:(NSDirectoryEnumerationOptions)mask    // none supported just yet
-               completionHandler:(void (^)(NSArray *contents, NSURL *dir, NSError *error))block;   // directory URL tries to resolve relative paths
+               completionHandler:(void (^)(NSArray *contents, NSError *error))block;
 
 // More advanced version of directory listing
 //  * listing results are delivered as they arrive over the wire, if possible

@@ -569,7 +569,22 @@
 {
     [self setIsLoading: YES];
     
-    [[self session] contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:NSDirectoryEnumerationSkipsHiddenFiles completionHandler:^(NSArray *contents, NSURL *dir, NSError *error) {
+    NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsHiddenFiles|NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+    NSMutableArray *contents = [[NSMutableArray alloc] init];
+    
+    [[self session] enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
+        
+        [contents addObject:url];
+        
+    } completionHandler:^(NSError *error) {
+        
+        // Quick faff to separate out directory URL and real contents
+        NSURL *dir = nil;
+        if ([contents count] > 0)
+        {
+            dir = [[[contents objectAtIndex:0] copy] autorelease];
+            [contents removeObjectAtIndex:0];
+        }
         
         // An error is most likely the folder not existing, so try loading up the home directory
         if ([contents count] == 0 && error && [[dir path] length] > 0)

@@ -197,10 +197,10 @@ createIntermediateDirectories:(BOOL)createIntermediates
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
                          options:(NSDirectoryEnumerationOptions)mask
-               completionHandler:(void (^)(NSArray *, NSURL *, NSError *))block;
+               completionHandler:(void (^)(NSArray *, NSError *))block;
 {
     NSMutableArray *contents = [[NSMutableArray alloc] init];
-    __block NSURL *resolved = nil;
+    __block BOOL resolved = NO;
     
     [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
@@ -210,14 +210,13 @@ createIntermediateDirectories:(BOOL)createIntermediates
         }
         else
         {
-            resolved = [aURL copy];
+            resolved = YES;
         }
         
     } completionHandler:^(NSError *error) {
         
-        block(contents, resolved, error);
+        block(contents, error);
         [contents release];
-        [resolved release];
     }];
 }
 
