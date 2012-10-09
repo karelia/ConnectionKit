@@ -238,11 +238,18 @@
 
 - (void)createDirectoryAtPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
 {
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_createDirectoryAtPath:permissions:)
-                                                             target:self
-                                                          arguments:[NSArray arrayWithObjects:path, permissions, nil]];
+    path = [self canonicalPathForPath:path];
     
-    NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:
+                                [self methodSignatureForSelector:@selector(threaded_createDirectoryAtPath:permissions:)]];
+    [invocation setTarget:self];
+    [invocation setSelector:@selector(threaded_createDirectoryAtPath:permissions:)];
+    [invocation setArgument:&path atIndex:2];
+    [invocation setArgument:&permissions atIndex:3];
+    [invocation retainArguments];
+    
+    NSOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+    
     [self enqueueOperation:op];
     [op release];
 }
@@ -314,16 +321,71 @@
     [proxy release];
 }
 
-- (void)directoryContents
-{ 
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_directoryContents:) object:[self currentDirectory]];
+- (void) deleteDirectory:(NSString *)path
+{
+    path = [self canonicalPathForPath:path];
+    
+    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_removeDirectoryAtPath:) object:path];
     [self enqueueOperation:op];
     [op release];
+}
+
+- (void)threaded_removeDirectoryAtPath:(NSString *)path
+{
+    NSError *error;
+    BOOL result = [_session removeDirectoryAtPath:path error:&error];
+    if (result) error = nil;
+
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self didDeleteDirectory:path error:error];
+    [proxy release];
+}
+
+- (void)rename:(NSString *)fromPath to:(NSString *)toPath
+{
+    fromPath = [self canonicalPathForPath:fromPath];
+    toPath = [self canonicalPathForPath:toPath];
+    
+    NSInvocation *invocation = [NSInvocation invocationWithMethodSignature:
+                                [self methodSignatureForSelector:@selector(threaded_rename:to:)]];
+    [invocation setTarget:self];
+    [invocation setSelector:@selector(threaded_rename:to:)];
+    [invocation setArgument:&fromPath atIndex:2];
+    [invocation setArgument:&toPath atIndex:3];
+    [invocation retainArguments];
+    
+    NSOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
+    [self enqueueOperation:op];
+    [op release];
+}
+
+- (void)threaded_rename:(NSString *)fromPath to:(NSString *)toPath
+{
+    NSError *error;
+
+    BOOL result = [_session renameItem:fromPath toPath:toPath error:&error];
+    if (result) error = nil;
+    
+    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+    [proxy connection:self didRename:fromPath to:toPath error:error];
+    [proxy release];
+}
+
+
+- (void) contentsOfDirectory:(NSString *)directory {
+    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_directoryContents:) object:directory];
+    [self enqueueOperation:op];
+    [op release];
+
+}
+
+- (void)directoryContents
+{
+    [self contentsOfDirectory:[self currentDirectory]];
 }
 - (void)threaded_directoryContents:(NSString *)path;
 {
     NSMutableArray *result = [[NSMutableArray alloc] init];
-    
     NSError *error;
     BOOL success = [_session enumerateContentsOfDirectoryAtPath:path error:&error usingBlock:^(NSDictionary *parsedResourceListing) {
         
@@ -351,12 +413,20 @@
                 break;
         }
         
-        NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
-                                    type, NSFileType,
-                                    nil];
-        [result addObject:attributes];
-        [attributes release];
+        // Do not add . and .. entries
+        if (![[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName] isEqualToString:@"."]
+            && ![[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName] isEqualToString:@".."]) {
+            NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
+                                        type, NSFileType,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceModDate], NSFileModificationDate,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceMode], NSFilePosixPermissions,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceSize], NSFileSize,
+                                        nil];
+            [result addObject:attributes];
+            [attributes release];
+        }
+        
     }];
     
     if (success)
@@ -406,11 +476,13 @@
 
 - (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
 {
-    if (![self delegate]) return;
+    // Contents commented because of an error thrown when deleting a directory. Had no time to debug, don't need this debug information right now.
     
-    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
-    [proxy connection:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
-    [proxy release];
+//    if (![self delegate]) return;
+    
+//    id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
+//    [proxy connection:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+//    [proxy release];
 }
 
 @end
