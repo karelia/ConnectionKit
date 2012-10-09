@@ -174,12 +174,12 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     return result;
 }
 
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
-    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path openingPosixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
     NSParameterAssert(data);
     
@@ -220,6 +220,16 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     
     [self enqueueOperation:request];
     [request release];
+}
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+{
+    // Basically ignore it
+    id delegate = [self delegate];
+    if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+    {
+        [delegate connection:self didSetPermissionsForFile:path error:nil];
+    }
 }
 
 - (void)deleteFile:(NSString *)path
