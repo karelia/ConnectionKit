@@ -30,7 +30,7 @@
 
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
-                         options:(NSDirectoryEnumerationOptions)mask    // none supported just yet
+                         options:(NSDirectoryEnumerationOptions)mask
                completionHandler:(void (^)(NSArray *contents, NSError *error))block;
 
 // More advanced version of directory listing
