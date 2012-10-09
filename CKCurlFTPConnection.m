@@ -381,9 +381,7 @@
 
 - (void)directoryContents
 {
-    NSOperation *op = [[NSInvocationOperation alloc] initWithTarget:self selector:@selector(threaded_directoryContents:) object:[self currentDirectory]];
-    [self enqueueOperation:op];
-    [op release];
+    [self contentsOfDirectory:[self currentDirectory]];
 }
 - (void)threaded_directoryContents:(NSString *)path;
 {
@@ -414,15 +412,21 @@
                 type = NSFileTypeSocket;
                 break;
         }
-        NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
-                                    type, NSFileType,
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceModDate], NSFileModificationDate,
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceMode], NSFilePosixPermissions,
-                                    [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceSize], NSFileSize,
-                                    nil];
-        [result addObject:attributes];
-        [attributes release];
+        
+        // Do not add . and .. entries
+        if (![[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName] isEqualToString:@"."]
+            && ![[parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName] isEqualToString:@".."]) {
+            NSDictionary *attributes = [[NSDictionary alloc] initWithObjectsAndKeys:
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceName], cxFilenameKey,
+                                        type, NSFileType,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceModDate], NSFileModificationDate,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceMode], NSFilePosixPermissions,
+                                        [parsedResourceListing objectForKey:(NSString *)kCFFTPResourceSize], NSFileSize,
+                                        nil];
+            [result addObject:attributes];
+            [attributes release];
+        }
+        
     }];
     
     if (success)
