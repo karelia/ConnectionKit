@@ -228,6 +228,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     if ([url ck2_isFTPURL])
     {
         NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:YES];
+        url = [request URL];    // ensures it's a directory URL
         
         NSMutableData *totalData = [[NSMutableData alloc] init];
         
@@ -242,8 +243,19 @@ createIntermediateDirectories:(BOOL)createIntermediates
             else
             {
                 // Report directory itself
-                // TODO: actually resolve it
-                block(url);
+                NSURL *resolved = url;
+                NSString *path = [[self class] pathOfURLRelativeToHomeDirectory:url];
+                if (![path isAbsolutePath])
+                {
+                    NSString *home = [handle initialFTPPath];
+                    if ([home isAbsolutePath])
+                    {
+                        resolved = [[self class] URLWithPath:home relativeToURL:url];
+                        resolved = [resolved URLByAppendingPathComponent:path];
+                    }
+                }
+                
+                block(resolved);
                 
                 
                 // Process the data to make a directory listing
@@ -266,7 +278,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                                 BOOL isDirectory = [type intValue] == DT_DIR;
                                 
-                                block([url URLByAppendingPathComponent:name isDirectory:isDirectory]);
+                                block([resolved URLByAppendingPathComponent:name isDirectory:isDirectory]);
                             }
                             
                             CFRelease(parsedDict);
