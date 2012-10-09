@@ -253,13 +253,21 @@
     
     NSMutableArray *componentCells = [[pathControl pathComponentCells] mutableCopy];
     
+    
     // Add in cell for root/home
+    NSString *path = [CK2FileTransferSession pathOfURLRelativeToHomeDirectory:url];
+    
+    NSURL *rootURL = ([path isAbsolutePath] ?
+                      [CK2FileTransferSession URLWithPath:@"/" relativeToURL:url] :
+                      [CK2FileTransferSession URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"/" relativeToURL:url]]);
+    
     NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
-    NSURL *rootURL = ([componentCells count] > 0 ? [[[componentCells objectAtIndex:0] URL] URLByDeletingLastPathComponent] : url);
     [rootCell setURL:rootURL];
     [componentCells insertObject:rootCell atIndex:0];
     [rootCell release];
     
+    
+    // Fill in icons
     NSImage *folderIcon = [[NSWorkspace sharedWorkspace] iconForFileType:(NSString *)kUTTypeFolder];
     
     for (NSPathComponentCell *aCell in componentCells)
