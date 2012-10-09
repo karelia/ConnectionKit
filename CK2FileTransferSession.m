@@ -276,8 +276,105 @@ createIntermediateDirectories:(BOOL)createIntermediates
                             {
                                 NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                                 BOOL isDirectory = [type intValue] == DT_DIR;
+                                NSURL *aURL = [resolved URLByAppendingPathComponent:name isDirectory:isDirectory];
                                 
-                                block([resolved URLByAppendingPathComponent:name isDirectory:isDirectory]);
+                                // Fill in requested keys as best we can
+                                for (NSString *aKey in keys)
+                                {
+                                    if ([aKey isEqualToString:NSURLContentModificationDateKey])
+                                    {
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL,
+                                                                                (CFStringRef)aKey,
+                                                                                CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate));
+                                    }
+                                    else if ([aKey isEqualToString:NSURLEffectiveIconKey])
+                                    {
+                                        // Not supported yet but could be
+                                    }
+                                    else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
+                                    {
+                                        NSString *typeValue;
+                                        switch ([type integerValue])
+                                        {
+                                            case DT_CHR:
+                                                typeValue = NSURLFileResourceTypeCharacterSpecial;
+                                                break;
+                                            case DT_DIR:
+                                                typeValue = NSURLFileResourceTypeDirectory;
+                                                break;
+                                            case DT_BLK:
+                                                typeValue = NSURLFileResourceTypeBlockSpecial;
+                                                break;
+                                            case DT_REG:
+                                                typeValue = NSURLFileResourceTypeRegular;
+                                                break;
+                                            case DT_LNK:
+                                                typeValue = NSURLFileResourceTypeSymbolicLink;
+                                                break;
+                                            case DT_SOCK:
+                                                typeValue = NSURLFileResourceTypeSocket;
+                                                break;
+                                            default:
+                                                typeValue = NSURLFileResourceTypeUnknown;
+                                        }
+                                        
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, typeValue);
+                                    }
+                                    else if ([aKey isEqualToString:NSURLFileSecurityKey])
+                                    {
+                                        // Not supported yet but could be
+                                    }
+                                    else if ([aKey isEqualToString:NSURLHasHiddenExtensionKey])
+                                    {
+                                        // Could fake it?
+                                    }
+                                    else if ([aKey isEqualToString:NSURLIsDirectoryKey])
+                                    {
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @(isDirectory));
+                                    }
+                                    else if ([aKey isEqualToString:NSURLIsHiddenKey])
+                                    {
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([name hasPrefix:@"."]));
+                                    }
+                                    else if ([aKey isEqualToString:NSURLIsPackageKey])
+                                    {
+                                        // Could guess based on extension
+                                    }
+                                    else if ([aKey isEqualToString:NSURLIsRegularFileKey])
+                                    {
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([type intValue] == DT_REG));
+                                    }
+                                    else if ([aKey isEqualToString:NSURLIsSymbolicLinkKey])
+                                    {
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([type intValue] == DT_LNK));
+                                    }
+                                    else if ([aKey isEqualToString:NSURLLocalizedNameKey])
+                                    {
+                                        // Strip off extensions? Return last path component?
+                                    }
+                                    else if ([aKey isEqualToString:NSURLLocalizedTypeDescriptionKey])
+                                    {
+                                        // Could guess from extension
+                                    }
+                                    else if ([aKey isEqualToString:NSURLNameKey])
+                                    {
+                                        // Return last path component?
+                                    }
+                                    else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
+                                    {
+                                        // Can derive by deleting last path component. Always true though?
+                                    }
+                                    else if ([aKey isEqualToString:NSURLPathKey])
+                                    {
+                                        // Could do via our +pathOfURLRelativeToHomeDirectory: routine
+                                    }
+                                    else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
+                                    {
+                                        // Could guess from extension
+                                    }
+                                }
+                                
+                                block(aURL);
                             }
                             
                             CFRelease(parsedDict);
