@@ -252,6 +252,12 @@
     [pathControl setURL:url];
     
     NSMutableArray *componentCells = [[pathControl pathComponentCells] mutableCopy];
+    NSImage *folderIcon = [NSImage imageNamed:NSImageNameFolder];
+    
+    for (NSPathComponentCell *aCell in componentCells)
+    {
+        [aCell setImage:folderIcon];
+    }
     
     
     // Add in cell for root/home
@@ -263,23 +269,15 @@
     
     NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
     [rootCell setURL:rootURL];
+    [rootCell setImage:[NSImage imageNamed:NSImageNameNetwork]];    // TODO: Ideally, this would be OS X's icon of a blue disk, but I don't know how
     [componentCells insertObject:rootCell atIndex:0];
     [rootCell release];
-    
-    
-    // Fill in icons
-    NSImage *folderIcon = [[NSWorkspace sharedWorkspace] iconForFileType:(NSString *)kUTTypeFolder];
-    
-    for (NSPathComponentCell *aCell in componentCells)
-    {
-        [aCell setImage:folderIcon];
-    }
     
     [pathControl setPathComponentCells:componentCells];
     [componentCells release];
 }
 
-//=========================================================== 
+//===========================================================
 //  canChooseDirectories 
 //=========================================================== 
 - (BOOL)canChooseDirectories
