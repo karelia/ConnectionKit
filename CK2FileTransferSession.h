@@ -68,6 +68,10 @@
 
 
 #pragma mark URLs
+// These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
+//  http://example.com/relative/path
+//  ftp://example.com/relative/path
+//  ssh://example.com/~/relative/path
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 
