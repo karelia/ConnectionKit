@@ -427,11 +427,9 @@
 		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: [[self connection] currentDirectory]
 																			  forKey: @"filePath"]];
 	
-	NSEnumerator *theEnum = [selectedFiles objectEnumerator];
-	NSDictionary* currentItem;
 	NSMutableArray *returnValue = [NSMutableArray array];
 	
-	while (currentItem = [theEnum nextObject])
+	for (NSDictionary *currentItem in selectedFiles)
 	{ 
 		NSString *pathToAdd = [currentItem objectForKey: @"filePath"];
 		
