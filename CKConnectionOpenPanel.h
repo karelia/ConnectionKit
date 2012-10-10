@@ -48,16 +48,18 @@ enum {
 	CK2FileTransferSession  *_session;
     NSURL                   *_directory;
     
-	BOOL canChooseDirectories;
-	BOOL canChooseFiles;
-	BOOL canCreateDirectories;
-    BOOL shouldDisplayOpenButton;
-    BOOL shouldDisplayOpenCancelButton;
-	BOOL allowsMultipleSelection;
+    // Basic settings
+	BOOL        _canChooseDirectories;
+	BOOL        _canChooseFiles;
+	BOOL        _canCreateDirectories;
+    BOOL        _shouldDisplayOpenButton;
+    BOOL        _shouldDisplayOpenCancelButton;
+	BOOL        _allowsMultipleSelection;
+	NSString    *_prompt;
+	NSArray     *_allowedFileTypes;
+    
 	BOOL isLoading;
-	NSString *prompt;
 	NSString *newFolderName;
-	NSMutableArray *allowedFileTypes;
 	IBOutlet NSArrayController *directoryContents;
     IBOutlet NSPathControl  *pathControl;
 	IBOutlet NSWindow *createFolder;
@@ -79,31 +81,18 @@ enum {
 @property(nonatomic, readonly) CK2FileTransferSession *session;
 @property(nonatomic, copy) NSURL *directoryURL;
 
-- (BOOL)canChooseDirectories;
-- (void)setCanChooseDirectories:(BOOL)flag;
-
-- (BOOL)canChooseFiles;
-- (void)setCanChooseFiles:(BOOL)flag;
-
-- (BOOL)canCreateDirectories;
-- (void)setCanCreateDirectories:(BOOL)flag;
-
-- (BOOL)shouldDisplayOpenButton;
-- (void)setShouldDisplayOpenButton:(BOOL)flag;
-
-- (BOOL)shouldDisplayOpenCancelButton;
-- (void)setShouldDisplayOpenCancelButton:(BOOL)flag;
-
-- (BOOL)allowsMultipleSelection;
-- (void)setAllowsMultipleSelection:(BOOL)flag;
+@property(nonatomic) BOOL canChooseDirectories;
+@property(nonatomic) BOOL canChooseFiles;
+@property(nonatomic) BOOL canCreateDirectories;
+@property(nonatomic) BOOL shouldDisplayOpenButton;
+@property(nonatomic) BOOL shouldDisplayOpenCancelButton;
+@property(nonatomic) BOOL allowsMultipleSelection;
+@property(nonatomic, copy) NSString *prompt;
+@property(nonatomic, copy) NSArray *allowedFileTypes;
 
 - (BOOL)isLoading;
 
 - (NSArray *)URLs;
-- (NSString *)prompt;
-- (void)setPrompt:(NSString *)aPrompt;
-- (NSMutableArray *)allowedFileTypes;
-- (void)setAllowedFileTypes:(NSMutableArray *)anAllowedFileTypes;
 - (NSString *)newFolderName;
 - (void)setNewFolderName:(NSString *)aNewFolderName;
 - (BOOL)isSelectionValid;

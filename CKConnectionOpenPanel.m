@@ -48,8 +48,8 @@
 		_session = [session retain];
         [self setDirectoryURL:url];
         
-        shouldDisplayOpenButton = YES;
-        shouldDisplayOpenCancelButton = YES;
+        _shouldDisplayOpenButton = YES;
+        _shouldDisplayOpenCancelButton = YES;
         [self setAllowsMultipleSelection: NO];
         [self setCanChooseFiles: YES];
         [self setCanChooseDirectories: YES];
@@ -62,10 +62,10 @@
 	return self;
 }
 
-- (void) awakeFromNib
+- (void)awakeFromNib
 {
-	[openButton setHidden:!shouldDisplayOpenButton];
-    [openCancelButton setHidden:!shouldDisplayOpenCancelButton];
+	[openButton setHidden:![self shouldDisplayOpenButton]];
+    [openCancelButton setHidden:![self shouldDisplayOpenCancelButton]];
     
     // Sort directories like the Finder
     if ([NSString instancesRespondToSelector:@selector(localizedStandardCompare:)])
@@ -280,107 +280,15 @@
     [componentCells release];
 }
 
-//===========================================================
-//  canChooseDirectories 
-//=========================================================== 
-- (BOOL)canChooseDirectories
-{
-	//NSLog(@"in -canChooseDirectories, returned canChooseDirectories = %@", canChooseDirectories ? @"YES": @"NO" );
-	
-	return canChooseDirectories;
-}
+@synthesize canChooseDirectories = _canChooseDirectories;
+@synthesize canChooseFiles = _canChooseFiles;
+@synthesize canCreateDirectories = _canCreateDirectories;
+@synthesize shouldDisplayOpenButton = _shouldDisplayOpenButton;
+@synthesize shouldDisplayOpenCancelButton = _shouldDisplayOpenCancelButton;
+@synthesize allowsMultipleSelection = _allowsMultipleSelection;
+@synthesize prompt = _prompt;
+@synthesize allowedFileTypes = _allowedFileTypes;
 
-- (void)setCanChooseDirectories:(BOOL)flag
-{
-	//NSLog(@"in -setCanChooseDirectories, old value of canChooseDirectories: %@, changed to: %@", (canChooseDirectories ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	canChooseDirectories = flag;
-}
-
-//=========================================================== 
-//  canChooseFiles 
-//=========================================================== 
-- (BOOL)canChooseFiles
-{
-	//NSLog(@"in -canChooseFiles, returned canChooseFiles = %@", canChooseFiles ? @"YES": @"NO" );
-	
-	return canChooseFiles;
-}
-
-- (void)setCanChooseFiles:(BOOL)flag
-{
-	//NSLog(@"in -setCanChooseFiles, old value of canChooseFiles: %@, changed to: %@", (canChooseFiles ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	canChooseFiles = flag;
-}
-
-//=========================================================== 
-//  canCreateDirectories 
-//=========================================================== 
-- (BOOL)canCreateDirectories
-{
-	//NSLog(@"in -canCreateDirectories, returned canCreateDirectories = %@", canCreateDirectories ? @"YES": @"NO" );
-	
-	return canCreateDirectories;
-}
-
-- (void)setCanCreateDirectories:(BOOL)flag
-{
-	//NSLog(@"in -setCanCreateDirectories, old value of canCreateDirectories: %@, changed to: %@", (canCreateDirectories ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	canCreateDirectories = flag;
-}
-
-//=========================================================== 
-//  shouldDisplayOpenButton 
-//=========================================================== 
-- (BOOL)shouldDisplayOpenButton
-{
-	//NSLog(@"in -shouldDisplayOpenButton, returned shouldDisplayOpenButton = %@", shouldDisplayOpenButton ? @"YES": @"NO" );
-	
-	return shouldDisplayOpenButton;
-}
-
-- (void)setShouldDisplayOpenButton:(BOOL)flag
-{
-	//NSLog(@"in -setShouldDisplayOpenButton, old value of shouldDisplayOpenButton: %@, changed to: %@", (shouldDisplayOpenButton ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	shouldDisplayOpenButton = flag;
-}
-
-//=========================================================== 
-//  shouldDisplayOpenCancelButton 
-//=========================================================== 
-- (BOOL)shouldDisplayOpenCancelButton
-{
-	//NSLog(@"in -shouldDisplayOpenCancelButton, returned shouldDisplayOpenCancelButton = %@", shouldDisplayOpenCancelButton ? @"YES": @"NO" );
-	
-	return shouldDisplayOpenCancelButton;
-}
-
-- (void)setShouldDisplayOpenCancelButton:(BOOL)flag
-{
-	//NSLog(@"in -setShouldDisplayOpenCancelButton, old value of shouldDisplayOpenCancelButton: %@, changed to: %@", (shouldDisplayOpenCancelButton ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	shouldDisplayOpenCancelButton = flag;
-}
-
-//=========================================================== 
-//  allowsMultipleSelection 
-//=========================================================== 
-- (BOOL)allowsMultipleSelection
-{
-	//NSLog(@"in -allowsMultipleSelection, returned allowsMultipleSelection = %@", allowsMultipleSelection ? @"YES": @"NO" );
-	
-	return allowsMultipleSelection;
-}
-
-- (void)setAllowsMultipleSelection:(BOOL)flag
-{
-	//NSLog(@"in -setAllowsMultipleSelection, old value of allowsMultipleSelection: %@, changed to: %@", (allowsMultipleSelection ? @"YES": @"NO"), (flag ? @"YES": @"NO") );
-	
-	allowsMultipleSelection = flag;
-}
 
 //=========================================================== 
 //  isSelectionValid 
@@ -432,47 +340,6 @@
         return [NSArray arrayWithObject:[self directoryURL]];
     }
 }
-
-//===========================================================
-//  prompt 
-//=========================================================== 
-- (NSString *)prompt
-{
-	//NSLog(@"in -prompt, returned prompt = %@", prompt);
-	
-	return [[prompt retain] autorelease]; 
-}
-
-- (void)setPrompt:(NSString *)aPrompt
-{
-	//NSLog(@"in -setPrompt:, old value of prompt: %@, changed to: %@", prompt, aPrompt);
-	
-	if (prompt != aPrompt) {
-		[prompt release];
-		prompt = [aPrompt retain];
-	}
-}
-
-//=========================================================== 
-//  allowedFileTypes 
-//=========================================================== 
-- (NSMutableArray *)allowedFileTypes
-{
-	//NSLog(@"in -allowedFileTypes, returned allowedFileTypes = %@", allowedFileTypes);
-	
-	return [[allowedFileTypes retain] autorelease]; 
-}
-
-- (void)setAllowedFileTypes:(NSMutableArray *)anAllowedFileTypes
-{
-	//NSLog(@"in -setAllowedFileTypes:, old value of allowedFileTypes: %@, changed to: %@", allowedFileTypes, anAllowedFileTypes);
-	
-	if (allowedFileTypes != anAllowedFileTypes) {
-		[allowedFileTypes release];
-		allowedFileTypes = [anAllowedFileTypes retain];
-	}
-}
-
 
 //=========================================================== 
 //  newFolderName 
