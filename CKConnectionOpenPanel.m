@@ -269,7 +269,7 @@
     
     NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
     [rootCell setURL:rootURL];
-    [rootCell setImage:[NSImage imageNamed:NSImageNameNetwork]];    // TODO: Ideally, this would be OS X's icon of a blue disk, but I don't know how
+    [rootCell setImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFileServerIcon)]];
     [componentCells insertObject:rootCell atIndex:0];
     [rootCell release];
     
