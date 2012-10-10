@@ -422,41 +422,15 @@
 - (NSArray *)URLs
 {
 	NSArray *selectedFiles = [directoryContents selectedObjects];
-	
-	if (![selectedFiles count])
-		selectedFiles = [NSArray arrayWithObject: [NSDictionary dictionaryWithObject: [[self connection] currentDirectory]
-																			  forKey: @"filePath"]];
-	
-	NSMutableArray *returnValue = [NSMutableArray array];
-	
-	for (NSDictionary *currentItem in selectedFiles)
-	{ 
-		NSString *pathToAdd = [currentItem objectForKey: @"filePath"];
-		
-		//check that we are past the root directory
-		//
-        id<CKPublishingConnection> connection = [self connection];
-        NSString *rootDirectory = [connection rootDirectory];
-		if (([pathToAdd rangeOfString: rootDirectory].location == 0) &&
-			(![pathToAdd isEqualToString: rootDirectory]))
-			[returnValue addObject: [pathToAdd substringFromIndex: [rootDirectory length] + 1]];
-		else if ([pathToAdd isEqualToString: rootDirectory])
-			[returnValue addObject: @""];
-		else  //we have up back to before the root directory path needs ../ added
-		{
-			NSString *pathPrefix = @"";
-			while ([pathToAdd rangeOfString: rootDirectory].location == NSNotFound)
-			{
-				pathPrefix = [pathPrefix stringByAppendingPathComponent: @"../"];
-				rootDirectory = [rootDirectory stringByDeletingLastPathComponent];
-			}
-			pathToAdd = [pathPrefix stringByAppendingPathComponent: pathToAdd];
-			
-			[returnValue addObject:[NSURL URLWithString:pathToAdd relativeToURL:[[connection request] URL]]];
-		}
-	}
-	
-	return [[returnValue copy] autorelease]; 
+    
+	if ([selectedFiles count])
+    {
+        return [selectedFiles valueForKey:@"URL"];
+    }
+    else
+    {
+        return [NSArray arrayWithObject:[self directoryURL]];
+    }
 }
 
 //===========================================================
