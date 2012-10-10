@@ -269,7 +269,10 @@
     
     NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
     [rootCell setURL:rootURL];
-    [rootCell setImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFileServerIcon)]];
+    
+    NSString *type = NSFileTypeForHFSTypeCode([path isAbsolutePath] ? kGenericFileServerIcon : kUserFolderIcon);
+    [rootCell setImage:[[NSWorkspace sharedWorkspace] iconForFileType:type]];
+    
     [componentCells insertObject:rootCell atIndex:0];
     [rootCell release];
     
