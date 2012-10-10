@@ -559,9 +559,6 @@
                                    didEndSelector:@selector(directorySheetDidEnd:returnCode:contextInfo:)
                                       contextInfo:[handler copy]];
     
-	
-	[self setIsLoading: YES];
-    
     [self setDirectoryURL:[self directoryURL] selectFile:nil completionHandler:nil];
 }
 
