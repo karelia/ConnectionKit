@@ -368,7 +368,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                     }
                                     else if ([aKey isEqualToString:NSURLNameKey])
                                     {
-                                        // Return last path component?
+                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, name);
                                     }
                                     else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                     {
