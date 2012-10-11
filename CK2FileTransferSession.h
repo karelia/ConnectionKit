@@ -28,6 +28,7 @@
 
 #pragma mark Discovering Directory Contents
 
+// NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
                          options:(NSDirectoryEnumerationOptions)mask
@@ -37,6 +38,8 @@
 //  * listing results are delivered as they arrive over the wire, if possible
 //  * FIRST result is the directory itself, with relative path resolved if possible
 //  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
+//
+// All docs for -contentsOfDirectoryAtURL:… should apply here too
 - (void)enumerateContentsOfURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask

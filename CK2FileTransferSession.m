@@ -279,7 +279,17 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 NSURL *aURL = [resolved URLByAppendingPathComponent:name isDirectory:isDirectory];
                                 
                                 // Fill in requested keys as best we can
-                                for (NSString *aKey in keys)
+                                NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
+                                                                      NSURLContentModificationDateKey,
+                                                                      NSURLIsDirectoryKey,
+                                                                      NSURLIsRegularFileKey,
+                                                                      NSURLIsSymbolicLinkKey,
+                                                                      NSURLNameKey,
+                                                                      NSURLFileResourceTypeKey, // 10.7 properties go last because might be nil at runtime
+                                                                      NSURLFileSecurityKey,
+                                                                      nil]);
+                                
+                                for (NSString *aKey in keysToFill)
                                 {
                                     if ([aKey isEqualToString:NSURLContentModificationDateKey])
                                     {
