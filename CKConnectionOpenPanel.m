@@ -557,7 +557,14 @@
 
 + (BOOL)isDirectory:(NSURL *)url;
 {
-    return CFURLHasDirectoryPath((CFURLRef)url);   // TODO: use proper resource value;
+    NSNumber *isDirectory;
+    if ([url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] && isDirectory)
+    {
+        return [isDirectory boolValue];
+    }
+    
+    // Fallback to guessing from the URL
+    return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
 - (NSInteger)runModal
