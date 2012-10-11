@@ -100,19 +100,28 @@
   
   if ([[directoryContents selectedObjects] count] == 1)
   {
-    if ([[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])  //file
-      [self setIsSelectionValid: [self canChooseFiles]];
-    else      //folder
-      [self setIsSelectionValid: [self canChooseDirectories]];
-    
-		if ([self canChooseDirectories])
-			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"select"
-                                                                                value: @"Select"
-                                                                                table: @"localizable"]];
-		else
-			[self setPrompt: [[NSBundle bundleForClass: [self class]] localizedStringForKey: @"open"
-                                                                                value: @"Open"
-                                                                                table: @"localizable"]];
+      NSURL *url = [[[directoryContents selectedObjects] objectAtIndex:0] valueForKey:@"URL"];
+      if ([[self class] isDirectory:url])
+      {
+          [self setIsSelectionValid: [self canChooseDirectories]];
+          
+          if ([self canChooseDirectories])
+          {
+              [self setPrompt:[[NSBundle bundleForClass:[self class]] localizedStringForKey:@"select"
+                                                                                      value:@"Select"
+                                                                                      table:@"localizable"]];
+          }
+          else
+          {
+              [self setPrompt:[[NSBundle bundleForClass:[self class]] localizedStringForKey:@"open"
+                                                                                      value:@"Open"
+                                                                                      table:@"localizable"]];
+          }
+      }
+      else
+      {
+          [self setIsSelectionValid:[self canChooseFiles]];
+      }
   }
   else if ([[directoryContents selectedObjects] count] == 0)
   {
@@ -138,12 +147,10 @@
     BOOL wholeSelectionIsValid = YES;
     while ((currentItem = [theEnum nextObject]) && wholeSelectionIsValid)
     {
-      if ([[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])
-        wholeSelectionIsValid = [self canChooseFiles];
-      else
-        wholeSelectionIsValid = [self canChooseDirectories];        
+        NSURL *url = [[[directoryContents selectedObjects] objectAtIndex:0] valueForKey:@"URL"];
+        wholeSelectionIsValid = ([[self class] isDirectory:url] ? [self canChooseDirectories] : [self canChooseFiles]);
     }
-    [self setIsSelectionValid: wholeSelectionIsValid];
+    [self setIsSelectionValid:wholeSelectionIsValid];
   }
 }
 
@@ -155,7 +162,7 @@
   //
 	if ([sender tag] && 
 		([[directoryContents selectedObjects] count] == 1) && 
-		![[[[directoryContents selectedObjects] objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue] &&
+		[[self class] isDirectory:[[[directoryContents selectedObjects] objectAtIndex:0] valueForKey:@"URL"]] &&
 		![self canChooseDirectories])
 	{
 	}
@@ -228,10 +235,13 @@
 - (IBAction) openFolder: (id) sender
 {
 	if ([sender count])
-		if (![[[sender objectAtIndex: 0] valueForKey: @"isLeaf"] boolValue])
+    {
+        NSURL *url = [[sender objectAtIndex: 0] valueForKey:@"URL"];
+		if ([[self class] isDirectory:url])
 		{
-            [self setDirectoryURL:[[sender objectAtIndex:0] valueForKey:@"URL"] selectFile:nil completionHandler:nil];
+            [self setDirectoryURL:url selectFile:nil completionHandler:nil];
 		}
+    }
 }
 
 #pragma mark ----=accessors=----
@@ -462,10 +472,9 @@
                 isSymlink = nil;
             }
             
-            BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)aURL);   // TODO: use proper resource value
-            
             [currentItem setObject:aURL forKey:@"URL"];
             
+            BOOL isDirectory = [[self class] isDirectory:aURL];
             BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
             [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
             
@@ -546,6 +555,11 @@
     }];
 }
 
++ (BOOL)isDirectory:(NSURL *)url;
+{
+    return CFURLHasDirectoryPath((CFURLRef)url);   // TODO: use proper resource value;
+}
+
 - (NSInteger)runModal
 {
   //force the window to be loaded, to be sure tableView is set
@@ -594,35 +608,19 @@
 
 - (BOOL)tableView:(NSTableView *)aTableView shouldSelectRow:(NSInteger)rowIndex
 {
-	BOOL returnValue = YES;
-	
-	if ([[[[directoryContents arrangedObjects] objectAtIndex: rowIndex] valueForKey: @"isLeaf"] boolValue])
-	{
-		returnValue = [self canChooseFiles];
-	}
-	else
-		returnValue = [self canChooseDirectories];
-	
+	NSURL *url = [[[directoryContents arrangedObjects] objectAtIndex:rowIndex] valueForKey:@"URL"];
+	BOOL returnValue = ([[self class] isDirectory:url] ? [self canChooseDirectories] : [self canChooseFiles]);
 	return returnValue;
 }
-
 
 - (void)tableView:(NSTableView *)aTableView willDisplayCell:(id)aCell forTableColumn:(NSTableColumn *)aTableColumn row:(NSInteger)rowIndex
 {
 	//disable the cell we can't select
 	//
 	
-	BOOL enabled = YES;
-	
-	if ([[[[directoryContents arrangedObjects] objectAtIndex: rowIndex] valueForKey: @"isLeaf"] boolValue])
-	{
-		enabled = [self canChooseFiles];
-	}
-	else
-	{
-		enabled = [self canChooseDirectories];
-	}
-		
+	NSURL *url = [[[directoryContents arrangedObjects] objectAtIndex:rowIndex] valueForKey:@"URL"];
+	BOOL enabled = ([[self class] isDirectory:url] ? [self canChooseDirectories] : [self canChooseFiles]);
+    
 	
 	[aCell setEnabled: enabled];
 	if ([aCell isKindOfClass:[NSTextFieldCell class]])
