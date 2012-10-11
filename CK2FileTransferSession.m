@@ -9,6 +9,7 @@
 #import "CK2FileTransferSession.h"
 
 #import "CKConnectionRegistry.h"
+#import "CKRemoteURL.h"
 
 #import <CURLHandle/CURLHandle.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
@@ -276,7 +277,10 @@ createIntermediateDirectories:(BOOL)createIntermediates
                             {
                                 NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                                 BOOL isDirectory = [type intValue] == DT_DIR;
-                                NSURL *aURL = [resolved URLByAppendingPathComponent:name isDirectory:isDirectory];
+                                NSURL *nsURL = [resolved URLByAppendingPathComponent:name isDirectory:isDirectory];
+                                
+                                // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
+                                CKRemoteURL *aURL = [[CKRemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
                                 
                                 // Fill in requested keys as best we can
                                 NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
@@ -293,9 +297,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 {
                                     if ([aKey isEqualToString:NSURLContentModificationDateKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL,
-                                                                                (CFStringRef)aKey,
-                                                                                CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate));
+                                        [aURL setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                     {
@@ -328,7 +330,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                                 typeValue = NSURLFileResourceTypeUnknown;
                                         }
                                         
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, typeValue);
+                                        [aURL setTemporaryResourceValue:typeValue forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLFileSecurityKey])
                                     {
@@ -340,11 +342,11 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                     }
                                     else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @(isDirectory));
+                                        [aURL setTemporaryResourceValue:@(isDirectory) forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLIsHiddenKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([name hasPrefix:@"."]));
+                                        [aURL setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLIsPackageKey])
                                     {
@@ -352,11 +354,11 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                     }
                                     else if ([aKey isEqualToString:NSURLIsRegularFileKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([type intValue] == DT_REG));
+                                        [aURL setTemporaryResourceValue:@([type intValue] == DT_REG) forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLIsSymbolicLinkKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, @([type intValue] == DT_LNK));
+                                        [aURL setTemporaryResourceValue:@([type intValue] == DT_LNK) forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLLocalizedNameKey])
                                     {
@@ -368,7 +370,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                     }
                                     else if ([aKey isEqualToString:NSURLNameKey])
                                     {
-                                        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)aURL, (CFStringRef)aKey, name);
+                                        [aURL setTemporaryResourceValue:name forKey:aKey];
                                     }
                                     else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                     {
@@ -385,6 +387,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 }
                                 
                                 block(aURL);
+                                [aURL release];
                             }
                             
                             CFRelease(parsedDict);

@@ -29,6 +29,7 @@
 #pragma mark Discovering Directory Contents
 
 // NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
+// In order to supply resource values, have to work around rdar://problem/11069131 by returning a custom NSURL subclass. Can't guarantee therefore that they will work correctly with the CFURL APIs. So far in practice the only incompatibility I've found is CFURLHasDirectoryPath() always returning NO
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
                          options:(NSDirectoryEnumerationOptions)mask
