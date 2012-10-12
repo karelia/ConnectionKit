@@ -61,7 +61,7 @@
              inDirectoryAtURL:(NSURL *)directory
 createIntermediateDirectories:(BOOL)createIntermediates
                        client:(id <CK2FileTransferProtocolClient>)client
-            completionHandler:(void (^)(NSError *error))handler;
+                        token:(id)token;
 {
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
@@ -75,7 +75,14 @@ createIntermediateDirectories:(BOOL)createIntermediates
     [request curl_setPostTransferCommands:commands];
     
     [self sendRequest:request client:client dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
-        handler(error);
+        if (error)
+        {
+            [client fileTransferProtocolToken:token didFailWithError:error];
+        }
+        else
+        {
+            [client fileTransferProtocolDidFinishWithToken:token];
+        }
     }];
     
     [request release];
@@ -285,17 +292,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                       inDirectoryAtURL:[url URLByDeletingLastPathComponent]
          createIntermediateDirectories:createIntermediates
                                 client:client
-                     completionHandler:^(NSError *error) {
-                         
-                         if (error)
-                         {
-                             [client fileTransferProtocolToken:token didFailWithError:error];
-                         }
-                         else
-                         {
-                             [client fileTransferProtocolDidFinishWithToken:token];
-                         }
-                     }];
+                                 token:token];
 }
 
 + (void)startCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client token:(id)token progressBlock:(void (^)(NSUInteger))progressBlock;
@@ -341,17 +338,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                       inDirectoryAtURL:[url URLByDeletingLastPathComponent]
          createIntermediateDirectories:NO
                                 client:client
-                     completionHandler:^(NSError *error) {
-                         
-                         if (error)
-                         {
-                             [client fileTransferProtocolToken:token didFailWithError:error];
-                         }
-                         else
-                         {
-                             [client fileTransferProtocolDidFinishWithToken:token];
-                         }
-                     }];
+                                 token:token];
 }
 
 + (void)startSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client token:(id)token;
@@ -368,17 +355,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                    inDirectoryAtURL:[url URLByDeletingLastPathComponent]
       createIntermediateDirectories:NO
                              client:client
-                  completionHandler:^(NSError *error) {
-                      
-                      if (error)
-                      {
-                          [client fileTransferProtocolToken:token didFailWithError:error];
-                      }
-                      else
-                      {
-                          [client fileTransferProtocolDidFinishWithToken:token];
-                      }
-                  }];
+                              token:token];
         
         return;
     }
