@@ -52,6 +52,10 @@
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CKRemoteURL.h */; };
 		2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8211626CA67000C9D9F /* CKRemoteURL.m */; };
+		2790A8291627636E000C9D9F /* CK2FileTransferProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */; };
+		2790A82A1627636E000C9D9F /* CK2FileTransferProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */; };
+		2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
+		2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */; };
@@ -144,13 +148,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
-		};
-		2743E80D1622E47600019979 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 223FD092160B523700BE1C80;
-			remoteInfo = CURLHandleTests;
 		};
 		27448C2C14580F7500EB086F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -256,6 +253,10 @@
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		2790A8201626CA67000C9D9F /* CKRemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKRemoteURL.h; sourceTree = "<group>"; };
 		2790A8211626CA67000C9D9F /* CKRemoteURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKRemoteURL.m; sourceTree = "<group>"; };
+		2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileTransferProtocol.h; sourceTree = "<group>"; };
+		2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferProtocol.m; sourceTree = "<group>"; };
+		2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FTPProtocol.h; sourceTree = "<group>"; };
+		2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FTPProtocol.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CKConnectionRegistry.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
 		27BFFED615027F0A00EFA319 /* CKCurlFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKCurlFTPConnection.h; sourceTree = "<group>"; };
@@ -514,7 +515,6 @@
 			isa = PBXGroup;
 			children = (
 				27BFFEE215027F4200EFA319 /* CURLHandle.framework */,
-				2743E80E1622E47600019979 /* CURLHandleTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -661,6 +661,10 @@
 				27FD90C80ED5BFFD0068D634 /* Other */,
 				2743E8071622E47600019979 /* CK2FileTransferSession.h */,
 				2743E8081622E47600019979 /* CK2FileTransferSession.m */,
+				2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */,
+				2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */,
+				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
+				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -835,6 +839,8 @@
 				27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileTransferSession.h in Headers */,
 				2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */,
+				2790A8291627636E000C9D9F /* CK2FileTransferProtocol.h in Headers */,
+				2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -967,13 +973,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		2743E80E1622E47600019979 /* CURLHandleTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = CURLHandleTests.octest;
-			remoteRef = 2743E80D1622E47600019979 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		27448C2D14580F7500EB086F /* DAVKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -1173,6 +1172,8 @@
 				270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileTransferSession.m in Sources */,
 				2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */,
+				2790A82A1627636E000C9D9F /* CK2FileTransferProtocol.m in Sources */,
+				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
