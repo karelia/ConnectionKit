@@ -85,29 +85,6 @@
     [NSException raise:NSInvalidArgumentException format:@"Don't support cancelling FTP session auth yet"];
 }
 
-#pragma mark Home Directory
-
-- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
-{
-    // Deliberately want a request that should avoid doing any work
-    NSMutableURLRequest *request = [_request mutableCopy];
-    [request setURL:[NSURL URLWithString:@"/" relativeToURL:[request URL]]];
-    [request setHTTPMethod:@"HEAD"];
-    
-    [self sendRequest:request dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
-        if (error)
-        {
-            handler(nil, error);
-        }
-        else
-        {
-            handler([handle initialFTPPath], error);
-        }
-    }];
-    
-    [request release];
-}
-
 #pragma mark Discovering Directory Contents
 
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
