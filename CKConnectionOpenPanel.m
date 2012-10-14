@@ -451,107 +451,110 @@
         [self setDirectoryURL:dir];
         
         
-        // Populate the file list
-        [directoryContents setContent:nil];
-        
-        for (NSURL *aURL in contents)
-        {
-            NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
-            [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
+        // Populate the file list. Deals with array controller for UI so needs to run on main thread
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
             
-            NSString *filename = [aURL lastPathComponent];
-            [currentItem setObject:filename forKey:@"fileName"];
+            [directoryContents setContent:nil];
             
-            NSNumber *isSymlink;
-            if ([aURL getResourceValue:&isSymlink forKey:NSURLIsSymbolicLinkKey error:NULL] && [isSymlink boolValue])
+            for (NSURL *aURL in contents)
             {
-                //NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
-            }
-            else
-            {
-                isSymlink = nil;
-            }
-            
-            [currentItem setObject:aURL forKey:@"URL"];
-            
-            BOOL isDirectory = [[self class] isDirectory:aURL];
-            BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
-            [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
-            
-            //get the icon
-            NSImage *icon;
-            if (isDirectory)
-            {
-                static NSImage *folder;
-                if (!folder)
-                {
-                    folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
-                    [folder setSize:NSMakeSize(16,16)];
-                }
+                NSMutableDictionary *currentItem = [NSMutableDictionary dictionary];
+                [currentItem setObject:[NSMutableArray array] forKey:@"subItems"];
                 
-                icon = folder;
-            }
-            else if (isSymlink)
-            {
-                static NSImage *symFolder;
-                if (!symFolder)
-                {
-                    NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
-                    symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
-                    [symFolder setSize:NSMakeSize(16,16)];
-                }
-                static NSImage *symFile;
-                if (!symFile)
-                {
-                    NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
-                    symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
-                    [symFile setSize:NSMakeSize(16,16)];
-                }
+                NSString *filename = [aURL lastPathComponent];
+                [currentItem setObject:filename forKey:@"fileName"];
                 
-                NSString *target = nil;//[cur objectForKey:cxSymbolicLinkTargetKey];
-                if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
+                NSNumber *isSymlink;
+                if ([aURL getResourceValue:&isSymlink forKey:NSURLIsSymbolicLinkKey error:NULL] && [isSymlink boolValue])
                 {
-                    icon = symFolder;
+                    //NSLog(@"%@: %@", NSStringFromSelector(_cmd), [cur objectForKey:cxSymbolicLinkTargetKey]);
                 }
                 else
                 {
-                    NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
-                    NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
-                    [comp lockFocus];
-                    [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                    [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-                    [comp unlockFocus];
-                    [comp autorelease];
-                    icon = comp;
+                    isSymlink = nil;
                 }
+                
+                [currentItem setObject:aURL forKey:@"URL"];
+                
+                BOOL isDirectory = [[self class] isDirectory:aURL];
+                BOOL enabled = (isDirectory ? [self canChooseDirectories] : [self canChooseFiles]);
+                [currentItem setObject:[NSNumber numberWithBool:enabled] forKey:@"isEnabled"];
+                
+                //get the icon
+                NSImage *icon;
+                if (isDirectory)
+                {
+                    static NSImage *folder;
+                    if (!folder)
+                    {
+                        folder = [[[NSWorkspace sharedWorkspace] iconForFile:@"/tmp"] copy];
+                        [folder setSize:NSMakeSize(16,16)];
+                    }
+                    
+                    icon = folder;
+                }
+                else if (isSymlink)
+                {
+                    static NSImage *symFolder;
+                    if (!symFolder)
+                    {
+                        NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                        symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
+                        [symFolder setSize:NSMakeSize(16,16)];
+                    }
+                    static NSImage *symFile;
+                    if (!symFile)
+                    {
+                        NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                        symFile = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_file" ofType:@"tif"]];
+                        [symFile setSize:NSMakeSize(16,16)];
+                    }
+                    
+                    NSString *target = nil;//[cur objectForKey:cxSymbolicLinkTargetKey];
+                    if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
+                    {
+                        icon = symFolder;
+                    }
+                    else
+                    {
+                        NSImage *fileType = [[NSWorkspace sharedWorkspace] iconForFileType:[filename pathExtension]];
+                        NSImage *comp = [[NSImage alloc] initWithSize:NSMakeSize(16,16)];
+                        [comp lockFocus];
+                        [fileType drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                        [symFile drawInRect:NSMakeRect(0,0,16,16) fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+                        [comp unlockFocus];
+                        [comp autorelease];
+                        icon = comp;
+                    }
+                }
+                else
+                {
+                    NSString *extension = [filename pathExtension];
+                    icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
+                    [icon setSize:NSMakeSize(16,16)];
+                }
+                
+                if (icon) [currentItem setObject:icon forKey:@"image"];
+                
+                
+                // Select the directory that was just created (if there is one)
+                if ([filename isEqualToString:[file lastPathComponent]]) [directoryContents setSelectsInsertedObjects:YES];
+                
+                // Actually insert the listed item
+                [directoryContents addObject:currentItem];
+                [directoryContents setSelectsInsertedObjects:NO];
             }
-            else
-            {
-                NSString *extension = [filename pathExtension];
-                icon = [[[[NSWorkspace sharedWorkspace] iconForFileType:extension] copy] autorelease];  // copy so can mutate
-                [icon setSize:NSMakeSize(16,16)];
-            }
-            
-            if (icon) [currentItem setObject:icon forKey:@"image"];
             
             
-            // Select the directory that was just created (if there is one)
-            if ([filename isEqualToString:[file lastPathComponent]]) [directoryContents setSelectsInsertedObjects:YES];
+            // Want the list sorted like the Finder does
+            [directoryContents rearrangeObjects];
             
-            // Actually insert the listed item
-            [directoryContents addObject:currentItem];
-            [directoryContents setSelectsInsertedObjects:NO];
-        }
-        
-        
-        // Want the list sorted like the Finder does
-        [directoryContents rearrangeObjects];
-        
-        [self setIsLoading: NO];
-        
-        
-        // Callback
-        if (block) block(error);
+            [self setIsLoading: NO];
+            
+            
+            // Callback
+            if (block) block(error);
+        }];
     }];
 }
 
