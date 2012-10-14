@@ -510,8 +510,10 @@
                         [symFile setSize:NSMakeSize(16,16)];
                     }
                     
-                    NSString *target = nil;//[cur objectForKey:cxSymbolicLinkTargetKey];
-                    if ([target hasSuffix:@"/"] || [target hasSuffix:@"\\"])
+                    NSURL *target;
+                    if ([aURL getResourceValue:&target forKey:CK2URLSymbolicLinkDestinationKey error:NULL] &&
+                        target &&
+                        [[self class] isDirectory:target])
                     {
                         icon = symFolder;
                     }
