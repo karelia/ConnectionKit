@@ -478,4 +478,17 @@ createIntermediateDirectories:(BOOL)createIntermediates
     [handle release];   // handle retains itself until finished or cancelled
 }
 
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // FIXME: pass correct token through
+    [_client fileTransferProtocolToken:nil didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                                code:NSURLErrorUserCancelledAuthentication
+                                                                            userInfo:nil]];
+}
+
 @end
