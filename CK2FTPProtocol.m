@@ -237,7 +237,28 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 }
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
-                                    // Could guess from extension
+                                    // Guess from symlink, extension, and directory
+                                    if ([type intValue] == DT_LNK)
+                                    {
+                                        [aURL setTemporaryResourceValue:(NSString *)kUTTypeSymLink forKey:aKey];
+                                    }
+                                    else
+                                    {
+                                        NSString *extension = [name pathExtension];
+                                        if ([extension length])
+                                        {
+                                            CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                                                     (CFStringRef)extension,
+                                                                                                     (isDirectory ? kUTTypeDirectory : kUTTypeData));
+                                            
+                                            [aURL setTemporaryResourceValue:(NSString *)type forKey:aKey];
+                                            CFRelease(type);
+                                        }
+                                        else
+                                        {
+                                            [aURL setTemporaryResourceValue:(NSString *)kUTTypeData forKey:aKey];
+                                        }
+                                    }
                                 }
                                 else if ([aKey isEqualToString:NSURLFileSizeKey])
                                 {
