@@ -154,6 +154,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                                                   NSURLIsRegularFileKey,
                                                                   NSURLIsSymbolicLinkKey,
                                                                   NSURLNameKey,
+                                                                  NSURLFileSizeKey,
                                                                   CK2URLSymbolicLinkDestinationKey,
                                                                   NSURLFileResourceTypeKey, // 10.7 properties go last because might be nil at runtime
                                                                   NSURLFileSecurityKey,
@@ -249,6 +250,10 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
                                     // Could guess from extension
+                                }
+                                else if ([aKey isEqualToString:NSURLFileSizeKey])
+                                {
+                                    [aURL setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceSize) forKey:aKey];
                                 }
                                 else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
                                 {
