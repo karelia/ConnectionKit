@@ -154,6 +154,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                                                   NSURLIsRegularFileKey,
                                                                   NSURLIsSymbolicLinkKey,
                                                                   NSURLNameKey,
+                                                                  CK2URLSymbolicLinkDestinationKey,
                                                                   NSURLFileResourceTypeKey, // 10.7 properties go last because might be nil at runtime
                                                                   NSURLFileSecurityKey,
                                                                   nil]);
@@ -248,6 +249,17 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
                                     // Could guess from extension
+                                }
+                                else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
+                                {
+                                    NSString *path = CFDictionaryGetValue(parsedDict, kCFFTPResourceLink);
+                                    if ([path length])
+                                    {
+                                        // Servers in my experience hand include a trailing slash to indicate if the target is a directory
+                                        // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
+                                        // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
+                                        [aURL setTemporaryResourceValue:[CK2FileTransferSession URLWithPath:path relativeToURL:url] forKey:aKey];
+                                    }
                                 }
                             }
                             
