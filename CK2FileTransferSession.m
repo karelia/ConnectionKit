@@ -14,6 +14,9 @@
 #import <CURLHandle/CURLHandle.h>
 
 
+NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestination";
+
+
 @interface CK2FileTransferSession () <CK2FileTransferProtocolClient>
 @end
 

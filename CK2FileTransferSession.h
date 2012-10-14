@@ -47,6 +47,8 @@
                     usingBlock:(void (^)(NSURL *url))block
              completionHandler:(void (^)(NSError *error))completionBlock;
 
+extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
+
 
 #pragma mark Creating and Deleting Items
 
