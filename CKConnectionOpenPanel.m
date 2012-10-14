@@ -495,13 +495,6 @@
                 }
                 else if (isSymlink)
                 {
-                    static NSImage *symFolder;
-                    if (!symFolder)
-                    {
-                        NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
-                        symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
-                        [symFolder setSize:NSMakeSize(16,16)];
-                    }
                     static NSImage *symFile;
                     if (!symFile)
                     {
@@ -515,6 +508,14 @@
                         target &&
                         [[self class] isDirectory:target])
                     {
+                        static NSImage *symFolder;
+                        if (!symFolder)
+                        {
+                            NSBundle *bundle = [NSBundle bundleForClass:[CKConnectionOpenPanel class]]; // hardcode class incase app subclasses
+                            symFolder = [[NSImage alloc] initWithContentsOfFile:[bundle pathForResource:@"symlink_folder" ofType:@"tif"]];
+                            [symFolder setSize:NSMakeSize(16,16)];
+                        }
+                        
                         icon = symFolder;
                     }
                     else
