@@ -8,6 +8,9 @@
 
 #import "CKRemoteURL.h"
 
+#import "CK2FileTransferSession.h"
+
+
 @implementation CKRemoteURL
 
 - (void)dealloc;
@@ -23,7 +26,26 @@
     *value = [_temporaryResourceValues objectForKey:key];
     if (*value == nil)
     {
-        return [super getResourceValue:value forKey:key error:error];
+        // A few keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
+        if ([key isEqualToString:NSURLHasHiddenExtensionKey])
+        {
+            *value = [NSNumber numberWithBool:NO];
+            return YES;
+        }
+        else if ([key isEqualToString:NSURLLocalizedNameKey])
+        {
+            *value = [self lastPathComponent];
+            return YES;
+        }
+        else if ([key isEqualToString:NSURLPathKey])
+        {
+            *value = [CK2FileTransferSession pathOfURLRelativeToHomeDirectory:self];
+            return YES;
+        }
+        else
+        {
+            return [super getResourceValue:value forKey:key error:error];
+        }
     }
     else if (*value == [NSNull null])
     {

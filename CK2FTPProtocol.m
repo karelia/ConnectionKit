@@ -203,10 +203,6 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 {
                                     // Not supported yet but could be
                                 }
-                                else if ([aKey isEqualToString:NSURLHasHiddenExtensionKey])
-                                {
-                                    // Could fake it?
-                                }
                                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                 {
                                     [aURL setTemporaryResourceValue:@(isDirectory) forKey:aKey];
@@ -227,10 +223,6 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 {
                                     [aURL setTemporaryResourceValue:@([type intValue] == DT_LNK) forKey:aKey];
                                 }
-                                else if ([aKey isEqualToString:NSURLLocalizedNameKey])
-                                {
-                                    // Strip off extensions? Return last path component?
-                                }
                                 else if ([aKey isEqualToString:NSURLLocalizedTypeDescriptionKey])
                                 {
                                     // Could guess from extension
@@ -242,10 +234,6 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                 {
                                     // Can derive by deleting last path component. Always true though?
-                                }
-                                else if ([aKey isEqualToString:NSURLPathKey])
-                                {
-                                    // Could do via our +pathOfURLRelativeToHomeDirectory: routine
                                 }
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
