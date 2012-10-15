@@ -37,8 +37,7 @@
     }
     else
     {
-        return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                      relativeToURL:baseURL];
+        return [super URLWithPath:path relativeToURL:baseURL];
     }
 }
 
