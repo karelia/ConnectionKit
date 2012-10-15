@@ -74,7 +74,7 @@
 + (void)registerClass:(Class)protocolClass;
 
 // Completion block is guaranteed to be called on our private serial queue
-+ (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
++ (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;
 
 + (Class)classForURL:(NSURL *)url;    // only suitable for stateless calls to the protocol class
 
