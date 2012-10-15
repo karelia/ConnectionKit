@@ -51,6 +51,13 @@
                              token:(id)token;
 
 
+#pragma mark For Subclasses to Customize
+// Session consults registered protocols to find out which is qualified to handle paths for a specific URL
+// Default behaviour is generic path-handling. Override if your protocol has some special requirements. e.g. SFTP indicates home directory with a ~
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
++ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+
+
 #pragma mark Registration
 
 /*!

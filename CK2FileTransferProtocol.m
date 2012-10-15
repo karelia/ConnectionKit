@@ -79,6 +79,19 @@
     [self doesNotRecognizeSelector:_cmd];
 }
 
+#pragma mark For Subclasses to Customize
+
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+{
+    return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
+                  relativeToURL:baseURL];
+}
+
++ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+{
+    return [URL path];
+}
+
 #pragma mark Registration
 
 static NSMutableArray *sRegisteredProtocols;

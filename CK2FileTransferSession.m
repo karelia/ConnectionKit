@@ -414,43 +414,20 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     [[self delegate] fileTransferSession:self appendString:info toTranscript:transcript];
 }
 
-#pragma mark FTP URL helpers
+#pragma mark URLs
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    NSString *scheme = [baseURL scheme];
-    
-    if (([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame) &&
-        [path isAbsolutePath])
-    {
-        // Get to host's URL, including single trailing slash
-        // -absoluteURL has to be called so that the real path can be properly appended
-        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path];
-    }
-    else
-    {
-        return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                      relativeToURL:baseURL];
-    }
+    Class protocolClass = [CK2FileTransferProtocol classForURL:baseURL];
+    if (!protocolClass) protocolClass = [CK2FileTransferProtocol class];
+    return [protocolClass URLWithPath:path relativeToURL:baseURL];
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 {
-    // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    NSString *scheme = [URL scheme];
-    if ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame)
-    {
-        CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
-        NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        if (strictPath) CFRelease(strictPath);
-        return result;
-    }
-    else
-    {
-        return [URL path];
-    }
+    Class protocolClass = [CK2FileTransferProtocol classForURL:URL];
+    if (!protocolClass) protocolClass = [CK2FileTransferProtocol class];
+    return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
 }
 
 @end

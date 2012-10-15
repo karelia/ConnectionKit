@@ -18,12 +18,40 @@
 
 @implementation CK2FTPProtocol
 
-#pragma mark Requests
+#pragma mark URLs
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return [url ck2_isFTPURL];
 }
+
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+{
+    // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    if ([path isAbsolutePath])
+    {
+        // Get to host's URL, including single trailing slash
+        // -absoluteURL has to be called so that the real path can be properly appended
+        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
+        return [baseURL URLByAppendingPathComponent:path];
+    }
+    else
+    {
+        return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
+                      relativeToURL:baseURL];
+    }
+}
+
++ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+{
+    // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
+    NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    if (strictPath) CFRelease(strictPath);
+    return result;
+}
+
+#pragma mark Requests
 
 + (NSMutableURLRequest *)newMutableRequestWithURL:(NSURL *)url isDirectory:(BOOL)directory;
 {
