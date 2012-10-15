@@ -1224,7 +1224,7 @@
         [_inputStream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSRunLoopCommonModes];
         [_inputStream open];
         
-        NSURL *outputURL = [[CKConnectionRegistry sharedConnectionRegistry] URLWithPath:path relativeToURL:_baseURL];
+        NSURL *outputURL = [CK2FileTransferSession URLWithPath:path relativeToURL:_baseURL];
         [_URLForWritingTo release]; _URLForWritingTo = [outputURL copy];
         [self setupOutputStream];
         

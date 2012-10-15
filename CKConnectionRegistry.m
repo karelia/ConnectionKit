@@ -160,49 +160,4 @@ enum {
     return result;
 }
 
-#pragma mark URLs
-
-- (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
-{
-    NSString *scheme = [baseURL scheme];
-    
-    // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([scheme isEqualToString:@"ftp"])
-    {
-        return [CURLFTPSession URLWithPath:path relativeToURL:baseURL];
-    }
-    
-    // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if (![path isAbsolutePath] &&
-        ([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"]) &&
-        [[baseURL path] length] <= 1)
-    {
-        path = [@"/~" stringByAppendingPathComponent:path];
-    }
-    
-    return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                  relativeToURL:baseURL];
-}
-
-- (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
-{
-    NSString *scheme = [URL scheme];
-    
-    // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([scheme isEqualToString:@"ftp"])
-    {
-        return [CURLFTPSession pathOfURLRelativeToHomeDirectory:URL];
-    }
-    
-    NSString *result = [URL path];
-    
-    // SCP and SFTP represent the home directory using ~/ at the start of the path
-    if ([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"])
-    {
-        if ([result hasPrefix:@"/~/"]) result = [result substringFromIndex:3];
-    }
-    
-    return result;
-}
-
 @end
