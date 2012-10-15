@@ -115,4 +115,24 @@ static NSMutableArray *sRegisteredProtocols;
     });
 }
 
++ (Class)classForURL:(NSURL *)url;
+{
+    __block Class result = nil;
+    
+    // Search for correct protocol
+    dispatch_sync([self queue], ^{
+        
+        for (Class aProtocol in sRegisteredProtocols)
+        {
+            if ([aProtocol canHandleURL:url])
+            {
+                result = aProtocol;
+                break;
+            }
+        }
+    });
+    
+    return result;
+}
+
 @end
