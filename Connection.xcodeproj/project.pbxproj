@@ -170,6 +170,13 @@
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = DAVKit;
 		};
+		2790A9B0162B5CBC000C9D9F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223FD092160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
+		};
 		27BFFEE115027F4200EFA319 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
@@ -515,6 +522,7 @@
 			isa = PBXGroup;
 			children = (
 				27BFFEE215027F4200EFA319 /* CURLHandle.framework */,
+				2790A9B1162B5CBC000C9D9F /* CURLHandleTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -985,6 +993,13 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 27448C2E14580F7500EB086F /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		2790A9B1162B5CBC000C9D9F /* CURLHandleTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CURLHandleTests.octest;
+			remoteRef = 2790A9B0162B5CBC000C9D9F /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		27BFFEE215027F4200EFA319 /* CURLHandle.framework */ = {
