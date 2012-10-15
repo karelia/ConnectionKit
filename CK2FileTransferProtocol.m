@@ -21,6 +21,9 @@
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         queue = dispatch_queue_create("CK2FileTransferSystem", DISPATCH_QUEUE_SERIAL);
+        
+        // Register built-in protocols too
+        [self registerClass:[CK2FTPProtocol class]];
     });
     
     return queue;
@@ -95,12 +98,6 @@ static NSMutableArray *sRegisteredProtocols;
 
 + (void)protocolForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
 {
-    // Register built-in protocols
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        [self registerClass:[CK2FTPProtocol class]];
-    });
-    
     // Search for correct protocol
     dispatch_async([self queue], ^{
         
