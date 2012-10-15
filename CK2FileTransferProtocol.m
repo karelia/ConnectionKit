@@ -9,6 +9,7 @@
 #import "CK2FileTransferProtocol.h"
 
 #import "CK2FTPProtocol.h"
+#import "CK2SFTPProtocol.h"
 
 
 @implementation CK2FileTransferProtocol
@@ -24,6 +25,7 @@
         
         // Register built-in protocols too
         [self registerClass:[CK2FTPProtocol class]];
+        [self registerClass:[CK2SFTPProtocol class]];
     });
     
     return queue;
