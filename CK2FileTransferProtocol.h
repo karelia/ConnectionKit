@@ -74,7 +74,7 @@
 + (void)registerClass:(Class)protocolClass;
 
 // Completion block is guaranteed to be called on our private serial queue
-+ (void)protocolForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
++ (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
 
 @end
 

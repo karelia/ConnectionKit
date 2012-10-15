@@ -96,7 +96,7 @@ static NSMutableArray *sRegisteredProtocols;
     });
 }
 
-+ (void)protocolForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
++ (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocol))block;
 {
     // Search for correct protocol
     dispatch_async([self queue], ^{

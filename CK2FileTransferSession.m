@@ -120,7 +120,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol protocolForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
         
         if (protocol)
         {
@@ -177,7 +177,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol protocolForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
         
         if (protocol)
         {
@@ -300,7 +300,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(request);
     
-    [CK2FileTransferProtocol protocolForURL:[request URL] completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:[request URL] completionHandler:^(Class protocol) {
         
         if (protocol)
         {
@@ -323,7 +323,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol protocolForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
         
         if (protocol)
         {
@@ -356,7 +356,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     NSParameterAssert(keyedValues);
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol protocolForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
         
         if (protocol)
         {
