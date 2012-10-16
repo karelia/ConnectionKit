@@ -24,8 +24,7 @@
         queue = dispatch_queue_create("CK2FileTransferSystem", DISPATCH_QUEUE_SERIAL);
         
         // Register built-in protocols too
-        [self registerClass:[CK2FTPProtocol class]];
-        [self registerClass:[CK2SFTPProtocol class]];
+        sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
     });
     
     return queue;
@@ -91,8 +90,6 @@ static NSMutableArray *sRegisteredProtocols;
     NSParameterAssert([protocolClass isSubclassOfClass:[CK2FileTransferProtocol class]]);
     
     dispatch_async([self queue], ^{ // might as well be async as queue might be blocked momentarily by a protocol
-        
-        if (!sRegisteredProtocols) sRegisteredProtocols = [[NSMutableArray alloc] initWithCapacity:1];
         
         [sRegisteredProtocols insertObject:protocolClass
                                            atIndex:0];  // so newest is consulted first
