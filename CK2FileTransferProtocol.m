@@ -39,46 +39,34 @@
     return NO;
 }
 
-+ (void)startEnumeratingContentsOfURL:(NSURL *)url
-           includingPropertiesForKeys:(NSArray *)keys
-                              options:(NSDirectoryEnumerationOptions)mask
-                               client:(id <CK2FileTransferProtocolClient>)client
-                                token:(id)token
-                           usingBlock:(void (^)(NSURL *url))block;
++ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client usingBlock:(void (^)(NSURL *))block;
 {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-+ (void)startCreatingDirectoryAtURL:(NSURL *)url
-        withIntermediateDirectories:(BOOL)createIntermediates
-                             client:(id <CK2FileTransferProtocolClient>)client
-                              token:(id)token;
++ (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-+ (void)startCreatingFileWithRequest:(NSURLRequest *)request
-         withIntermediateDirectories:(BOOL)createIntermediates
-                              client:(id <CK2FileTransferProtocolClient>)client
-                               token:(id)token
-                       progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
++ (CK2FileTransferProtocol *)startCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-+ (void)startRemovingFileAtURL:(NSURL *)url
-                        client:(id <CK2FileTransferProtocolClient>)client
-                         token:(id)token;
++ (CK2FileTransferProtocol *)startRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
-+ (void)startSettingResourceValues:(NSDictionary *)keyedValues
-                       ofItemAtURL:(NSURL *)url
-                            client:(id <CK2FileTransferProtocolClient>)client
-                             token:(id)token;
++ (CK2FileTransferProtocol *)startSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
+    return nil;
 }
 
 #pragma mark For Subclasses to Customize

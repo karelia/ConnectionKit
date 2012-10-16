@@ -14,11 +14,22 @@
 #import <CURLHandle/CURLHandle.h>
 
 
-NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestination";
+@interface CK2FileTransferClient : NSObject <CK2FileTransferProtocolClient>
+{
+  @private
+    CK2FileTransferSession  *_session;
+    void    (^_completionBlock)(NSError *);
+}
 
+- (id)initWithCompletionBlock:(void (^)(NSError *))block session:(CK2FileTransferSession *)session;
 
-@interface CK2FileTransferSession () <CK2FileTransferProtocolClient>
 @end
+
+
+#pragma mark -
+
+
+NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestination";
 
 
 @implementation CK2FileTransferSession
@@ -120,16 +131,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocolClass) {
         
-        if (protocol)
+        if (protocolClass)
         {
-            [protocol startEnumeratingContentsOfURL:url
-                         includingPropertiesForKeys:keys
-                                            options:mask
-                                             client:self
-                                              token:completionBlock
-                                         usingBlock:block];
+            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:completionBlock];
+            [protocolClass startEnumeratingContentsOfURL:url includingPropertiesForKeys:keys options:mask client:client usingBlock:block];
         }
         else if ([url isFileURL])
         {
@@ -181,7 +188,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocol)
         {
-            [protocol startCreatingDirectoryAtURL:url withIntermediateDirectories:createIntermediates client:self token:handler];
+            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
+            [protocol startCreatingDirectoryAtURL:url withIntermediateDirectories:createIntermediates client:client];
         }
         else
         {            
@@ -304,11 +312,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocol)
         {
-            void (^block)(NSError *) = ^(NSError *error){
+            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:^(NSError *error) {
                 progressBlock(0, error);
-            };
+            }];
             
-            [protocol startCreatingFileWithRequest:request withIntermediateDirectories:createIntermediates client:self token:block progressBlock:^(NSUInteger bytesWritten){
+            [protocol startCreatingFileWithRequest:request withIntermediateDirectories:createIntermediates client:client progressBlock:^(NSUInteger bytesWritten){
                 progressBlock(bytesWritten, nil);
             }];
         }
@@ -327,7 +335,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocol)
         {
-            [protocol startRemovingFileAtURL:url client:self token:handler];
+            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
+            [protocol startRemovingFileAtURL:url client:client];
         }
         else
         {
@@ -360,7 +369,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocol)
         {
-            [protocol startRemovingFileAtURL:url client:self token:handler];
+            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
+            [protocol startRemovingFileAtURL:url client:client];
         }
         else
         {
@@ -383,37 +393,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @synthesize delegate = _delegate;
 
-#pragma mark CK2FileTransferProtocolClient
-
-// As a gloriously cunning ruse, the tokens passed to protocols are actually completion blocks!
-
-- (void)fileTransferProtocolDidFinishWithToken:(id)token;
-{
-    void (^block)(NSError *) = token;
-    block(nil);
-}
-
-- (void)fileTransferProtocolToken:(id)token didFailWithError:(NSError *)error;
-{
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    
-    void (^block)(NSError *) = token;
-    block(error);
-}
-
-- (void)fileTransferProtocolToken:(id)token didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // TODO: Cache credentials per protection space
-    // TODO: bounce challenge over a suitable thread?
-    [[self delegate] fileTransferSession:self didReceiveAuthenticationChallenge:challenge];
-}
-
-- (void)fileTransferProtocolToken:(id)token appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
-{
-    // TODO: bounce message over a suitable thread?
-    [[self delegate] fileTransferSession:self appendString:info toTranscript:transcript];
-}
-
 #pragma mark URLs
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
@@ -428,6 +407,71 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     Class protocolClass = [CK2FileTransferProtocol classForURL:URL];
     if (!protocolClass) protocolClass = [CK2FileTransferProtocol class];
     return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
+}
+
+#pragma mark Transfers
+
+- (CK2FileTransferClient *)makeClientWithCompletionHandler:(void (^)(NSError *error))block;
+{
+    CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithCompletionBlock:block session:self];
+    return [client autorelease];
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CK2FileTransferClient
+
+- (id)initWithCompletionBlock:(void (^)(NSError *))block session:(CK2FileTransferSession *)session;
+{
+    NSParameterAssert(block);
+    NSParameterAssert(session);
+    
+    if (self = [self init])
+    {
+        _session = [session retain];
+        _completionBlock = [block copy];
+        
+        [self retain];  // until protocol finishes or fails
+    }
+    
+    return self;
+}
+
+- (void)finishWithError:(NSError *)error;
+{
+    _completionBlock(error);
+    [_completionBlock release]; _completionBlock = nil;
+    [_session release]; _session = nil;
+    
+    [self release]; // balances call in -init
+}
+
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didFailWithError:(NSError *)error;
+{
+    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    [self finishWithError:error];
+}
+
+- (void)fileTransferProtocolDidFinish:(CK2FileTransferProtocol *)protocol;
+{
+    [self finishWithError:nil];
+}
+
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // TODO: Cache credentials per protection space
+    // TODO: bounce challenge over a suitable thread?
+    [[_session delegate] fileTransferSession:_session didReceiveAuthenticationChallenge:challenge];
+}
+
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+{
+    // TODO: bounce message over a suitable thread?
+    [[_session delegate] fileTransferSession:_session appendString:info toTranscript:transcript];
 }
 
 @end

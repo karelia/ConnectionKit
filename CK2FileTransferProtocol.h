@@ -22,33 +22,28 @@
 
 + (BOOL)canHandleURL:(NSURL *)url;
 
-+ (void)startEnumeratingContentsOfURL:(NSURL *)url
-           includingPropertiesForKeys:(NSArray *)keys
-                              options:(NSDirectoryEnumerationOptions)mask
-                               client:(id <CK2FileTransferProtocolClient>)client
-                                token:(id)token
-                           usingBlock:(void (^)(NSURL *url))block;
++ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url
+                                includingPropertiesForKeys:(NSArray *)keys
+                                                   options:(NSDirectoryEnumerationOptions)mask
+                                                    client:(id <CK2FileTransferProtocolClient>)client
+                                                usingBlock:(void (^)(NSURL *url))block;
 
-+ (void)startCreatingDirectoryAtURL:(NSURL *)url
-        withIntermediateDirectories:(BOOL)createIntermediates
-                             client:(id <CK2FileTransferProtocolClient>)client
-                              token:(id)token;
++ (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url
+                             withIntermediateDirectories:(BOOL)createIntermediates
+                                                  client:(id <CK2FileTransferProtocolClient>)client;
 
 // The data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
-+ (void)startCreatingFileWithRequest:(NSURLRequest *)request
-         withIntermediateDirectories:(BOOL)createIntermediates
-                              client:(id <CK2FileTransferProtocolClient>)client
-                               token:(id)token
-                       progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
++ (CK2FileTransferProtocol *)startCreatingFileWithRequest:(NSURLRequest *)request
+                              withIntermediateDirectories:(BOOL)createIntermediates
+                                                   client:(id <CK2FileTransferProtocolClient>)client
+                                            progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
 
-+ (void)startRemovingFileAtURL:(NSURL *)url
-                        client:(id <CK2FileTransferProtocolClient>)client
-                         token:(id)token;
++ (CK2FileTransferProtocol *)startRemovingFileAtURL:(NSURL *)url
+                                             client:(id <CK2FileTransferProtocolClient>)client;
 
-+ (void)startSettingResourceValues:(NSDictionary *)keyedValues
-                       ofItemAtURL:(NSURL *)url
-                            client:(id <CK2FileTransferProtocolClient>)client
-                             token:(id)token;
++ (CK2FileTransferProtocol *)startSettingResourceValues:(NSDictionary *)keyedValues
+                                            ofItemAtURL:(NSURL *)url
+                                                 client:(id <CK2FileTransferProtocolClient>)client;
 
 
 #pragma mark For Subclasses to Customize
@@ -90,10 +85,10 @@
 
 @protocol CK2FileTransferProtocolClient <NSObject>
 
-- (void)fileTransferProtocolDidFinishWithToken:(id)token;
-- (void)fileTransferProtocolToken:(id)token didFailWithError:(NSError *)error;
+- (void)fileTransferProtocolDidFinish:(CK2FileTransferProtocol *)protocol;
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didFailWithError:(NSError *)error;
 
-- (void)fileTransferProtocolToken:(id)token didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)fileTransferProtocolToken:(id)token appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
 @end
