@@ -365,10 +365,13 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 {
 	NSParameterAssert(record);
     
-    [self willChangeValueForKey:@"contents"];
-	[_contents addObject:record];
-	[record setParent:self];
-	[self didChangeValueForKey:@"contents"];
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndex:[_contents count]];
+    [self willChange:NSKeyValueChangeInsertion valuesAtIndexes:indexes forKey:@"contents"];
+    {{
+        [_contents addObject:record];
+        [record setParent:self];
+    }}
+	[self didChange:NSKeyValueChangeInsertion valuesAtIndexes:indexes forKey:@"contents"];
 }
 
 - (NSArray *)contents

@@ -172,12 +172,19 @@ enum {
         return [CURLFTPSession URLWithPath:path relativeToURL:baseURL];
     }
     
-    // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if (![path isAbsolutePath] &&
-        ([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"]) &&
-        [[baseURL path] length] <= 1)
+    if ([path isAbsolutePath])
     {
-        path = [@"/~" stringByAppendingPathComponent:path];
+        // On 10.6, file URLs sometimes behave strangely when combined with an absolute path. Force it to be resolved
+        if ([baseURL isFileURL]) [baseURL absoluteString];
+    }
+    else
+    {
+        // SCP and SFTP represent the home directory using ~/ at the start of the path <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+        if (([scheme isEqualToString:@"scp"] || [scheme isEqualToString:@"sftp"]) &&
+            [[baseURL path] length] <= 1)
+        {
+            path = [@"/~" stringByAppendingPathComponent:path];
+        }
     }
     
     return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
