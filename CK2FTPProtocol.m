@@ -116,7 +116,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
 
 #pragma mark Operations
 
-+ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client usingBlock:(void (^)(NSURL *))block;
++ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
 {
     NSMutableURLRequest *request = [self newMutableRequestWithURL:url isDirectory:YES];
     url = [request URL];    // ensures it's a directory URL
@@ -146,7 +146,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                 }
             }
             
-            block(resolved);
+            [client fileTransferProtocol:self didDiscoverItemAtURL:resolved];
             
             
             // Process the data to make a directory listing
@@ -303,7 +303,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                 }
                             }
                             
-                            block(aURL);
+                            [client fileTransferProtocol:protocol didDiscoverItemAtURL:aURL];
                             [aURL release];
                         }
                         

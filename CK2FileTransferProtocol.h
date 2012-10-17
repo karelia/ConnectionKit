@@ -25,8 +25,7 @@
 + (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url
                                 includingPropertiesForKeys:(NSArray *)keys
                                                    options:(NSDirectoryEnumerationOptions)mask
-                                                    client:(id <CK2FileTransferProtocolClient>)client
-                                                usingBlock:(void (^)(NSURL *url))block;
+                                                    client:(id <CK2FileTransferProtocolClient>)client;
 
 + (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url
                              withIntermediateDirectories:(BOOL)createIntermediates
@@ -85,10 +84,17 @@
 
 @protocol CK2FileTransferProtocolClient <NSObject>
 
+#pragma mark General
 - (void)fileTransferProtocolDidFinish:(CK2FileTransferProtocol *)protocol;
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didFailWithError:(NSError *)error;
-
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+
+
+#pragma mark Operation-Specific
+// Only made use of by directory enumeration at present, but hey, maybe something else will in future
+// URL should be pre-populated with properties requested by client
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+
 
 @end

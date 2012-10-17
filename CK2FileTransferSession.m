@@ -19,9 +19,11 @@
   @private
     CK2FileTransferSession  *_session;
     void    (^_completionBlock)(NSError *);
+    void    (^_enumerationBlock)(NSURL *);
 }
 
 - (id)initWithCompletionBlock:(void (^)(NSError *))block session:(CK2FileTransferSession *)session;
+- (id)initWithEnumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block session:(CK2FileTransferSession *)session;
 
 @end
 
@@ -135,8 +137,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:completionBlock];
-            [protocolClass startEnumeratingContentsOfURL:url includingPropertiesForKeys:keys options:mask client:client usingBlock:block];
+            CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithEnumerationBlock:block
+                                                                                    completionBlock:completionBlock
+                                                                                            session:self];
+            
+            [protocolClass startEnumeratingContentsOfURL:url includingPropertiesForKeys:keys options:mask client:client];
+            [client release];
         }
         else if ([url isFileURL])
         {
@@ -442,10 +448,21 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return self;
 }
 
+- (id)initWithEnumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block session:(CK2FileTransferSession *)session;
+{
+    if (self = [self initWithCompletionBlock:block session:session])
+    {
+        _enumerationBlock = [enumBlock copy];
+    }
+    return self;
+}
+
 - (void)finishWithError:(NSError *)error;
 {
     _completionBlock(error);
+    
     [_completionBlock release]; _completionBlock = nil;
+    [_enumerationBlock release]; _enumerationBlock = nil;
     [_session release]; _session = nil;
     
     [self release]; // balances call in -init
@@ -473,6 +490,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     // TODO: bounce message over a suitable thread?
     [[_session delegate] fileTransferSession:_session appendString:info toTranscript:transcript];
+}
+
+- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+{
+    if (_enumerationBlock)
+    {
+        _enumerationBlock(url);
+    }
 }
 
 @end
