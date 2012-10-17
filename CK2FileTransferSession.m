@@ -300,6 +300,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             }
             
             progressBlock((error ? 0 : [data length]), error);
+            [data release];
         });
     }
 }
