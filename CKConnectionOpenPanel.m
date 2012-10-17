@@ -43,7 +43,7 @@
 {
 	NSParameterAssert(session);
     
-    if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
+    if (self = [self initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
 		_session = [session retain];
         [self setDirectoryURL:url];
