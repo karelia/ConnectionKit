@@ -99,7 +99,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
     [request curl_setPostTransferCommands:commands];
     
-    CK2FTPProtocol *protocol = [self sendRequest:request client:client dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
+    __block CK2FTPProtocol *protocol = [self sendRequest:request client:client dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
         if (error)
         {
             [client fileTransferProtocol:protocol didFailWithError:error];
@@ -123,7 +123,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     
     NSMutableData *totalData = [[NSMutableData alloc] init];
     
-    CK2FTPProtocol *protocol = [self sendRequest:request client:client dataHandler:^(NSData *data) {
+    __block CK2FTPProtocol *protocol = [self sendRequest:request client:client dataHandler:^(NSData *data) {
         [totalData appendData:data];
     } completionHandler:^(CURLHandle *handle, NSError *error) {
         
@@ -360,7 +360,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
     
-    CK2FTPProtocol *protocol = [self sendRequest:request client:client progressBlock:^(NSUInteger bytesWritten) {
+    __block CK2FTPProtocol *protocol = [self sendRequest:request client:client progressBlock:^(NSUInteger bytesWritten) {
         
         if (bytesWritten == 0) atEnd = YES;
         if (bytesWritten && progressBlock) progressBlock(bytesWritten);
