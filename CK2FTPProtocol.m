@@ -75,22 +75,12 @@
 
 + (CK2FTPProtocol *)sendRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client dataHandler:(void (^)(NSData *data))dataBlock completionHandler:(void (^)(CURLHandle *handle, NSError *error))handler;
 {
-    CK2FTPProtocol *transfer = [[self alloc] initWithRequest:request client:client dataHandler:dataBlock completionHandler:^(CURLHandle *handle, NSError *error) {
-        
-        handler(handle, error);
-    }];
-    
-    return [transfer autorelease];
+    return [[[self alloc] initWithRequest:request client:client dataHandler:dataBlock completionHandler:handler] autorelease];
 }
 
 + (CK2FTPProtocol *)sendRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(CURLHandle *handle, NSError *error))handler;
 {
-    CK2FTPProtocol *transfer = [[self alloc] initWithRequest:request client:client progressBlock:progressBlock completionHandler:^(CURLHandle *handle, NSError *error) {
-        
-        handler(handle, error);
-    }];
-    
-    return [transfer autorelease];
+    return [[[self alloc] initWithRequest:request client:client progressBlock:progressBlock completionHandler:handler] autorelease];
 }
 
 + (CK2FTPProtocol *)executeCustomCommands:(NSArray *)commands
