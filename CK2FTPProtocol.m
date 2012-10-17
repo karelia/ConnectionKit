@@ -57,8 +57,15 @@
     // CURL is very particular about whether URLs passed to it have directory terminator or not
     if (directory != CFURLHasDirectoryPath((CFURLRef)url))
     {
-        NSString *lastComponent = [url lastPathComponent];
-        url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:lastComponent isDirectory:directory];
+        if (directory)
+        {
+            url = [url URLByAppendingPathComponent:@""];
+        }
+        else
+        {
+            NSString *lastComponent = [url lastPathComponent];
+            url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:lastComponent isDirectory:directory];
+        }
     }
     
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
