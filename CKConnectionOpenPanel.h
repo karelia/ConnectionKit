@@ -45,6 +45,17 @@ enum {
 
 @interface CKConnectionOpenPanel : NSWindowController 
 {
+	IBOutlet NSArrayController *directoryContents;
+    IBOutlet NSPathControl  *pathControl;
+	IBOutlet NSTableView *tableView;
+    IBOutlet NSButton *openButton;
+    IBOutlet NSButton *openCancelButton;
+
+	IBOutlet NSWindow       *createFolder;
+    IBOutlet NSButton       *createFolderButton;
+    IBOutlet NSTextField    *folderNameField;
+    
+  @private
 	CK2FileTransferSession  *_session;
     NSURL                   *_directory;
     
@@ -59,13 +70,6 @@ enum {
 	NSArray     *_allowedFileTypes;
     
 	BOOL isLoading;
-	NSString *newFolderName;
-	IBOutlet NSArrayController *directoryContents;
-    IBOutlet NSPathControl  *pathControl;
-	IBOutlet NSWindow *createFolder;
-	IBOutlet NSTableView *tableView;
-    IBOutlet NSButton *openButton;
-    IBOutlet NSButton *openCancelButton;
 	BOOL isSelectionValid;
 	NSModalSession myModalSession;
 	BOOL myKeepRunning;
@@ -76,7 +80,7 @@ enum {
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
 - (IBAction)goToFolder:(NSPathControl *)sender;
-- (IBAction) createNewFolder: (id) sender;
+- (IBAction)createNewFolder:(NSButton *)sender;
 
 @property(nonatomic, readonly) CK2FileTransferSession *session;
 @property(nonatomic, copy) NSURL *directoryURL;
@@ -93,8 +97,6 @@ enum {
 - (BOOL)isLoading;
 
 - (NSArray *)URLs;
-- (NSString *)newFolderName;
-- (void)setNewFolderName:(NSString *)aNewFolderName;
 - (BOOL)isSelectionValid;
 - (void)setIsSelectionValid:(BOOL)flag;
 

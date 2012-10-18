@@ -183,49 +183,6 @@
 	[[NSApplication sharedApplication] runModalForWindow: createFolder];
 }
 
-- (IBAction) createNewFolder: (id) sender
-{
-	[[NSApplication sharedApplication] stopModal];
-	[createFolder orderOut: sender];
-	
-	if ([sender tag] == NSOKButton)
-	{
-		//check that a folder with the same name does not exiss
-		//
-		BOOL containsObject = NO;
-		
-		NSURL *url = [[self directoryURL] URLByAppendingPathComponent:[self newFolderName] isDirectory:YES];
-        
-        NSEnumerator *theEnum = [[directoryContents arrangedObjects] objectEnumerator];
-		id currentObject = nil;
-		
-		while ((currentObject = [theEnum nextObject]) && !containsObject)
-			containsObject = [[currentObject objectForKey: @"fileName"] isEqualToString: [self newFolderName]];
-		
-		if (!containsObject)
-		{
-            [[self session] createDirectoryAtURL:url withIntermediateDirectories:NO completionHandler:^(NSError *error) {
-                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                    if (error)
-                    {
-                        [self presentError:error];
-                    }
-                    else
-                    {
-                        [self setDirectoryURL:url selectFile:url completionHandler:nil];
-                    }
-                }];
-            }];
-		}
-		else
-		{  
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
-                [self setDirectoryURL:url selectFile:nil completionHandler:nil];
-            }];
-		}
-	}
-}
-
 - (IBAction)goToFolder:(NSPathControl *)sender
 {
     NSPathComponentCell *cell = [sender clickedPathComponentCell];
@@ -352,32 +309,11 @@
 }
 
 //=========================================================== 
-//  newFolderName 
-//=========================================================== 
-- (NSString *)newFolderName
-{
-	//NSLog(@"in -newFolderName, returned newFolderName = %@", newFolderName);
-	
-	return [[newFolderName retain] autorelease]; 
-}
-
-- (void)setNewFolderName:(NSString *)aNewFolderName
-{
-	//NSLog(@"in -setNewFolderName:, old value of newFolderName: %@, changed to: %@", newFolderName, aNewFolderName);
-	
-	if (newFolderName != aNewFolderName) {
-		[newFolderName release];
-		newFolderName = [aNewFolderName retain];
-	}
-}
-
-//=========================================================== 
 // dealloc
 //=========================================================== 
 - (void)dealloc
 {
 	[tableView setDelegate: nil];
-	[self setNewFolderName:nil];
 	[self setPrompt:nil];
 	[self setAllowedFileTypes:nil];
     
@@ -615,6 +551,60 @@
     }
     
 	[self autorelease];
+}
+
+#pragma mark Creating a Folder
+
+- (void)createNewFolder:(NSButton *)sender;
+{
+	[[NSApplication sharedApplication] stopModal];
+	[createFolder orderOut:sender];
+	
+	if ([sender tag] == NSOKButton)
+	{
+		//check that a folder with the same name does not exiss
+		//
+		BOOL containsObject = NO;
+		
+        NSString *folderName = [folderNameField stringValue];
+		NSURL *url = [[self directoryURL] URLByAppendingPathComponent:folderName isDirectory:YES];
+        
+        NSEnumerator *theEnum = [[directoryContents arrangedObjects] objectEnumerator];
+		id currentObject = nil;
+		
+		while ((currentObject = [theEnum nextObject]) && !containsObject)
+			containsObject = [[currentObject objectForKey:@"fileName"] isEqualToString:folderName];
+		
+		if (!containsObject)
+		{
+            [[self session] createDirectoryAtURL:url withIntermediateDirectories:NO completionHandler:^(NSError *error) {
+                [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                    if (error)
+                    {
+                        [self presentError:error];
+                    }
+                    else
+                    {
+                        [self setDirectoryURL:url selectFile:url completionHandler:nil];
+                    }
+                }];
+            }];
+		}
+		else
+		{
+            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+                [self setDirectoryURL:url selectFile:nil completionHandler:nil];
+            }];
+		}
+	}
+}
+
+- (void)controlTextDidChange:(NSNotification *)notification;
+{
+    if ([notification object] == folderNameField)
+    {
+        [createFolderButton setEnabled:[[folderNameField stringValue] length] > 0];
+    }
 }
 
 #pragma mark ----=NStableView delegate=----
