@@ -7,11 +7,7 @@
 //
 
 #import "CK2FileTransferSession.h"
-
-#import "CKConnectionRegistry.h"
 #import "CK2FileTransferProtocol.h"
-
-#import <CURLHandle/CURLHandle.h>
 
 
 @interface CK2FileTransferClient : NSObject <CK2FileTransferProtocolClient>
