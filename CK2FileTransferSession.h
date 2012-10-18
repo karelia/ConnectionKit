@@ -16,13 +16,7 @@
 
 @interface CK2FileTransferSession : NSObject <NSURLAuthenticationChallengeSender>
 {
-@private
-    NSURLRequest        *_request;
-    
-    // Auth
-    NSURLCredential     *_credential;
-    NSOperationQueue    *_opsAwaitingAuth;
-    
+  @private
     id <CK2FileTransferSessionDelegate> _delegate;
 }
 

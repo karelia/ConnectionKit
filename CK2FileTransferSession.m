@@ -36,69 +36,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @implementation CK2FileTransferSession
 
-#pragma mark Lifecycle
-
-- (void)dealloc
-{
-    [_request release];
-    [_credential release];
-    [_opsAwaitingAuth release];
-    
-    [super dealloc];
-}
-
-- (void)doAuthForURL:(NSURL *)url completionHandler:(void (^)(void))block;
-{
-    // First demand auth
-    if (!_opsAwaitingAuth)
-    {
-        _opsAwaitingAuth = [[NSOperationQueue alloc] init];
-        [_opsAwaitingAuth setSuspended:YES];
-        
-        NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
-        
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
-                                                                            port:[[url port] integerValue]
-                                                                        protocol:protocol
-                                                                           realm:nil
-                                                            authenticationMethod:NSURLAuthenticationMethodDefault];
-        
-        NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
-        
-        NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                             proposedCredential:credential
-                                                                                           previousFailureCount:0
-                                                                                                failureResponse:nil
-                                                                                                          error:nil
-                                                                                                         sender:self];
-        
-        [space release];
-        
-        [[self delegate] fileTransferSession:self didReceiveAuthenticationChallenge:challenge];
-        [challenge release];
-    }
-    
-    
-    // Will run pretty much immediately once we're authenticated
-    [_opsAwaitingAuth addOperationWithBlock:block];
-}
-
 #pragma mark NSURLAuthenticationChallengeSender
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    _credential = [credential copy];
-    [_opsAwaitingAuth setSuspended:NO];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [_opsAwaitingAuth setSuspended:NO];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [NSException raise:NSInvalidArgumentException format:@"Don't support cancelling FTP session auth yet"];
 }
 
 #pragma mark Discovering Directory Contents
