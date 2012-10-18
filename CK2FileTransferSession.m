@@ -144,42 +144,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             [protocolClass startEnumeratingContentsOfURL:url includingPropertiesForKeys:keys options:mask client:client];
             [client release];
         }
-        else if ([url isFileURL])
-        {
-            // Fall back to standard file manager                
-            NSFileManager *manager = [[NSFileManager alloc] init];
-            
-            // Enumerate contents
-            NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
-                
-                NSLog(@"enumeration error: %@", error);
-                return YES;
-            }];
-            
-            BOOL reportedDirectory = NO;
-            
-            NSURL *aURL;
-            while (aURL = [enumerator nextObject])
-            {
-                // Report the main directory first
-                if (!reportedDirectory)
-                {
-                    block(url);
-                    reportedDirectory = YES;
-                }
-                
-                block(aURL);
-            }
-            
-            [manager release];
-            completionBlock(nil);
-        }
         else
         {
-            // I thought NSFileManager would give us back a nice NSURLErrorUnsupportedURL error or similar if fed a non-file URL, but in practice it just reports that the file doesn't exist, which isn't ideal. So do our own handling instead
-            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
-            NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-            completionBlock(error);
+            completionBlock([self unsupportedURLErrorWithURL:url]);
         }
     }];
 }
@@ -199,116 +166,52 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         }
         else
         {            
-            NSFileManager *manager = [[NSFileManager alloc] init];
-            
-            NSError *error;
-            if ([manager createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
-            {
-                error = nil;
-            }
-            else if (!error)
-            {
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-            }
-            
-            handler(error);
-            [manager release];
+            handler([self unsupportedURLErrorWithURL:url]);
         }
     }];
 }
 
 - (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    if (![url isFileURL])
-    {
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
-        [request setHTTPBody:data];
-        
-        [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
-        [request release];
-    }
-    else
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            
-            // TODO: Use a stream or similar to write incrementally and report progress
-            NSError *error;
-            if ([data writeToURL:url options:0 error:&error])
-            {
-                error = nil;
-            }
-            else if (!error)
-            {
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
-            }
-            
-            progressBlock((error ? 0 : [data length]), error);
-        });
-    }
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
+    [request setHTTPBody:data];
+    
+    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
+    [request release];
 }
 
 - (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
-    if (![destinationURL isFileURL])
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
+    
+    // Read the data using an input stream if possible
+    NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
+    if (stream)
     {
-        NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
-        
-        // Read the data using an input stream if possible
-        NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
-        if (stream)
-        {
-            [request setHTTPBodyStream:stream];
-            [stream release];
-        }
-        else
-        {
-            NSError *error;
-            NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
-            
-            if (data)
-            {
-                [request setHTTPBody:data];
-                [data release];
-            }
-            else
-            {
-                [request release];
-                if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-                progressBlock(0, error);
-                return;
-            }
-        }
-        
-        [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
-        [request release];
+        [request setHTTPBodyStream:stream];
+        [stream release];
     }
     else
     {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            
-            NSError *error;
-            NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
-            
-            if (data)
-            {
-                if ([data writeToURL:destinationURL options:0 error:&error])
-                {
-                    error = nil;
-                }
-                else if (!error)
-                {
-                    error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
-                }
-            }
-            else if (!error)
-            {
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-            }
-            
-            progressBlock((error ? 0 : [data length]), error);
+        NSError *error;
+        NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
+        
+        if (data)
+        {
+            [request setHTTPBody:data];
             [data release];
-        });
+        }
+        else
+        {
+            [request release];
+            if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
+            progressBlock(0, error);
+            return;
+        }
     }
+    
+    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
+    [request release];
 }
 
 - (void)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
@@ -329,7 +232,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         }
         else
         {
-            
+            progressBlock(0, [self unsupportedURLErrorWithURL:[request URL]]);
         }
     }];
 }
@@ -347,20 +250,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         }
         else
         {
-            NSFileManager *manager = [[NSFileManager alloc] init];
-            
-            NSError *error;
-            if ([manager removeItemAtURL:url error:&error])
-            {
-                error = nil;
-            }
-            else if (!error)
-            {
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
-            }
-            
-            handler(error);
-            [manager release];
+            handler([self unsupportedURLErrorWithURL:url]);
         }
     }];
 }
@@ -381,17 +271,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         }
         else
         {
-            NSError *error;
-            if ([url setResourceValues:keyedValues error:&error])
-            {
-                error = nil;
-            }
-            else if (!error)
-            {
-                error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:nil];
-            }
-            
-            handler(error);
+            handler([self unsupportedURLErrorWithURL:url]);
         }
     }];
 }
@@ -430,6 +310,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithCompletionBlock:block session:self];
     return [client autorelease];
+}
+
+- (NSError *)unsupportedURLErrorWithURL:(NSURL *)url;
+{
+    NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+    return [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
 }
 
 @end

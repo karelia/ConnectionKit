@@ -10,6 +10,7 @@
 
 #import "CK2FTPProtocol.h"
 #import "CK2SFTPProtocol.h"
+#import "CK2FileProtocol.h"
 
 
 @implementation CK2FileTransferProtocol
@@ -24,7 +25,7 @@
         queue = dispatch_queue_create("CK2FileTransferSystem", DISPATCH_QUEUE_SERIAL);
         
         // Register built-in protocols too
-        sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
+        sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2FileProtocol class], [CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
     });
     
     return queue;
