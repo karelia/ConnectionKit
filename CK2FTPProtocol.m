@@ -146,7 +146,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                 }
             }
             
-            [client fileTransferProtocol:self didDiscoverItemAtURL:resolved];
+            [client fileTransferProtocol:protocol didDiscoverItemAtURL:resolved];
             
             
             // Process the data to make a directory listing
