@@ -1,9 +1,6 @@
 /* authorise */
 "%@\nWhat would you like to do?" = "%@\nWas möchten Sie tun?";
 
-/* ConnectionOpenPanel */
-"A Connection Error Occurred" = "Ein Verbindungsfehler ist aufgetreten";
-
 /* FTP Abort */
 "Action Aborted. Local Error" = "Aktion abgebrochen. Lokaler Fehler";
 
@@ -60,9 +57,6 @@
 
 /* filesize: exabytes */
 "EB" = "EB";
-
-/* Directory Parsing Error */
-"Error parsing directory listing" = "Fehler beim Lesen der Verzeichnisstruktur";
 
 /* FTP no data streams available */
 "Exhausted all connection types to server. Please contact server administrator" = "Alle Verbindungsarten zum Server wurden versucht. Kontaktieren Sie den Serveradministrator.";
@@ -132,14 +126,14 @@
 /* FTP Error */
 "Not Logged In" = "Nicht eingeloggt";
 
-/* OK */
-"OK" = "OK";
-
 /* filesize: petabytes */
 "PB" = "PB";
 
 /* Permission Denied */
 "Permission Denied" = "Zugriff verweigert";
+
+/* ConnectionOpenPanel */
+"Please check your settings." = "Bitte prüfen Sie Ihre Einstellungen.";
 
 /* config
    error */

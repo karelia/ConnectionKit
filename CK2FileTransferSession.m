@@ -405,7 +405,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
     Class protocolClass = [CK2FileTransferProtocol classForURL:baseURL];
-    if (!protocolClass) protocolClass = [CK2FileTransferProtocol class];
+    if (!protocolClass)
+    {
+        protocolClass = [CK2FileTransferProtocol class];
+        if ([path isAbsolutePath])
+        {
+            // On 10.6, file URLs sometimes behave strangely when combined with an absolute path. Force it to be resolved
+            if ([baseURL isFileURL]) [baseURL absoluteString];
+        }
+    }
     return [protocolClass URLWithPath:path relativeToURL:baseURL];
 }
 

@@ -78,6 +78,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 //  http://example.com/relative/path
 //  ftp://example.com/relative/path
 //  ssh://example.com/~/relative/path
+//
+// Takes care of the file URL bug on 10.6
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 
