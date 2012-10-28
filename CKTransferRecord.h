@@ -73,7 +73,7 @@
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
 
-+ (id)recordWithName:(NSString *)name size:(unsigned long long)size;
++ (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
 - (void)cancel:(id)sender;
 

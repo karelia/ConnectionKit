@@ -39,7 +39,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 - (void)setLogsErrors:(BOOL)flag;
 
 //Shared Accessors
-+ (id)sharedProxy;
++ (instancetype)sharedProxy;
 
 //Getting Keychain Items
 - (EMGenericKeychainItem *)genericKeychainItemForService:(NSString *)serviceNameString

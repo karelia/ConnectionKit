@@ -33,7 +33,7 @@
 @interface KTLogger (Private)
 
 - (id)init;
-+ (id)sharedLogger;
++ (instancetype)sharedLogger;
 - (void)logFile:(char *)file lineNumber:(NSInteger)line loggingDomain:(NSString *)domain loggingLevel:(NSInteger)level message:(NSString *)log;
 - (void)setLoggingLevel:(KTLoggingLevel)level forDomain:(NSString *)domain;
 
@@ -59,7 +59,7 @@ static NSString *KTLevelMap[] = {
 @implementation KTLogger
 
 
-+ (id)sharedLogger
++ (instancetype)sharedLogger
 {
 	if (nil == _sharedLogger)
 	{

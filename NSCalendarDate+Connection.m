@@ -42,7 +42,7 @@
 	return newDate;
 }
 
-+ (id)calendarDateWithString:(NSString *)string
++ (instancetype)calendarDateWithString:(NSString *)string
 {
 	NSCalendarDate *date = nil;
 	// Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123

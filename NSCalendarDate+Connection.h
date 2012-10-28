@@ -41,7 +41,7 @@
 	 Sun Nov  6 08:49:37 1994       ; ANSI C's asctime() format
 	 2006-02-05T23:22:39Z			; ISO 8601 date format
 	 */
-+ (id)calendarDateWithString:(NSString *)string;
++ (instancetype)calendarDateWithString:(NSString *)string;
 
 - (NSString *)zuluFormat;
 

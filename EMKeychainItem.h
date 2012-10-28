@@ -51,10 +51,10 @@
 
 - (NSString *)serviceName;
 
-+ (id)genericKeychainItem:(SecKeychainItemRef)item 
-		   forServiceName:(NSString *)serviceName
-				 username:(NSString *)username
-				 password:(NSString *)password;
++ (instancetype)genericKeychainItem:(SecKeychainItemRef)item
+                     forServiceName:(NSString *)serviceName
+                           username:(NSString *)username
+                           password:(NSString *)password;
 - (BOOL)setServiceName:(NSString *)newServiceName;
 @end
 
@@ -67,13 +67,13 @@
 }
 
 
-+ (id)internetKeychainItem:(SecKeychainItemRef)item
-				 forServer:(NSString *)server
-				  username:(NSString *)username
-				  password:(NSString *)password
-					  path:(NSString *)path
-					  port:(NSInteger)port
-				  protocol:(SecProtocolType)protocol;
++ (instancetype)internetKeychainItem:(SecKeychainItemRef)item
+                           forServer:(NSString *)server
+                            username:(NSString *)username
+                            password:(NSString *)password
+                                path:(NSString *)path
+                                port:(NSInteger)port
+                            protocol:(SecProtocolType)protocol;
 
 - (NSString *)server;
 - (BOOL)setServer:(NSString *)newServer;

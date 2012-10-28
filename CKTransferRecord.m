@@ -63,7 +63,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (CKTransferRecord *)parent { return _parent; }
 
-+ (id)recordWithName:(NSString *)name size:(unsigned long long)size
++ (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size
 {
 	return [[[CKTransferRecord alloc] initWithName:name size:size] autorelease];
 }

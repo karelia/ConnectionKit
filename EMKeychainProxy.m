@@ -30,7 +30,7 @@ static EMKeychainProxy *sharedProxy = nil;
 
 #pragma mark -
 #pragma mark Shared Singleton
-+ (id)sharedProxy
++ (instancetype)sharedProxy
 {
 	if (!sharedProxy)
 		[[EMKeychainProxy alloc] init];

@@ -77,7 +77,7 @@ typedef enum {
 	IBOutlet NSTableView	*oDomains;
 }
 
-+ (id)sharedLogger;
++ (instancetype)sharedLogger;
 
 // Default is to log to the console (stderr)
 + (void)setLogToConsole:(BOOL)flag;
