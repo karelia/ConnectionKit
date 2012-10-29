@@ -35,8 +35,4 @@
 - (NSString *)base64Encoding;
 - (NSString *)descriptionAsUTF8String;
 
-// gzip
-- (NSData *)inflate;
-- (NSData *)deflate;
-
 @end
