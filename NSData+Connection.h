@@ -39,7 +39,4 @@
 - (NSData *)inflate;
 - (NSData *)deflate;
 
-- (NSRange)rangeOfData:(NSData *)data;
-- (NSRange)rangeOfData:(NSData *)data range:(NSRange)range;
-
 @end
