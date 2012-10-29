@@ -839,6 +839,15 @@
 
 - (void)connection:(CKAbstractConnection *)aConn didReceiveContents:(NSArray *)contents ofDirectory:(NSString *)dirPath error:(NSError *)error
 {
+    // An error is most likely the folder not existing, so try loading up the home directory
+    if (!contents && error && [dirPath length] > 0)
+    {
+        [aConn changeToDirectory:@""];
+        [aConn directoryContents];
+        return;
+    }
+    
+    
     // Populate the popup button used for navigating back to ancestor directories.
     NSArray *pathComponents = [dirPath pathComponents];
     if ([pathComponents count] > 1 &&

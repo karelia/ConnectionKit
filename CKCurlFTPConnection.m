@@ -209,12 +209,12 @@
     return result;
 }
 
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
-    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path posixPermissions:permissions];
+    return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path openingPosixPermissions:permissions];
 }
 
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path posixPermissions:(NSNumber *)permissions;
+- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
     NSParameterAssert(data);
     
@@ -224,9 +224,9 @@
     path = [self canonicalPathForPath:path];
     
     
-    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:permissions:)
+    NSInvocation *invocation = [NSInvocation invocationWithSelector:@selector(threaded_writeData:toPath:transferRecord:)
                                                              target:self
-                                                          arguments:[NSArray arrayWithObjects:data, path, result, permissions, nil]];
+                                                          arguments:[NSArray arrayWithObjects:data, path, result, nil]];
     
     NSInvocationOperation *op = [[NSInvocationOperation alloc] initWithInvocation:invocation];
     [self enqueueOperation:op];
@@ -236,18 +236,11 @@
     return result;
 }
 
-- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record permissions:(NSNumber *)permissions;
+- (void)threaded_writeData:(NSData *)data toPath:(NSString *)path transferRecord:(CKTransferRecord *)record
 {
     NSError *error;
     BOOL result = [_session createFileAtPath:path contents:data withIntermediateDirectories:NO error:&error];
     
-    if (result && permissions)
-    {
-        result = [_session setAttributes:[NSDictionary dictionaryWithObject:permissions forKey:NSFilePosixPermissions]
-                            ofItemAtPath:path
-                                   error:&error];
-    }
-        
     if ([[self delegate] respondsToSelector:@selector(connection:uploadDidFinish:error:)])
     {
         id proxy = [[UKMainThreadProxy alloc] initWithTarget:[self delegate]];
@@ -291,6 +284,27 @@
         [proxy connection:self didCreateDirectory:path error:error];
         [proxy release];
     }
+}
+
+- (void)setPermissions:(unsigned long)permissions forFile:(NSString *)path;
+{
+    NSOperation *op = [NSBlockOperation blockOperationWithBlock:^{
+        
+        NSError *error;
+        BOOL result = [_session setAttributes:[NSDictionary dictionaryWithObject:@(permissions) forKey:NSFilePosixPermissions]
+                                 ofItemAtPath:path
+                                        error:&error];
+        
+        id delegate = [self delegate];
+        if ([delegate respondsToSelector:@selector(connection:didSetPermissionsForFile:error:)])
+        {
+            id proxy = [[UKMainThreadProxy alloc] initWithTarget:delegate];
+            [proxy connection:self didSetPermissionsForFile:path error:(result ? nil : error)];
+            [proxy release];
+        }
+    }];
+    
+    [self enqueueOperation:op];
 }
 
 - (void)deleteFile:(NSString *)path
