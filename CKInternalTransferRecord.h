@@ -52,12 +52,12 @@
 	} myFlags;
 }
 
-+ (id)recordWithLocal:(NSString *)localPath
-				 data:(NSData *)data
-			   offset:(unsigned long long)offset
-			   remote:(NSString *)remote
-			 delegate:(id)delegate
-			 userInfo:(id)ui;
++ (instancetype)recordWithLocal:(NSString *)localPath
+                           data:(NSData *)data
+                         offset:(unsigned long long)offset
+                         remote:(NSString *)remote
+                       delegate:(id)delegate
+                       userInfo:(id)ui;
 
 - (id)initWithLocal:(NSString *)localPath
 				 data:(NSData *)data

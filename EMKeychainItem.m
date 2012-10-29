@@ -135,10 +135,10 @@
 	[super dealloc];
 }
 
-+ (id)genericKeychainItem:(SecKeychainItemRef)item 
-		   forServiceName:(NSString *)serviceName
-				 username:(NSString *)username
-				 password:(NSString *)password
++ (instancetype)genericKeychainItem:(SecKeychainItemRef)item
+                     forServiceName:(NSString *)serviceName
+                           username:(NSString *)username
+                           password:(NSString *)password
 {
 	return [[[EMGenericKeychainItem alloc] initWithCoreKeychainItem:item serviceName:serviceName username:username password:password] autorelease];
 }
@@ -186,13 +186,13 @@
 	[super dealloc];
 }
 
-+ (id)internetKeychainItem:(SecKeychainItemRef)item
-				 forServer:(NSString *)server
-				  username:(NSString *)username
-				  password:(NSString *)password
-					  path:(NSString *)path
-					  port:(NSInteger)port
-				  protocol:(SecProtocolType)protocol
++ (instancetype)internetKeychainItem:(SecKeychainItemRef)item
+                           forServer:(NSString *)server
+                            username:(NSString *)username
+                            password:(NSString *)password
+                                path:(NSString *)path
+                                port:(NSInteger)port
+                            protocol:(SecProtocolType)protocol
 {
 	return [[[EMInternetKeychainItem alloc] initWithCoreKeychainItem:item server:server username:username password:password path:path port:port protocol:protocol] autorelease];
 }
