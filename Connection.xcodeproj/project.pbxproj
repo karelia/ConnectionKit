@@ -315,8 +315,6 @@
 		79CFD83609F7048400172CDD /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
 		79CFD83909F7048400172CDD /* NNTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNTPConnection.h; sourceTree = "<group>"; };
 		79CFD83A09F7048400172CDD /* NNTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNTPConnection.m; sourceTree = "<group>"; };
-		79CFD83B09F7048400172CDD /* ONBSocket.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ONBSocket.h; sourceTree = "<group>"; };
-		79CFD83C09F7048400172CDD /* ONBSocket.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ONBSocket.m; sourceTree = "<group>"; };
 		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
 		79CFD84209F7048400172CDD /* RunLoopForwarder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunLoopForwarder.m; sourceTree = "<group>"; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
@@ -641,7 +639,6 @@
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
 				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
-				79CFD12009F7024000172CDD /* Socket with SSL Capabilities */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
 			);
 			name = Connections;
@@ -655,15 +652,6 @@
 				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
 			name = WebDAV;
-			sourceTree = "<group>";
-		};
-		79CFD12009F7024000172CDD /* Socket with SSL Capabilities */ = {
-			isa = PBXGroup;
-			children = (
-				79CFD83B09F7048400172CDD /* ONBSocket.h */,
-				79CFD83C09F7048400172CDD /* ONBSocket.m */,
-			);
-			name = "Socket with SSL Capabilities";
 			sourceTree = "<group>";
 		};
 		79CFD8A009F705B400172CDD /* Utility */ = {
