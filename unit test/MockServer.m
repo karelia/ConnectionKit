@@ -227,7 +227,7 @@
     NSString* string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     MockServerLog(@"got data %@", string);
 
-    NSString* output = @"HTTP/1.1 200 OK\r\nDate: Tue, 06 Nov 2012 14:21:32 GMT\r\nServer: Apache/2.2.14 (Ubuntu)\r\nVary: Accept-Encoding\r\nContent-Type: text/html; charset=iso-8859-1\r\n<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
+    NSString* output = @"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
 
     [self.outputData appendData:[output dataUsingEncoding:NSUTF8StringEncoding]];
     [self performSelector:@selector(processOutput) withObject:nil afterDelay:0.0];
