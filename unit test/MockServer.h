@@ -16,6 +16,8 @@
 @property (readonly, atomic) BOOL running;
 @property (readonly, nonatomic) NSUInteger port;
 
++ (id)closeResponse;
+
 + (MockServer*)serverWithResponses:(NSDictionary*)responses;
 + (MockServer*)serverWithPort:(NSUInteger)port responses:(NSDictionary*)responses;
 

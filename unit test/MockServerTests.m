@@ -20,10 +20,13 @@
 - (void)testServer
 {
     NSString* expectedRequest = @"GET /index.html HTTP/1.1";
+    NSString* expectedResponse = @"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n";
     NSString* expectedContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
-    NSString* expectedResponse = [NSString stringWithFormat:@"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n%@", expectedContent];
 
-    MockServer* server = [MockServer serverWithPort:0 responses:@{ expectedRequest : expectedResponse }];
+    id closeCommand = [MockServer closeResponse];
+
+    MockServer* server = [MockServer serverWithPort:0 responses:@{ expectedRequest : @[ expectedResponse, expectedContent, closeCommand] }];
+    
     STAssertNotNil(server, @"got server");
     [server start];
     BOOL started = server.running;

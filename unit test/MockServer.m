@@ -35,6 +35,7 @@
 @synthesize output = _output;
 @synthesize listener = _listener;
 
+
 #pragma mark - Object Lifecycle
 
 + (MockServer*)serverWithResponses:(NSDictionary*)responses
@@ -187,15 +188,40 @@
             NSRange range = [request rangeOfString:key options:NSAnchoredSearch];
             if (range.location != NSNotFound)
             {
-                MockServerLog(@"wrote response %@", obj);
-                [self.outputData appendData:[obj dataUsingEncoding:NSUTF8StringEncoding]];
-                [self performSelector:@selector(processOutput) withObject:nil afterDelay:0.0];
+                NSArray* commands = obj;
+
+                id closeCommand = [NSNull null];
+                for (NSString* command in commands)
+                {
+                    if (command == closeCommand)
+                    {
+                        [self performSelector:@selector(processClose) withObject:nil afterDelay:0.0];
+                    }
+                    else
+                    {
+                        [self performSelector:@selector(queueOutput:) withObject:command afterDelay:0.0];
+                    }
+                }
                 *stop = YES;
             }
         }];
 
         [request release];
     }
+}
+
+- (void)processClose
+{
+    MockServerLog(@"closed connection");
+    [self.output close];
+    [self.input close];
+}
+
+- (void)queueOutput:(id)string
+{
+    MockServerLog(@"queued output %@", string);
+    [self.outputData appendData:[string dataUsingEncoding:NSUTF8StringEncoding]];
+    [self processOutput];
 }
 
 - (void)processOutput
@@ -205,8 +231,6 @@
     {
         NSUInteger written = [self.output write:[self.outputData bytes] maxLength:bytesToWrite];
         [self.outputData replaceBytesInRange:NSMakeRange(0, written) withBytes:nil length:0];
-        [self.output close];
-        [self.input close];
 
         MockServerLog(@"wrote %ld bytes", (long)written);
     }
@@ -455,6 +479,13 @@ static void callbackAcceptConnection(CFSocketRef s, CFSocketCallBackType type, C
     }
 
     return result;
+}
+
+#pragma mark - Special Responses
+
++ (id)closeResponse
+{
+    return [NSNull null];
 }
 
 @end
