@@ -187,7 +187,7 @@
             }
             else
             {
-                NSData* data = [NSData dataWithBytesNoCopy:buffer length:bytesRead];
+                NSData* data = [NSData dataWithBytes:buffer length:bytesRead];
                 [self processInput:data];
             }
             break;
@@ -196,18 +196,7 @@
         case NSStreamEventHasSpaceAvailable:
         {
             MockServerAssert(aStream == self.output);     // should never happen for the input stream
-            NSUInteger bytesToWrite = [self.outputData length];
-            if (bytesToWrite)
-            {
-                NSUInteger written = [self.output write:[self.outputData bytes] maxLength:bytesToWrite];
-                [self.outputData replaceBytesInRange:NSMakeRange(0, written) withBytes:nil length:0];
-
-                MockServerLog(@"wrote %ld bytes", (long)written);
-            }
-            else
-            {
-                MockServerLog(@"nothing to write");
-            }
+            [self processOutput];
             break;
         }
 
@@ -238,8 +227,30 @@
     NSString* string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
     MockServerLog(@"got data %@", string);
 
-    NSString* output = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n<html><head>\n<title>400 Bad Request</title>\n</head><body>\n<h1>Bad Request</h1>\n<p>Your browser sent a request that this server could not understand.<br />\n</p>\n<hr>\n<address>Apache/2.2.14 (Ubuntu) Server at downloads.elegantchaos.com Port 80</address>\n</body></html>";
+    NSString* output = @"HTTP/1.1 200 OK\r\nDate: Tue, 06 Nov 2012 14:21:32 GMT\r\nServer: Apache/2.2.14 (Ubuntu)\r\nVary: Accept-Encoding\r\nContent-Type: text/html; charset=iso-8859-1\r\n<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
+
     [self.outputData appendData:[output dataUsingEncoding:NSUTF8StringEncoding]];
+    [self performSelector:@selector(processOutput) withObject:nil afterDelay:0.0];
+    
+    [string release];
+}
+
+- (void)processOutput
+{
+    NSUInteger bytesToWrite = [self.outputData length];
+    if (bytesToWrite)
+    {
+        NSUInteger written = [self.output write:[self.outputData bytes] maxLength:bytesToWrite];
+        [self.outputData replaceBytesInRange:NSMakeRange(0, written) withBytes:nil length:0];
+
+        MockServerLog(@"wrote %ld bytes", (long)written);
+    }
+    else
+    {
+        MockServerLog(@"nothing to write");
+        [self.output close];
+        [self.input close];
+    }
 }
 
 - (void)acceptConnection:(int)fd
@@ -475,7 +486,9 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
     self.exitRunLoop = NO;
     while (!self.exitRunLoop)
     {
-        [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
+        }
     }
 }
 
@@ -487,32 +500,37 @@ static void AcceptCallback(CFSocketRef s, CFSocketCallBackType type, CFDataRef a
 
 - (void)testServer
 {
-    ECTestServer* server = [ECTestServer serverWithPort:10000 responses:@{ @"blah" : @"blah" }];
+    ECTestServer* server = [ECTestServer serverWithPort:0 responses:@{ @"blah" : @"blah" }];
     STAssertNotNil(server, @"got server");
     [server startServer];
+    BOOL started = server.listeningSocket != nil;
+    STAssertTrue(started, @"server started ok");
 
-    NSURL* url = [NSURL URLWithString:@"http://127.0.0.1:10000/index.html"];
-
-    __block NSString* string = nil;
-
-    [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url] queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error)
+    if (started)
     {
-        if (error)
-        {
-            NSLog(@"got error %@", error);
-        }
-        else
-        {
-            string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        }
+        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%ld/index.html", (long)server.port]];
 
-        [self timeToExitRunLoop];
-    }];
+        __block NSString* string = nil;
 
-    [self runUntilTimeToExit];
+        [NSURLConnection sendAsynchronousRequest:[NSURLRequest requestWithURL:url] queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error)
+         {
+             if (error)
+             {
+                 NSLog(@"got error %@", error);
+             }
+             else
+             {
+                 string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+             }
 
-    STAssertEqualObjects(string, @"blah", @"wrong response");
-    [string release];
+             [self timeToExitRunLoop];
+         }];
+
+        [self runUntilTimeToExit];
+        
+        STAssertEqualObjects(string, @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n", @"wrong response");
+        [string release];
+    }
 
     server.responses = nil;
 }
