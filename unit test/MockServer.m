@@ -223,7 +223,7 @@
     {
         if ([command isKindOfClass:[NSNumber class]])
         {
-            delay = [command doubleValue];
+            delay += [command doubleValue];
         }
         else
         {
@@ -238,11 +238,8 @@
             }
             
             [self performSelector:method withObject:command afterDelay:delay];
-            delay = 0.0;
-
         }
     }
-
 }
 
 - (void)processOutput

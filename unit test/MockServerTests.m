@@ -25,7 +25,7 @@
 
     id closeCommand = [MockServer closeResponse];
 
-    MockServer* server = [MockServer serverWithPort:0 responses:@{ expectedRequest : @[ expectedResponse, expectedContent, closeCommand] }];
+    MockServer* server = [MockServer serverWithPort:0 responses:@{ expectedRequest : @[ expectedResponse, expectedContent, @(0.1), closeCommand] }];
     
     STAssertNotNil(server, @"got server");
     [server start];
