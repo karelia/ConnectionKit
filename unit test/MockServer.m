@@ -27,13 +27,14 @@
 
 @implementation MockServer
 
-@synthesize running = _running;
-@synthesize port = _port;
-@synthesize responses = _responses;
-@synthesize outputData = _outputData;
 @synthesize input   = _input;
-@synthesize output = _output;
 @synthesize listener = _listener;
+@synthesize output = _output;
+@synthesize outputData = _outputData;
+@synthesize port = _port;
+@synthesize queue = _queue;
+@synthesize responses = _responses;
+@synthesize running = _running;
 
 
 #pragma mark - Object Lifecycle
@@ -59,6 +60,7 @@
         self.port = port;
         self.responses = responses;
         self.outputData = [NSMutableData data];
+        self.queue = [NSOperationQueue currentQueue];
         MockServerLog(@"made server at port %ld", (long) port);
     }
 
@@ -70,7 +72,8 @@
     [_input release];
     [_output release];
     [_outputData release];
-
+    [_queue release];
+    
     [super dealloc];
 }
 
@@ -189,19 +192,7 @@
             if (range.location != NSNotFound)
             {
                 NSArray* commands = obj;
-
-                id closeCommand = [NSNull null];
-                for (NSString* command in commands)
-                {
-                    if (command == closeCommand)
-                    {
-                        [self performSelector:@selector(processClose) withObject:nil afterDelay:0.0];
-                    }
-                    else
-                    {
-                        [self performSelector:@selector(queueOutput:) withObject:command afterDelay:0.0];
-                    }
-                }
+                [self processCommands:obj];
                 *stop = YES;
             }
         }];
@@ -222,6 +213,36 @@
     MockServerLog(@"queued output %@", string);
     [self.outputData appendData:[string dataUsingEncoding:NSUTF8StringEncoding]];
     [self processOutput];
+}
+
+- (void)processCommands:(NSArray*)commands
+{
+    id closeCommand = [NSNull null];
+    NSTimeInterval delay = 0.0;
+    for (id command in commands)
+    {
+        if ([command isKindOfClass:[NSNumber class]])
+        {
+            delay = [command doubleValue];
+        }
+        else
+        {
+            SEL method;
+            if (command == closeCommand)
+            {
+                method = @selector(processClose);
+            }
+            else
+            {
+                method = @selector(queueOutput:);
+            }
+            
+            [self performSelector:method withObject:command afterDelay:delay];
+            delay = 0.0;
+
+        }
+    }
+
 }
 
 - (void)processOutput

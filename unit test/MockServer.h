@@ -13,8 +13,9 @@
 
 @interface MockServer : NSObject<NSStreamDelegate>
 
-@property (readonly, atomic) BOOL running;
 @property (readonly, nonatomic) NSUInteger port;
+@property (strong, nonatomic) NSOperationQueue* queue;
+@property (readonly, atomic) BOOL running;
 
 + (id)closeResponse;
 
