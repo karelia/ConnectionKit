@@ -11,46 +11,18 @@
 
 @interface MockServerTests : SenTestCase
 
-@property (assign, atomic) BOOL exitRunLoop;
-
 @end
 
 @implementation MockServerTests
 
-@synthesize exitRunLoop = _exitRunLoop;
-
 #pragma mark - Tests
-
-// --------------------------------------------------------------------------
-/// Some tests need the run loop to run for a while, for example
-/// to perform an asynchronous network request.
-/// This method runs until something external (such as a
-/// delegate method) sets the exitRunLoop flag.
-// --------------------------------------------------------------------------
-
-- (void)runUntilTimeToExit
-{
-    self.exitRunLoop = NO;
-    while (!self.exitRunLoop)
-    {
-        @autoreleasepool {
-            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
-        }
-    }
-}
-
-- (void)timeToExitRunLoop
-{
-    self.exitRunLoop = YES;
-}
-
 
 - (void)testServer
 {
     MockServer* server = [MockServer serverWithPort:0 responses:@{ @"blah" : @"blah" }];
     STAssertNotNil(server, @"got server");
-    [server startServer];
-    BOOL started = server.listeningSocket != nil;
+    [server start];
+    BOOL started = server.running;
     STAssertTrue(started, @"server started ok");
 
     if (started)
@@ -70,16 +42,14 @@
                  string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
              }
 
-             [self timeToExitRunLoop];
+             [server stop];
          }];
 
-        [self runUntilTimeToExit];
+        [server runUntilStopped];
         
         STAssertEqualObjects(string, @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n", @"wrong response");
         [string release];
     }
-
-    server.responses = nil;
 }
 
 @end

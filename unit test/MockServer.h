@@ -13,7 +13,8 @@
 
 @interface MockServer : NSObject<NSStreamDelegate>
 
-@property (readonly, nonatomic) BOOL running;
+@property (readonly, atomic) BOOL running;
+@property (readonly, nonatomic) NSUInteger port;
 
 + (MockServer*)serverWithResponses:(NSDictionary*)responses;
 + (MockServer*)serverWithPort:(NSUInteger)port responses:(NSDictionary*)responses;

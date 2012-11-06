@@ -21,7 +21,7 @@
 @property (strong, nonatomic) NSMutableData* outputData;
 @property (assign, nonatomic) NSUInteger port;
 @property (strong, nonatomic) NSDictionary* responses;
-@property (assign, nonatomic) BOOL running;
+@property (assign, atomic) BOOL running;
 
 @end
 
@@ -199,14 +199,14 @@
     {
         NSUInteger written = [self.output write:[self.outputData bytes] maxLength:bytesToWrite];
         [self.outputData replaceBytesInRange:NSMakeRange(0, written) withBytes:nil length:0];
+        [self.output close];
+        [self.input close];
 
         MockServerLog(@"wrote %ld bytes", (long)written);
     }
     else
     {
         MockServerLog(@"nothing to write");
-        [self.output close];
-        [self.input close];
     }
 }
 
@@ -215,12 +215,12 @@
 - (id)setupStream:(NSStream*)stream
 {
     MockServerAssert(stream);
-    CFRelease(stream);
 
     [stream setProperty:(id)kCFBooleanTrue forKey:(NSString *)kCFStreamPropertyShouldCloseNativeSocket];
     stream.delegate = self;
     [stream scheduleInRunLoop:[NSRunLoop currentRunLoop] forMode:NSDefaultRunLoopMode];
     [stream open];
+    CFRelease(stream);
 
     return stream;
 }
@@ -315,7 +315,9 @@
 
 - (void)acceptConnectionOnSocket:(int)socket
 {
-    MockServerAssert(CFSocketGetNative(self.listener) == socket);
+    MockServerAssert((self.input == nil) && (self.output == nil));
+    MockServerAssert(socket >= 0);
+
     if ((self.input) || (self.output))
     {
         MockServerLog(@"received connection twice - something wrong");
@@ -326,11 +328,8 @@
     {
         MockServerLog(@"received connection");
 
-        MockServerAssert(socket >= 0);
-        MockServerAssert((self.input == nil) && (self.output == nil));
-
-        CFReadStreamRef     readStream;
-        CFWriteStreamRef    writeStream;
+        CFReadStreamRef readStream;
+        CFWriteStreamRef writeStream;
         CFStreamCreatePairWithSocket(NULL, socket, &readStream, &writeStream);
 
         self.input = [self setupStream:(NSStream*)readStream];
@@ -340,14 +339,14 @@
 
 static void callbackAcceptConnection(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info)
 {
+    MockServer* obj = (MockServer*)info;
     MockServerAssert(type == kCFSocketAcceptCallBack);
+    MockServerAssert(obj && (obj.listener == s));
     MockServerAssert(data);
-    MockServerAssert(info);
 
-    if (info && data && (type == kCFSocketAcceptCallBack))
+    if (obj && data && (type == kCFSocketAcceptCallBack))
     {
         int socket = *((int*)data);
-        MockServer* obj = (MockServer*)info;
         [obj acceptConnectionOnSocket:socket];
     }
 }
