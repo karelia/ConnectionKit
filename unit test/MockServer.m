@@ -187,12 +187,14 @@
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
         MockServerLog(@"got request %@", request);
 
-        [self.responses enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-            NSRange range = [request rangeOfString:key options:NSAnchoredSearch];
-            if (range.location != NSNotFound)
+        [self.responses enumerateKeysAndObjectsUsingBlock:^(id key, id commands, BOOL *stop) {
+            NSError* error = nil;
+            NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:NSRegularExpressionAllowCommentsAndWhitespace error:&error];
+            NSArray* matches = [expression matchesInString:request options:0 range:NSMakeRange(0, [request length])];
+            if ([matches count] > 0)
             {
-                NSArray* commands = obj;
-                [self processCommands:obj];
+                MockServerLog(@"matched with request pattern %@", key);
+                [self processCommands:commands];
                 *stop = YES;
             }
         }];

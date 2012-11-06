@@ -19,7 +19,7 @@
 
 - (void)testServer
 {
-    NSString* expectedRequest = @"GET /index.html HTTP/1.1";
+    NSString* expectedRequest = @"^GET .* HTTP.*";
     NSString* expectedResponse = @"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n";
     NSString* expectedContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
 
