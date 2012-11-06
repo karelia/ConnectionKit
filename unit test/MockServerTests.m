@@ -19,7 +19,11 @@
 
 - (void)testServer
 {
-    MockServer* server = [MockServer serverWithPort:0 responses:@{ @"blah" : @"blah" }];
+    NSString* expectedRequest = @"GET /index.html HTTP/1.1";
+    NSString* expectedContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
+    NSString* expectedResponse = [NSString stringWithFormat:@"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n%@", expectedContent];
+
+    MockServer* server = [MockServer serverWithPort:0 responses:@{ expectedRequest : expectedResponse }];
     STAssertNotNil(server, @"got server");
     [server start];
     BOOL started = server.running;
@@ -47,7 +51,7 @@
 
         [server runUntilStopped];
         
-        STAssertEqualObjects(string, @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n", @"wrong response");
+        STAssertEqualObjects(string, expectedContent, @"wrong response");
         [string release];
     }
 }

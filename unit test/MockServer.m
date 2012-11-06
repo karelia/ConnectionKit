@@ -180,15 +180,21 @@
 
     else
     {
-        NSString* string = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
-        MockServerLog(@"got data %@", string);
+        NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
+        MockServerLog(@"got request %@", request);
 
-        NSString* output = @"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
+        [self.responses enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+            NSRange range = [request rangeOfString:key options:NSAnchoredSearch];
+            if (range.location != NSNotFound)
+            {
+                MockServerLog(@"wrote response %@", obj);
+                [self.outputData appendData:[obj dataUsingEncoding:NSUTF8StringEncoding]];
+                [self performSelector:@selector(processOutput) withObject:nil afterDelay:0.0];
+                *stop = YES;
+            }
+        }];
 
-        [self.outputData appendData:[output dataUsingEncoding:NSUTF8StringEncoding]];
-        [self performSelector:@selector(processOutput) withObject:nil afterDelay:0.0];
-
-        [string release];
+        [request release];
     }
 }
 
