@@ -12,6 +12,7 @@
 #import <netinet/in.h>   // for IPPROTO_TCP, sockaddr_in
 
 #import "MockServer.h"
+#import "MockServerResponder.h"
 
 @interface MockServer()
 
@@ -20,9 +21,7 @@
 @property (strong, nonatomic) NSOutputStream* output;
 @property (strong, nonatomic) NSMutableData* outputData;
 @property (assign, nonatomic) NSUInteger port;
-@property (strong, nonatomic) NSArray* requests;
-@property (strong, nonatomic) NSArray* responses;
-@property (strong, nonatomic) NSArray* initialResponse;
+@property (strong, nonatomic) MockServerResponder* responder;
 @property (assign, atomic) BOOL running;
 
 @end
@@ -35,8 +34,7 @@
 @synthesize outputData = _outputData;
 @synthesize port = _port;
 @synthesize queue = _queue;
-@synthesize requests = _requests;
-@synthesize responses = _responses;
+@synthesize responder = _responder;
 @synthesize running = _running;
 
 NSString *const CloseCommand = @"«close»";
@@ -65,36 +63,7 @@ NSString *const InitialResponseKey = @"«initial»";
         self.port = port;
         self.outputData = [NSMutableData data];
         self.queue = [NSOperationQueue currentQueue];
-
-        // process responses array - we pull out some special responses, and pre-calculate all the regular expressions
-        NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators;
-        NSMutableArray* processed = [NSMutableArray arrayWithCapacity:[responses count]];
-        NSMutableArray* expressions = [NSMutableArray arrayWithCapacity:[responses count]];
-        for (NSArray* response in responses)
-        {
-            NSUInteger length = [response count];
-            if (length > 0)
-            {
-                NSString* key = response[0];
-                NSArray* commands = [response subarrayWithRange:NSMakeRange(1, length - 1)];
-                if ([key isEqualToString:InitialResponseKey])
-                {
-                    self.initialResponse = commands;
-                }
-                else
-                {
-                    NSError* error = nil;
-                    NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:options error:&error];
-                    if (expression)
-                    {
-                        [expressions addObject:expression];
-                        [processed addObject:commands];
-                    }
-                }
-            }
-        }
-        self.requests = expressions;
-        self.responses = processed;
+        self.responder = [MockServerResponder responderWithResponses:responses];
 
         MockServerLog(@"made server at port %ld", (long) port);
     }
@@ -108,8 +77,7 @@ NSString *const InitialResponseKey = @"«initial»";
     [_output release];
     [_outputData release];
     [_queue release];
-    [_responses release];
-    [_requests release];
+    [_responder release];
     
     [super dealloc];
 }
@@ -222,31 +190,17 @@ NSString *const InitialResponseKey = @"«initial»";
     else
     {
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
-        NSRange wholeString = NSMakeRange(0, [request length]);
-
         MockServerLog(@"got request '%@'", request);
-
-        BOOL matched = NO;
-        NSUInteger count = [self.requests count];
-        for (NSUInteger n = 0; n < count; ++n)
+        NSArray* commands = [self.responder responseForRequest:request server:self];
+        if (commands)
         {
-            NSRegularExpression* expression = self.requests[n];
-            NSTextCheckingResult* match = [expression firstMatchInString:request options:0 range:wholeString];
-            if (match)
-            {
-                MockServerLog(@"matched with request pattern %@", expression);
-                NSArray* commands = self.responses[n];
-                [self processCommands:commands request:request match:match];
-                matched = YES;
-                break;
-            }
+            [self processCommands:commands];
         }
-
-        if (!matched)
+        else
         {
             // if nothing matched, close the connection
             // to prevent this, add a key of ".*" as the last response in the array
-            [self performSelector:@selector(processClose) withObject:nil afterDelay:0.0];
+            [self processCommands:@[CloseCommand]];
         }
 
         [request release];
@@ -267,7 +221,7 @@ NSString *const InitialResponseKey = @"«initial»";
     [self processOutput];
 }
 
-- (void)processCommands:(NSArray*)commands request:(NSString*)request match:(NSTextCheckingResult*)match
+- (void)processCommands:(NSArray*)commands
 {
     NSTimeInterval delay = 0.0;
     for (id command in commands)
@@ -285,36 +239,6 @@ NSString *const InitialResponseKey = @"«initial»";
             }
             else
             {
-                BOOL containsTokens = [command rangeOfString:@"$"].location != NSNotFound;
-                if (containsTokens)
-                {
-                    // always add the request as $0
-                    NSMutableDictionary* replacements = [NSMutableDictionary dictionary];
-                    [replacements setObject:request forKey:@"$0"];
-
-                    // add any matched subgroups
-                    if (match)
-                    {
-                        NSUInteger count = match.numberOfRanges;
-                        for (NSUInteger n = 1; n < count; ++n)
-                        {
-                            NSString* token = [NSString stringWithFormat:@"$%ld", (long) n];
-                            NSRange range = [match rangeAtIndex:n];
-                            NSString* replacement = [request substringWithRange:range];
-                            [replacements setObject:replacement forKey:token];
-                        }
-                    }
-
-                    // perform replacements
-                    NSMutableString* replaced = [NSMutableString stringWithString:command];
-                    [replacements enumerateKeysAndObjectsUsingBlock:^(id key, id replacement, BOOL *stop) {
-                        [replaced replaceOccurrencesOfString:key withString:replacement options:0 range:NSMakeRange(0, [replaced length])];
-                    }];
-
-                    MockServerLog(@"expanded response %@ as %@", command, replaced);
-                    command = replaced;
-                }
-                
                 method = @selector(queueOutput:);
             }
             
@@ -404,7 +328,7 @@ NSString *const InitialResponseKey = @"«initial»";
             MockServerLog(@"opened %@ stream", [self nameForStream:stream]);
             if (stream == self.input)
             {
-                [self processCommands:self.initialResponse request:nil match:nil];
+                [self processCommands:self.responder.initialResponse];
             }
             break;
         }
