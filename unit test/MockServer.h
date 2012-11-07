@@ -27,6 +27,8 @@
 - (void)stop;
 - (void)runUntilStopped;
 
+- (NSDictionary*)standardSubstitutions;
+
 @end
 
 extern NSString *const CloseCommand;

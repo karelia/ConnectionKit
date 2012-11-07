@@ -22,9 +22,6 @@
 @property (strong, nonatomic) MockServerResponder* responder;
 @property (strong, nonatomic) MockServer* server;
 
-// TODO: move these elsewhere?
-@property (strong, nonatomic) MockServerListener* extraListener;
-@property (strong, nonatomic) MockServerConnection* extraConnection;
 
 @end
 
@@ -59,8 +56,6 @@
 
         self.input = [self setupStream:(NSStream*)readStream];
         self.output = [self setupStream:(NSStream*)writeStream];
-
-        [self makeExtraListener];
     }
 
     return self;
@@ -73,8 +68,6 @@
     [_outputData release];
     [_server release];
 
-    [_extraConnection release];
-    [_extraListener release];
     
     [super dealloc];
 }
@@ -104,7 +97,7 @@
 
     else
     {
-        NSDictionary* substitutions = [self standardSubstitutions];
+        NSDictionary* substitutions = [self.server standardSubstitutions];
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
         MockServerLog(@"got request '%@'", request);
         NSArray* commands = [self.responder responseForRequest:request substitutions:substitutions];
@@ -163,46 +156,7 @@
     }
 }
 
-- (NSDictionary*)standardSubstitutions
-{
-    NSUInteger extraPort = self.extraListener.port;
-    NSDictionary* substitutions =
-    @{
-        @"$address" : @"127.0.0.1",
-        @"$server" : @"fakeserver 20121107",
-        @"$size" : [NSString stringWithFormat:@"%ld", (long) [self.server.data length]],
-        @"$pasv" : [NSString stringWithFormat:@"127,0,0,1,%ld,%ld", extraPort / 256L, extraPort % 256L]
-    };
 
-    return substitutions;
-}
-
-- (void)makeExtraListener
-{
-    MockServer* server = self.server;
-    self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
-
-        MockServerLog(@"got connection on extra listener");
-        BOOL ok = self.extraConnection == nil;
-        if (ok)
-        {
-            NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
-            MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
-            self.extraConnection = [MockServerConnection connectionWithSocket:socket responder:responder server:self.server];
-
-            // we're done with the listener now
-            MockServerListener* listener = self.extraListener;
-            [listener retain];
-            [listener stop:@"passive connection made"];
-            self.extraListener = nil;
-            [listener autorelease];
-        }
-
-        return ok;
-    }];
-
-    [self.extraListener start];
-}
 
 - (void)processOutput
 {

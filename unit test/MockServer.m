@@ -23,6 +23,9 @@
 @property (strong, nonatomic) MockServerResponder* responder;
 @property (assign, atomic) BOOL running;
 
+@property (strong, nonatomic) MockServerListener* extraListener;
+@property (strong, nonatomic) MockServerConnection* extraConnection;
+
 @end
 
 @implementation MockServer
@@ -82,7 +85,10 @@ NSString *const InitialResponseKey = @"«initial»";
     [_data release];
     [_queue release];
     [_responder release];
-    
+
+    [_extraConnection release];
+    [_extraListener release];
+
     [super dealloc];
 }
 
@@ -93,6 +99,8 @@ NSString *const InitialResponseKey = @"«initial»";
     BOOL success = [self.listener start];
     if (success)
     {
+        [self makeDataListener];
+
         MockServerAssert(self.port != 0);
         MockServerLog(@"server started on port %ld", self.port);
         self.running = YES;
@@ -119,6 +127,54 @@ NSString *const InitialResponseKey = @"«initial»";
 - (NSUInteger)port
 {
     return self.listener.port;
+}
+
+#pragma mark - Substitutions
+
+
+- (NSDictionary*)standardSubstitutions
+{
+    NSUInteger extraPort = self.extraListener.port;
+    NSDictionary* substitutions =
+    @{
+    @"$address" : @"127.0.0.1",
+    @"$server" : @"fakeserver 20121107",
+    @"$size" : [NSString stringWithFormat:@"%ld", (long) [self.data length]],
+    @"$pasv" : [NSString stringWithFormat:@"127,0,0,1,%ld,%ld", extraPort / 256L, extraPort % 256L]
+    };
+
+    return substitutions;
+}
+
+#pragma mark - Data Connection
+
+- (void)makeDataListener
+{
+    __block MockServer* server = self;
+    self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
+
+        MockServerLog(@"got connection on data listener");
+        BOOL ok = self.extraConnection == nil;
+        if (ok)
+        {
+            NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
+            MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
+            server.extraConnection = [MockServerConnection connectionWithSocket:socket responder:responder server:server];
+
+            // we're done with the listener now
+            [server performSelector:@selector(disposeDataListener) withObject:nil afterDelay:0.0];
+        }
+
+        return ok;
+    }];
+
+    [self.extraListener start];
+}
+
+- (void)disposeDataListener
+{
+    [self.extraListener stop:@"finished with data listener"];
+    self.extraListener = nil;
 }
 
 @end
