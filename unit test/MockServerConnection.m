@@ -154,10 +154,6 @@
             {
                 method = @selector(processClose);
             }
-            else if ([command isEqual:ListenCommand])
-            {
-                method = @selector(processListen);
-            }
             else
             {
                 method = @selector(queueOutput:);
@@ -168,20 +164,8 @@
     }
 }
 
-- (void)processListen
-{
-    if (self.extraListener)
-    {
-        MockServerLog(@"asked to make another extra listener - ignoring");
-    }
-    else
-    {
-    }
-}
-
 - (void)makeExtraListener
 {
-    MockServerLog(@"asked to make a listening connection");
     self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
 
         MockServerLog(@"got connection on extra listener");

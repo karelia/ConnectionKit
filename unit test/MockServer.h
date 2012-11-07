@@ -29,5 +29,4 @@
 @end
 
 extern NSString *const CloseCommand;
-extern NSString *const ListenCommand;
 extern NSString *const InitialResponseKey;
