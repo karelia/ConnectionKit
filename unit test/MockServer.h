@@ -17,8 +17,6 @@
 @property (strong, nonatomic) NSOperationQueue* queue;
 @property (readonly, atomic) BOOL running;
 
-+ (id)closeResponse;
-
 + (MockServer*)serverWithResponses:(NSDictionary*)responses;
 + (MockServer*)serverWithPort:(NSUInteger)port responses:(NSDictionary*)responses;
 
@@ -29,3 +27,7 @@
 - (void)runUntilStopped;
 
 @end
+
+extern NSString *const CloseCommand;
+extern NSString *const InitialResponseKey;
+extern NSString *const UnknownResponseKey;

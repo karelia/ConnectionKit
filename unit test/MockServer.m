@@ -21,6 +21,8 @@
 @property (strong, nonatomic) NSMutableData* outputData;
 @property (assign, nonatomic) NSUInteger port;
 @property (strong, nonatomic) NSDictionary* responses;
+@property (strong, nonatomic) NSArray* initialResponse;
+@property (strong, nonatomic) NSArray* unknownResponse;
 @property (assign, atomic) BOOL running;
 
 @end
@@ -36,6 +38,9 @@
 @synthesize responses = _responses;
 @synthesize running = _running;
 
+NSString *const CloseCommand = @"«close»";
+NSString *const InitialResponseKey = @"«initial»";
+NSString *const UnknownResponseKey = @"«unknown»";
 
 #pragma mark - Object Lifecycle
 
@@ -61,6 +66,10 @@
         self.responses = responses;
         self.outputData = [NSMutableData data];
         self.queue = [NSOperationQueue currentQueue];
+
+        self.initialResponse = responses[InitialResponseKey];
+        self.unknownResponse = responses[UnknownResponseKey];
+
         MockServerLog(@"made server at port %ld", (long) port);
     }
 
@@ -185,19 +194,29 @@
     else
     {
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
-        MockServerLog(@"got request %@", request);
+        NSRange wholeString = NSMakeRange(0, [request length]);
+        NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators;
 
+        MockServerLog(@"got request '%@'", request);
+
+        __block BOOL matched = NO;
         [self.responses enumerateKeysAndObjectsUsingBlock:^(id key, id commands, BOOL *stop) {
             NSError* error = nil;
-            NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:NSRegularExpressionAllowCommentsAndWhitespace error:&error];
-            NSArray* matches = [expression matchesInString:request options:0 range:NSMakeRange(0, [request length])];
-            if ([matches count] > 0)
+            NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:options error:&error];
+            NSTextCheckingResult* match = [expression firstMatchInString:request options:0 range:wholeString];
+            if (match)
             {
                 MockServerLog(@"matched with request pattern %@", key);
                 [self processCommands:commands];
                 *stop = YES;
+                matched = YES;
             }
         }];
+
+        if (!matched)
+        {
+            [self processCommands:self.unknownResponse];
+        }
 
         [request release];
     }
@@ -219,7 +238,6 @@
 
 - (void)processCommands:(NSArray*)commands
 {
-    id closeCommand = [NSNull null];
     NSTimeInterval delay = 0.0;
     for (id command in commands)
     {
@@ -230,7 +248,7 @@
         else
         {
             SEL method;
-            if (command == closeCommand)
+            if ([command isEqual:CloseCommand])
             {
                 method = @selector(processClose);
             }
@@ -323,6 +341,10 @@
         case NSStreamEventOpenCompleted:
         {
             MockServerLog(@"opened %@ stream", [self nameForStream:stream]);
+            if (stream == self.input)
+            {
+                [self processCommands:self.initialResponse];
+            }
             break;
         }
 
@@ -365,12 +387,11 @@
 
 - (void)acceptConnectionOnSocket:(int)socket
 {
-    MockServerAssert((self.input == nil) && (self.output == nil));
     MockServerAssert(socket >= 0);
 
     if ((self.input) || (self.output))
     {
-        MockServerLog(@"received connection twice - something wrong");
+        MockServerLog(@"received connection twice - ignoring second one");
         int error = close(socket);
         MockServerAssert(error == 0);
     }
@@ -499,13 +520,6 @@ static void callbackAcceptConnection(CFSocketRef s, CFSocketCallBackType type, C
     }
 
     return result;
-}
-
-#pragma mark - Special Responses
-
-+ (id)closeResponse
-{
-    return [NSNull null];
 }
 
 @end
