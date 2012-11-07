@@ -19,12 +19,12 @@
 @interface MockServer()
 
 @property (strong, nonatomic) MockServerConnection* connection;
+@property (strong, nonatomic) NSMutableArray* dataConnections;
+@property (strong, nonatomic) MockServerListener* dataListener;
 @property (strong, nonatomic) MockServerListener* listener;
 @property (strong, nonatomic) MockServerResponder* responder;
 @property (assign, atomic) BOOL running;
 
-@property (strong, nonatomic) MockServerListener* extraListener;
-@property (strong, nonatomic) MockServerConnection* extraConnection;
 
 @end
 
@@ -32,6 +32,8 @@
 
 @synthesize connection = _connection;
 @synthesize data = _data;
+@synthesize dataConnections = _dataConnections;
+@synthesize dataListener = _dataListener;
 @synthesize listener = _listener;
 @synthesize queue = _queue;
 @synthesize responder = _responder;
@@ -83,11 +85,10 @@ NSString *const InitialResponseKey = @"«initial»";
 {
     [_connection release];
     [_data release];
+    [_dataConnections release];
+    [_dataListener release];
     [_queue release];
     [_responder release];
-
-    [_extraConnection release];
-    [_extraListener release];
 
     [super dealloc];
 }
@@ -111,6 +112,12 @@ NSString *const InitialResponseKey = @"«initial»";
 {
     [self.connection cancel];
     [self.listener stop:@"stopped externally"];
+    [self.dataListener stop:@"stopped externally"];
+    for (MockServerConnection* connection in self.dataConnections)
+    {
+        [connection cancel];
+    }
+
     self.running = NO;
 }
 
@@ -134,7 +141,7 @@ NSString *const InitialResponseKey = @"«initial»";
 
 - (NSDictionary*)standardSubstitutions
 {
-    NSUInteger extraPort = self.extraListener.port;
+    NSUInteger extraPort = self.dataListener.port;
     NSDictionary* substitutions =
     @{
     @"$address" : @"127.0.0.1",
@@ -150,31 +157,25 @@ NSString *const InitialResponseKey = @"«initial»";
 
 - (void)makeDataListener
 {
+    self.dataConnections = [NSMutableArray array];
     __block MockServer* server = self;
-    self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
+    self.dataListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
 
         MockServerLog(@"got connection on data listener");
-        BOOL ok = self.extraConnection == nil;
-        if (ok)
-        {
-            NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
-            MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
-            server.extraConnection = [MockServerConnection connectionWithSocket:socket responder:responder server:server];
 
-            // we're done with the listener now
-            [server performSelector:@selector(disposeDataListener) withObject:nil afterDelay:0.0];
-        }
+        NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
+        MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
+        MockServerConnection* connection = [MockServerConnection connectionWithSocket:socket responder:responder server:server];
+        [self.dataConnections addObject:connection];
 
-        return ok;
+        return YES;
     }];
 
-    [self.extraListener start];
+    [self.dataListener start];
 }
 
 - (void)disposeDataListener
 {
-    [self.extraListener stop:@"finished with data listener"];
-    self.extraListener = nil;
 }
 
 @end
