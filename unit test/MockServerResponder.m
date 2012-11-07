@@ -1,10 +1,7 @@
-// --------------------------------------------------------------------------
-//! @author Sam Deane
 //
-//  Copyright 2012 Sam Deane, Elegant Chaos. All rights reserved.
-//  This source code is distributed under the terms of Elegant Chaos's 
-//  liberal license: http://www.elegantchaos.com/license/liberal
-// --------------------------------------------------------------------------
+//  Created by Sam Deane on 06/11/2012.
+//  Copyright 2012 Karelia Software. All rights reserved.
+//
 
 #import "MockServerResponder.h"
 #import "MockServer.h"

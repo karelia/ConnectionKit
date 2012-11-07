@@ -1,9 +1,9 @@
 //
-//  Tests.m
-//  Tests
+//  PathTests.m
+//  Connection
 //
 //  Created by Sam Deane on 08/03/2012.
-//  Copyright (c) 2012 Elegant Chaos. All rights reserved.
+//  Copyright 2012 Karelia Software. All rights reserved.
 //
 
 #import "CK2FileTransferSession.h"

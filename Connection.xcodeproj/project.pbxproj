@@ -484,14 +484,7 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
-				22F680C2164970570008A4F4 /* MockServer.h */,
-				22F680BC164938050008A4F4 /* MockServer.m */,
-				22B47C4F164AB342006E80EB /* MockServerConnection.h */,
-				22B47C50164AB342006E80EB /* MockServerConnection.m */,
-				22B47C56164ABE97006E80EB /* MockServerListener.h */,
-				22B47C57164ABE97006E80EB /* MockServerListener.m */,
-				22B47C52164AB37E006E80EB /* MockServerResponder.h */,
-				22B47C53164AB37E006E80EB /* MockServerResponder.m */,
+				22B47C59164AE5EE006E80EB /* MockServer */,
 				22F680C3164970570008A4F4 /* MockServerTests.m */,
 				22CC56F81509048E00F94154 /* PathTests.m */,
 			);
@@ -536,6 +529,21 @@
 				220AD7981509019B00748655 /* UnitTests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		22B47C59164AE5EE006E80EB /* MockServer */ = {
+			isa = PBXGroup;
+			children = (
+				22F680C2164970570008A4F4 /* MockServer.h */,
+				22F680BC164938050008A4F4 /* MockServer.m */,
+				22B47C4F164AB342006E80EB /* MockServerConnection.h */,
+				22B47C50164AB342006E80EB /* MockServerConnection.m */,
+				22B47C56164ABE97006E80EB /* MockServerListener.h */,
+				22B47C57164ABE97006E80EB /* MockServerListener.m */,
+				22B47C52164AB37E006E80EB /* MockServerResponder.h */,
+				22B47C53164AB37E006E80EB /* MockServerResponder.m */,
+			);
+			name = MockServer;
 			sourceTree = "<group>";
 		};
 		27448C2514580F7500EB086F /* Products */ = {
