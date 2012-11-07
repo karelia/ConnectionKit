@@ -13,13 +13,13 @@
 
 #import "MockServer.h"
 #import "MockServerConnection.h"
+#import "MockServerListener.h"
 #import "MockServerResponder.h"
 
 @interface MockServer()
 
 @property (strong, nonatomic) MockServerConnection* connection;
-@property (assign, nonatomic) CFSocketRef listener;
-@property (assign, nonatomic) NSUInteger port;
+@property (strong, nonatomic) MockServerListener* listener;
 @property (strong, nonatomic) MockServerResponder* responder;
 @property (assign, atomic) BOOL running;
 
@@ -29,7 +29,6 @@
 
 @synthesize connection = _connection;
 @synthesize listener = _listener;
-@synthesize port = _port;
 @synthesize queue = _queue;
 @synthesize responder = _responder;
 @synthesize running = _running;
@@ -57,11 +56,20 @@ NSString *const InitialResponseKey = @"«initial»";
 {
     if ((self = [super init]) != nil)
     {
-        self.port = port;
         self.queue = [NSOperationQueue currentQueue];
         self.responder = [MockServerResponder responderWithResponses:responses];
+        self.listener = [MockServerListener listenerWithPort:port connectionBlock:^BOOL(int socket) {
+            MockServerAssert(socket != 0);
 
-        MockServerLog(@"made server at port %ld", (long) port);
+            BOOL ok = self.connection == nil;
+            if (ok)
+            {
+                MockServerLog(@"received connection");
+                self.connection = [MockServerConnection connectionWithSocket:socket responder:self.responder server:self];
+            }
+
+            return ok;
+        }];
     }
 
     return self;
@@ -80,12 +88,20 @@ NSString *const InitialResponseKey = @"«initial»";
 
 - (void)start
 {
-    [self startServer];
+    BOOL success = [self.listener start];
+    if (success)
+    {
+        MockServerAssert(self.port != 0);
+        MockServerLog(@"server started on port %ld", self.port);
+        self.running = YES;
+    }
 }
 
 - (void)stop
 {
-    [self stopServer:@"Stopped externally"];
+    [self.connection cancel];
+    [self.listener stop:@"stopped externally"];
+    self.running = NO;
 }
 
 - (void)runUntilStopped
@@ -98,201 +114,9 @@ NSString *const InitialResponseKey = @"«initial»";
     }
 }
 
-
-#pragma mark - Start / Stop
-
-- (void)startServer
+- (NSUInteger)port
 {
-    int socket;
-
-    BOOL success = [self makeSocket:&socket];
-    if (success)
-    {
-        success = [self bindSocket:socket];
-    }
-
-    if (success)
-    {
-        success = [self listenOnSocket:socket];
-    }
-
-    if (success && (self.port == 0))
-    {
-        success = [self retrievePortForSocket:socket];
-    }
-
-    if (success)
-    {
-        success = [self makeCFSocketForSocket:socket];
-    }
-
-    if (success)
-    {
-        MockServerAssert(self.port != 0);
-        NSLog(@"server started on port %ld", self.port);
-        self.running = YES;
-    }
-    else
-    {
-        [self stopServer:@"Start failed"];
-        if (socket != -1)
-        {
-            int err = close(socket);
-            if (!err)
-            {
-                MockServerLog(@"couldn't close socket %d", socket);
-            }
-        }
-    }
-}
-
-- (void)stopServer:(NSString *)reason
-{
-    [self.connection cancel];
-
-    if (self.listener)
-    {
-        CFSocketInvalidate(self.listener);
-        CFRelease(self.listener);
-        self.listener = NULL;
-    }
-
-    self.running = NO;
-    NSLog(@"server stopped with reason %@", reason);
-}
-
-
-#pragma mark - Sockets
-
-- (void)acceptConnectionOnSocket:(int)socket
-{
-    MockServerAssert(socket >= 0);
-
-    if (self.connection)
-    {
-        MockServerLog(@"received connection twice - ignoring second one");
-        int error = close(socket);
-        MockServerAssert(error == 0);
-    }
-    else
-    {
-        MockServerLog(@"received connection");
-        self.connection = [MockServerConnection connectionWithSocket:socket responder:self.responder server:self];
-    }
-}
-
-static void callbackAcceptConnection(CFSocketRef s, CFSocketCallBackType type, CFDataRef address, const void *data, void *info)
-{
-    MockServer* obj = (MockServer*)info;
-    MockServerAssert(type == kCFSocketAcceptCallBack);
-    MockServerAssert(obj && (obj.listener == s));
-    MockServerAssert(data);
-
-    if (obj && data && (type == kCFSocketAcceptCallBack))
-    {
-        int socket = *((int*)data);
-        [obj acceptConnectionOnSocket:socket];
-    }
-}
-
-- (BOOL)makeSocket:(int*)socketOut
-{
-    int fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (socketOut)
-        *socketOut = fd;
-
-    BOOL result = (fd != -1);
-
-    if (result)
-    {
-        MockServerLog(@"got socket %d", fd);
-    }
-    else
-    {
-        MockServerLog(@"couldn't make socket");
-    }
-
-    return result;
-}
-
-- (BOOL)bindSocket:(int)socket
-{
-    struct sockaddr_in  addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_len    = sizeof(addr);
-    addr.sin_family = AF_INET;
-    addr.sin_port   = htons(self.port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-    int err = bind(socket, (const struct sockaddr *) &addr, sizeof(addr));
-    BOOL result = (err == 0);
-    if (!result)
-    {
-        MockServerLog(@"couldn't bind socket %d, error %d", socket, err);
-    }
-    
-    return result;
-}
-
-- (BOOL)listenOnSocket:(int)socket
-{
-    int err = listen(socket, 5);
-    BOOL result = err == 0;
-
-    if (!result)
-    {
-        MockServerLog(@"couldn't listen on socket %d", socket);
-    }
-
-    return result;
-}
-
-- (BOOL)retrievePortForSocket:(int)socket
-{
-    // If we bound to port 0 the kernel will have assigned us a port.
-    // use getsockname to find out what port number we actually got.
-    struct sockaddr_in addr;
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_len    = sizeof(addr);
-    addr.sin_family = AF_INET;
-    addr.sin_port   = htons(self.port);
-    addr.sin_addr.s_addr = INADDR_ANY;
-    socklen_t addrLen = sizeof(addr);
-    int err = getsockname(socket, (struct sockaddr *) &addr, &addrLen);
-    BOOL result = (err == 0);
-    if (result)
-    {
-        MockServerAssert(addrLen == sizeof(addr));
-        self.port = ntohs(addr.sin_port);
-    }
-    else
-    {
-        MockServerLog(@"couldn't retrieve socket port");
-    }
-
-    return result;
-}
-
-- (BOOL)makeCFSocketForSocket:(int)socket
-{
-    CFSocketContext context = { 0, (void *) self, NULL, NULL, NULL };
-
-    MockServerAssert(self.listener == NULL);
-    self.listener = CFSocketCreateWithNative(NULL, socket, kCFSocketAcceptCallBack, callbackAcceptConnection, &context);
-
-    BOOL result = (self.listener != nil);
-    if (result)
-    {
-        CFRunLoopSourceRef source = CFSocketCreateRunLoopSource(NULL, self.listener, 0);
-        MockServerAssert(source);
-        CFRunLoopAddSource(CFRunLoopGetCurrent(), source, kCFRunLoopDefaultMode);
-        CFRelease(source);
-    }
-    else
-    {
-        MockServerLog(@"couldn't make CFSocket for socket %d", socket);
-    }
-
-    return result;
+    return self.listener.port;
 }
 
 @end
