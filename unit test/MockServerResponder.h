@@ -18,6 +18,6 @@
 
 - (id)initWithResponses:(NSArray*)responses;
 
-- (NSArray*)responseForRequest:(NSString*)request server:(MockServer*)server;
+- (NSArray*)responseForRequest:(NSString*)request substitutions:(NSDictionary*)substitutions;
 
 @end

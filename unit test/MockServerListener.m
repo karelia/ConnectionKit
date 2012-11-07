@@ -114,7 +114,8 @@
     {
         CFSocketInvalidate(self.listener);
         CFRelease(self.listener);
-        self.listener = NULL;
+        self.connectionBlock = nil;
+        self.listener = nil;
     }
 
     MockServerLog(@"listener stopped because: %@", reason);

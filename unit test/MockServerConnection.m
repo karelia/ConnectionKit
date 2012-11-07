@@ -9,7 +9,9 @@
 #import <Foundation/Foundation.h>
 
 #import "MockServerConnection.h"
+
 #import "MockServer.h"
+#import "MockServerListener.h"
 #import "MockServerResponder.h"
 
 @interface MockServerConnection()
@@ -19,6 +21,10 @@
 @property (strong, nonatomic) NSMutableData* outputData;
 @property (strong, nonatomic) MockServerResponder* responder;
 @property (strong, nonatomic) MockServer* server;
+
+// TODO: move these elsewhere?
+@property (strong, nonatomic) MockServerListener* extraListener;
+@property (strong, nonatomic) MockServerConnection* extraConnection;
 
 @end
 
@@ -53,6 +59,8 @@
 
         self.input = [self setupStream:(NSStream*)readStream];
         self.output = [self setupStream:(NSStream*)writeStream];
+
+        [self makeExtraListener];
     }
 
     return self;
@@ -65,6 +73,9 @@
     [_outputData release];
     [_server release];
 
+    [_extraConnection release];
+    [_extraListener release];
+    
     [super dealloc];
 }
 
@@ -93,9 +104,11 @@
 
     else
     {
+        NSUInteger extraPort = self.extraListener.port;
+        NSDictionary* substitutions = @{ @"$pasv" : [NSString stringWithFormat:@"127,0,0,1,%ld,%ld", extraPort / 256L, extraPort % 256L] };
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
         MockServerLog(@"got request '%@'", request);
-        NSArray* commands = [self.responder responseForRequest:request server:self.server];
+        NSArray* commands = [self.responder responseForRequest:request substitutions:substitutions];
         if (commands)
         {
             [self processCommands:commands];
@@ -141,6 +154,10 @@
             {
                 method = @selector(processClose);
             }
+            else if ([command isEqual:ListenCommand])
+            {
+                method = @selector(processListen);
+            }
             else
             {
                 method = @selector(queueOutput:);
@@ -149,6 +166,44 @@
             [self performSelector:method withObject:command afterDelay:delay];
         }
     }
+}
+
+- (void)processListen
+{
+    if (self.extraListener)
+    {
+        MockServerLog(@"asked to make another extra listener - ignoring");
+    }
+    else
+    {
+    }
+}
+
+- (void)makeExtraListener
+{
+    MockServerLog(@"asked to make a listening connection");
+    self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
+
+        MockServerLog(@"got connection on extra listener");
+        BOOL ok = self.extraConnection == nil;
+        if (ok)
+        {
+            NSArray* responses = @[ @[InitialResponseKey, @"This is a test response", CloseCommand ] ];
+            MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
+            self.extraConnection = [MockServerConnection connectionWithSocket:socket responder:responder server:self.server];
+
+            // we're done with the listener now
+            MockServerListener* listener = self.extraListener;
+            [listener retain];
+            [listener stop:@"passive connection made"];
+            self.extraListener = nil;
+            [listener autorelease];
+        }
+
+        return ok;
+    }];
+
+    [self.extraListener start];
 }
 
 - (void)processOutput
@@ -160,10 +215,6 @@
         [self.outputData replaceBytesInRange:NSMakeRange(0, written) withBytes:nil length:0];
 
         MockServerLog(@"wrote %ld bytes", (long)written);
-    }
-    else
-    {
-        MockServerLog(@"nothing to write");
     }
 }
 

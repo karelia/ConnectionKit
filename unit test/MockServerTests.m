@@ -31,14 +31,16 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
 - (NSArray*)ftpResponses
 {
     NSArray* responses = @[
-    @[InitialResponseKey, @"220 66.209.94.250 FTP server (tnftpd 20080929) ready.\r\n" ],
+    @[InitialResponseKey, @"220 127.0.0.1 FTP server (tnftpd 20080929) ready.\r\n" ],
     @[@"USER user", @"331 User user accepted, provide password.\r\n"],
     @[@"PASS pass", @"230 User user logged in.\r\n"],
     @[@"SYST", @"215 UNIX Type: L8 Version: tnftpd 20080929\r\n" ],
     @[@"PWD", @"257 \"/\" is the current directory.\r\n" ],
     @[@"TYPE I", @"200 Type set to I.\r\n" ],
     @[@"CWD /", @"250 CWD command successful.\r\n" ],
-    @[@"PASV", @"227 Entering Passive Mode (66,209,94,250,192,124)\r\n"],
+    @[@"PASV", @"227 Entering Passive Mode ($pasv)\r\n"],
+    @[@"SIZE test.txt", @"213 24\r\n"],
+    @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' (24 bytes).\r\n"],
     @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand],
     ];
 
@@ -129,7 +131,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
         NSString* string = [self stringForRequest:request server:server];
 
-        STAssertEqualObjects(string, @"", @"wrong response");
+        STAssertEqualObjects(string, @"This is a test response", @"wrong response");
         [string release];
     }
 }

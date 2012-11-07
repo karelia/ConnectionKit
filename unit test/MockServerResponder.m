@@ -81,7 +81,7 @@
 
 #pragma mark - Public API
 
-- (NSArray*)responseForRequest:(NSString *)request server:(MockServer *)server
+- (NSArray*)responseForRequest:(NSString*)request substitutions:(NSDictionary*)substitutions
 {
     NSArray* commands = nil;
     NSRange wholeString = NSMakeRange(0, [request length]);
@@ -96,7 +96,7 @@
         {
             MockServerLog(@"matched with request pattern %@", expression);
             NSArray* rawCommands = self.responses[n];
-            commands = [self substitutedCommands:rawCommands match:match request:request];
+            commands = [self substitutedCommands:rawCommands match:match request:request substitutions:substitutions];
             matched = YES;
             break;
         }
@@ -124,9 +124,10 @@
     }
 }
 
-- (NSArray*)substitutedCommands:(NSArray*)commands match:(NSTextCheckingResult*)match request:(NSString*)request
+- (NSArray*)substitutedCommands:(NSArray*)commands match:(NSTextCheckingResult*)match request:(NSString*)request substitutions:(NSDictionary*)serverSubstitutions
 {
     NSMutableDictionary* substitutions = [NSMutableDictionary dictionary];
+    [substitutions addEntriesFromDictionary:serverSubstitutions];
     [self addSubstitutionsForMatch:match request:request toDictionary:substitutions];
 
     NSMutableArray* substitutedCommands = [NSMutableArray arrayWithCapacity:[commands count]];
