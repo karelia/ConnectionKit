@@ -179,13 +179,14 @@
 
 - (void)makeExtraListener
 {
+    MockServer* server = self.server;
     self.extraListener = [MockServerListener listenerWithPort:0 connectionBlock:^BOOL(int socket) {
 
         MockServerLog(@"got connection on extra listener");
         BOOL ok = self.extraConnection == nil;
         if (ok)
         {
-            NSArray* responses = @[ @[InitialResponseKey, @"This is a test response", CloseCommand ] ];
+            NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
             MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
             self.extraConnection = [MockServerConnection connectionWithSocket:socket responder:responder server:self.server];
 
