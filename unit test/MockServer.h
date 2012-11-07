@@ -17,10 +17,10 @@
 @property (strong, nonatomic) NSOperationQueue* queue;
 @property (readonly, atomic) BOOL running;
 
-+ (MockServer*)serverWithResponses:(NSDictionary*)responses;
-+ (MockServer*)serverWithPort:(NSUInteger)port responses:(NSDictionary*)responses;
++ (MockServer*)serverWithResponses:(NSArray*)responses;
++ (MockServer*)serverWithPort:(NSUInteger)port responses:(NSArray*)responses;
 
-- (id)initWithPort:(NSUInteger)port responses:(NSDictionary*)responses;
+- (id)initWithPort:(NSUInteger)port responses:(NSArray*)responses;
 
 - (void)start;
 - (void)stop;
@@ -30,4 +30,3 @@
 
 extern NSString *const CloseCommand;
 extern NSString *const InitialResponseKey;
-extern NSString *const UnknownResponseKey;

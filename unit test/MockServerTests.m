@@ -18,35 +18,34 @@
 static NSString *const HTTPHeader = @"HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=iso-8859-1\r\n\r\n";
 static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\"><html><head><title>example</title></head><body>example result</body></html>\n";
 
-- (NSDictionary*)httpResponses
+- (NSArray*)httpResponses
 {
-    NSDictionary* responses = @{
-    @"^GET .* HTTP.*" : @[ HTTPHeader, HTTPContent, @(0.1), CloseCommand],
-    @"^HEAD .* HTTP.*" : @[ HTTPHeader, CloseCommand],
-    };
+    NSArray* responses = @[
+    @[ @"^GET .* HTTP.*", HTTPHeader, HTTPContent, @(0.1), CloseCommand],
+    @[@"^HEAD .* HTTP.*", HTTPHeader, CloseCommand],
+    ];
 
     return responses;
 }
 
-- (NSDictionary*)ftpResponses
+- (NSArray*)ftpResponses
 {
-    NSDictionary* responses = @{
-    InitialResponseKey : @[ @"220 66.209.94.250 FTP server (tnftpd 20080929) ready.\r\n" ],
-    UnknownResponseKey : @[ @"500 '$0': command not understood.", CloseCommand],
-    @"USER user" : @[ @"331 User user accepted, provide password.\r\n"],
-    @"PASS pass" : @[ @"230 User user logged in.\r\n"],
-    @"SYST" : @[ @"215 UNIX Type: L8 Version: tnftpd 20080929\r\n" ],
-    @"PWD" : @[ @"257 \"/\" is the current directory.\r\n" ],
-    @"TYPE I" : @[ @"200 Type set to I.\r\n" ],
-    @"CWD /" : @[ @"250 CWD command successful.\r\n" ],
-    @"PASV" : @[ @"227 Entering Passive Mode (66,209,94,250,192,124)\r\n"],
-
-    };
+    NSArray* responses = @[
+    @[InitialResponseKey, @"220 66.209.94.250 FTP server (tnftpd 20080929) ready.\r\n" ],
+    @[@"USER user", @"331 User user accepted, provide password.\r\n"],
+    @[@"PASS pass", @"230 User user logged in.\r\n"],
+    @[@"SYST", @"215 UNIX Type: L8 Version: tnftpd 20080929\r\n" ],
+    @[@"PWD", @"257 \"/\" is the current directory.\r\n" ],
+    @[@"TYPE I", @"200 Type set to I.\r\n" ],
+    @[@"CWD /", @"250 CWD command successful.\r\n" ],
+    @[@"PASV", @"227 Entering Passive Mode (66,209,94,250,192,124)\r\n"],
+    @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand],
+    ];
 
     return responses;
 }
 
-- (MockServer*)setupServerWithResponses:(NSDictionary*)responses
+- (MockServer*)setupServerWithResponses:(NSArray*)responses
 {
     MockServer* server = [MockServer serverWithPort:0 responses:responses];
 

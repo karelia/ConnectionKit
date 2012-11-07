@@ -20,9 +20,9 @@
 @property (strong, nonatomic) NSOutputStream* output;
 @property (strong, nonatomic) NSMutableData* outputData;
 @property (assign, nonatomic) NSUInteger port;
-@property (strong, nonatomic) NSDictionary* responses;
+@property (strong, nonatomic) NSArray* requests;
+@property (strong, nonatomic) NSArray* responses;
 @property (strong, nonatomic) NSArray* initialResponse;
-@property (strong, nonatomic) NSArray* unknownResponse;
 @property (assign, atomic) BOOL running;
 
 @end
@@ -35,40 +35,66 @@
 @synthesize outputData = _outputData;
 @synthesize port = _port;
 @synthesize queue = _queue;
+@synthesize requests = _requests;
 @synthesize responses = _responses;
 @synthesize running = _running;
 
 NSString *const CloseCommand = @"«close»";
 NSString *const InitialResponseKey = @"«initial»";
-NSString *const UnknownResponseKey = @"«unknown»";
 
 #pragma mark - Object Lifecycle
 
-+ (MockServer*)serverWithResponses:(NSDictionary*)responses
++ (MockServer*)serverWithResponses:(NSArray*)responses
 {
     MockServer* server = [[MockServer alloc] initWithPort:0 responses:responses];
 
     return [server autorelease];
 }
 
-+ (MockServer*)serverWithPort:(NSUInteger)port responses:(NSDictionary*)responses
++ (MockServer*)serverWithPort:(NSUInteger)port responses:(NSArray*)responses
 {
     MockServer* server = [[MockServer alloc] initWithPort:port responses:responses];
 
     return [server autorelease];
 }
 
-- (id)initWithPort:(NSUInteger)port responses:(NSDictionary*)responses
+- (id)initWithPort:(NSUInteger)port responses:(NSArray*)responses
 {
     if ((self = [super init]) != nil)
     {
         self.port = port;
-        self.responses = responses;
         self.outputData = [NSMutableData data];
         self.queue = [NSOperationQueue currentQueue];
 
-        self.initialResponse = responses[InitialResponseKey];
-        self.unknownResponse = responses[UnknownResponseKey];
+        // process responses array - we pull out some special responses, and pre-calculate all the regular expressions
+        NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators;
+        NSMutableArray* processed = [NSMutableArray arrayWithCapacity:[responses count]];
+        NSMutableArray* expressions = [NSMutableArray arrayWithCapacity:[responses count]];
+        for (NSArray* response in responses)
+        {
+            NSUInteger length = [response count];
+            if (length > 0)
+            {
+                NSString* key = response[0];
+                NSArray* commands = [response subarrayWithRange:NSMakeRange(1, length - 1)];
+                if ([key isEqualToString:InitialResponseKey])
+                {
+                    self.initialResponse = commands;
+                }
+                else
+                {
+                    NSError* error = nil;
+                    NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:options error:&error];
+                    if (expression)
+                    {
+                        [expressions addObject:expression];
+                        [processed addObject:commands];
+                    }
+                }
+            }
+        }
+        self.requests = expressions;
+        self.responses = processed;
 
         MockServerLog(@"made server at port %ld", (long) port);
     }
@@ -82,6 +108,8 @@ NSString *const UnknownResponseKey = @"«unknown»";
     [_output release];
     [_outputData release];
     [_queue release];
+    [_responses release];
+    [_requests release];
     
     [super dealloc];
 }
@@ -195,27 +223,30 @@ NSString *const UnknownResponseKey = @"«unknown»";
     {
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
         NSRange wholeString = NSMakeRange(0, [request length]);
-        NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators;
 
         MockServerLog(@"got request '%@'", request);
 
-        __block BOOL matched = NO;
-        [self.responses enumerateKeysAndObjectsUsingBlock:^(id key, id commands, BOOL *stop) {
-            NSError* error = nil;
-            NSRegularExpression* expression = [NSRegularExpression regularExpressionWithPattern:key options:options error:&error];
+        BOOL matched = NO;
+        NSUInteger count = [self.requests count];
+        for (NSUInteger n = 0; n < count; ++n)
+        {
+            NSRegularExpression* expression = self.requests[n];
             NSTextCheckingResult* match = [expression firstMatchInString:request options:0 range:wholeString];
             if (match)
             {
-                MockServerLog(@"matched with request pattern %@", key);
+                MockServerLog(@"matched with request pattern %@", expression);
+                NSArray* commands = self.responses[n];
                 [self processCommands:commands request:request match:match];
-                *stop = YES;
                 matched = YES;
+                break;
             }
-        }];
+        }
 
         if (!matched)
         {
-            [self processCommands:self.unknownResponse request:request match:nil];
+            // if nothing matched, close the connection
+            // to prevent this, add a key of ".*" as the last response in the array
+            [self performSelector:@selector(processClose) withObject:nil afterDelay:0.0];
         }
 
         [request release];
