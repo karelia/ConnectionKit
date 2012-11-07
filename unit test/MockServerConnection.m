@@ -104,8 +104,7 @@
 
     else
     {
-        NSUInteger extraPort = self.extraListener.port;
-        NSDictionary* substitutions = @{ @"$pasv" : [NSString stringWithFormat:@"127,0,0,1,%ld,%ld", extraPort / 256L, extraPort % 256L] };
+        NSDictionary* substitutions = [self standardSubstitutions];
         NSString* request = [[NSString alloc] initWithBytes:buffer length:bytesRead encoding:NSUTF8StringEncoding];
         MockServerLog(@"got request '%@'", request);
         NSArray* commands = [self.responder responseForRequest:request substitutions:substitutions];
@@ -131,13 +130,6 @@
     [self.input close];
 }
 
-- (void)queueOutput:(id)string
-{
-    MockServerLog(@"queued output %@", string);
-    [self.outputData appendData:[string dataUsingEncoding:NSUTF8StringEncoding]];
-    [self processOutput];
-}
-
 - (void)processCommands:(NSArray*)commands
 {
     NSTimeInterval delay = 0.0;
@@ -150,18 +142,39 @@
         else
         {
             SEL method;
-            if ([command isEqual:CloseCommand])
+            BOOL isString = [command isKindOfClass:[NSString class]];
+            if (isString && [command isEqual:CloseCommand])
             {
                 method = @selector(processClose);
             }
             else
             {
-                method = @selector(queueOutput:);
+                method = @selector(processOutput);
+                if (isString)
+                {
+                    MockServerLog(@"queued output %@", command);
+                    command = [command dataUsingEncoding:NSUTF8StringEncoding];
+                }
+                [self.outputData appendData:command];
             }
 
             [self performSelector:method withObject:command afterDelay:delay];
         }
     }
+}
+
+- (NSDictionary*)standardSubstitutions
+{
+    NSUInteger extraPort = self.extraListener.port;
+    NSDictionary* substitutions =
+    @{
+        @"$address" : @"127.0.0.1",
+        @"$server" : @"fakeserver 20121107",
+        @"$size" : [NSString stringWithFormat:@"%ld", (long) [self.server.data length]],
+        @"$pasv" : [NSString stringWithFormat:@"127,0,0,1,%ld,%ld", extraPort / 256L, extraPort % 256L]
+    };
+
+    return substitutions;
 }
 
 - (void)makeExtraListener

@@ -31,16 +31,16 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
 - (NSArray*)ftpResponses
 {
     NSArray* responses = @[
-    @[InitialResponseKey, @"220 127.0.0.1 FTP server (tnftpd 20080929) ready.\r\n" ],
+    @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ],
     @[@"USER user", @"331 User user accepted, provide password.\r\n"],
     @[@"PASS pass", @"230 User user logged in.\r\n"],
-    @[@"SYST", @"215 UNIX Type: L8 Version: tnftpd 20080929\r\n" ],
+    @[@"SYST", @"215 UNIX Type: L8 Version: $server\r\n" ],
     @[@"PWD", @"257 \"/\" is the current directory.\r\n" ],
     @[@"TYPE I", @"200 Type set to I.\r\n" ],
     @[@"CWD /", @"250 CWD command successful.\r\n" ],
     @[@"PASV", @"227 Entering Passive Mode ($pasv)\r\n"],
-    @[@"SIZE test.txt", @"213 24\r\n"],
-    @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' (24 bytes).\r\n"],
+    @[@"SIZE test.txt", @"213 $size\r\n"],
+    @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' ($size bytes).\r\n"],
     @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand],
     ];
 
@@ -127,11 +127,13 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
     MockServer* server = [self setupServerWithResponses:[self ftpResponses]];
     if (server)
     {
+        NSString* testData = @"This is some test data";
+        server.data = [testData dataUsingEncoding:NSUTF8StringEncoding];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"ftp://user:pass@127.0.0.1:%ld/test.txt", (long)server.port]];
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
         NSString* string = [self stringForRequest:request server:server];
 
-        STAssertEqualObjects(string, @"This is a test response", @"wrong response");
+        STAssertEqualObjects(string, testData, @"wrong response");
         [string release];
     }
 }

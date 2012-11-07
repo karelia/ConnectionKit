@@ -28,6 +28,7 @@
 @implementation MockServer
 
 @synthesize connection = _connection;
+@synthesize data = _data;
 @synthesize listener = _listener;
 @synthesize queue = _queue;
 @synthesize responder = _responder;
@@ -78,6 +79,7 @@ NSString *const InitialResponseKey = @"«initial»";
 - (void)dealloc
 {
     [_connection release];
+    [_data release];
     [_queue release];
     [_responder release];
     
