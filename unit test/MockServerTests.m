@@ -93,7 +93,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
 
     [server runUntilStopped];
 
-    return string;
+    return [string autorelease];
 }
 
 #pragma mark - Tests
@@ -104,9 +104,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
     if (server)
     {
         NSString* string = [self stringForScheme:@"http" path:@"/index.html" method:@"GET" server:server];
-
         STAssertEqualObjects(string, HTTPContent, @"wrong response");
-        [string release];
     }
 }
 
@@ -116,9 +114,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
     if (server)
     {
         NSString* string = [self stringForScheme:@"http" path:@"/index.html" method:@"HEAD" server:server];
-
         STAssertEqualObjects(string, @"", @"wrong response");
-        [string release];
     }
 }
 
@@ -131,21 +127,10 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
         server.data = [testData dataUsingEncoding:NSUTF8StringEncoding];
         NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"ftp://user:pass@127.0.0.1:%ld/test.txt", (long)server.port]];
         NSURLRequest* request = [NSURLRequest requestWithURL:url];
-        NSString* string = [self stringForRequest:request server:server];
 
+        NSString* string = [self stringForRequest:request server:server];
         STAssertEqualObjects(string, testData, @"wrong response");
-        [string release];
     }
 }
 
-- (void)testRegexp
-{
-    NSError* error = nil;
-    NSRegularExpressionOptions options = NSRegularExpressionDotMatchesLineSeparators;
-    NSRegularExpression* reg = [NSRegularExpression regularExpressionWithPattern:@"USER user" options:options error:&error];
-    STAssertNotNil(reg, @"got expression");
-    NSString* string = @"USER user\r\n";
-    NSTextCheckingResult* match = [reg firstMatchInString:string options:0 range:NSMakeRange(0, [string length])];
-    STAssertNotNil(match, @"got match");
-}
 @end
