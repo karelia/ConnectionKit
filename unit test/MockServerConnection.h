@@ -9,15 +9,14 @@
 #import <Foundation/Foundation.h>
 
 @class MockServer;
+@class MockServerResponder;
 
-@interface MockServerResponder : NSObject
+@interface MockServerConnection : NSObject<NSStreamDelegate>
 
-@property (strong, nonatomic, readonly) NSArray* initialResponse;
++ (MockServerConnection*)connectionWithSocket:(int)socket responder:(MockServerResponder*)responder server:(MockServer*)server;
 
-+ (MockServerResponder*)responderWithResponses:(NSArray*)responses;
+- (id)initWithSocket:(int)socket responder:(MockServerResponder*)responder server:(MockServer *)server;
 
-- (id)initWithResponses:(NSArray*)responses;
-
-- (NSArray*)responseForRequest:(NSString*)request server:(MockServer*)server;
+- (void)cancel;
 
 @end

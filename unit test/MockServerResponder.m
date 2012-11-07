@@ -86,8 +86,6 @@
     NSArray* commands = nil;
     NSRange wholeString = NSMakeRange(0, [request length]);
 
-    MockServerLog(@"got request '%@'", request);
-
     BOOL matched = NO;
     NSUInteger count = [self.requests count];
     for (NSUInteger n = 0; n < count; ++n)
@@ -126,11 +124,6 @@
     }
 }
 
-- (NSString*)substitutedCommand:(NSString*)command match:(NSTextCheckingResult*)match request:(NSString*)request
-{
-    return command;
-}
-
 - (NSArray*)substitutedCommands:(NSArray*)commands match:(NSTextCheckingResult*)match request:(NSString*)request
 {
     NSMutableDictionary* substitutions = [NSMutableDictionary dictionary];
@@ -149,8 +142,8 @@
                     [substituted replaceOccurrencesOfString:key withString:replacement options:0 range:NSMakeRange(0, [substituted length])];
                 }];
 
-                command = substituted;
                 MockServerLog(@"expanded response %@ as %@", command, substituted);
+                command = substituted;
             }
         }
 
