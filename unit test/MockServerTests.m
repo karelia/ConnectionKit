@@ -32,7 +32,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
 {
     NSDictionary* responses = @{
     InitialResponseKey : @[ @"220 66.209.94.250 FTP server (tnftpd 20080929) ready.\r\n" ],
-    UnknownResponseKey : @[ @"500 '': command not understood."],
+    UnknownResponseKey : @[ @"500 '$0': command not understood.", CloseCommand],
     @"USER user" : @[ @"331 User user accepted, provide password.\r\n"],
     @"PASS pass" : @[ @"230 User user logged in.\r\n"],
     @"SYST" : @[ @"215 UNIX Type: L8 Version: tnftpd 20080929\r\n" ],

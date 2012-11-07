@@ -207,7 +207,7 @@ NSString *const UnknownResponseKey = @"«unknown»";
             if (match)
             {
                 MockServerLog(@"matched with request pattern %@", key);
-                [self processCommands:commands];
+                [self processCommands:commands request:request match:match];
                 *stop = YES;
                 matched = YES;
             }
@@ -215,7 +215,7 @@ NSString *const UnknownResponseKey = @"«unknown»";
 
         if (!matched)
         {
-            [self processCommands:self.unknownResponse];
+            [self processCommands:self.unknownResponse request:request match:nil];
         }
 
         [request release];
@@ -236,7 +236,7 @@ NSString *const UnknownResponseKey = @"«unknown»";
     [self processOutput];
 }
 
-- (void)processCommands:(NSArray*)commands
+- (void)processCommands:(NSArray*)commands request:(NSString*)request match:(NSTextCheckingResult*)match
 {
     NSTimeInterval delay = 0.0;
     for (id command in commands)
@@ -254,6 +254,36 @@ NSString *const UnknownResponseKey = @"«unknown»";
             }
             else
             {
+                BOOL containsTokens = [command rangeOfString:@"$"].location != NSNotFound;
+                if (containsTokens)
+                {
+                    // always add the request as $0
+                    NSMutableDictionary* replacements = [NSMutableDictionary dictionary];
+                    [replacements setObject:request forKey:@"$0"];
+
+                    // add any matched subgroups
+                    if (match)
+                    {
+                        NSUInteger count = match.numberOfRanges;
+                        for (NSUInteger n = 1; n < count; ++n)
+                        {
+                            NSString* token = [NSString stringWithFormat:@"$%ld", (long) n];
+                            NSRange range = [match rangeAtIndex:n];
+                            NSString* replacement = [request substringWithRange:range];
+                            [replacements setObject:replacement forKey:token];
+                        }
+                    }
+
+                    // perform replacements
+                    NSMutableString* replaced = [NSMutableString stringWithString:command];
+                    [replacements enumerateKeysAndObjectsUsingBlock:^(id key, id replacement, BOOL *stop) {
+                        [replaced replaceOccurrencesOfString:key withString:replacement options:0 range:NSMakeRange(0, [replaced length])];
+                    }];
+
+                    MockServerLog(@"expanded response %@ as %@", command, replaced);
+                    command = replaced;
+                }
+                
                 method = @selector(queueOutput:);
             }
             
@@ -343,7 +373,7 @@ NSString *const UnknownResponseKey = @"«unknown»";
             MockServerLog(@"opened %@ stream", [self nameForStream:stream]);
             if (stream == self.input)
             {
-                [self processCommands:self.initialResponse];
+                [self processCommands:self.initialResponse request:nil match:nil];
             }
             break;
         }
