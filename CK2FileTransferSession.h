@@ -79,6 +79,24 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 
+/*!
+ @method         canHandleURL:
+ 
+ @abstract
+ Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
+ 
+ @discussion
+ The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
+ 
+ @param
+ url     The URL to preflight.
+ 
+ @result
+ YES         if it is likely that the given request can be used to
+ perform a file operation and the associated I/O can be
+ started
+ */
++ (BOOL)canHandleURL:(NSURL *)url;
 
 @end
 

@@ -249,6 +249,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
 }
 
++ (BOOL)canHandleURL:(NSURL *)url;
+{
+    return ([CK2FileTransferProtocol classForURL:url] != nil);
+}
+
 #pragma mark Transfers
 
 - (CK2FileTransferClient *)makeClientWithCompletionHandler:(void (^)(NSError *error))block;
