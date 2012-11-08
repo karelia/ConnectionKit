@@ -5,6 +5,10 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+ * A collection of stock responses that can be used to fake an FTP server.
+ */
+
 @interface MockServerFTPResponses : NSObject
 
 + (NSArray*)initialResponse;
@@ -19,6 +23,8 @@
 + (NSArray*)retrResponse;
 + (NSArray*)listResponse;
 + (NSArray*)commandNotUnderstoodResponse;
+
 + (NSArray*)standardResponses;
++ (NSArray*)badLoginResponses;
 
 @end

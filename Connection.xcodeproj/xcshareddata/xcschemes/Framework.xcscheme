@@ -37,6 +37,14 @@
                BlueprintName = "UnitTests"
                ReferencedContainer = "container:Connection.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "PathTests">
+               </Test>
+               <Test
+                  Identifier = "MockServerTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
    </TestAction>

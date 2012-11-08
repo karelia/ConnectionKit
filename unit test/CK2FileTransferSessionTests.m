@@ -92,6 +92,31 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)testContentsOfDirectoryAtURLBadLogin
+{
+    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses badLoginResponses]];
+    if (server)
+    {
+        server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
+
+        CK2FileTransferSession* session = [[CK2FileTransferSession alloc] init];
+        session.delegate = self;
+        NSURL* url = [self URLForPath:@"/directory/" server:server];
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        [session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+
+            STAssertNotNil(error, @"should get error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+            STAssertTrue([contents count] == 0, @"shouldn't get content");
+
+            [server stop];
+        }];
+
+        [server runUntilStopped];
+        [session release];
+    }
+}
+
 - (void)testEnumerateContentsOfURL
 {
     MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];

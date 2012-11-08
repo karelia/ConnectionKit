@@ -23,6 +23,11 @@
     return @[@"PASS (\\w+)", @"230 User user logged in.\r\n"];
 }
 
++ (NSArray*)passwordBadResponse
+{
+    return @[@"PASS (\\w+)", @"530 Login incorrect.\r\n"];
+}
+
 + (NSArray*)sysReponse
 {
     return @[@"SYST", @"215 UNIX Type: L8 Version: $server\r\n" ];
@@ -82,6 +87,18 @@
     [self sizeResponse],
     [self retrResponse],
     [self listResponse],
+    [self commandNotUnderstoodResponse],
+    ];
+
+    return responses;
+}
+
++ (NSArray*)badLoginResponses
+{
+    NSArray* responses = @[
+    [self initialResponse],
+    [self userOkResponse],
+    [self passwordBadResponse],
     [self commandNotUnderstoodResponse],
     ];
 
