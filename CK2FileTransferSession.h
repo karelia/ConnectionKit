@@ -14,7 +14,7 @@
 @protocol CK2FileTransferSessionDelegate;
 
 
-@interface CK2FileTransferSession : NSObject <NSURLAuthenticationChallengeSender>
+@interface CK2FileTransferSession : NSObject
 {
   @private
     id <CK2FileTransferSessionDelegate> _delegate;
