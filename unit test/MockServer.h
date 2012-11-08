@@ -13,7 +13,7 @@
 
  * You provide the server with an optional port to run on, and a list of responses.
  *
- * The responses constist of an array of arrays, in this format:
+ * The responses consist of an array of arrays, in this format:
  *     pattern, command, command...
  *
  * The pattern is a regular expression which is matched against input received by the server.

@@ -160,7 +160,13 @@ NSString *const InitialResponseKey = @"«initial»";
 
         MockServerLog(@"got connection on data listener");
 
-        NSArray* responses = @[ @[InitialResponseKey, server.data, CloseCommand ] ];
+        NSData* data = server.data;
+        if (!data)
+        {
+            data = [@"Test data" dataUsingEncoding:NSUTF8StringEncoding];
+        }
+
+        NSArray* responses = @[ @[InitialResponseKey, data, CloseCommand ] ];
         MockServerResponder* responder = [MockServerResponder responderWithResponses:responses];
         MockServerConnection* connection = [MockServerConnection connectionWithSocket:socket responder:responder server:server];
         [self.dataConnections addObject:connection];
