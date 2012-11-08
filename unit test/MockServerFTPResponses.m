@@ -68,6 +68,16 @@
     return @[@"LIST", @(0.1), @"150 Opening ASCII mode data connection for '/bin/ls'.\r\n", @(0.1), @"226 Transfer complete.\r\n"];
 }
 
++ (NSArray*)mkdResponse
+{
+    return @[ @"MKD (\\w+)", @"257 \"$1\" directory created.\r\n"];
+}
+
++ (NSArray*)mkdFileExistsResponse
+{
+    return @[ @"MKD (\\w+)", @"550 $1: File exists.\r\n"];
+
+}
 + (NSArray*)commandNotUnderstoodResponse
 {
     return @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand];
@@ -87,6 +97,7 @@
     [self sizeResponse],
     [self retrResponse],
     [self listResponse],
+    [self mkdResponse],
     [self commandNotUnderstoodResponse],
     ];
 

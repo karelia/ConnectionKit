@@ -170,7 +170,37 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateDirectoryAtURL
 {
-    //- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(void (^)(NSError *error))handler;
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
+}
+
+- (void)testCreateDirectoryAtURLAlreadyExists
+{
+    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
+    NSArray* responses = @[[MockServerFTPResponses mkdFileExistsResponse]];
+    responses = [responses arrayByAddingObjectsFromArray:[MockServerFTPResponses standardResponses]];
+
+    if ([self setupSessionWithResponses:responses])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should get error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
 }
 
 - (void)testCreateFileAtURL

@@ -22,6 +22,9 @@
 + (NSArray*)sizeResponse;
 + (NSArray*)retrResponse;
 + (NSArray*)listResponse;
++ (NSArray*)mkdResponse;
++ (NSArray*)mkdFileExistsResponse;
+
 + (NSArray*)commandNotUnderstoodResponse;
 
 + (NSArray*)standardResponses;
