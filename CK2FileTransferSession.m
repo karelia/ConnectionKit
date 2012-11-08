@@ -14,10 +14,12 @@
 {
   @private
     CK2FileTransferSession  *_session;
+    void    (^_deliverDelegateMessages)(void(^)(void));
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
 }
 
+// These methods record the queue/thread used to invoke them so as to deliver *delegate messages* (not blocks) back to the right thread
 - (id)initWithSession:(CK2FileTransferSession *)session completionBlock:(void (^)(NSError *))block;
 - (id)initWithSession:(CK2FileTransferSession *)session enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
 
@@ -284,6 +286,25 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     if (self = [self init])
     {
         _session = [session retain];
+        
+        NSOperationQueue *queue = [NSOperationQueue currentQueue];
+        if (queue)
+        {
+            _deliverDelegateMessages = ^(void(^block)(void)) {
+                [queue addOperationWithBlock:block];
+            };
+        }
+        else
+        {
+            dispatch_queue_t queue = dispatch_get_current_queue();
+            NSAssert(queue, @"dispatch_get_current_queue unexpectedly claims there is no current queue");
+            
+            _deliverDelegateMessages = ^(void(^block)(void)) {
+                dispatch_async(queue, block);
+            };
+        }
+        _deliverDelegateMessages = [_deliverDelegateMessages copy];
+        
         _completionBlock = [block copy];
         
         [self retain];  // until protocol finishes or fails
@@ -301,12 +322,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return self;
 }
 
+- (void)deliverBlockToDelegate:(void (^)(void))block;
+{
+    _deliverDelegateMessages(block);
+}
+
 - (void)finishWithError:(NSError *)error;
 {
     _completionBlock(error);
     
     [_completionBlock release]; _completionBlock = nil;
     [_enumerationBlock release]; _enumerationBlock = nil;
+    [_deliverDelegateMessages release]; _deliverDelegateMessages = nil;
     [_session release]; _session = nil;
     
     [self release]; // balances call in -init
@@ -326,14 +353,16 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // TODO: Cache credentials per protection space
-    // TODO: bounce challenge over a suitable thread?
-    [[_session delegate] fileTransferSession:_session didReceiveAuthenticationChallenge:challenge];
+    [self deliverBlockToDelegate:^{
+        [[_session delegate] fileTransferSession:_session didReceiveAuthenticationChallenge:challenge];
+    }];
 }
 
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
-    // TODO: bounce message over a suitable thread?
-    [[_session delegate] fileTransferSession:_session appendString:info toTranscript:transcript];
+    [self deliverBlockToDelegate:^{
+        [[_session delegate] fileTransferSession:_session appendString:info toTranscript:transcript];
+    }];
 }
 
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
