@@ -246,8 +246,22 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateFileAtURL2
 {
-    //
-    //- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* source = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"CpMac"];
+
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            if (bytesWritten == 0)
+            {
+                [self.server stop];
+            }
+        }];
+    }
+
+    [self.server runUntilStopped];
 }
 
 - (void)testRemoveFileAtURL
@@ -303,6 +317,18 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testSetResourceValues
 {
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSDictionary* values = @{};
+        [self.session setResourceValues:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
+
     //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
     //// All other attributes are ignored
     //- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;

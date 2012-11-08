@@ -80,7 +80,7 @@
 
 + (NSArray*)storResponse
 {
-    return @[ @"STOR ([a-zA-Z0-9.]+)", @(0.1), @"150 Opening ASCII mode data connection for '$1'.\r\n", @(0.1), @"226 Transfer complete.\r\n"];
+    return @[ @"STOR ([a-zA-Z0-9.]+)", @(0.1), @"150 Opening ASCII mode data connection for '$1'.\r\n", @(0.2), @"226 Transfer complete.\r\n"];
 }
 
 + (NSArray*)deleResponse
