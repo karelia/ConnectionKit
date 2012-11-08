@@ -44,6 +44,9 @@
                                             ofItemAtURL:(NSURL *)url
                                                  client:(id <CK2FileTransferProtocolClient>)client;
 
+// Your cue to stop doing any more work. Once this is called, the client will ignore you should you choose to continue
+- (void)stop;
+
 
 #pragma mark For Subclasses to Customize
 // Session consults registered protocols to find out which is qualified to handle paths for a specific URL

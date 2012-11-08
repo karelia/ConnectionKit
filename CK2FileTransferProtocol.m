@@ -69,6 +69,11 @@
     return nil;
 }
 
+- (void)stop;
+{
+    [self doesNotRecognizeSelector:_cmd];
+}
+
 #pragma mark For Subclasses to Customize
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
