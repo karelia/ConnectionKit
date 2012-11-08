@@ -66,7 +66,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Delegate
-// Delegate messages are delivered on the same queue that was used to insantiate the session. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
+// Delegate messages are delivered on the same queue that was used to instantiate the session. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
 @property(assign) id <CK2FileTransferSessionDelegate> delegate;
 
 
