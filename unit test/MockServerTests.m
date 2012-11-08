@@ -4,6 +4,8 @@
 //
 
 #import "MockServer.h"
+#import "MockServerFTPResponses.h"
+
 #import <SenTestingKit/SenTestingKit.h>
 
 @interface MockServerTests : SenTestCase
@@ -20,25 +22,6 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
     NSArray* responses = @[
     @[ @"^GET .* HTTP.*", HTTPHeader, HTTPContent, @(0.1), CloseCommand],
     @[@"^HEAD .* HTTP.*", HTTPHeader, CloseCommand],
-    ];
-
-    return responses;
-}
-
-- (NSArray*)ftpResponses
-{
-    NSArray* responses = @[
-    @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ],
-    @[@"USER user", @"331 User user accepted, provide password.\r\n"],
-    @[@"PASS pass", @"230 User user logged in.\r\n"],
-    @[@"SYST", @"215 UNIX Type: L8 Version: $server\r\n" ],
-    @[@"PWD", @"257 \"/\" is the current directory.\r\n" ],
-    @[@"TYPE I", @"200 Type set to I.\r\n" ],
-    @[@"CWD /", @"250 CWD command successful.\r\n" ],
-    @[@"PASV", @"227 Entering Passive Mode ($pasv)\r\n"],
-    @[@"SIZE test.txt", @"213 $size\r\n"],
-    @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' ($size bytes).\r\n"],
-    @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand],
     ];
 
     return responses;
@@ -117,7 +100,7 @@ static NSString*const HTTPContent = @"<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 
 
 - (void)testFTP
 {
-    MockServer* server = [self setupServerWithResponses:[self ftpResponses]];
+    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];
     if (server)
     {
         NSString* testData = @"This is some test data";
