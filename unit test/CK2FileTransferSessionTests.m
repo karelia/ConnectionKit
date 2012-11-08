@@ -8,6 +8,7 @@
 
 #import "CK2FileTransferSession.h"
 #import <SenTestingKit/SenTestingKit.h>
+#import <curl/curl.h>
 
 @interface CK2FileTransferSessionTests : SenTestCase<CK2FileTransferSessionDelegate>
 
@@ -190,6 +191,23 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     responses = [responses arrayByAddingObjectsFromArray:[MockServerFTPResponses standardResponses]];
 
     if ([self setupSessionWithResponses:responses])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should get error");
+            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
+            STAssertTrue(ftpCode == 550, @"should get 550 from server");
+
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
+}
+
+- (void)testCreateDirectoryAtURLBadLogin
+{
+    if ([self setupSessionWithResponses:[MockServerFTPResponses badLoginResponses]])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
