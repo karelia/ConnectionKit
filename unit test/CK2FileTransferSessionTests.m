@@ -4,6 +4,8 @@
 //
 
 #import "MockServer.h"
+#import "MockServerFTPResponses.h"
+
 #import "CK2FileTransferSession.h"
 #import <SenTestingKit/SenTestingKit.h>
 
@@ -15,24 +17,9 @@
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
 
-- (NSArray*)ftpResponses
++ (NSArray*)ftpInitialResponse
 {
-    NSArray* responses = @[
-    @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ],
-    @[@"USER (\\w+)", @"331 User $1 accepted, provide password.\r\n"],
-    @[@"PASS (\\w+)", @"230 User user logged in.\r\n"],
-    @[@"SYST", @"215 UNIX Type: L8 Version: $server\r\n" ],
-    @[@"PWD", @"257 \"/\" is the current directory.\r\n" ],
-    @[@"TYPE (\\w+)", @"200 Type set to $1.\r\n" ],
-    @[@"CWD .*", @"250 CWD command successful.\r\n" ],
-    @[@"PASV", @"227 Entering Passive Mode ($pasv)\r\n"],
-    @[@"SIZE test.txt", @"213 $size\r\n"],
-    @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' ($size bytes).\r\n"],
-    @[@"LIST", @(0.1), @"150 Opening ASCII mode data connection for '/bin/ls'.\r\n", @(0.1), @"226 Transfer complete.\r\n"],
-    @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand],
-    ];
-
-    return responses;
+    return @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ];
 }
 
 - (MockServer*)setupServerWithResponses:(NSArray*)responses
@@ -69,7 +56,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testContentsOfDirectoryAtURL
 {
-    MockServer* server = [self setupServerWithResponses:[self ftpResponses]];
+    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];
     if (server)
     {
         server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
@@ -107,7 +94,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testEnumerateContentsOfURL
 {
-    MockServer* server = [self setupServerWithResponses:[self ftpResponses]];
+    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];
     if (server)
     {
         server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
@@ -137,6 +124,38 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [server runUntilStopped];
         [session release];
     }
+}
+
+- (void)testCreateDirectoryAtURL
+{
+    //- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(void (^)(NSError *error))handler;
+}
+
+- (void)testCreateFileAtURL
+{
+    //
+    //// 0 bytesWritten indicates writing has ended. This might be because of a failure; if so, error will be filled in
+    //- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+}
+
+- (void)testCreateFileAtURL2
+{
+    //
+    //- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+}
+
+- (void)testRemoveFileAtURL
+{
+    //
+    //- (void)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+}
+
+- (void)testSetResourceValues
+{
+    //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
+    //// All other attributes are ignored
+    //- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+    
 }
 
 @end

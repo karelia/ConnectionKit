@@ -25,6 +25,7 @@
 /* Begin PBXBuildFile section */
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
+		2239A1F2164C068A008D4ADE /* MockServerFTPResponses.m in Sources */ = {isa = PBXBuildFile; fileRef = 2239A1F1164C068A008D4ADE /* MockServerFTPResponses.m */; };
 		223B683115A1B16B00C127BA /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
 		22B47C54164AB37E006E80EB /* MockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B47C53164AB37E006E80EB /* MockServerResponder.m */; };
 		22B47C55164ABAB8006E80EB /* MockServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B47C50164AB342006E80EB /* MockServerConnection.m */; };
@@ -245,6 +246,8 @@
 		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
+		2239A1F0164C068A008D4ADE /* MockServerFTPResponses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MockServerFTPResponses.h; sourceTree = "<group>"; };
+		2239A1F1164C068A008D4ADE /* MockServerFTPResponses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MockServerFTPResponses.m; sourceTree = "<group>"; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
 		22B47C4F164AB342006E80EB /* MockServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MockServerConnection.h; sourceTree = "<group>"; };
@@ -541,6 +544,8 @@
 				22F680BC164938050008A4F4 /* MockServer.m */,
 				22B47C4F164AB342006E80EB /* MockServerConnection.h */,
 				22B47C50164AB342006E80EB /* MockServerConnection.m */,
+				2239A1F0164C068A008D4ADE /* MockServerFTPResponses.h */,
+				2239A1F1164C068A008D4ADE /* MockServerFTPResponses.m */,
 				22B47C56164ABE97006E80EB /* MockServerListener.h */,
 				22B47C57164ABE97006E80EB /* MockServerListener.m */,
 				22B47C52164AB37E006E80EB /* MockServerResponder.h */,
@@ -1160,6 +1165,7 @@
 				22B47C55164ABAB8006E80EB /* MockServerConnection.m in Sources */,
 				22B47C58164ABE97006E80EB /* MockServerListener.m in Sources */,
 				22B47C5B164BC2D4006E80EB /* CK2FileTransferSessionTests.m in Sources */,
+				2239A1F2164C068A008D4ADE /* MockServerFTPResponses.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
