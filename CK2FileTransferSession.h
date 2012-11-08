@@ -4,6 +4,8 @@
 //
 //  Created by Mike on 08/10/2012.
 //
+//  Usage:
+//  Much like NSFileManager, alloc + init your own instance. Likely you'll want to give it a delegate so can handle authentication challenges. Then just use the instance methods to perform your desired file operations.
 //
 
 #import <Foundation/Foundation.h>
