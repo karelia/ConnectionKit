@@ -80,20 +80,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     [super dealloc];
 }
 
-#pragma mark NSURLAuthenticationChallengeSender
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-}
-
 #pragma mark Discovering Directory Contents
 
 - (void)contentsOfDirectoryAtURL:(NSURL *)url
