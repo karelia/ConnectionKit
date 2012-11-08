@@ -11,6 +11,9 @@
 
 @interface CK2FileTransferSessionTests : SenTestCase<CK2FileTransferSessionDelegate>
 
+@property (strong, nonatomic) MockServer* server;
+@property (strong, nonatomic) CK2FileTransferSession* session;
+
 @end
 
 @implementation CK2FileTransferSessionTests
@@ -22,15 +25,23 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     return @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ];
 }
 
-- (MockServer*)setupServerWithResponses:(NSArray*)responses
+- (BOOL)setupSessionWithResponses:(NSArray*)responses
 {
-    MockServer* server = [MockServer serverWithPort:0 responses:responses];
+    self.server = [MockServer serverWithPort:0 responses:responses];
+    STAssertNotNil(self.server, @"got server");
 
-    STAssertNotNil(server, @"got server");
-    [server start];
-    BOOL started = server.running;
-    STAssertTrue(started, @"server started ok");
-    return started ? server : nil;
+    if (self.server)
+    {
+        [self.server start];
+        BOOL started = self.server.running;
+        STAssertTrue(started, @"server started ok");
+
+        self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
+        self.session = [[CK2FileTransferSession alloc] init];
+        self.session.delegate = self;
+    }
+
+    return self.session != nil;
 }
 
 #pragma mark - Delegate
@@ -48,24 +59,24 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 #pragma mark - Tests
 
-- (NSURL*)URLForPath:(NSString*)path server:(MockServer*)server
+- (void)tearDown
 {
-    NSURL* result = [NSURL URLWithString:[NSString stringWithFormat:@"ftp://127.0.0.1:%ld/%@", server.port, path]];
+    self.session = nil;
+    self.server = nil;
+}
+- (NSURL*)URLForPath:(NSString*)path
+{
+    NSURL* result = [NSURL URLWithString:[NSString stringWithFormat:@"ftp://127.0.0.1:%ld/%@", self.server.port, path]];
     return result;
 }
 
 - (void)testContentsOfDirectoryAtURL
 {
-    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];
-    if (server)
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
     {
-        server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
-
-        CK2FileTransferSession* session = [[CK2FileTransferSession alloc] init];
-        session.delegate = self;
-        NSURL* url = [self URLForPath:@"/directory/" server:server];
+        NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        [session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             if (error)
             {
@@ -77,64 +88,52 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 STAssertTrue(count == 2, @"should have two results");
                 if (count == 2)
                 {
-                    NSURL* file1 = [self URLForPath:@"/directory/file1.txt" server:server];
+                    NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];
                     STAssertTrue([contents[0] isEqual:file1], @"got file 1");
-                    NSURL* file2 = [self URLForPath:@"/directory/file2.txt" server:server];
+                    NSURL* file2 = [self URLForPath:@"/directory/file2.txt"];
                     STAssertTrue([contents[1] isEqual:file2], @"got file 2");
                 }
             }
             
-            [server stop];
+            [self.server stop];
         }];
-
-        [server runUntilStopped];
-        [session release];
+        
+        [self.server runUntilStopped];
     }
 }
 
 - (void)testContentsOfDirectoryAtURLBadLogin
 {
-    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses badLoginResponses]];
-    if (server)
+    if ([self setupSessionWithResponses:[MockServerFTPResponses badLoginResponses]])
     {
-        server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
-
-        CK2FileTransferSession* session = [[CK2FileTransferSession alloc] init];
-        session.delegate = self;
-        NSURL* url = [self URLForPath:@"/directory/" server:server];
+        NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        [session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             STAssertNotNil(error, @"should get error");
             STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
-            [server stop];
+            [self.server stop];
         }];
-
-        [server runUntilStopped];
-        [session release];
+        
+        [self.server runUntilStopped];
     }
 }
 
 - (void)testEnumerateContentsOfURL
 {
-    MockServer* server = [self setupServerWithResponses:[MockServerFTPResponses standardResponses]];
-    if (server)
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
     {
-        server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
-
-        CK2FileTransferSession* session = [[CK2FileTransferSession alloc] init];
-        session.delegate = self;
-        NSURL* url = [self URLForPath:@"/directory/" server:server];
+        NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         NSMutableArray* expectedURLS = [NSMutableArray arrayWithArray:@[
-            url,
-            [self URLForPath:@"/directory/file1.txt" server:server],
-            [self URLForPath:@"/directory/file2.txt" server:server]
-        ]];
+                                        url,
+                                        [self URLForPath:@"/directory/file1.txt"],
+                                        [self URLForPath:@"/directory/file2.txt"]
+                                        ]];
 
-        [session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
+        [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
             NSLog(@"got item %@", item);
             STAssertTrue([expectedURLS containsObject:item], @"got expected item");
             [expectedURLS removeObject:item];
@@ -143,11 +142,29 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             {
                 STFail(@"got error %@", error);
             }
-            [server stop];
+            [self.server stop];
+        }];
+        
+        [self.server runUntilStopped];
+    }
+}
+
+- (void)testEnumerateContentsOfURLBadLogin
+{
+    if ([self setupSessionWithResponses:[MockServerFTPResponses badLoginResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/"];
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
+            STFail(@"shouldn't get any items");
+        } completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should get error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+
+            [self.server stop];
         }];
 
-        [server runUntilStopped];
-        [session release];
+        [self.server runUntilStopped];
     }
 }
 
