@@ -1,5 +1,5 @@
 //
-//  CK2FileTransferSession.h
+//  CK2FileManager
 //  Connection
 //
 //  Created by Mike on 08/10/2012.
@@ -13,14 +13,14 @@
 #import "CKConnectionProtocol.h"
 
 
-@protocol CK2FileTransferSessionDelegate;
+@protocol CK2FileManagerDelegate;
 
 
-@interface CK2FileTransferSession : NSObject
+@interface CK2FileManager : NSObject
 {
   @private
-    id <CK2FileTransferSessionDelegate> _delegate;
-    void                                (^_deliverDelegateMessages)(void(^)(void));
+    id <CK2FileManagerDelegate> _delegate;
+    void                        (^_deliverDelegateMessages)(void(^)(void));
 }
 
 #pragma mark Discovering Directory Contents
@@ -66,8 +66,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Delegate
-// Delegate messages are delivered on the same queue that was used to instantiate the session. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
-@property(assign) id <CK2FileTransferSessionDelegate> delegate;
+// Delegate messages are delivered on the same queue that was used to instantiate the manager. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
+@property(assign) id <CK2FileManagerDelegate> delegate;
 
 
 #pragma mark URLs
@@ -102,9 +102,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 @end
 
 
-@protocol CK2FileTransferSessionDelegate <NSObject>
-- (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)fileTransferSession:(CK2FileTransferSession *)session appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+@protocol CK2FileManagerDelegate <NSObject>
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end
 
 

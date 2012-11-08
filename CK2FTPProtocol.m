@@ -8,7 +8,7 @@
 
 #import "CK2FTPProtocol.h"
 
-#import "CK2FileTransferSession.h"
+#import "CK2FileManager.h"
 #import "CKRemoteURL.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
@@ -135,13 +135,13 @@ createIntermediateDirectories:(BOOL)createIntermediates
         {
             // Report directory itself
             NSURL *resolved = url;
-            NSString *path = [CK2FileTransferSession pathOfURLRelativeToHomeDirectory:url];
+            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
             if (![path isAbsolutePath])
             {
                 NSString *home = [handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    resolved = [CK2FileTransferSession URLWithPath:home relativeToURL:url];
+                    resolved = [CK2FileManager URLWithPath:home relativeToURL:url];
                     resolved = [resolved URLByAppendingPathComponent:path];
                 }
             }
@@ -298,7 +298,7 @@ createIntermediateDirectories:(BOOL)createIntermediates
                                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
                                         // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
                                         // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
-                                        [aURL setTemporaryResourceValue:[CK2FileTransferSession URLWithPath:path relativeToURL:url] forKey:aKey];
+                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:url] forKey:aKey];
                                     }
                                 }
                             }

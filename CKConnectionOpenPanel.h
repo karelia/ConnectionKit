@@ -35,7 +35,7 @@
 @protocol CKConnection;
 
 #import <Cocoa/Cocoa.h>
-#import "CK2FileTransferSession.h"
+#import "CK2FileManager.h"
 
 
 enum {
@@ -56,7 +56,7 @@ enum {
     IBOutlet NSTextField    *folderNameField;
     
   @private
-	CK2FileTransferSession  *_session;
+	CK2FileManager  *_session;
     NSURL                   *_directory;
     
     // Basic settings
@@ -75,14 +75,14 @@ enum {
 	BOOL myKeepRunning;
 }
 
-- (id)initWithFileTransferSession:(CK2FileTransferSession *)session directoryURL:(NSURL *)url;
+- (id)initWithFileTransferSession:(CK2FileManager *)session directoryURL:(NSURL *)url;
 
 - (IBAction) closePanel: (id) sender;
 - (IBAction) newFolder: (id) sender;
 - (IBAction)goToFolder:(NSPathControl *)sender;
 - (IBAction)createNewFolder:(NSButton *)sender;
 
-@property(nonatomic, readonly) CK2FileTransferSession *session;
+@property(nonatomic, readonly) CK2FileManager *session;
 @property(nonatomic, copy) NSURL *directoryURL;
 
 @property(nonatomic) BOOL canChooseDirectories;

@@ -1,25 +1,25 @@
 //
-//  CK2FileTransferSession.m
+//  CK2FileManager
 //  Connection
 //
 //  Created by Mike on 08/10/2012.
 //
 //
 
-#import "CK2FileTransferSession.h"
+#import "CK2FileManager.h"
 #import "CK2FileTransferProtocol.h"
 
 
 @interface CK2FileTransferClient : NSObject <CK2FileTransferProtocolClient>
 {
   @private
-    CK2FileTransferSession  *_session;
+    CK2FileManager  *_manager;
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
 }
 
-- (id)initWithSession:(CK2FileTransferSession *)session completionBlock:(void (^)(NSError *))block;
-- (id)initWithSession:(CK2FileTransferSession *)session enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
+- (id)initWithManager:(CK2FileManager *)manager completionBlock:(void (^)(NSError *))block;
+- (id)initWithManager:(CK2FileManager *)manager enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
 
 @end
 
@@ -30,7 +30,7 @@
 NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestination";
 
 
-@implementation CK2FileTransferSession
+@implementation CK2FileManager
 
 #pragma mark Lifecycle
 
@@ -117,7 +117,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithSession:self
+            CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithManager:self
                                                                           enumerationBlock:block
                                                                            completionBlock:completionBlock];
             
@@ -298,7 +298,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (CK2FileTransferClient *)makeClientWithCompletionHandler:(void (^)(NSError *error))block;
 {
-    CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithSession:self completionBlock:block];
+    CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithManager:self completionBlock:block];
     return [client autorelease];
 }
 
@@ -316,14 +316,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @implementation CK2FileTransferClient
 
-- (id)initWithSession:(CK2FileTransferSession *)session completionBlock:(void (^)(NSError *))block;
+- (id)initWithManager:(CK2FileManager *)manager completionBlock:(void (^)(NSError *))block;
 {
     NSParameterAssert(block);
-    NSParameterAssert(session);
+    NSParameterAssert(manager);
     
     if (self = [self init])
     {
-        _session = [session retain];
+        _manager = [manager retain];
         _completionBlock = [block copy];
         
         [self retain];  // until protocol finishes or fails
@@ -332,9 +332,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return self;
 }
 
-- (id)initWithSession:(CK2FileTransferSession *)session enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
+- (id)initWithManager:(CK2FileManager *)manager enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
 {
-    if (self = [self initWithSession:session completionBlock:block])
+    if (self = [self initWithManager:manager completionBlock:block])
     {
         _enumerationBlock = [enumBlock copy];
     }
@@ -347,7 +347,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     
     [_completionBlock release]; _completionBlock = nil;
     [_enumerationBlock release]; _enumerationBlock = nil;
-    [_session release]; _session = nil;
+    [_manager release]; _manager = nil;
     
     [self release]; // balances call in -init
 }
@@ -366,15 +366,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // TODO: Cache credentials per protection space
-    [_session deliverBlockToDelegate:^{
-        [[_session delegate] fileTransferSession:_session didReceiveAuthenticationChallenge:challenge];
+    [_manager deliverBlockToDelegate:^{
+        [[_manager delegate] fileManager:_manager didReceiveAuthenticationChallenge:challenge];
     }];
 }
 
 - (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
-    [_session deliverBlockToDelegate:^{
-        [[_session delegate] fileTransferSession:_session appendString:info toTranscript:transcript];
+    [_manager deliverBlockToDelegate:^{
+        [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
     }];
 }
 
