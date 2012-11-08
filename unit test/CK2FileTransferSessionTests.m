@@ -285,6 +285,22 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     [self.server runUntilStopped];
 }
 
+- (void)testRemoveFileAtURLBadLogin
+{
+    if ([self setupSessionWithResponses:[MockServerFTPResponses badLoginResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should get error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
+
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
+}
+
 - (void)testSetResourceValues
 {
     //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
