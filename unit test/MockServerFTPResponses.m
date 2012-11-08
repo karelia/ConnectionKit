@@ -55,12 +55,12 @@
 
 + (NSArray*)sizeResponse
 {
-    return @[@"SIZE test.txt", @"213 $size\r\n"];
+    return @[@"SIZE ([a-zA-Z0-9.]+)", @"213 $size\r\n"];
 }
 
 + (NSArray*)retrResponse
 {
-    return @[@"RETR /test.txt", @"150 Opening BINARY mode data connection for '/test.txt' ($size bytes).\r\n"];
+    return @[@"RETR ([a-zA-Z0-9.]+/)", @"150 Opening BINARY mode data connection for '$1' ($size bytes).\r\n"];
 }
 
 + (NSArray*)listResponse
@@ -76,8 +76,23 @@
 + (NSArray*)mkdFileExistsResponse
 {
     return @[ @"MKD (\\w+)", @"550 $1: File exists.\r\n"];
-
 }
+
++ (NSArray*)storResponse
+{
+    return @[ @"STOR ([a-zA-Z0-9.]+)", @(0.1), @"150 Opening ASCII mode data connection for '$1'.\r\n", @(0.1), @"226 Transfer complete.\r\n"];
+}
+
++ (NSArray*)deleResponse
+{
+    return @[ @"DELE ([a-zA-Z0-9.]+)", @"250 DELE command successful.\r\n" ];
+}
+
++ (NSArray*)deleFileDoesntExistResponse
+{
+    return @[ @"DELE ([a-zA-Z0-9.]+)", @"550 $1: No such file or directory.\r\n" ];
+}
+
 + (NSArray*)commandNotUnderstoodResponse
 {
     return @[@"(\\w+).*", @"500 '$1': command not understood.", CloseCommand];
@@ -98,6 +113,8 @@
     [self retrResponse],
     [self listResponse],
     [self mkdResponse],
+    [self storResponse],
+    [self deleResponse],
     [self commandNotUnderstoodResponse],
     ];
 

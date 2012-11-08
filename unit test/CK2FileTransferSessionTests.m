@@ -112,7 +112,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
             [self.server stop];
@@ -160,7 +160,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STFail(@"shouldn't get any items");
         } completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
 
             [self.server stop];
         }];
@@ -212,7 +212,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error");
+            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
 
             [self.server stop];
         }];
@@ -223,6 +223,22 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateFileAtURL
 {
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            if (bytesWritten == 0)
+            {
+                [self.server stop];
+            }
+        }];
+    }
+
+    [self.server runUntilStopped];
+
     //
     //// 0 bytesWritten indicates writing has ended. This might be because of a failure; if so, error will be filled in
     //- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
@@ -236,8 +252,16 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testRemoveFileAtURL
 {
-    //
-    //- (void)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+    if ([self setupSessionWithResponses:[MockServerFTPResponses standardResponses]])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
 }
 
 - (void)testSetResourceValues
