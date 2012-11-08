@@ -24,6 +24,9 @@
 + (NSArray*)listResponse;
 + (NSArray*)mkdResponse;
 + (NSArray*)mkdFileExistsResponse;
++ (NSArray*)storResponse;
++ (NSArray*)deleResponse;
++ (NSArray*)deleFileDoesntExistResponse;
 
 + (NSArray*)commandNotUnderstoodResponse;
 

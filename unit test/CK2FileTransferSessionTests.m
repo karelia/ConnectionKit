@@ -264,6 +264,27 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     [self.server runUntilStopped];
 }
 
+- (void)testRemoveFileAtURLFileDoesnExist
+{
+    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
+    NSArray* responses = @[[MockServerFTPResponses deleFileDoesntExistResponse]];
+    responses = [responses arrayByAddingObjectsFromArray:[MockServerFTPResponses standardResponses]];
+
+    if ([self setupSessionWithResponses:responses])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should get error");
+            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
+            STAssertTrue(ftpCode == 550, @"should get 550 from server");
+
+            [self.server stop];
+        }];
+    }
+
+    [self.server runUntilStopped];
+}
+
 - (void)testSetResourceValues
 {
     //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
