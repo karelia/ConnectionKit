@@ -86,7 +86,7 @@
     // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
     [request curl_setPostTransferCommands:commands];
     
-    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
+    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(NSError *error) {
         
         if (error)
         {
@@ -115,7 +115,7 @@
         
         [totalData appendData:data];
         
-    } completionHandler:^(CURLHandle *handle, NSError *error) {
+    } completionHandler:^(NSError *error) {
         
         if (error)
         {
@@ -128,7 +128,7 @@
             NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
             if (![path isAbsolutePath])
             {
-                NSString *home = [handle initialFTPPath];
+                NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
                     resolved = [CK2FileManager URLWithPath:home relativeToURL:url];
@@ -355,7 +355,7 @@
         if (bytesWritten == 0) atEnd = YES;
         if (bytesWritten && progressBlock) progressBlock(bytesWritten);
         
-    } completionHandler:^(CURLHandle *handle, NSError *error) {
+    } completionHandler:^(NSError *error) {
         
         // Long FTP uploads have a tendency to have the control connection cutoff for idling. As a hack, assume that if we reached the end of the body stream, a timeout is likely because of that
         if (error && atEnd && [error code] == NSURLErrorTimedOut && [[error domain] isEqualToString:NSURLErrorDomain])
@@ -406,7 +406,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client completionHandler:(void (^)(CURLHandle *, NSError *))handler;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 {
     if (self = [self init])
     {
@@ -419,7 +419,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(CURLHandle *, NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -428,7 +428,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(CURLHandle *, NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -463,8 +463,21 @@
     [challenge release];
 }
 
+- (void)endWithError:(NSError *)error;
+{
+    _completionHandler(error);
+    [_handle release]; _handle = nil;
+    [self release];
+}
+
+- (void)stop;
+{
+    [_handle cancel];
+}
+
 - (void)dealloc;
 {
+    [_handle release];
     [_client release];
     [_completionHandler release];
     [_dataBlock release];
@@ -501,8 +514,7 @@
 - (void)handle:(CURLHandle *)handle didFailWithError:(NSError *)error;
 {
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    _completionHandler(handle, error);
-    [self release];
+    [self endWithError:error];
 }
 
 - (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
@@ -517,8 +529,7 @@
 
 - (void)handleDidFinish:(CURLHandle *)handle;
 {
-    _completionHandler(handle, nil);
-    [self release];
+    [self endWithError:nil];
 }
 
 - (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
@@ -538,11 +549,9 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    CURLHandle *handle = [[CURLHandle alloc] initWithRequest:_request
-                                                  credential:credential
-                                                    delegate:self];
-    
-    [handle release];   // handle retains itself until finished or cancelled
+    _handle = [[CURLHandle alloc] initWithRequest:_request
+                                       credential:credential
+                                         delegate:self];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;

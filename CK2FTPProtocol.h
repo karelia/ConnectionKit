@@ -15,10 +15,11 @@
 {
   @private
     NSURLRequest    *_request;
-    
     id <CK2FileTransferProtocolClient>  _client;
     
-    void    (^_completionHandler)(CURLHandle *handle, NSError *error);
+    CURLHandle  *_handle;
+    
+    void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
     void    (^_progressBlock)(NSUInteger bytesWritten);
 }
