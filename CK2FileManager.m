@@ -10,7 +10,7 @@
 #import "CK2FileTransferProtocol.h"
 
 
-@interface CK2FileTransferClient : NSObject <CK2FileTransferProtocolClient>
+@interface CK2FileOperation : NSObject <CK2FileTransferProtocolClient>
 {
   @private
     CK2FileTransferProtocol *_protocol;
@@ -120,18 +120,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithManager:self
-                                                                          enumerationBlock:block
-                                                                           completionBlock:completionBlock];
+            CK2FileOperation *operation = [[CK2FileOperation alloc] initWithManager:self
+                                                                   enumerationBlock:block
+                                                                    completionBlock:completionBlock];
             
             CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForEnumeratingDirectoryAtURL:url
                                                                              includingPropertiesForKeys:keys
                                                                                                 options:mask
-                                                                                                 client:client];
+                                                                                                 client:operation];
             
-            [client startWithProtocol:protocol];
+            [operation startWithProtocol:protocol];
             [protocol release];
-            [client release];
+            [operation release];
         }
         else
         {
@@ -150,13 +150,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
+            CK2FileOperation *operation = [self makeOperationWithCompletionHandler:handler];
             
             CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForCreatingDirectoryAtURL:url
                                                                          withIntermediateDirectories:createIntermediates
-                                                                                              client:client];
+                                                                                              client:operation];
             
-            [client startWithProtocol:protocol];
+            [operation startWithProtocol:protocol];
             [protocol release];
         }
         else
@@ -217,18 +217,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:^(NSError *error) {
+            CK2FileOperation *operation = [self makeOperationWithCompletionHandler:^(NSError *error) {
                 progressBlock(0, error);
             }];
             
             CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForCreatingFileWithRequest:request
                                                                           withIntermediateDirectories:createIntermediates
-                                                                                               client:client
+                                                                                               client:operation
                                                                                         progressBlock:^(NSUInteger bytesWritten){
                 progressBlock(bytesWritten, nil);
             }];
             
-            [client startWithProtocol:protocol];
+            [operation startWithProtocol:protocol];
             [protocol release];
         }
         else
@@ -246,9 +246,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
-            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForRemovingFileAtURL:url client:client];
-            [client startWithProtocol:protocol];
+            CK2FileOperation *operation = [self makeOperationWithCompletionHandler:handler];
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForRemovingFileAtURL:url client:operation];
+            [operation startWithProtocol:protocol];
             [protocol release];
         }
         else
@@ -269,9 +269,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
         if (protocolClass)
         {
-            CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
-            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForSettingResourceValues:keyedValues ofItemAtURL:url client:client];
-            [client startWithProtocol:protocol];
+            CK2FileOperation *operation = [self makeOperationWithCompletionHandler:handler];
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForSettingResourceValues:keyedValues ofItemAtURL:url client:operation];
+            [operation startWithProtocol:protocol];
             [protocol release];
         }
         else
@@ -319,12 +319,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return ([CK2FileTransferProtocol classForURL:url] != nil);
 }
 
-#pragma mark Transfers
+#pragma mark Operations
 
-- (CK2FileTransferClient *)makeClientWithCompletionHandler:(void (^)(NSError *error))block;
+- (CK2FileOperation *)makeOperationWithCompletionHandler:(void (^)(NSError *error))block;
 {
-    CK2FileTransferClient *client = [[CK2FileTransferClient alloc] initWithManager:self completionBlock:block];
-    return [client autorelease];
+    CK2FileOperation *result = [[CK2FileOperation alloc] initWithManager:self completionBlock:block];
+    return [result autorelease];
 }
 
 - (NSError *)unsupportedURLErrorWithURL:(NSURL *)url;
@@ -339,7 +339,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 #pragma mark -
 
 
-@implementation CK2FileTransferClient
+@implementation CK2FileOperation
+
+#pragma mark Lifecycle
 
 - (id)initWithManager:(CK2FileManager *)manager completionBlock:(void (^)(NSError *))block;
 {
