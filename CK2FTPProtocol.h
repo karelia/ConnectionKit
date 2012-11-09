@@ -6,16 +6,16 @@
 //
 //
 
-#import "CK2FileTransferProtocol.h"
+#import "CK2Protocol.h"
 
 #import <CURLHandle/CURLHandle.h>
 
 
-@interface CK2FTPProtocol : CK2FileTransferProtocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
+@interface CK2FTPProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 {
   @private
     NSURLRequest    *_request;
-    id <CK2FileTransferProtocolClient>  _client;
+    id <CK2ProtocolClient>  _client;
     
     CURLHandle  *_handle;
     

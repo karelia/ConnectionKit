@@ -6,8 +6,8 @@
 //
 //
 
-#import "CK2FileTransferProtocol.h"
+#import "CK2Protocol.h"
 
-@interface CK2SFTPProtocol : CK2FileTransferProtocol
+@interface CK2SFTPProtocol : CK2Protocol
 
 @end

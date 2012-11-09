@@ -73,7 +73,7 @@
     return request;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands inDirectoryAtURL:(NSURL *)directory createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2FileTransferProtocolClient>)client;
+- (id)initWithCustomCommands:(NSArray *)commands inDirectoryAtURL:(NSURL *)directory createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client;
 {
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
@@ -104,7 +104,7 @@
 
 #pragma mark Operations
 
-- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     NSMutableURLRequest *request = [[self class] newMutableRequestWithURL:url isDirectory:YES];
     url = [request URL];    // ensures it's a directory URL
@@ -329,7 +329,7 @@
     return self;
 }
 
-- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[url lastPathComponent]]]
                        inDirectoryAtURL:[url URLByDeletingLastPathComponent]
@@ -337,7 +337,7 @@
                                  client:client];
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     if ([request curl_createIntermediateDirectories] != createIntermediates)
     {
@@ -376,7 +376,7 @@
     return self;
 }
 
-- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[url lastPathComponent]]]
                        inDirectoryAtURL:[url URLByDeletingLastPathComponent]
@@ -384,7 +384,7 @@
                                  client:client];
 }
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
 {
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
@@ -406,7 +406,7 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 {
     if (self = [self init])
     {
@@ -419,7 +419,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -428,7 +428,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {

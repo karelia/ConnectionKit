@@ -7,14 +7,14 @@
 //
 
 #import "CK2FileManager.h"
-#import "CK2FileTransferProtocol.h"
+#import "CK2Protocol.h"
 
 
-@interface CK2FileOperation : NSObject <CK2FileTransferProtocolClient>
+@interface CK2FileOperation : NSObject <CK2ProtocolClient>
 {
   @private
-    CK2FileTransferProtocol *_protocol;
-    CK2FileManager          *_manager;
+    CK2Protocol     *_protocol;
+    CK2FileManager  *_manager;
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
@@ -54,7 +54,7 @@
 #pragma mark -
 
 
-@interface CK2FileTransferProtocol (Internals)
+@interface CK2Protocol (Internals)
 
 // Completion block is guaranteed to be called on our private serial queue
 + (void)classForURL:(NSURL *)url completionHandler:(void (^)(Class protocolClass))block;
@@ -252,10 +252,10 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    Class protocolClass = [CK2FileTransferProtocol classForURL:baseURL];
+    Class protocolClass = [CK2Protocol classForURL:baseURL];
     if (!protocolClass)
     {
-        protocolClass = [CK2FileTransferProtocol class];
+        protocolClass = [CK2Protocol class];
         if ([path isAbsolutePath])
         {
             // On 10.6, file URLs sometimes behave strangely when combined with an absolute path. Force it to be resolved
@@ -267,14 +267,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 {
-    Class protocolClass = [CK2FileTransferProtocol classForURL:URL];
-    if (!protocolClass) protocolClass = [CK2FileTransferProtocol class];
+    Class protocolClass = [CK2Protocol classForURL:URL];
+    if (!protocolClass) protocolClass = [CK2Protocol class];
     return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
 }
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
-    return ([CK2FileTransferProtocol classForURL:url] != nil);
+    return ([CK2Protocol classForURL:url] != nil);
 }
 
 #pragma mark Operations
@@ -292,7 +292,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (id)initWithURL:(NSURL *)url
           manager:(CK2FileManager *)manager
    failureHandler:(void (^)(NSError *))failureBlock
-createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlock;
+createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSParameterAssert(url);
     NSParameterAssert(manager);
@@ -302,7 +302,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
         _manager = [manager retain];
         _completionBlock = [failureBlock copy];
         
-        [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocolClass) {
+        [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
             
             if (protocolClass)
             {
@@ -330,7 +330,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    self = [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2FileTransferProtocol *(Class protocolClass) {
+    self = [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForEnumeratingDirectoryAtURL:url
                                             includingPropertiesForKeys:keys
@@ -347,7 +347,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2FileTransferProtocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingDirectoryAtURL:url
                                         withIntermediateDirectories:createIntermediates
@@ -361,7 +361,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
                              progressBlock:(void (^)(NSUInteger))progressBlock
                            completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:[request URL] manager:manager failureHandler:block createProtocolBlock:^CK2FileTransferProtocol *(Class protocolClass) {
+    return [self initWithURL:[request URL] manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingFileWithRequest:request
                                          withIntermediateDirectories:createIntermediates
@@ -374,7 +374,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
                               manager:(CK2FileManager *)manager
                       completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2FileTransferProtocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRemovingFileAtURL:url client:self];
     }];
@@ -385,7 +385,7 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2FileTransferProtocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingResourceValues:keyedValues
                                                        ofItemAtURL:url
@@ -414,18 +414,18 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
     [super dealloc];
 }
 
-- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didFailWithError:(NSError *)error;
+- (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self finishWithError:error];
 }
 
-- (void)fileTransferProtocolDidFinish:(CK2FileTransferProtocol *)protocol;
+- (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
 {
     [self finishWithError:nil];
 }
 
-- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // TODO: Cache credentials per protection space
     [_manager deliverBlockToDelegate:^{
@@ -433,14 +433,14 @@ createProtocolBlock:(CK2FileTransferProtocol *(^)(Class protocolClass))createBlo
     }];
 }
 
-- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
     [_manager deliverBlockToDelegate:^{
         [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
     }];
 }
 
-- (void)fileTransferProtocol:(CK2FileTransferProtocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+- (void)fileTransferProtocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
     if (_enumerationBlock)
     {

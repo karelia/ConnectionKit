@@ -31,7 +31,7 @@
     [super dealloc];
 }
 
-- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
@@ -61,7 +61,7 @@
     }];
 }
 
-- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
@@ -77,7 +77,7 @@
     }];
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     return [self initWithBlock:^{
         
@@ -127,7 +127,7 @@
     }];
 }
 
-- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client
+- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client
 {
     return [self initWithBlock:^{
                 
@@ -143,7 +143,7 @@
     }];
 }
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
