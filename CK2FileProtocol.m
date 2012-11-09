@@ -35,10 +35,8 @@
 {
     return [self initWithBlock:^{
         
-        NSFileManager *manager = [[NSFileManager alloc] init];
-        
         // Enumerate contents
-        NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
+        NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
             
             NSLog(@"enumeration error: %@", error);
             return YES;
@@ -58,9 +56,7 @@
             
             [client fileTransferProtocol:self didDiscoverItemAtURL:aURL];
         }
-        
-        [manager release];
-        
+                
         [client fileTransferProtocolDidFinish:self];
     }];
 }
@@ -69,10 +65,8 @@
 {
     return [self initWithBlock:^{
         
-        NSFileManager *manager = [[NSFileManager alloc] init];
-        
         NSError *error;
-        if ([manager createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
+        if ([[NSFileManager defaultManager] createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
         {
             [client fileTransferProtocolDidFinish:self];
         }
@@ -80,8 +74,6 @@
         {
             [client fileTransferProtocol:self didFailWithError:error];
         }
-        
-        [manager release];
     }];
 }
 
@@ -138,11 +130,9 @@
 - (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client
 {
     return [self initWithBlock:^{
-        
-        NSFileManager *manager = [[NSFileManager alloc] init];
-        
+                
         NSError *error;
-        if ([manager removeItemAtURL:url error:&error])
+        if ([[NSFileManager defaultManager] removeItemAtURL:url error:&error])
         {
             [client fileTransferProtocolDidFinish:self];
         }
@@ -150,8 +140,6 @@
         {
             [client fileTransferProtocol:self didFailWithError:error];
         }
-        
-        [manager release];
     }];
 }
 
