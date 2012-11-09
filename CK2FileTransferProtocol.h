@@ -18,31 +18,38 @@
 
 #pragma mark For Subclasses to Implement
 
-// A CK2FileTransferProtocol is guaranteed to only be accessed from one thread at a time. Multiple operations can be in-flight at once, but they're only kicked off serially. Thus, your code should avoid blocking the thread it's called on
+/*  A CK2FileTransferProtocol is guaranteed to only be accessed from one thread at a time. Multiple operations can be in-flight at once, but they're only kicked off serially. Thus, your code should avoid blocking the thread it's called on
+ */
 
+// Generally, subclasses check the URL's scheme to see if they support it
 + (BOOL)canHandleURL:(NSURL *)url;
 
-+ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url
-                                includingPropertiesForKeys:(NSArray *)keys
-                                                   options:(NSDirectoryEnumerationOptions)mask
-                                                    client:(id <CK2FileTransferProtocolClient>)client;
+// Override these methods to get setup ready for performing the operation
 
-+ (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url
-                             withIntermediateDirectories:(BOOL)createIntermediates
-                                                  client:(id <CK2FileTransferProtocolClient>)client;
+- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url
+            includingPropertiesForKeys:(NSArray *)keys
+                               options:(NSDirectoryEnumerationOptions)mask
+                                client:(id <CK2FileTransferProtocolClient>)client;
 
-// The data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
-+ (CK2FileTransferProtocol *)startCreatingFileWithRequest:(NSURLRequest *)request
-                              withIntermediateDirectories:(BOOL)createIntermediates
-                                                   client:(id <CK2FileTransferProtocolClient>)client
-                                            progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
+- (id)initForCreatingDirectoryAtURL:(NSURL *)url
+        withIntermediateDirectories:(BOOL)createIntermediates
+                             client:(id <CK2FileTransferProtocolClient>)client;
 
-+ (CK2FileTransferProtocol *)startRemovingFileAtURL:(NSURL *)url
-                                             client:(id <CK2FileTransferProtocolClient>)client;
 
-+ (CK2FileTransferProtocol *)startSettingResourceValues:(NSDictionary *)keyedValues
-                                            ofItemAtURL:(NSURL *)url
-                                                 client:(id <CK2FileTransferProtocolClient>)client;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request    // the data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
+         withIntermediateDirectories:(BOOL)createIntermediates
+                              client:(id <CK2FileTransferProtocolClient>)client
+                       progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
+
+- (id)initForRemovingFileAtURL:(NSURL *)url
+                        client:(id <CK2FileTransferProtocolClient>)client;
+
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues
+                       ofItemAtURL:(NSURL *)url
+                            client:(id <CK2FileTransferProtocolClient>)client;
+
+// Override to kick off the requested operation. You SHOULD avoid blocking the thread this is called on
+- (void)start;
 
 // Your cue to stop doing any more work. Once this is called, the client will ignore you should you choose to continue
 - (void)stop;

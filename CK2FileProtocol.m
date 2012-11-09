@@ -15,144 +15,165 @@
     return [url isFileURL];
 }
 
-+ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initWithBlock:(void (^)(void))block;
 {
-    NSFileManager *manager = [[NSFileManager alloc] init];
-    
-    // Enumerate contents
-    NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
-        
-        NSLog(@"enumeration error: %@", error);
-        return YES;
-    }];
-    
-    CK2FileProtocol *protocol = [[self alloc] init];
-    
-    BOOL reportedDirectory = NO;
-    
-    NSURL *aURL;
-    while (aURL = [enumerator nextObject])
+    if (self = [self init])
     {
-        // Report the main directory first
-        if (!reportedDirectory)
+        _block = [_block copy];
+    }
+    
+    return self;
+}
+
+- (void)dealloc
+{
+    [_block release];
+    [super dealloc];
+}
+
+- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
+{
+    return [self initWithBlock:^{
+        
+        NSFileManager *manager = [[NSFileManager alloc] init];
+        
+        // Enumerate contents
+        NSDirectoryEnumerator *enumerator = [manager enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
+            
+            NSLog(@"enumeration error: %@", error);
+            return YES;
+        }];
+                
+        BOOL reportedDirectory = NO;
+        
+        NSURL *aURL;
+        while (aURL = [enumerator nextObject])
         {
-            [client fileTransferProtocol:protocol didDiscoverItemAtURL:url];
-            reportedDirectory = YES;
+            // Report the main directory first
+            if (!reportedDirectory)
+            {
+                [client fileTransferProtocol:self didDiscoverItemAtURL:url];
+                reportedDirectory = YES;
+            }
+            
+            [client fileTransferProtocol:self didDiscoverItemAtURL:aURL];
         }
         
-        [client fileTransferProtocol:protocol didDiscoverItemAtURL:aURL];
-    }
-    
-    [manager release];
-    
-    [client fileTransferProtocolDidFinish:protocol];
-    return [protocol autorelease];
+        [manager release];
+        
+        [client fileTransferProtocolDidFinish:self];
+    }];
 }
 
-+ (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
 {
-    NSFileManager *manager = [[NSFileManager alloc] init];
-    CK2FileProtocol *protocol = [[self alloc] init];
-    
-    NSError *error;
-    if ([manager createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
-    {
-        [client fileTransferProtocolDidFinish:protocol];
-    }
-    else
-    {
-        [client fileTransferProtocol:protocol didFailWithError:error];
-    }
-    
-    [manager release];
-    return [protocol autorelease];
-}
-
-+ (CK2FileTransferProtocol *)startCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
-{
-    CK2FileProtocol *protocol = [[self alloc] init];
-
-    NSData *data = [request HTTPBody];
-    if (data)
-    {
-        // TODO: Use a stream or similar to write incrementally and report progress
+    return [self initWithBlock:^{
+        
+        NSFileManager *manager = [[NSFileManager alloc] init];
+        
         NSError *error;
-        if ([data writeToURL:[request URL] options:0 error:&error])
+        if ([manager createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
         {
-            [client fileTransferProtocolDidFinish:protocol];
+            [client fileTransferProtocolDidFinish:self];
         }
         else
         {
-            [client fileTransferProtocol:protocol didFailWithError:error];
+            [client fileTransferProtocol:self didFailWithError:error];
         }
-    }
-    else
-    {
-        // TODO: Work asynchronously so aren't blocking this one throughout the write
-        NSInputStream *inputStream = [request HTTPBodyStream];
-        [inputStream open];
         
-        NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[request URL] append:NO];
-        [outputStream open];
-        // TODO: Handle outputStream being nil?
+        [manager release];
+    }];
+}
+
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+{
+    return [self initWithBlock:^{
         
-        uint8_t buffer[1024];
-        while ([inputStream hasBytesAvailable])
+        NSData *data = [request HTTPBody];
+        if (data)
         {
-            NSUInteger length = [inputStream read:buffer maxLength:1024];
+            // TODO: Use a stream or similar to write incrementally and report progress
+            NSError *error;
+            if ([data writeToURL:[request URL] options:0 error:&error])
+            {
+                [client fileTransferProtocolDidFinish:self];
+            }
+            else
+            {
+                [client fileTransferProtocol:self didFailWithError:error];
+            }
+        }
+        else
+        {
+            // TODO: Work asynchronously so aren't blocking this one throughout the write
+            NSInputStream *inputStream = [request HTTPBodyStream];
+            [inputStream open];
             
-            // FIXME: Handle not all the bytes being written
-            [outputStream write:buffer maxLength:length];
+            NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[request URL] append:NO];
+            [outputStream open];
+            // TODO: Handle outputStream being nil?
             
-            // FIXME: Report any error reading or writing
+            uint8_t buffer[1024];
+            while ([inputStream hasBytesAvailable])
+            {
+                NSUInteger length = [inputStream read:buffer maxLength:1024];
+                
+                // FIXME: Handle not all the bytes being written
+                [outputStream write:buffer maxLength:length];
+                
+                // FIXME: Report any error reading or writing
+                
+                progressBlock(length);
+            }
             
-            progressBlock(length);
+            [inputStream close];
+            [outputStream close];
+            [outputStream release];
+            
+            [client fileTransferProtocolDidFinish:self];
+        }
+    }];
+}
+
+- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client
+{
+    return [self initWithBlock:^{
+        
+        NSFileManager *manager = [[NSFileManager alloc] init];
+        
+        NSError *error;
+        if ([manager removeItemAtURL:url error:&error])
+        {
+            [client fileTransferProtocolDidFinish:self];
+        }
+        else
+        {
+            [client fileTransferProtocol:self didFailWithError:error];
         }
         
-        [inputStream close];
-        [outputStream close];
-        [outputStream release];
+        [manager release];
+    }];
+}
+
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+{
+    return [self initWithBlock:^{
         
-        [client fileTransferProtocolDidFinish:protocol];
-    }
-    
-    return [protocol autorelease];
+        NSError *error;
+        if ([url setResourceValues:keyedValues error:&error])
+        {
+            [client fileTransferProtocolDidFinish:self];
+        }
+        else
+        {
+            [client fileTransferProtocol:self didFailWithError:error];
+        }
+    }];
 }
 
-+ (CK2FileTransferProtocol *)startRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (void)start;
 {
-    NSFileManager *manager = [[NSFileManager alloc] init];
-    CK2FileProtocol *protocol = [[self alloc] init];
-    
-    NSError *error;
-    if ([manager removeItemAtURL:url error:&error])
-    {
-        [client fileTransferProtocolDidFinish:protocol];
-    }
-    else
-    {
-        [client fileTransferProtocol:protocol didFailWithError:error];
-    }
-    
-    [manager release];
-    return [protocol autorelease];
-}
-
-+ (CK2FileTransferProtocol *)startSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
-{
-    CK2FileProtocol *protocol = [[self alloc] init];
-
-    NSError *error;
-    if ([url setResourceValues:keyedValues error:&error])
-    {
-        [client fileTransferProtocolDidFinish:protocol];
-    }
-    else
-    {
-        [client fileTransferProtocol:protocol didFailWithError:error];
-    }
-    
-    return [protocol autorelease];
+    _block();
 }
 
 @end

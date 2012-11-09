@@ -9,5 +9,9 @@
 #import "CK2FileTransferProtocol.h"
 
 @interface CK2FileProtocol : CK2FileTransferProtocol
+{
+  @private
+    void    (^_block)(void);
+}
 
 @end

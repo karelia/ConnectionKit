@@ -13,13 +13,17 @@
 @interface CK2FileTransferClient : NSObject <CK2FileTransferProtocolClient>
 {
   @private
-    CK2FileManager  *_manager;
+    CK2FileTransferProtocol *_protocol;
+    CK2FileManager          *_manager;
+    
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
 }
 
 - (id)initWithManager:(CK2FileManager *)manager completionBlock:(void (^)(NSError *))block;
 - (id)initWithManager:(CK2FileManager *)manager enumerationBlock:(void (^)(NSURL *))enumBlock completionBlock:(void (^)(NSError *))block;
+
+- (void)startWithProtocol:(CK2FileTransferProtocol *)protocol;
 
 @end
 
@@ -120,7 +124,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                           enumerationBlock:block
                                                                            completionBlock:completionBlock];
             
-            [protocolClass startEnumeratingContentsOfURL:url includingPropertiesForKeys:keys options:mask client:client];
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForEnumeratingDirectoryAtURL:url
+                                                                             includingPropertiesForKeys:keys
+                                                                                                options:mask
+                                                                                                 client:client];
+            
+            [client startWithProtocol:protocol];
+            [protocol release];
             [client release];
         }
         else
@@ -136,12 +146,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocolClass) {
         
-        if (protocol)
+        if (protocolClass)
         {
             CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
-            [protocol startCreatingDirectoryAtURL:url withIntermediateDirectories:createIntermediates client:client];
+            
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForCreatingDirectoryAtURL:url
+                                                                         withIntermediateDirectories:createIntermediates
+                                                                                              client:client];
+            
+            [client startWithProtocol:protocol];
+            [protocol release];
         }
         else
         {            
@@ -197,17 +213,23 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(request);
     
-    [CK2FileTransferProtocol classForURL:[request URL] completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:[request URL] completionHandler:^(Class protocolClass) {
         
-        if (protocol)
+        if (protocolClass)
         {
             CK2FileTransferClient *client = [self makeClientWithCompletionHandler:^(NSError *error) {
                 progressBlock(0, error);
             }];
             
-            [protocol startCreatingFileWithRequest:request withIntermediateDirectories:createIntermediates client:client progressBlock:^(NSUInteger bytesWritten){
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                                          withIntermediateDirectories:createIntermediates
+                                                                                               client:client
+                                                                                        progressBlock:^(NSUInteger bytesWritten){
                 progressBlock(bytesWritten, nil);
             }];
+            
+            [client startWithProtocol:protocol];
+            [protocol release];
         }
         else
         {
@@ -220,12 +242,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocolClass) {
         
-        if (protocol)
+        if (protocolClass)
         {
             CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
-            [protocol startRemovingFileAtURL:url client:client];
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForRemovingFileAtURL:url client:client];
+            [client startWithProtocol:protocol];
+            [protocol release];
         }
         else
         {
@@ -241,12 +265,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     NSParameterAssert(keyedValues);
     NSParameterAssert(url);
     
-    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocol) {
+    [CK2FileTransferProtocol classForURL:url completionHandler:^(Class protocolClass) {
         
-        if (protocol)
+        if (protocolClass)
         {
             CK2FileTransferClient *client = [self makeClientWithCompletionHandler:handler];
-            [protocol startRemovingFileAtURL:url client:client];
+            CK2FileTransferProtocol *protocol = [[protocolClass alloc] initForSettingResourceValues:keyedValues ofItemAtURL:url client:client];
+            [client startWithProtocol:protocol];
+            [protocol release];
         }
         else
         {
@@ -338,6 +364,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         _enumerationBlock = [enumBlock copy];
     }
     return self;
+}
+
+- (void)startWithProtocol:(CK2FileTransferProtocol *)protocol;
+{
+    _protocol = [protocol retain];
+    [protocol start];
 }
 
 - (void)finishWithError:(NSError *)error;
