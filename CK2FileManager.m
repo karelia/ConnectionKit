@@ -13,11 +13,12 @@
 
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
 {
+  @public   // HACK so auth trampoline can get at them
+    CK2FileManager  *_manager;
+    dispatch_queue_t    _queue;
+    
   @private
     CK2Protocol     *_protocol;
-    CK2FileManager  *_manager;
-    
-    dispatch_queue_t    _queue;
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
@@ -64,11 +65,11 @@
 {
   @private
     NSURLAuthenticationChallenge    *_originalChallenge;
-    CK2QueueProxy                   *_senderQueue;
+    CK2FileOperation                *_operation;
     NSURLAuthenticationChallenge    *_trampolineChallenge;
 }
 
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
++ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
 @property(nonatomic, readonly, retain) NSURLAuthenticationChallenge *originalChallenge;
 
 @end
@@ -485,7 +486,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
-    [CK2AuthenticationChallengeTrampoline handleChallenge:challenge manager:_manager];
+    [CK2AuthenticationChallengeTrampoline handleChallenge:challenge operation:self];
     // TODO: Cache credentials per protection space
 }
 
@@ -515,20 +516,22 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 @implementation CK2AuthenticationChallengeTrampoline
 
-+ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
++ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
 {
     // Trust the tramoline to release itself when done
-    [[[self alloc] initWithChallenge:challenge manager:manager] release];
+    [[[self alloc] initWithChallenge:challenge operation:operation] release];
 }
 
-- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
+- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
 {
     if (self = [super init])
     {
         _originalChallenge = [challenge retain];
-        _senderQueue = [[CK2QueueProxy currentQueue] retain];
+        _operation = [operation retain];
         
         _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
+        
+        CK2FileManager *manager = operation->_manager;
         
         [manager deliverBlockToDelegate:^{
             [[manager delegate] fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
@@ -542,7 +545,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)dealloc
 {
     [_originalChallenge release];
-    [_senderQueue release];
+    [_operation release];
     [_trampolineChallenge release];
     [super dealloc];
 }
@@ -553,30 +556,30 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    [_senderQueue addOperationWithBlock:^{
+    dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
         [self release];
-    }];
+    });
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    [_senderQueue addOperationWithBlock:^{
+    dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
         [self release];
-    }];
+    });
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    [_senderQueue addOperationWithBlock:^{
+    dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
         [self release];
-    }];
+    });
 }
 
 @end

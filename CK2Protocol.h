@@ -96,8 +96,8 @@
  @abstract Start authentication for the specified request
  @param protocol The protocol object requesting authentication.
  @param challenge The authentication challenge.
- @discussion The protocol client guarantees that it will answer the
- request on the same queue that called this method.
+ @discussion The protocol client answers the request on the same queue
+ as -start was called on.
  */
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
