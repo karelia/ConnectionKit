@@ -15,14 +15,12 @@
 
 
 @protocol CK2FileManagerDelegate;
-@class CK2QueueProxy;
 
 
 @interface CK2FileManager : NSObject
 {
   @private
     id <CK2FileManagerDelegate> _delegate;
-    CK2QueueProxy               *_delegateQueue;
 }
 
 #pragma mark Discovering Directory Contents
@@ -68,7 +66,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Delegate
-// Delegate messages are delivered on the same queue that was used to instantiate the manager. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
+// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
+// Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
@@ -105,6 +104,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 @protocol CK2FileManagerDelegate <NSObject>
+// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end

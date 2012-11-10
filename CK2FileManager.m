@@ -8,7 +8,6 @@
 
 #import "CK2FileManager.h"
 #import "CK2Protocol.h"
-#import "CK2QueueProxy.h"
 
 
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
@@ -95,25 +94,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 
 @implementation CK2FileManager
-
-#pragma mark Lifecycle
-
-- (id)init;
-{
-    if (self = [super init])
-    {
-        // Record the queue to use for delegate messages
-        _delegateQueue = [[CK2QueueProxy currentQueue] retain];
-    }
-    
-    return self;
-}
-
-- (void)dealloc;
-{
-    [_delegateQueue release]; _delegateQueue = nil;
-    [super dealloc];
-}
 
 #pragma mark Discovering Directory Contents
 
@@ -250,11 +230,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 #pragma mark Delegate
 
 @synthesize delegate = _delegate;
-
-- (void)deliverBlockToDelegate:(void (^)(void))block;
-{
-    [_delegateQueue addOperationWithBlock:block];
-}
 
 #pragma mark URLs
 
@@ -495,9 +470,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through since could well be valuable debugging info
     
-    [_manager deliverBlockToDelegate:^{
+    // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
-    }];
+    });
 }
 
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
@@ -533,9 +509,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         CK2FileManager *manager = operation->_manager;
         
-        [manager deliverBlockToDelegate:^{
+        // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             [[manager delegate] fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-        }];
+        });
         
         [self retain];  // gets released when challenge is replied to
     }
