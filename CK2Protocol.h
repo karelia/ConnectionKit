@@ -21,28 +21,27 @@
 // Generally, subclasses check the URL's scheme to see if they support it
 + (BOOL)canHandleURL:(NSURL *)url;
 
-// Override these methods to get setup ready for performing the operation
+// Override these methods to get setup ready for performing the operation. The request is used to indicate the URL to operate on, and the timeout to apply
 
-- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url
-            includingPropertiesForKeys:(NSArray *)keys
-                               options:(NSDirectoryEnumerationOptions)mask
-                                client:(id <CK2ProtocolClient>)client;
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request
+                  includingPropertiesForKeys:(NSArray *)keys
+                                     options:(NSDirectoryEnumerationOptions)mask
+                                      client:(id <CK2ProtocolClient>)client;
 
-- (id)initForCreatingDirectoryAtURL:(NSURL *)url
-        withIntermediateDirectories:(BOOL)createIntermediates
-                             client:(id <CK2ProtocolClient>)client;
-
+- (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request
+              withIntermediateDirectories:(BOOL)createIntermediates
+                                   client:(id <CK2ProtocolClient>)client;
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request    // the data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
          withIntermediateDirectories:(BOOL)createIntermediates
                               client:(id <CK2ProtocolClient>)client
                        progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
 
-- (id)initForRemovingFileAtURL:(NSURL *)url
-                        client:(id <CK2ProtocolClient>)client;
+- (id)initForRemovingFileWithRequest:(NSURLRequest *)request
+                              client:(id <CK2ProtocolClient>)client;
 
 - (id)initForSettingResourceValues:(NSDictionary *)keyedValues
-                       ofItemAtURL:(NSURL *)url
+                 ofItemWithRequest:(NSURLRequest *)request
                             client:(id <CK2ProtocolClient>)client;
 
 // Override to kick off the requested operation

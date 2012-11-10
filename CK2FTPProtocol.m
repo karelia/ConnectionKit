@@ -52,8 +52,10 @@
 
 #pragma mark Requests
 
-+ (NSMutableURLRequest *)newMutableRequestWithURL:(NSURL *)url isDirectory:(BOOL)directory;
++ (NSURLRequest *)newRequestWithRequest:(NSURLRequest *)request isDirectory:(BOOL)directory;
 {
+    NSURL *url = [request URL];
+    
     // CURL is very particular about whether URLs passed to it have directory terminator or not
     if (directory != CFURLHasDirectoryPath((CFURLRef)url))
     {
@@ -68,17 +70,18 @@
         }
     }
     
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setCachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData];
-    return request;
+    NSMutableURLRequest *result = [request mutableCopy];
+    [result setURL:url];
+    return result;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands inDirectoryAtURL:(NSURL *)directory createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client;
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client;
 {
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
     // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [[self class] newMutableRequestWithURL:directory isDirectory:YES];
+    NSMutableURLRequest *request = [childRequest mutableCopy];
+    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
     [request setHTTPMethod:@"HEAD"];
     [request curl_setCreateIntermediateDirectories:createIntermediates];
     
@@ -104,10 +107,9 @@
 
 #pragma mark Operations
 
-- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
-    NSMutableURLRequest *request = [[self class] newMutableRequestWithURL:url isDirectory:YES];
-    url = [request URL];    // ensures it's a directory URL
+    request = [[self class] newRequestWithRequest:request isDirectory:YES];
     
     NSMutableData *totalData = [[NSMutableData alloc] init];
     
@@ -124,19 +126,19 @@
         else
         {
             // Report directory itself
-            NSURL *resolved = url;
+            NSURL *url = [request URL];    // ensures it's a directory URL;
             NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
             if (![path isAbsolutePath])
             {
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    resolved = [CK2FileManager URLWithPath:home relativeToURL:url];
-                    resolved = [resolved URLByAppendingPathComponent:path];
+                    url = [CK2FileManager URLWithPath:home relativeToURL:url];
+                    url = [url URLByAppendingPathComponent:path];
                 }
             }
             
-            [client protocol:self didDiscoverItemAtURL:resolved];
+            [client protocol:self didDiscoverItemAtURL:url];
             
             
             // Process the data to make a directory listing
@@ -158,7 +160,7 @@
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
-                            NSURL *nsURL = [resolved URLByAppendingPathComponent:name isDirectory:isDirectory];
+                            NSURL *nsURL = [url URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
                             CKRemoteURL *aURL = [[CKRemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
@@ -329,10 +331,10 @@
     return self;
 }
 
-- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
 {
-    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[url lastPathComponent]]]
-                       inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[[request URL] lastPathComponent]]]
+             request:request
           createIntermediateDirectories:createIntermediates
                                  client:client];
 }
@@ -376,15 +378,15 @@
     return self;
 }
 
-- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
+- (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[url lastPathComponent]]]
-                       inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[[request URL] lastPathComponent]]]
+             request:request
           createIntermediateDirectories:NO
                                  client:client];
 }
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
@@ -392,10 +394,10 @@
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"SITE CHMOD %lo %@",
                                                       [permissions unsignedLongValue],
-                                                      [url lastPathComponent]]];
+                                                      [[request URL] lastPathComponent]]];
         
         return [self initWithCustomCommands:commands
-                           inDirectoryAtURL:[url URLByDeletingLastPathComponent]
+                 request:request
               createIntermediateDirectories:NO
                                      client:client];
     }

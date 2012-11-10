@@ -325,10 +325,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForEnumeratingDirectoryAtURL:url
-                                            includingPropertiesForKeys:keys
-                                                               options:mask
-                                                                client:self];
+        return [[protocolClass alloc] initForEnumeratingDirectoryWithRequest:[manager requestWithURL:url]
+                                                  includingPropertiesForKeys:keys
+                                                                     options:mask
+                                                                      client:self];
     }];
     
     if (self) _enumerationBlock = [enumBlock copy];
@@ -342,9 +342,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForCreatingDirectoryAtURL:url
-                                        withIntermediateDirectories:createIntermediates
-                                                             client:self];
+        return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[manager requestWithURL:url]
+                                              withIntermediateDirectories:createIntermediates
+                                                                   client:self];
     }];
 }
 
@@ -369,7 +369,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForRemovingFileAtURL:url client:self];
+        return [[protocolClass alloc] initForRemovingFileWithRequest:[manager requestWithURL:url] client:self];
     }];
 }
 
@@ -381,7 +381,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingResourceValues:keyedValues
-                                                       ofItemAtURL:url
+                                                 ofItemWithRequest:[manager requestWithURL:url]
                                                             client:self];
     }];
 }

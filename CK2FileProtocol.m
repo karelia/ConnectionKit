@@ -31,16 +31,19 @@
     [super dealloc];
 }
 
-- (id)initForEnumeratingDirectoryAtURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
         // Enumerate contents
-        NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtURL:url includingPropertiesForKeys:keys options:mask errorHandler:^BOOL(NSURL *url, NSError *error) {
+        NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtURL:[request URL]
+                                                                 includingPropertiesForKeys:keys
+                                                                                    options:mask
+                                                                               errorHandler:^BOOL(NSURL *url, NSError *error) {
             
-            NSLog(@"enumeration error: %@", error);
-            return YES;
-        }];
+                                                                                   NSLog(@"enumeration error: %@", error);
+                                                                                   return YES;
+                                                                               }];
                 
         BOOL reportedDirectory = NO;
         
@@ -50,7 +53,7 @@
             // Report the main directory first
             if (!reportedDirectory)
             {
-                [client protocol:self didDiscoverItemAtURL:url];
+                [client protocol:self didDiscoverItemAtURL:[request URL]];
                 reportedDirectory = YES;
             }
             
@@ -61,12 +64,12 @@
     }];
 }
 
-- (id)initForCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
+- (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
         NSError *error;
-        if ([[NSFileManager defaultManager] createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
+        if ([[NSFileManager defaultManager] createDirectoryAtURL:[request URL] withIntermediateDirectories:createIntermediates attributes:nil error:&error])
         {
             [client protocolDidFinish:self];
         }
@@ -127,12 +130,12 @@
     }];
 }
 
-- (id)initForRemovingFileAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client
+- (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
                 
         NSError *error;
-        if ([[NSFileManager defaultManager] removeItemAtURL:url error:&error])
+        if ([[NSFileManager defaultManager] removeItemAtURL:[request URL] error:&error])
         {
             [client protocolDidFinish:self];
         }
@@ -143,12 +146,12 @@
     }];
 }
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2ProtocolClient>)client;
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
         NSError *error;
-        if ([url setResourceValues:keyedValues error:&error])
+        if ([[request URL] setResourceValues:keyedValues error:&error])
         {
             [client protocolDidFinish:self];
         }
