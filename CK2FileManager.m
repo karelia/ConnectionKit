@@ -260,6 +260,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return ([CK2Protocol classForURL:url] != nil);
 }
 
+- (NSURLRequest *)requestWithURL:(NSURL *)url;
+{
+    return [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
+}
+
 #pragma mark Operations
 
 @end
