@@ -15,13 +15,14 @@
 
 
 @protocol CK2FileManagerDelegate;
+@class CK2QueueProxy;
 
 
 @interface CK2FileManager : NSObject
 {
   @private
     id <CK2FileManagerDelegate> _delegate;
-    void                        (^_deliverDelegateMessages)(void(^)(void));
+    CK2QueueProxy               *_delegateQueue;
 }
 
 #pragma mark Discovering Directory Contents

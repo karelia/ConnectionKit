@@ -8,6 +8,7 @@
 
 #import "CK2FileManager.h"
 #import "CK2Protocol.h"
+#import "CK2QueueProxy.h"
 
 
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
@@ -63,7 +64,7 @@
 {
   @private
     NSURLAuthenticationChallenge    *_originalChallenge;
-    void                            (^_senderQueue)(void(^)(void));
+    CK2QueueProxy                   *_senderQueue;
     NSURLAuthenticationChallenge    *_trampolineChallenge;
 }
 
@@ -101,7 +102,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     if (self = [super init])
     {
         // Record the queue to use for delegate messages
-        _deliverDelegateMessages = [[self class] copyCurrentQueueAsBlock];
+        _delegateQueue = [[CK2QueueProxy currentQueue] retain];
     }
     
     return self;
@@ -109,7 +110,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (void)dealloc;
 {
-    [_deliverDelegateMessages release]; _deliverDelegateMessages = nil;
+    [_delegateQueue release]; _delegateQueue = nil;
     [super dealloc];
 }
 
@@ -251,32 +252,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (void)deliverBlockToDelegate:(void (^)(void))block;
 {
-    _deliverDelegateMessages(block);
-}
-
-+ (void(^)(void(^block)(void)))copyCurrentQueueAsBlock;
-{
-    void (^result)(void(^block)(void));
-    
-    // Create a block that submits blocks to what looks the best match to be the current queue
-    NSOperationQueue *queue = [NSOperationQueue currentQueue];
-    if (queue)
-    {
-        result = ^(void(^block)(void)) {
-            [queue addOperationWithBlock:block];
-        };
-    }
-    else
-    {
-        dispatch_queue_t queue = dispatch_get_current_queue();
-        NSAssert(queue, @"dispatch_get_current_queue unexpectedly claims there is no current queue");
-        
-        result = ^(void(^block)(void)) {
-            dispatch_async(queue, block);
-        };
-    }
-    
-    return [result copy];
+    [_delegateQueue addOperationWithBlock:block];
 }
 
 #pragma mark URLs
@@ -550,7 +526,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (self = [super init])
     {
         _originalChallenge = [challenge retain];
-        _senderQueue = [CK2FileManager copyCurrentQueueAsBlock];
+        _senderQueue = [[CK2QueueProxy currentQueue] retain];
         
         _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
         
@@ -577,30 +553,30 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    _senderQueue(^{
+    [_senderQueue addOperationWithBlock:^{
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
         [self release];
-    });
+    }];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    _senderQueue(^{
+    [_senderQueue addOperationWithBlock:^{
         [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
         [self release];
-    });
+    }];
 }
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(challenge == _trampolineChallenge);
     
-    _senderQueue(^{
+    [_senderQueue addOperationWithBlock:^{
         [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
         [self release];
-    });
+    }];
 }
 
 @end
