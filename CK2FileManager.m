@@ -578,6 +578,22 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     });
 }
 
+- (void)performDefaultHandlingForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // TODO: Should this be forwarded straight on to the original sender if implements this method?
+    if ([challenge previousFailureCount] == 0)
+    {
+        NSURLCredential *credential = [challenge proposedCredential];
+        if (credential)
+        {
+            [self useCredential:credential forAuthenticationChallenge:challenge];
+            return;
+        }
+    }
+    
+    [self continueWithoutCredentialForAuthenticationChallenge:challenge];
+}
+
 @end
 
 
