@@ -90,7 +90,17 @@
 #pragma mark General
 - (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
+
+/*!
+ @method fileTransferProtocol:didReceiveAuthenticationChallenge:
+ @abstract Start authentication for the specified request
+ @param protocol The protocol object requesting authentication.
+ @param challenge The authentication challenge.
+ @discussion The protocol client guarantees that it will answer the
+ request on the same queue that called this method.
+ */
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
 - (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
 

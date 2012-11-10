@@ -59,6 +59,23 @@
 #pragma mark -
 
 
+@interface CK2AuthenticationChallengeTrampoline : NSObject <NSURLAuthenticationChallengeSender>
+{
+  @private
+    NSURLAuthenticationChallenge    *_originalChallenge;
+    void                            (^_senderQueue)(void(^)(void));
+    NSURLAuthenticationChallenge    *_trampolineChallenge;
+}
+
++ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
+@property(nonatomic, readonly, retain) NSURLAuthenticationChallenge *originalChallenge;
+
+@end
+
+
+#pragma mark -
+
+
 @interface CK2Protocol (Internals)
 
 // Completion block is guaranteed to be called on our private serial queue
@@ -492,10 +509,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
     
+    [CK2AuthenticationChallengeTrampoline handleChallenge:challenge manager:_manager];
     // TODO: Cache credentials per protection space
-    [_manager deliverBlockToDelegate:^{
-        [[_manager delegate] fileManager:_manager didReceiveAuthenticationChallenge:challenge];
-    }];
 }
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
@@ -514,6 +529,78 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
     if (_enumerationBlock) _enumerationBlock(url);
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation CK2AuthenticationChallengeTrampoline
+
++ (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
+{
+    // Trust the tramoline to release itself when done
+    [[[self alloc] initWithChallenge:challenge manager:manager] release];
+}
+
+- (id)initWithChallenge:(NSURLAuthenticationChallenge *)challenge manager:(CK2FileManager *)manager;
+{
+    if (self = [super init])
+    {
+        _originalChallenge = [challenge retain];
+        _senderQueue = [CK2FileManager copyCurrentQueueAsBlock];
+        
+        _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
+        
+        [manager deliverBlockToDelegate:^{
+            [[manager delegate] fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+        }];
+        
+        [self retain];  // gets released when challenge is replied to
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_originalChallenge release];
+    [_senderQueue release];
+    [_trampolineChallenge release];
+    [super dealloc];
+}
+
+@synthesize originalChallenge = _originalChallenge;
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSParameterAssert(challenge == _trampolineChallenge);
+    
+    _senderQueue(^{
+        [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
+        [self release];
+    });
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSParameterAssert(challenge == _trampolineChallenge);
+    
+    _senderQueue(^{
+        [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
+        [self release];
+    });
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    NSParameterAssert(challenge == _trampolineChallenge);
+    
+    _senderQueue(^{
+        [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
+        [self release];
+    });
 }
 
 @end
