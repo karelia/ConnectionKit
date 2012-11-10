@@ -314,7 +314,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             {
                 NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
                 NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info];
-                failureBlock(error);
+                [self finishWithError:error];
                 [error release];
             }
         }];
