@@ -284,7 +284,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     {
         _manager = [manager retain];
         _completionBlock = [completionBlock copy];
-        _queue = dispatch_queue_create("CK2FileOperation", DISPATCH_QUEUE_SERIAL);
+        _queue = dispatch_queue_create("CK2FileOperation", NULL);
         
         [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
             

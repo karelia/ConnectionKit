@@ -22,7 +22,7 @@
     static dispatch_queue_t queue;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        queue = dispatch_queue_create("CK2FileTransferSystem", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("CK2FileTransferSystem", NULL);
         
         // Register built-in protocols too
         sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2FileProtocol class], [CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
