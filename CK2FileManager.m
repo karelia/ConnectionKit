@@ -84,23 +84,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     if (self = [super init])
     {
         // Record the queue to use for delegate messages
-        NSOperationQueue *queue = [NSOperationQueue currentQueue];
-        if (queue)
-        {
-            _deliverDelegateMessages = ^(void(^block)(void)) {
-                [queue addOperationWithBlock:block];
-            };
-        }
-        else
-        {
-            dispatch_queue_t queue = dispatch_get_current_queue();
-            NSAssert(queue, @"dispatch_get_current_queue unexpectedly claims there is no current queue");
-            
-            _deliverDelegateMessages = ^(void(^block)(void)) {
-                dispatch_async(queue, block);
-            };
-        }
-        _deliverDelegateMessages = [_deliverDelegateMessages copy];
+        _deliverDelegateMessages = [[self class] copyCurrentQueueAsBlock];
     }
     
     return self;
@@ -251,6 +235,31 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)deliverBlockToDelegate:(void (^)(void))block;
 {
     _deliverDelegateMessages(block);
+}
+
++ (void(^)(void(^block)(void)))copyCurrentQueueAsBlock;
+{
+    void (^result)(void(^block)(void));
+    
+    // Create a block that submits blocks to what looks the best match to be the current queue
+    NSOperationQueue *queue = [NSOperationQueue currentQueue];
+    if (queue)
+    {
+        result = ^(void(^block)(void)) {
+            [queue addOperationWithBlock:block];
+        };
+    }
+    else
+    {
+        dispatch_queue_t queue = dispatch_get_current_queue();
+        NSAssert(queue, @"dispatch_get_current_queue unexpectedly claims there is no current queue");
+        
+        result = ^(void(^block)(void)) {
+            dispatch_async(queue, block);
+        };
+    }
+    
+    return [result copy];
 }
 
 #pragma mark URLs
