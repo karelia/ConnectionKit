@@ -16,8 +16,12 @@
     CK2Protocol     *_protocol;
     CK2FileManager  *_manager;
     
+    dispatch_queue_t    _queue;
+    
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
+    
+    BOOL    _cancelled;
 }
 
 - (id)initEnumerationOperationWithURL:(NSURL *)url
@@ -47,6 +51,7 @@
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 
+- (void)cancel;
 
 @end
 
@@ -301,14 +306,24 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     {
         _manager = [manager retain];
         _completionBlock = [completionBlock copy];
+        _queue = dispatch_queue_create("CK2FileOperation", DISPATCH_QUEUE_SERIAL);
         
         [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
             
             if (protocolClass)
             {
-                _protocol = createBlock(protocolClass);
-                // TODO: Handle protocol's init method returning nil
-                [_protocol start];
+                // Bounce over to operation's own queue for kicking off the real work
+                // Keep an eye out for early opportunity to bail out if get cancelled
+                dispatch_async(_queue, ^{
+                    
+                    if (![self isCancelled])
+                    {
+                        _protocol = createBlock(protocolClass);
+                        // TODO: Handle protocol's init method returning nil
+                        
+                        if (![self isCancelled]) [_protocol start];
+                    }
+                });
             }
             else
             {
@@ -395,28 +410,62 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)finishWithError:(NSError *)error;
 {
-    _completionBlock(error);
+    // Run completion block on own queue so that:
+    //  A) It doesn't potentially hold up the calling queue for too long
+    //  B) Serialises access, guaranteeing the block is only run once
+    dispatch_async(_queue, ^{
+        if (_completionBlock)
+        {
+            _completionBlock(error);
+            [_completionBlock release]; _completionBlock = nil;
+        }
+    });
     
-    [_completionBlock release]; _completionBlock = nil;
+    // These ivars are already finished with, so can ditch them early
     [_enumerationBlock release]; _enumerationBlock = nil;
     [_manager release]; _manager = nil;
-    
-    [self release]; // balances call in -init
 }
 
 - (void)dealloc
 {
     [_protocol release];
     [_manager release];
+    if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
     
     [super dealloc];
 }
 
+#pragma mark Cancellation
+
+- (void)cancel;
+{
+    /*  Any already-enqueued delegate messages will likely still run. That's fine as it seems we might as well report things that are already known to have happened
+     */
+    
+    _cancelled = YES;
+    
+    // Tell the protocol as soon as we can.
+    dispatch_async(_queue, ^{
+        [_protocol stop];
+    });
+    
+    // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
+    NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
+    [self finishWithError:cancellationError];
+    [cancellationError release];
+}
+
+- (BOOL)isCancelled; { return _cancelled; }
+
+#pragma mark CK2ProtocolClient
+
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
     NSParameterAssert(protocol == _protocol);
+    if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
+    
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self finishWithError:error];
 }
@@ -424,12 +473,16 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
 {
     NSParameterAssert(protocol == _protocol);
+    // Might as well report success even if cancelled
+    
     [self finishWithError:nil];
 }
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(protocol == _protocol);
+    if ([self isCancelled]) return; // don't care about auth once cancelled
+    
     // TODO: Cache credentials per protection space
     [_manager deliverBlockToDelegate:^{
         [[_manager delegate] fileManager:_manager didReceiveAuthenticationChallenge:challenge];
@@ -439,6 +492,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
     NSParameterAssert(protocol == _protocol);
+    // Even if cancelled, allow through since could well be valuable debugging info
+    
     [_manager deliverBlockToDelegate:^{
         [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
     }];
@@ -447,6 +502,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
     NSParameterAssert(protocol == _protocol);
+    // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
+    
     if (_enumerationBlock)
     {
         _enumerationBlock(url);

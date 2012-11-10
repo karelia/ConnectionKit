@@ -18,9 +18,6 @@
 
 #pragma mark For Subclasses to Implement
 
-/*  A CK2Protocol is guaranteed to only be accessed from one thread at a time. Multiple operations can be in-flight at once, but they're only kicked off serially. Thus, your code should avoid blocking the thread it's called on
- */
-
 // Generally, subclasses check the URL's scheme to see if they support it
 + (BOOL)canHandleURL:(NSURL *)url;
 
@@ -48,10 +45,11 @@
                        ofItemAtURL:(NSURL *)url
                             client:(id <CK2ProtocolClient>)client;
 
-// Override to kick off the requested operation. You SHOULD avoid blocking the thread this is called on
+// Override to kick off the requested operation
 - (void)start;
 
 // Your cue to stop doing any more work. Once this is called, the client will ignore you should you choose to continue
+// This method will always be called on the same serial queue as -start. Thus if your work *can* be cancelled, you should avoid blocking the queue in order to be notified in a timely manner
 - (void)stop;
 
 
