@@ -515,6 +515,21 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		273F0E13164E8D3E00588885 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				2790A8271627636E000C9D9F /* CK2Protocol.h */,
+				2790A8281627636E000C9D9F /* CK2Protocol.m */,
+				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
+				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
+				27F394F3162C162900944F43 /* CK2SFTPProtocol.h */,
+				27F394F4162C162900944F43 /* CK2SFTPProtocol.m */,
+				27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */,
+				27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */,
+			);
+			name = Protocols;
+			sourceTree = "<group>";
+		};
 		27448C2514580F7500EB086F /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -673,14 +688,7 @@
 				27FD90C80ED5BFFD0068D634 /* Other */,
 				2743E8071622E47600019979 /* CK2FileManager.h */,
 				2743E8081622E47600019979 /* CK2FileManager.m */,
-				2790A8271627636E000C9D9F /* CK2Protocol.h */,
-				2790A8281627636E000C9D9F /* CK2Protocol.m */,
-				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
-				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
-				27F394F3162C162900944F43 /* CK2SFTPProtocol.h */,
-				27F394F4162C162900944F43 /* CK2SFTPProtocol.m */,
-				27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */,
-				27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */,
+				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
