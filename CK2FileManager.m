@@ -507,7 +507,24 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         _originalChallenge = [challenge retain];
         _operation = [operation retain];
         
-        _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
+        if ([challenge proposedCredential])
+        {
+            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithAuthenticationChallenge:challenge sender:self];
+        }
+        else
+        {
+            // Invent the best credential available
+            // TODO: Base on the URL's user + password if included
+            NSURLProtectionSpace *space = [challenge protectionSpace];
+            NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+            
+            _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                              proposedCredential:credential
+                                                                            previousFailureCount:[challenge previousFailureCount]
+                                                                                 failureResponse:[challenge failureResponse]
+                                                                                           error:[challenge error]
+                                                                                          sender:self];
+        }
         
         CK2FileManager *manager = operation->_manager;
         

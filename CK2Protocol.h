@@ -97,7 +97,9 @@
  @param protocol The protocol object requesting authentication.
  @param challenge The authentication challenge.
  @discussion The protocol client answers the request on the same queue
- as -start was called on.
+ as -start was called on. It may add a default credential to the
+ challenge it issues to the connection delegate, if the protocol did not
+ provide one.
  */
 - (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
