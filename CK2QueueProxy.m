@@ -10,22 +10,6 @@
 
 @implementation CK2QueueProxy
 
-+ (instancetype)currentQueue;
-{
-    // Create a block that submits blocks to what looks the best match to be the current queue
-    NSOperationQueue *queue = [NSOperationQueue currentQueue];
-    if (queue)
-    {
-        return [[[self alloc] initWithOperationQueue:queue] autorelease];
-    }
-    else
-    {
-        dispatch_queue_t queue = dispatch_get_current_queue();
-        NSAssert(queue, @"dispatch_get_current_queue unexpectedly claims there is no current queue");
-        return [[[self alloc] initWithDispatchQueue:queue] autorelease];
-    }
-}
-
 - (id)initWithOperationQueue:(NSOperationQueue *)queue;
 {
     return [self initWithDispatchBlock:^(void(^block)(void)) {

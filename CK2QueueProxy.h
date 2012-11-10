@@ -14,7 +14,6 @@
     void    (^_dispatchBlock)(void(^)(void));
 }
 
-+ (instancetype)currentQueue;   // Creates a queue encapsulating the current operation or dispatch queue
 - (id)initWithOperationQueue:(NSOperationQueue *)queue;
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;
 
