@@ -487,7 +487,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 #pragma mark CK2ProtocolClient
 
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
+- (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
     NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // ignore errors once cancelled as protocol might be trying to invent its own
@@ -496,7 +496,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self finishWithError:error];
 }
 
-- (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
+- (void)protocolDidFinish:(CK2Protocol *)protocol;
 {
     NSParameterAssert(protocol == _protocol);
     // Might as well report success even if cancelled
@@ -504,7 +504,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self finishWithError:nil];
 }
 
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     NSParameterAssert(protocol == _protocol);
     if ([self isCancelled]) return; // don't care about auth once cancelled
@@ -513,7 +513,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // TODO: Cache credentials per protection space
 }
 
-- (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through since could well be valuable debugging info
@@ -523,7 +523,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+- (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere

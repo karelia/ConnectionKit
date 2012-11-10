@@ -88,26 +88,26 @@
 @protocol CK2ProtocolClient <NSObject>
 
 #pragma mark General
-- (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
+- (void)protocolDidFinish:(CK2Protocol *)protocol;
+- (void)protocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 
 /*!
- @method fileTransferProtocol:didReceiveAuthenticationChallenge:
+ @method protocoldidReceiveAuthenticationChallenge:
  @abstract Start authentication for the specified request
  @param protocol The protocol object requesting authentication.
  @param challenge The authentication challenge.
  @discussion The protocol client guarantees that it will answer the
  request on the same queue that called this method.
  */
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)protocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 
-- (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+- (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
 
 #pragma mark Operation-Specific
 // Only made use of by directory enumeration at present, but hey, maybe something else will in future
 // URL should be pre-populated with properties requested by client
-- (void)fileTransferProtocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
+- (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 
 
 @end

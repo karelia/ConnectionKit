@@ -50,14 +50,14 @@
             // Report the main directory first
             if (!reportedDirectory)
             {
-                [client fileTransferProtocol:self didDiscoverItemAtURL:url];
+                [client protocol:self didDiscoverItemAtURL:url];
                 reportedDirectory = YES;
             }
             
-            [client fileTransferProtocol:self didDiscoverItemAtURL:aURL];
+            [client protocol:self didDiscoverItemAtURL:aURL];
         }
                 
-        [client fileTransferProtocolDidFinish:self];
+        [client protocolDidFinish:self];
     }];
 }
 
@@ -68,11 +68,11 @@
         NSError *error;
         if ([[NSFileManager defaultManager] createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:nil error:&error])
         {
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
         else
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
     }];
 }
@@ -88,11 +88,11 @@
             NSError *error;
             if ([data writeToURL:[request URL] options:0 error:&error])
             {
-                [client fileTransferProtocolDidFinish:self];
+                [client protocolDidFinish:self];
             }
             else
             {
-                [client fileTransferProtocol:self didFailWithError:error];
+                [client protocol:self didFailWithError:error];
             }
         }
         else
@@ -122,7 +122,7 @@
             [outputStream close];
             [outputStream release];
             
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
     }];
 }
@@ -134,11 +134,11 @@
         NSError *error;
         if ([[NSFileManager defaultManager] removeItemAtURL:url error:&error])
         {
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
         else
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
     }];
 }
@@ -150,11 +150,11 @@
         NSError *error;
         if ([url setResourceValues:keyedValues error:&error])
         {
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
         else
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
     }];
 }

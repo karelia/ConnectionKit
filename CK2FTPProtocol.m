@@ -90,11 +90,11 @@
         
         if (error)
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
         else
         {
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
     }];
     
@@ -119,7 +119,7 @@
         
         if (error)
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
         else
         {
@@ -136,7 +136,7 @@
                 }
             }
             
-            [client fileTransferProtocol:self didDiscoverItemAtURL:resolved];
+            [client protocol:self didDiscoverItemAtURL:resolved];
             
             
             // Process the data to make a directory listing
@@ -293,7 +293,7 @@
                                 }
                             }
                             
-                            [client fileTransferProtocol:self didDiscoverItemAtURL:aURL];
+                            [client protocol:self didDiscoverItemAtURL:aURL];
                             [aURL release];
                         }
                         
@@ -313,12 +313,12 @@
                     NSError *error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorCannotParseResponse userInfo:userInfo];
                     [userInfo release];
                     
-                    [client fileTransferProtocol:self didFailWithError:error];
+                    [client protocol:self didFailWithError:error];
                     break;
                 }
                 else
                 {
-                    [client fileTransferProtocolDidFinish:self];
+                    [client protocolDidFinish:self];
                     break;
                 }
             }
@@ -365,11 +365,11 @@
         
         if (error)
         {
-            [client fileTransferProtocol:self didFailWithError:error];
+            [client protocol:self didFailWithError:error];
         }
         else
         {
-            [client fileTransferProtocolDidFinish:self];
+            [client protocolDidFinish:self];
         }
     }];
     
@@ -400,7 +400,7 @@
                                      client:client];
     }
     
-    [client fileTransferProtocolDidFinish:nil];
+    [client protocolDidFinish:nil];
     return nil;
 }
 
@@ -459,7 +459,7 @@
     
     [space release];
     
-    [_client fileTransferProtocol:self didReceiveAuthenticationChallenge:challenge];
+    [_client protocol:self didReceiveAuthenticationChallenge:challenge];
     [challenge release];
 }
 
@@ -542,7 +542,7 @@
         string = @"PASS ####";
     }
     
-    [_client fileTransferProtocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    [_client protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
@@ -561,7 +561,7 @@
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [_client fileTransferProtocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+    [_client protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
                                                                             code:NSURLErrorUserCancelledAuthentication
                                                                         userInfo:nil]];
 }
