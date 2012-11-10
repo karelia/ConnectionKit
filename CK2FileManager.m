@@ -425,6 +425,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     _cancelled = YES;
     
     // Tell the protocol as soon as we can.
+    dispatch_set_target_queue(_queue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
+    
     dispatch_async(_queue, ^{
         [_protocol stop];
     });
