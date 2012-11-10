@@ -594,6 +594,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [self continueWithoutCredentialForAuthenticationChallenge:challenge];
 }
 
+- (void)rejectProtectionSpaceAndContinueWithChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // TODO: Presumably this should move on to the next protection space if there is one
+    [self cancelAuthenticationChallenge:challenge];
+}
+
 @end
 
 
