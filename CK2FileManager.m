@@ -416,17 +416,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didFailWithError:(NSError *)error;
 {
+    NSParameterAssert(protocol == _protocol);
     if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     [self finishWithError:error];
 }
 
 - (void)fileTransferProtocolDidFinish:(CK2Protocol *)protocol;
 {
+    NSParameterAssert(protocol == _protocol);
     [self finishWithError:nil];
 }
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
+    NSParameterAssert(protocol == _protocol);
     // TODO: Cache credentials per protection space
     [_manager deliverBlockToDelegate:^{
         [[_manager delegate] fileManager:_manager didReceiveAuthenticationChallenge:challenge];
@@ -435,6 +438,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
+    NSParameterAssert(protocol == _protocol);
     [_manager deliverBlockToDelegate:^{
         [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
     }];
@@ -442,6 +446,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)fileTransferProtocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
 {
+    NSParameterAssert(protocol == _protocol);
     if (_enumerationBlock)
     {
         _enumerationBlock(url);
