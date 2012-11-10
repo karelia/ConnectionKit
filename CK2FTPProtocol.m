@@ -412,7 +412,6 @@
 {
     if (self = [self initWithRequest:request client:client])
     {
-        [self retain];  // until finished
         _completionHandler = [handler copy];
     }
     
@@ -465,7 +464,6 @@
 {
     _completionHandler(error);
     [_handle release]; _handle = nil;
-    [self release];
 }
 
 - (void)stop;
