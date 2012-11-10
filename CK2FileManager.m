@@ -291,7 +291,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (id)initWithURL:(NSURL *)url
           manager:(CK2FileManager *)manager
-   failureHandler:(void (^)(NSError *))failureBlock
+completionHandler:(void (^)(NSError *))completionBlock
 createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSParameterAssert(url);
@@ -300,7 +300,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (self = [self init])
     {
         _manager = [manager retain];
-        _completionBlock = [failureBlock copy];
+        _completionBlock = [completionBlock copy];
         
         [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
             
@@ -330,7 +330,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    self = [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForEnumeratingDirectoryAtURL:url
                                             includingPropertiesForKeys:keys
@@ -347,7 +347,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingDirectoryAtURL:url
                                         withIntermediateDirectories:createIntermediates
@@ -361,7 +361,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                              progressBlock:(void (^)(NSUInteger))progressBlock
                            completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:[request URL] manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    return [self initWithURL:[request URL] manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForCreatingFileWithRequest:request
                                          withIntermediateDirectories:createIntermediates
@@ -374,7 +374,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                               manager:(CK2FileManager *)manager
                       completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForRemovingFileAtURL:url client:self];
     }];
@@ -385,7 +385,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:url manager:manager failureHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         return [[protocolClass alloc] initForSettingResourceValues:keyedValues
                                                        ofItemAtURL:url
