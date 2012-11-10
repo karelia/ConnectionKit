@@ -504,10 +504,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
-    if (_enumerationBlock)
-    {
-        _enumerationBlock(url);
-    }
+    if (_enumerationBlock) _enumerationBlock(url);
 }
 
 @end
