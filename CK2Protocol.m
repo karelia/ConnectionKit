@@ -92,6 +92,29 @@
     return [URL path];
 }
 
+#pragma mark For Subclasses to Use
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    if (self = [self init])
+    {
+        _request = [request copy];
+        _client = [client retain];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_request release];
+    [_client release];
+    
+    [super dealloc];
+}
+
+@synthesize request = _request;
+@synthesize client = _client;
+
 #pragma mark Registration
 
 static NSMutableArray *sRegisteredProtocols;

@@ -15,6 +15,11 @@
 
 
 @interface CK2Protocol : NSObject
+{
+  @private
+    NSURLRequest            *_request;
+    id <CK2ProtocolClient>  _client;
+}
 
 #pragma mark For Subclasses to Implement
 
@@ -57,6 +62,14 @@
 // Default behaviour is generic path-handling. Override if your protocol has some special requirements. e.g. SFTP indicates home directory with a ~
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+
+
+#pragma mark For Subclasses to Use
+
+// Most subclasses will want to use this to store the request and client upon initialization, but they're not obliged to
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client;
+@property(nonatomic, readonly, copy) NSURLRequest *request;
+@property(nonatomic, readonly, retain) id <CK2ProtocolClient> client;
 
 
 #pragma mark Registration

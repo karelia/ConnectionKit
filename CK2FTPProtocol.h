@@ -14,9 +14,6 @@
 @interface CK2FTPProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 {
   @private
-    NSURLRequest    *_request;
-    id <CK2ProtocolClient>  _client;
-    
     CURLHandle  *_handle;
     
     void    (^_completionHandler)(NSError *error);

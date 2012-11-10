@@ -410,11 +410,9 @@
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 {
-    if (self = [self init])
+    if (self = [self initWithRequest:request client:client])
     {
         [self retain];  // until finished
-        _request = [request copy];
-        _client = [client retain];
         _completionHandler = [handler copy];
     }
     
@@ -441,7 +439,7 @@
 
 - (void)start;
 {
-    NSURL *url = [_request URL];
+    NSURL *url = [[self request] URL];
     NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
     
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
@@ -459,7 +457,7 @@
     
     [space release];
     
-    [_client protocol:self didReceiveAuthenticationChallenge:challenge];
+    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
     [challenge release];
 }
 
@@ -478,7 +476,6 @@
 - (void)dealloc;
 {
     [_handle release];
-    [_client release];
     [_completionHandler release];
     [_dataBlock release];
     [_progressBlock release];
@@ -491,7 +488,7 @@
 - (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
 {
     // Deliberately want a request that should avoid doing any work
-    NSMutableURLRequest *request = [_request mutableCopy];
+    NSMutableURLRequest *request = [[self request] mutableCopy];
     [request setURL:[NSURL URLWithString:@"/" relativeToURL:[request URL]]];
     [request setHTTPMethod:@"HEAD"];
     
@@ -542,14 +539,14 @@
         string = @"PASS ####";
     }
     
-    [_client protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    [[self client] protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    _handle = [[CURLHandle alloc] initWithRequest:_request
+    _handle = [[CURLHandle alloc] initWithRequest:[self request]
                                        credential:credential
                                          delegate:self];
 }
@@ -561,9 +558,9 @@
 
 - (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    [_client protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                            code:NSURLErrorUserCancelledAuthentication
-                                                                        userInfo:nil]];
+    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                      code:NSURLErrorUserCancelledAuthentication
+                                                                  userInfo:nil]];
 }
 
 @end
