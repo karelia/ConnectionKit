@@ -11,14 +11,14 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileManagerTests : SenTestCase<CK2FileManagerDelegate>
+@interface CK2FileManagerFTPTests : SenTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) KSMockServer* server;
 @property (strong, nonatomic) CK2FileManager* session;
 
 @end
 
-@implementation CK2FileManagerTests
+@implementation CK2FileManagerFTPTests
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
 
