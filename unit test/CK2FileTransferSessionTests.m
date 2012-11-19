@@ -4,6 +4,7 @@
 //
 
 #import "KSMockServer.h"
+#import "KSMockServerRegExResponder.h"
 #import "KSMockServerFTPResponses.h"
 
 #import "CK2FileTransferSession.h"
@@ -28,7 +29,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (BOOL)setupSessionWithResponses:(NSArray*)responses
 {
-    self.server = [KSMockServer serverWithPort:0 responses:responses];
+    KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithResponses:responses];
+    self.server = [KSMockServer serverWithPort:0 responder:responder];
     STAssertNotNil(self.server, @"got server");
 
     if (self.server)

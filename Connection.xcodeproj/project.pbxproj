@@ -35,6 +35,7 @@
 		22F6D0CC165A44BB00443CC9 /* KSMockServerListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0BF165A44BB00443CC9 /* KSMockServerListener.m */; };
 		22F6D0CD165A44BB00443CC9 /* KSMockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */; };
 		22F6D0CF165A44BB00443CC9 /* KSMockServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0C4165A44BB00443CC9 /* KSMockServerTests.m */; };
+		22F6D0E4165A6C8100443CC9 /* KSMockServerRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */; };
 		22FA97FA1509090A001728B8 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
 		22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
@@ -261,6 +262,8 @@
 		22F6D0C0165A44BB00443CC9 /* KSMockServerResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerResponder.h; sourceTree = "<group>"; };
 		22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponder.m; sourceTree = "<group>"; };
 		22F6D0C4165A44BB00443CC9 /* KSMockServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerTests.m; sourceTree = "<group>"; };
+		22F6D0DF165A6C2200443CC9 /* KSMockServerRegExResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerRegExResponder.h; sourceTree = "<group>"; };
+		22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerRegExResponder.m; sourceTree = "<group>"; };
 		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
 		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
@@ -547,6 +550,8 @@
 				22F6D0BD165A44BB00443CC9 /* KSMockServerFTPResponses.m */,
 				22F6D0BE165A44BB00443CC9 /* KSMockServerListener.h */,
 				22F6D0BF165A44BB00443CC9 /* KSMockServerListener.m */,
+				22F6D0DF165A6C2200443CC9 /* KSMockServerRegExResponder.h */,
+				22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */,
 				22F6D0C0165A44BB00443CC9 /* KSMockServerResponder.h */,
 				22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */,
 				22F6D0C3165A44BB00443CC9 /* UnitTests */,
@@ -1174,6 +1179,7 @@
 				22F6D0CC165A44BB00443CC9 /* KSMockServerListener.m in Sources */,
 				22F6D0CD165A44BB00443CC9 /* KSMockServerResponder.m in Sources */,
 				22F6D0CF165A44BB00443CC9 /* KSMockServerTests.m in Sources */,
+				22F6D0E4165A6C8100443CC9 /* KSMockServerRegExResponder.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
