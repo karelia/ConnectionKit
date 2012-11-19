@@ -325,7 +325,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSDictionary* values = @{};
+        NSDictionary* values = @{ NSFilePosixPermissions : @"0744"};
         [self.session setResourceValues:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self.server stop];
