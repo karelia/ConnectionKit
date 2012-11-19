@@ -7,18 +7,18 @@
 #import "KSMockServerRegExResponder.h"
 #import "KSMockServerFTPResponses.h"
 
-#import "CK2FileTransferSession.h"
+#import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileTransferSessionTests : SenTestCase<CK2FileTransferSessionDelegate>
+@interface CK2FileManagerTests : SenTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) KSMockServer* server;
-@property (strong, nonatomic) CK2FileTransferSession* session;
+@property (strong, nonatomic) CK2FileManager* session;
 
 @end
 
-@implementation CK2FileTransferSessionTests
+@implementation CK2FileManagerTests
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
 
@@ -40,7 +40,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         STAssertTrue(started, @"server started ok");
 
         self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
-        self.session = [[CK2FileTransferSession alloc] init];
+        self.session = [[CK2FileManager alloc] init];
         self.session.delegate = self;
     }
 
@@ -48,14 +48,13 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 }
 
 #pragma mark - Delegate
-
-- (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     NSURLCredential* credential = [NSURLCredential credentialWithUser:@"user" password:@"pass" persistence:NSURLCredentialPersistenceNone];
     [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
 
-- (void)fileTransferSession:(CK2FileTransferSession *)session appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
 {
     NSLog(@"> %@", info);
 }
@@ -325,7 +324,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSDictionary* values = @{ NSFilePosixPermissions : @"0744"};
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setResourceValues:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self.server stop];
