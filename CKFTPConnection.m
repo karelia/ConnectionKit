@@ -853,7 +853,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 		case 502: //Command not implemented
 		{
 			NSDictionary *userInfo = [NSDictionary dictionaryWithObjectsAndKeys:
-									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad ftp command"), NSLocalizedDescriptionKey,
+									  LocalizedStringInConnectionKitBundle(@"Failed to change to directory", @"Bad FTP command"), NSLocalizedDescriptionKey,
 									  command, NSLocalizedFailureReasonErrorKey, path, NSFilePathErrorKey, nil];
 			error = [NSError errorWithDomain:CKFTPErrorDomain code:ConnectionErrorChangingDirectory userInfo:userInfo];
 			break;			
@@ -3384,7 +3384,7 @@ void dealWithConnectionSocket(CFSocketRef s, CFSocketCallBackType type,
 	NSInputStream *iStream = [(NSInputStream *)read autorelease];
 	NSOutputStream *oStream = [(NSOutputStream *)write autorelease];
 	
-	//send the data streams to the ftp connection object
+	//send the data streams to the FTP connection object
 	[con setDataInputStreamAndOpen:iStream outputStream:oStream socket:connectedFrom];
 	
 	//close down the original listening socket
