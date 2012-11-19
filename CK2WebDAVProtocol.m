@@ -19,18 +19,18 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(id, NSError *))handler;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(id))handler;
 {
     if (self = [self initWithRequest:request client:client])
     {
-        _session = [[DAVSession alloc] initWithRootURL:[request URL] delegate:self];
+        _session = [[DAVSession alloc] initWithRootURL:request.URL delegate:self];
         _completionHandler = [handler copy];
     }
 
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(id, NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(id))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -39,7 +39,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(id, NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(id))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -65,7 +65,6 @@
 {
     CK2WebDAVLog(@"enumerating directory");
 
-    CK2WebDAVLog(@"blah");
     NSString *path = [CK2WebDAVProtocol pathOfURLRelativeToHomeDirectory:request.URL];
     if (!path) path = @"/";
 
@@ -77,25 +76,21 @@
 
         [totalData appendData:data];
 
-    } completionHandler:^(id result, NSError *error) {
+    } completionHandler:^(id result) {
 
-        if (error)
+        NSURL* root = request.URL;
+        [client protocol:self didDiscoverItemAtURL:root];
+        for (DAVResponseItem *aResponseItem in result)
         {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            NSURL* root = request.URL;
-            [client protocol:self didDiscoverItemAtURL:root];
-            for (DAVResponseItem *aResponseItem in result)
-            {
-                NSString *path = [aResponseItem href];
+            NSString *path = [aResponseItem href];
 
-                // TODO: add properties
+            // TODO: add properties
 
-                [client protocol:self didDiscoverItemAtURL:[root URLByAppendingPathComponent:path]];
-            }
+            [client protocol:self didDiscoverItemAtURL:[root URLByAppendingPathComponent:path]];
         }
+
+        [client protocolDidFinish:self];
+
     }];
 
     if (self != nil)
@@ -161,14 +156,14 @@
 {
     CK2WebDAVLog(@"webdav request succeeded");
 
-    _completionHandler(result, nil);
+    _completionHandler(result);
 }
 
 - (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
 {
     CK2WebDAVLog(@"webdav request failed");
 
-    _completionHandler(nil, error);
+    [self.client protocol:self didFailWithError:error];
 }
 
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite

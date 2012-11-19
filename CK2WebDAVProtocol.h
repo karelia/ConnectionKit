@@ -14,7 +14,7 @@
     DAVSession* _session;
     DAVRequest* _davRequest;
 
-    void    (^_completionHandler)(id result, NSError *error);
+    void    (^_completionHandler)(id result);
     void    (^_dataBlock)(NSData *data);
     void    (^_progressBlock)(NSUInteger bytesWritten);
 }

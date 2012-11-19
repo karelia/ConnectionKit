@@ -49,7 +49,7 @@
 #pragma mark - Delegate
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:@"user" password:@"pass" persistence:NSURLCredentialPersistenceNone];
+    NSURLCredential* credential = [NSURLCredential credentialWithUser:@"demo" password:@"demo" persistence:NSURLCredentialPersistenceNone];
     [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
 
@@ -343,7 +343,7 @@
     
     if ([self setupSession])
     {
-        NSURL* url = [NSURL URLWithString:@"http://www.crushftp.com/#/demo/"];
+        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/#/demo/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
