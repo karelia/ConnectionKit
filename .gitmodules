@@ -7,3 +7,6 @@
 [submodule "CurlHandle"]
 	path = CurlHandle
 	url = git@github.com:karelia/CurlHandle.git
+[submodule "unit test/MockServer"]
+	path = unit test/MockServer
+	url = git@github.com:karelia/MockServer.git
