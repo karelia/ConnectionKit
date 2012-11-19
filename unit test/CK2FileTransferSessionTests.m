@@ -218,9 +218,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             [self.server stop];
         }];
-    }
 
-    [self.server runUntilStopped];
+        [self.server runUntilStopped];
+    }
 }
 
 - (void)testCreateFileAtURL
@@ -237,21 +237,21 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 [self.server stop];
             }
         }];
+
+        [self.server runUntilStopped];
     }
-
-    [self.server runUntilStopped];
-
-    //
-    //// 0 bytesWritten indicates writing has ended. This might be because of a failure; if so, error will be filled in
-    //- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 }
 
 - (void)testCreateFileAtURL2
 {
     if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
     {
+        NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
+        NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
+        NSError* error = nil;
+        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSURL* source = [[[NSBundle mainBundle] bundleURL] URLByAppendingPathComponent:@"CpMac"];
 
         [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -261,9 +261,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 [self.server stop];
             }
         }];
-    }
 
-    [self.server runUntilStopped];
+        [self.server runUntilStopped];
+
+        STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+    }
 }
 
 - (void)testRemoveFileAtURL
@@ -296,9 +298,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             [self.server stop];
         }];
+
+        [self.server runUntilStopped];
     }
 
-    [self.server runUntilStopped];
 }
 
 - (void)testRemoveFileAtURLBadLogin
@@ -312,9 +315,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             [self.server stop];
         }];
-    }
 
-    [self.server runUntilStopped];
+        [self.server runUntilStopped];
+    }
 }
 
 - (void)testSetResourceValues
@@ -327,9 +330,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertNil(error, @"got unexpected error %@", error);
             [self.server stop];
         }];
+
+        [self.server runUntilStopped];
     }
 
-    [self.server runUntilStopped];
 
     //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
     //// All other attributes are ignored
