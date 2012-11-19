@@ -11,7 +11,7 @@
 #import "CK2FTPProtocol.h"
 #import "CK2SFTPProtocol.h"
 #import "CK2FileProtocol.h"
-
+#import "CK2WebDAVProtocol.h"
 
 @implementation CK2Protocol
 
@@ -25,7 +25,7 @@
         queue = dispatch_queue_create("CK2FileTransferSystem", NULL);
         
         // Register built-in protocols too
-        sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2FileProtocol class], [CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
+        sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2FileProtocol class], [CK2SFTPProtocol class], [CK2FTPProtocol class], [CK2WebDAVProtocol class], nil];
     });
     
     return queue;

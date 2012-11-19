@@ -26,6 +26,9 @@
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
 		223B683115A1B16B00C127BA /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
+		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
+		2288CD75165A98E300F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
+		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D103165A8A2200443CC9 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
@@ -250,6 +253,9 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
+		2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests.m; sourceTree = "<group>"; };
+		2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2WebDAVProtocol.h; sourceTree = "<group>"; };
+		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
 		22F6D0EE165A8A2200443CC9 /* KSMockServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServer.h; sourceTree = "<group>"; };
@@ -497,6 +503,7 @@
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */,
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
+				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
 			);
 			name = "Unit Tests";
@@ -581,6 +588,8 @@
 				27F394F4162C162900944F43 /* CK2SFTPProtocol.m */,
 				27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */,
 				27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */,
+				2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */,
+				2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */,
 			);
 			name = Protocols;
 			sourceTree = "<group>";
@@ -1192,6 +1201,8 @@
 				22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */,
 				22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */,
 				22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */,
+				2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */,
+				2288CD75165A98E300F34E24 /* CK2WebDAVProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1257,6 +1268,7 @@
 				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,
 				27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */,
+				2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
