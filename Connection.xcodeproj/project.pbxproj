@@ -26,7 +26,7 @@
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
 		223B683115A1B16B00C127BA /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
-		22CC56F91509048E00F94154 /* PathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* PathTests.m */; };
+		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D103165A8A2200443CC9 /* CK2FileManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerTests.m */; };
 		22F6D108165A8A2200443CC9 /* KSMockServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0EF165A8A2200443CC9 /* KSMockServer.m */; };
@@ -36,7 +36,7 @@
 		22F6D10D165A8A2200443CC9 /* KSMockServerRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0FB165A8A2200443CC9 /* KSMockServerRegExResponder.m */; };
 		22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */; };
 		22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D100165A8A2200443CC9 /* KSMockServerTests.m */; };
-		22F6D112165A8A2200443CC9 /* URLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* URLTests.m */; };
+		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
 		22FA97FA1509090A001728B8 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
 		22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
@@ -250,7 +250,7 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
-		22CC56F81509048E00F94154 /* PathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PathTests.m; sourceTree = "<group>"; };
+		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerTests.m; sourceTree = "<group>"; };
 		22F6D0EE165A8A2200443CC9 /* KSMockServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServer.h; sourceTree = "<group>"; };
 		22F6D0EF165A8A2200443CC9 /* KSMockServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServer.m; sourceTree = "<group>"; };
@@ -265,7 +265,7 @@
 		22F6D0FC165A8A2200443CC9 /* KSMockServerResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerResponder.h; sourceTree = "<group>"; };
 		22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponder.m; sourceTree = "<group>"; };
 		22F6D100165A8A2200443CC9 /* KSMockServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerTests.m; sourceTree = "<group>"; };
-		22F6D102165A8A2200443CC9 /* URLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = URLTests.m; sourceTree = "<group>"; };
+		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
 		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
 		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
@@ -494,10 +494,10 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
-				22CC56F81509048E00F94154 /* PathTests.m */,
+				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerTests.m */,
+				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
-				22F6D102165A8A2200443CC9 /* URLTests.m */,
 			);
 			name = "Unit Tests";
 			path = "unit test";
@@ -1182,7 +1182,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22CC56F91509048E00F94154 /* PathTests.m in Sources */,
+				22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */,
 				22F6D103165A8A2200443CC9 /* CK2FileManagerTests.m in Sources */,
 				22F6D108165A8A2200443CC9 /* KSMockServer.m in Sources */,
 				22F6D10A165A8A2200443CC9 /* KSMockServerConnection.m in Sources */,
@@ -1191,7 +1191,7 @@
 				22F6D10D165A8A2200443CC9 /* KSMockServerRegExResponder.m in Sources */,
 				22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */,
 				22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */,
-				22F6D112165A8A2200443CC9 /* URLTests.m in Sources */,
+				22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
