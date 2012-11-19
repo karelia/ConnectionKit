@@ -1,11 +1,12 @@
 //
-//  CK2FileTransferSession.h
+//  CK2FileManager
 //  Connection
 //
 //  Created by Mike on 08/10/2012.
 //
 //  Usage:
 //  Much like NSFileManager, alloc + init your own instance. Likely you'll want to give it a delegate so can handle authentication challenges. Then just use the instance methods to perform your desired file operations.
+//  If an operation is cancelled, the completion handler will be called with a NSURLErrorCancelled error.
 //
 
 #import <Foundation/Foundation.h>
@@ -13,13 +14,13 @@
 #import "CKConnectionProtocol.h"
 
 
-@protocol CK2FileTransferSessionDelegate;
+@protocol CK2FileManagerDelegate;
 
 
-@interface CK2FileTransferSession : NSObject
+@interface CK2FileManager : NSObject
 {
   @private
-    id <CK2FileTransferSessionDelegate> _delegate;
+    id <CK2FileManagerDelegate> _delegate;
 }
 
 #pragma mark Discovering Directory Contents
@@ -65,8 +66,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Delegate
-// Delegate messages are received on arbitrary queues. So changing delegate might mean you still receive message shortly after the change. Not ideal I know!
-@property(assign) id <CK2FileTransferSessionDelegate> delegate;
+// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
+// Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
+@property(assign) id <CK2FileManagerDelegate> delegate;
 
 
 #pragma mark URLs
@@ -79,13 +81,32 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 
+/*!
+ @method         canHandleURL:
+ 
+ @abstract
+ Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
+ 
+ @discussion
+ The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
+ 
+ @param
+ url     The URL to preflight.
+ 
+ @result
+ YES         if it is likely that the given request can be used to
+ perform a file operation and the associated I/O can be
+ started
+ */
++ (BOOL)canHandleURL:(NSURL *)url;
 
 @end
 
 
-@protocol CK2FileTransferSessionDelegate <NSObject>
-- (void)fileTransferSession:(CK2FileTransferSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-- (void)fileTransferSession:(CK2FileTransferSession *)session appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
+@protocol CK2FileManagerDelegate <NSObject>
+// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end
 
 

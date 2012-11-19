@@ -26,16 +26,17 @@
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
 		223B683115A1B16B00C127BA /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
-		22B47C5B164BC2D4006E80EB /* CK2FileTransferSessionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22B47C5A164BC2D4006E80EB /* CK2FileTransferSessionTests.m */; };
 		22CC56F91509048E00F94154 /* PathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* PathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		22F6D0C8165A44BB00443CC9 /* KSMockServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0B5165A44BA00443CC9 /* KSMockServer.m */; };
-		22F6D0CA165A44BB00443CC9 /* KSMockServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0BB165A44BB00443CC9 /* KSMockServerConnection.m */; };
-		22F6D0CB165A44BB00443CC9 /* KSMockServerFTPResponses.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0BD165A44BB00443CC9 /* KSMockServerFTPResponses.m */; };
-		22F6D0CC165A44BB00443CC9 /* KSMockServerListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0BF165A44BB00443CC9 /* KSMockServerListener.m */; };
-		22F6D0CD165A44BB00443CC9 /* KSMockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */; };
-		22F6D0CF165A44BB00443CC9 /* KSMockServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0C4165A44BB00443CC9 /* KSMockServerTests.m */; };
-		22F6D0E4165A6C8100443CC9 /* KSMockServerRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */; };
+		22F6D103165A8A2200443CC9 /* CK2FileTransferSessionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileTransferSessionTests.m */; };
+		22F6D108165A8A2200443CC9 /* KSMockServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0EF165A8A2200443CC9 /* KSMockServer.m */; };
+		22F6D10A165A8A2200443CC9 /* KSMockServerConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0F5165A8A2200443CC9 /* KSMockServerConnection.m */; };
+		22F6D10B165A8A2200443CC9 /* KSMockServerFTPResponses.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0F7165A8A2200443CC9 /* KSMockServerFTPResponses.m */; };
+		22F6D10C165A8A2200443CC9 /* KSMockServerListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0F9165A8A2200443CC9 /* KSMockServerListener.m */; };
+		22F6D10D165A8A2200443CC9 /* KSMockServerRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0FB165A8A2200443CC9 /* KSMockServerRegExResponder.m */; };
+		22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */; };
+		22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D100165A8A2200443CC9 /* KSMockServerTests.m */; };
+		22F6D112165A8A2200443CC9 /* URLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* URLTests.m */; };
 		22FA97FA1509090A001728B8 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C2D14580F7500EB086F /* DAVKit.framework */; };
 		22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
@@ -54,16 +55,16 @@
 		270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
-		2743E8091622E47600019979 /* CK2FileTransferSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileTransferSession.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2743E80A1622E47600019979 /* CK2FileTransferSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileTransferSession.m */; };
+		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2743E80A1622E47600019979 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
 		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
 		2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CKRemoteURL.h */; };
 		2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8211626CA67000C9D9F /* CKRemoteURL.m */; };
-		2790A8291627636E000C9D9F /* CK2FileTransferProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */; };
-		2790A82A1627636E000C9D9F /* CK2FileTransferProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */; };
+		2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2Protocol.h */; };
+		2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2Protocol.m */; };
 		2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
 		2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
 		27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -249,21 +250,22 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
-		22B47C5A164BC2D4006E80EB /* CK2FileTransferSessionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferSessionTests.m; sourceTree = "<group>"; };
 		22CC56F81509048E00F94154 /* PathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PathTests.m; sourceTree = "<group>"; };
-		22F6D0B4165A44BA00443CC9 /* KSMockServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServer.h; sourceTree = "<group>"; };
-		22F6D0B5165A44BA00443CC9 /* KSMockServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServer.m; sourceTree = "<group>"; };
-		22F6D0BA165A44BB00443CC9 /* KSMockServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerConnection.h; sourceTree = "<group>"; };
-		22F6D0BB165A44BB00443CC9 /* KSMockServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerConnection.m; sourceTree = "<group>"; };
-		22F6D0BC165A44BB00443CC9 /* KSMockServerFTPResponses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerFTPResponses.h; sourceTree = "<group>"; };
-		22F6D0BD165A44BB00443CC9 /* KSMockServerFTPResponses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerFTPResponses.m; sourceTree = "<group>"; };
-		22F6D0BE165A44BB00443CC9 /* KSMockServerListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerListener.h; sourceTree = "<group>"; };
-		22F6D0BF165A44BB00443CC9 /* KSMockServerListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerListener.m; sourceTree = "<group>"; };
-		22F6D0C0165A44BB00443CC9 /* KSMockServerResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerResponder.h; sourceTree = "<group>"; };
-		22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponder.m; sourceTree = "<group>"; };
-		22F6D0C4165A44BB00443CC9 /* KSMockServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerTests.m; sourceTree = "<group>"; };
-		22F6D0DF165A6C2200443CC9 /* KSMockServerRegExResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerRegExResponder.h; sourceTree = "<group>"; };
-		22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerRegExResponder.m; sourceTree = "<group>"; };
+		22F6D0E7165A8A2200443CC9 /* CK2FileTransferSessionTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferSessionTests.m; sourceTree = "<group>"; };
+		22F6D0EE165A8A2200443CC9 /* KSMockServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServer.h; sourceTree = "<group>"; };
+		22F6D0EF165A8A2200443CC9 /* KSMockServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServer.m; sourceTree = "<group>"; };
+		22F6D0F4165A8A2200443CC9 /* KSMockServerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerConnection.h; sourceTree = "<group>"; };
+		22F6D0F5165A8A2200443CC9 /* KSMockServerConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerConnection.m; sourceTree = "<group>"; };
+		22F6D0F6165A8A2200443CC9 /* KSMockServerFTPResponses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerFTPResponses.h; sourceTree = "<group>"; };
+		22F6D0F7165A8A2200443CC9 /* KSMockServerFTPResponses.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerFTPResponses.m; sourceTree = "<group>"; };
+		22F6D0F8165A8A2200443CC9 /* KSMockServerListener.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerListener.h; sourceTree = "<group>"; };
+		22F6D0F9165A8A2200443CC9 /* KSMockServerListener.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerListener.m; sourceTree = "<group>"; };
+		22F6D0FA165A8A2200443CC9 /* KSMockServerRegExResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerRegExResponder.h; sourceTree = "<group>"; };
+		22F6D0FB165A8A2200443CC9 /* KSMockServerRegExResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerRegExResponder.m; sourceTree = "<group>"; };
+		22F6D0FC165A8A2200443CC9 /* KSMockServerResponder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KSMockServerResponder.h; sourceTree = "<group>"; };
+		22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponder.m; sourceTree = "<group>"; };
+		22F6D100165A8A2200443CC9 /* KSMockServerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerTests.m; sourceTree = "<group>"; };
+		22F6D102165A8A2200443CC9 /* URLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = URLTests.m; sourceTree = "<group>"; };
 		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKSFTPConnection.h; sourceTree = "<group>"; };
 		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKSFTPConnection.m; sourceTree = "<group>"; };
 		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
@@ -278,8 +280,8 @@
 		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = SFTP/libssh2.dylib; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
-		2743E8071622E47600019979 /* CK2FileTransferSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileTransferSession.h; sourceTree = "<group>"; };
-		2743E8081622E47600019979 /* CK2FileTransferSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferSession.m; sourceTree = "<group>"; };
+		2743E8071622E47600019979 /* CK2FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManager.h; sourceTree = "<group>"; };
+		2743E8081622E47600019979 /* CK2FileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManager.m; sourceTree = "<group>"; };
 		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
 		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
@@ -288,8 +290,8 @@
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
 		2790A8201626CA67000C9D9F /* CKRemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKRemoteURL.h; sourceTree = "<group>"; };
 		2790A8211626CA67000C9D9F /* CKRemoteURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKRemoteURL.m; sourceTree = "<group>"; };
-		2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileTransferProtocol.h; sourceTree = "<group>"; };
-		2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileTransferProtocol.m; sourceTree = "<group>"; };
+		2790A8271627636E000C9D9F /* CK2Protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Protocol.h; sourceTree = "<group>"; };
+		2790A8281627636E000C9D9F /* CK2Protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Protocol.m; sourceTree = "<group>"; };
 		2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FTPProtocol.h; sourceTree = "<group>"; };
 		2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FTPProtocol.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CKConnectionRegistry.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -492,9 +494,10 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
-				22B47C5A164BC2D4006E80EB /* CK2FileTransferSessionTests.m */,
-				22F6D0B1165A44BA00443CC9 /* MockServer */,
 				22CC56F81509048E00F94154 /* PathTests.m */,
+				22F6D0E7165A8A2200443CC9 /* CK2FileTransferSessionTests.m */,
+				22F6D0E8165A8A2200443CC9 /* MockServer */,
+				22F6D102165A8A2200443CC9 /* URLTests.m */,
 			);
 			name = "Unit Tests";
 			path = "unit test";
@@ -539,32 +542,47 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		22F6D0B1165A44BA00443CC9 /* MockServer */ = {
+		22F6D0E8165A8A2200443CC9 /* MockServer */ = {
 			isa = PBXGroup;
 			children = (
-				22F6D0B4165A44BA00443CC9 /* KSMockServer.h */,
-				22F6D0B5165A44BA00443CC9 /* KSMockServer.m */,
-				22F6D0BA165A44BB00443CC9 /* KSMockServerConnection.h */,
-				22F6D0BB165A44BB00443CC9 /* KSMockServerConnection.m */,
-				22F6D0BC165A44BB00443CC9 /* KSMockServerFTPResponses.h */,
-				22F6D0BD165A44BB00443CC9 /* KSMockServerFTPResponses.m */,
-				22F6D0BE165A44BB00443CC9 /* KSMockServerListener.h */,
-				22F6D0BF165A44BB00443CC9 /* KSMockServerListener.m */,
-				22F6D0DF165A6C2200443CC9 /* KSMockServerRegExResponder.h */,
-				22F6D0E0165A6C2200443CC9 /* KSMockServerRegExResponder.m */,
-				22F6D0C0165A44BB00443CC9 /* KSMockServerResponder.h */,
-				22F6D0C1165A44BB00443CC9 /* KSMockServerResponder.m */,
-				22F6D0C3165A44BB00443CC9 /* UnitTests */,
+				22F6D0EE165A8A2200443CC9 /* KSMockServer.h */,
+				22F6D0EF165A8A2200443CC9 /* KSMockServer.m */,
+				22F6D0F4165A8A2200443CC9 /* KSMockServerConnection.h */,
+				22F6D0F5165A8A2200443CC9 /* KSMockServerConnection.m */,
+				22F6D0F6165A8A2200443CC9 /* KSMockServerFTPResponses.h */,
+				22F6D0F7165A8A2200443CC9 /* KSMockServerFTPResponses.m */,
+				22F6D0F8165A8A2200443CC9 /* KSMockServerListener.h */,
+				22F6D0F9165A8A2200443CC9 /* KSMockServerListener.m */,
+				22F6D0FA165A8A2200443CC9 /* KSMockServerRegExResponder.h */,
+				22F6D0FB165A8A2200443CC9 /* KSMockServerRegExResponder.m */,
+				22F6D0FC165A8A2200443CC9 /* KSMockServerResponder.h */,
+				22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */,
+				22F6D0FF165A8A2200443CC9 /* UnitTests */,
 			);
 			path = MockServer;
 			sourceTree = "<group>";
 		};
-		22F6D0C3165A44BB00443CC9 /* UnitTests */ = {
+		22F6D0FF165A8A2200443CC9 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
-				22F6D0C4165A44BB00443CC9 /* KSMockServerTests.m */,
+				22F6D100165A8A2200443CC9 /* KSMockServerTests.m */,
 			);
 			path = UnitTests;
+			sourceTree = "<group>";
+		};
+		273F0E13164E8D3E00588885 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				2790A8271627636E000C9D9F /* CK2Protocol.h */,
+				2790A8281627636E000C9D9F /* CK2Protocol.m */,
+				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
+				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
+				27F394F3162C162900944F43 /* CK2SFTPProtocol.h */,
+				27F394F4162C162900944F43 /* CK2SFTPProtocol.m */,
+				27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */,
+				27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */,
+			);
+			name = Protocols;
 			sourceTree = "<group>";
 		};
 		27448C2514580F7500EB086F /* Products */ = {
@@ -723,16 +741,9 @@
 				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				27FD90C80ED5BFFD0068D634 /* Other */,
-				2743E8071622E47600019979 /* CK2FileTransferSession.h */,
-				2743E8081622E47600019979 /* CK2FileTransferSession.m */,
-				2790A8271627636E000C9D9F /* CK2FileTransferProtocol.h */,
-				2790A8281627636E000C9D9F /* CK2FileTransferProtocol.m */,
-				2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */,
-				2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */,
-				27F394F3162C162900944F43 /* CK2SFTPProtocol.h */,
-				27F394F4162C162900944F43 /* CK2SFTPProtocol.m */,
-				27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */,
-				27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */,
+				2743E8071622E47600019979 /* CK2FileManager.h */,
+				2743E8081622E47600019979 /* CK2FileManager.m */,
+				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Connections;
 			sourceTree = "<group>";
@@ -889,9 +900,9 @@
 				2702E3FB1459CBB10085BBC4 /* libssh2_sftp.h in Headers */,
 				2702E3FC1459CBB10085BBC4 /* libssh2.h in Headers */,
 				27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */,
-				2743E8091622E47600019979 /* CK2FileTransferSession.h in Headers */,
+				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */,
-				2790A8291627636E000C9D9F /* CK2FileTransferProtocol.h in Headers */,
+				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
 				2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */,
 				27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */,
 				27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */,
@@ -1172,14 +1183,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				22CC56F91509048E00F94154 /* PathTests.m in Sources */,
-				22B47C5B164BC2D4006E80EB /* CK2FileTransferSessionTests.m in Sources */,
-				22F6D0C8165A44BB00443CC9 /* KSMockServer.m in Sources */,
-				22F6D0CA165A44BB00443CC9 /* KSMockServerConnection.m in Sources */,
-				22F6D0CB165A44BB00443CC9 /* KSMockServerFTPResponses.m in Sources */,
-				22F6D0CC165A44BB00443CC9 /* KSMockServerListener.m in Sources */,
-				22F6D0CD165A44BB00443CC9 /* KSMockServerResponder.m in Sources */,
-				22F6D0CF165A44BB00443CC9 /* KSMockServerTests.m in Sources */,
-				22F6D0E4165A6C8100443CC9 /* KSMockServerRegExResponder.m in Sources */,
+				22F6D103165A8A2200443CC9 /* CK2FileTransferSessionTests.m in Sources */,
+				22F6D108165A8A2200443CC9 /* KSMockServer.m in Sources */,
+				22F6D10A165A8A2200443CC9 /* KSMockServerConnection.m in Sources */,
+				22F6D10B165A8A2200443CC9 /* KSMockServerFTPResponses.m in Sources */,
+				22F6D10C165A8A2200443CC9 /* KSMockServerListener.m in Sources */,
+				22F6D10D165A8A2200443CC9 /* KSMockServerRegExResponder.m in Sources */,
+				22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */,
+				22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */,
+				22F6D112165A8A2200443CC9 /* URLTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1239,9 +1251,9 @@
 				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */,
-				2743E80A1622E47600019979 /* CK2FileTransferSession.m in Sources */,
+				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
 				2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */,
-				2790A82A1627636E000C9D9F /* CK2FileTransferProtocol.m in Sources */,
+				2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */,
 				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,
 				27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */,

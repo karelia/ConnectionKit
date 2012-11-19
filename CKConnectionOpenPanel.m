@@ -39,7 +39,7 @@
 
 @implementation CKConnectionOpenPanel
 
-- (id)initWithFileTransferSession:(CK2FileTransferSession *)session directoryURL:(NSURL *)url;
+- (id)initWithFileTransferSession:(CK2FileManager *)session directoryURL:(NSURL *)url;
 {
 	NSParameterAssert(session);
     
@@ -228,11 +228,11 @@
     
     
     // Add in cell for root/home
-    NSString *path = [CK2FileTransferSession pathOfURLRelativeToHomeDirectory:url];
+    NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
     
     NSURL *rootURL = ([path isAbsolutePath] ?
-                      [CK2FileTransferSession URLWithPath:@"/" relativeToURL:url] :
-                      [CK2FileTransferSession URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"/" relativeToURL:url]]);
+                      [CK2FileManager URLWithPath:@"/" relativeToURL:url] :
+                      [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"/" relativeToURL:url]]);
     
     NSPathComponentCell *rootCell = [[NSPathComponentCell alloc] initTextCell:[url host]];
     [rootCell setURL:rootURL];

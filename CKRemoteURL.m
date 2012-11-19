@@ -8,7 +8,7 @@
 
 #import "CKRemoteURL.h"
 
-#import "CK2FileTransferSession.h"
+#import "CK2FileManager.h"
 
 
 @implementation CKRemoteURL
@@ -39,7 +39,7 @@
         }
         else if ([key isEqualToString:NSURLPathKey])
         {
-            *value = [CK2FileTransferSession pathOfURLRelativeToHomeDirectory:self];
+            *value = [CK2FileManager pathOfURLRelativeToHomeDirectory:self];
             return YES;
         }
         else

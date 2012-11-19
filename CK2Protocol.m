@@ -1,19 +1,19 @@
 //
-//  CK2FileTransferProtocol.m
+//  CK2Protocol
 //  Connection
 //
 //  Created by Mike on 11/10/2012.
 //
 //
 
-#import "CK2FileTransferProtocol.h"
+#import "CK2Protocol.h"
 
 #import "CK2FTPProtocol.h"
 #import "CK2SFTPProtocol.h"
 #import "CK2FileProtocol.h"
 
 
-@implementation CK2FileTransferProtocol
+@implementation CK2Protocol
 
 #pragma mark Serialization
 
@@ -22,7 +22,7 @@
     static dispatch_queue_t queue;
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        queue = dispatch_queue_create("CK2FileTransferSystem", DISPATCH_QUEUE_SERIAL);
+        queue = dispatch_queue_create("CK2FileTransferSystem", NULL);
         
         // Register built-in protocols too
         sRegisteredProtocols = [[NSMutableArray alloc] initWithObjects:[CK2FileProtocol class], [CK2SFTPProtocol class], [CK2FTPProtocol class], nil];
@@ -39,34 +39,44 @@
     return NO;
 }
 
-+ (CK2FileTransferProtocol *)startEnumeratingContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-+ (CK2FileTransferProtocol *)startCreatingDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-+ (CK2FileTransferProtocol *)startCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2FileTransferProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-+ (CK2FileTransferProtocol *)startRemovingFileAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
 }
 
-+ (CK2FileTransferProtocol *)startSettingResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url client:(id<CK2FileTransferProtocolClient>)client;
+- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
+}
+
+- (void)start;
+{
+    [self doesNotRecognizeSelector:_cmd];
+}
+
+- (void)stop;
+{
+    [self doesNotRecognizeSelector:_cmd];
 }
 
 #pragma mark For Subclasses to Customize
@@ -82,13 +92,36 @@
     return [URL path];
 }
 
+#pragma mark For Subclasses to Use
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    if (self = [self init])
+    {
+        _request = [request copy];
+        _client = [client retain];
+    }
+    return self;
+}
+
+- (void)dealloc
+{
+    [_request release];
+    [_client release];
+    
+    [super dealloc];
+}
+
+@synthesize request = _request;
+@synthesize client = _client;
+
 #pragma mark Registration
 
 static NSMutableArray *sRegisteredProtocols;
 
 + (void)registerClass:(Class)protocolClass;
 {
-    NSParameterAssert([protocolClass isSubclassOfClass:[CK2FileTransferProtocol class]]);
+    NSParameterAssert([protocolClass isSubclassOfClass:[CK2Protocol class]]);
     
     dispatch_async([self queue], ^{ // might as well be async as queue might be blocked momentarily by a protocol
         
