@@ -44,6 +44,15 @@
                <Test
                   Identifier = "MockServerTests">
                </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests">
+               </Test>
+               <Test
+                  Identifier = "KSMockServerTests">
+               </Test>
+               <Test
+                  Identifier = "URLTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
