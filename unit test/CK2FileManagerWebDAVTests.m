@@ -9,12 +9,16 @@
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
-#import <curl/curl.h>
+#import <DAVKit/DAVKit.h>
+
+#define TEST_WITH_FAKE_SERVER 0
+#define TEST_WITH_REAL_SERVER 1
 
 @interface CK2FileManagerWebDAVTests : SenTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) KSMockServer* server;
 @property (strong, nonatomic) CK2FileManager* session;
+@property (assign, nonatomic) BOOL running;
 
 @end
 
@@ -71,7 +75,8 @@
     return result;
 }
 
-#if 0
+#if TEST_WITH_FAKE_SERVER
+
 - (void)testContentsOfDirectoryAtURL
 {
     if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
@@ -337,10 +342,26 @@
 
 #endif
 
+#if TEST_WITH_REAL_SERVER
+
+- (void)stop
+{
+    self.running = NO;
+}
+
+- (void)runUntilStopped
+{
+    self.running = YES;
+    while (self.running)
+    {
+        @autoreleasepool {
+            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
+        }
+    }
+}
+
 - (void)testContentsOfDirectoryAtURLRealServer
 {
-    __block BOOL running = YES;
-    
     if ([self setupSession])
     {
         NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/"];
@@ -358,16 +379,52 @@
                 STAssertTrue(![contents containsObject:url], @"contents shouldn't include url of directory itself, they were: %@", contents);
             }
             
-            running = NO;
+            [self stop];
         }];
-        
-        while (running)
-        {
-            @autoreleasepool {
-                [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
-            }
-        }
+
+        [self runUntilStopped];
     }
 }
+
+- (void)testCreateAndRemoveDirectoryAtURLRealServer
+{
+    if ([self setupSession])
+    {
+        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory"];
+
+        // delete directory in case it's left from last time
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // try to make it
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // try to make it again - should fail
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"should have error");
+            STAssertTrue([[error domain] isEqual:DAVClientErrorDomain], @"");
+            STAssertEquals([error code], 405, @"should have error 405, got %ld", (long) [error code]);
+
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // try to delete directory - should work this time
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self stop];
+        }];
+        [self runUntilStopped];
+    }
+}
+
+#endif
 
 @end
