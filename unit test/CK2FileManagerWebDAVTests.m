@@ -435,6 +435,53 @@
     [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
 }
 
+- (void)testCreateAndRemoveFileAtURLRealServer
+{
+    if ([self setupSession])
+    {
+        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-file.txt"];
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+
+        // try to delete in case it's left around from last time - ignore error
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // try to upload
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            if (bytesWritten == 0)
+            {
+                [self stop];
+            }
+        }];
+        [self runUntilStopped];
+
+        // try to download
+        NSURL* downloadURL = [NSURL URLWithString:@"https://demo:demo@www.crushftp.com/demo/ck-test-file.txt"];
+        NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL];
+        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            NSString* received = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+            STAssertTrue([received isEqualToString:@"Some test text"], @"string should have matched, was %@", received);
+
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // try to delete - this time we do want to check the error
+        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+    }
+}
+
 #endif
 
 @end
