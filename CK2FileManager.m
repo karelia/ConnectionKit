@@ -107,6 +107,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     
     [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
+        // Ignore first URL as it's the directory itself
         if (resolved)
         {
             [contents addObject:aURL];

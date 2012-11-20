@@ -28,7 +28,7 @@
 
 // Override these methods to get setup ready for performing the operation. The request is used to indicate the URL to operate on, and the timeout to apply
 
-- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request    // MUST "discover" the directory itself, first
                   includingPropertiesForKeys:(NSArray *)keys
                                      options:(NSDirectoryEnumerationOptions)mask
                                       client:(id <CK2ProtocolClient>)client;
