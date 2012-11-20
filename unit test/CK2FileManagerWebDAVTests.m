@@ -343,7 +343,7 @@
     
     if ([self setupSession])
     {
-        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/#/demo/"];
+        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
@@ -354,7 +354,7 @@
             else
             {
                 NSUInteger count = [contents count];
-                STAssertTrue(count == 2, @"should have two results");
+                STAssertTrue(count == 13, @"should have 13 results");
                 if (count == 2)
                 {
                     NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];

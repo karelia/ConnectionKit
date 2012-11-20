@@ -5,6 +5,7 @@
 //
 
 #import "CK2WebDAVProtocol.h"
+#import "CKRemoteURL.h"
 
 #define CK2WebDAVLog NSLog
 //#define CK2WebDAVLog(...)
@@ -23,6 +24,9 @@
 {
     if (self = [self initWithRequest:request client:client])
     {
+        _queue = [[NSOperationQueue alloc] init];
+        _queue.name = @"CK2WebDAVProtocol";
+        _queue.suspended = YES;
         _session = [[DAVSession alloc] initWithRootURL:request.URL delegate:self];
         _completionHandler = [handler copy];
     }
@@ -50,11 +54,14 @@
 
 - (void)dealloc;
 {
-    [_session release];
-    [_davRequest release];
+    CK2WebDAVLog(@"dealloced");
+    
     [_completionHandler release];
     [_dataBlock release];
+    [_davRequest release];
     [_progressBlock release];
+    [_queue release];
+    [_session release];
 
     [super dealloc];
 }
@@ -78,15 +85,24 @@
 
     } completionHandler:^(id result) {
 
-        NSURL* root = request.URL;
-        [client protocol:self didDiscoverItemAtURL:root];
-        for (DAVResponseItem *aResponseItem in result)
+        NSURL* root = [NSURL URLWithString:@"/" relativeToURL:request.URL];
+        for (DAVResponseItem* item in result)
         {
-            NSString *path = [aResponseItem href];
-
-            // TODO: add properties
-
-            [client protocol:self didDiscoverItemAtURL:[root URLByAppendingPathComponent:path]];
+            NSString *name = [[item href] lastPathComponent];
+            if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+            {
+                CKRemoteURL* url = [[CKRemoteURL alloc] initWithString:[[root URLByAppendingPathComponent:[item href]] absoluteString]];
+                [url setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey];
+                [url setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey];
+                [url setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey];
+                [item.fileAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
+                    [url setTemporaryResourceValue:obj forKey:key];
+                }];
+                [url setTemporaryResourceValue:[item contentType] forKey:NSURLFileResourceTypeKey]; // 10.7 properties go last because might be nil at runtime
+                [client protocol:self didDiscoverItemAtURL:url];
+                CK2WebDAVLog(@"%@", url);
+                [url release];
+            }
         }
 
         [client protocolDidFinish:self];
@@ -95,9 +111,10 @@
 
     if (self != nil)
     {
-        _davRequest = [[DAVListingRequest alloc] initWithPath:path session:_session delegate:self];
+        DAVRequest* davRequest = [[DAVListingRequest alloc] initWithPath:path session:_session delegate:self];
+        [_queue addOperation:davRequest];
     }
-    
+
     return self;
 }
 
@@ -132,7 +149,7 @@
 - (void)start;
 {
     CK2WebDAVLog(@"started");
-    [_davRequest start];
+    _queue.suspended = NO;
 }
 
 - (void)stop

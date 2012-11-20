@@ -11,8 +11,9 @@
 @interface CK2WebDAVProtocol : CK2Protocol<DAVPutRequestDelegate, DAVSessionDelegate>
 {
 @private
-    DAVSession* _session;
-    DAVRequest* _davRequest;
+    DAVSession*         _session;
+    DAVRequest*         _davRequest;
+    NSOperationQueue*   _queue;
 
     void    (^_completionHandler)(id result);
     void    (^_dataBlock)(NSData *data);
