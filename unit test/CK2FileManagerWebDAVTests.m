@@ -354,14 +354,8 @@
             else
             {
                 NSUInteger count = [contents count];
-                STAssertTrue(count == 13, @"should have 13 results");
-                if (count == 2)
-                {
-                    NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];
-                    STAssertTrue([contents[0] isEqual:file1], @"got file 1");
-                    NSURL* file2 = [self URLForPath:@"/directory/file2.txt"];
-                    STAssertTrue([contents[1] isEqual:file2], @"got file 2");
-                }
+                STAssertTrue(count > 0, @"should have results");
+                STAssertTrue(![contents containsObject:url], @"contents shouldn't include url of directory itself, they were: %@", contents);
             }
             
             running = NO;

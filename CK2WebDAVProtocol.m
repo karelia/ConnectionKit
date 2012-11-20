@@ -58,7 +58,6 @@
     
     [_completionHandler release];
     [_dataBlock release];
-    [_davRequest release];
     [_progressBlock release];
     [_queue release];
     [_session release];
@@ -75,17 +74,9 @@
     NSString *path = [CK2WebDAVProtocol pathOfURLRelativeToHomeDirectory:request.URL];
     if (!path) path = @"/";
 
+    self = [self initWithRequest:request client:client completionHandler:^(id result) {
 
-
-    NSMutableData *totalData = [[NSMutableData alloc] init];
-
-    self = [self initWithRequest:request client:client dataHandler:^(NSData *data) {
-
-        [totalData appendData:data];
-
-    } completionHandler:^(id result) {
-
-        NSURL* root = [NSURL URLWithString:@"/" relativeToURL:request.URL];
+        NSURL* root = [[NSURL URLWithString:@"/" relativeToURL:request.URL] absoluteURL];
         for (DAVResponseItem* item in result)
         {
             NSString *name = [[item href] lastPathComponent];

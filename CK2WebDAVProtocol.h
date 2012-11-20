@@ -12,7 +12,6 @@
 {
 @private
     DAVSession*         _session;
-    DAVRequest*         _davRequest;
     NSOperationQueue*   _queue;
 
     void    (^_completionHandler)(id result);
