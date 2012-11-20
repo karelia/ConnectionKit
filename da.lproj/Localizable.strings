@@ -122,7 +122,7 @@
 "Exhausted all connection types to server. Please contact server administrator" = "Har udtømt alle forbindelsestyper til serveren. Kontakt venligst serveradministratoren";
 
 /* Failed to change to directory
-   Bad ftp command */
+   Bad FTP command */
 
 "Failed to change to directory" = "Kunne ikke skifte mappe";
 

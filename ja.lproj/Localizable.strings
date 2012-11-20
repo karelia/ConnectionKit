@@ -61,7 +61,7 @@
 /* FTP no data streams available */
 "Exhausted all connection types to server. Please contact server administrator" = "すべてのサーバ接続タイプでの接続に失敗しました。サーバ管理者に連絡してください。";
 
-/* Bad ftp command */
+/* Bad FTP command */
 "Failed to change to directory" = "ディレクトリへの移動に失敗しました";
 
 /* couldn't delete the file */

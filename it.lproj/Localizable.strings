@@ -61,7 +61,7 @@
 /* FTP no data streams available */
 "Exhausted all connection types to server. Please contact server administrator" = "Tutte le possibili modalità di connessione sono state provate. Contatta l'amministratore del server.";
 
-/* Bad ftp command */
+/* Bad FTP command */
 "Failed to change to directory" = "Impossibile cambiare la cartella";
 
 /* couldn't delete the file */

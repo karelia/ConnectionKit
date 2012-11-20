@@ -61,7 +61,7 @@
 /* FTP no data streams available */
 "Exhausted all connection types to server. Please contact server administrator" = "Tous les types de connexion au serveur sont épuisés. Veuillez contacter l'administrateur de serveur";
 
-/* Bad ftp command */
+/* Bad FTP command */
 "Failed to change to directory" = "N'a pas modifié en répertoire";
 
 /* couldn't delete the file */
