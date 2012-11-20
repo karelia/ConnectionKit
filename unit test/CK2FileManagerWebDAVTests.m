@@ -386,12 +386,10 @@
     }
 }
 
-- (void)testCreateAndRemoveDirectoryAtURLRealServer
+- (void)testCreateAndRemoveDirectoryOnRealServerAtURL:(NSURL*)url
 {
     if ([self setupSession])
     {
-        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory"];
-
         // delete directory in case it's left from last time
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             [self stop];
@@ -410,7 +408,7 @@
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should have error");
             STAssertTrue([[error domain] isEqual:DAVClientErrorDomain], @"");
-            STAssertEquals([error code], 405, @"should have error 405, got %ld", (long) [error code]);
+            STAssertEquals([error code], (NSInteger) 405, @"should have error 405, got %ld", (long) [error code]);
 
             [self stop];
         }];
@@ -423,6 +421,18 @@
         }];
         [self runUntilStopped];
     }
+}
+
+- (void)testCreateAndRemoveDirectoryAtURLRealServer
+{
+    NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory"];
+    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+}
+
+- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
+{
+    NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory/ck-test-subdirectory"];
+    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
 }
 
 #endif
