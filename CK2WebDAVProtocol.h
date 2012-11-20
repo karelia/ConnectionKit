@@ -8,15 +8,19 @@
 #import "CK2Protocol.h"
 #import <DAVKit/DAVKit.h>
 
+typedef void (^CK2WebDAVCompletionHandler)(id result);
+typedef void (^CK2WebDAVErrorHandler)(NSError* error);
+typedef void (^CK2WebDAVProgressHandler)(NSUInteger bytesWritten);
+
 @interface CK2WebDAVProtocol : CK2Protocol<DAVPutRequestDelegate, DAVSessionDelegate>
 {
 @private
     DAVSession*         _session;
     NSOperationQueue*   _queue;
 
-    void    (^_completionHandler)(id result);
-    void    (^_dataBlock)(NSData *data);
-    void    (^_progressBlock)(NSUInteger bytesWritten);
+    CK2WebDAVCompletionHandler _completionHandler;
+    CK2WebDAVErrorHandler _errorHandler;
+    CK2WebDAVProgressHandler _progressHandler;
 }
 
 @end

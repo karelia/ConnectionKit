@@ -1641,6 +1641,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = Connection;
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
 			};
@@ -1729,6 +1730,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = Connection;
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
 			};
@@ -1767,6 +1769,7 @@
 					AppKit,
 				);
 				PRODUCT_NAME = Connection;
+				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
 				ZERO_LINK = NO;
 			};
