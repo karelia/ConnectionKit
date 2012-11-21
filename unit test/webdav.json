@@ -1,12 +1,7 @@
 [
- [ "PROPFIND ([a-zA-Z0-9\/]+) HTTP\/1.1.*",
-  "HTTP/1.0 401 Unauthorized\r\n",
-  "WWW-Authenticate: Basic realm=\"test\"\r\n\r\n",
-  "«close»"
-  ],
   [
-    "PROPFINDXX ([a-zA-Z0-9\/]+) HTTP\/1.1.*",
-    "HTTP/1.1 207 Multi-Status\r\nDate: Tue, 27 Apr 2010 09:38:30 GMT\r\nServer: Apache/2.2.14 (Unix) DAV/2 mod_ssl/2.2.14 OpenSSL/0.9.8l PHP/5.3.1 mod_perl/2.0.4 Perl/v5.10.1\r\nContent-Length: 706\r\nContent-Type: text/xml; charset=\"utf-8\"\r\n\r\n",
+    "PROPFIND ([a-zA-Z0-9\/]+) HTTP\/1.1.*Authorization: Basic dXNlcjpkZW1v.*",
+    "HTTP/1.1 207 Multi-Status\r\nDate: $date\r\nServer: Apache/2.2.14 (Unix) DAV/2 mod_ssl/2.2.14 OpenSSL/0.9.8l PHP/5.3.1 mod_perl/2.0.4 Perl/v5.10.1\r\nContent-Type: text/xml; charset=\"utf-8\"\r\n\r\n",
 
    "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n",
    "<D:multistatus xmlns:D=\"DAV:\" xmlns:ns0=\"DAV:\">",
@@ -44,8 +39,19 @@
    "</D:multistatus>",
     "«close»"
   ],
-  [
-    ".*",
-    "Unknown blah"
-  ]
+ [
+  "DELETE.*Authorization: Basic dXNlcjpwYXNz.*",
+  "HTTP/1.1 204 No Content\r\n\r\n",
+  "«close»"
+ ],
+ [
+  ".*Authorization: Basic .*",
+  "HTTP/1.0 501 Not Implemented\r\n\r\b",
+  "«close»"
+  ],
+ [ ".*",
+  "HTTP/1.0 401 Unauthorized\r\n",
+  "WWW-Authenticate: Basic realm=\"test\"\r\n\r\n",
+  "«close»"
+  ],
 ]

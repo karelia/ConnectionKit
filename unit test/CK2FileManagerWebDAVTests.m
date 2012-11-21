@@ -126,6 +126,14 @@
 #endif
 }
 
+- (void)pause
+{
+#if TEST_WITH_REAL_SERVER
+    self.running = NO;
+#else
+    [self.server pause];
+#endif
+}
 - (NSArray*)webDAVResponses
 {
     NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
@@ -160,7 +168,7 @@
 
             STAssertNotNil(error, @"should have error");
 
-            [self stop];
+            [self pause];
         }];
         [self runUntilStopped];
 
@@ -187,53 +195,53 @@
 
 - (void)testCreateAndRemoveDirectoryOnRealServerAtURL:(NSURL*)url
 {
-    NSArray* responses = [self webDAVResponses];
-    if ([self setupSessionWithResponses:responses])
-    {
-        // delete directory in case it's left from last time
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            [self stop];
-        }];
-        [self runUntilStopped];
+    // delete directory in case it's left from last time
+    [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self pause];
+    }];
+    [self runUntilStopped];
 
-        // try to make it
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+    // try to make it
+    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
 
-            [self stop];
-        }];
-        [self runUntilStopped];
+        [self pause];
+    }];
+    [self runUntilStopped];
 
-        // try to make it again - should fail
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should have error");
-            STAssertTrue([[error domain] isEqual:DAVClientErrorDomain], @"");
-            STAssertEquals([error code], (NSInteger) 405, @"should have error 405, got %ld", (long) [error code]);
+    // try to make it again - should fail
+    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        STAssertNotNil(error, @"should have error");
+        STAssertTrue([[error domain] isEqual:DAVClientErrorDomain], @"");
+        STAssertEquals([error code], (NSInteger) 405, @"should have error 405, got %ld", (long) [error code]);
 
-            [self stop];
-        }];
-        [self runUntilStopped];
+        [self pause];
+    }];
+    [self runUntilStopped];
 
-        // try to delete directory - should work this time
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-            [self stop];
-        }];
-        [self runUntilStopped];
-    }
+    // try to delete directory - should work this time
+    [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+        [self stop];
+    }];
+    [self runUntilStopped];
 }
 
 - (void)testCreateAndRemoveDirectoryAtURLRealServer
 {
-    NSURL* url = [self URLForPath:@"ck-test-directory"];
-    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+    NSArray* responses = [self webDAVResponses];
+    if ([self setupSessionWithResponses:responses])
+    {
+        NSURL* url = [self URLForPath:@"ck-test-directory"];
+        [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+    }
 }
 
-- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
-{
-    NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
-    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
-}
+//- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
+//{
+//    NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
+//    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+//}
 
 - (void)testCreateAndRemoveFileAtURLRealServer
 {
