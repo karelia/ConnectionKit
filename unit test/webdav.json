@@ -2,7 +2,6 @@
  [ "PROPFIND ([a-zA-Z0-9\/]+) HTTP\/1.1.*",
   "HTTP/1.0 401 Unauthorized\r\n",
   "WWW-Authenticate: Basic realm=\"test\"\r\n\r\n",
-  "Blah\r\n",
   "«close»"
   ],
   [
