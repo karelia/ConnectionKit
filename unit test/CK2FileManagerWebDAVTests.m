@@ -40,25 +40,31 @@
     return [self setupSession];
 }
 
-- (BOOL)setupSessionWithResponses:(NSArray*)responses
+- (BOOL)setupSessionWithResponses:(NSString*)responseSet
 {
 #if TEST_WITH_REAL_SERVER
     return [self setupSessionWithRealServer];
 #else
     self.user = @"user";
     self.password = @"pass";
-    KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithResponses:responses];
-    self.server = [KSMockServer serverWithPort:0 responder:responder];
-    STAssertNotNil(self.server, @"got server");
 
-    if (self.server)
+    NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
+    KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithURL:url set:responseSet];
+    if (responder)
     {
-        [self.server start];
-        BOOL started = self.server.running;
-        STAssertTrue(started, @"server started ok");
+        self.server = [KSMockServer serverWithPort:0 responder:responder];
+        STAssertNotNil(self.server, @"got server");
 
-        [self setupSession];
+        if (self.server)
+        {
+            [self.server start];
+            BOOL started = self.server.running;
+            STAssertTrue(started, @"server started ok");
+            
+            [self setupSession];
+        }
     }
+    
     return self.session != nil;
 #endif
 }
@@ -156,8 +162,7 @@
 
 - (void)testContentsOfDirectoryAtURLRealServer
 {
-    NSArray* responses = [self webDAVResponses];
-    if ([self setupSessionWithResponses:responses])
+    if ([self setupSessionWithResponses:@"standard"])
     {
         NSURL* url = [self URLForPath:@""];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -229,8 +234,7 @@
 
 - (void)testCreateAndRemoveDirectoryAtURLRealServer
 {
-    NSArray* responses = [self webDAVResponses];
-    if ([self setupSessionWithResponses:responses])
+    if ([self setupSessionWithResponses:@"standard"])
     {
         NSURL* url = [self URLForPath:@"ck-test-directory"];
         [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
@@ -245,8 +249,7 @@
 
 - (void)testCreateAndRemoveFileAtURLRealServer
 {
-    NSArray* responses = [self webDAVResponses];
-    if ([self setupSessionWithResponses:responses])
+    if ([self setupSessionWithResponses:@"standard"])
     {
         NSURL* url = [self URLForPath:@"ck-test-file.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
