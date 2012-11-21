@@ -3,6 +3,7 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
+#import "CK2FileManagerBaseTests.h"
 #import "KSMockServer.h"
 #import "KSMockServerRegExResponder.h"
 #import "KSMockServerFTPResponses.h"
@@ -11,10 +12,7 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileManagerFTPTests : SenTestCase<CK2FileManagerDelegate>
-
-@property (strong, nonatomic) KSMockServer* server;
-@property (strong, nonatomic) CK2FileManager* session;
+@interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
 
 @end
 
@@ -27,54 +25,21 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     return @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ];
 }
 
-- (BOOL)setupSessionWithResponses:(NSArray*)responses
+- (BOOL)setup
 {
-    KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithResponses:responses];
-    self.server = [KSMockServer serverWithPort:0 responder:responder];
-    STAssertNotNil(self.server, @"got server");
+    BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"]);
+    self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
 
-    if (self.server)
-    {
-        [self.server start];
-        BOOL started = self.server.running;
-        STAssertTrue(started, @"server started ok");
-
-        self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
-        self.session = [[CK2FileManager alloc] init];
-        self.session.delegate = self;
-    }
-
-    return self.session != nil;
-}
-
-#pragma mark - Delegate
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:@"user" password:@"pass" persistence:NSURLCredentialPersistenceNone];
-    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-}
-
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
-{
-    NSLog(@"> %@", info);
+    return result;
 }
 
 #pragma mark - Tests
 
-- (void)tearDown
-{
-    self.session = nil;
-    self.server = nil;
-}
-- (NSURL*)URLForPath:(NSString*)path
-{
-    NSURL* result = [NSURL URLWithString:[NSString stringWithFormat:@"ftp://127.0.0.1:%ld/%@", self.server.port, path]];
-    return result;
-}
+#if !TEST_WITH_REAL_SERVER
 
 - (void)testContentsOfDirectoryAtURL
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -91,9 +56,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 if (count == 2)
                 {
                     NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];
-                    STAssertTrue([contents[0] isEqual:file1], @"got file 1");
+                    STAssertTrue([contents[0] isEqual:file1], @"got %@ not %@", contents[0], file1);
                     NSURL* file2 = [self URLForPath:@"/directory/file2.txt"];
-                    STAssertTrue([contents[1] isEqual:file2], @"got file 2");
+                    STAssertTrue([contents[1] isEqual:file2], @"got %@ not %@", contents[0], file2);
                 }
             }
             
@@ -106,8 +71,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testContentsOfDirectoryAtURLBadLogin
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
+    if ([self setup])
     {
+        [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
@@ -125,7 +91,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testEnumerateContentsOfURL
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -153,8 +119,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testEnumerateContentsOfURLBadLogin
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
+    if ([self setup])
     {
+        [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
@@ -172,7 +139,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateDirectoryAtURL
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
@@ -187,12 +154,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateDirectoryAtURLAlreadyExists
 {
-    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
-    NSArray* responses = @[[KSMockServerFTPResponses mkdFileExistsResponse]];
-    responses = [responses arrayByAddingObjectsFromArray:[KSMockServerFTPResponses standardResponses]];
-
-    if ([self setupSessionWithResponses:responses])
+    if ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"])
     {
+        [self useResponseSet:@"mkdir fail"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
@@ -208,8 +172,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateDirectoryAtURLBadLogin
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
+    if ([self setup])
     {
+        [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
@@ -224,7 +189,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateFileAtURL
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
@@ -243,7 +208,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateFileAtURL2
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
         NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
@@ -269,7 +234,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testRemoveFileAtURL
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
@@ -283,12 +248,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testRemoveFileAtURLFileDoesnExist
 {
-    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
-    NSArray* responses = @[[KSMockServerFTPResponses deleFileDoesntExistResponse]];
-    responses = [responses arrayByAddingObjectsFromArray:[KSMockServerFTPResponses standardResponses]];
-
-    if ([self setupSessionWithResponses:responses])
+    if ([self setup])
     {
+        [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
@@ -305,8 +267,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testRemoveFileAtURLBadLogin
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
+    if ([self setup])
     {
+        [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
@@ -321,7 +284,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testSetResourceValues
 {
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
@@ -340,4 +303,5 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     
 }
 
+#endif
 @end

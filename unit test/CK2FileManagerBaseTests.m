@@ -59,7 +59,7 @@
             BOOL started = self.server.running;
             STAssertTrue(started, @"server started ok");
 
-            self.url = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%ld", self.server.port]];
+            self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://127.0.0.1:%ld", realURL.scheme, self.server.port]];
 
             [self setupSession];
         }
@@ -103,7 +103,8 @@
 
 - (NSURL*)URLForPath:(NSString*)path
 {
-    NSURL* url = [self.url URLByAppendingPathComponent:path];
+    NSURL* url = [CK2FileManager URLWithPath:path relativeToURL:self.url];
+    //    NSURL* url = [self.url URLByAppendingPathComponent:path];
     return url;
 }
 
