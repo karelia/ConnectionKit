@@ -282,31 +282,5 @@
     [[self client] protocol:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
 }
 
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-// TODO - don't think we need these as we always pass on the challenge from DAVKit, so we shouldn't get called ourselves
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    CK2WebDAVLog(@"use credential called");
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    CK2WebDAVLog(@"continue without credential called");
-
-    [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    CK2WebDAVLog(@"cancel authentication called");
-    
-    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                      code:NSURLErrorUserCancelledAuthentication
-                                                                  userInfo:nil]];
-}
-
 @end
 

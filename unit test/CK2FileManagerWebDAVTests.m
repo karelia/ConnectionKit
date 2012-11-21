@@ -11,14 +11,15 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <DAVKit/DAVKit.h>
 
-#define TEST_WITH_FAKE_SERVER 0
-#define TEST_WITH_REAL_SERVER 1
+#define TEST_WITH_REAL_SERVER 0
 
 @interface CK2FileManagerWebDAVTests : SenTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) KSMockServer* server;
 @property (strong, nonatomic) CK2FileManager* session;
 @property (assign, nonatomic) BOOL running;
+@property (strong, nonatomic) NSString* user;
+@property (strong, nonatomic) NSString* password;
 
 @end
 
@@ -32,8 +33,20 @@
     return self.session != nil;
 }
 
+- (BOOL)setupSessionWithRealServer
+{
+    self.user = @"demo";
+    self.password = @"demo";
+    return [self setupSession];
+}
+
 - (BOOL)setupSessionWithResponses:(NSArray*)responses
 {
+#if TEST_WITH_REAL_SERVER
+    return [self setupSessionWithRealServer];
+#else
+    self.user = @"user";
+    self.password = @"pass";
     KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithResponses:responses];
     self.server = [KSMockServer serverWithPort:0 responder:responder];
     STAssertNotNil(self.server, @"got server");
@@ -46,15 +59,24 @@
 
         [self setupSession];
     }
-
     return self.session != nil;
+#endif
 }
 
 #pragma mark - Delegate
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:@"demo" password:@"demo" persistence:NSURLCredentialPersistenceNone];
-    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    if (challenge.previousFailureCount > 0)
+    {
+        NSLog(@"cancelling authentication");
+        [challenge.sender cancelAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        NSLog(@"authenticating as %@ %@", self.user, self.password);
+        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
+        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    }
 }
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
@@ -71,286 +93,27 @@
 }
 - (NSURL*)URLForPath:(NSString*)path
 {
+#if TEST_WITH_REAL_SERVER
+    NSURL* url = [[NSURL URLWithString:@"https://www.crushftp.com/demo/"] URLByAppendingPathComponent:path];
+#else
     NSURL* result = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%ld/%@", self.server.port, path]];
+#endif
+
     return result;
 }
 
-#if TEST_WITH_FAKE_SERVER
-
-- (void)testContentsOfDirectoryAtURL
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/"];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
-
-            if (error)
-            {
-                STFail(@"got error %@", error);
-            }
-            else
-            {
-                NSUInteger count = [contents count];
-                STAssertTrue(count == 2, @"should have two results");
-                if (count == 2)
-                {
-                    NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];
-                    STAssertTrue([contents[0] isEqual:file1], @"got file 1");
-                    NSURL* file2 = [self URLForPath:@"/directory/file2.txt"];
-                    STAssertTrue([contents[1] isEqual:file2], @"got file 2");
-                }
-            }
-            
-            [self.server stop];
-        }];
-        
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testContentsOfDirectoryAtURLBadLogin
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/"];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
-
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
-            STAssertTrue([contents count] == 0, @"shouldn't get content");
-
-            [self.server stop];
-        }];
-        
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testEnumerateContentsOfURL
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/"];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        NSMutableArray* expectedURLS = [NSMutableArray arrayWithArray:@[
-                                        url,
-                                        [self URLForPath:@"/directory/file1.txt"],
-                                        [self URLForPath:@"/directory/file2.txt"]
-                                        ]];
-
-        [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
-            NSLog(@"got item %@", item);
-            STAssertTrue([expectedURLS containsObject:item], @"got expected item");
-            [expectedURLS removeObject:item];
-        } completionHandler:^(NSError *error) {
-            if (error)
-            {
-                STFail(@"got error %@", error);
-            }
-            [self.server stop];
-        }];
-        
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testEnumerateContentsOfURLBadLogin
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/"];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-        [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
-            STFail(@"shouldn't get any items");
-        } completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
-
-            [self.server stop];
-        }];
-
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testCreateDirectoryAtURL
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            [self.server stop];
-        }];
-    }
-
-    [self.server runUntilStopped];
-}
-
-- (void)testCreateDirectoryAtURLAlreadyExists
-{
-    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
-    NSArray* responses = @[[KSMockServerFTPResponses mkdFileExistsResponse]];
-    responses = [responses arrayByAddingObjectsFromArray:[KSMockServerFTPResponses standardResponses]];
-
-    if ([self setupSessionWithResponses:responses])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
-
-            [self.server stop];
-        }];
-    }
-
-    [self.server runUntilStopped];
-}
-
-- (void)testCreateDirectoryAtURLBadLogin
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
-
-            [self.server stop];
-        }];
-
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testCreateFileAtURL
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            if (bytesWritten == 0)
-            {
-                [self.server stop];
-            }
-        }];
-
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testCreateFileAtURL2
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
-        NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
-        NSError* error = nil;
-        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
-
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            if (bytesWritten == 0)
-            {
-                [self.server stop];
-            }
-        }];
-
-        [self.server runUntilStopped];
-
-        STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
-    }
-}
-
-- (void)testRemoveFileAtURL
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
-        }];
-    }
-
-    [self.server runUntilStopped];
-}
-
-- (void)testRemoveFileAtURLFileDoesnExist
-{
-    // mostly we use the standard responses, but we use an alternative "fileExists" response to the MKD command, to force the operation to fail
-    NSArray* responses = @[[KSMockServerFTPResponses deleFileDoesntExistResponse]];
-    responses = [responses arrayByAddingObjectsFromArray:[KSMockServerFTPResponses standardResponses]];
-
-    if ([self setupSessionWithResponses:responses])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
-
-            [self.server stop];
-        }];
-
-        [self.server runUntilStopped];
-    }
-
-}
-
-- (void)testRemoveFileAtURLBadLogin
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses badLoginResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired, @"should get authentication error, got %@ instead", error);
-
-            [self.server stop];
-        }];
-
-        [self.server runUntilStopped];
-    }
-}
-
-- (void)testSetResourceValues
-{
-    if ([self setupSessionWithResponses:[KSMockServerFTPResponses standardResponses]])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
-        [self.session setResourceValues:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
-        }];
-
-        [self.server runUntilStopped];
-    }
- 
-}
-
-#endif
-
-#if TEST_WITH_REAL_SERVER
 
 - (void)stop
 {
+#if TEST_WITH_REAL_SERVER
     self.running = NO;
+#else
+    [self.server stop];
 }
 
 - (void)runUntilStopped
 {
+#if TEST_WITH_REAL_SERVER
     self.running = YES;
     while (self.running)
     {
@@ -358,14 +121,51 @@
             [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
         }
     }
+#else
+    [self.server runUntilStopped];
+#endif
 }
+
+- (NSArray*)webDAVResponses
+{
+    NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
+    NSError* error = nil;
+    NSData* data = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:&error];
+    NSArray* result = @[];
+    if (data)
+    {
+        result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
+    }
+
+    if (!result)
+    {
+        NSLog(@"error parsing responses file: %@", error);
+    }
+
+    return result;
+}
+
 
 - (void)testContentsOfDirectoryAtURLRealServer
 {
-    if ([self setupSession])
+    NSArray* responses = [self webDAVResponses];
+    if ([self setupSessionWithResponses:responses])
     {
-        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/"];
+        NSURL* url = [self URLForPath:@""];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+
+        // do the test with the wrong password
+        self.password = @"wrong";
+        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+
+            STAssertNotNil(error, @"should have error");
+
+            [self stop];
+        }];
+        [self runUntilStopped];
+
+        // do test with the right password
+        self.password = @"demo";
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             if (error)
@@ -381,14 +181,14 @@
             
             [self stop];
         }];
-
         [self runUntilStopped];
     }
 }
 
 - (void)testCreateAndRemoveDirectoryOnRealServerAtURL:(NSURL*)url
 {
-    if ([self setupSession])
+    NSArray* responses = [self webDAVResponses];
+    if ([self setupSessionWithResponses:responses])
     {
         // delete directory in case it's left from last time
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
@@ -425,21 +225,22 @@
 
 - (void)testCreateAndRemoveDirectoryAtURLRealServer
 {
-    NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory"];
+    NSURL* url = [self URLForPath:@"ck-test-directory"];
     [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
 }
 
 - (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
 {
-    NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-directory/ck-test-subdirectory"];
+    NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
     [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
 }
 
 - (void)testCreateAndRemoveFileAtURLRealServer
 {
-    if ([self setupSession])
+    NSArray* responses = [self webDAVResponses];
+    if ([self setupSessionWithResponses:responses])
     {
-        NSURL* url = [NSURL URLWithString:@"https://www.crushftp.com/demo/ck-test-file.txt"];
+        NSURL* url = [self URLForPath:@"ck-test-file.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         // try to delete in case it's left around from last time - ignore error
