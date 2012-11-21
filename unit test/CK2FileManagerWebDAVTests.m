@@ -3,6 +3,7 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
+#import "CK2FileManagerBaseTests.h"
 #import "KSMockServer.h"
 #import "KSMockServerRegExResponder.h"
 #import "KSMockServerFTPResponses.h"
@@ -13,156 +14,21 @@
 
 #define TEST_WITH_REAL_SERVER 0
 
-@interface CK2FileManagerWebDAVTests : SenTestCase<CK2FileManagerDelegate>
-
-@property (strong, nonatomic) KSMockServer* server;
-@property (strong, nonatomic) CK2FileManager* session;
-@property (assign, nonatomic) BOOL running;
-@property (strong, nonatomic) NSString* user;
-@property (strong, nonatomic) NSString* password;
+@interface CK2FileManagerWebDAVTests : CK2FileManagerBaseTests
 
 @end
 
 @implementation CK2FileManagerWebDAVTests
 
-- (BOOL)setupSession
+- (BOOL)setup
 {
-    self.session = [[CK2FileManager alloc] init];
-    self.session.delegate = self;
-
-    return self.session != nil;
+    return [self setupSessionWithRealURL:[NSURL URLWithString:@"https://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
 }
-
-- (BOOL)setupSessionWithRealServer
-{
-    self.user = @"demo";
-    self.password = @"demo";
-    return [self setupSession];
-}
-
-- (BOOL)setupSessionWithResponses:(NSString*)responseSet
-{
-#if TEST_WITH_REAL_SERVER
-    return [self setupSessionWithRealServer];
-#else
-    self.user = @"user";
-    self.password = @"pass";
-
-    NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
-    KSMockServerRegExResponder* responder = [KSMockServerRegExResponder responderWithURL:url set:responseSet];
-    if (responder)
-    {
-        self.server = [KSMockServer serverWithPort:0 responder:responder];
-        STAssertNotNil(self.server, @"got server");
-
-        if (self.server)
-        {
-            [self.server start];
-            BOOL started = self.server.running;
-            STAssertTrue(started, @"server started ok");
-            
-            [self setupSession];
-        }
-    }
-    
-    return self.session != nil;
-#endif
-}
-
-#pragma mark - Delegate
-- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
-{
-    if (challenge.previousFailureCount > 0)
-    {
-        NSLog(@"cancelling authentication");
-        [challenge.sender cancelAuthenticationChallenge:challenge];
-    }
-    else
-    {
-        NSLog(@"authenticating as %@ %@", self.user, self.password);
-        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
-        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
-    }
-}
-
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
-{
-    NSLog(@"> %@", info);
-}
-
 #pragma mark - Tests
-
-- (void)tearDown
-{
-    self.session = nil;
-    self.server = nil;
-}
-- (NSURL*)URLForPath:(NSString*)path
-{
-#if TEST_WITH_REAL_SERVER
-    NSURL* url = [[NSURL URLWithString:@"https://www.crushftp.com/demo/"] URLByAppendingPathComponent:path];
-#else
-    NSURL* result = [NSURL URLWithString:[NSString stringWithFormat:@"http://127.0.0.1:%ld/%@", self.server.port, path]];
-#endif
-
-    return result;
-}
-
-
-- (void)stop
-{
-#if TEST_WITH_REAL_SERVER
-    self.running = NO;
-#else
-    [self.server stop];
-}
-
-- (void)runUntilStopped
-{
-#if TEST_WITH_REAL_SERVER
-    self.running = YES;
-    while (self.running)
-    {
-        @autoreleasepool {
-            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
-        }
-    }
-#else
-    [self.server runUntilStopped];
-#endif
-}
-
-- (void)pause
-{
-#if TEST_WITH_REAL_SERVER
-    self.running = NO;
-#else
-    [self.server pause];
-#endif
-}
-- (NSArray*)webDAVResponses
-{
-    NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
-    NSError* error = nil;
-    NSData* data = [NSData dataWithContentsOfURL:url options:NSDataReadingUncached error:&error];
-    NSArray* result = @[];
-    if (data)
-    {
-        result = [NSJSONSerialization JSONObjectWithData:data options:0 error:&error];
-    }
-
-    if (!result)
-    {
-        NSLog(@"error parsing responses file: %@", error);
-    }
-
-    return result;
-}
-
 
 - (void)testContentsOfDirectoryAtURLRealServer
 {
-    if ([self setupSessionWithResponses:@"standard"])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@""];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -214,12 +80,9 @@
     }];
     [self runUntilStopped];
 
-#if !TEST_WITH_REAL_SERVER
-    // switch the responder so that the next delete fails
-    NSURL* responderData = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
-    self.server.responder = [KSMockServerRegExResponder responderWithURL:responderData set:@"make fails"];
-#endif
-    
+    // switch the responder so that the next delete fails (has no effect if we're using the real server)
+    [self useResponseSet:@"make fails"];
+
     // try to make it again - should fail
     [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
         STAssertNotNil(error, @"should have error");
@@ -240,22 +103,25 @@
 
 - (void)testCreateAndRemoveDirectoryAtURLRealServer
 {
-    if ([self setupSessionWithResponses:@"standard"])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"ck-test-directory"];
         [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
     }
 }
 
-//- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
-//{
-//    NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
-//    [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
-//}
+- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
+{
+    if ([self setup])
+    {
+        NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
+        [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+    }
+}
 
 - (void)testCreateAndRemoveFileAtURLRealServer
 {
-    if ([self setupSessionWithResponses:@"standard"])
+    if ([self setup])
     {
         NSURL* url = [self URLForPath:@"ck-test-file.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
@@ -299,7 +165,5 @@
 
     }
 }
-
-#endif
 
 @end
