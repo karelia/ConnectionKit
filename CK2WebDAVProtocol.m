@@ -8,8 +8,9 @@
 #import "CKRemoteURL.h"
 #import "CKTransferRecord.h"
 
+#ifndef CK2WebDAVLog
 #define CK2WebDAVLog NSLog
-//#define CK2WebDAVLog(...)
+#endif
 
 @interface CK2WebDAVProtocol()
 
@@ -277,7 +278,7 @@
 
 - (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
 {
-    CK2WebDAVLog(sent ? @"< %@ " : @"> %@", string);
+    CK2WebDAVLog(sent ? @"<-- %@ " : @"--> %@", string);
 
     [[self client] protocol:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
 }

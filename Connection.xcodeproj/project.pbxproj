@@ -255,6 +255,7 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
+		2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnitTests_Prefix.pch; path = ../UnitTests_Prefix.pch; sourceTree = "<group>"; };
 		22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerBaseTests.h; sourceTree = "<group>"; };
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EE8165D23D9005FCC4A /* KSMockServerResponseCollection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponseCollection.m; sourceTree = "<group>"; };
@@ -560,8 +561,7 @@
 		22F6D0E8165A8A2200443CC9 /* MockServer */ = {
 			isa = PBXGroup;
 			children = (
-				22662EE8165D23D9005FCC4A /* KSMockServerResponseCollection.m */,
-				22662EE9165D23D9005FCC4A /* KSMockServerResponseCollection.h */,
+				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				22F6D0EE165A8A2200443CC9 /* KSMockServer.h */,
 				22F6D0EF165A8A2200443CC9 /* KSMockServer.m */,
 				22F6D0F4165A8A2200443CC9 /* KSMockServerConnection.h */,
@@ -572,6 +572,8 @@
 				22F6D0FB165A8A2200443CC9 /* KSMockServerRegExResponder.m */,
 				22F6D0FC165A8A2200443CC9 /* KSMockServerResponder.h */,
 				22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */,
+				22662EE9165D23D9005FCC4A /* KSMockServerResponseCollection.h */,
+				22662EE8165D23D9005FCC4A /* KSMockServerResponseCollection.m */,
 				22F6D0FF165A8A2200443CC9 /* UnitTests */,
 			);
 			path = MockServer;
@@ -1413,6 +1415,7 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1443,6 +1446,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -1467,6 +1471,7 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
