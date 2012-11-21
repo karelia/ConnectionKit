@@ -19,8 +19,12 @@
 
 - (BOOL)setup
 {
-    return [self setupSessionWithRealURL:[NSURL URLWithString:@"http://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
+    BOOL result = [self setupSessionWithRealURL:[NSURL URLWithString:@"https://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
+    STAssertTrue(result, @"failed to setup");
+
+    return result;
 }
+
 #pragma mark - Tests
 
 - (void)testContentsOfDirectoryAtURL

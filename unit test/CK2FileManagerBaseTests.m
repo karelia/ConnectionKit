@@ -64,9 +64,9 @@
             [self setupSession];
         }
     }
-    
-    return self.session != nil;
 #endif
+
+    return self.session != nil;
 }
 
 - (void)useResponseSet:(NSString*)name
