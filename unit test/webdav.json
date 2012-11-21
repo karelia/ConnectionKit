@@ -3,7 +3,12 @@
     {
         "standard": {
             "responses": ["find", "delete", "mkcol", "unauthorized", "unknown" ]
+        },
+
+        "make fails": {
+            "responses": ["find", "delete", "mkcol-fail", "unauthorized", "unknown" ]
         }
+
     },
 
     "responses":
@@ -56,6 +61,33 @@
 
             "commands" : [
                           "HTTP/1.1 204 No Content\r\n\r\n",
+                          "«close»"
+                          ]
+        },
+
+        "delete-fail": {
+            "pattern": "DELETE.*Authorization: Basic dXNlcjpwYXNz.*",
+
+            "commands" : [
+                          "HTTP/1.1 404 Not Found\r\n\r\n",
+                          "«close»"
+                          ]
+        },
+
+        "mkcol": {
+            "pattern": "MKCOL.*Authorization: Basic dXNlcjpwYXNz.*",
+
+            "commands" : [
+                          "HTTP/1.1 204 No Content\r\n\r\n",
+                          "«close»"
+                          ]
+        },
+
+        "mkcol-fail": {
+            "pattern": "MKCOL.*Authorization: Basic dXNlcjpwYXNz.*",
+
+            "commands" : [
+                          "HTTP/1.1 405 Method Not Allowed\r\n\r\n",
                           "«close»"
                           ]
         },

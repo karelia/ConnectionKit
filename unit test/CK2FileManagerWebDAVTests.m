@@ -214,6 +214,12 @@
     }];
     [self runUntilStopped];
 
+#if !TEST_WITH_REAL_SERVER
+    // switch the responder so that the next delete fails
+    NSURL* responderData = [[NSBundle bundleForClass:[self class]] URLForResource:@"webdav" withExtension:@"json"];
+    self.server.responder = [KSMockServerRegExResponder responderWithURL:responderData set:@"make fails"];
+#endif
+    
     // try to make it again - should fail
     [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
         STAssertNotNil(error, @"should have error");
