@@ -6,7 +6,6 @@
 #import "CK2FileManagerBaseTests.h"
 #import "KSMockServer.h"
 #import "KSMockServerRegExResponder.h"
-#import "KSMockServerFTPResponses.h"
 #import "KSMockServerResponseCollection.h"
 
 #import "CK2FileManager.h"
@@ -59,7 +58,8 @@
             BOOL started = self.server.running;
             STAssertTrue(started, @"server started ok");
 
-            self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://127.0.0.1:%ld", realURL.scheme, self.server.port]];
+            NSString* scheme = [realURL.scheme isEqualToString:@"https"] ? @"http" : realURL.scheme;
+            self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://127.0.0.1:%ld", scheme, self.server.port]];
 
             [self setupSession];
         }
@@ -98,7 +98,7 @@
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
 {
-    NSLog(@"> %@", info);
+    NSLog(@"%@ %@", transcript == CKTranscriptReceived ? @"<-- " : @"-->", info);
 }
 
 - (NSURL*)URLForPath:(NSString*)path

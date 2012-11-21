@@ -6,13 +6,10 @@
 #import "CK2FileManagerBaseTests.h"
 #import "KSMockServer.h"
 #import "KSMockServerRegExResponder.h"
-#import "KSMockServerFTPResponses.h"
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <DAVKit/DAVKit.h>
-
-#define TEST_WITH_REAL_SERVER 0
 
 @interface CK2FileManagerWebDAVTests : CK2FileManagerBaseTests
 
@@ -22,11 +19,11 @@
 
 - (BOOL)setup
 {
-    return [self setupSessionWithRealURL:[NSURL URLWithString:@"https://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
+    return [self setupSessionWithRealURL:[NSURL URLWithString:@"http://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
 }
 #pragma mark - Tests
 
-- (void)testContentsOfDirectoryAtURLRealServer
+- (void)testContentsOfDirectoryAtURL
 {
     if ([self setup])
     {
@@ -64,7 +61,7 @@
     }
 }
 
-- (void)testCreateAndRemoveDirectoryOnRealServerAtURL:(NSURL*)url
+- (void)testCreateAndRemoveDirectoryAtURL:(NSURL*)url
 {
     // delete directory in case it's left from last time
     [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
@@ -101,25 +98,25 @@
     [self runUntilStopped];
 }
 
-- (void)testCreateAndRemoveDirectoryAtURLRealServer
+- (void)testCreateAndRemoveDirectoryAtURL
 {
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@"ck-test-directory"];
-        [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
+        [self testCreateAndRemoveDirectoryAtURL:url];
     }
 }
 
-- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURLRealServer
-{
-    if ([self setup])
-    {
-        NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
-        [self testCreateAndRemoveDirectoryOnRealServerAtURL:url];
-    }
-}
+//- (void)testCreateAndRemoveDirectoryAndSubdirectoryAtURL
+//{
+//    if ([self setup])
+//    {
+//        NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-subdirectory"];
+//        [self testCreateAndRemoveDirectoryAtURL:url];
+//    }
+//}
 
-- (void)testCreateAndRemoveFileAtURLRealServer
+- (void)testCreateAndRemoveFileAtURL
 {
     if ([self setup])
     {
@@ -128,7 +125,7 @@
 
         // try to delete in case it's left around from last time - ignore error
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            [self stop];
+            [self pause];
         }];
         [self runUntilStopped];
 
@@ -138,11 +135,12 @@
 
             if (bytesWritten == 0)
             {
-                [self stop];
+                [self pause];
             }
         }];
         [self runUntilStopped];
 
+#if TEST_WITH_REAL_SERVER
         // try to download
         NSURL* downloadURL = [NSURL URLWithString:@"https://demo:demo@www.crushftp.com/demo/ck-test-file.txt"];
         NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL];
@@ -152,9 +150,10 @@
             NSString* received = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             STAssertTrue([received isEqualToString:@"Some test text"], @"string should have matched, was %@", received);
 
-            [self stop];
+            [self pause];
         }];
         [self runUntilStopped];
+#endif
 
         // try to delete - this time we do want to check the error
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {

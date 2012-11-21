@@ -51,7 +51,10 @@
                   Identifier = "URLTests">
                </Test>
                <Test
-                  Identifier = "CK2FileManagerWebDAVTests">
+                  Identifier = "CK2FileManagerFTPTests">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerBaseTests">
                </Test>
             </SkippedTests>
          </TestableReference>
