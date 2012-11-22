@@ -438,6 +438,13 @@
 
 - (void)start;
 {
+    [self requestAuthenticationWithProposedCredential:nil   // client will fill it in for us
+                                 previousFailureCount:0
+                                                error:nil];
+}
+
+- (void)requestAuthenticationWithProposedCredential:(NSURLCredential *)credential previousFailureCount:(NSUInteger)failureCount error:(NSError *)error;
+{
     NSURL *url = [[self request] URL];
     NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
     
@@ -448,10 +455,10 @@
                                                         authenticationMethod:NSURLAuthenticationMethodDefault];
     
     NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:nil // client will fill it in for us
-                                                                                       previousFailureCount:0
+                                                                                         proposedCredential:credential
+                                                                                       previousFailureCount:failureCount
                                                                                             failureResponse:nil
-                                                                                                      error:nil
+                                                                                                      error:error
                                                                                                      sender:self];
     
     [space release];
@@ -544,6 +551,33 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
+    // Swap out existing handler for one that retries after an auth failure
+    void (^oldHandler)(NSError *) = _completionHandler;
+    
+    _completionHandler = ^(NSError *error) {
+        
+        if ([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain])
+        {
+            // Swap back to the original handler...
+            void (^thisBlock)(NSError *) = _completionHandler;
+            _completionHandler = [oldHandler copy];
+            
+            // ...then retry auth
+            [self requestAuthenticationWithProposedCredential:credential
+                                         previousFailureCount:([challenge previousFailureCount] + 1)
+                                                        error:error];
+            
+            [thisBlock release];
+        }
+        else
+        {
+            oldHandler(error);
+        }
+    };
+    
+    _completionHandler = [_completionHandler copy];
+    [oldHandler release];
+    
     _handle = [[CURLHandle alloc] initWithRequest:[self request]
                                        credential:credential
                                          delegate:self];
