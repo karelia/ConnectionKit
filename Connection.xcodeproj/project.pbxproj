@@ -11,6 +11,8 @@
 		220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220526F9165E9DFB00A2BBC9 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92C09F7080B00172CDD /* libcurl.dylib */; };
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		22052703165EA60000A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
 		22662EE4165D1EE4005FCC4A /* CK2FileManagerBaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */; };
@@ -29,7 +31,6 @@
 		22F6D10E165A8A2200443CC9 /* KSMockServerResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0FD165A8A2200443CC9 /* KSMockServerResponder.m */; };
 		22F6D110165A8A2200443CC9 /* KSMockServerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D100165A8A2200443CC9 /* KSMockServerTests.m */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
-		22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
@@ -179,7 +180,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				22FA97FD15090A20001728B8 /* DAVKit.framework in CopyFiles */,
 				22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -363,9 +363,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				22052703165EA60000A2BBC9 /* CURLHandle.framework in Frameworks */,
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */,
+				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
