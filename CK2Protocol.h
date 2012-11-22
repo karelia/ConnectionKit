@@ -35,10 +35,12 @@
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request
               withIntermediateDirectories:(BOOL)createIntermediates
+                        openingAttributes:(NSDictionary *)attributes
                                    client:(id <CK2ProtocolClient>)client;
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request    // the data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
          withIntermediateDirectories:(BOOL)createIntermediates
+                   openingAttributes:(NSDictionary *)attributes
                               client:(id <CK2ProtocolClient>)client
                        progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
 

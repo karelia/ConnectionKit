@@ -358,6 +358,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         return [[protocolClass alloc] initForCreatingDirectoryWithRequest:[manager requestWithURL:url]
                                               withIntermediateDirectories:createIntermediates
+                                                        openingAttributes:attributes
                                                                    client:self];
     }];
 }
@@ -373,6 +374,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         return [[protocolClass alloc] initForCreatingFileWithRequest:request
                                          withIntermediateDirectories:createIntermediates
+                                                   openingAttributes:attributes
                                                               client:self
                                                        progressBlock:progressBlock];
     }];
