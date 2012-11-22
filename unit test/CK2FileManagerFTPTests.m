@@ -159,7 +159,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
+            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
 
             [self.server stop];
@@ -253,7 +253,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:[NSNumber numberWithInt:CURLINFO_RESPONSE_CODE]] longValue];
+            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
 
             [self.server stop];
