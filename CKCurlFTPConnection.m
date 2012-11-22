@@ -114,6 +114,7 @@
             NSMutableURLRequest *request = [[_session baseRequest] mutableCopy];
             [request curl_setDesiredSSLLevel:CURLUSESSL_NONE];
             [_session setBaseRequest:request];
+            [request release];
             
             path = [_session homeDirectoryPath:&error];
         }
