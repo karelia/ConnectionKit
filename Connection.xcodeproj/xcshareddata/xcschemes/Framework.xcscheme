@@ -39,19 +39,7 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "PathTests">
-               </Test>
-               <Test
                   Identifier = "MockServerTests">
-               </Test>
-               <Test
-                  Identifier = "KSMockServerTests">
-               </Test>
-               <Test
-                  Identifier = "URLTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests">
                </Test>
                <Test
                   Identifier = "CK2FileManagerBaseTests">

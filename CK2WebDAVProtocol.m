@@ -76,13 +76,13 @@
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"enumerating directory results");
 
-            NSURL* root = [[NSURL URLWithString:@"/" relativeToURL:request.URL] absoluteURL];
             for (DAVResponseItem* item in result)
             {
                 NSString *name = [[item href] lastPathComponent];
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                 {
-                    CKRemoteURL* url = [[CKRemoteURL alloc] initWithString:[[root URLByAppendingPathComponent:[item href]] absoluteString]];
+
+                    CKRemoteURL* url = [CKRemoteURL URLWithURL:[davRequest concatenatedURLWithPath:[item href]]];
                     [url setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey];
                     [url setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey];
                     [url setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey];
@@ -92,7 +92,6 @@
                     [url setTemporaryResourceValue:[item contentType] forKey:NSURLFileResourceTypeKey]; // 10.7 properties go last because might be nil at runtime
                     [client protocol:self didDiscoverItemAtURL:url];
                     CK2WebDAVLog(@"%@", url);
-                    [url release];
                 }
             }
         };
@@ -130,20 +129,10 @@
         NSData* data = [request HTTPBody];
 
         DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
-        [davRequest setData:data];
+        davRequest.data = data;
+        davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
         [_queue addOperation:davRequest];
         [davRequest release];
-
-        CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)[path pathExtension], NULL);
-        CFStringRef mimeType = NULL;
-        if (type)
-        {
-            mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
-            CFRelease(type);
-        }
-        if (!mimeType) mimeType = CFRetain(CFSTR("application/octet-stream"));
-        [davRequest setDataMIMEType:(NSString *)mimeType];
-        CFRelease(mimeType);
 
         CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
 
@@ -212,6 +201,23 @@
     return path;
 }
 
+- (NSString*)MIMETypeForExtension:(NSString*)extension
+{
+    CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
+    NSString* mimeType = nil;
+    if (type)
+    {
+        mimeType = (NSString*)UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
+        CFRelease(type);
+        [mimeType autorelease];
+    }
+    if (!mimeType)
+    {
+        mimeType = @"application/octet-stream";
+    }
+
+    return mimeType;
+}
 
 #pragma mark Request Delegate
 

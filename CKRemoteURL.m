@@ -19,6 +19,13 @@
     [super dealloc];
 }
 
++ (CKRemoteURL*)URLWithURL:(NSURL*)url
+{
+    CKRemoteURL* result = [[CKRemoteURL alloc] initWithString:[url relativeString] relativeToURL:[url baseURL]];
+
+    return [result autorelease];
+}
+
 #pragma mark Getting and Setting File System Resource Properties
 
 - (BOOL)getResourceValue:(out id *)value forKey:(NSString *)key error:(out NSError **)error;
