@@ -525,7 +525,7 @@
 		
 	[self setIsLoading: YES];
 	
-	NSInteger ret;
+	NSInteger ret = NSRunContinuesResponse;
 	for (;;) {
 		if (!myKeepRunning)
 		{
