@@ -3,6 +3,8 @@
 #import <Cocoa/Cocoa.h>
 #import <Connection/Connection.h>
 
+@class CKHost;
+
 @interface DropletController : NSObject
 {
     IBOutlet NSButton *oCancel;
