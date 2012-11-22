@@ -255,7 +255,7 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
-		2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UnitTests_Prefix.pch; path = ../UnitTests_Prefix.pch; sourceTree = "<group>"; };
+		2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests_Prefix.pch; sourceTree = "<group>"; };
 		22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerBaseTests.h; sourceTree = "<group>"; };
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EE8165D23D9005FCC4A /* KSMockServerResponseCollection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KSMockServerResponseCollection.m; sourceTree = "<group>"; };
@@ -513,6 +513,7 @@
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */,
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
+				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
 			);
 			name = "Unit Tests";
@@ -561,7 +562,6 @@
 		22F6D0E8165A8A2200443CC9 /* MockServer */ = {
 			isa = PBXGroup;
 			children = (
-				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				22F6D0EE165A8A2200443CC9 /* KSMockServer.h */,
 				22F6D0EF165A8A2200443CC9 /* KSMockServer.m */,
 				22F6D0F4165A8A2200443CC9 /* KSMockServerConnection.h */,

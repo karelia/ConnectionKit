@@ -39,7 +39,8 @@
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             STAssertNotNil(error, @"should have error");
-
+            STAssertTrue([error.domain isEqualToString:DAVClientErrorDomain], @"unexpected domain %@", error.domain);
+            STAssertTrue(error.code == 501, @"unexpected code %ld", (long) error.code);
             [self pause];
         }];
         [self runUntilStopped];

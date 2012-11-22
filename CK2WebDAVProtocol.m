@@ -200,6 +200,8 @@
 - (void)stop
 {
     CK2WebDAVLog(@"stopped");
+    _queue.suspended = YES;
+    [_queue cancelAllOperations];
 }
 
 - (NSString*)pathForRequest:(NSURLRequest*)request
