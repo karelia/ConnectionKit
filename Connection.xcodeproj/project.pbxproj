@@ -327,8 +327,8 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
-		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = error.png; sourceTree = "<group>"; };
-		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = finished.png; sourceTree = "<group>"; };
+		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
+		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
 		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
 		79420AD20C91CDE80002B99D /* NSNumber+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSNumber+Connection.h"; sourceTree = "<group>"; };
@@ -517,10 +517,11 @@
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
 				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
+				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
 			);
 			name = "Unit Tests";
-			path = "unit test";
+			path = UnitTests;
 			sourceTree = "<group>";
 		};
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
@@ -695,10 +696,9 @@
 			children = (
 				797CC8C509F861770063FF9B /* Localizable.strings */,
 				79CFD8E409F7071E00172CDD /* Images */,
-				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 				CE9795FC0EC3CF9600FA9C5F /* Framework-Info.plist */,
 			);
-			name = Resources;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
@@ -1332,6 +1332,7 @@
 				795FF5060B0C048700EA9292 /* en */,
 			);
 			name = Droplet.nib;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		797CC8C509F861770063FF9B /* Localizable.strings */ = {
@@ -1366,6 +1367,7 @@
 				CE94B90E1463124A00F90408 /* es */,
 			);
 			name = DropletLauncher.nib;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */ = {
@@ -1383,6 +1385,7 @@
 				CE94B90D1463124A00F90408 /* es */,
 			);
 			name = ConnectionOpenPanel.nib;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		79CFD8CA09F706C700172CDD /* KTLog.nib */ = {
@@ -1400,6 +1403,7 @@
 				CE94B90F1463124A00F90408 /* es */,
 			);
 			name = KTLog.nib;
+			path = Resources;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXVariantGroup section */
@@ -1419,7 +1423,7 @@
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -1428,7 +1432,7 @@
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
@@ -1450,11 +1454,11 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1475,11 +1479,11 @@
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
 				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "unit test/UnitTests_Prefix.pch";
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				INFOPLIST_FILE = "UnitTest-Info.plist";
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1646,7 +1650,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Connection_Prefix.pch;
-				INFOPLIST_FILE = "Framework-Info.plist";
+				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1735,7 +1739,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Connection_Prefix.pch;
-				INFOPLIST_FILE = "Framework-Info.plist";
+				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1774,7 +1778,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Connection_Prefix.pch;
-				INFOPLIST_FILE = "Framework-Info.plist";
+				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
