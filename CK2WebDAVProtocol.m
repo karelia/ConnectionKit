@@ -113,13 +113,29 @@
  the path we were initially given, and calls the completion block we were given.
  */
 
-- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(CK2WebDAVCompletionHandler)completionHandler
+- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates
+                            errorHandler:(CK2WebDAVErrorHandler)errorHandler
+                       completionHandler:(CK2WebDAVCompletionHandler)completionHandler
 {
     CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
         DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
 
         self.completionHandler = completionHandler;
+        self.errorHandler = errorHandler;
+    };
+
+    CK2WebDAVErrorHandler errorBlock = ^(NSError* error) {
+        if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
+        {
+            // ignore failure to create for all but the top directory, on the basis that they may well exist already
+            createDirectoryBlock(nil);
+        }
+        else
+        {
+            // other errors are passed on
+            errorHandler(error);
+        }
     };
 
     BOOL recursed = NO;
@@ -128,7 +144,7 @@
         NSString* parent = [path stringByDeletingLastPathComponent];
         if (![parent isEqualToString:@"/"])
         {
-            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES completionHandler:[createDirectoryBlock copy]];
+            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:[errorBlock copy] completionHandler:[createDirectoryBlock copy]];
             recursed = YES;
         }
     }
@@ -147,10 +163,19 @@
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
         NSString* path = [self pathForRequest:request];
-        [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:createIntermediates completionHandler:^(id result) {
-            CK2WebDAVLog(@"create directory done");
-            [self.client protocolDidFinish:self];
-        }];
+        [self addCreateDirectoryRequestForPath:path
+                   withIntermediateDirectories:createIntermediates
+                                  errorHandler:^(NSError *error) {
+
+                                      CK2WebDAVLog(@"create directory failed");
+                                      [self.client protocol:self didFailWithError:error];
+
+                                  } completionHandler:^(id result) {
+
+                                      CK2WebDAVLog(@"create directory done");
+                                      [self.client protocolDidFinish:self];
+                                  }
+         ];
     };
 
     return self;
@@ -165,28 +190,54 @@
         NSString* path = [self pathForRequest:request];
         NSData* data = [request HTTPBody];
 
-        DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
-        davRequest.data = data;
-        davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
-        [_queue addOperation:davRequest];
-        [davRequest release];
+        CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
+            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
+            davRequest.data = data;
+            davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
+            [_queue addOperation:davRequest];
+            [davRequest release];
 
-        CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
+            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
 
-        self.progressHandler = ^(NSUInteger progress) {
-            [transfer setProgress:progress];
+            self.progressHandler = ^(NSUInteger progress) {
+                [transfer setProgress:progress];
+            };
+
+            self.completionHandler =  ^(id result) {
+                CK2WebDAVLog(@"creating file done");
+                [transfer transferDidFinish:transfer error:nil];
+                [self.client protocolDidFinish:self];
+            };
+
+            self.errorHandler = ^(NSError* error) {
+                CK2WebDAVLog(@"creating file failed");
+                [transfer transferDidFinish:transfer error:error];
+                [self.client protocol:self didFailWithError:error];
+            };
         };
 
-        self.completionHandler =  ^(id result) {
-            CK2WebDAVLog(@"creating file done");
-            [transfer transferDidFinish:transfer error:nil];
-            [self.client protocolDidFinish:self];
-        };
+        if (createIntermediates)
+        {
+            NSString* parent = [path stringByDeletingLastPathComponent];
+            createIntermediates = ![parent isEqualToString:@"/"];
+            if (createIntermediates)
+            {
+                [self addCreateDirectoryRequestForPath:path
+                           withIntermediateDirectories:createIntermediates
+                                          errorHandler:^(NSError *error) {
 
-        self.errorHandler = ^(NSError* error) {
-            CK2WebDAVLog(@"creating file failed");
-            [transfer transferDidFinish:transfer error:error];
-        };
+                                              CK2WebDAVLog(@"create subdirectory failed");
+                                              [self.client protocol:self didFailWithError:error];
+
+                                          } completionHandler:makeFileBlock];
+            }
+        }
+
+        if (!createIntermediates)
+        {
+            makeFileBlock(nil);
+        }
+
    }
 
     return self;
@@ -297,8 +348,10 @@
     {
         self.errorHandler(error);
     }
-
-    [self.client protocol:self didFailWithError:error];
+    else
+    {
+        [self.client protocol:self didFailWithError:error];
+    }
 }
 
 - (void)webDAVRequest:(DAVRequest *)request didSendDataOfLength:(NSInteger)bytesWritten totalBytesWritten:(NSInteger)totalBytesWritten totalBytesExpectedToWrite:(NSInteger)totalBytesExpectedToWrite
