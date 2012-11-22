@@ -16,10 +16,11 @@
 - (void)dealloc
 {
     [_password release];
-    [_url release];
     [_responses release];
     [_session release];
     [_server release];
+    [_transcript release];
+    [_url release];
     [_user release];
 
     [super dealloc];
@@ -29,8 +30,13 @@
 {
     self.session = [[CK2FileManager alloc] init];
     self.session.delegate = self;
-
+    self.transcript = [[[NSMutableString alloc] init] autorelease];
     return self.session != nil;
+}
+
+- (void)tearDown
+{
+    NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
 }
 
 - (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
@@ -96,9 +102,35 @@
     }
 }
 
-- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
 {
-    NSLog(@"%@ %@", transcript == CKTranscriptReceived ? @"<-- " : @"-->", info);
+    NSString* prefix;
+    switch (transcriptType)
+    {
+        case CKTranscriptSent:
+            prefix = @"-->";
+            break;
+
+        case CKTranscriptReceived:
+            prefix = @"<--";
+            break;
+
+        case CKTranscriptData:
+            prefix = @"(d)";
+            break;
+
+        case CKTranscriptInfo:
+            prefix = @"(i)";
+            break;
+
+        default:
+            prefix = @"(?)";
+    }
+
+    @synchronized(self.transcript)
+    {
+        [self.transcript appendFormat:@"%@ %@\n", prefix, info];
+    }
 }
 
 - (NSURL*)URLForPath:(NSString*)path

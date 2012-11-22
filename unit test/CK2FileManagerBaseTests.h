@@ -21,6 +21,7 @@
 @property (strong, nonatomic) NSString* password;
 @property (strong, nonatomic) KSMockServerResponseCollection* responses;
 @property (strong, nonatomic) NSURL* url;
+@property (strong, nonatomic) NSMutableString* transcript;
 
 - (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
 - (void)useResponseSet:(NSString*)name;
