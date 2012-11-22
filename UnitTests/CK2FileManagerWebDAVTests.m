@@ -40,7 +40,7 @@
         [self runUntilStopped];
 
         // try to upload
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             if (bytesWritten == 0)
@@ -84,7 +84,7 @@
     [self runUntilStopped];
 
     // try to make it
-    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
         STAssertNil(error, @"got unexpected error %@", error);
 
         [self pause];
@@ -95,7 +95,7 @@
     [self useResponseSet:@"make fails"];
 
     // try to make it again - should fail
-    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+    [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
         STAssertNotNil(error, @"should have error");
         STAssertTrue([[error domain] isEqual:DAVClientErrorDomain], @"");
         STAssertEquals([error code], (NSInteger) 405, @"should have error 405, got %ld", (long) [error code]);
