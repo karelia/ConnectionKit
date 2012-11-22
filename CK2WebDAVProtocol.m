@@ -94,11 +94,50 @@
                     CK2WebDAVLog(@"%@", url);
                 }
             }
+
+            [self.client protocolDidFinish:self];
         };
 
     }
 
     return self;
+}
+
+/**
+ Create a chain of createDirectory requests.
+ If createIntermediates is NO, we just create one request for the specified path, and set the completion handler
+ for the operation to whatever we were given.
+
+ If it's YES, we recurse down to the root of the path, and make a request which creates the root directory. We then
+ set the completion of this request to create the next level up, and so on, until the final completion which creates
+ the path we were initially given, and calls the completion block we were given.
+ */
+
+- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(CK2WebDAVCompletionHandler)completionHandler
+{
+    CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
+        DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
+        [_queue addOperation:davRequest];
+
+        self.completionHandler = completionHandler;
+    };
+
+    BOOL recursed = NO;
+    if (createIntermediates)
+    {
+        NSString* parent = [path stringByDeletingLastPathComponent];
+        if (![parent isEqualToString:@"/"])
+        {
+            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES completionHandler:[createDirectoryBlock copy]];
+            recursed = YES;
+        }
+    }
+
+    if (!recursed)
+    {
+        createDirectoryBlock(nil);
+    }
+
 }
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client;
@@ -108,12 +147,10 @@
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
         NSString* path = [self pathForRequest:request];
-        DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
-        [_queue addOperation:davRequest];
-
-        self.completionHandler = ^(id result) {
+        [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:createIntermediates completionHandler:^(id result) {
             CK2WebDAVLog(@"create directory done");
-        };
+            [self.client protocolDidFinish:self];
+        }];
     };
 
     return self;
@@ -143,6 +180,7 @@
         self.completionHandler =  ^(id result) {
             CK2WebDAVLog(@"creating file done");
             [transfer transferDidFinish:transfer error:nil];
+            [self.client protocolDidFinish:self];
         };
 
         self.errorHandler = ^(NSError* error) {
@@ -167,6 +205,7 @@
 
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"removing file done");
+            [self.client protocolDidFinish:self];
         };
     }
 
@@ -235,12 +274,19 @@
 {
     CK2WebDAVLog(@"webdav request succeeded");
 
+    // if there is a completion handler set, it is expected to call protocolDidFinish
+    // this lets us build chains of requests where only the final one makes the
+    // didFinish call
     if (self.completionHandler)
     {
         self.completionHandler(result);
     }
 
-    [self.client protocolDidFinish:self];
+    // if not, we call it
+    else
+    {
+        [self.client protocolDidFinish:self];
+    }
 }
 
 - (void)request:(DAVRequest *)aRequest didFailWithError:(NSError *)error;
