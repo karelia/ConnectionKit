@@ -6,8 +6,8 @@
 //  Copyright 2011 Karelia Software. All rights reserved.
 //
 
-#import <Connection/Connection.h>
 
+#import "CKConnectionProtocol.h"
 
 @class CK2SFTPSession;
 
