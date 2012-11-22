@@ -82,7 +82,7 @@
     
     NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
                                                                         port:[[url port] integerValue]
-                                                                    protocol:([_request curl_desiredSSLLevel] > CURLUSESSL_NONE ? @"ftps" : [url scheme])
+                                                                    protocol:([_request curl_desiredSSLLevel] >= CURLUSESSL_CONTROL ? @"ftps" : [url scheme])
                                                                        realm:nil
                                                         authenticationMethod:nil];
     
