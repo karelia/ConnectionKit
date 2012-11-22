@@ -57,7 +57,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  *  FTP:    opening attributes are ignored
  *  SFTP:   Only NSFilePosixPermissions is used, and some servers choose to ignore it
  *  WebDAV: Only CK2FileMIMEType is supported
- *  file:   The full suite of attributes supported by NSFileManager should be available
+ *  file:   The full suite of attributes supported by NSFileManager should be available, but *only* for directories
  *
  *  If you particularly care about setting permissions on a remote server then, a follow up call to -setResourceValues:… is needed.
  */

@@ -69,7 +69,7 @@
     return [self initWithBlock:^{
         
         NSError *error;
-        if ([[NSFileManager defaultManager] createDirectoryAtURL:[request URL] withIntermediateDirectories:createIntermediates attributes:nil error:&error])
+        if ([[NSFileManager defaultManager] createDirectoryAtURL:[request URL] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
         {
             [client protocolDidFinish:self];
         }
