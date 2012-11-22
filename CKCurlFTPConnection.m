@@ -144,6 +144,7 @@
                                                                        realm:[protectionSpace realm]
                                                         authenticationMethod:[protectionSpace authenticationMethod]];
                 [protectionSpace autorelease];
+                // Note: NSURLProtectionSpace is weirdly broken. Calling -protocol will always hand back @"ftps", but somewhere internally it knows it's really FTP. rdar://problem/12741908
                 
                 path = [_session homeDirectoryPath:&error];
             }
