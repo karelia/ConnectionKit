@@ -20,7 +20,6 @@
     NSString            *_currentDirectory;
     
     NSObject                        *_delegate;
-    NSURLAuthenticationChallenge    *_challenge;
 }
 
 @property(nonatomic, copy) NSString *currentDirectory;

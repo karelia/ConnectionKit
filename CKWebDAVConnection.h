@@ -16,7 +16,6 @@
 {
   @private
     BOOL                            _connected;
-    NSURLAuthenticationChallenge    *_challenge;
     DAVSession                      *_session;
     
     NSMapTable                      *_transferRecordsByRequest;
