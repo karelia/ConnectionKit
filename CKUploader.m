@@ -1069,13 +1069,22 @@
         // Can't ask the handle whether it used SSL or not, so instead insist it does, and then retry if fails
         NSURLRequest *request = [_session baseRequest];
         
+        NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
         BOOL fallbackToFTP = ([request curl_desiredSSLLevel] == CURLUSESSL_TRY);
+        
         if (fallbackToFTP);
         {
             NSMutableURLRequest *secureRequest = [request mutableCopy];
             [secureRequest curl_setDesiredSSLLevel:CURLUSESSL_CONTROL];
             [_session setBaseRequest:secureRequest];
             [secureRequest release];
+            
+            protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[protectionSpace host]
+                                                                    port:[protectionSpace port]
+                                                                protocol:@"ftps"    // is FTP otherwise
+                                                                   realm:[protectionSpace realm]
+                                                    authenticationMethod:[protectionSpace authenticationMethod]];
+            [protectionSpace autorelease];
         }
         
         
@@ -1087,7 +1096,6 @@
         
         
         // If the server doesn't support SSL/TLS, fall back to regular if requested
-        NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
         if (!path)
         {
             if (fallbackToFTP &&
