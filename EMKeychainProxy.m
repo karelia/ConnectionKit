@@ -33,7 +33,11 @@ static EMKeychainProxy *sharedProxy = nil;
 + (instancetype)sharedProxy
 {
 	if (!sharedProxy)
+    {
+#ifndef __clang_analyzer__
 		[[EMKeychainProxy alloc] init];
+#endif
+    }
 	return sharedProxy;
 }
 
@@ -94,6 +98,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	void *password = nil;
 	
 	SecKeychainItemRef item = nil;
+#ifndef __clang_analyzer__
 	OSStatus returnStatus = SecKeychainFindGenericPassword(NULL, strlen(serviceName), serviceName, strlen(username), username, &passwordLength, (void **)&password, &item);
 	if (returnStatus != noErr || !item)
 	{
@@ -103,6 +108,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		}
 		return nil;
 	}
+#endif
 	NSString *passwordString = [NSString stringWithCharacters:password length:passwordLength];
 	SecKeychainItemFreeContent(NULL, password);
 
@@ -131,6 +137,7 @@ static EMKeychainProxy *sharedProxy = nil;
 	
 	SecKeychainItemRef item = nil;
 	//0 is kSecAuthenticationTypeAny
+#ifndef __clang_analyzer__
 	OSStatus returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
 	
 	if (returnStatus != noErr && protocol == kSecProtocolTypeFTP)
@@ -139,7 +146,7 @@ static EMKeychainProxy *sharedProxy = nil;
 		protocol = kSecProtocolTypeFTPAccount;		
 		returnStatus = SecKeychainFindInternetPassword(NULL, strlen(server), server, 0, NULL, strlen(username), username, strlen(path), path, port, protocol, 0, &passwordLength, (void **)&password, &item);
 	}
-	
+#endif
 	if (returnStatus != noErr || !item)
 	{
 		if (_logErrors)
