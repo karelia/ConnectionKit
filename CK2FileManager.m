@@ -10,6 +10,9 @@
 #import "CK2Protocol.h"
 
 
+NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
+
+
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
 {
   @public   // HACK so auth trampoline can get at them
@@ -34,11 +37,13 @@
 
 - (id)initDirectoryCreationOperationWithURL:(NSURL *)url
                 withIntermediateDirectories:(BOOL)createIntermediates
+                          openingAttributes:(NSDictionary *)attributes
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 
 - (id)initFileCreationOperationWithRequest:(NSURLRequest *)request
                withIntermediateDirectories:(BOOL)createIntermediates
+                         openingAttributes:(NSDictionary *)attributes
                                    manager:(CK2FileManager *)manager
                              progressBlock:(void (^)(NSUInteger))progressBlock
                            completionBlock:(void (^)(NSError *))block;
@@ -139,27 +144,28 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Creating and Deleting Items
 
-- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(void (^)(NSError *error))handler;
+- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(url);
     
     CK2FileOperation *operation = [[CK2FileOperation alloc] initDirectoryCreationOperationWithURL:url
                                                                       withIntermediateDirectories:createIntermediates
+                                                                                openingAttributes:attributes
                                                                                           manager:self
                                                                                   completionBlock:handler];
     [operation release];
 }
 
-- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPBody:data];
     
-    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
+    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
     [request release];
 }
 
-- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
     
@@ -189,14 +195,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         }
     }
     
-    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates progressBlock:progressBlock];
+    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
     [request release];
 }
 
-- (void)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (void)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithRequest:request
                                                                      withIntermediateDirectories:createIntermediates
+                                                                               openingAttributes:attributes
                                                                                          manager:self
                                                                                    progressBlock:^(NSUInteger bytesWritten) {
                                                                                        
@@ -343,6 +350,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (id)initDirectoryCreationOperationWithURL:(NSURL *)url
                 withIntermediateDirectories:(BOOL)createIntermediates
+                          openingAttributes:(NSDictionary *)attributes
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 {
@@ -356,6 +364,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (id)initFileCreationOperationWithRequest:(NSURLRequest *)request
                withIntermediateDirectories:(BOOL)createIntermediates
+                         openingAttributes:(NSDictionary *)attributes
                                    manager:(CK2FileManager *)manager
                              progressBlock:(void (^)(NSUInteger))progressBlock
                            completionBlock:(void (^)(NSError *))block;

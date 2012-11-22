@@ -14,6 +14,9 @@
 #import "CKConnectionProtocol.h"
 
 
+extern NSString * const CK2FileMIMEType;
+
+
 @protocol CK2FileManagerDelegate;
 
 
@@ -47,15 +50,27 @@
 extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
 
 
-#pragma mark Creating and Deleting Items
+#pragma mark Creating Items
 
-- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates completionHandler:(void (^)(NSError *error))handler;
+/*  In all these methods, we refer to "opening attributes". They apply *only* if the server supports supplying specific attributes at creation time. In practice at present this should give:
+ *
+ *  FTP:    opening attributes are ignored
+ *  SFTP:   Only NSFilePosixPermissions is used, and some servers choose to ignore it
+ *  WebDAV: Only CK2FileMIMEType is supported
+ *  file:   The full suite of attributes supported by NSFileManager should be available
+ *
+ *  If you particularly care about setting permissions on a remote server then, a follow up call to -setResourceValues:… is needed.
+ */
+
+- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
 // 0 bytesWritten indicates writing has ended. This might be because of a failure; if so, error will be filled in
-- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 
-- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 
+
+#pragma mark Deleting Items
 - (void)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
 

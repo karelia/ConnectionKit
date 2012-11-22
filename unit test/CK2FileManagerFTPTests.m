@@ -141,7 +141,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self.server stop];
@@ -157,7 +157,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         [self useResponseSet:@"mkdir fail"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
@@ -175,7 +175,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
@@ -192,7 +192,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             if (bytesWritten == 0)
@@ -216,7 +216,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
 
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             if (bytesWritten == 0)
@@ -308,7 +308,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
@@ -316,7 +316,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
 
         [self useResponseSet:@"default"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self.server pause];
