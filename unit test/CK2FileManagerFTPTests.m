@@ -78,7 +78,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain], @"should get authentication error, got %@ instead", error);
+            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
             [self.server stop];
@@ -127,7 +127,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STFail(@"shouldn't get any items");
         } completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain], @"should get authentication error, got %@ instead", error);
+            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
             [self.server stop];
         }];
@@ -177,7 +177,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain], @"should get authentication error, got %@ instead", error);
+            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
             [self.server stop];
         }];
@@ -272,7 +272,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            STAssertTrue([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain], @"should get authentication error, got %@ instead", error);
+            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
             [self.server stop];
         }];
