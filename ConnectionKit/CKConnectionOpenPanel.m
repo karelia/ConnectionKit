@@ -577,7 +577,7 @@
 		
 		if (!containsObject)
 		{
-            [[self session] createDirectoryAtURL:url withIntermediateDirectories:NO completionHandler:^(NSError *error) {
+            [[self session] createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
                 [[NSOperationQueue mainQueue] addOperationWithBlock:^{
                     if (error)
                     {
