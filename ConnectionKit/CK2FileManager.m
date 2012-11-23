@@ -450,16 +450,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     _cancelled = YES;
     
-    // Tell the protocol as soon as we can.
-    dispatch_set_target_queue(_queue, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0));
-    
-    dispatch_async(_queue, ^{
-        [_protocol stop];
-    });
-    
     // Report cancellation to completion handler. If protocol has already finished or failed, it'll go ignored
     NSError *cancellationError = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorCancelled userInfo:nil];
     [self finishWithError:cancellationError];
+    
+    // Once the cancellation message is queued up, it's safe to tell the protocol as it can't misinterpret the message and issue its own cancellation error
+    [_protocol stop];
     [cancellationError release];
 }
 

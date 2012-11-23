@@ -55,7 +55,7 @@
 - (void)start;
 
 // Your cue to stop doing any more work. Once this is called, the client will ignore you should you choose to continue
-// This method will always be called on the same serial queue as -start. Thus if your work *can* be cancelled, you should avoid blocking the queue in order to be notified in a timely manner
+// Called on an arbitrary thread, so bounce over to your own queue/thread if needed
 - (void)stop;
 
 
