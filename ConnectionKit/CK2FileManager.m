@@ -102,7 +102,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Discovering Directory Contents
 
-- (void)contentsOfDirectoryAtURL:(NSURL *)url
+- (id)contentsOfDirectoryAtURL:(NSURL *)url
       includingPropertiesForKeys:(NSArray *)keys
                          options:(NSDirectoryEnumerationOptions)mask
                completionHandler:(void (^)(NSArray *, NSError *))block;
@@ -110,7 +110,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     NSMutableArray *contents = [[NSMutableArray alloc] init];
     __block BOOL resolved = NO;
     
-    [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
+    id result = [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
         // Ignore first URL as it's the directory itself
         if (resolved)
@@ -127,9 +127,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         block(contents, error);
         [contents release];
     }];
+    
+    return result;
 }
 
-- (void)enumerateContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask usingBlock:(void (^)(NSURL *))block completionHandler:(void (^)(NSError *))completionBlock;
+- (id)enumerateContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask usingBlock:(void (^)(NSURL *))block completionHandler:(void (^)(NSError *))completionBlock;
 {
     NSParameterAssert(url);
     
@@ -139,12 +141,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                     manager:self
                                                                            enumerationBlock:block
                                                                             completionBlock:completionBlock];
-    [operation release];
+    return [operation autorelease];
 }
 
 #pragma mark Creating and Deleting Items
 
-- (void)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
+- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(url);
     
@@ -153,19 +155,20 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                 openingAttributes:attributes
                                                                                           manager:self
                                                                                   completionBlock:handler];
-    [operation release];
+    return [operation autorelease];
 }
 
-- (void)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPBody:data];
     
-    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
+    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
     [request release];
+    return result;
 }
 
-- (void)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
     
@@ -191,15 +194,16 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             [request release];
             if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
             progressBlock(0, error);
-            return;
+            return nil;
         }
     }
     
-    [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
+    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
     [request release];
+    return result;
 }
 
-- (void)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithRequest:request
                                                                      withIntermediateDirectories:createIntermediates
@@ -213,18 +217,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                      
                                                                                      progressBlock(0, error);
                                                                                  }];
-    [operation release];
+    return [operation autorelease];
 }
 
-- (void)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileRemovalOperationWithURL:url manager:self completionBlock:handler];
-    [operation release];
+    return [operation autorelease];
 }
 
 #pragma mark Getting and Setting Attributes
 
-- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(keyedValues);
     
@@ -232,7 +236,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                               values:keyedValues
                                                                                              manager:self
                                                                                      completionBlock:handler];
-    [operation release];
+    return [operation autorelease];
 }
 
 #pragma mark Delegate
@@ -274,6 +278,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 }
 
 #pragma mark Operations
+
+- (void)cancelOperation:(id)operation;
+{
+    [operation cancel];
+}
 
 @end
 
