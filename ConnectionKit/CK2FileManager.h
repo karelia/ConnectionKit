@@ -75,9 +75,13 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Getting and Setting Attributes
-// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
-// All other attributes are ignored
-- (id)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+// It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:
+//
+//  FTP:    Only NSFilePosixPermissions is supported, and not by all servers
+//  SFTP:   Only NSFilePosixPermissions is supported
+//  WebDAV: No attributes are supported
+//  file:   Behaves the same as NSFileManager
+- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
 
 #pragma mark Cancelling Operations

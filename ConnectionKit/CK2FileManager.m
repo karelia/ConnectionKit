@@ -228,7 +228,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Getting and Setting Attributes
 
-- (id)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(keyedValues);
     
@@ -406,7 +406,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForSettingResourceValues:keyedValues
+        return [[protocolClass alloc] initForSettingAttributes:keyedValues
                                                  ofItemWithRequest:[manager requestWithURL:url]
                                                             client:self];
     }];

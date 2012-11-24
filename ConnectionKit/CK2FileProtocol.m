@@ -146,12 +146,12 @@
     }];
 }
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+- (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
         
         NSError *error;
-        if ([[request URL] setResourceValues:keyedValues error:&error])
+        if ([[NSFileManager defaultManager] setAttributes:keyedValues ofItemAtPath:[[request URL] path] error:&error])
         {
             [client protocolDidFinish:self];
         }

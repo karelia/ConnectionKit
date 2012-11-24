@@ -47,7 +47,7 @@
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request
                               client:(id <CK2ProtocolClient>)client;
 
-- (id)initForSettingResourceValues:(NSDictionary *)keyedValues
+- (id)initForSettingAttributes:(NSDictionary *)keyedValues
                  ofItemWithRequest:(NSURLRequest *)request
                             client:(id <CK2ProtocolClient>)client;
 
