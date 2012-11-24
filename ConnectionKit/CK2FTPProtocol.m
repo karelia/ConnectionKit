@@ -401,9 +401,11 @@
               createIntermediateDirectories:NO
                                      client:client];
     }
-    
-    [client protocolDidFinish:nil];
-    return nil;
+    else
+    {
+        self = [self initWithRequest:nil client:client];
+        return self;
+    }
 }
 
 #pragma mark Lifecycle
@@ -438,6 +440,14 @@
 
 - (void)start;
 {
+    // If there's no request, that means we were asked to do nothing possible over FTP. Most likely, storing attributes that aren't POSIX permissions
+    // So jump straight to completion
+    if (![self request])
+    {
+        [[self client] protocolDidFinish:self];
+        return;
+    }
+    
     [self requestAuthenticationWithProposedCredential:nil   // client will fill it in for us
                                  previousFailureCount:0
                                                 error:nil];
