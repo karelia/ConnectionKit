@@ -281,7 +281,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
-- (void)testSetResourceValues
+- (void)testSetAttributes
 {
     if ([self setup])
     {
