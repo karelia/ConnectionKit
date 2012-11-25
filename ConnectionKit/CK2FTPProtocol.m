@@ -100,7 +100,7 @@
                 if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                 {
                     NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
-                    if (responseCode == 500 || responseCode == 502)
+                    if (responseCode == 500 || responseCode == 502 || responseCode == 504)
                     {
                         [client protocolDidFinish:self];
                         return;
