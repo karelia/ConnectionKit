@@ -105,6 +105,13 @@
                         [client protocolDidFinish:self];
                         return;
                     }
+                    else if (responseCode == 550)
+                    {
+                        // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                        error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                                    code:NSFileWriteUnknownError
+                                                userInfo:@{ NSUnderlyingErrorKey : error }];
+                    }
                 }
             }
             
