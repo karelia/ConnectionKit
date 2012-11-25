@@ -357,6 +357,25 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)testSetAttributesOperationNotPermitted
+{
+    if ([self setup])
+    {
+        [self useResponseSet:@"chmod not permitted"];
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain] && ([error code] == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
+                                                                                 [error code] == NSFileWriteNoPermissionError),
+                         @"should get error");
+            [self.server stop];
+        }];
+        
+        [self.server runUntilStopped];
+    }
+}
+
 - (void)testBadLoginThenGoodLogin
 {
     if ([self setup])
