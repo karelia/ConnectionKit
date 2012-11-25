@@ -323,6 +323,40 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     
 }
 
+- (void)testSetAttributesCHMODNotUnderstood
+{
+    if ([self setup])
+    {
+        [self useResponseSet:@"chmod not understood"];
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self.server stop];
+        }];
+
+        [self.server runUntilStopped];
+    }
+}
+
+- (void)testSetAttributesCHMODUnsupported
+{
+    if ([self setup])
+    {
+        [self useResponseSet:@"chmod unsupported"];
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self.server stop];
+        }];
+
+        [self.server runUntilStopped];
+    }
+}
+
 - (void)testBadLoginThenGoodLogin
 {
     if ([self setup])
