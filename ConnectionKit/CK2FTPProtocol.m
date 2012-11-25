@@ -11,6 +11,7 @@
 #import "CK2FileManager.h"
 #import "CKRemoteURL.h"
 
+#import <CurlHandle/CURLHandle.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
 #import <sys/dirent.h>
@@ -93,6 +94,21 @@
         
         if (error)
         {
+            // CHMOD failures for unsupported or unrecognized command should go ignored
+            if ([[[request curl_postTransferCommands] lastObject] hasPrefix:@"SITE CHMOD"])
+            {
+                if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                {
+                    NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
+                    if (responseCode == 500 || responseCode == 502)
+                    {
+                        [client protocolDidFinish:self];
+                        return;
+                    }
+                }
+            }
+            
+            
             [client protocol:self didFailWithError:error];
         }
         else
