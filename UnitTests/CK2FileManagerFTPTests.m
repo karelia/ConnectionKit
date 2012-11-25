@@ -281,6 +281,27 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)testSetUnknownAttributes
+{
+    if ([self setup])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSDictionary* values = @{ @"test" : @"test" };
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self.server stop];
+        }];
+        
+        [self.server runUntilStopped];
+    }
+    
+    
+    //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
+    //// All other attributes are ignored
+    //- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+    
+}
+
 - (void)testSetAttributes
 {
     if ([self setup])
