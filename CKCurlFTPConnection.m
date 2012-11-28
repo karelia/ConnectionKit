@@ -108,7 +108,7 @@
         NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
         BOOL fallbackToFTP = ([request curl_desiredSSLLevel] == CURLUSESSL_TRY);
         
-        if (fallbackToFTP);
+        if (fallbackToFTP)
         {
             NSMutableURLRequest *secureRequest = [request mutableCopy];
             [secureRequest curl_setDesiredSSLLevel:CURLUSESSL_CONTROL];

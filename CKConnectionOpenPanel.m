@@ -52,7 +52,7 @@
     NSParameterAssert([request URL]);
     
     
-    if ([super initWithWindowNibName: @"ConnectionOpenPanel"])
+    if ([self initWithWindowNibName: @"ConnectionOpenPanel"])
 	{
 		id <CKPublishingConnection> connection = [[CKConnectionRegistry sharedConnectionRegistry] connectionWithRequest:request];
         if (connection)
