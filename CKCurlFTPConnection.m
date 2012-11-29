@@ -13,7 +13,7 @@
 #import <sys/dirent.h>
 
 
-@interface CKCurlFTPConnection () <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
+@interface CKCurlFTPConnection () <NSURLAuthenticationChallengeSender>
 @end
 
 
