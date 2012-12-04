@@ -4,7 +4,6 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-#import "KMSServer.h"
 
 #import "CK2FileManager.h"
 
@@ -47,11 +46,11 @@
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            [self.server stop];
+            [self stop];
         }];
     }
 
-    [self.server runUntilStopped];
+    [self runUntilStopped];
 }
 
 @end

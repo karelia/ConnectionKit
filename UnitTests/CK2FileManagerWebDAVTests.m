@@ -4,8 +4,6 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-
-#import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <DAVKit/DAVKit.h>
 

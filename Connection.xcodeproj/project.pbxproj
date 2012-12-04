@@ -22,6 +22,7 @@
 		224AB381166E500E0066B1C6 /* KMSResponseCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB37A166E500E0066B1C6 /* KMSResponseCollection.m */; };
 		224AB382166E500E0066B1C6 /* KMSServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB37C166E500E0066B1C6 /* KMSServer.m */; };
 		224AB387166E501C0066B1C6 /* KMSTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB386166E501C0066B1C6 /* KMSTests.m */; };
+		224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB389166E52680066B1C6 /* KMSTestCase.m */; };
 		22662EE4165D1EE4005FCC4A /* CK2FileManagerBaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */; };
 		22662EF3165D2EEC005FCC4A /* ftp.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF1165D2EEC005FCC4A /* ftp.json */; };
 		22662EF4165D2EEC005FCC4A /* webdav.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF2165D2EEC005FCC4A /* webdav.json */; };
@@ -212,6 +213,8 @@
 		224AB37B166E500E0066B1C6 /* KMSServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSServer.h; sourceTree = "<group>"; };
 		224AB37C166E500E0066B1C6 /* KMSServer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSServer.m; sourceTree = "<group>"; };
 		224AB386166E501C0066B1C6 /* KMSTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTests.m; sourceTree = "<group>"; };
+		224AB388166E52680066B1C6 /* KMSTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTestCase.h; sourceTree = "<group>"; };
+		224AB389166E52680066B1C6 /* KMSTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTestCase.m; sourceTree = "<group>"; };
 		22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerBaseTests.h; sourceTree = "<group>"; };
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EF1165D2EEC005FCC4A /* ftp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ftp.json; sourceTree = "<group>"; };
@@ -493,6 +496,8 @@
 				224AB37A166E500E0066B1C6 /* KMSResponseCollection.m */,
 				224AB37B166E500E0066B1C6 /* KMSServer.h */,
 				224AB37C166E500E0066B1C6 /* KMSServer.m */,
+				224AB388166E52680066B1C6 /* KMSTestCase.h */,
+				224AB389166E52680066B1C6 /* KMSTestCase.m */,
 				22F6D0FF165A8A2200443CC9 /* UnitTests */,
 			);
 			path = MockServer;
@@ -1016,6 +1021,7 @@
 				224AB381166E500E0066B1C6 /* KMSResponseCollection.m in Sources */,
 				224AB382166E500E0066B1C6 /* KMSServer.m in Sources */,
 				224AB387166E501C0066B1C6 /* KMSTests.m in Sources */,
+				224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
