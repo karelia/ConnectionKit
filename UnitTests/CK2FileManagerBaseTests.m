@@ -32,7 +32,7 @@
     self.url = realURL;
 #else
     NSString* scheme = [realURL.scheme isEqualToString:@"https"] ? @"http" : realURL.scheme;
-    [super setupSessionWithScheme:scheme responses:responsesFile];
+    [super setupServerWithScheme:scheme responses:responsesFile];
 #endif
 
     [self setupSession];
