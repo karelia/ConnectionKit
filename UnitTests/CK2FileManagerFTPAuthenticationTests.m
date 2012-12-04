@@ -46,11 +46,11 @@
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            [self stop];
+            [self pause];
         }];
     }
 
-    [self runUntilStopped];
+    [self runUntilPaused];
 }
 
 @end

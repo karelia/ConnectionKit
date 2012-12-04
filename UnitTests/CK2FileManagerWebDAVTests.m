@@ -33,7 +33,7 @@
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             [self pause];
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
 
         // try to upload
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
@@ -44,7 +44,7 @@
                 [self pause];
             }
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
 
 #if TEST_WITH_REAL_SERVER
         // try to download
@@ -58,15 +58,15 @@
 
             [self pause];
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
 #endif
 
         // try to delete - this time we do want to check the error
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
-            [self stop];
+            [self pause];
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
         
     }
 }
@@ -77,7 +77,7 @@
     [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
         [self pause];
     }];
-    [self runUntilStopped];
+    [self runUntilPaused];
 
     // try to make it
     [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
@@ -85,7 +85,7 @@
 
         [self pause];
     }];
-    [self runUntilStopped];
+    [self runUntilPaused];
 
     // switch the responder so that the next delete fails (has no effect if we're using the real server)
     [self useResponseSet:@"make fails"];
@@ -98,14 +98,14 @@
 
         [self pause];
     }];
-    [self runUntilStopped];
+    [self runUntilPaused];
 
     // try to delete directory - should work this time
     [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
         STAssertNil(error, @"got unexpected error %@", error);
-        [self stop];
+        [self pause];
     }];
-    [self runUntilStopped];
+    [self runUntilPaused];
 }
 
 #pragma mark - Tests
@@ -126,7 +126,7 @@
             STAssertTrue(error.code == 501, @"unexpected code %ld", (long) error.code);
             [self pause];
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
 
         // do test with the right password
         self.password = @"demo";
@@ -143,9 +143,9 @@
                 STAssertTrue(![contents containsObject:url], @"contents shouldn't include url of directory itself, they were: %@", contents);
             }
             
-            [self stop];
+            [self pause];
         }];
-        [self runUntilStopped];
+        [self runUntilPaused];
     }
 }
 

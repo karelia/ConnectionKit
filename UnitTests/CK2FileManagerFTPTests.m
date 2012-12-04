@@ -55,10 +55,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 }
             }
             
-            [self.server stop];
+            [self pause];
         }];
         
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -75,10 +75,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
-            [self.server stop];
+            [self pause];
         }];
         
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -103,10 +103,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             {
                 STFail(@"got error %@", error);
             }
-            [self.server stop];
+            [self pause];
         }];
         
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -123,10 +123,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -138,11 +138,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            [self.server stop];
+            [self pause];
         }];
     }
 
-    [self.server runUntilStopped];
+    [self runUntilPaused];
 }
 
 - (void)testCreateDirectoryAtURLAlreadyExists
@@ -156,11 +156,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
 
-            [self.server stop];
+            [self pause];
         }];
     }
 
-    [self.server runUntilStopped];
+    [self runUntilPaused];
 }
 
 - (void)testCreateDirectoryAtURLBadLogin
@@ -173,10 +173,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -191,11 +191,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             if (bytesWritten == 0)
             {
-                [self.server stop];
+                [self pause];
             }
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -215,11 +215,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             if (bytesWritten == 0)
             {
-                [self.server stop];
+                [self pause];
             }
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
 
         STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
     }
@@ -232,11 +232,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
+            [self pause];
         }];
     }
 
-    [self.server runUntilStopped];
+    [self runUntilPaused];
 }
 
 - (void)testRemoveFileAtURLFileDoesnExist
@@ -250,10 +250,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
 
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 
 }
@@ -268,10 +268,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -283,10 +283,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSDictionary* values = @{ @"test" : @"test" };
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
+            [self pause];
         }];
         
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
     
     
@@ -304,10 +304,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 
 
@@ -327,10 +327,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
             STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -344,10 +344,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
             STAssertNil(error, @"got unexpected error %@", error);
-            [self.server stop];
+            [self pause];
         }];
 
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -363,10 +363,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain] && ([error code] == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
                                                                                  [error code] == NSFileWriteNoPermissionError),
                          @"should get error");
-            [self.server stop];
+            [self pause];
         }];
         
-        [self.server runUntilStopped];
+        [self runUntilPaused];
     }
 }
 
@@ -391,7 +391,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
     }
 
-    [self.server runUntilStopped];
+    [self runUntilPaused];
 }
 
 #endif

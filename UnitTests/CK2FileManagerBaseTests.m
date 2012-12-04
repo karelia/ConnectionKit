@@ -100,7 +100,7 @@
 }
 
 
-- (void)runUntilStopped
+- (void)runUntilPaused
 {
 #if TEST_WITH_REAL_SERVER
     self.running = YES;
@@ -111,16 +111,7 @@
         }
     }
 #else
-    [super runUntilStopped];
-#endif
-}
-
-- (void)stop
-{
-#if TEST_WITH_REAL_SERVER
-    self.running = NO;
-#else
-    [super stop];
+    [super runUntilPaused];
 #endif
 }
 
