@@ -4,9 +4,9 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-#import "KSMockServer.h"
-#import "KSMockServerRegExResponder.h"
-#import "KSMockServerResponseCollection.h"
+#import "KMSServer.h"
+#import "KMSRegExResponder.h"
+#import "KMSResponseCollection.h"
 
 #import "CK2FileManager.h"
 #import <DAVKit/DAVKit.h>
@@ -51,11 +51,11 @@
     self.password = @"pass";
 
     NSURL* url = [[NSBundle bundleForClass:[self class]] URLForResource:responsesFile withExtension:@"json"];
-    self.responses = [KSMockServerResponseCollection collectionWithURL:url];
-    KSMockServerRegExResponder* responder = [self.responses responderWithName:@"default"];
+    self.responses = [KMSResponseCollection collectionWithURL:url];
+    KMSRegExResponder* responder = [self.responses responderWithName:@"default"];
     if (responder)
     {
-        self.server = [KSMockServer serverWithPort:0 responder:responder];
+        self.server = [KMSServer serverWithPort:0 responder:responder];
         STAssertNotNil(self.server, @"got server");
 
         if (self.server)
@@ -78,7 +78,7 @@
 - (void)useResponseSet:(NSString*)name
 {
 #if !TEST_WITH_REAL_SERVER
-    KSMockServerResponder* responder = [self.responses responderWithName:name];
+    KMSResponder* responder = [self.responses responderWithName:name];
     if (responder)
     {
         self.server.responder = responder;

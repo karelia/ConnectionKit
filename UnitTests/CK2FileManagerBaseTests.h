@@ -9,17 +9,17 @@
 
 #define TEST_WITH_REAL_SERVER 0
 
-@class KSMockServer;
-@class KSMockServerResponseCollection;
+@class KMSServer;
+@class KMSResponseCollection;
 
 @interface CK2FileManagerBaseTests : SenTestCase<CK2FileManagerDelegate>
 
-@property (strong, nonatomic) KSMockServer* server;
+@property (strong, nonatomic) KMSServer* server;
 @property (strong, nonatomic) CK2FileManager* session;
 @property (assign, nonatomic) BOOL running;
 @property (strong, nonatomic) NSString* user;
 @property (strong, nonatomic) NSString* password;
-@property (strong, nonatomic) KSMockServerResponseCollection* responses;
+@property (strong, nonatomic) KMSResponseCollection* responses;
 @property (strong, nonatomic) NSURL* url;
 @property (strong, nonatomic) NSMutableString* transcript;
 

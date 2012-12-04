@@ -4,8 +4,6 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-#import "KSMockServer.h"
-#import "KSMockServerRegExResponder.h"
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>

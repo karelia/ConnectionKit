@@ -4,8 +4,7 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-#import "KSMockServer.h"
-#import "KSMockServerRegExResponder.h"
+#import "KMSServer.h"
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
@@ -18,11 +17,6 @@
 @implementation CK2FileManagerFTPTests
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
-
-+ (NSArray*)ftpInitialResponse
-{
-    return @[InitialResponseKey, @"220 $address FTP server ($server) ready.\r\n" ];
-}
 
 - (BOOL)setup
 {

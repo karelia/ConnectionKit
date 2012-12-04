@@ -4,7 +4,7 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
-#import "KSMockServer.h"
+#import "KMSServer.h"
 
 #import "CK2FileManager.h"
 
