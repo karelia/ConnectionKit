@@ -128,5 +128,33 @@
     }
 }
 
+- (void)testEnumerateContentsOfDirectoryAtURL
+{
+    if ([self setupSession])
+    {
+        if ([self makeTestContents])
+        {
+            NSMutableArray* expected = [@[ @"CK2FileManagerFileTests", @"test.txt", @"subfolder" ] mutableCopy];
+            NSURL* url = [self temporaryFolder];
+            NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+            [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
+
+                NSString* name = [url lastPathComponent];
+                STAssertTrue([expected containsObject:name], @"unexpected name %@", name);
+                [expected removeObject:name];
+
+            } completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+
+            [self runUntilPaused];
+
+            STAssertTrue([expected count] == 0, @"shouldn't have any items left");
+            [expected release];
+        }
+    }
+}
+
 @end
 
