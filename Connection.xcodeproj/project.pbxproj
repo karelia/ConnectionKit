@@ -15,6 +15,12 @@
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD79B1509019B00748655 /* Cocoa.framework */; };
+		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
+		22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
+		22407D5B166FA12500E1EAD4 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
+		22407D5C166FA13400E1EAD4 /* libssl.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
+		22407D5E166FA17600E1EAD4 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
+		22407D5F166FA17B00E1EAD4 /* libcrypto.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
 		224AB37D166E500E0066B1C6 /* KMSConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB372166E500E0066B1C6 /* KMSConnection.m */; };
 		224AB37E166E500E0066B1C6 /* KMSListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB374166E500E0066B1C6 /* KMSListener.m */; };
 		224AB37F166E500E0066B1C6 /* KMSRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB376166E500E0066B1C6 /* KMSRegExResponder.m */; };
@@ -31,7 +37,6 @@
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		22F6D103165A8A2200443CC9 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
 		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -182,7 +187,9 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				22407D5F166FA17B00E1EAD4 /* libcrypto.dylib in CopyFiles */,
 				22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */,
+				22407D5C166FA13400E1EAD4 /* libssl.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -200,6 +207,8 @@
 		220AD79B1509019B00748655 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = Library/Frameworks/Cocoa.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
+		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = SFTP/libssl.dylib; sourceTree = "<group>"; };
+		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = SFTP/libcrypto.dylib; sourceTree = "<group>"; };
 		2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests_Prefix.pch; sourceTree = "<group>"; };
 		224AB371166E500E0066B1C6 /* KMSConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSConnection.h; sourceTree = "<group>"; };
 		224AB372166E500E0066B1C6 /* KMSConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSConnection.m; sourceTree = "<group>"; };
@@ -372,7 +381,10 @@
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				220AD79C1509019B00748655 /* Cocoa.framework in Frameworks */,
+				22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */,
 				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
+				22407D5B166FA12500E1EAD4 /* libssl.dylib in Frameworks */,
+				22407D5E166FA17600E1EAD4 /* libcrypto.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -431,17 +443,19 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
+				79FB807109F74185006E7D11 /* Carbon.framework */,
+				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				27448C371458100D00EB086F /* DAVKit.framework */,
+				22407D5D166FA17600E1EAD4 /* libcrypto.dylib */,
 				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
 				D3053AAC0DE60D6B008646CE /* libicucore.A.dylib */,
 				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
-				79CFD92D09F7080B00172CDD /* libz.dylib */,
-				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
-				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
-				79FB807109F74185006E7D11 /* Carbon.framework */,
-				79CFD93609F7084000172CDD /* Security.framework */,
-				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
 				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
+				22407D5A166FA12500E1EAD4 /* libssl.dylib */,
+				79CFD92D09F7080B00172CDD /* libz.dylib */,
+				79CFD93609F7084000172CDD /* Security.framework */,
+				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
 			);
 			name = "Linked Frameworks";
 			sourceTree = "<group>";
@@ -1012,7 +1026,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */,
-				22F6D103165A8A2200443CC9 /* CK2FileManagerFTPTests.m in Sources */,
 				22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */,
 				2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */,
 				22662EE4165D1EE4005FCC4A /* CK2FileManagerBaseTests.m in Sources */,
@@ -1026,6 +1039,7 @@
 				224AB387166E501C0066B1C6 /* KMSCollectionTests.m in Sources */,
 				224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */,
 				224AB38C166E587F0066B1C6 /* KMSManualTests.m in Sources */,
+				22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1172,6 +1186,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/SFTP\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1197,6 +1215,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/SFTP\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
@@ -1221,6 +1243,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "\"@loader_path/../Frameworks\"";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"$(SRCROOT)/SFTP\"",
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
