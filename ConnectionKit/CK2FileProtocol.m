@@ -19,7 +19,8 @@
 {
     if (self = [self init])
     {
-        _block = [_block copy];
+        NSAssert(block != nil, @"should have a valid block");
+        _block = [block copy];
     }
     
     return self;
