@@ -11,7 +11,9 @@
 @interface CK2FileManagerBaseTests : KMSTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) CK2FileManager* session;
+@property (assign, nonatomic) BOOL useMockServer;
 
+- (BOOL)setupSession;
 - (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
 
 @end

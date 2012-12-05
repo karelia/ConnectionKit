@@ -31,6 +31,7 @@
     self.password = @"demo";
     self.url = realURL;
 #else
+    self.useMockServer = YES;
     NSString* scheme = [realURL.scheme isEqualToString:@"https"] ? @"http" : realURL.scheme;
     [super setupServerWithScheme:scheme responses:responsesFile];
 #endif
@@ -102,26 +103,32 @@
 
 - (void)runUntilPaused
 {
-#if TEST_WITH_REAL_SERVER
-    self.running = YES;
-    while (self.running)
+    if (self.useMockServer)
     {
-        @autoreleasepool {
-            [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
+        [super runUntilPaused];
+    }
+    else
+    {
+        self.running = YES;
+        while (self.running)
+        {
+            @autoreleasepool {
+                [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
+            }
         }
     }
-#else
-    [super runUntilPaused];
-#endif
 }
 
 - (void)pause
 {
-#if TEST_WITH_REAL_SERVER
-    self.running = NO;
-#else
-    [super pause];
-#endif
+    if (self.useMockServer)
+    {
+        [super pause];
+    }
+    else
+    {
+        self.running = NO;
+    }
 }
 
 
