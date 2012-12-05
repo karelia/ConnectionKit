@@ -122,7 +122,7 @@
 "Exhausted all connection types to server. Please contact server administrator" = "已嘗試與此伺服器的所有連線類型。請與伺服器管理員聯繫。";
 
 /* Failed to change to directory
-   Bad ftp command */
+   Bad FTP command */
 
 "Failed to change to directory" = "無法更改目錄";
 

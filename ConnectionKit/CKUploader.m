@@ -41,7 +41,6 @@
 {
 @private
     CURLFTPSession      *_session;
-    NSURL               *_URL;
     NSOperationQueue    *_queue;
     BOOL                _started;
     
@@ -148,6 +147,8 @@
 @synthesize options = _options;
 @synthesize rootTransferRecord = _rootRecord;
 @synthesize baseTransferRecord = _baseRecord;
+
+- (NSURLRequest *)request; { return _request; }
 
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 {
@@ -886,8 +887,6 @@
         // HACK clear out super's connection ref
         [self setValue:nil forKey:@"connection"];
         
-        _URL = [[request URL] copy];
-        
         _queue = [[NSOperationQueue alloc] init];
         [_queue setMaxConcurrentOperationCount:1];
         [_queue setSuspended:YES];  // we'll resume once authenticated
@@ -942,7 +941,6 @@
 {
     [_session setDelegate:nil];
     [_session release];
-    [_URL release];
     [_queue release];
     
     [super dealloc];
@@ -953,12 +951,14 @@
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
     if (!_started && !([self options] & CKUploadingDryRun))
-    {
-        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[_URL host]
-                                                                            port:[[_URL port] integerValue]
-                                                                        protocol:NSURLProtectionSpaceFTP
+    {        
+        NSURL *url = [[self request] URL];
+        
+        NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
+                                                                            port:[[url port] integerValue]
+                                                                        protocol:([[self request] curl_desiredSSLLevel] >= CURLUSESSL_CONTROL ? @"ftps" : [url scheme])
                                                                            realm:nil
-                                                            authenticationMethod:NSURLAuthenticationMethodDefault];
+                                                            authenticationMethod:nil];
         
         NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
         
@@ -1086,14 +1086,68 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
+        // Can't ask the handle whether it used SSL or not, so instead insist it does, and then retry if fails
+        NSURLRequest *request = [_session baseRequest];
+        
+        NSURLProtectionSpace *protectionSpace = [challenge protectionSpace];
+        BOOL fallbackToFTP = ([request curl_desiredSSLLevel] == CURLUSESSL_TRY);
+        
+        if (fallbackToFTP)
+        {
+            NSMutableURLRequest *secureRequest = [request mutableCopy];
+            [secureRequest curl_setDesiredSSLLevel:CURLUSESSL_CONTROL];
+            [_session setBaseRequest:secureRequest];
+            [secureRequest release];
+            
+            protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[protectionSpace host]
+                                                                    port:[protectionSpace port]
+                                                                protocol:@"ftps"    // is FTP otherwise
+                                                                   realm:[protectionSpace realm]
+                                                    authenticationMethod:[protectionSpace authenticationMethod]];
+            [protectionSpace autorelease];
+        }
+        
+        
+        // Try it
         [_session useCredential:credential];
         
         NSError *error;
         NSString *path = [_session homeDirectoryPath:&error];
         
+        
+        // If the server doesn't support SSL/TLS, fall back to regular if requested
+        if (!path)
+        {
+            if (fallbackToFTP &&
+                [error code] == CURLE_USE_SSL_FAILED &&
+                [[error domain] isEqualToString:CURLcodeErrorDomain])
+            {
+                [self FTPSession:_session
+             didReceiveDebugInfo:[NSString stringWithFormat:@"Falling back to plain FTP after TLS/SSL error: %@", [error localizedDescription]]
+                          ofType:CURLINFO_HEADER_IN];
+                
+                NSMutableURLRequest *insecureRequest = [[_session baseRequest] mutableCopy];
+                [insecureRequest curl_setDesiredSSLLevel:CURLUSESSL_NONE];
+                [_session setBaseRequest:insecureRequest];
+                [insecureRequest release];
+                
+                protectionSpace = [[NSURLProtectionSpace alloc] initWithHost:[protectionSpace host]
+                                                                        port:[protectionSpace port]
+                                                                    protocol:NSURLProtectionSpaceFTP
+                                                                       realm:[protectionSpace realm]
+                                                        authenticationMethod:[protectionSpace authenticationMethod]];
+                [protectionSpace autorelease];
+                // Note: NSURLProtectionSpace is weirdly broken. Calling -protocol will always hand back @"ftps", but somewhere internally it knows it's really FTP. rdar://problem/12741908
+                
+                path = [_session homeDirectoryPath:&error];
+            }
+        }
+        
+        
+        // Handle the outcome
         if (path)
         {
-            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:[challenge protectionSpace]];
+            [[NSURLCredentialStorage sharedCredentialStorage] setDefaultCredential:credential forProtectionSpace:protectionSpace];
             [_queue setSuspended:NO];
         }
         else if ([[error domain] isEqualToString:NSURLErrorDomain] && [error code] == NSURLErrorUserAuthenticationRequired)
