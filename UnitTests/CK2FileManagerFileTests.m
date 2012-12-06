@@ -524,7 +524,9 @@
         NSURL* temp = [self makeTestContents];
         NSURL* url = [temp URLByAppendingPathComponent:@"test.txt"];
 
-        NSDictionary* values = @{ @"CompletelyBogusAttribute" : @"Chutney" };
+        // we try to set a completely nonsense attribute
+        // the expectation is that this will be silently ignored, rather than causing an error
+        NSDictionary* values = @{ @"Awesomeness" : @"Totally Rad" };
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
