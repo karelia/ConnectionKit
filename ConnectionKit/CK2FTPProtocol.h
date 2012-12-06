@@ -6,20 +6,10 @@
 //
 //
 
-#import "CK2Protocol.h"
-
-#import <CURLHandle/CURLHandle.h>
+#import "CK2CURLBasedProtocol.h"
 
 
-@interface CK2FTPProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
-{
-  @private
-    CURLHandle  *_handle;
-    
-    void    (^_completionHandler)(NSError *error);
-    void    (^_dataBlock)(NSData *data);
-    void    (^_progressBlock)(NSUInteger bytesWritten);
-}
+@interface CK2FTPProtocol : CK2CURLBasedProtocol <NSURLAuthenticationChallengeSender>
 
 @end
 
