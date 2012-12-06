@@ -245,39 +245,30 @@
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         // try to make file - should fail because intermediate directory isn't present
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
 
         // try again, should work
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
 
         // and again - should fail because the file exists
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
@@ -293,30 +284,24 @@
 
         // try to make file - should fail because we don't have permission
         NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
 
         // try again, should fail again, but this time because we can't make the intermediate directory
         url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
@@ -334,13 +319,10 @@
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
@@ -358,13 +340,10 @@
 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
 
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];

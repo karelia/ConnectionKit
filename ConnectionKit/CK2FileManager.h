@@ -64,10 +64,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
-// 0 bytesWritten indicates writing has ended. This might be because of a failure; if so, error will be filled in
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
 
 
 #pragma mark Deleting Items

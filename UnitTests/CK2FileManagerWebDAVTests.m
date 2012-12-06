@@ -36,13 +36,10 @@
         [self runUntilPaused];
 
         // try to upload
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
         [self runUntilPaused];
 

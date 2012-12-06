@@ -186,13 +186,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];
@@ -210,13 +207,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
 
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            if (bytesWritten == 0)
-            {
-                [self pause];
-            }
+            [self pause];
         }];
 
         [self runUntilPaused];

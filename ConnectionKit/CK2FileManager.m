@@ -158,17 +158,17 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
     [request setHTTPBody:data];
     
-    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
+    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock completionHandler:handler];
     [request release];
     return result;
 }
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
     
@@ -193,30 +193,24 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         {
             [request release];
             if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-            progressBlock(0, error);
+            handler(error);
             return nil;
         }
     }
     
-    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock];
+    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock completionHandler:handler];
     [request release];
     return result;
 }
 
-- (id)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten, NSError *error))progressBlock;
+- (id)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithRequest:request
                                                                      withIntermediateDirectories:createIntermediates
                                                                                openingAttributes:attributes
                                                                                          manager:self
-                                                                                   progressBlock:^(NSUInteger bytesWritten) {
-                                                                                       
-                                                                                       progressBlock(bytesWritten, nil);
-                                                                                   }
-                                                                                 completionBlock:^(NSError *error) {
-                                                                                     
-                                                                                     progressBlock(0, error);
-                                                                                 }];
+                                                                                   progressBlock:progressBlock
+                                                                                 completionBlock:handler];
     return [operation autorelease];
 }
 
