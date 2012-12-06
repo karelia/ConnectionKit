@@ -341,13 +341,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
+        // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
+        _enumerationBlock = [enumBlock copy];
+        
         return [[protocolClass alloc] initForEnumeratingDirectoryWithRequest:[manager requestWithURL:url]
                                                   includingPropertiesForKeys:keys
                                                                      options:mask
                                                                       client:self];
     }];
     
-    if (self) _enumerationBlock = [enumBlock copy];
     return self;
 }
 
