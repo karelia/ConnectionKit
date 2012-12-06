@@ -11,6 +11,7 @@
 @interface CK2FileManagerBaseTests : KMSTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) CK2FileManager* session;
+@property (strong, nonatomic) NSMutableString* transcript;
 @property (assign, nonatomic) BOOL useMockServer;
 
 - (BOOL)setupSession;

@@ -13,6 +13,7 @@
 - (void)dealloc
 {
     [_session release];
+    [_transcript release];
 
     [super dealloc];
 }
@@ -21,6 +22,7 @@
 {
     self.session = [[CK2FileManager alloc] init];
     self.session.delegate = self;
+    self.transcript = [[[NSMutableString alloc] init] autorelease];
     return self.session != nil;
 }
 
@@ -131,5 +133,10 @@
     }
 }
 
+- (void)tearDown
+{
+    [super tearDown];
+    NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+}
 
 @end
