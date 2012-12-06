@@ -172,6 +172,7 @@
         // try to make subdirectory with intermediate directory - should fail
         [self.session createDirectoryAtURL:subdirectory withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
 
             [self pause];
@@ -217,6 +218,7 @@
         // try to make subdirectory in /System - this really ought to fail
         [self.session createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
             [self pause];
@@ -226,43 +228,66 @@
         STAssertFalse([fm fileExistsAtPath:[url path]], @"directory shouldn't exist");
     }
 }
-#if 0 // TODO: rewrite these tests for the file protocol
 
-
-- (void)testCreateDirectoryAtURLAlreadyExists
+- (void)testCreateFileAtURL
 {
-    if ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"])
+    if ([self setupSession])
     {
-        [self useResponseSet:@"mkdir fail"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
+        NSFileManager* fm = [NSFileManager defaultManager];
+        NSURL* temp = [self temporaryFolder];
+        NSURL* directory = [temp URLByAppendingPathComponent:@"directory"];
+        NSURL* file = [directory URLByAppendingPathComponent:@"test.txt"];
+        NSError* error = nil;
 
-            [self pause];
-        }];
-    }
+        [fm removeItemAtURL:file error:&error];
+        [fm removeItemAtURL:directory error:&error];
 
-    [self runUntilPaused];
-}
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
-- (void)testCreateDirectoryAtURLBadLogin
-{
-    if ([self setup])
-    {
-        [self useResponseSet:@"bad login"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
+        // try to make file - should fail because intermediate directory isn't present
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
 
-            [self pause];
+            if (bytesWritten == 0)
+            {
+                [self pause];
+            }
         }];
 
         [self runUntilPaused];
+
+        // try again, should work
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            if (bytesWritten == 0)
+            {
+                [self pause];
+            }
+        }];
+
+        [self runUntilPaused];
+
+        // and again - should fail because the file exists
+        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:^(NSUInteger bytesWritten, NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            if (bytesWritten == 0)
+            {
+                [self pause];
+            }
+        }];
+
+        [self runUntilPaused];
+
     }
 }
+
+
+#if 0 // TODO: rewrite these tests for the file protocol
+
 
 - (void)testCreateFileAtURL
 {

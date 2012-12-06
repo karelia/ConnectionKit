@@ -84,6 +84,17 @@
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     return [self initWithBlock:^{
+
+        if (createIntermediates)
+        {
+            NSError *error;
+            NSURL* intermediates = [[request URL] URLByDeletingLastPathComponent];
+            if (![[NSFileManager defaultManager] createDirectoryAtURL:intermediates withIntermediateDirectories:YES attributes:nil error:&error])
+            {
+                [client protocol:self didFailWithError:error];
+                return;
+            }
+        }
         
         NSData *data = [request HTTPBody];
         if (data)
