@@ -11,15 +11,12 @@
 		220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220526F9165E9DFB00A2BBC9 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92C09F7080B00172CDD /* libcurl.dylib */; };
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		22052703165EA60000A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
 		22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		22407D5B166FA12500E1EAD4 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
-		22407D5C166FA13400E1EAD4 /* libssl.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
 		22407D5E166FA17600E1EAD4 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
-		22407D5F166FA17B00E1EAD4 /* libcrypto.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
 		224AB37D166E500E0066B1C6 /* KMSConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB372166E500E0066B1C6 /* KMSConnection.m */; };
 		224AB37E166E500E0066B1C6 /* KMSListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB374166E500E0066B1C6 /* KMSListener.m */; };
@@ -38,7 +35,6 @@
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
-		22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
@@ -48,6 +44,11 @@
 		2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */; };
+		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
+		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		271059541671441700E20511 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
+		27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
+		27105BC21671599700E20511 /* libssl.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -186,9 +187,20 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				22407D5F166FA17B00E1EAD4 /* libcrypto.dylib in CopyFiles */,
-				22FA97FE15090A2E001728B8 /* libssh2.dylib in CopyFiles */,
-				22407D5C166FA13400E1EAD4 /* libssl.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27282EDA167131150057CCF7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				271059521671334500E20511 /* DAVKit.framework in CopyFiles */,
+				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
+				271059541671441700E20511 /* libssh2.dylib in CopyFiles */,
+				27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */,
+				27105BC21671599700E20511 /* libssl.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,7 +387,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22052703165EA60000A2BBC9 /* CURLHandle.framework in Frameworks */,
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */,
@@ -856,6 +867,7 @@
 				79CFD12109F702BE00172CDD /* Headers */,
 				79CFD12209F702BE00172CDD /* Resources */,
 				7931260F0B3684B2002FF80D /* Strip UKKQueue */,
+				27282EDA167131150057CCF7 /* CopyFiles */,
 			);
 			buildRules = (
 			);
@@ -1267,6 +1279,7 @@
 				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/SFTP/libssh2/include";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@loader_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
@@ -1318,6 +1331,7 @@
 				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/SFTP/libssh2/include";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
@@ -1356,6 +1370,7 @@
 				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/SFTP/libssh2/include";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@executable_path/../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(LIBRARY_SEARCH_PATHS_QUOTED_FOR_TARGET_1)",
