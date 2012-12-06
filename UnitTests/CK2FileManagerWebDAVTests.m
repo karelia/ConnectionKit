@@ -30,7 +30,7 @@
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         // try to delete in case it's left around from last time - ignore error
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             [self pause];
         }];
         [self runUntilPaused];
@@ -59,7 +59,7 @@
 #endif
 
         // try to delete - this time we do want to check the error
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
@@ -71,7 +71,7 @@
 - (void)doTestCreateAndRemoveDirectoryAtURL:(NSURL*)url
 {
     // delete directory in case it's left from last time
-    [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+    [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
         [self pause];
     }];
     [self runUntilPaused];
@@ -98,7 +98,7 @@
     [self runUntilPaused];
 
     // try to delete directory - should work this time
-    [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+    [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
         STAssertNil(error, @"got unexpected error %@", error);
         [self pause];
     }];

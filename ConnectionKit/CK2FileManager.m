@@ -48,9 +48,9 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
                              progressBlock:(void (^)(NSUInteger))progressBlock
                            completionBlock:(void (^)(NSError *))block;
 
-- (id)initFileRemovalOperationWithURL:(NSURL *)url
-                              manager:(CK2FileManager *)manager
-                      completionBlock:(void (^)(NSError *))block;
+- (id)initRemovalOperationWithURL:(NSURL *)url
+                          manager:(CK2FileManager *)manager
+                  completionBlock:(void (^)(NSError *))block;
 
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
                                         values:(NSDictionary *)keyedValues
@@ -214,9 +214,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)removeFileAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileRemovalOperationWithURL:url manager:self completionBlock:handler];
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
     return [operation autorelease];
 }
 
@@ -385,9 +385,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
-- (id)initFileRemovalOperationWithURL:(NSURL *)url
-                              manager:(CK2FileManager *)manager
-                      completionBlock:(void (^)(NSError *))block;
+- (id)initRemovalOperationWithURL:(NSURL *)url
+                          manager:(CK2FileManager *)manager
+                  completionBlock:(void (^)(NSError *))block;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         

@@ -402,7 +402,7 @@
             STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
 
             // remove a file
-            [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+            [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -410,7 +410,7 @@
             STAssertFalse([fm fileExistsAtPath:[testFile path]], @"removal should have worked");
 
             // remove it again - should obviously fail
-            [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+            [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
                 STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -419,7 +419,7 @@
             [self runUntilPaused];
 
             // remove subdirectory - now empty, so should work
-            [self.session removeFileAtURL:subdirectory completionHandler:^(NSError *error) {
+            [self.session removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -443,7 +443,7 @@
         NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
 
         // remove subdirectory that has something in it - should fail
-        [self.session removeFileAtURL:subdirectory completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
             #if DELETING_DIRECTORY_WITH_ITEMS_FAILS
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
@@ -470,7 +470,7 @@
         NSURL* temp = [self temporaryFolder];
         NSURL* testFile = [temp URLByAppendingPathComponent:@"imaginary.txt"];
 
-        [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected error");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);

@@ -224,7 +224,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
@@ -239,7 +239,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
             STAssertTrue(ftpCode == 550, @"should get 550 from server");
@@ -258,7 +258,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
