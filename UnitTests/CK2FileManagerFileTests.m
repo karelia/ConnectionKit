@@ -28,17 +28,6 @@
     NSError* error = nil;
     NSURL* tempFolder = [self temporaryFolder];
     NSFileManager* fm = [NSFileManager defaultManager];
-
-    NSMutableArray* contents = [NSMutableArray array];
-    NSDirectoryEnumerator* enumerator = [fm enumeratorAtURL:tempFolder includingPropertiesForKeys:nil options:0 errorHandler:nil];
-    for (NSURL* url in enumerator)
-    {
-        [contents addObject:url];
-    }
-    for (NSURL* url in contents)
-    {
-        [fm removeItemAtURL:url error:&error];
-    }
     [fm removeItemAtURL:tempFolder error:&error];
 }
 
@@ -53,7 +42,7 @@
     return ok;
 }
 
-- (BOOL)makeTestContents
+- (NSURL*)makeTestContents
 {
     BOOL ok;
     NSError* error = nil;
@@ -78,7 +67,12 @@
         STAssertTrue(ok, @"couldn't make other test file: %@", error);
     }
 
-    return ok;
+    if (!ok)
+    {
+        tempFolder = nil;
+    }
+    
+    return tempFolder;
 }
 
 - (void)setUp
@@ -99,9 +93,9 @@
 {
     if ([self setupSession])
     {
-        if ([self makeTestContents])
+        NSURL* url = [self makeTestContents];
+        if (url)
         {
-            NSURL* url = [self temporaryFolder];
             NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
             [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
@@ -132,10 +126,10 @@
 {
     if ([self setupSession])
     {
-        if ([self makeTestContents])
+        NSURL* url = [self makeTestContents];
+        if (url)
         {
             NSMutableArray* expected = [@[ @"CK2FileManagerFileTests", @"test.txt", @"subfolder" ] mutableCopy];
-            NSURL* url = [self temporaryFolder];
             NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
             [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
 
@@ -394,58 +388,110 @@
 }
 
 
-#if 0 // TODO: rewrite these tests for the file protocol
-
-
 - (void)testRemoveFileAtURL
 {
-    if ([self setup])
+    if ([self setupSession])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
+        NSURL* temp = [self makeTestContents];
+        if (temp)
+        {
+            NSFileManager* fm = [NSFileManager defaultManager];
+            NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
+            NSURL* testFile = [subdirectory URLByAppendingPathComponent:@"another.txt"];
+
+            STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
+
+            // remove a file
+            [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+            STAssertFalse([fm fileExistsAtPath:[testFile path]], @"removal should have worked");
+
+            // remove it again - should obviously fail
+            [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+                STAssertNotNil(error, @"expected error");
+                STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+                STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            // remove subdirectory - now empty, so should work
+            [self.session removeFileAtURL:subdirectory completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+            STAssertFalse([fm fileExistsAtPath:[subdirectory path]], @"removal should have failed");
+        }
+    }
+
+}
+
+- (void)testRemoveFileAtURLDirectoryContainingItems
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self makeTestContents];
+        NSFileManager* fm = [NSFileManager defaultManager];
+        NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
+
+        // remove subdirectory that has something in it - should fail
+        [self.session removeFileAtURL:subdirectory completionHandler:^(NSError *error) {
+            #if DELETING_DIRECTORY_WITH_ITEMS_FAILS
+                STAssertNotNil(error, @"expected error");
+                STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+                STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+            #else
+                STAssertNil(error, @"got unexpected error %@", error);
+            #endif
+            [self pause];
+        }];
+        [self runUntilPaused];
+        STAssertTrue([fm fileExistsAtPath:[subdirectory path]], @"removal should have failed");
+    }
+    
+}
+
+- (void)testRemoveFileAtURLDoesntExist
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self temporaryFolder];
+        NSURL* testFile = [temp URLByAppendingPathComponent:@"imaginary.txt"];
+
+        [self.session removeFileAtURL:testFile completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected error");
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+            [self pause];
+        }];
+        [self runUntilPaused];
+
+    }
+}
+
+- (void)testSetAttributes
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self makeTestContents];
+        NSURL* url = [temp URLByAppendingPathComponent:@"test.txt"];
+
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
-    }
-
-    [self runUntilPaused];
-}
-
-- (void)testRemoveFileAtURLFileDoesnExist
-{
-    if ([self setup])
-    {
-        [self useResponseSet:@"delete fail"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
-
-            [self pause];
-        }];
-
-        [self runUntilPaused];
-    }
-
-}
-
-- (void)testRemoveFileAtURLBadLogin
-{
-    if ([self setup])
-    {
-        [self useResponseSet:@"bad login"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        [self.session removeFileAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
-
-            [self pause];
-        }];
 
         [self runUntilPaused];
     }
 }
+
+#if 0 // TODO: rewrite these tests for the file protocol
+
 
 - (void)testSetUnknownAttributes
 {
