@@ -430,12 +430,16 @@
 
 }
 
+// NSFileManager will happily delete a directory that contains stuff, so
+// currently CK2FileManager is doing the same thing.
+// If we ever change that, set the following variable to 1 to test for it
+#define DELETING_DIRECTORY_WITH_ITEMS_FAILS 0
+
 - (void)testRemoveFileAtURLDirectoryContainingItems
 {
     if ([self setupSession])
     {
         NSURL* temp = [self makeTestContents];
-        NSFileManager* fm = [NSFileManager defaultManager];
         NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
 
         // remove subdirectory that has something in it - should fail
@@ -450,7 +454,11 @@
             [self pause];
         }];
         [self runUntilPaused];
-        STAssertTrue([fm fileExistsAtPath:[subdirectory path]], @"removal should have failed");
+
+        #if DELETING_DIRECTORY_WITH_ITEMS_FAILS
+            NSFileManager* fm = [NSFileManager defaultManager];
+            STAssertTrue([fm fileExistsAtPath:[subdirectory path]], @"removal should have failed");
+        #endif
     }
     
 }
@@ -490,6 +498,41 @@
     }
 }
 
+- (void)testSetAttributesFileDoesntExist
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self temporaryFolder];
+        NSURL* url = [temp URLByAppendingPathComponent:@"imaginary.txt"];
+
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected error");
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+}
+
+- (void)testSetAttributesMadeUpAttribute
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self makeTestContents];
+        NSURL* url = [temp URLByAppendingPathComponent:@"test.txt"];
+
+        NSDictionary* values = @{ @"CompletelyBogusAttribute" : @"Chutney" };
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+}
 #if 0 // TODO: rewrite these tests for the file protocol
 
 
