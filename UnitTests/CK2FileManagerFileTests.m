@@ -309,48 +309,93 @@
     }
 }
 
+- (void)testCreateFileAtURLWithContents
+{
+    if ([self setupSession])
+    {
+        NSFileManager* fm = [NSFileManager defaultManager];
+        NSURL* temp = [self temporaryFolder];
+        NSURL* directory = [temp URLByAppendingPathComponent:@"directory"];
+        NSURL* file = [directory URLByAppendingPathComponent:@"test.txt"];
+        NSError* error = nil;
+
+        [fm removeItemAtURL:file error:&error];
+        [fm removeItemAtURL:directory error:&error];
+
+        NSURL* source = [temp URLByAppendingPathComponent:@"source.txt"];
+        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+
+        // try to make file - should fail because intermediate directory isn't present
+        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) ENOENT, @"unexpected error code %ld", [error code]);
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+
+        // try again, should work
+        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+
+        // and again - should fail because the file exists
+        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+
+    }
+}
+
+- (void)testCreateFileAtURLWithContentsNoPermission
+{
+    if ([self setupSession])
+    {
+        NSError* error = nil;
+        NSURL* temp = [self temporaryFolder];
+        NSURL* source = [temp URLByAppendingPathComponent:@"source.txt"];
+        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+
+        // try to make file - should fail because we don't have permission
+        NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) EACCES, @"unexpected error code %ld", [error code]);
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+
+        // try again, should fail again, but this time because we can't make the intermediate directory
+        url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error here");
+            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) ENOENT, @"unexpected error code %ld", [error code]);
+            
+            [self pause];
+        }];
+        
+        [self runUntilPaused];
+        
+    }
+}
+
 
 #if 0 // TODO: rewrite these tests for the file protocol
 
-
-- (void)testCreateFileAtURL
-{
-    if ([self setup])
-    {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            [self pause];
-        }];
-
-        [self runUntilPaused];
-    }
-}
-
-- (void)testCreateFileAtURL2
-{
-    if ([self setup])
-    {
-        NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
-        NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
-        NSError* error = nil;
-        STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
-
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
-
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            [self pause];
-        }];
-
-        [self runUntilPaused];
-
-        STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
-    }
-}
 
 - (void)testRemoveFileAtURL
 {

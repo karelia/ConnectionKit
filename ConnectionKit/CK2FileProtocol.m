@@ -123,14 +123,24 @@
             uint8_t buffer[1024];
             while ([inputStream hasBytesAvailable])
             {
-                NSUInteger length = [inputStream read:buffer maxLength:1024];
-                
-                // FIXME: Handle not all the bytes being written
-                [outputStream write:buffer maxLength:length];
-                
-                // FIXME: Report any error reading or writing
-                
-                progressBlock(length);
+                NSInteger length = [inputStream read:buffer maxLength:1024];
+                if (length < 0)
+                {
+                    [client protocol:self didFailWithError:[inputStream streamError]];
+                    return;
+                }
+
+                NSUInteger written = [outputStream write:buffer maxLength:length];
+                if (written != length)
+                {
+                    [client protocol:self didFailWithError:[outputStream streamError]];
+                    return;
+                }
+
+                if (progressBlock)
+                {
+                    progressBlock(length);
+                }
             }
             
             [inputStream close];
