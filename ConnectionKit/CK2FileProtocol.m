@@ -8,6 +8,9 @@
 
 #import "CK2FileProtocol.h"
 
+#import "CK2CURLBasedProtocol.h"
+
+
 @implementation CK2FileProtocol
 
 + (BOOL)canHandleURL:(NSURL *)url;
@@ -84,7 +87,8 @@
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     return [self initWithBlock:^{
-
+        
+        // Sadly libcurl doesn't support creating intermediate directories for local files, so do it ourself
         if (createIntermediates)
         {
             NSError *error;
@@ -96,59 +100,22 @@
             }
         }
         
-        NSData *data = [request HTTPBody];
-        if (data)
-        {
-            // TODO: Use a stream or similar to write incrementally and report progress
-            NSError *error;
-            if ([data writeToURL:[request URL] options:0 error:&error])
-            {
-                [client protocolDidFinish:self];
-            }
-            else
+        // Hand off to CURLHandle to create the file
+        __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
+            
+            if (error)
             {
                 [client protocol:self didFailWithError:error];
             }
-        }
-        else
-        {
-            // TODO: Work asynchronously so aren't blocking this one throughout the write
-            NSInputStream *inputStream = [request HTTPBodyStream];
-            [inputStream open];
-            
-            NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[request URL] append:NO];
-            [outputStream open];
-            // TODO: Handle outputStream being nil?
-            
-            uint8_t buffer[1024];
-            while ([inputStream hasBytesAvailable])
+            else
             {
-                NSInteger length = [inputStream read:buffer maxLength:1024];
-                if (length < 0)
-                {
-                    [client protocol:self didFailWithError:[inputStream streamError]];
-                    return;
-                }
-
-                NSUInteger written = [outputStream write:buffer maxLength:length];
-                if (written != length)
-                {
-                    [client protocol:self didFailWithError:[outputStream streamError]];
-                    return;
-                }
-
-                if (progressBlock)
-                {
-                    progressBlock(length);
-                }
+                [client protocolDidFinish:self];
             }
             
-            [inputStream close];
-            [outputStream close];
-            [outputStream release];
-            
-            [client protocolDidFinish:self];
-        }
+            [curlProtocol autorelease];
+        }];
+        
+        [curlProtocol start];
     }];
 }
 
