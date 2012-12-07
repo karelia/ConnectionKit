@@ -7,7 +7,6 @@
 //
 
 #import "CK2FileProtocol.h"
-#import "CK2FTPProtocol.h"
 
 #import "CK2CURLBasedProtocol.h"
 
@@ -85,26 +84,6 @@
     }];
 }
 
-#define USE_CURL_HANDLE_FOR_FILE_CREATION 1
-#if USE_CURL_HANDLE_FOR_FILE_CREATION
-
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
-{
-    id result =  nil;
-    [self release];
-    self = nil;
-
-    CK2FTPProtocol* curlProtocol = [[CK2FTPProtocol alloc] initForCreatingFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes client:client progressBlock:progressBlock];
-    if (curlProtocol)
-    {
-        result = curlProtocol;
-    }
-
-    return result;
-}
-
-#else
-
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
 {
     return [self initWithBlock:^{
@@ -139,8 +118,6 @@
         [curlProtocol start];
     }];
 }
-
-#endif
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
