@@ -396,7 +396,7 @@
     if (permissions)
     {
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
-                                                      @"SITE CHMOD %lo %@",
+                                                      @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
                                                       [[request URL] lastPathComponent]]];
         
