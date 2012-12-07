@@ -21,6 +21,8 @@ typedef enum
 
 static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
 
+static size_t kCopyBufferSize = 4096;
+
 @interface CK2FileProtocol()
 
 @property (assign, nonatomic) dispatch_queue_t queue;
@@ -127,18 +129,18 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
         {
             case kCreateWithCURL:
             {
-                [self createFileWithCURLForRequest:request client:client progressBlock:progressBlock];
+                [self createFileWithCURLForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
                 break;
             }
 
             case kCreateWithStreams:
             {
-                [self createFileSyncForRequest:request client:client progressBlock:progressBlock];
+                [self createFileSyncForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
                 break;
             }
 
             default:
-                [self createFileAsyncForRequest:request client:client progressBlock:progressBlock];
+                [self createFileAsyncForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
         }
     }];
 }
@@ -199,6 +201,17 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
     return error;
 }
 
+- (NSError*)noInputStreamError
+{
+    NSError* error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadInvalidFileNameError userInfo:nil];
+
+    return error;
+}
+
+- (NSError*)currentPOSIXError
+{
+    return [self modifiedErrorForFileError:[NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]];
+}
 
 - (NSInputStream*)inputStreamForRequest:(NSURLRequest*)request
 {
@@ -216,7 +229,12 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
     return inputStream;
 }
 
-- (void)createFileWithCURLForRequest:(NSURLRequest*)request client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+/**
+ File creation implementation that uses CURLHandle.
+ The main problem with this is that CURLHandle doesn't return very good error information.
+ */
+
+- (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
 {
     // Hand off to CURLHandle to create the file
     __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
@@ -236,23 +254,25 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
     [curlProtocol start];
 }
 
-- (void)createFileSyncForRequest:(NSURLRequest*)request client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+/**
+ Simple file creation implementation which just works synchronously, copying between two streams.
+ */
+
+- (void)createFileSyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
 {
-    // TODO: Work asynchronously so aren't blocking this one throughout the write
     NSInputStream *inputStream = [self inputStreamForRequest:request];
     [inputStream open];
 
     NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:[request URL] append:NO];
     [outputStream open];
-    // TODO: Handle outputStream being nil?
 
     NSError* error = nil;
     if (inputStream && outputStream)
     {
-        uint8_t buffer[1024];
+        uint8_t buffer[kCopyBufferSize];
         while ([inputStream hasBytesAvailable])
         {
-            NSInteger length = [inputStream read:buffer maxLength:1024];
+            NSInteger length = [inputStream read:buffer maxLength:kCopyBufferSize];
             if (length < 0)
             {
                 error = [inputStream streamError];
@@ -278,7 +298,7 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
     }
     else
     {
-        error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:nil]; // TODO: proper error here
+        error = [self noInputStreamError];
     }
 
     if (error)
@@ -291,55 +311,83 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
     }
 }
 
-- (void)createFileAsyncForRequest:(NSURLRequest*)request client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
-{
-    // TODO: Work asynchronously so aren't blocking this one throughout the write
-    NSInputStream *inputStream = [request HTTPBodyStream];
-    [inputStream open];
+/**
+ File creation implementation which works asynchronously.
+ We open an input stream for the input.
+ We open an output file for writing using POSIX open/write calls.
+ We then attach a gcd dispatch source to it, and use that to pull input from the stream and write it to the file.
+ 
+ We make a dedicated queue to attach the source to, and release it in the cancel handler of the source, so
+ it only lives for the duration of the operation.
+ */
 
-    NSURL* url = [request URL];
-    NSAssert([url isFileURL], @"wrong URL scheme: %@", url);
-    NSString* path = [url path];
-    int outfile = open([path UTF8String], O_CREAT | O_TRUNC | O_WRONLY, 0744);
-    if (outfile != -1)
+- (void)createFileAsyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+{
+    NSInputStream *inputStream = [self inputStreamForRequest:request];
+    NSError* error = nil;
+
+    if (inputStream != nil)
     {
-        dispatch_queue_t queue = dispatch_queue_create("CK2FileProtocol", NULL);
-        dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_WRITE, outfile, 0, queue);
-        dispatch_source_set_event_handler(source, ^{
-            // the output source is ready for data - lets see if we can get it from the input
-            uint8_t buffer[1024];
-            NSInteger length = [inputStream read:buffer maxLength:1024];
-            if (length < 0)
-            {
-                dispatch_source_cancel(source);
-                [client protocol:self didFailWithError:[self modifiedErrorForFileError:[inputStream streamError]]];
-                return;
-            }
-            else if (length == 0)
-            {
-                [client protocolDidFinish:self];
-            }
-            else
-            {
-                ssize_t written = write(outfile, buffer, length);
-                if (written != length)
+        [inputStream open];
+
+        NSURL* url = [request URL];
+        NSAssert([url isFileURL], @"wrong URL scheme: %@", url);
+        NSString* path = [url path];
+        int perms = [[attributes objectForKey:NSFilePosixPermissions] int32Value];
+        if (perms == 0)
+        {
+            perms = 0744;
+        }
+        int outfile = open([path UTF8String], O_CREAT | O_TRUNC | O_WRONLY, perms);
+        if (outfile != -1)
+        {
+            dispatch_queue_t queue = dispatch_queue_create("CK2FileProtocol", NULL);
+            dispatch_source_t source = dispatch_source_create(DISPATCH_SOURCE_TYPE_WRITE, outfile, 0, queue);
+
+            dispatch_source_set_event_handler(source, ^{
+                uint8_t buffer[kCopyBufferSize];
+                NSInteger length = [inputStream read:buffer maxLength:kCopyBufferSize];
+                if (length < 0)
                 {
-                    NSError* error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
-                    [client protocol:self didFailWithError:[self modifiedErrorForFileError:error]];
+                    dispatch_source_cancel(source);
+                    [client protocol:self didFailWithError:[self modifiedErrorForFileError:[inputStream streamError]]];
                 }
-            }
-        });
-        dispatch_source_set_cancel_handler(source, ^{
-            dispatch_release(source);
-            dispatch_release(queue);
-        });
-        
-        dispatch_resume(source);
+                else if (length == 0)
+                {
+                    dispatch_source_cancel(source);
+                    [client protocolDidFinish:self];
+                }
+                else
+                {
+                    ssize_t written = write(outfile, buffer, length);
+                    if (written != length)
+                    {
+                        [client protocol:self didFailWithError:[self currentPOSIXError]];
+                    }
+                }
+            });
+
+            dispatch_source_set_cancel_handler(source, ^{
+                close(outfile);
+                dispatch_release(source);
+                dispatch_release(queue);
+            });
+            
+            dispatch_resume(source);
+        }
+        else
+        {
+            error = [self currentPOSIXError];
+        }
     }
     else
     {
-        NSError* error = [NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
-        [client protocol:self didFailWithError:[self modifiedErrorForFileError:error]];
+        error = [self noInputStreamError];
+    }
+
+    if (error)
+    {
+        [client protocol:self didFailWithError:error];
     }
 }
 

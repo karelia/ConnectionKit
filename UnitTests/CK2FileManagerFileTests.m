@@ -257,8 +257,12 @@
         }];
 
         [self runUntilPaused];
+        STAssertTrue([fm fileExistsAtPath:[file path]], @"file hasn't been copied");
+        NSString* string = [NSString stringWithContentsOfURL:file encoding:NSUTF8StringEncoding error:&error];
+        STAssertTrue([string isEqualToString:@"Some test text"], @"bad contents of file: %@", string);
 
         // and again - should fail because the file exists
+        [self resume];
         [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
@@ -318,6 +322,7 @@
 
         NSURL* source = [temp URLByAppendingPathComponent:@"source.txt"];
         STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+        STAssertTrue([fm fileExistsAtPath:[source path]], @"source file hasn't been created");
 
         // try to make file - should fail because intermediate directory isn't present
         [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
@@ -338,6 +343,10 @@
         }];
 
         [self runUntilPaused];
+
+        STAssertTrue([fm fileExistsAtPath:[file path]], @"file hasn't been copied");
+        NSString* string = [NSString stringWithContentsOfURL:file encoding:NSUTF8StringEncoding error:&error];
+        STAssertTrue([string isEqualToString:@"Some test text"], @"bad contents of file: %@", string);
 
         // and again - should fail because the file exists
         [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
