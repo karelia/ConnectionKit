@@ -6,8 +6,8 @@
 //
 //
 
-#import "CK2Protocol.h"
+#import "CK2CURLBasedProtocol.h"
 
-@interface CK2SFTPProtocol : CK2Protocol
+@interface CK2SFTPProtocol : CK2CURLBasedProtocol <NSURLAuthenticationChallengeSender>
 
 @end

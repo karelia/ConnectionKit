@@ -433,34 +433,6 @@
 
 #pragma mark Lifecycle
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
-{
-    if (self = [self initWithRequest:request client:client])
-    {
-        _completionHandler = [handler copy];
-    }
-    
-    return self;
-}
-
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler
-{
-    if (self = [self initWithRequest:request client:client completionHandler:handler])
-    {
-        _dataBlock = [dataBlock copy];
-    }
-    return self;
-}
-
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
-{
-    if (self = [self initWithRequest:request client:client completionHandler:handler])
-    {
-        _progressBlock = [progressBlock copy];
-    }
-    return self;
-}
-
 - (void)start;
 {
     // If there's no request, that means we were asked to do nothing possible over FTP. Most likely, storing attributes that aren't POSIX permissions
@@ -500,27 +472,6 @@
     [challenge release];
 }
 
-- (void)endWithError:(NSError *)error;
-{
-    _completionHandler(error);
-    [_handle release]; _handle = nil;
-}
-
-- (void)stop;
-{
-    [_handle cancel];
-}
-
-- (void)dealloc;
-{
-    [_handle release];
-    [_completionHandler release];
-    [_dataBlock release];
-    [_progressBlock release];
-    
-    [super dealloc];
-}
-
 #pragma mark Home Directory
 
 - (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
@@ -542,42 +493,6 @@
     }];
     
     [request release];
-}
-
-#pragma mark CURLHandleDelegate
-
-- (void)handle:(CURLHandle *)handle didFailWithError:(NSError *)error;
-{
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
-    [self endWithError:error];
-}
-
-- (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
-{
-    if (_dataBlock) _dataBlock(data);
-}
-
-- (void)handle:(CURLHandle *)handle willSendBodyDataOfLength:(NSUInteger)bytesWritten
-{
-    if (_progressBlock) _progressBlock(bytesWritten);
-}
-
-- (void)handleDidFinish:(CURLHandle *)handle;
-{
-    [self endWithError:nil];
-}
-
-- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
-{
-    // Don't want to include password in transcripts usually!
-    if (type == CURLINFO_HEADER_OUT &&
-        [string hasPrefix:@"PASS"] &&
-        ![[NSUserDefaults standardUserDefaults] boolForKey:@"AllowPasswordToBeLogged"])
-    {
-        string = @"PASS ####";
-    }
-    
-    [[self client] protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
@@ -611,9 +526,7 @@
     _completionHandler = [_completionHandler copy];
     [oldHandler release];
     
-    _handle = [[CURLHandle alloc] initWithRequest:[self request]
-                                       credential:credential
-                                         delegate:self];
+    [self startWithCredential:credential];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;

@@ -17,6 +17,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 {
   @public   // HACK so auth trampoline can get at them
     CK2FileManager  *_manager;
+    NSURL           *_URL;
     dispatch_queue_t    _queue;
     
   @private
@@ -299,6 +300,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (self = [self init])
     {
         _manager = [manager retain];
+        _URL = [url copy];
         _completionBlock = [completionBlock copy];
         _queue = dispatch_queue_create("CK2FileOperation", NULL);
         
@@ -430,6 +432,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     [_protocol release];
     [_manager release];
+    [_URL release];
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
@@ -532,9 +535,19 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         else
         {
             // Invent the best credential available
-            // TODO: Base on the URL's user + password if included
             NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+            NSString *user = [_operation->_URL user];
+            NSString *password = [_operation->_URL password];
+            
+            NSURLCredential *credential;
+            if (user && password)
+            {
+                credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+            }
+            else
+            {
+                credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
+            }
             
             _trampolineChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                               proposedCredential:credential
