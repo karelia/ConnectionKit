@@ -102,59 +102,6 @@
     return self;
 }
 
-/**
- Create a chain of createDirectory requests.
- If createIntermediates is NO, we just create one request for the specified path, and set the completion handler
- for the operation to whatever we were given.
-
- If it's YES, we recurse down to the root of the path, and make a request which creates the root directory. We then
- set the completion of this request to create the next level up, and so on, until the final completion which creates
- the path we were initially given, and calls the completion block we were given.
- */
-
-- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates
-                            errorHandler:(CK2WebDAVErrorHandler)errorHandler
-                       completionHandler:(CK2WebDAVCompletionHandler)completionHandler
-{
-    CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
-        DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
-        [_queue addOperation:davRequest];
-
-        self.completionHandler = completionHandler;
-        self.errorHandler = errorHandler;
-    };
-
-    CK2WebDAVErrorHandler errorBlock = ^(NSError* error) {
-        if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
-        {
-            // ignore failure to create for all but the top directory, on the basis that they may well exist already
-            createDirectoryBlock(nil);
-        }
-        else
-        {
-            // other errors are passed on
-            errorHandler(error);
-        }
-    };
-
-    BOOL recursed = NO;
-    if (createIntermediates)
-    {
-        NSString* parent = [path stringByDeletingLastPathComponent];
-        if (![parent isEqualToString:@"/"])
-        {
-            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:[errorBlock copy] completionHandler:[createDirectoryBlock copy]];
-            recursed = YES;
-        }
-    }
-
-    if (!recursed)
-    {
-        createDirectoryBlock(nil);
-    }
-
-}
-
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     CK2WebDAVLog(@"creating directory");
@@ -162,19 +109,36 @@
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
         NSString* path = [self pathForRequest:request];
-        [self addCreateDirectoryRequestForPath:path
-                   withIntermediateDirectories:createIntermediates
-                                  errorHandler:^(NSError *error) {
 
-                                      CK2WebDAVLog(@"create directory failed");
-                                      [self reportFailedWithError:error];
+        // when done, we just report that we're finished
+        CK2WebDAVCompletionHandler handleCompletion = ^(id result) {
 
-                                  } completionHandler:^(id result) {
+            CK2WebDAVLog(@"create directory done");
+            [self reportFinished];
+        };
 
-                                      CK2WebDAVLog(@"create directory done");
-                                      [self reportFinished];
-                                  }
-         ];
+        // when a real error occurs, report it
+        CK2WebDAVErrorHandler handleRealError = ^(NSError *error) {
+            CK2WebDAVLog(@"create directory failed");
+            [self reportFailedWithError:error];
+        };
+
+        // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
+        CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
+            // only bother trying again if we actually got a relevant error
+            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 405))
+            {
+                [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
+            }
+            else
+            {
+                handleRealError(error);
+            }
+        };
+
+        // for the sake of efficiency, the first time we always try the creation without making intermediates
+        // if that fails, and if we were asked to make intermediates, we try again
+        [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:NO errorHandler:handleFirstError completionHandler:handleCompletion];
     };
 
     return self;
@@ -413,6 +377,60 @@
     [self.queue addOperationWithBlock:^{
         [self.client protocol:self didFailWithError:error];
     }];
+}
+
+
+/**
+ Create a chain of createDirectory requests.
+ If createIntermediates is NO, we just create one request for the specified path, and set the completion handler
+ for the operation to whatever we were given.
+
+ If it's YES, we recurse down to the root of the path, and make a request which creates the root directory. We then
+ set the completion of this request to create the next level up, and so on, until the final completion which creates
+ the path we were initially given, and calls the completion block we were given.
+ */
+
+- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates
+                            errorHandler:(CK2WebDAVErrorHandler)errorHandler
+                       completionHandler:(CK2WebDAVCompletionHandler)completionHandler
+{
+    CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
+        DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
+        [_queue addOperation:davRequest];
+
+        self.completionHandler = completionHandler;
+        self.errorHandler = errorHandler;
+    };
+
+    CK2WebDAVErrorHandler errorBlock = ^(NSError* error) {
+        if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
+        {
+            // ignore failure to create for all but the top directory, on the basis that they may well exist already
+            createDirectoryBlock(nil);
+        }
+        else
+        {
+            // other errors are passed on
+            errorHandler(error);
+        }
+    };
+
+    BOOL recursed = NO;
+    if (createIntermediates)
+    {
+        NSString* parent = [path stringByDeletingLastPathComponent];
+        if (![parent isEqualToString:@"/"])
+        {
+            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:[errorBlock copy] completionHandler:[createDirectoryBlock copy]];
+            recursed = YES;
+        }
+    }
+
+    if (!recursed)
+    {
+        createDirectoryBlock(nil);
+    }
+    
 }
 
 @end
