@@ -416,7 +416,7 @@
 
 - (void)start;
 {
-    // If there's no request, that means we were asked to do nothing possible over FTP. Most likely, storing attributes that aren't POSIX permissions
+    // If there's no request, that means we were asked to do nothing possible over SFTP. Most likely, storing attributes that aren't POSIX permissions
     // So jump straight to completion
     if (![self request])
     {
