@@ -12,6 +12,7 @@
 {
   @private
     void    (^_block)(void);
+    dispatch_queue_t _queue;
 }
 
 @end

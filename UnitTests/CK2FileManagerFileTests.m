@@ -322,8 +322,8 @@
         // try to make file - should fail because intermediate directory isn't present
         [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) ENOENT, @"unexpected error code %ld", [error code]);
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
 
             [self pause];
         }];
@@ -364,8 +364,8 @@
         NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
         [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) EACCES, @"unexpected error code %ld", [error code]);
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
 
             [self pause];
         }];
@@ -376,8 +376,8 @@
         url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
         [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
-            STAssertTrue([[error domain] isEqualToString:NSPOSIXErrorDomain], @"unexpected error domain %@", [error domain]);
-            STAssertEquals([error code], (NSInteger) ENOENT, @"unexpected error code %ld", [error code]);
+            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+            STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
             
             [self pause];
         }];
