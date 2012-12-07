@@ -32,7 +32,14 @@
     NSString *result = [super pathOfURLRelativeToHomeDirectory:URL];
     
     // SCP and SFTP represent the home directory using ~/ at the start of the path
-    if ([result hasPrefix:@"/~/"]) result = [result substringFromIndex:3];
+    if ([result hasPrefix:@"/~/"])
+    {
+        result = [result substringFromIndex:3];
+    }
+    else if ([result isEqualToString:@"/~"])
+    {
+        result = @".";
+    }
     
     return result;
 }
