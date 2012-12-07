@@ -97,28 +97,6 @@
         
         if (error)
         {
-            // CHMOD failures for unsupported or unrecognized command should go ignored
-            if ([[[request curl_postTransferCommands] lastObject] hasPrefix:@"SITE CHMOD"])
-            {
-                if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
-                {
-                    NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
-                    if (responseCode == 500 || responseCode == 502 || responseCode == 504)
-                    {
-                        [client protocolDidFinish:self];
-                        return;
-                    }
-                    else if (responseCode == 550)
-                    {
-                        // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                        error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                                    code:NSFileWriteUnknownError
-                                                userInfo:@{ NSUnderlyingErrorKey : error }];
-                    }
-                }
-            }
-            
-            
             [client protocol:self didFailWithError:error];
         }
         else
