@@ -178,11 +178,21 @@
                 
                 if (bytesConsumed > 0)
                 {
+                    [totalData replaceBytesInRange:NSMakeRange(0, bytesConsumed) withBytes:NULL length:0];
+                    
                     // Make sure CFFTPCreateParsedResourceListing was able to properly
                     // parse the incoming data
                     if (parsedDict)
                     {
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
+                        
+                        // SFTP and some FTP servers report . and .. which we don't care about
+                        if ([name isEqualToString:@"."] || [name isEqualToString:@".."])
+                        {
+                            CFRelease(parsedDict);
+                            continue;
+                        }
+                        
                         if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
@@ -328,8 +338,6 @@
                         
                         CFRelease(parsedDict);
                     }
-                    
-                    [totalData replaceBytesInRange:NSMakeRange(0, bytesConsumed) withBytes:NULL length:0];
                 }
                 else if (bytesConsumed < 0)
                 {
