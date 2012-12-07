@@ -45,28 +45,7 @@
                   Identifier = "CK2FileManagerBaseTests">
                </Test>
                <Test
-                  Identifier = "CK2FileManagerFTPAuthenticationTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerWebDAVTests">
-               </Test>
-               <Test
-                  Identifier = "KMSCollectionTests">
-               </Test>
-               <Test
-                  Identifier = "KMSManualTests">
-               </Test>
-               <Test
-                  Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "PathTests">
-               </Test>
-               <Test
-                  Identifier = "URLTests">
+                  Identifier = "CK2FileManagerFileTests">
                </Test>
             </SkippedTests>
          </TestableReference>

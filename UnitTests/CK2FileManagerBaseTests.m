@@ -111,13 +111,13 @@
     }
     else
     {
-        self.running = YES;
-        while (self.running)
+        while (self.state != KMSPauseRequested)
         {
             @autoreleasepool {
                 [[NSRunLoop currentRunLoop] runUntilDate:[NSDate date]];
             }
         }
+        self.state = KMSPaused;
     }
 }
 
@@ -129,7 +129,7 @@
     }
     else
     {
-        self.running = NO;
+        self.state = KMSPauseRequested;
     }
 }
 
