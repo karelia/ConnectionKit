@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		220526BA165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */; };
 		220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
-		220526F9165E9DFB00A2BBC9 /* libcurl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92C09F7080B00172CDD /* libcurl.dylib */; };
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
@@ -407,7 +406,6 @@
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
 				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
 				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
-				220526F9165E9DFB00A2BBC9 /* libcurl.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
