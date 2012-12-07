@@ -14,9 +14,6 @@
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
-		22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		22407D5B166FA12500E1EAD4 /* libssl.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
-		22407D5E166FA17600E1EAD4 /* libcrypto.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
 		224AB37D166E500E0066B1C6 /* KMSConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB372166E500E0066B1C6 /* KMSConnection.m */; };
 		224AB37E166E500E0066B1C6 /* KMSListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB374166E500E0066B1C6 /* KMSListener.m */; };
@@ -393,10 +390,7 @@
 			files = (
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
-				22407D57166F9EDE00E1EAD4 /* libssh2.dylib in Frameworks */,
 				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
-				22407D5B166FA12500E1EAD4 /* libssl.dylib in Frameworks */,
-				22407D5E166FA17600E1EAD4 /* libcrypto.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
