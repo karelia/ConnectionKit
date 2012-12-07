@@ -17,6 +17,7 @@
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
 @property (copy, nonatomic) CK2WebDAVProgressHandler progressHandler;
+@property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
 
@@ -25,7 +26,7 @@
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
 @synthesize progressHandler = _progressHandler;
-
+@synthesize queue = _queue;
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
@@ -38,9 +39,7 @@
 {
     if (self = [super initWithRequest:request client:client])
     {
-        _queue = [[NSOperationQueue alloc] init];
-        _queue.name = @"CK2WebDAVProtocol";
-        _queue.suspended = YES;
+        [self setupQueue];
         _session = [[DAVSession alloc] initWithRootURL:request.URL delegate:self];
     }
 
@@ -95,7 +94,7 @@
                 }
             }
 
-            [self.client protocolDidFinish:self];
+            [self reportFinished];
         };
 
     }
@@ -168,12 +167,12 @@
                                   errorHandler:^(NSError *error) {
 
                                       CK2WebDAVLog(@"create directory failed");
-                                      [self.client protocol:self didFailWithError:error];
+                                      [self reportFailedWithError:error];
 
                                   } completionHandler:^(id result) {
 
                                       CK2WebDAVLog(@"create directory done");
-                                      [self.client protocolDidFinish:self];
+                                      [self reportFinished];
                                   }
          ];
     };
@@ -206,13 +205,13 @@
             self.completionHandler =  ^(id result) {
                 CK2WebDAVLog(@"creating file done");
                 [transfer transferDidFinish:transfer error:nil];
-                [self.client protocolDidFinish:self];
+                [self reportFinished];
             };
 
             self.errorHandler = ^(NSError* error) {
                 CK2WebDAVLog(@"creating file failed");
                 [transfer transferDidFinish:transfer error:error];
-                [self.client protocol:self didFailWithError:error];
+                [self reportFailedWithError:error];
             };
         };
 
@@ -227,7 +226,7 @@
                                           errorHandler:^(NSError *error) {
 
                                               CK2WebDAVLog(@"create subdirectory failed");
-                                              [self.client protocol:self didFailWithError:error];
+                                              [self reportFailedWithError:error];
 
                                           } completionHandler:makeFileBlock];
             }
@@ -256,7 +255,7 @@
 
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"removing file done");
-            [self.client protocolDidFinish:self];
+            [self reportFinished];
         };
     }
 
@@ -273,14 +272,14 @@
 - (void)start;
 {
     CK2WebDAVLog(@"started");
-    _queue.suspended = NO;
+    self.queue.suspended = NO;
 }
 
 - (void)stop
 {
     CK2WebDAVLog(@"stopped");
-    _queue.suspended = YES;
-    [_queue cancelAllOperations];
+    self.queue.suspended = YES;
+    [self.queue cancelAllOperations];
 }
 
 - (NSString*)pathForRequest:(NSURLRequest*)request
@@ -336,7 +335,7 @@
     // if not, we call it
     else
     {
-        [self.client protocolDidFinish:self];
+        [self reportFinished];
     }
 }
 
@@ -350,7 +349,7 @@
     }
     else
     {
-        [self.client protocol:self didFailWithError:error];
+        [self reportFailedWithError:error];
     }
 }
 
@@ -388,6 +387,32 @@
     CK2WebDAVLog(sent ? @"<-- %@ " : @"--> %@", string);
 
     [[self client] protocol:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
+}
+
+#pragma mark - Utilities
+
+- (void)setupQueue
+{
+    NSOperationQueue* queue = [[NSOperationQueue alloc] init];
+    queue.suspended = YES;
+    queue.name = @"CK2WebDAVProtocol";
+    queue.maxConcurrentOperationCount = 1;
+    self.queue = queue;
+    [queue release];
+}
+
+- (void)reportFinished
+{
+    [self.queue addOperationWithBlock:^{
+        [self.client protocolDidFinish:self];
+    }];
+}
+
+- (void)reportFailedWithError:(NSError*)error
+{
+    [self.queue addOperationWithBlock:^{
+        [self.client protocol:self didFailWithError:error];
+    }];
 }
 
 @end
