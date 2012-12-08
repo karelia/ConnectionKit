@@ -29,6 +29,9 @@
 // If completion handler is nil, the standard behaviour of reporting to the client will be performed
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 
+// Already handled for you; can override in a subclass if you want
+- (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
+
 
 #pragma mark Loading
 - (void)start;                                              // creates and starts the CURLHandle with no credential
