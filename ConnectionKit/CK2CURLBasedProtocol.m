@@ -429,7 +429,21 @@
         }
         else
         {
-            oldHandler(error);
+            if (oldHandler)
+            {
+                oldHandler(error);
+            }
+            else
+            {
+                if (error)
+                {
+                    [[self client] protocol:self didFailWithError:error];
+                }
+                else
+                {
+                    [[self client] protocolDidFinish:self];
+                }
+            }
         }
     };
     
