@@ -59,24 +59,7 @@
     // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
     [request curl_setPostTransferCommands:commands];
     
-    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(NSError *error) {
-        
-        if (handler)
-        {
-            handler(error);
-        }
-        else
-        {
-            if (error)
-            {
-                [client protocol:self didFailWithError:error];
-            }
-            else
-            {
-                [client protocolDidFinish:self];
-            }
-        }
-    }];
+    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:handler];
     
     [request release];
     return self;
@@ -338,7 +321,22 @@
 
 - (void)endWithError:(NSError *)error;
 {
-    _completionHandler(error);
+    if (_completionHandler)
+    {
+        _completionHandler(error);
+    }
+    else
+    {
+        if (error)
+        {
+            [[self client] protocol:self didFailWithError:error];
+        }
+        else
+        {
+            [[self client] protocolDidFinish:self];
+        }
+    }
+    
     [_handle release]; _handle = nil;
 }
 

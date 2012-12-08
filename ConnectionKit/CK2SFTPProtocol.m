@@ -73,17 +73,7 @@
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
     
-    self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:^(NSError *error) {
-        
-        if (error)
-        {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
-    }];
+    self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
     
     [mutableRequest release];
     
