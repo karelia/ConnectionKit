@@ -170,13 +170,6 @@
         return;
     }
     
-    [self requestAuthenticationWithProposedCredential:nil   // client will fill it in for us
-                                 previousFailureCount:0
-                                                error:nil];
-}
-
-- (void)requestAuthenticationWithProposedCredential:(NSURLCredential *)credential previousFailureCount:(NSUInteger)failureCount error:(NSError *)error;
-{
     NSURL *url = [[self request] URL];
     NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
     
@@ -187,10 +180,10 @@
                                                         authenticationMethod:NSURLAuthenticationMethodDefault];
     
     NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:credential
-                                                                                       previousFailureCount:failureCount
+                                                                                         proposedCredential:nil // client will fill it in for us
+                                                                                       previousFailureCount:0
                                                                                             failureResponse:nil
-                                                                                                      error:error
+                                                                                                      error:nil
                                                                                                      sender:self];
     
     [space release];
@@ -220,52 +213,6 @@
     }];
     
     [request release];
-}
-
-#pragma mark NSURLAuthenticationChallengeSender
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    // Swap out existing handler for one that retries after an auth failure
-    void (^oldHandler)(NSError *) = _completionHandler;
-    
-    _completionHandler = ^(NSError *error) {
-        
-        if ([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain])
-        {
-            // Swap back to the original handler...
-            void (^thisBlock)(NSError *) = _completionHandler;
-            _completionHandler = [oldHandler copy];
-            
-            // ...then retry auth
-            [self requestAuthenticationWithProposedCredential:credential
-                                         previousFailureCount:([challenge previousFailureCount] + 1)
-                                                        error:error];
-            
-            [thisBlock release];
-        }
-        else
-        {
-            oldHandler(error);
-        }
-    };
-    
-    _completionHandler = [_completionHandler copy];
-    [oldHandler release];
-    
-    [self startWithCredential:credential];
-}
-
-- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
-}
-
-- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
-                                                                      code:NSURLErrorUserCancelledAuthentication
-                                                                  userInfo:nil]];
 }
 
 #pragma mark CURLHandleDelegate

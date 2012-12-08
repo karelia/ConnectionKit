@@ -398,4 +398,57 @@
     [[self client] protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
 }
 
+#pragma mark NSURLAuthenticationChallengeSender
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    // Swap out existing handler for one that retries after an auth failure
+    void (^oldHandler)(NSError *) = _completionHandler;
+    
+    _completionHandler = ^(NSError *error) {
+        
+        if ([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain])
+        {
+            // Swap back to the original handler...
+            void (^thisBlock)(NSError *) = _completionHandler;
+            _completionHandler = [oldHandler copy];
+            
+            // ...then retry auth
+            NSURLAuthenticationChallenge *newChallenge = [[NSURLAuthenticationChallenge alloc]
+                                                          initWithProtectionSpace:[challenge protectionSpace]
+                                                          proposedCredential:credential
+                                                          previousFailureCount:([challenge previousFailureCount] + 1)
+                                                          failureResponse:nil
+                                                          error:error
+                                                          sender:self];
+            
+            [[self client] protocol:self didReceiveAuthenticationChallenge:newChallenge];
+            [newChallenge release];
+            
+            [thisBlock release];
+        }
+        else
+        {
+            oldHandler(error);
+        }
+    };
+    
+    _completionHandler = [_completionHandler copy];
+    [oldHandler release];
+    
+    [self startWithCredential:credential];
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [self useCredential:nil forAuthenticationChallenge:challenge];  // libcurl will use annonymous login
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    [[self client] protocol:self didFailWithError:[NSError errorWithDomain:NSURLErrorDomain
+                                                                      code:NSURLErrorUserCancelledAuthentication
+                                                                  userInfo:nil]];
+}
+
 @end

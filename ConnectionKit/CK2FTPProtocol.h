@@ -9,7 +9,7 @@
 #import "CK2CURLBasedProtocol.h"
 
 
-@interface CK2FTPProtocol : CK2CURLBasedProtocol <NSURLAuthenticationChallengeSender>
+@interface CK2FTPProtocol : CK2CURLBasedProtocol
 
 @end
 

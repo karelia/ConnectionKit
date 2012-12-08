@@ -11,7 +11,7 @@
 #import <CURLHandle/CURLHandle.h>
 
 
-@interface CK2CURLBasedProtocol : CK2Protocol <CURLHandleDelegate>
+@interface CK2CURLBasedProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 {
     CURLHandle  *_handle;
     
@@ -34,7 +34,9 @@
 
 
 #pragma mark Loading
-- (void)start;                                              // creates and starts the CURLHandle with no credential
-- (void)startWithCredential:(NSURLCredential *)credential;  // creates and starts the CURLHandle with supplied credential
+
+// If the protocol requires authentication, override -start to fire off an authentication challenge to the client. When a response is received to the challenge, CK2CURLBasedProtocol automatically handles it to start up the handle/request
+- (void)start;
+
 
 @end
