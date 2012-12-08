@@ -45,58 +45,7 @@
                   Identifier = "CK2FileManagerBaseTests">
                </Test>
                <Test
-                  Identifier = "CK2FileManagerFTPAuthenticationTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerWebDAVTests">
-               </Test>
-               <Test
-                  Identifier = "KMSCollectionTests">
-               </Test>
-               <Test
                   Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "PathTests">
-               </Test>
-               <Test
-                  Identifier = "URLTests">
-               </Test>
-               <Test
-                  Identifier = "KMSManualTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testContentsOfDirectoryAtURL">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testCreateDirectoryAtURL">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testCreateDirectoryAtURLNoPermission">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testEnumerateContentsOfDirectoryAtURL">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testRemoveFileAtURL">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testRemoveFileAtURLDirectoryContainingItems">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testRemoveFileAtURLDoesntExist">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testSetAttributes">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testSetAttributesFileDoesntExist">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests/testSetAttributesMadeUpAttribute">
                </Test>
             </SkippedTests>
          </TestableReference>
