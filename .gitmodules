@@ -1,6 +1,3 @@
-[submodule "SFTP"]
-	path = SFTP
-	url = git@github.com:karelia/libssh2_sftp-Cocoa-wrapper.git
 [submodule "DAVKit"]
 	path = DAVKit
 	url = git@github.com:karelia/DAVKit.git
