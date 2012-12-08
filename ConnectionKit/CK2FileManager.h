@@ -102,7 +102,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path
 //  ftp://example.com/relative/path
-//  ssh://example.com/~/relative/path
+//  sftp://example.com/~/relative/path
 //
 // Takes care of the file URL bug on 10.6
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
