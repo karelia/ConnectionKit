@@ -8,11 +8,8 @@
 
 #import "CKConnectionRegistry.h"
 
-#import "CKCurlFTPConnection.h"
-
 #import "NSURL+Connection.h"
 
-#import <CurlHandle/CURLFTPSession.h>
 
 NSString *CKConnectionErrorDomain = @"ConnectionErrorDomain";
 NSString *ConnectionDirectoryExistsKey = @"ConnectionDirectoryExistsKey";
