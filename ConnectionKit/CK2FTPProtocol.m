@@ -541,4 +541,19 @@
                                                                   userInfo:nil]];
 }
 
+#pragma mark CURLHandleDelegate
+
+- (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
+{
+    // Don't want to include password in transcripts usually!
+    if (type == CURLINFO_HEADER_OUT &&
+        [string hasPrefix:@"PASS"] &&
+        ![[NSUserDefaults standardUserDefaults] boolForKey:@"AllowPasswordToBeLogged"])
+    {
+        string = @"PASS ####";
+    }
+    
+    [super handle:handle didReceiveDebugInformation:string ofType:type];
+}
+
 @end
