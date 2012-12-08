@@ -8,6 +8,9 @@
 
 #import "CK2CURLBasedProtocol.h"
 
+#import <CurlHandle/NSURLRequest+CURLHandle.h>
+
+
 @implementation CK2CURLBasedProtocol
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
@@ -35,6 +38,43 @@
     {
         _progressBlock = [progressBlock copy];
     }
+    return self;
+}
+
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
+{
+    // Navigate to the directory
+    // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
+    // If the connection is already at that directory then curl wisely does nothing
+    NSMutableURLRequest *request = [childRequest mutableCopy];
+    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
+    [request setHTTPMethod:@"HEAD"];
+    [request curl_setCreateIntermediateDirectories:createIntermediates];
+    
+    // Custom commands once we're in the correct directory
+    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
+    [request curl_setPostTransferCommands:commands];
+    
+    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(NSError *error) {
+        
+        if (handler)
+        {
+            handler(error);
+        }
+        else
+        {
+            if (error)
+            {
+                [client protocol:self didFailWithError:error];
+            }
+            else
+            {
+                [client protocolDidFinish:self];
+            }
+        }
+    }];
+    
+    [request release];
     return self;
 }
 

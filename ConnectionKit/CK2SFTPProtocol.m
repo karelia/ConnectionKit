@@ -79,36 +79,6 @@
     return result;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client;
-{
-    // Navigate to the directory
-    // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
-    // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [childRequest mutableCopy];
-    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
-    [request setHTTPMethod:@"HEAD"];
-    [request curl_setCreateIntermediateDirectories:createIntermediates];
-    
-    // Custom commands once we're in the correct directory
-    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
-    [request curl_setPostTransferCommands:commands];
-    
-    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(NSError *error) {
-        
-        if (error)
-        {
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
-    }];
-    
-    [request release];
-    return self;
-}
-
 #pragma mark Operations
 
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
@@ -352,7 +322,8 @@
     self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:[[request URL] lastPathComponent]]]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
-                                 client:client];
+                                 client:client
+                      completionHandler:nil];
     
     [mutableRequest release];
     return self;
@@ -387,7 +358,8 @@
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"rm " stringByAppendingString:[[request URL] lastPathComponent]]]
                                 request:request
           createIntermediateDirectories:NO
-                                 client:client];
+                                 client:client
+                      completionHandler:nil];
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -403,7 +375,8 @@
         return [self initWithCustomCommands:commands
                                     request:request
               createIntermediateDirectories:NO
-                                     client:client];
+                                     client:client
+                          completionHandler:nil];
     }
     else
     {

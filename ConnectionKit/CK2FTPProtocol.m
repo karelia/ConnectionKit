@@ -76,58 +76,6 @@
     return result;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client;
-{
-    // Navigate to the directory
-    // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
-    // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [childRequest mutableCopy];
-    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
-    [request setHTTPMethod:@"HEAD"];
-    [request curl_setCreateIntermediateDirectories:createIntermediates];
-    
-    // Custom commands once we're in the correct directory
-    // CURLOPT_PREQUOTE does much the same thing, but sometimes runs the command twice in my testing
-    [request curl_setPostTransferCommands:commands];
-    
-    self = [self initWithRequest:request client:client dataHandler:nil completionHandler:^(NSError *error) {
-        
-        if (error)
-        {
-            // CHMOD failures for unsupported or unrecognized command should go ignored
-            if ([[[request curl_postTransferCommands] lastObject] hasPrefix:@"SITE CHMOD"])
-            {
-                if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
-                {
-                    NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
-                    if (responseCode == 500 || responseCode == 502 || responseCode == 504)
-                    {
-                        [client protocolDidFinish:self];
-                        return;
-                    }
-                    else if (responseCode == 550)
-                    {
-                        // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                        error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                                    code:NSFileWriteUnknownError
-                                                userInfo:@{ NSUnderlyingErrorKey : error }];
-                    }
-                }
-            }
-            
-            
-            [client protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [client protocolDidFinish:self];
-        }
-    }];
-    
-    [request release];
-    return self;
-}
-
 #pragma mark Operations
 
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
@@ -359,7 +307,8 @@
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[[request URL] lastPathComponent]]]
              request:request
           createIntermediateDirectories:createIntermediates
-                                 client:client];
+                                 client:client
+                      completionHandler:nil];
 }
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
@@ -406,7 +355,8 @@
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[[request URL] lastPathComponent]]]
              request:request
           createIntermediateDirectories:NO
-                                 client:client];
+                                 client:client
+                      completionHandler:nil];
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -422,7 +372,37 @@
         return [self initWithCustomCommands:commands
                  request:request
               createIntermediateDirectories:NO
-                                     client:client];
+                                     client:client
+                          completionHandler:^(NSError *error) {
+                              
+                              if (error)
+                              {
+                                  // CHMOD failures for unsupported or unrecognized command should go ignored
+                                  if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                                  {
+                                      NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
+                                      if (responseCode == 500 || responseCode == 502 || responseCode == 504)
+                                      {
+                                          [client protocolDidFinish:self];
+                                          return;
+                                      }
+                                      else if (responseCode == 550)
+                                      {
+                                          // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                                          error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                                                      code:NSFileWriteUnknownError
+                                                                  userInfo:@{ NSUnderlyingErrorKey : error }];
+                                      }
+                                  }
+                              
+                                  
+                                  [client protocol:self didFailWithError:error];
+                              }
+                              else
+                              {
+                                  [client protocolDidFinish:self];
+                              }
+                          }];
     }
     else
     {
