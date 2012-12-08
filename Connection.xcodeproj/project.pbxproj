@@ -36,8 +36,6 @@
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
 		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
-		2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27BFFED715027F0A00EFA319 /* CKCurlFTPConnection.m */; };
 		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
@@ -251,8 +249,6 @@
 		2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = ../SFTP/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
 		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = ../SFTP/CK2SFTPSession.h; sourceTree = "<group>"; };
 		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = ../SFTP/CK2SFTPSession.m; sourceTree = "<group>"; };
-		2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SSHCredential.h; path = ../SFTP/CK2SSHCredential.h; sourceTree = "<group>"; };
-		2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SSHCredential.m; path = ../SFTP/CK2SSHCredential.m; sourceTree = "<group>"; };
 		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = CurlHandle/SFTP/libssh2.dylib; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
@@ -764,8 +760,6 @@
 				2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */,
 				2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */,
 				2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */,
-				2702E3ED1459CB550085BBC4 /* CK2SSHCredential.h */,
-				2702E3EE1459CB550085BBC4 /* CK2SSHCredential.m */,
 				2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */,
 				2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */,
 				D3598B590CF3D3E400C61A38 /* Other */,
@@ -821,7 +815,6 @@
 				2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */,
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
-				2702E3F31459CB550085BBC4 /* CK2SSHCredential.h in Headers */,
 				27BFFED815027F0A00EFA319 /* CKCurlFTPConnection.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */,
@@ -1083,7 +1076,6 @@
 				27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */,
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
-				2702E3F41459CB550085BBC4 /* CK2SSHCredential.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				270943231502CCCF007AF1D6 /* CKCurlFTPConnection.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
