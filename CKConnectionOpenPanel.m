@@ -811,7 +811,7 @@
 	else
 	{
 		
-		NSString *informativeText = [error localizedDescription];
+		NSString *informativeText = ([error localizedDescription]) ? [error localizedDescription] : LocalizedStringInConnectionKitBundle(@"An unknown error occurred.", @"ConnectionOpenPanel");
 		
 		NSAlert *a = [[NSAlert alloc] init];
         [a setMessageText:informativeText];
