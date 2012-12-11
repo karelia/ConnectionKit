@@ -322,8 +322,6 @@
 		79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = CKConnectionOpenPanel.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		79CFD83509F7048400172CDD /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
 		79CFD83609F7048400172CDD /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
-		79CFD83909F7048400172CDD /* NNTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NNTPConnection.h; sourceTree = "<group>"; };
-		79CFD83A09F7048400172CDD /* NNTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = NNTPConnection.m; sourceTree = "<group>"; };
 		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
 		79CFD84209F7048400172CDD /* RunLoopForwarder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunLoopForwarder.m; sourceTree = "<group>"; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
@@ -576,8 +574,6 @@
 		27FD90C80ED5BFFD0068D634 /* Other */ = {
 			isa = PBXGroup;
 			children = (
-				79CFD83909F7048400172CDD /* NNTPConnection.h */,
-				79CFD83A09F7048400172CDD /* NNTPConnection.m */,
 			);
 			name = Other;
 			sourceTree = "<group>";
