@@ -5,7 +5,7 @@
 //
 
 #import "CK2WebDAVProtocol.h"
-#import "CKRemoteURL.h"
+#import "CK2RemoteURL.h"
 #import "CKTransferRecord.h"
 
 #ifndef CK2WebDAVLog
@@ -81,7 +81,7 @@
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                 {
 
-                    CKRemoteURL* url = [CKRemoteURL URLWithURL:[davRequest concatenatedURLWithPath:[item href]]];
+                    CK2RemoteURL* url = [CK2RemoteURL URLWithURL:[davRequest concatenatedURLWithPath:[item href]]];
                     [url setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey];
                     [url setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey];
                     [url setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey];

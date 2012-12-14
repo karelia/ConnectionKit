@@ -1,17 +1,17 @@
 //
-//  CKRemoteURL.m
+//  CK2RemoteURL.m
 //  Connection
 //
 //  Created by Mike on 11/10/2012.
 //
 //
 
-#import "CKRemoteURL.h"
+#import "CK2RemoteURL.h"
 
 #import "CK2FileManager.h"
 
 
-@implementation CKRemoteURL
+@implementation CK2RemoteURL
 
 - (void)dealloc;
 {
@@ -19,9 +19,9 @@
     [super dealloc];
 }
 
-+ (CKRemoteURL*)URLWithURL:(NSURL*)url
++ (CK2RemoteURL*)URLWithURL:(NSURL*)url
 {
-    CKRemoteURL* result = [[CKRemoteURL alloc] initWithString:[url relativeString] relativeToURL:[url baseURL]];
+    CK2RemoteURL* result = [[CK2RemoteURL alloc] initWithString:[url relativeString] relativeToURL:[url baseURL]];
 
     return [result autorelease];
 }

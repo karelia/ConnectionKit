@@ -50,8 +50,8 @@
 		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
 		278B06080EFA7EAB0093B23D /* CKURLProtectionSpace.h in Headers */ = {isa = PBXBuildFile; fileRef = 278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */; };
 		278B06090EFA7EAB0093B23D /* CKURLProtectionSpace.m in Sources */ = {isa = PBXBuildFile; fileRef = 278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */; };
-		2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CKRemoteURL.h */; };
-		2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8211626CA67000C9D9F /* CKRemoteURL.m */; };
+		2790A8221626CA67000C9D9F /* CK2RemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CK2RemoteURL.h */; };
+		2790A8231626CA67000C9D9F /* CK2RemoteURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8211626CA67000C9D9F /* CK2RemoteURL.m */; };
 		2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2Protocol.h */; };
 		2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2Protocol.m */; };
 		2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
@@ -258,8 +258,8 @@
 		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKURLProtectionSpace.h; sourceTree = "<group>"; };
 		278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKURLProtectionSpace.m; sourceTree = "<group>"; };
-		2790A8201626CA67000C9D9F /* CKRemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKRemoteURL.h; sourceTree = "<group>"; };
-		2790A8211626CA67000C9D9F /* CKRemoteURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKRemoteURL.m; sourceTree = "<group>"; };
+		2790A8201626CA67000C9D9F /* CK2RemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2RemoteURL.h; sourceTree = "<group>"; };
+		2790A8211626CA67000C9D9F /* CK2RemoteURL.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2RemoteURL.m; sourceTree = "<group>"; };
 		2790A8271627636E000C9D9F /* CK2Protocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Protocol.h; sourceTree = "<group>"; };
 		2790A8281627636E000C9D9F /* CK2Protocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Protocol.m; sourceTree = "<group>"; };
 		2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FTPProtocol.h; sourceTree = "<group>"; };
@@ -715,8 +715,8 @@
 				27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */,
 				278B06060EFA7EAB0093B23D /* CKURLProtectionSpace.h */,
 				278B06070EFA7EAB0093B23D /* CKURLProtectionSpace.m */,
-				2790A8201626CA67000C9D9F /* CKRemoteURL.h */,
-				2790A8211626CA67000C9D9F /* CKRemoteURL.m */,
+				2790A8201626CA67000C9D9F /* CK2RemoteURL.h */,
+				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
 			);
 			name = Utility;
 			sourceTree = "<group>";
@@ -806,7 +806,7 @@
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
-				2790A8221626CA67000C9D9F /* CKRemoteURL.h in Headers */,
+				2790A8221626CA67000C9D9F /* CK2RemoteURL.h in Headers */,
 				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
 				2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */,
 				27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */,
@@ -1067,7 +1067,7 @@
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
-				2790A8231626CA67000C9D9F /* CKRemoteURL.m in Sources */,
+				2790A8231626CA67000C9D9F /* CK2RemoteURL.m in Sources */,
 				2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */,
 				2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */,
 				27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */,

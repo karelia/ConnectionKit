@@ -9,7 +9,7 @@
 #import "CK2CURLBasedProtocol.h"
 
 #import "CK2FileManager.h"
-#import "CKRemoteURL.h"
+#import "CK2RemoteURL.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
@@ -132,7 +132,7 @@
                             NSURL *nsURL = [url URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            CKRemoteURL *aURL = [[CKRemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
+                            CK2RemoteURL *aURL = [[CK2RemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
