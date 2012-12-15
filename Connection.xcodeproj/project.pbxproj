@@ -102,8 +102,6 @@
 		79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD90109F7077900172CDD /* NSData+Connection.m */; };
 		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
 		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
-		79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */; };
 		79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
@@ -307,8 +305,6 @@
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
 		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
 		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSFileManager+Connection.h"; sourceTree = "<group>"; };
-		79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSFileManager+Connection.m"; sourceTree = "<group>"; };
 		79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMatrix+Connection.h"; sourceTree = "<group>"; };
 		79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMatrix+Connection.m"; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
@@ -661,8 +657,6 @@
 				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
 				223B687915A1CC8700C127BA /* NSInvocation+Connection.h */,
 				223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */,
-				79E51CDE0BAA6755008F81A5 /* NSFileManager+Connection.h */,
-				79E51CDF0BAA6755008F81A5 /* NSFileManager+Connection.m */,
 				79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */,
 				79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */,
 				27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */,
@@ -744,7 +738,6 @@
 				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				79B9CD9C0B1A907600FBFDB3 /* CKInternalTransferRecord.h in Headers */,
-				79E51CE00BAA6755008F81A5 /* NSFileManager+Connection.h in Headers */,
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
@@ -998,7 +991,6 @@
 				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				79B9CD9D0B1A907600FBFDB3 /* CKInternalTransferRecord.m in Sources */,
-				79E51CE10BAA6755008F81A5 /* NSFileManager+Connection.m in Sources */,
 				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
 				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
