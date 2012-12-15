@@ -29,7 +29,6 @@
 
 #import "CKInternalTransferRecord.h"
 #import "RunLoopForwarder.h"
-#import "NSObject+Connection.h"
 
 @implementation CKInternalTransferRecord
 

@@ -34,7 +34,6 @@
 
 #import "RunLoopForwarder.h"
 #import "NSInvocation+Connection.h"
-#import "NSObject+Connection.h"
 
 @implementation RunLoopForwarder
 

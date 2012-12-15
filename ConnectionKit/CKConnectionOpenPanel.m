@@ -34,8 +34,6 @@
 #import "CKConnectionProtocol.h"
 #import "CKConnectionRegistry.h"
 
-#import "NSArray+Connection.h"
-
 
 @implementation CKConnectionOpenPanel
 

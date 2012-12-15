@@ -28,7 +28,6 @@ Copyright (c) 2004-2006 Karelia Software. All rights reserved.
  
  */
 #import "NSDictionary+Connection.h"
-#import "NSObject+Connection.h"
 
 @implementation NSDictionary (Connection)
 
