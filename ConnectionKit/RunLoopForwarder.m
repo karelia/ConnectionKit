@@ -121,8 +121,9 @@
 			else
 			{
 				[anInvocation performSelector:@selector(invokeWithTarget:)
+                                     onThread:createdOnThread
 								   withObject:myDelegate
-									 inThread:createdOnThread];
+                                waitUntilDone:NO];
 			}
 		} 
 		else 

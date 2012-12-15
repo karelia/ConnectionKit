@@ -37,12 +37,4 @@
 	return [self description];
 }
 
-- (void) performSelector:(SEL)selector
-              withObject:(id)object
-                inThread:(NSThread *)thread
-{
-    // TODO: still needed?
-    [self performSelector:selector withObject:object];
-}
-
 @end
