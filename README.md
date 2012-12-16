@@ -1,3 +1,5 @@
+ConnectionKit 2 is still under heavy development, but the front-end API is probably stable.
+
 Features
 ========
 
