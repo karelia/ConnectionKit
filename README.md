@@ -8,6 +8,7 @@ Things someone could do if they're feeling nice:
 * Improve handling of invalid certificates for FTPS
 * Amazon S3 protocol
 * Port `CKUploader` to the new API
+* API for downloading/reading files
 
 Features
 ========
