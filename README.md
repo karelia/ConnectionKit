@@ -1,4 +1,13 @@
+Development
+===========
+
 ConnectionKit 2 is still under heavy development, but the front-end API is probably stable.
+
+Things someone could do if they're feeling nice:
+
+* Improve handling of invalid certificates for FTPS
+* Amazon S3 protocol
+* Port `CKUploader` to the new API
 
 Features
 ========
