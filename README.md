@@ -29,7 +29,7 @@ Dependencies
 
 Requires OS X v10.6+
 
-Relies upon CURLHandle and DAVKit. They are provided as submodules and may have their own dependencies in turn. Out of the box, provided you check out all submodules, `CURLHandle.framework` should be able to nicely build, self-containing all its dependencies.
+Relies upon CURLHandle and DAVKit. They are provided as submodules and may have their own dependencies in turn. Out of the box, provided you initialise all submodules, `CURLHandle.framework` should be able to nicely build, self-containing all its dependencies.
 
 License
 =======
