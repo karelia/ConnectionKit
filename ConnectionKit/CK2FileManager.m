@@ -495,7 +495,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [[_manager delegate] fileManager:_manager appendString:info toTranscript:transcript];
+        
+        id <CK2FileManagerDelegate> delegate = [_manager delegate];
+        if ([delegate respondsToSelector:@selector(fileManager:appendString:toTranscript:)])
+        {
+            [delegate fileManager:_manager appendString:info toTranscript:transcript];
+        }
     });
 }
 
