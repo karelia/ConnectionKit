@@ -132,7 +132,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 @protocol CK2FileManagerDelegate <NSObject>
 // Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
+@optional
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+@required
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 @end
 
