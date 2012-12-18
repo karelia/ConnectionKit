@@ -11,7 +11,7 @@
 @interface CK2SFTPProtocol : CK2CURLBasedProtocol
 {
   @private
-    NSURL   *_knownHostsFile;
-    BOOL    _haveKnownHostsCredential;
+    NSURLCredential *_hostFingerprintCredential;
+    BOOL            _haveHostFingerprintCredential;
 }
 @end

@@ -23,7 +23,8 @@ extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 
 @interface NSURLCredential (CK2SSHHostFingerprint)
 
-+ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts;
+// NSURLCredentialPersistencePermanent indicates new keys should be added to the known_hosts file
++ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
 - (NSURL *)ck2_SSHKnownHostsFileURL;
 
 @end

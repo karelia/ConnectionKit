@@ -47,9 +47,9 @@ NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2Authentication
 
 @implementation CK2SSHKnownHostsFile
 
-- (id)initWithSSHKnownHostsFileURL:(NSURL *)knownHosts;
+- (id)initWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
 {
-    if (self = [self init])
+    if (self = [self initWithUser:nil password:nil persistence:persistence])
     {
         _knownHostsFileURL = [knownHosts copy];
     }
@@ -81,9 +81,9 @@ NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2Authentication
 
 @implementation NSURLCredential (CK2SSHHostFingerprint)
 
-+ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts;
++ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
 {
-    return [[[CK2SSHKnownHostsFile alloc] initWithSSHKnownHostsFileURL:knownHosts] autorelease];
+    return [[[CK2SSHKnownHostsFile alloc] initWithSSHKnownHostsFileURL:knownHosts persistence:persistence] autorelease];
 }
 
 - (NSURL *)ck2_SSHKnownHostsFileURL; { return nil; }

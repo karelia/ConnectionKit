@@ -129,8 +129,10 @@
     // See what the client wants to do about checking the host's fingerprint
     NSURL *url = [[self request] URL];
     NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:[url host]];
+    NSURL *knownHosts = [NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO];
     
-    NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
+    NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:knownHosts
+                                                                              persistence:NSURLCredentialPersistenceNone];
     
     NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                                          proposedCredential:credential
@@ -145,13 +147,13 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    if (_haveKnownHostsCredential)
+    if (_haveHostFingerprintCredential)
     {
         return [super useCredential:credential forAuthenticationChallenge:challenge];
     }
     
-    _knownHostsFile = [[credential ck2_SSHKnownHostsFileURL] copy];
-    _haveKnownHostsCredential = YES;
+    _hostFingerprintCredential = [credential copy];
+    _haveHostFingerprintCredential = YES;
     
     
     // Now we can grab the login credential
@@ -180,11 +182,26 @@
 - (NSURLRequest *)request;
 {
     // Once we know the known_hosts file's location, adjust the request to include it
-    if (!_knownHostsFile) return [super request];
+    NSURL *knownHosts = [_hostFingerprintCredential ck2_SSHKnownHostsFileURL];
+    if (!knownHosts) return [super request];
     
     NSMutableURLRequest *result = [[[super request] mutableCopy] autorelease];
-    [result curl_setSSHKnownHostsFileURL:_knownHostsFile];
+    [result curl_setSSHKnownHostsFileURL:knownHosts];
     return result;
+}
+
+#pragma mark CURLHandleDelegate
+
+- (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
+{
+    if (match == CURLKHMATCH_MISMATCH)
+    {
+        return CURLKHSTAT_REJECT;
+    }
+    else
+    {
+        return ([_hostFingerprintCredential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE);
+    }
 }
 
 @end
