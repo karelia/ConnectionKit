@@ -31,6 +31,7 @@
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
+		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
 		2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
@@ -227,6 +228,8 @@
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
+		22FEB6671680818800BB778B /* KMSTranscriptEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTranscriptEntry.m; sourceTree = "<group>"; };
+		22FEB6681680818800BB778B /* KMSTranscriptEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTranscriptEntry.h; sourceTree = "<group>"; };
 		2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKSFTPConnection.h; path = ../../ConnectionKit/CKSFTPConnection.h; sourceTree = "<group>"; };
 		2702E3E01459CAFC0085BBC4 /* CKSFTPConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKSFTPConnection.m; path = ../../ConnectionKit/CKSFTPConnection.m; sourceTree = "<group>"; };
 		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = ../SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
@@ -465,6 +468,8 @@
 		22F6D0E8165A8A2200443CC9 /* MockServer */ = {
 			isa = PBXGroup;
 			children = (
+				22FEB6671680818800BB778B /* KMSTranscriptEntry.m */,
+				22FEB6681680818800BB778B /* KMSTranscriptEntry.h */,
 				224AB371166E500E0066B1C6 /* KMSConnection.h */,
 				224AB372166E500E0066B1C6 /* KMSConnection.m */,
 				224AB373166E500E0066B1C6 /* KMSListener.h */,
@@ -980,6 +985,7 @@
 				224AB38C166E587F0066B1C6 /* KMSManualTests.m in Sources */,
 				22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */,
 				22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */,
+				22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
