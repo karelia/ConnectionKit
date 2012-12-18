@@ -59,9 +59,22 @@
     }
     else
     {
-        NSLog(@"authenticating as %@ %@", self.user, self.password);
-        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
-        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
+        
+        if ([authMethod isEqualToString:NSURLAuthenticationMethodDefault] ||
+            [authMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest] ||
+            [authMethod isEqualToString:NSURLAuthenticationMethodHTMLForm] ||
+            [authMethod isEqualToString:NSURLAuthenticationMethodNTLM] ||
+            [authMethod isEqualToString:NSURLAuthenticationMethodNegotiate])
+        {
+            NSLog(@"authenticating as %@ %@", self.user, self.password);
+            NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
+            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        }
+        else
+        {
+            [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
+        }
     }
 }
 
