@@ -7,6 +7,7 @@
 //
 
 #import "CK2SFTPProtocol.h"
+#import "CK2Authentication.h"
 
 #import "CK2SFTPSession.h"
 
@@ -112,19 +113,7 @@
     }
 }
 
-#pragma mark Lifecycle
-
-- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
-{
-    // Adjust the request to specify known_hosts file
-    NSMutableURLRequest *mutableRequest = [request mutableCopy];
-    [mutableRequest curl_setSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
-    
-    self = [super initWithRequest:mutableRequest client:client];
-    [mutableRequest release];
-    
-    return self;
-}
+#pragma mark Lifecycle & Auth
 
 - (void)start;
 {
@@ -136,6 +125,36 @@
         return;
     }
     
+    
+    // See what the client wants to do about checking the host's fingerprint
+    NSURL *url = [[self request] URL];
+    NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:[url host]];
+    
+    NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
+    
+    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                                         proposedCredential:credential
+                                                                                       previousFailureCount:0
+                                                                                            failureResponse:nil
+                                                                                                      error:nil
+                                                                                                     sender:self];
+        
+    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
+    [challenge release];
+}
+
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    if (_haveKnownHostsCredential)
+    {
+        return [super useCredential:credential forAuthenticationChallenge:challenge];
+    }
+    
+    _knownHostsFile = [[credential ck2_SSHKnownHostsFileURL] copy];
+    _haveKnownHostsCredential = YES;
+    
+    
+    // Now we can grab the login credential
     NSURL *url = [[self request] URL];
     
     NSURLProtectionSpace *space = [[CK2SSHProtectionSpace alloc] initWithHost:[url host]
@@ -144,17 +163,28 @@
                                                                         realm:nil
                                                          authenticationMethod:NSURLAuthenticationMethodDefault];
     
-    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:nil // client will fill it in for us
-                                                                                       previousFailureCount:0
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
+    challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                           proposedCredential:nil // client will fill it in for us
+                                                         previousFailureCount:0
+                                                              failureResponse:nil
+                                                                        error:nil
+                                                                       sender:self];
+    
     
     [space release];
     
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
     [challenge release];
+}
+
+- (NSURLRequest *)request;
+{
+    // Once we know the known_hosts file's location, adjust the request to include it
+    if (!_knownHostsFile) return [super request];
+    
+    NSMutableURLRequest *result = [[[super request] mutableCopy] autorelease];
+    [result curl_setSSHKnownHostsFileURL:_knownHostsFile];
+    return result;
 }
 
 @end

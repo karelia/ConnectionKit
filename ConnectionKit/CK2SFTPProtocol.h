@@ -9,5 +9,9 @@
 #import "CK2CURLBasedProtocol.h"
 
 @interface CK2SFTPProtocol : CK2CURLBasedProtocol
-
+{
+  @private
+    NSURL   *_knownHostsFile;
+    BOOL    _haveKnownHostsCredential;
+}
 @end
