@@ -114,6 +114,18 @@
 
 #pragma mark Lifecycle
 
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    // Adjust the request to specify known_hosts file
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    [mutableRequest curl_setSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
+    
+    self = [super initWithRequest:mutableRequest client:client];
+    [mutableRequest release];
+    
+    return self;
+}
+
 - (void)start;
 {
     // If there's no request, that means we were asked to do nothing possible over SFTP. Most likely, storing attributes that aren't POSIX permissions
