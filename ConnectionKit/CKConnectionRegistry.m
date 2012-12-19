@@ -82,12 +82,11 @@ enum {
 - (NSURLRequest *)connectionRequestForName:(NSString *)name host:(NSString *)host port:(NSNumber *)port
 {
     Class connectionClass = [self connectionClassForName:name];
-    if (!connectionClass) return nil;
 
     // if the name we passed in is in the supported schemes, use it, otherwise use the first scheme
     NSArray* schemes = [connectionClass URLSchemes];
     NSString* scheme = [name lowercaseString];
-    if (![schemes containsObject:scheme])
+    if (schemes && ![schemes containsObject:scheme])
     {
         scheme = [schemes objectAtIndex:0];
     }
