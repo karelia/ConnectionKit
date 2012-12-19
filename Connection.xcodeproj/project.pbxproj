@@ -110,10 +110,6 @@
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
-		D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */; };
-		D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */ = {isa = PBXBuildFile; fileRef = D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */ = {isa = PBXBuildFile; fileRef = D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -341,10 +337,6 @@
 		CED1897E0AC3210D002E8A4A /* ja */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = ja; path = ja.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CEDE18DD0A5C69BC0055352C /* zh_TW */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_TW; path = zh_TW.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEDE18DE0A5C69BE0055352C /* da */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = da; path = da.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
-		D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainProxy.h; sourceTree = "<group>"; };
-		D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainProxy.m; sourceTree = "<group>"; };
-		D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EMKeychainItem.h; sourceTree = "<group>"; };
-		D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EMKeychainItem.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -615,10 +607,6 @@
 		7983E2120B0C22D600F5078E /* Keychain */ = {
 			isa = PBXGroup;
 			children = (
-				D3F21D960D14BB2900B1BADD /* EMKeychainProxy.h */,
-				D3F21D970D14BB2900B1BADD /* EMKeychainProxy.m */,
-				D3F21E850D14D0DD00B1BADD /* EMKeychainItem.h */,
-				D3F21E860D14D0DD00B1BADD /* EMKeychainItem.m */,
 			);
 			name = Keychain;
 			sourceTree = "<group>";
@@ -752,8 +740,6 @@
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
-				D3F21D980D14BB2900B1BADD /* EMKeychainProxy.h in Headers */,
-				D3F21E870D14D0DD00B1BADD /* EMKeychainItem.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
 				27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */,
@@ -1007,8 +993,6 @@
 				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
 				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
-				D3F21D990D14BB2900B1BADD /* EMKeychainProxy.m in Sources */,
-				D3F21E880D14D0DD00B1BADD /* EMKeychainItem.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
 				27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */,

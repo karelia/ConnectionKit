@@ -69,6 +69,3 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>
 
-#import <Connection/EMKeychainProxy.h>
-#import <Connection/EMKeychainItem.h>
-
