@@ -1,4 +1,6 @@
 
 #import "KTLog.h"
 
+#ifndef CK2WebDAVLog
 #define CK2WebDAVLog(...)
+#endif
