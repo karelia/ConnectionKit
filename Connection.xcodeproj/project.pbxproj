@@ -26,6 +26,7 @@
 		22662EE4165D1EE4005FCC4A /* CK2FileManagerBaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */; };
 		22662EF3165D2EEC005FCC4A /* ftp.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF1165D2EEC005FCC4A /* ftp.json */; };
 		22662EF4165D2EEC005FCC4A /* webdav.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF2165D2EEC005FCC4A /* webdav.json */; };
+		227113BF168388FD00280005 /* http.json in Resources */ = {isa = PBXBuildFile; fileRef = 227113BE168388FD00280005 /* http.json */; };
 		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
@@ -218,6 +219,7 @@
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EF1165D2EEC005FCC4A /* ftp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ftp.json; sourceTree = "<group>"; };
 		22662EF2165D2EEC005FCC4A /* webdav.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = webdav.json; sourceTree = "<group>"; };
+		227113BE168388FD00280005 /* http.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = http.json; sourceTree = "<group>"; };
 		2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests.m; sourceTree = "<group>"; };
 		2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2WebDAVProtocol.h; sourceTree = "<group>"; };
 		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
@@ -484,6 +486,7 @@
 		22F6D0FF165A8A2200443CC9 /* UnitTests */ = {
 			isa = PBXGroup;
 			children = (
+				227113BE168388FD00280005 /* http.json */,
 				22662EF1165D2EEC005FCC4A /* ftp.json */,
 				22662EF2165D2EEC005FCC4A /* webdav.json */,
 				224AB38B166E587F0066B1C6 /* KMSManualTests.m */,
@@ -899,6 +902,7 @@
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
 				795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
+				227113BF168388FD00280005 /* http.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

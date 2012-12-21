@@ -230,6 +230,11 @@
 {
     CK2WebDAVLog(@"setting resource values");
 
+    if ((self = [self initWithRequest:request client:client]) != nil)
+    {
+        [self reportFinished];
+    }
+
     return self;
 }
 
