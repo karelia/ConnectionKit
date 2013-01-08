@@ -6,7 +6,7 @@
 //
 //  Usage:
 //  Much like NSFileManager, alloc + init your own instance. Likely you'll want to give it a delegate so can handle authentication challenges. Then just use the instance methods to perform your desired file operations.
-//  A opaque object is returned from each "worker" method that represents the file operation being performed. You can hang onto this token and pass it to -cancelOperation:
+//  An opaque object is returned from each "worker" method that represents the file operation being performed. You can hang onto this token and pass it to -cancelOperation:
 //
 
 #import <Foundation/Foundation.h>
