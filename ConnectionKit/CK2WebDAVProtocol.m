@@ -402,6 +402,7 @@
     CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
         DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
+        [davRequest release];
 
         self.completionHandler = completionHandler;
         self.errorHandler = errorHandler;
