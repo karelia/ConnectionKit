@@ -182,6 +182,13 @@ static size_t kCopyBufferSize = 4096;
     _block();
 }
 
+- (void)stop;
+{
+    // Most operations are synchronous; we can't stop them
+    // TODO: Directory enumeration could theoretically stop midway through
+    // TODO: File creation is DEFINITELY cancellable
+}
+
 #pragma mark - File Copying
 
 - (NSError*)modifiedErrorForFileError:(NSError*)error
