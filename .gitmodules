@@ -1,9 +1,9 @@
 [submodule "DAVKit"]
 	path = DAVKit
-	url = git@github.com:karelia/DAVKit.git
+	url = git@github.com:EnthusiasticCode/DAVKit.git
 [submodule "CurlHandle"]
 	path = CurlHandle
-	url = git@github.com:karelia/CurlHandle.git
+	url = git@github.com:EnthusiasticCode/CurlHandle.git
 [submodule "UnitTests/MockServer"]
 	path = UnitTests/MockServer
 	url = git@github.com:karelia/MockServer.git
