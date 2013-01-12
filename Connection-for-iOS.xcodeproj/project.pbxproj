@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		220526BA165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */; };
-		220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
@@ -38,12 +36,7 @@
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
 		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
-		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		271059541671441700E20511 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
-		27105BC21671599700E20511 /* libssl.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -79,7 +72,6 @@
 		795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
 		795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
-		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		7978FC150B117D7C0048168B /* bookmark.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7978FC140B117D7C0048168B /* bookmark.tif */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
 		798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 798313C70B0D67E000F5078E /* CKTransferProgressCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -104,14 +96,33 @@
 		79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8CA09F706C700172CDD /* KTLog.nib */; };
 		79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD90009F7077900172CDD /* NSData+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD90109F7077900172CDD /* NSData+Connection.m */; };
-		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
-		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
 		79F18B440CFF3AAE009F0324 /* NSMatrix+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
-		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
-		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		CD92EDBE16A184D20035A117 /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84209F7048400172CDD /* RunLoopForwarder.m */; };
+		CD92EDBF16A184D20035A117 /* NSData+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD90109F7077900172CDD /* NSData+Connection.m */; };
+		CD92EDC016A184D20035A117 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
+		CD92EDC116A184D20035A117 /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
+		CD92EDC316A184D20035A117 /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
+		CD92EDC516A184D20035A117 /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
+		CD92EDC616A184D20035A117 /* CKInternalTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B9CD9B0B1A907600FBFDB3 /* CKInternalTransferRecord.m */; };
+		CD92EDCA16A184D20035A117 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
+		CD92EDCB16A184D20035A117 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
+		CD92EDCD16A184D20035A117 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
+		CD92EDCE16A184D20035A117 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
+		CD92EDCF16A184D20035A117 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
+		CD92EDD016A184D20035A117 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
+		CD92EDD116A184D20035A117 /* CK2RemoteURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8211626CA67000C9D9F /* CK2RemoteURL.m */; };
+		CD92EDD216A184D20035A117 /* CK2Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2Protocol.m */; };
+		CD92EDD316A184D20035A117 /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
+		CD92EDD416A184D20035A117 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
+		CD92EDD516A184D20035A117 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
+		CD92EDD716A184D20035A117 /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
+		CD92EDD816A184D20035A117 /* CK2Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278D8B78167FF35D00622468 /* CK2Authentication.m */; };
+		CD92EDE616A185330035A117 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD92EDE516A185330035A117 /* Security.framework */; };
+		CD92EDF616A18AB70035A117 /* libcurlhandle.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD92EDF316A18AA70035A117 /* libcurlhandle.a */; };
+		CD92EE1816A1928B0035A117 /* liblibdavkit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = CD92EE1316A190AF0035A117 /* liblibdavkit.a */; };
+		CD92EE1C16A193FB0035A117 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CD92EE1B16A193FB0035A117 /* MobileCoreServices.framework */; };
 		CDDD233116A07BD300693DE6 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CDDD233016A07BD300693DE6 /* Foundation.framework */; };
-		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -157,6 +168,34 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
+		CD92EDF216A18AA70035A117 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CD92EDE716A18AA70035A117 /* CURLHandle-for-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CDDD237116A0886800693DE6;
+			remoteInfo = curlhandle;
+		};
+		CD92EE0E16A190AF0035A117 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
+			remoteInfo = DAVKit;
+		};
+		CD92EE1016A190AF0035A117 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = C9FF77EC121C6F51001250C7;
+			remoteInfo = Tests;
+		};
+		CD92EE1216A190AF0035A117 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = CD8AE291161873710095DC1B;
+			remoteInfo = libdavkit;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -175,11 +214,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				271059521671334500E20511 /* DAVKit.framework in CopyFiles */,
 				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
-				271059541671441700E20511 /* libssh2.dylib in CopyFiles */,
-				27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */,
-				27105BC21671599700E20511 /* libssl.dylib in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -196,8 +231,6 @@
 
 /* Begin PBXFileReference section */
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
-		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPAuthenticationTests.m; sourceTree = "<group>"; };
 		220526F4165E989700A2BBC9 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Connection_Prefix.pch; path = ConnectionKit/Connection_Prefix.pch; sourceTree = "<group>"; };
 		220526F6165E98B400A2BBC9 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ConnectionKit/main.m; sourceTree = "<group>"; };
@@ -205,8 +238,6 @@
 		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		223B687915A1CC8700C127BA /* NSInvocation+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSInvocation+Connection.h"; sourceTree = "<group>"; };
 		223B687A15A1CC8700C127BA /* NSInvocation+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSInvocation+Connection.m"; sourceTree = "<group>"; };
-		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = CurlHandle/SFTP/libssl.dylib; sourceTree = "<group>"; };
-		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = CurlHandle/SFTP/libcrypto.dylib; sourceTree = "<group>"; };
 		22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFileTests.m; sourceTree = "<group>"; };
 		2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnitTests_Prefix.pch; sourceTree = "<group>"; };
 		224AB371166E500E0066B1C6 /* KMSConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSConnection.h; sourceTree = "<group>"; };
@@ -244,7 +275,6 @@
 		2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = ../SFTP/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
 		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = ../SFTP/CK2SFTPSession.h; sourceTree = "<group>"; };
 		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = ../SFTP/CK2SFTPSession.m; sourceTree = "<group>"; };
-		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = CurlHandle/SFTP/libssh2.dylib; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
 		2743E8071622E47600019979 /* CK2FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManager.h; sourceTree = "<group>"; };
@@ -252,7 +282,6 @@
 		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
 		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
-		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278D8B77167FF35D00622468 /* CK2Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Authentication.h; sourceTree = "<group>"; };
 		278D8B78167FF35D00622468 /* CK2Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Authentication.m; sourceTree = "<group>"; };
 		2790A8201626CA67000C9D9F /* CK2RemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2RemoteURL.h; sourceTree = "<group>"; };
@@ -272,8 +301,6 @@
 		27F394F4162C162900944F43 /* CK2SFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2SFTPProtocol.m; sourceTree = "<group>"; };
 		27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Connection.h"; sourceTree = "<group>"; };
 		27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Connection.m"; sourceTree = "<group>"; };
-		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
-		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -290,7 +317,6 @@
 		795AFEF20B115511006905FA /* UKKQueue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKKQueue.m; sourceTree = "<group>"; };
 		795AFEF30B115511006905FA /* UKMainThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKMainThreadProxy.h; sourceTree = "<group>"; };
 		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
-		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
 		7978FC140B117D7C0048168B /* bookmark.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = bookmark.tif; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferProgressCell.h; sourceTree = "<group>"; };
@@ -317,13 +343,12 @@
 		79CFD8CB09F706C700172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLog.nib; sourceTree = "<group>"; };
 		79CFD90009F7077900172CDD /* NSData+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Connection.h"; sourceTree = "<group>"; };
 		79CFD90109F7077900172CDD /* NSData+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+Connection.m"; sourceTree = "<group>"; };
-		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
-		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
-		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
 		79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSMatrix+Connection.h"; sourceTree = "<group>"; };
 		79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMatrix+Connection.m"; sourceTree = "<group>"; };
-		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
-		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		CD92EDE516A185330035A117 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk/System/Library/Frameworks/Security.framework; sourceTree = DEVELOPER_DIR; };
+		CD92EDE716A18AA70035A117 /* CURLHandle-for-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "CURLHandle-for-iOS.xcodeproj"; path = "CurlHandle/CURLHandleSource/CURLHandle-for-iOS.xcodeproj"; sourceTree = "<group>"; };
+		CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "DAVKit-for-iOS.xcodeproj"; path = "DAVKit/DAVKit-for-iOS.xcodeproj"; sourceTree = "<group>"; };
+		CD92EE1B16A193FB0035A117 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.0.sdk/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		CDDD232F16A07BD300693DE6 /* libconnectionkit.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libconnectionkit.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		CDDD233016A07BD300693DE6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		CE1AD3DE0A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -342,7 +367,6 @@
 		CEA9AFD30A64224100855897 /* ja */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = ja; path = ja.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CEB563840A7AB7070081179A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CEB563850A7AB7070081179A /* de */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
-		CEB6FA0A13A696B200C8059F /* libsasl2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsasl2.dylib; path = /usr/lib/libsasl2.dylib; sourceTree = "<absolute>"; };
 		CED189610AC320E4002E8A4A /* de */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = de; path = de.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189620AC320E8002E8A4A /* fr */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = fr; path = fr.lproj/KTLog.nib; sourceTree = "<group>"; };
 		CED189630AC320EA002E8A4A /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/KTLog.nib; sourceTree = "<group>"; };
@@ -360,7 +384,6 @@
 			files = (
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
-				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -369,14 +392,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */,
-				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
-				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
-				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
-				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
-				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
-				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
-				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
-				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -384,6 +399,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD92EE1C16A193FB0035A117 /* MobileCoreServices.framework in Frameworks */,
+				CD92EE1816A1928B0035A117 /* liblibdavkit.a in Frameworks */,
+				CD92EDF616A18AB70035A117 /* libcurlhandle.a in Frameworks */,
+				CD92EDE616A185330035A117 /* Security.framework in Frameworks */,
 				CDDD233116A07BD300693DE6 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -399,6 +418,7 @@
 				79CFD11A09F7022900172CDD /* Connections */,
 				7983E2120B0C22D600F5078E /* Keychain */,
 				79CFD8A509F705FF00172CDD /* UI */,
+				29B97323FDCFA39411CA2CEA /* Frameworks */,
 			);
 			name = Framework;
 			path = ConnectionKit;
@@ -421,35 +441,6 @@
 			);
 			name = "Unit Tests";
 			path = UnitTests;
-			sourceTree = "<group>";
-		};
-		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
-				79FB807109F74185006E7D11 /* Carbon.framework */,
-				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				27448C371458100D00EB086F /* DAVKit.framework */,
-				22407D5D166FA17600E1EAD4 /* libcrypto.dylib */,
-				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
-				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
-				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
-				22407D5A166FA12500E1EAD4 /* libssl.dylib */,
-				79CFD92D09F7080B00172CDD /* libz.dylib */,
-				79CFD93609F7084000172CDD /* Security.framework */,
-				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
-			);
-			name = "Linked Frameworks";
-			sourceTree = "<group>";
-		};
-		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
-				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
-				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
-			);
-			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
@@ -578,7 +569,6 @@
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
-				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
 			name = Connection;
@@ -606,12 +596,15 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */,
+				CD92EDE716A18AA70035A117 /* CURLHandle-for-iOS.xcodeproj */,
+				CD92EDE516A185330035A117 /* Security.framework */,
 				220AD7991509019B00748655 /* SenTestingKit.framework */,
 				CDDD233016A07BD300693DE6 /* Foundation.framework */,
-				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
+				CD92EE1B16A193FB0035A117 /* MobileCoreServices.framework */,
 			);
 			name = Frameworks;
+			path = ..;
 			sourceTree = "<group>";
 		};
 		795AFEE50B1154E2006905FA /* UKKQueue */ = {
@@ -717,6 +710,24 @@
 				7978FC140B117D7C0048168B /* bookmark.tif */,
 			);
 			name = Images;
+			sourceTree = "<group>";
+		};
+		CD92EDE816A18AA70035A117 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CD92EDF316A18AA70035A117 /* libcurlhandle.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CD92EE0616A190AF0035A117 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				CD92EE0F16A190AF0035A117 /* DAVKit.framework */,
+				CD92EE1116A190AF0035A117 /* Tests.octest */,
+				CD92EE1316A190AF0035A117 /* liblibdavkit.a */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
@@ -873,8 +884,16 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
+					ProductGroup = CD92EDE816A18AA70035A117 /* Products */;
+					ProjectRef = CD92EDE716A18AA70035A117 /* CURLHandle-for-iOS.xcodeproj */;
+				},
+				{
 					ProductGroup = 220526E3165E96AA00A2BBC9 /* Products */;
 					ProjectRef = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+				},
+				{
+					ProductGroup = CD92EE0616A190AF0035A117 /* Products */;
+					ProjectRef = CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */;
 				},
 				{
 					ProductGroup = 220526EC165E97B400A2BBC9 /* Products */;
@@ -917,6 +936,34 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CD92EDF316A18AA70035A117 /* libcurlhandle.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libcurlhandle.a;
+			remoteRef = CD92EDF216A18AA70035A117 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CD92EE0F16A190AF0035A117 /* DAVKit.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = DAVKit.framework;
+			remoteRef = CD92EE0E16A190AF0035A117 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CD92EE1116A190AF0035A117 /* Tests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = Tests.octest;
+			remoteRef = CD92EE1016A190AF0035A117 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CD92EE1316A190AF0035A117 /* liblibdavkit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblibdavkit.a;
+			remoteRef = CD92EE1216A190AF0035A117 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1059,6 +1106,26 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CD92EDBE16A184D20035A117 /* RunLoopForwarder.m in Sources */,
+				CD92EDBF16A184D20035A117 /* NSData+Connection.m in Sources */,
+				CD92EDC016A184D20035A117 /* NSString+Connection.m in Sources */,
+				CD92EDC116A184D20035A117 /* CKTransferRecord.m in Sources */,
+				CD92EDC316A184D20035A117 /* UKFileWatcher.m in Sources */,
+				CD92EDC516A184D20035A117 /* UKMainThreadProxy.m in Sources */,
+				CD92EDC616A184D20035A117 /* CKInternalTransferRecord.m in Sources */,
+				CD92EDCA16A184D20035A117 /* NSURL+Connection.m in Sources */,
+				CD92EDCB16A184D20035A117 /* CKConnectionRegistry.m in Sources */,
+				CD92EDCD16A184D20035A117 /* CK2SFTPFileHandle.m in Sources */,
+				CD92EDCE16A184D20035A117 /* CK2SFTPSession.m in Sources */,
+				CD92EDCF16A184D20035A117 /* CKUploader.m in Sources */,
+				CD92EDD016A184D20035A117 /* CK2FileManager.m in Sources */,
+				CD92EDD116A184D20035A117 /* CK2RemoteURL.m in Sources */,
+				CD92EDD216A184D20035A117 /* CK2Protocol.m in Sources */,
+				CD92EDD316A184D20035A117 /* CK2FTPProtocol.m in Sources */,
+				CD92EDD416A184D20035A117 /* CK2SFTPProtocol.m in Sources */,
+				CD92EDD516A184D20035A117 /* CK2FileProtocol.m in Sources */,
+				CD92EDD716A184D20035A117 /* CK2CURLBasedProtocol.m in Sources */,
+				CD92EDD816A184D20035A117 /* CK2Authentication.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1389,16 +1456,19 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "connectionkit/connectionkit-Prefix.pch";
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2-for-iOS/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/CurlHandle/SFTP/libssh2-for-iOS/include/libssh2",
+					"$(SOURCE_ROOT)/CurlHandle/libcurl-for-iOS/curl/include",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP/libssh2-for-iOS/lib";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1418,11 +1488,14 @@
 				DSTROOT = /tmp/connectionkit.dst;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "connectionkit/connectionkit-Prefix.pch";
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2-for-iOS/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/CurlHandle/SFTP/libssh2-for-iOS/include/libssh2",
+					"$(SOURCE_ROOT)/CurlHandle/libcurl-for-iOS/curl/include",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP/libssh2-for-iOS/lib";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1443,11 +1516,14 @@
 				DSTROOT = /tmp/connectionkit.dst;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "connectionkit/connectionkit-Prefix.pch";
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2-for-iOS/include";
+				HEADER_SEARCH_PATHS = (
+					"$(SOURCE_ROOT)/CurlHandle/SFTP/libssh2-for-iOS/include/libssh2",
+					"$(SOURCE_ROOT)/CurlHandle/libcurl-for-iOS/curl/include",
+				);
 				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
-				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP";
+				LIBRARY_SEARCH_PATHS = "$(SRCROOT)/CURLHandle/SFTP/libssh2-for-iOS/lib";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
@@ -1497,6 +1573,7 @@
 				CDDD233C16A07BD300693DE6 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

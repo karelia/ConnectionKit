@@ -29,7 +29,11 @@
  */
 
 
+#if !TARGET_OS_IPHONE
 #import <Cocoa/Cocoa.h>
+#else
+#import <Foundation/Foundation.h>
+#endif
 
 
 #define LocalizedStringInConnectionKitBundle(key, comment) \

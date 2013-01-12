@@ -32,7 +32,9 @@
 
 @interface NSData (Connection)
 
+#if !TARGET_OS_IPHONE
 - (NSString *)base64Encoding;
+#endif
 - (NSString *)descriptionAsUTF8String;
 
 @end

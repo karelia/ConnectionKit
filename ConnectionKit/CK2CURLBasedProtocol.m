@@ -14,6 +14,9 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
+#if TARGET_OS_IPHONE
+#import <MobileCoreServices/MobileCoreServices.h>
+#endif
 
 @implementation CK2CURLBasedProtocol
 
