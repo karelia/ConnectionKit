@@ -395,19 +395,21 @@
  the path we were initially given, and calls the completion block we were given.
  */
 
-- (void)addCreateDirectoryRequestForPath:(NSString*)path withIntermediateDirectories:(BOOL)createIntermediates
+- (void)addCreateDirectoryRequestForPath:(NSString*)path
+             withIntermediateDirectories:(BOOL)createIntermediates
                             errorHandler:(CK2WebDAVErrorHandler)errorHandler
                        completionHandler:(CK2WebDAVCompletionHandler)completionHandler
 {
-    CK2WebDAVCompletionHandler createDirectoryBlock = ^(id result) {
+    CK2WebDAVCompletionHandler createDirectoryBlock = Block_copy(^(id result) {
         DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
+        [davRequest release];
 
         self.completionHandler = completionHandler;
         self.errorHandler = errorHandler;
-    };
+    });
 
-    CK2WebDAVErrorHandler errorBlock = ^(NSError* error) {
+    CK2WebDAVErrorHandler errorBlock = Block_copy(^(NSError* error) {
         if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
         {
             // ignore failure to create for all but the top directory, on the basis that they may well exist already
@@ -418,7 +420,7 @@
             // other errors are passed on
             errorHandler(error);
         }
-    };
+    });
 
     BOOL recursed = NO;
     if (createIntermediates)
@@ -426,7 +428,7 @@
         NSString* parent = [path stringByDeletingLastPathComponent];
         if (![parent isEqualToString:@"/"])
         {
-            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:[errorBlock copy] completionHandler:[createDirectoryBlock copy]];
+            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:errorBlock completionHandler:createDirectoryBlock];
             recursed = YES;
         }
     }
@@ -435,7 +437,9 @@
     {
         createDirectoryBlock(nil);
     }
-    
+
+    Block_release(errorHandler);
+    Block_release(createDirectoryBlock);
 }
 
 @end

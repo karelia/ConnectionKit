@@ -110,6 +110,7 @@
 		79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */; };
 		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
 		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
+		ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */ = {isa = PBXBuildFile; fileRef = ADEE5E17169C84DF006188C5 /* KMSState.h */; };
 		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
 /* End PBXBuildFile section */
 
@@ -314,6 +315,7 @@
 		79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSMatrix+Connection.m"; sourceTree = "<group>"; };
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
+		ADEE5E17169C84DF006188C5 /* KMSState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSState.h; sourceTree = "<group>"; };
 		CE1AD3DE0A7E845A0083C01E /* it */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = it; path = it.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE55A6600AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = zh_CN; path = zh_CN.lproj/ConnectionOpenPanel.nib; sourceTree = "<group>"; };
@@ -478,6 +480,7 @@
 				224AB37C166E500E0066B1C6 /* KMSServer.m */,
 				224AB388166E52680066B1C6 /* KMSTestCase.h */,
 				224AB389166E52680066B1C6 /* KMSTestCase.m */,
+				ADEE5E17169C84DF006188C5 /* KMSState.h */,
 				22F6D0FF165A8A2200443CC9 /* UnitTests */,
 			);
 			path = MockServer;
@@ -757,6 +760,7 @@
 				27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */,
 				27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */,
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
+				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
