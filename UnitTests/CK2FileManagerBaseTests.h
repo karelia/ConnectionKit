@@ -4,7 +4,7 @@
 //
 
 #import "KMSTestCase.h"
-#import "KMSServer.h"
+#import "KMSState.h"
 #import "CK2FileManager.h"
 
 #define TEST_WITH_REAL_SERVER 0
