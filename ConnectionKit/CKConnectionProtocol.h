@@ -227,8 +227,6 @@ typedef enum {
 
 - (void)editFile:(NSString *)remoteFile;
 
-- (void)cancelTransfer;
-
 @end
 
 

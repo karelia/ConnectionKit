@@ -68,6 +68,29 @@
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
+		32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */; };
+		32B592BA16A4960B0020FFE9 /* CK2OpenPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */; };
+		32B592BB16A4960B0020FFE9 /* CK2OpenPanelController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A416A4960B0020FFE9 /* CK2OpenPanelController.m */; };
+		32B592BC16A4960B0020FFE9 /* CK2FileCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A516A4960B0020FFE9 /* CK2FileCell.h */; };
+		32B592BD16A4960B0020FFE9 /* CK2FileCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A616A4960B0020FFE9 /* CK2FileCell.m */; };
+		32B592BE16A4960B0020FFE9 /* NSURL+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */; };
+		32B592BF16A4960B0020FFE9 /* NSURL+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */; };
+		32B592C016A4960B0020FFE9 /* CK2PathControl.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A916A4960B0020FFE9 /* CK2PathControl.h */; };
+		32B592C116A4960B0020FFE9 /* CK2PathControl.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592AA16A4960B0020FFE9 /* CK2PathControl.m */; };
+		32B592C216A4960B0020FFE9 /* CK2IconViewItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592AB16A4960B0020FFE9 /* CK2IconViewItem.h */; };
+		32B592C316A4960B0020FFE9 /* CK2IconViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */; };
+		32B592C416A4960B0020FFE9 /* CK2IconItemView.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */; };
+		32B592C516A4960B0020FFE9 /* CK2IconItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */; };
+		32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */; };
+		32B592C716A4960B0020FFE9 /* CK2OpenPanelViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B016A4960B0020FFE9 /* CK2OpenPanelViewController.h */; };
+		32B592C816A4960B0020FFE9 /* CK2OpenPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B116A4960B0020FFE9 /* CK2OpenPanelViewController.m */; };
+		32B592C916A4960B0020FFE9 /* CK2OpenPanelIconViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B216A4960B0020FFE9 /* CK2OpenPanelIconViewController.h */; };
+		32B592CA16A4960B0020FFE9 /* CK2OpenPanelIconViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B316A4960B0020FFE9 /* CK2OpenPanelIconViewController.m */; };
+		32B592CB16A4960B0020FFE9 /* CK2OpenPanelListViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B416A4960B0020FFE9 /* CK2OpenPanelListViewController.h */; };
+		32B592CC16A4960B0020FFE9 /* CK2OpenPanelListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */; };
+		32B592CD16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */; };
+		32B592CE16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -121,13 +144,6 @@
 			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
 			remoteInfo = CURLHandle;
 		};
-		220526E9165E96AA00A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 223FD092160B523700BE1C80;
-			remoteInfo = CURLHandleTests;
-		};
 		220526F0165E97B400A2BBC9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
@@ -155,6 +171,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
+		};
+		32B5929B169E13080020FFE9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223FD092160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -264,6 +287,29 @@
 		27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Connection.m"; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
+		32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanel.m; sourceTree = "<group>"; };
+		32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelController.h; sourceTree = "<group>"; };
+		32B592A416A4960B0020FFE9 /* CK2OpenPanelController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelController.m; sourceTree = "<group>"; };
+		32B592A516A4960B0020FFE9 /* CK2FileCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileCell.h; sourceTree = "<group>"; };
+		32B592A616A4960B0020FFE9 /* CK2FileCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileCell.m; sourceTree = "<group>"; };
+		32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+CK2OpenPanel.h"; sourceTree = "<group>"; };
+		32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+CK2OpenPanel.m"; sourceTree = "<group>"; };
+		32B592A916A4960B0020FFE9 /* CK2PathControl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2PathControl.h; sourceTree = "<group>"; };
+		32B592AA16A4960B0020FFE9 /* CK2PathControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2PathControl.m; sourceTree = "<group>"; };
+		32B592AB16A4960B0020FFE9 /* CK2IconViewItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconViewItem.h; sourceTree = "<group>"; };
+		32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconViewItem.m; sourceTree = "<group>"; };
+		32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconItemView.h; sourceTree = "<group>"; };
+		32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconItemView.m; sourceTree = "<group>"; };
+		32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2OpenPanel.xib; sourceTree = "<group>"; };
+		32B592B016A4960B0020FFE9 /* CK2OpenPanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelViewController.h; sourceTree = "<group>"; };
+		32B592B116A4960B0020FFE9 /* CK2OpenPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelViewController.m; sourceTree = "<group>"; };
+		32B592B216A4960B0020FFE9 /* CK2OpenPanelIconViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelIconViewController.h; sourceTree = "<group>"; };
+		32B592B316A4960B0020FFE9 /* CK2OpenPanelIconViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelIconViewController.m; sourceTree = "<group>"; };
+		32B592B416A4960B0020FFE9 /* CK2OpenPanelListViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelListViewController.h; sourceTree = "<group>"; };
+		32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelListViewController.m; sourceTree = "<group>"; };
+		32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelColumnViewController.h; sourceTree = "<group>"; };
+		32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelColumnViewController.m; sourceTree = "<group>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -445,7 +491,7 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
+				32B5929C169E13080020FFE9 /* CURLHandleTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -592,6 +638,36 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		32B592A016A1016A0020FFE9 /* CK2OpenPanel */ = {
+			isa = PBXGroup;
+			children = (
+				32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */,
+				32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */,
+				32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */,
+				32B592A416A4960B0020FFE9 /* CK2OpenPanelController.m */,
+				32B592B016A4960B0020FFE9 /* CK2OpenPanelViewController.h */,
+				32B592B116A4960B0020FFE9 /* CK2OpenPanelViewController.m */,
+				32B592B216A4960B0020FFE9 /* CK2OpenPanelIconViewController.h */,
+				32B592B316A4960B0020FFE9 /* CK2OpenPanelIconViewController.m */,
+				32B592B416A4960B0020FFE9 /* CK2OpenPanelListViewController.h */,
+				32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */,
+				32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */,
+				32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */,
+				32B592A516A4960B0020FFE9 /* CK2FileCell.h */,
+				32B592A616A4960B0020FFE9 /* CK2FileCell.m */,
+				32B592A916A4960B0020FFE9 /* CK2PathControl.h */,
+				32B592AA16A4960B0020FFE9 /* CK2PathControl.m */,
+				32B592AB16A4960B0020FFE9 /* CK2IconViewItem.h */,
+				32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */,
+				32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */,
+				32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */,
+				32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */,
+				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
+				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
+			);
+			name = CK2OpenPanel;
+			sourceTree = "<group>";
+		};
 		795AFEE50B1154E2006905FA /* UKKQueue */ = {
 			isa = PBXGroup;
 			children = (
@@ -672,6 +748,7 @@
 		79CFD8A509F705FF00172CDD /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				32B592A016A1016A0020FFE9 /* CK2OpenPanel */,
 				79CFD81109F7048400172CDD /* CKConnectionOpenPanel.h */,
 				79CFD81209F7048400172CDD /* CKConnectionOpenPanel.m */,
 				79CFD8C609F7069100172CDD /* ConnectionOpenPanel.nib */,
@@ -757,6 +834,17 @@
 				27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */,
 				27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */,
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
+				32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */,
+				32B592BA16A4960B0020FFE9 /* CK2OpenPanelController.h in Headers */,
+				32B592BC16A4960B0020FFE9 /* CK2FileCell.h in Headers */,
+				32B592BE16A4960B0020FFE9 /* NSURL+CK2OpenPanel.h in Headers */,
+				32B592C016A4960B0020FFE9 /* CK2PathControl.h in Headers */,
+				32B592C216A4960B0020FFE9 /* CK2IconViewItem.h in Headers */,
+				32B592C416A4960B0020FFE9 /* CK2IconItemView.h in Headers */,
+				32B592C716A4960B0020FFE9 /* CK2OpenPanelViewController.h in Headers */,
+				32B592C916A4960B0020FFE9 /* CK2OpenPanelIconViewController.h in Headers */,
+				32B592CB16A4960B0020FFE9 /* CK2OpenPanelListViewController.h in Headers */,
+				32B592CD16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -858,13 +946,6 @@
 			remoteRef = 220526E7165E96AA00A2BBC9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = CURLHandleTests.octest;
-			remoteRef = 220526E9165E96AA00A2BBC9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		220526F1165E97B400A2BBC9 /* DAVKit.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
@@ -877,6 +958,13 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		32B5929C169E13080020FFE9 /* CURLHandleTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CURLHandleTests.octest;
+			remoteRef = 32B5929B169E13080020FFE9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -903,6 +991,7 @@
 				795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				227113BF168388FD00280005 /* http.json in Resources */,
+				32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -949,7 +1038,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\nmv en.lproj/Localizable.strings.utf8 en.lproj/Localizable.strings\n";
+			shellScript = "echo \"Generating Localizable.strings ...\"\nexit 0\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\nmv en.lproj/Localizable.strings.utf8 en.lproj/Localizable.strings\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1012,6 +1101,17 @@
 				2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */,
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
+				32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */,
+				32B592BB16A4960B0020FFE9 /* CK2OpenPanelController.m in Sources */,
+				32B592BD16A4960B0020FFE9 /* CK2FileCell.m in Sources */,
+				32B592BF16A4960B0020FFE9 /* NSURL+CK2OpenPanel.m in Sources */,
+				32B592C116A4960B0020FFE9 /* CK2PathControl.m in Sources */,
+				32B592C316A4960B0020FFE9 /* CK2IconViewItem.m in Sources */,
+				32B592C516A4960B0020FFE9 /* CK2IconItemView.m in Sources */,
+				32B592C816A4960B0020FFE9 /* CK2OpenPanelViewController.m in Sources */,
+				32B592CA16A4960B0020FFE9 /* CK2OpenPanelIconViewController.m in Sources */,
+				32B592CC16A4960B0020FFE9 /* CK2OpenPanelListViewController.m in Sources */,
+				32B592CE16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
