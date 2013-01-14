@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		220526BA165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */; };
-		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
@@ -36,7 +35,6 @@
 		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
 		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
-		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -126,41 +124,6 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		220526E7165E96AA00A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = CURLHandle;
-		};
-		220526E9165E96AA00A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 223FD092160B523700BE1C80;
-			remoteInfo = CURLHandleTests;
-		};
-		220526F0165E97B400A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 8DC2EF5B0486A6940098B216;
-			remoteInfo = DAVKit;
-		};
-		220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = C9FF77EC121C6F51001250C7;
-			remoteInfo = Tests;
-		};
-		220526FC165EA20600A2BBC9 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
-			remoteInfo = CURLHandle;
-		};
 		220AD7AD1509021A00748655 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
@@ -214,7 +177,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,7 +243,6 @@
 		2743E8081622E47600019979 /* CK2FileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManager.m; sourceTree = "<group>"; };
 		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
 		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
-		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
 		278D8B77167FF35D00622468 /* CK2Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Authentication.h; sourceTree = "<group>"; };
 		278D8B78167FF35D00622468 /* CK2Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Authentication.m; sourceTree = "<group>"; };
 		2790A8201626CA67000C9D9F /* CK2RemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2RemoteURL.h; sourceTree = "<group>"; };
@@ -294,7 +255,6 @@
 		27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLBasedProtocol.m; sourceTree = "<group>"; };
 		27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CKConnectionRegistry.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKConnectionRegistry.m; sourceTree = "<group>"; };
-		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = ../CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
 		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKUploader.h; sourceTree = "<group>"; };
 		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploader.m; sourceTree = "<group>"; };
 		27F394F3162C162900944F43 /* CK2SFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2SFTPProtocol.h; sourceTree = "<group>"; };
@@ -391,7 +351,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -449,24 +408,6 @@
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				220AD7981509019B00748655 /* UnitTests.octest */,
 				CDDD232F16A07BD300693DE6 /* libconnectionkit.a */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		220526E3165E96AA00A2BBC9 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		220526EC165E97B400A2BBC9 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				220526F1165E97B400A2BBC9 /* DAVKit.framework */,
-				220526F3165E97B400A2BBC9 /* Tests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -550,7 +491,6 @@
 		27FD90C60ED5BFC00068D634 /* FTP */ = {
 			isa = PBXGroup;
 			children = (
-				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
 			);
 			name = FTP;
 			sourceTree = "<group>";
@@ -650,7 +590,6 @@
 		79CFD11D09F7023D00172CDD /* WebDAV */ = {
 			isa = PBXGroup;
 			children = (
-				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
 				27447AA61458075600EB086F /* CKWebDAVConnection.h */,
 				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
@@ -831,7 +770,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				220526FD165EA20600A2BBC9 /* PBXTargetDependency */,
 			);
 			name = Framework;
 			productName = Framework;
@@ -888,16 +826,8 @@
 					ProjectRef = CD92EDE716A18AA70035A117 /* CURLHandle-for-iOS.xcodeproj */;
 				},
 				{
-					ProductGroup = 220526E3165E96AA00A2BBC9 /* Products */;
-					ProjectRef = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-				},
-				{
 					ProductGroup = CD92EE0616A190AF0035A117 /* Products */;
 					ProjectRef = CD92EE0516A190AF0035A117 /* DAVKit-for-iOS.xcodeproj */;
-				},
-				{
-					ProductGroup = 220526EC165E97B400A2BBC9 /* Products */;
-					ProjectRef = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -910,34 +840,6 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		220526E8165E96AA00A2BBC9 /* CURLHandle.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = CURLHandle.framework;
-			remoteRef = 220526E7165E96AA00A2BBC9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = CURLHandleTests.octest;
-			remoteRef = 220526E9165E96AA00A2BBC9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		220526F1165E97B400A2BBC9 /* DAVKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = DAVKit.framework;
-			remoteRef = 220526F0165E97B400A2BBC9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		220526F3165E97B400A2BBC9 /* Tests.octest */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.cfbundle;
-			path = Tests.octest;
-			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
 		CD92EDF316A18AA70035A117 /* libcurlhandle.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
@@ -962,7 +864,8 @@
 		CD92EE1316A190AF0035A117 /* liblibdavkit.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
-			path = liblibdavkit.a;
+			name = liblibdavkit.a;
+			path = libdavkit.a;
 			remoteRef = CD92EE1216A190AF0035A117 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1132,11 +1035,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		220526FD165EA20600A2BBC9 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = CURLHandle;
-			targetProxy = 220526FC165EA20600A2BBC9 /* PBXContainerItemProxy */;
-		};
 		220AD7AE1509021A00748655 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
