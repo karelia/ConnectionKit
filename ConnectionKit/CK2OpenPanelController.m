@@ -95,8 +95,7 @@
         _urlCache = [[NSMutableDictionary alloc] init];
         _runningOperations = [[NSMutableDictionary alloc] init];
 
-        _history = [[NSMutableArray alloc] init];
-        _historyIndex = 0;
+        _historyManager = [[NSUndoManager alloc] init];
         
         _fileManager = [[CK2FileManager alloc] init];
         [_fileManager setDelegate:self];
@@ -136,7 +135,7 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
     
     [_urlCache release];
-    [_history release];
+    [_historyManager release];
     
     [super dealloc];
 }
@@ -224,9 +223,8 @@
     _urlCache = [[NSMutableDictionary alloc] init];
     [_runningOperations release];
     _runningOperations = [[NSMutableDictionary alloc] init];
-    [_history release];
-    _history = [[NSMutableArray alloc] init];
-    _historyIndex = 0;
+    [_historyManager release];
+    _historyManager = [[NSUndoManager alloc] init];
 
     [self validateViews];
 }
@@ -728,8 +726,8 @@
 
 - (void)validateHistoryButtons
 {
-    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && (_historyIndex > 0)) forSegment:0];
-    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && (_historyIndex < [_history count])) forSegment:1];
+    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && ([_historyManager canUndo])) forSegment:0];
+    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && ([_historyManager canRedo])) forSegment:1];
 }
 
 - (IBAction)changeHistory:(id)sender
@@ -750,45 +748,30 @@
 
 - (IBAction)back:(id)sender
 {
-    if (_historyIndex > 0)
-    {
-        NSDictionary        *historyEntry;
-        
-        _historyIndex--;
-
-        historyEntry = _history[_historyIndex];
-        [self setURL:[historyEntry objectForKey:HISTORY_DIRECTORY_URL_KEY] updateDirectory:YES];
-        [_tabView selectTabViewItemAtIndex:[[historyEntry objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue]];
-        
-        [self validateHistoryButtons];
-    }
+    [_historyManager undo];
+    [self validateHistoryButtons];
 }
 
 - (IBAction)forward:(id)sender
 {
-    if (_historyIndex < [_history count] - 1)
-    {
-        NSDictionary        *historyEntry;
-        
-        _historyIndex++;
-        historyEntry = _history[_historyIndex];
-        [self setURL:[historyEntry objectForKey:HISTORY_DIRECTORY_URL_KEY] updateDirectory:YES];
-        [_tabView selectTabViewItemAtIndex:[[historyEntry objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue]];
-        
-        [self validateHistoryButtons];
-    }
+    [_historyManager redo];
+    [self validateHistoryButtons];
+}
+
+- (void)changeView:(NSDictionary *)dict
+{
+    [self addToHistory];
+
+    [self setURL:[dict objectForKey:HISTORY_DIRECTORY_URL_KEY] updateDirectory:YES];
+    [_tabView selectTabViewItemAtIndex:[[dict objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue]];
 }
 
 - (void)addToHistory
 {
-    [_history insertObject:@{ HISTORY_DIRECTORY_URL_KEY : [_openPanel directoryURL],
-    HISTORY_DIRECTORY_VIEW_INDEX_KEY : [NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:[_tabView selectedTabViewItem]]] }
-        atIndex:_historyIndex++];
+    [_historyManager registerUndoWithTarget:self selector:@selector(changeView:)
+                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [_openPanel directoryURL],
+       HISTORY_DIRECTORY_VIEW_INDEX_KEY : [NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:[_tabView selectedTabViewItem]]] }];
     
-    if (_historyIndex < [_history count])
-    {
-        [_history removeObjectsInRange:NSMakeRange(_historyIndex, [_history count] - _historyIndex)];
-    }
     [self validateHistoryButtons];
 }
 

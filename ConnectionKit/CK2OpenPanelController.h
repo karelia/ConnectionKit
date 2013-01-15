@@ -62,8 +62,7 @@
     IBOutlet NSArrayController      *_arrayController;
     CK2FileManager                  *_fileManager;
     
-    NSMutableArray                  *_history;
-    NSUInteger                      _historyIndex;
+    NSUndoManager                   *_historyManager;
     NSTabViewItem                   *_lastTab;
     
     id                              _currentBootstrapOperation;
