@@ -119,7 +119,7 @@
     
     item = [self item];
 
-    NSAssert([item view] != self, @"Item view for view %@ not properly set.", self);
+    NSAssert([item view] == self, @"Item view for view %@ not properly set.", self);
     
     bounds = [self bounds];
     

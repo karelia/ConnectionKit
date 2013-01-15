@@ -50,7 +50,7 @@
 
 - (id)init {
     self = [super init];
-    [self setLineBreakMode:NSLineBreakByTruncatingTail];
+    [self setLineBreakMode:NSLineBreakByTruncatingMiddle];
     return self;
 }
 
