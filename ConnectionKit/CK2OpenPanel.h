@@ -32,9 +32,9 @@
 #import <Cocoa/Cocoa.h>
 
 //TODO: Handle/display errors better
+//TODO: Implement rest of API (see properties below)
 //TODO: Save window/view dimensions and state (like which view is selected)
 //TODO: Add preview controller for browser
-//TODO: Add formatter for file sizes
 //TODO: Implement search field?
 //TODO: Restore outlineview expanded items when reverting history
 
@@ -83,6 +83,7 @@
 // That way, if you show the panel in the completion block, nothing will be "in progress". You can still show
 // the panel beforehand but much of the UI will be disabled until the URLs are loaded. The UI will still be responsive
 // in that you'll see progress indicators spinning and you can still cancel.
+// Note that the completion block is called on the main thread.
 - (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
