@@ -121,6 +121,7 @@
     if (_currentBootstrapOperation != nil)
     {
         [_fileManager cancelOperation:_currentBootstrapOperation];
+        [_currentBootstrapOperation release];
     }
     
     [_fileManager release];
@@ -213,18 +214,18 @@
     {
         [_fileManager cancelOperation:operation];
     }
+    [_runningOperations removeAllObjects];
     
     if (_currentBootstrapOperation != nil)
     {
         [_fileManager cancelOperation:_currentBootstrapOperation];
+        [_currentBootstrapOperation release];
+        _currentBootstrapOperation = nil;
     }
 
-    [_urlCache release];
-    _urlCache = [[NSMutableDictionary alloc] init];
-    [_runningOperations release];
-    _runningOperations = [[NSMutableDictionary alloc] init];
-    [_historyManager release];
-    _historyManager = [[NSUndoManager alloc] init];
+    [_urlCache removeAllObjects];
+    [_runningOperations removeAllObjects];
+    [_historyManager removeAllActions];
 
     [self validateViews];
 }
@@ -356,6 +357,7 @@
     if (_currentBootstrapOperation != nil)
     {
         [_fileManager cancelOperation:_currentBootstrapOperation];
+        [_currentBootstrapOperation release];
     }
     
     resolvedURL = nil;
@@ -438,6 +440,8 @@
              [resolvedURL autorelease];
          });
      }];
+    
+    [_currentBootstrapOperation retain];
     
     [_hostField setStringValue:[rootURL host]];
     [self validateViews];
