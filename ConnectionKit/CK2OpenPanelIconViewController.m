@@ -42,14 +42,6 @@
 
 @implementation CK2OpenPanelIconViewController
 
-- (void)dealloc
-{
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSViewFrameDidChangeNotification object:_iconView];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:[[self controller] openPanel]];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:[[self controller] openPanel]];
-
-    [super dealloc];
-}
 
 - (void)awakeFromNib
 {
@@ -59,12 +51,6 @@
     [iconItem setTarget:self];
     [iconItem setAction:@selector(itemSelected:)];
     [iconItem setDoubleAction:@selector(itemDoubleClicked:)];
-
-    [_iconView setPostsFrameChangedNotifications:YES];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(iconViewDidResize:) name:NSViewFrameDidChangeNotification object:_iconView];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:[[self controller] openPanel]];
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:[[self controller] openPanel]];
 }
 
 - (void)reload
@@ -124,8 +110,6 @@
             NSLog(@"No index found for item: %@", url);
         }
     }
-    
-    [self iconViewDidResize:nil];
 }
 
 
@@ -165,43 +149,6 @@
             [controller ok:self];
         }
     }
-}
-
-- (void)iconViewDidResize:(NSNotification *)notification
-{
-    NSUInteger  colCount;
-    CGFloat     calcWidth;
-    NSSize      size, minSize;
-    NSRect      frame;
-    
-    // NSCollectionView tends to align things towards the left. We want the icons to be evenly distributed so we
-    // set the minimum width of each item to force such a layout.
-    frame = [_iconView frame];
-    minSize = [[[_iconView itemPrototype] view] frame].size;
-    
-    colCount = NSWidth(frame) / minSize.width;
-    calcWidth = NSWidth(frame) / colCount;
-    
-    [_iconView setMaxNumberOfColumns:colCount];
-    
-    size = NSMakeSize(calcWidth, minSize.width);
-    [_iconView setMinItemSize:size];
-    // Setting the max size gets rid of odd scroller behavior
-    [_iconView setMaxItemSize:size];
-    
-}
-
-
-#pragma mark NSWindowDelegate
-
-- (void)windowDidBecomeKey:(NSNotification *)notification
-{
-    [_iconView setNeedsDisplay:YES];
-}
-
-- (void)windowDidResignKey:(NSNotification *)notification
-{
-    [_iconView setNeedsDisplay:YES];
 }
 
 @end

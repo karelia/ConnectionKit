@@ -184,22 +184,13 @@
     }
     else if ([keyPath isEqual:@"canCreateDirectories"])
     {
-        NSRect      rect1, rect2;
-        
-        rect1 = [_newFolderButton frame];
-        rect2 = [_progressIndicator frame];
-        
         if ([_openPanel canCreateDirectories])
         {
             [_newFolderButton setHidden:NO];
-            rect2.origin.x = NSMaxY(rect1) + 8.0;
-            [_progressIndicator setFrame:rect2];
         }
         else
         {
             [_newFolderButton setHidden:YES];
-            rect2.origin.x = NSMinX(rect1);
-            [_progressIndicator setFrame:rect2];
         }
     }
     else
@@ -495,7 +486,7 @@
     }
     
     currentController = [self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]];
-    if ((sender != currentController) || flag)
+    if ((sender != currentController) || (![currentController hasFixedRoot] && flag))
     {
         if (flag)
         {
