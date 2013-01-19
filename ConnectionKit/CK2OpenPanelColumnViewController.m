@@ -33,6 +33,7 @@
 #import "CK2OpenPanelColumnViewController.h"
 #import "CK2OpenPanelController.h"
 #import "CK2FileCell.h"
+#import "CK2BrowserPreviewController.h"
 #import "NSURL+CK2OpenPanel.h"
 
 @interface CK2OpenPanelColumnViewController ()
@@ -178,10 +179,6 @@
     
     if (indexPath != nil)
     {
-/*        NSUInteger          lastColIndex;
-        
-        lastColIndex = [indexPath length] - 1;
-        [_browser reloadDataForRowIndexes:[NSIndexSet indexSetWithIndex:[indexPath indexAtPosition:lastColIndex]] inColumn:lastColIndex];*/
         [_browser reloadColumn:[indexPath length]];
     }
     else
@@ -339,6 +336,23 @@
 - (BOOL)browser:(NSBrowser *)browser writeRowsWithIndexes:(NSIndexSet *)rowIndexes inColumn:(NSInteger)column toPasteboard:(NSPasteboard *)pasteboard
 {
     return NO;
+}
+
+- (NSViewController *)browser:(NSBrowser *)browser previewViewControllerForLeafItem:(id)item
+{
+    if (_previewController == nil)
+    {
+        _previewController = [[CK2BrowserPreviewController alloc] init];
+    }
+    return _previewController;
+}
+
+- (NSString *)browser:(NSBrowser *)browser typeSelectStringForRow:(NSInteger)row inColumn:(NSInteger)column
+{
+    NSURL   *item;
+    
+    item = [browser itemAtRow:row inColumn:column];
+    return [item displayName];
 }
 
 @end

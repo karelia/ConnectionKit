@@ -33,10 +33,12 @@
 #import <Cocoa/Cocoa.h>
 #import "CK2OpenPanelViewController.h"
 
+@class CK2BrowserPreviewController;
 
 @interface CK2OpenPanelColumnViewController : CK2OpenPanelViewController <NSBrowserDelegate>
 {
     IBOutlet NSBrowser                  *_browser;
+    CK2BrowserPreviewController         *_previewController;
 }
 
 @end

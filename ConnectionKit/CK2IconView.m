@@ -146,20 +146,34 @@
         [self scrollRectToVisible:[self frameForItemAtIndex:i]];
     }
 }
-     
-- (void)viewDidMoveToWindow
+
+- (void)viewWillMoveToWindow:(NSWindow *)newWindow
 {
-    NSWindow                *window;
-    NSNotificationCenter    *notificationCenter;
+    NSWindow            *window;
     
     window = [self window];
-    notificationCenter = [NSNotificationCenter defaultCenter];
-    
-    [notificationCenter removeObserver:self name:NSWindowDidBecomeKeyNotification object:nil];
-    [notificationCenter removeObserver:self name:NSWindowDidResignKeyNotification object:nil];
     
     if (window != nil)
     {
+        NSNotificationCenter    *notificationCenter;
+
+        notificationCenter = [NSNotificationCenter defaultCenter];
+        [notificationCenter removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
+        [notificationCenter removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+    }
+}
+
+- (void)viewDidMoveToWindow
+{
+    NSWindow                *window;
+    
+    window = [self window];
+
+    if (window != nil)
+    {
+        NSNotificationCenter    *notificationCenter;
+        
+        notificationCenter = [NSNotificationCenter defaultCenter];
         [notificationCenter addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:window];
         [notificationCenter addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:window];
     }
