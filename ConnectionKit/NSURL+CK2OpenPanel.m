@@ -317,6 +317,19 @@
     }
 }
 
+- (NSURL *)URLByDeletingTrailingSlash
+{
+    NSString    *path;
+    
+    path = [self path];
+    if ([path hasSuffix:@"/"])
+    {
+        path = [path substringToIndex:[path length] - 1];
+    }
+    // Quite the rigamarole just to get an URL without the trailing slash
+    return [[NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] relativeToURL:[self root]] absoluteURL];
+}
+
 @end
 
 

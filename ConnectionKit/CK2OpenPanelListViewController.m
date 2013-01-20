@@ -46,6 +46,16 @@
     [_outlineView setTarget:self];
 }
 
+- (BOOL)allowsMutipleSelection
+{
+    return [_outlineView allowsMultipleSelection];
+}
+
+- (void)setAllowsMutipleSelection:(BOOL)allowsMutipleSelection
+{
+    [_outlineView setAllowsMultipleSelection:allowsMutipleSelection];
+}
+
 - (void)reload
 {
     [_outlineView reloadData];
@@ -53,30 +63,36 @@
 
 - (void)update
 {
+    NSArray                 *urls;
     NSURL                   *url;
     CK2OpenPanelController  *controller;
+    NSMutableIndexSet       *indexSet;
+    NSRect                  rect;
     
     controller = [self controller];
     
     [_outlineView reloadData];
     
-    url = [[self controller] URL];
-    
-    if (![url isEqual:[[controller openPanel] directoryURL]])
+    urls = [controller URLs];
+    indexSet = [NSMutableIndexSet indexSet];
+    rect = NSZeroRect;
+  
+    for (url in urls)
     {
-        NSInteger       row;
-        
-        row = [_outlineView rowForItem:[controller URL]];
-        if (row > 0)
+        if (![url isEqual:[[controller openPanel] directoryURL]])
         {
-            [_outlineView selectRowIndexes:[NSIndexSet indexSetWithIndex:row] byExtendingSelection:NO];
-            [_outlineView scrollRowToVisible:row];
-        }
-        else
-        {
-            NSLog(@"NO ROW FOR ITEM: %@", [controller URL]);
+            NSInteger       row;
+            
+            row = [_outlineView rowForItem:url];
+            if (row > 0)
+            {
+                [indexSet addIndex:row];
+                rect = NSUnionRect(rect, [_outlineView rectOfRow:row]);
+            }
         }
     }
+    [_outlineView selectRowIndexes:indexSet byExtendingSelection:NO];
+    [_outlineView scrollRectToVisible:rect];
 }
 
 - (void)urlDidLoad:(NSURL *)url
@@ -91,45 +107,49 @@
     }
 }
 
-- (IBAction)itemSelected:(id)sender
+- (NSArray *)selectedURLs
 {
-    NSInteger       row;
+    NSIndexSet      *indexSet;
+    NSMutableArray  *urls;
     
-    row = [_outlineView clickedRow];
+    indexSet = [_outlineView selectedRowIndexes];
     
-    if (row != -1)
-    {
-        NSURL       *url;
-        
-        url = [_outlineView itemAtRow:row];
-        [[self controller] setURL:url updateDirectory:NO sender:self];
-    }
-    else
-    {
-        NSLog(@"WHAT THE?");
-    }
+    urls = [NSMutableArray array];
+    
+    [indexSet enumerateIndexesUsingBlock:
+     ^(NSUInteger idx, BOOL *stop)
+     {
+         NSURL       *url;
+         
+         url = [_outlineView itemAtRow:idx];
+         if (url != nil)
+         {
+             [urls addObject:url];
+         }
+     }];
+    
+    return urls;
 }
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
-    NSInteger                   row;
     CK2OpenPanelController      *controller;
+    NSArray                     *urls;
     
     controller = [self controller];
-    row = [_outlineView clickedRow];
+    urls = [self selectedURLs];
     
-    if (row != -1)
+    if ([urls count] == 1)
     {
-        NSURL       *url;
+        NSURL                   *url;
         
-        url = [_outlineView itemAtRow:row];
-        
+        url = [urls objectAtIndex:0];
         if ([url canHazChildren])
         {
             if (![url isEqual:[[controller openPanel] directoryURL]])
             {
                 [controller addToHistory];
-                [controller setURL:url updateDirectory:YES sender:self];
+                [controller setURLs:urls updateDirectory:YES sender:self];
             }
         }
         else
@@ -139,10 +159,6 @@
                 [controller ok:self];
             }
         }
-    }
-    else
-    {
-        NSLog(@"WHAT THE?");
     }
 }
 

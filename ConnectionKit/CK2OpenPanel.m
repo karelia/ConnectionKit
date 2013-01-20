@@ -47,6 +47,7 @@
 @synthesize prompt = _prompt;
 @synthesize canChooseFiles = _canChooseFiles;
 @synthesize canChooseDirectories = _canChooseDirectories;
+@synthesize allowsMultipleSelection = _allowsMultipleSelection;
 @synthesize showsHiddenFiles = _showsHiddenFiles;
 @synthesize treatsFilePackagesAsDirectories = _treatsFilePackagesAsDirectories;
 @synthesize canCreateDirectories = _canCreateDirectories;
@@ -120,6 +121,11 @@
 - (NSURL *)URL
 {
     return [_viewController URL];
+}
+
+- (NSArray *)URLs
+{
+    return [_viewController URLs];
 }
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler

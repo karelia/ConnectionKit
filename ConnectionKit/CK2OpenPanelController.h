@@ -54,7 +54,7 @@
     IBOutlet CK2OpenPanelIconViewController      *_iconViewController;
     
     NSURL                           *_directoryURL;
-    NSURL                           *_url;
+    NSArray                         *_urls;
     NSURL                           *_home;
     
     NSMutableDictionary             *_urlCache;
@@ -69,10 +69,11 @@
 }
 
 @property (readwrite, assign) CK2OpenPanel     *openPanel;
-@property (readonly, copy) NSURL              *directoryURL;
+@property (readonly, copy) NSURL               *directoryURL;
 @property (readwrite, copy) NSURL              *URL;
+@property (readwrite, copy) NSArray            *URLs;
 @property (readwrite, copy) NSURL              *homeURL;
-//@property (readwrite, copy) NSArray                        *URLs;
+
 
 - (id)initWithPanel:(CK2OpenPanel *)panel;
 
@@ -93,7 +94,7 @@
 
 - (IBAction)home:(id)sender;
 
-- (void)setURL:(NSURL *)url updateDirectory:(BOOL)flag sender:(id)sender;
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender;
 - (BOOL)isURLValid:(NSURL *)url;
 - (NSArray *)childrenForURL:(NSURL *)url;
 - (void)addToHistory;

@@ -49,83 +49,118 @@
     [_browser setDoubleAction:@selector(itemDoubleClicked:)];
 }
 
+- (BOOL)allowsMutipleSelection
+{
+    return [_browser allowsMultipleSelection];
+}
+
+- (void)setAllowsMutipleSelection:(BOOL)allowsMutipleSelection
+{
+    [_browser setAllowsMultipleSelection:allowsMutipleSelection];
+}
+
 - (BOOL)hasFixedRoot
 {
     return YES;
 }
 
-- (NSIndexPath *)indexPathOfURL:(NSURL *)url
+
+- (void)getIndexPath:(NSIndexPath **)indexPath indexSet:(NSIndexSet **)indexSet ofURLs:(NSArray *)urls
 {
-    NSURL               *tempURL;
-    NSArray             *targetComponents, *children;
-    NSUInteger          i, count, row, *indexes, indexCount;
-    NSIndexPath         *indexPath;
+    CK2OpenPanelController      *controller;
+    NSURL                       *tempURL, *directoryURL, *root;
+    NSArray                     *targetComponents, *children;
+    NSUInteger                  i, count, row, *indexes, indexCount;
+    NSMutableIndexSet           *resultIndexes;
     
     if (![_browser isLoaded])
     {
         [_browser loadColumnZero];
     }
-    indexPath = nil;
-    targetComponents = [url pathComponents];
+    
+    controller = [self controller];
+    directoryURL = [[[self controller] openPanel] directoryURL];
+    root = [directoryURL root];
+
+    targetComponents = [directoryURL pathComponents];
     count = [targetComponents count];
-    
-    indexes = NULL;
-    if (count > 1)
+
+    if (indexPath != NULL)
     {
-        indexes = (NSUInteger *)malloc(sizeof(NSUInteger) * (count - 1));
-    }
-    indexCount = 0;
-    
-    tempURL = [url root];
-    
-    for (i = 1; i < count; i++)
-    {
-        children = [[self controller] childrenForURL:tempURL];
-        tempURL = [tempURL URLByAppendingPathComponent:[targetComponents objectAtIndex:i] isDirectory:YES];
-        
-        row = [children indexOfObject:tempURL];
-        
-        if (row == NSNotFound)
+        indexes = NULL;
+        if (count > 1)
         {
-            if (i == count - 1)
+            indexes = (NSUInteger *)malloc(sizeof(NSUInteger) * (count - 1));
+        }
+        indexCount = 0;
+        
+        tempURL = root;
+        
+        for (i = 1; i < count; i++)
+        {
+            children = [controller childrenForURL:tempURL];
+            tempURL = [tempURL URLByAppendingPathComponent:[targetComponents objectAtIndex:i] isDirectory:YES];
+            
+            row = [children indexOfObject:tempURL];
+            
+            if (row == NSNotFound)
             {
-                NSString    *path;
-                
-                // Try again but without the trailing slash
-                path = [tempURL path];
-                if ([path hasSuffix:@"/"])
+                if (i == count - 1)
                 {
-                    path = [path substringToIndex:[path length] - 1];
-                }
-                // Quite the rigamarole just to get an URL without the trailing slash
-                tempURL = [[NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] relativeToURL:[url root]] absoluteURL];
+                    tempURL = [tempURL URLByDeletingTrailingSlash];
                     
-                row = [children indexOfObject:tempURL];
+                    row = [children indexOfObject:tempURL];
+                }
+            }
+            
+            if (row == NSNotFound)
+            {
+                NSLog(@"Can't find entry in browser %@", tempURL);
+                break;
+            }
+            else
+            {
+                indexes[indexCount++] = row;
             }
         }
         
-        if (row == NSNotFound)
+        if (indexCount > 0)
         {
-            NSLog(@"Can't find entry in browser %@", tempURL);
-                break;
+            *indexPath = [NSIndexPath indexPathWithIndexes:indexes length:indexCount];
         }
-        else
+        
+        if (indexes != NULL)
         {
-            indexes[indexCount++] = row;
+            free(indexes);
         }
     }
     
-    if (indexCount > 0)
+    if (indexSet != NULL)
     {
-        indexPath = [NSIndexPath indexPathWithIndexes:indexes length:indexCount];
-    }
+        resultIndexes = [NSMutableIndexSet indexSet];
     
-    if (indexes != NULL)
-    {
-        free(indexes);
+        for (tempURL in urls)
+        {
+            children = [controller childrenForURL:directoryURL];
+            row = [children indexOfObject:tempURL];
+            
+            if (row == NSNotFound)
+            {
+                if (i == count - 1)
+                {
+                    tempURL = [tempURL URLByDeletingTrailingSlash];
+
+                    row = [children indexOfObject:tempURL];
+                }
+            }
+
+            if (row != NSNotFound)
+            {
+                [resultIndexes addIndex:row];
+            }
+        }
+        *indexSet = resultIndexes;
     }
-    
-    return indexPath;
 }
 
 - (void)reload
@@ -135,34 +170,32 @@
 
 - (void)update
 {
-    NSIndexPath     *indexPath;
-    NSURL           *url;
+    CK2OpenPanelController      *controller;
+    NSArray                     *urls;
+    NSURL                       *url;
+    NSIndexPath                 *indexPath;
+    NSIndexSet                  *indexSet;
     
-    url = [[self controller] URL];
-    indexPath = [self indexPathOfURL:url];
+    controller = [self controller];
+    urls = [controller URLs];
+    
+    indexPath = nil;
+    indexSet = nil;
+    [self getIndexPath:&indexPath indexSet:&indexSet ofURLs:urls];
     
     if (indexPath != nil)
     {
-        NSUInteger      length;
+        NSUInteger      column;
         
         [_browser setSelectionIndexPath:indexPath];
-        length = [indexPath length];
+        column = [indexPath length];
         
-        if (length > 0)
+        if (column > 0)
         {
-            NSUInteger  i;
-
-            i = length - 1;
-            if ([url canHazChildren])
-            {
-                [_browser scrollColumnToVisible:length];
-            }
-            else
-            {
-                [_browser scrollColumnToVisible:i];
-            }
-
-            [_browser scrollRowToVisible:[indexPath indexAtPosition:i] inColumn:i];
+            [_browser selectRowIndexes:indexSet inColumn:column];
+            [_browser scrollColumnToVisible:column];
+            [_browser scrollRowToVisible:[indexSet lastIndex] inColumn:column];
+            [_browser scrollRowToVisible:[indexSet firstIndex] inColumn:column];
         }
     }
     else
@@ -175,7 +208,8 @@
 {
     NSIndexPath         *indexPath;
     
-    indexPath = [self indexPathOfURL:url];
+    indexPath = nil;
+    [self getIndexPath:&indexPath indexSet:NULL ofURLs:@[ url ]];
     
     if (indexPath != nil)
     {
@@ -188,52 +222,58 @@
     [_browser setNeedsDisplay:YES];
 }
 
-- (IBAction)itemSelected:(id)sender
+- (NSArray *)selectedURLs
 {
-    NSURL               *url;
-    NSInteger           column, row;
     NSIndexPath         *indexPath;
+    NSIndexSet          *indexSet;
+    NSInteger           column;
+    NSMutableArray      *urls;
     
+    urls = [NSMutableArray array];
     indexPath = [_browser selectionIndexPath];
+    
     column = [indexPath length] - 1;
     if (column >= 0)
     {
-        row = [indexPath indexAtPosition:column];
-        
-        if (row != NSNotFound)
+        indexSet = [_browser selectedRowIndexesInColumn:column];
+
+        [indexSet enumerateIndexesUsingBlock:
+         ^(NSUInteger idx, BOOL *stop)
         {
-            url = [_browser itemAtRow:row inColumn:column];
+            NSURL       *url;
             
-            [[self controller] setURL:url updateDirectory:YES sender:self];
-        }
-        else
-        {
-            NSLog(@"WHAT THE?");
-        }
+            url = [_browser itemAtRow:idx inColumn:column];
+            
+            if (url != nil)
+            {
+                [urls addObject:url];
+            }
+        }];
     }
+    return urls;
 }
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
-    NSURL               *url;
-    NSInteger           column, row;
-    NSIndexPath         *indexPath;
+    NSArray                 *urls;
+    BOOL                    isValid;
+    CK2OpenPanelController  *controller;
     
-    indexPath = [_browser selectionIndexPath];
-    column = [indexPath length] - 1;
-    if (column > 0)
+    controller = [self controller];
+    urls = [self selectedURLs];
+    isValid = YES;
+    for (NSURL *url in urls)
     {
-        row = [indexPath indexAtPosition:column];
-        
-        if (row != NSNotFound)
+        if (![controller isURLValid:url])
         {
-            url = [_browser itemAtRow:row inColumn:column];
-            
-            if ([_controller isURLValid:url])
-            {
-                [_controller ok:self];
-            }
+            isValid = NO;
+            break;
         }
+    }
+    
+    if (isValid)
+    {
+        [controller ok:self];
     }
 }
 

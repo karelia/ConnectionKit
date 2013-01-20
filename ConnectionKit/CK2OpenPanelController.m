@@ -80,7 +80,7 @@
 
 @synthesize openPanel = _openPanel;
 @synthesize directoryURL = _directoryURL;
-@synthesize URL = _url;
+@synthesize URLs = _urls;
 @synthesize homeURL = _home;
 
 - (id)initWithPanel:(CK2OpenPanel *)panel
@@ -103,6 +103,7 @@
         [_openPanel addObserver:self forKeyPath:@"prompt" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"canChooseFiles" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"canChooseDirectories" options:NSKeyValueObservingOptionNew context:NULL];
+        [_openPanel addObserver:self forKeyPath:@"allowsMultipleSelection" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"showsHiddenFiles" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"treatsFilePackagesAsDirectories" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"canCreateDirectories" options:NSKeyValueObservingOptionNew context:NULL];        
@@ -129,12 +130,14 @@
     [_openPanel removeObserver:self forKeyPath:@"prompt"];
     [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
     [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
     [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
     [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
     [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
-    
+
+    [_urls release];
     [_urlCache release];
     [_historyManager release];
     
@@ -193,6 +196,12 @@
             [_newFolderButton setHidden:YES];
         }
     }
+    else if ([keyPath isEqual:@"allowsMultipleSelection"])
+    {
+        [_iconViewController setAllowsMutipleSelection:[_openPanel allowsMultipleSelection]];
+        [_listViewController setAllowsMutipleSelection:[_openPanel allowsMultipleSelection]];
+        [_browserController setAllowsMutipleSelection:[_openPanel allowsMultipleSelection]];
+    }
     else
     {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -221,6 +230,23 @@
     [self validateViews];
 }
 
+- (NSURL *)URL
+{
+    if ([_urls count] > 0)
+    {
+        return [_urls objectAtIndex:0];
+    }
+    return nil;
+}
+
+- (void)setURL:(NSURL *)URL
+{
+    [_urls release];
+    if (URL != nil)
+    {
+        _urls = [@[ URL ] retain];
+    }
+}
 
 // This pre-loads all the URLs up to the given one. Used in the bootstrapping process. This method
 // should NOT be called from the main thread as it will deadlock. It is meant to block until all the URLs are loaded.
@@ -315,11 +341,9 @@
             
             dispatch_async(dispatch_get_main_queue(),
             ^{
-
-                
                 if (success)
                 {
-                    [self setURL:directoryURL updateDirectory:YES sender:_openPanel];
+                    [self setURLs:@[ directoryURL ] updateDirectory:YES sender:_openPanel];
                 }
                 
                 if (block != NULL)
@@ -418,7 +442,7 @@
                                 
                  if (tempError == nil)
                  {
-                     [self setURL:resolvedURL updateDirectory:YES];
+                     [self setURLs:@[ resolvedURL ] updateDirectory:YES];
                  }
                  [self validateViews];
                                 
@@ -439,34 +463,26 @@
 }
 
 
-- (void)setURL:(NSURL *)url updateDirectory:(BOOL)flag
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag
 {
-    [self setURL:url updateDirectory:flag sender:nil];
+    [self setURLs:urls updateDirectory:flag sender:nil];
 }
 
-- (void)setURL:(NSURL *)url updateDirectory:(BOOL)flag sender:(id)sender
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender
 {
     CK2OpenPanelViewController  *currentController;
     
-    if ([url isPlaceholder])
-    {
-        return;
-    }
- 
-    [self setURL:url];
+    [self setURLs:urls];
     [self validateOKButton];
     
     if (flag)
     {
         NSURL       *directoryURL;
-        
-        if ([url canHazChildren])
+
+        directoryURL = [urls objectAtIndex:0];
+        if (![directoryURL canHazChildren])
         {
-            directoryURL = url;
-        }
-        else
-        {
-            directoryURL = [url URLByDeletingLastPathComponent];
+            directoryURL = [directoryURL URLByDeletingLastPathComponent];
         }
         
         if (![directoryURL isEqual:[self directoryURL]])
@@ -700,7 +716,23 @@
 
 - (void)validateOKButton
 {
-    [_okButton setEnabled:((_currentBootstrapOperation == nil) && [self isURLValid:[self URL]])];
+    BOOL    isValid;
+    
+    isValid = NO;
+    if (_currentBootstrapOperation == nil)
+    {
+        isValid = YES;
+        for (NSURL *url in [self URLs])
+        {
+            if (![self isURLValid:url])
+            {
+                isValid = NO;
+                break;
+            }
+        }
+    }
+    
+    [_okButton setEnabled:isValid];
 }
 
 - (IBAction)ok:(id)sender
@@ -757,7 +789,7 @@
 {
     [self addToHistory];
 
-    [self setURL:[dict objectForKey:HISTORY_DIRECTORY_URL_KEY] updateDirectory:YES];
+    [self setURLs:@[ [dict objectForKey:HISTORY_DIRECTORY_URL_KEY] ] updateDirectory:YES];
     [_tabView selectTabViewItemAtIndex:[[dict objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue]];
 }
 
@@ -778,7 +810,7 @@
     
     if (homeURL != nil)
     {
-        [self setURL:homeURL updateDirectory:YES];
+        [self setURLs:@[ homeURL ] updateDirectory:YES];
     }
 }
 
@@ -791,7 +823,7 @@
     if (![url isEqual:[_openPanel directoryURL]])
     {
         [self addToHistory];
-        [self setURL:url updateDirectory:YES sender:_pathControl];
+        [self setURLs:@[ url ] updateDirectory:YES sender:_pathControl];
     }
 }
 

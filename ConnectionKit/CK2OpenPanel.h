@@ -34,8 +34,7 @@
 //TODO: Handle/display errors better
 //TODO: Implement rest of API (see properties below)
 //TODO: Save window/view dimensions and state (like which view is selected)
-//TODO: Add preview controller for browser
-//TODO: Implement search field?
+//TODO: Implement "form-fitting" text selection in icon view
 //TODO: Restore outlineview expanded items when reverting history
 
 @protocol CK2OpenPanelDelegate;
@@ -48,6 +47,7 @@
     NSString                    *_prompt;
     BOOL                        _canChooseFiles;
     BOOL                        _canChooseDirectories;
+    BOOL                        _allowsMultipleSelection;
     BOOL                        _showsHiddenFiles;
     BOOL                        _treatsFilePackagesAsDirectories;
     BOOL                        _canCreateDirectories;
@@ -60,15 +60,15 @@
 @property (readwrite, copy) NSString    *prompt;
 @property (readwrite, assign) BOOL      canChooseFiles;
 @property (readwrite, assign) BOOL      canChooseDirectories;
+@property (readwrite, assign) BOOL      allowsMultipleSelection;
 @property (readwrite, assign) BOOL      showsHiddenFiles;
 @property (readwrite, assign) BOOL      treatsFilePackagesAsDirectories;
 @property (readwrite, assign) BOOL      canCreateDirectories;
 
 @property (readonly, copy) NSURL       *directoryURL;
 @property (readonly, copy) NSURL        *URL;
-//TODO:
-//@property (readonly, copy) NSArray      *URLs;
-//@property (readwrite, assign) BOOL      allowsMultipleSelection;
+@property (readonly, copy) NSArray      *URLs;
+
 //@property (readwrite, copy) NSString    *message;
 //@property (readwrite, retain) NSView    *accessoryView;
 //@property (readwrite, copy) NSArray     *allowedFileTypes;

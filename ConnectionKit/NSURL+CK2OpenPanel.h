@@ -51,4 +51,6 @@
 
 - (void)enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block;
 
+- (NSURL *)URLByDeletingTrailingSlash;
+
 @end

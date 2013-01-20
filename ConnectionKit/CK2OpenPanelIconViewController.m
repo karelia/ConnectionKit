@@ -53,6 +53,16 @@
     [iconItem setDoubleAction:@selector(itemDoubleClicked:)];
 }
 
+- (BOOL)allowsMutipleSelection
+{
+    return [_iconView allowsMultipleSelection];
+}
+
+- (void)setAllowsMutipleSelection:(BOOL)allowsMutipleSelection
+{
+    [_iconView setAllowsMultipleSelection:allowsMutipleSelection];
+}
+
 - (void)reload
 {
     CK2OpenPanelController  *controller;
@@ -79,9 +89,11 @@
 - (void)update
 {
     CK2OpenPanelController  *controller;
-    NSArray                 *children;
+    NSArray                 *children, *urls;
     NSUInteger              i;
     NSURL                   *url, *directoryURL;
+    NSMutableIndexSet       *indexSet;
+    NSRect                  rect;
     
     [self reload];
     
@@ -90,26 +102,26 @@
     
     children = [controller childrenForURL:directoryURL];
     
-    url = [controller URL];
+    urls = [controller URLs];
+    indexSet = [NSMutableIndexSet indexSet];
+    rect = NSZeroRect;
     
-    if (![url isEqual:directoryURL])
+    for (url in urls)
     {
-        i = [children indexOfObject:url];
-        
-        if (i != NSNotFound)
+        if (![url isEqual:directoryURL])
         {
-            NSRect  rect;
+            i = [children indexOfObject:url];
             
-            [_iconView setSelectionIndexes:[NSIndexSet indexSetWithIndex:i]];
-            
-            rect = [_iconView frameForItemAtIndex:i];
-            [_iconView scrollRectToVisible:rect];
-        }
-        else
-        {
-            NSLog(@"No index found for item: %@", url);
+            if (i != NSNotFound)
+            {
+                [indexSet addIndex:i];
+                rect = NSUnionRect(rect, [_iconView frameForItemAtIndex:i]);
+
+            }
         }
     }
+    [_iconView setSelectionIndexes:indexSet];
+    [_iconView scrollRectToVisible:rect];
 }
 
 
@@ -118,33 +130,60 @@
     [self reload];
 }
 
-- (IBAction)itemSelected:(id)sender
+- (NSArray *)selectedURLs
 {
-    NSURL       *url;
+    NSIndexSet      *indexSet;
+    NSArray         *urls;
     
-    url = [sender representedObject];
-    [[self controller] setURL:url updateDirectory:NO sender:self];
+    indexSet = [_iconView selectionIndexes];
+    if ([indexSet count] > 0)
+    {
+        urls = [[_iconView content] objectsAtIndexes:indexSet];
+    }
+    else
+    {
+        urls = [NSArray array];
+    }
+    return urls;
 }
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
     CK2OpenPanelController  *controller;
-    NSURL                   *url;
+    NSArray                 *urls;
     
     controller = [self controller];
-    url = [sender representedObject];
+ 
+    urls = [self selectedURLs];
     
-    if ([url canHazChildren])
+    if ([urls count] == 1)
     {
-        if (![url isEqual:[[controller openPanel] directoryURL]])
+        NSURL                   *url;
+        
+        url = [urls objectAtIndex:0];
+        if ([url canHazChildren])
         {
-            [controller addToHistory];
-            [controller setURL:url updateDirectory:YES sender:self];
+            if (![url isEqual:[[controller openPanel] directoryURL]])
+            {
+                [controller addToHistory];
+                [controller setURLs:urls updateDirectory:YES sender:self];
+            }
         }
     }
     else
     {
-        if ([controller isURLValid:url])
+        BOOL    isValid;
+
+        isValid = YES;
+        for (NSURL *url in urls)
+        {
+            if (![controller isURLValid:url])
+            {
+                isValid = NO;
+            }
+        }
+        
+        if (isValid)
         {
             [controller ok:self];
         }

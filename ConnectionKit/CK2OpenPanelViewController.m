@@ -31,6 +31,7 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import "CK2OpenPanelViewController.h"
+#import "CK2OpenPanelController.h"
 
 @implementation CK2OpenPanelViewController
 
@@ -40,6 +41,15 @@
     {
     }
     return self;
+}
+
+- (BOOL)allowsMutipleSelection
+{
+    return NO;
+}
+
+- (void)setAllowsMutipleSelection:(BOOL)allowsMutipleSelection
+{
 }
 
 - (void)reload
@@ -59,8 +69,22 @@
 {
 }
 
+- (NSArray *)selectedURLs
+{
+    return [NSArray array];
+}
+
+
 - (IBAction)itemSelected:(id)sender
 {
+    NSArray         *urls;
+    
+    urls = [self selectedURLs];
+    
+    if ([urls count] > 0)
+    {
+        [[self controller] setURLs:urls updateDirectory:NO sender:self];
+    }
 }
 
 - (IBAction)itemDoubleClicked:(id)sender

@@ -37,7 +37,4 @@
     IBOutlet NSOutlineView          *_outlineView;
 }
 
-- (IBAction)itemSelected:(id)sender;
-- (IBAction)itemDoubleClicked:(id)sender;
-
 @end

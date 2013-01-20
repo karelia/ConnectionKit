@@ -40,6 +40,7 @@
 }
 
 @property (readonly, assign) CK2OpenPanelController     *controller;
+@property (readwrite, assign) BOOL                      allowsMutipleSelection;
 
 - (id)init;
 
@@ -49,6 +50,7 @@
 
 - (void)urlDidLoad:(NSURL *)url;
 
+- (NSArray *)selectedURLs;
 - (IBAction)itemSelected:(id)sender;
 - (IBAction)itemDoubleClicked:(id)sender;
 
