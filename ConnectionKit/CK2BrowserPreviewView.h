@@ -19,8 +19,9 @@
     IBOutlet NSTextField        *_kindLabel;
     IBOutlet NSTextField        *_sizeLabel;
     IBOutlet NSTextField        *_dateModifiedLabel;
-    IBOutlet id                 _separator;
-    IBOutlet id                 _labelBox;
+    
+    NSRect                      _separatorRect;
+    NSGradient                  *_separatorGradient;
 }
 
 - (void)setURL:(NSURL *)url;

@@ -19,8 +19,28 @@
 - (void)dealloc
 {
     [[NSNotificationCenter defaultCenter] removeObserver:self];
+    [_separatorGradient release];
     
     [super dealloc];
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+    if (_separatorGradient == nil)
+    {
+        _separatorGradient = [[NSGradient alloc] initWithColorsAndLocations:
+                              [NSColor colorWithCalibratedWhite:1.0 alpha:0.0],
+                              0.0,
+                              [NSColor colorWithCalibratedWhite:0.83 alpha:1.0],
+                              0.25,
+                              [NSColor colorWithCalibratedWhite:0.83 alpha:1.0],
+                              0.75,
+                              [NSColor colorWithCalibratedWhite:1.0 alpha:0.0],
+                              1.0,
+                              nil];
+    }
+    
+    [_separatorGradient drawInRect:_separatorRect angle:0.0];
 }
 
 - (void)setURL:(NSURL *)url
@@ -71,15 +91,10 @@
 
 - (void)tileLabels
 {
-    NSRect      rect, bounds;
+    NSRect      rect;
     NSSize      size;
     CGFloat     y, height;
 
-    rect = [_labelBox frame];
-    bounds = [self bounds];
-    rect.size.width = NSWidth(bounds);
-    [_labelBox setFrame:rect];
-    
     [self tileLabelField:_dateModifiedLabel valueField:_dateModifiedField];
     [self tileLabelField:_sizeLabel valueField:_sizeField];
     [self tileLabelField:_kindLabel valueField:_kindField];
@@ -99,32 +114,29 @@
     rect = [_nameLabel frame];
     rect.origin.y = y - NSHeight(rect);
     [_nameLabel setFrame:rect];
-
-    rect = [_labelBox frame];
-    rect.size.height = y + LABELS_TOP_MARGIN;
-    rect.origin.y = 0.0;
-    [_labelBox setFrame:rect];
 }
 
 - (void)tile
 {
-    NSRect  bounds, separatorRect, iconFrame;
+    NSRect  bounds, iconFrame;
     
     bounds = [self bounds];
     
     [self tileLabels];
-    separatorRect = [_separator frame];
-    
-    separatorRect.origin.x = NSMinX(bounds) + (NSWidth(bounds) - NSWidth(separatorRect)) / 2.0;
-    separatorRect.origin.y = NSMaxY([_nameLabel frame]);
-    [_separator setFrame:separatorRect];
-    
-    iconFrame.size.width = MIN(NSWidth(bounds) - 2 * MARGIN, NSHeight(bounds) - NSMaxY(separatorRect) - 2 * MARGIN);
+
+    _separatorRect.size.width = NSWidth(bounds) * .8;
+    _separatorRect.size.height = 1.0;
+    _separatorRect.origin.x = NSMinX(bounds) + (NSWidth(bounds) - NSWidth(_separatorRect)) / 2.0;
+    _separatorRect.origin.y = NSMaxY([_nameLabel frame]) + LABELS_TOP_MARGIN;
+
+    iconFrame.size.width = MIN(NSWidth(bounds) - 2 * MARGIN, NSHeight(bounds) - NSMaxY(_separatorRect) - 2 * MARGIN);
     iconFrame.size.height = iconFrame.size.width;
     iconFrame.origin.x = NSMinX(bounds) + (NSWidth(bounds) - NSWidth(iconFrame)) / 2.0;
-    iconFrame.origin.y = NSMaxY(separatorRect) + MARGIN;
+    iconFrame.origin.y = NSMaxY(_separatorRect) + MARGIN;
     
     [_iconView setFrame:iconFrame];
+    
+    [self setNeedsDisplay:YES];
 }
 
 - (void)superviewFrameChanged:(NSNotification *)notification
