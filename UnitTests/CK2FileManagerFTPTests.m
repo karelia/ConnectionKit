@@ -255,19 +255,39 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             STAssertNotNil(error, @"got unexpected error %@", error);
             
             // Make sure the file went into root, rather than home
-            // Search for the last CWD command
-            __block BOOL haveChangedDirectory = NO;
+            // This could be done by changing directory to /, or storing directly to /test.txt
             [self.server.transcript enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
                 
-                if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"CWD "])
+                // Search back for the STOR command
+                if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"STOR "])
                 {
                     *stop = YES;
-                    haveChangedDirectory = YES;
-                    STAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
+                    
+                    // Was the STOR command itself valid?
+                    if ([aTranscriptEntry.value hasPrefix:@"STOR /test.txt"])
+                    {
+                        
+                    }
+                    else
+                    {
+                        // Search back for the preceeding CWD command
+                        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, index)];
+                        __block BOOL haveChangedDirectory = NO;
+                        
+                        [self.server.transcript enumerateObjectsAtIndexes:indexes options:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
+                            
+                            if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"CWD "])
+                            {
+                                *stop = YES;
+                                haveChangedDirectory = YES;
+                                STAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
+                            }
+                        }];
+                        
+                        STAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
+                    }
                 }
             }];
-            
-            STAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
             
             [self pause];
         }];
