@@ -24,23 +24,30 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
+    // Escape any unusual characters in the URL
+    path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
-    if ([path isAbsolutePath])
+    // According to libcurl's docs that should be enough. But with our current build of it, it seems they've gotten stricter
+    // The FTP spec could be interpreted that the only way to refer to the root directy is with the sequence @"%2F", which decodes as a slash
+    // That makes it very clear to the library etc. this particular slash is meant to be transmitted to the server, rather than treated as a path component separator
+    // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
+    NSString *scheme = [baseURL scheme];
+    
+    if (([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame) &&
+        [path isAbsolutePath])
     {
-        // Get to host's URL, including single trailing slash
-        // -absoluteURL has to be called so that the real path can be properly appended
-        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path];
+        path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
     }
-    else
-    {
-        return [super URLWithPath:path relativeToURL:baseURL];
-    }
+    
+    NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
+    return result;
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 {
     // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    // As above, the library seems to be stricter on how the slash is to be encoded these days. I'm not sure whether we should be similarly strict when decoding. Leaving it be for now
     CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
     NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (strictPath) CFRelease(strictPath);
