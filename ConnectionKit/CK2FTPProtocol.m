@@ -37,7 +37,7 @@
     if (([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame) &&
         [path isAbsolutePath])
     {
-        path = [path stringByReplacingCharactersInRange:NSMakeRange(0, 1) withString:@"%2F"];
+        path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
     }
     
     NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
