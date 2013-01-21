@@ -81,7 +81,7 @@
     {
         url = [children objectAtIndex:i];
         
-        [(CK2IconViewItem *)[_iconView itemAtIndex:i] setEnabled:[controller isURLValid:url]];
+        [(CK2IconViewItem *)[_iconView itemAtIndex:i] setEnabled:([controller isURLValid:url] || [url canHazChildren])];
     }
     [_iconView setNeedsDisplay:YES];
 }
@@ -94,6 +94,7 @@
     NSURL                   *url, *directoryURL;
     NSMutableIndexSet       *indexSet;
     NSRect                  rect;
+    NSMutableArray          *newURLs;
     
     [self reload];
     
@@ -106,6 +107,8 @@
     indexSet = [NSMutableIndexSet indexSet];
     rect = NSZeroRect;
     
+    newURLs = [NSMutableArray array];
+    
     for (url in urls)
     {
         if (![url isEqual:directoryURL])
@@ -116,12 +119,18 @@
             {
                 [indexSet addIndex:i];
                 rect = NSUnionRect(rect, [_iconView frameForItemAtIndex:i]);
-
+                [newURLs addObject:url];
             }
         }
     }
     [_iconView setSelectionIndexes:indexSet];
     [_iconView scrollRectToVisible:rect];
+    
+    if ([newURLs count] != [urls count])
+    {
+        // Only a subset of the URLs actually are visible so we update the internal URLs to match.
+        [controller setURLs:newURLs updateDirectory:NO sender:self];
+    }
 }
 
 

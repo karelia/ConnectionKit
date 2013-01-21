@@ -106,7 +106,8 @@
         [_openPanel addObserver:self forKeyPath:@"allowsMultipleSelection" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"showsHiddenFiles" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"treatsFilePackagesAsDirectories" options:NSKeyValueObservingOptionNew context:NULL];
-        [_openPanel addObserver:self forKeyPath:@"canCreateDirectories" options:NSKeyValueObservingOptionNew context:NULL];        
+        [_openPanel addObserver:self forKeyPath:@"allowedFileTypes" options:NSKeyValueObservingOptionNew context:NULL];
+        [_openPanel addObserver:self forKeyPath:@"canCreateDirectories" options:NSKeyValueObservingOptionNew context:NULL];
     }
     
     return self;
@@ -133,6 +134,7 @@
     [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
     [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
     [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowedFileTypes"];
     [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
@@ -178,7 +180,8 @@
         [_cancelButton setFrame:rect2];
     }
     else if ([keyPath isEqual:@"canChooseFiles"] || [keyPath isEqual:@"canChooseDirectories"] ||
-             [keyPath isEqual:@"showsHiddenFiles"] || [keyPath isEqual:@"treatsFilePackagesAsDirectories"])
+             [keyPath isEqual:@"showsHiddenFiles"] || [keyPath isEqual:@"treatsFilePackagesAsDirectories"] ||
+             [keyPath isEqual:@"allowedFileTypes"])
     {
         [[_browserController view] setNeedsDisplay:YES];
         [[_listViewController view] setNeedsDisplay:YES];
@@ -227,6 +230,12 @@
     [_runningOperations removeAllObjects];
     [_historyManager removeAllActions];
 
+    [self setURLs:nil];
+    
+    [_browserController reload];
+    [_iconViewController reload];
+    [_listViewController reload];
+
     [self validateViews];
 }
 
@@ -241,10 +250,13 @@
 
 - (void)setURL:(NSURL *)URL
 {
-    [_urls release];
     if (URL != nil)
     {
-        _urls = [@[ URL ] retain];
+        [self setURLs:@[ URL ]];
+    }
+    else
+    {
+        [self setURLs:nil];
     }
 }
 
@@ -522,6 +534,7 @@
     id      children;
         
     children = nil;
+    
     if ((url != nil) && [url canHazChildren])
     {
         children = [_urlCache objectForKey:url];
@@ -538,7 +551,7 @@
             blockChildren = children;
             
             [_urlCache setObject:blockChildren forKey:url];
-//            [self urlDidLoad:url];
+            [self urlDidLoad:url];
             
             if ([_runningOperations objectForKey:url] == nil)
             {                
@@ -560,7 +573,7 @@
                 ^(NSArray *contents, NSError *blockError)
                 {
                     id             value;
-                    
+           
                     value = contents;
                     if (value == nil)
                     {
@@ -620,20 +633,24 @@
 {
     if (![url isPlaceholder])
     {
-        id <CK2OpenPanelDelegate>  delegate;
-        BOOL                            delegateValid;
+        id <CK2OpenPanelDelegate>   delegate;
+        BOOL                        delegateValid, fileTypeValid;
+        NSArray                     *allowedFileTypes;
         
         delegate = [_openPanel delegate];
         
         delegateValid = (![delegate respondsToSelector:@selector(panel:shouldEnableURL:)] || [delegate panel:_openPanel shouldEnableURL:url]);
         
+        allowedFileTypes = [_openPanel allowedFileTypes];
+        fileTypeValid = ([allowedFileTypes count] == 0) || [allowedFileTypes containsObject:[url pathExtension]];
+        
         if ([url canHazChildren])
         {
-            return [_openPanel canChooseDirectories] && delegateValid;
+            return [_openPanel canChooseDirectories] && delegateValid && fileTypeValid;
         }
         else
         {
-            return [_openPanel canChooseFiles] && delegateValid;
+            return [_openPanel canChooseFiles] && delegateValid && fileTypeValid;
         }
     }
     return NO;

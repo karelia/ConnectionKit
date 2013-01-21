@@ -242,7 +242,7 @@
         [cell setImage:[item icon]];
     }
     
-    if ([[self controller] isURLValid:item])
+    if ([[self controller] isURLValid:item] || [item canHazChildren])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -254,7 +254,7 @@
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item
 {
-    return [[self controller] isURLValid:item];
+    return [[self controller] isURLValid:item] || [item canHazChildren];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id < NSDraggingInfo >)info item:(id)item childIndex:(NSInteger)index

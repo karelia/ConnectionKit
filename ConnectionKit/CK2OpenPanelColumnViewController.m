@@ -64,14 +64,17 @@
     return YES;
 }
 
-
-- (void)getIndexPath:(NSIndexPath **)indexPath indexSet:(NSIndexSet **)indexSet ofURLs:(NSArray *)urls
+// Gets the index path of the directory url and the indexset of the URLs under it. "urls" is passed by reference as
+// this method can change the list if only a subset can be selected (like when switching from the outline view to this
+// one). Will return YES if the list of urls has changed.
+- (BOOL)getIndexPath:(NSIndexPath **)indexPath indexSet:(NSIndexSet **)indexSet ofURLs:(NSArray **)urls inDirectory:(NSURL *)directoryURL
 {
     CK2OpenPanelController      *controller;
-    NSURL                       *tempURL, *directoryURL, *root;
+    NSURL                       *tempURL, *root;
     NSArray                     *targetComponents, *children;
     NSUInteger                  i, count, row, *indexes, indexCount;
     NSMutableIndexSet           *resultIndexes;
+    NSMutableArray              *newURLs;
     
     if (![_browser isLoaded])
     {
@@ -79,7 +82,15 @@
     }
     
     controller = [self controller];
-    directoryURL = [[[self controller] openPanel] directoryURL];
+    if (directoryURL == nil)
+    {
+        directoryURL = [*urls objectAtIndex:0];
+    }
+    if (![directoryURL canHazChildren])
+    {
+        directoryURL = [directoryURL URLByDeletingLastPathComponent];
+    }
+    
     root = [directoryURL root];
 
     targetComponents = [directoryURL pathComponents];
@@ -135,32 +146,39 @@
         }
     }
     
+    resultIndexes = [NSMutableIndexSet indexSet];
+    newURLs = [NSMutableArray array];
+    
+    for (tempURL in *urls)
+    {
+        children = [controller childrenForURL:directoryURL];
+        row = [children indexOfObject:tempURL];
+        
+        if (row == NSNotFound)
+        {
+            tempURL = [tempURL URLByDeletingTrailingSlash];
+            
+            row = [children indexOfObject:tempURL];
+        }
+        
+        if (row != NSNotFound)
+        {
+            [resultIndexes addIndex:row];
+            [newURLs addObject:tempURL];
+        }
+    }
+    
     if (indexSet != NULL)
     {
-        resultIndexes = [NSMutableIndexSet indexSet];
-    
-        for (tempURL in urls)
-        {
-            children = [controller childrenForURL:directoryURL];
-            row = [children indexOfObject:tempURL];
-            
-            if (row == NSNotFound)
-            {
-                if (i == count - 1)
-                {
-                    tempURL = [tempURL URLByDeletingTrailingSlash];
-
-                    row = [children indexOfObject:tempURL];
-                }
-            }
-
-            if (row != NSNotFound)
-            {
-                [resultIndexes addIndex:row];
-            }
-        }
         *indexSet = resultIndexes;
     }
+    
+    if ([newURLs count] != [*urls count])
+    {
+        *urls = newURLs;
+        return YES;
+    }
+    return NO;
 }
 
 - (void)reload
@@ -172,7 +190,6 @@
 {
     CK2OpenPanelController      *controller;
     NSArray                     *urls;
-    NSURL                       *url;
     NSIndexPath                 *indexPath;
     NSIndexSet                  *indexSet;
     
@@ -181,7 +198,10 @@
     
     indexPath = nil;
     indexSet = nil;
-    [self getIndexPath:&indexPath indexSet:&indexSet ofURLs:urls];
+    if ([self getIndexPath:&indexPath indexSet:&indexSet ofURLs:&urls inDirectory:[controller directoryURL]])
+    {
+        [controller setURLs:urls updateDirectory:NO sender:self];
+    }
     
     if (indexPath != nil)
     {
@@ -207,9 +227,11 @@
 - (void)urlDidLoad:(NSURL *)url
 {
     NSIndexPath         *indexPath;
+    NSArray             *urls;
     
     indexPath = nil;
-    [self getIndexPath:&indexPath indexSet:NULL ofURLs:@[ url ]];
+    urls = @[ url ];
+    [self getIndexPath:&indexPath indexSet:NULL ofURLs:&urls inDirectory:nil];
     
     if (indexPath != nil)
     {
@@ -327,7 +349,7 @@
     
     [cell setStringValue:[url displayName]];
     
-    if ([_controller isURLValid:url])
+    if ([_controller isURLValid:url] || [url canHazChildren])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -352,7 +374,7 @@
          
          url = [browser itemAtRow:idx inColumn:column];
          
-         if ([_controller isURLValid:url])
+         if ([_controller isURLValid:url] || [url canHazChildren])
          {
              [indexSet addIndex:idx];
          }

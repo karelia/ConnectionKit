@@ -51,6 +51,7 @@
 @synthesize showsHiddenFiles = _showsHiddenFiles;
 @synthesize treatsFilePackagesAsDirectories = _treatsFilePackagesAsDirectories;
 @synthesize canCreateDirectories = _canCreateDirectories;
+@synthesize allowedFileTypes = _allowedFileTypes;
 @synthesize completionBlock = _completionBlock;
 
 + (CK2OpenPanel *)openPanel
