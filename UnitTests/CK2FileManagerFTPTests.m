@@ -228,7 +228,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"got unexpected error %@", error);
+            STAssertNotNil(error, nil);
             // TODO: Test for specific error
             
             [self pause];
