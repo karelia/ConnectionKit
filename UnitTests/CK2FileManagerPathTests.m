@@ -44,9 +44,23 @@
     STAssertTrue([path isEqualToString:@"/absolute/path/file.txt"], @"path should start with slash");
 }
 
+- (void)testFTPAbsolutePercentEncoded
+{
+    NSURL* testURL = [NSURL URLWithString:@"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt"];
+    NSString* path = [CK2FileManager pathOfURLRelativeToHomeDirectory:testURL];
+    STAssertTrue([path isEqualToString:@"/absolute/path/file.txt"], @"path should start with slash");
+}
+
 - (void)testFTPRoot
 {
     NSURL* testURL = [NSURL URLWithString:@"ftp://user:pass@test.ftp.com//"];
+    NSString* path = [CK2FileManager pathOfURLRelativeToHomeDirectory:testURL];
+    STAssertTrue([path isEqualToString:@"/"], @"path should start with slash");
+}
+
+- (void)testFTPRootPercentEncoded
+{
+    NSURL* testURL = [NSURL URLWithString:@"ftp://user:pass@test.ftp.com/%2F"];
     NSString* path = [CK2FileManager pathOfURLRelativeToHomeDirectory:testURL];
     STAssertTrue([path isEqualToString:@"/"], @"path should start with slash");
 }

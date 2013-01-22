@@ -4,7 +4,9 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
+
 #import "KMSServer.h"
+#import "KMSTranscriptEntry.h"
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
@@ -216,6 +218,81 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self runUntilPaused];
 
         STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+    }
+}
+
+- (void)testCreateFileDenied
+{
+    if ([self setup])
+    {
+        [self useResponseSet:@"stor denied"];
+        NSURL* url = [self URLForPath:@"/test.txt"];
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, nil);
+            // TODO: Test for specific error
+            
+            [self pause];
+        }];
+        
+        [self runUntilPaused];
+    }
+}
+
+- (void)testCreateFileAtRootReallyGoesIntoRoot
+{
+    // I found we were constructing URLs wrong for the paths like: /example.txt
+    // Such files were ending up in the home folder, rather than root
+    
+    if ([self setup])
+    {
+        [self useResponseSet:@"chroot jail"];
+        NSURL* url = [self URLForPath:@"/test.txt"];
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"got unexpected error %@", error);
+            
+            // Make sure the file went into root, rather than home
+            // This could be done by changing directory to /, or storing directly to /test.txt
+            [self.server.transcript enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
+                
+                // Search back for the STOR command
+                if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"STOR "])
+                {
+                    *stop = YES;
+                    
+                    // Was the STOR command itself valid?
+                    if ([aTranscriptEntry.value hasPrefix:@"STOR /test.txt"])
+                    {
+                        
+                    }
+                    else
+                    {
+                        // Search back for the preceeding CWD command
+                        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, index)];
+                        __block BOOL haveChangedDirectory = NO;
+                        
+                        [self.server.transcript enumerateObjectsAtIndexes:indexes options:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
+                            
+                            if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"CWD "])
+                            {
+                                *stop = YES;
+                                haveChangedDirectory = YES;
+                                STAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
+                            }
+                        }];
+                        
+                        STAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
+                    }
+                }
+            }];
+            
+            [self pause];
+        }];
+        
+        [self runUntilPaused];
     }
 }
 

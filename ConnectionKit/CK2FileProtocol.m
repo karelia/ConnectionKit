@@ -74,6 +74,8 @@ static size_t kCopyBufferSize = 4096;
                 
         BOOL reportedDirectory = NO;
         
+        if (_cancelled) return; // bail should we be cancelled
+        
         NSURL *aURL;
         while (aURL = [enumerator nextObject])
         {
@@ -85,6 +87,8 @@ static size_t kCopyBufferSize = 4096;
             }
             
             [client protocol:self didDiscoverItemAtURL:aURL];
+            
+            if (_cancelled) return;
         }
                 
         [client protocolDidFinish:self];
@@ -180,6 +184,13 @@ static size_t kCopyBufferSize = 4096;
 - (void)start;
 {
     _block();
+}
+
+- (void)stop;
+{
+    // Most operations are synchronous; we can't stop them
+    _cancelled = YES;
+    // TODO: File creation is DEFINITELY cancellable
 }
 
 #pragma mark - File Copying

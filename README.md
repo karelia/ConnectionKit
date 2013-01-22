@@ -5,6 +5,7 @@ ConnectionKit 2 is still under heavy development, but the front-end API is proba
 
 Things someone could do if they're feeling nice:
 
+* Cancellation support for the File protocol
 * Improve handling of invalid certificates for FTPS
 * Amazon S3 protocol
 * Port `CKUploader` to the new API
@@ -18,12 +19,20 @@ ConnectionKit provides a Cocoa-friendly, block-based API for asynchronously work
 * FTP, SFTP and WebDAV servers
 * Local files
 
-Contact
+Contributors and Contact Info
 =======
 
 I'm Mike Abdullah, of [Karelia Software](http://karelia.com). [@mikeabdullah](http://twitter.com/mikeabdullah) on Twitter.
 
 Questions about the code should be left as issues at https://github.com/karelia/ConnectionKit or message me on Twitter.
+
+Big thanks to:
+
+* Sam Deane for:
+	* Sooo much testing, especially Mock Server
+	* The WebDAV protocol implementation
+	* Improving the File protocol implementation
+* And all contributors to the submodules of course!
 
 Dependencies
 ============

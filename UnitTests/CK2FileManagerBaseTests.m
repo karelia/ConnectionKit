@@ -112,7 +112,7 @@
 - (NSURL*)URLForPath:(NSString*)path
 {
     NSURL* url = [CK2FileManager URLWithPath:path relativeToURL:self.url];
-    return url;
+    return [url absoluteURL];   // account for relative URLs
 }
 
 
