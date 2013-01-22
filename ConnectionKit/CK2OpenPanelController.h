@@ -37,16 +37,24 @@
 
 @interface CK2OpenPanelController : NSViewController <NSTabViewDelegate, CK2FileManagerDelegate>
 {
+    IBOutlet NSView                 *_topSection;
     IBOutlet NSTextField            *_hostField;
+    IBOutlet NSView                 *_buttonSection;
     IBOutlet CK2PathControl         *_pathControl;
     IBOutlet NSSegmentedControl     *_viewPicker;
+    IBOutlet NSView                 *_middleSection;
     IBOutlet NSTabView              *_tabView;
+    IBOutlet NSView                 *_bottomSection;
     IBOutlet NSButton               *_okButton;
     IBOutlet NSButton               *_cancelButton;
     IBOutlet NSProgressIndicator    *_progressIndicator;
     IBOutlet NSSegmentedControl     *_historyButtons;
     IBOutlet NSButton               *_newFolderButton;
     IBOutlet NSSegmentedControl     *_homeButton;
+    
+    IBOutlet NSTextField            *_messageLabel;
+    IBOutlet NSBox                  *_accessoryContainer;
+    NSView                          *_initialAccessoryView;
     
     IBOutlet CK2OpenPanel      *_openPanel;
     IBOutlet CK2OpenPanelColumnViewController    *_browserController;
@@ -68,11 +76,12 @@
     id                              _currentBootstrapOperation;
 }
 
-@property (readwrite, assign) CK2OpenPanel     *openPanel;
-@property (readonly, copy) NSURL               *directoryURL;
-@property (readwrite, copy) NSURL              *URL;
-@property (readwrite, copy) NSArray            *URLs;
-@property (readwrite, copy) NSURL              *homeURL;
+@property (readwrite, assign) CK2OpenPanel      *openPanel;
+@property (readonly, copy) NSURL                *directoryURL;
+@property (readwrite, copy) NSURL               *URL;
+@property (readwrite, copy) NSArray             *URLs;
+@property (readwrite, copy) NSURL               *homeURL;
+@property (readwrite, retain) NSView            *accessoryView;
 
 
 - (id)initWithPanel:(CK2OpenPanel *)panel;
@@ -99,5 +108,6 @@
 - (NSArray *)childrenForURL:(NSURL *)url;
 - (void)addToHistory;
 
+- (void)validateVisibleColumns;
 
 @end

@@ -57,6 +57,8 @@
 
 #define MIN_PROMPT_BUTTON_WIDTH         82
 #define PROMPT_BUTTON_RIGHT_MARGIN      18
+#define MESSAGE_SIDE_MARGIN             16
+#define MESSAGE_HEIGHT                  24
 
 #define HISTORY_DIRECTORY_URL_KEY           @"directoryURL"
 #define HISTORY_DIRECTORY_VIEW_INDEX_KEY    @"viewIndex"
@@ -101,6 +103,7 @@
         [_fileManager setDelegate:self];
         
         [_openPanel addObserver:self forKeyPath:@"prompt" options:NSKeyValueObservingOptionNew context:NULL];
+        [_openPanel addObserver:self forKeyPath:@"message" options:NSKeyValueObservingOptionOld context:NULL];
         [_openPanel addObserver:self forKeyPath:@"canChooseFiles" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"canChooseDirectories" options:NSKeyValueObservingOptionNew context:NULL];
         [_openPanel addObserver:self forKeyPath:@"allowsMultipleSelection" options:NSKeyValueObservingOptionNew context:NULL];
@@ -115,6 +118,7 @@
 
 - (void)dealloc
 {
+    [_initialAccessoryView release];
     for (id operation in [_runningOperations allValues])
     {
         [_fileManager cancelOperation:operation];
@@ -129,6 +133,7 @@
     [_fileManager release];
     
     [_openPanel removeObserver:self forKeyPath:@"prompt"];
+    [_openPanel removeObserver:self forKeyPath:@"message"];
     [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
     [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
     [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
@@ -149,7 +154,9 @@
 - (void)awakeFromNib
 {
     NSTabViewItem       *item;
-    
+   
+    _initialAccessoryView = [[_accessoryContainer contentView] retain];
+    [_hostField setStringValue:@""];
     [self validateHistoryButtons];
     [self validateOKButton];
     [self validateProgressIndicator];
@@ -179,14 +186,72 @@
         rect2.origin.x = NSMinX(rect1) - NSWidth(rect2);
         [_cancelButton setFrame:rect2];
     }
+    else if ([keyPath isEqual:@"message"])
+    {
+        id          oldMessage;
+        NSString    *message;
+        CGFloat     height;
+        NSRect      rect, bounds;
+        
+        oldMessage = [change objectForKey:NSKeyValueChangeOldKey];
+        oldMessage = oldMessage == [NSNull null] ? nil : oldMessage;
+        message = [_openPanel message];
+
+        if ([message length] > 0)
+        {
+            [_messageLabel setStringValue:message];
+        }
+        
+        bounds = [[self view] bounds];
+        height = 0.0;
+        
+        if (([oldMessage length] == 0) && ([message length] > 0))
+        {
+            height = MESSAGE_HEIGHT;
+        }
+        else if (([oldMessage length] > 0) && ([message length] == 0))
+        {
+            height = -MESSAGE_HEIGHT;
+        }
+        
+        if (height != 0.0)
+        {
+            NSUInteger  buttonMask, middleMask;
+            
+            rect = [[self view] frame];
+            rect.size.height += height;
+            
+            buttonMask = [_buttonSection autoresizingMask];
+            [_buttonSection setAutoresizingMask:NSViewMaxYMargin | NSViewWidthSizable];
+            middleMask = [_middleSection autoresizingMask];
+            [_middleSection setAutoresizingMask:NSViewMaxYMargin | NSViewWidthSizable];
+            
+            rect = [_openPanel frameRectForContentRect:rect];
+            [_openPanel setFrame:rect display:YES];
+            
+            [_buttonSection setAutoresizingMask:buttonMask];
+            [_middleSection setAutoresizingMask:middleMask];
+
+            if ([_messageLabel superview] != [self view])
+            {
+                rect = [_messageLabel frame];
+                rect.origin.x = NSMinX(bounds) + MESSAGE_SIDE_MARGIN;
+                rect.origin.y = NSMaxY([_buttonSection frame]);
+                rect.size.width = NSWidth(bounds) - 2 * MESSAGE_SIDE_MARGIN;
+                [_messageLabel setFrame:rect];
+                [[self view] addSubview:_messageLabel];
+            }
+            else
+            {
+                [_messageLabel removeFromSuperview];
+            }
+        }
+    }
     else if ([keyPath isEqual:@"canChooseFiles"] || [keyPath isEqual:@"canChooseDirectories"] ||
              [keyPath isEqual:@"showsHiddenFiles"] || [keyPath isEqual:@"treatsFilePackagesAsDirectories"] ||
              [keyPath isEqual:@"allowedFileTypes"])
     {
-        [[_browserController view] setNeedsDisplay:YES];
-        [[_listViewController view] setNeedsDisplay:YES];
-        [_iconViewController reload];
-        [self validateOKButton];
+        [self validateVisibleColumns];
     }
     else if ([keyPath isEqual:@"canCreateDirectories"])
     {
@@ -209,6 +274,91 @@
     {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
     }
+}
+
+- (NSView *)accessoryView
+{
+    NSView  *view;
+    
+    view = [_accessoryContainer contentView];
+    
+    if (view == _initialAccessoryView)
+    {
+        return nil;
+    }
+    return view;
+}
+
+- (void)setAccessoryView:(NSView *)accessoryView
+{
+    NSRect  rect;
+    CGFloat height;
+    NSUInteger  mask;
+    
+    // Save off the mask and tweak it. We want the middle section to have different resizing behavior while we
+    // resize the window
+    mask = [_middleSection autoresizingMask];
+    [_middleSection setAutoresizingMask:NSViewMinYMargin | NSViewWidthSizable];
+
+    if (accessoryView != nil)
+    {
+        NSRect      accessoryFrame, containerFrame;
+
+        height = 0.0;
+        if ([_accessoryContainer superview] == [self view])
+        {
+            height = NSHeight([[_accessoryContainer contentView] frame]);
+        }
+        
+        accessoryFrame = [accessoryView frame];
+
+        // Remove the accessory container while we muck around with window dimensions and such. We want to preserve the
+        // accessory view's original size. Also, no need to retain because it's a top-level object in the xib.
+        [_accessoryContainer removeFromSuperview];
+        
+        [_accessoryContainer setFrameFromContentFrame:accessoryFrame];
+        [_accessoryContainer setContentView:accessoryView];
+        
+        // Tile the container
+        containerFrame = [_accessoryContainer frame];
+        containerFrame.origin.x = 0.0;
+        containerFrame.origin.y = NSMaxY([_bottomSection frame]);
+        [_accessoryContainer setFrame:containerFrame];
+
+ 
+        // Resize the window to accommodate
+        rect = [[self view] frame];
+        //PENDING: shrink to fit? Check against windows min and max?
+        rect.size.width = NSWidth(containerFrame);
+        rect.size.height += NSHeight(containerFrame) - height;
+        rect = [_openPanel frameRectForContentRect:rect];
+        [_openPanel setFrame:rect display:YES];
+        
+        [[self view] addSubview:_accessoryContainer];
+    }
+    else
+    {
+        CGFloat  height;
+        
+        height = NSHeight([_accessoryContainer frame]);
+        [_accessoryContainer setContentView:_initialAccessoryView];
+        [_accessoryContainer removeFromSuperview];
+        
+        rect = [[self view] frame];
+        rect.size.height -= height;
+        rect = [_openPanel frameRectForContentRect:rect];
+        [_openPanel setFrame:rect display:YES];
+    }
+    
+    [_middleSection setAutoresizingMask:mask];
+}
+
+- (void)validateVisibleColumns
+{
+    [[_browserController view] setNeedsDisplay:YES];
+    [[_listViewController view] setNeedsDisplay:YES];
+    [_iconViewController reload];
+    [self validateOKButton];
 }
 
 - (void)resetSession

@@ -45,6 +45,7 @@
 
 @synthesize title = _title;
 @synthesize prompt = _prompt;
+@synthesize message = _message;
 @synthesize canChooseFiles = _canChooseFiles;
 @synthesize canChooseDirectories = _canChooseDirectories;
 @synthesize allowsMultipleSelection = _allowsMultipleSelection;
@@ -112,6 +113,16 @@
 - (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
     [_viewController changeDirectory:directoryURL completionBlock:block];
+}
+
+- (NSView *)accessoryView
+{
+    return [_viewController accessoryView];
+}
+
+- (void)setAccessoryView:(NSView *)accessoryView
+{
+    [_viewController setAccessoryView:accessoryView];
 }
 
 - (NSURL *)directoryURL
@@ -223,6 +234,11 @@
 - (IBAction)cancel:(id)sender
 {
     [self endWithCode:NSFileHandlingPanelCancelButton];
+}
+
+- (void)validateVisibleColumns
+{
+    [_viewController validateVisibleColumns];
 }
 
 @end

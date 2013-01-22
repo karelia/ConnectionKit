@@ -45,6 +45,7 @@
     CK2OpenPanelController      *_viewController;
     NSString                    *_title;
     NSString                    *_prompt;
+    NSString                    *_message;
     BOOL                        _canChooseFiles;
     BOOL                        _canChooseDirectories;
     BOOL                        _allowsMultipleSelection;
@@ -59,6 +60,8 @@
 
 @property (readwrite, copy) NSString    *title;
 @property (readwrite, copy) NSString    *prompt;
+@property (readwrite, copy) NSString    *message;
+@property (readwrite, retain) NSView    *accessoryView;
 @property (readwrite, assign) BOOL      canChooseFiles;
 @property (readwrite, assign) BOOL      canChooseDirectories;
 @property (readwrite, assign) BOOL      allowsMultipleSelection;
@@ -71,8 +74,8 @@
 @property (readonly, copy) NSURL        *URL;
 @property (readonly, copy) NSArray      *URLs;
 
-//@property (readwrite, copy) NSString    *message;
-//@property (readwrite, retain) NSView    *accessoryView;
+
+
 
 //?@property (readwrite, assign) BOOL canCreateDirectories; - seems to be possible with some protocols
 
@@ -94,6 +97,8 @@
 
 - (IBAction)ok:(id)sender;
 - (IBAction)cancel:(id)sender;
+
+- (void)validateVisibleColumns;
 
 @end
 
