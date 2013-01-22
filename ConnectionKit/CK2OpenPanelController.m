@@ -411,9 +411,6 @@
          ^{
              __block NSError *tempError;
              
-#warning Added delay for testing. Remove before committing
-//             sleep(1);
-             
              tempError = nil;
              if (blockError != nil)
              {

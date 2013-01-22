@@ -68,6 +68,15 @@
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
+		324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */; };
+		324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */; };
+		324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */; };
+		324D22C216AE1741001CFDE6 /* CK2BrowserPreviewView.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */; };
+		324D22C516AE1754001CFDE6 /* CK2FileSizeFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */; };
+		324D22C616AE1754001CFDE6 /* CK2FileSizeFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */; };
+		324D22C916AE1763001CFDE6 /* CK2IconView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22C716AE1762001CFDE6 /* CK2IconView.h */; };
+		324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22C816AE1762001CFDE6 /* CK2IconView.m */; };
+		324D22CC16AE17AC001CFDE6 /* CK2FilePreview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */; };
 		32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */; };
 		32B592BA16A4960B0020FFE9 /* CK2OpenPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */; };
@@ -288,6 +297,15 @@
 		27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURL+Connection.m"; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewController.h; sourceTree = "<group>"; };
+		324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2BrowserPreviewController.m; sourceTree = "<group>"; };
+		324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewView.h; sourceTree = "<group>"; };
+		324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2BrowserPreviewView.m; sourceTree = "<group>"; };
+		324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileSizeFormatter.h; sourceTree = "<group>"; };
+		324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileSizeFormatter.m; sourceTree = "<group>"; };
+		324D22C716AE1762001CFDE6 /* CK2IconView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconView.h; sourceTree = "<group>"; };
+		324D22C816AE1762001CFDE6 /* CK2IconView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconView.m; sourceTree = "<group>"; };
+		324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2FilePreview.xib; sourceTree = "<group>"; };
 		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
 		32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanel.m; sourceTree = "<group>"; };
 		32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelController.h; sourceTree = "<group>"; };
@@ -664,9 +682,18 @@
 				32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */,
 				32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */,
 				32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */,
+				324D22C716AE1762001CFDE6 /* CK2IconView.h */,
+				324D22C816AE1762001CFDE6 /* CK2IconView.m */,
+				324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */,
+				324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */,
+				324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */,
+				324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */,
+				324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */,
+				324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */,
 				32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */,
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
 				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
+				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
 			);
 			name = CK2OpenPanel;
 			sourceTree = "<group>";
@@ -849,6 +876,10 @@
 				32B592CB16A4960B0020FFE9 /* CK2OpenPanelListViewController.h in Headers */,
 				32B592CD16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h in Headers */,
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
+				324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */,
+				324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */,
+				324D22C516AE1754001CFDE6 /* CK2FileSizeFormatter.h in Headers */,
+				324D22C916AE1763001CFDE6 /* CK2IconView.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -996,6 +1027,7 @@
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				227113BF168388FD00280005 /* http.json in Resources */,
 				32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */,
+				324D22CC16AE17AC001CFDE6 /* CK2FilePreview.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1116,6 +1148,10 @@
 				32B592CA16A4960B0020FFE9 /* CK2OpenPanelIconViewController.m in Sources */,
 				32B592CC16A4960B0020FFE9 /* CK2OpenPanelListViewController.m in Sources */,
 				32B592CE16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m in Sources */,
+				324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */,
+				324D22C216AE1741001CFDE6 /* CK2BrowserPreviewView.m in Sources */,
+				324D22C616AE1754001CFDE6 /* CK2FileSizeFormatter.m in Sources */,
+				324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
