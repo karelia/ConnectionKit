@@ -76,7 +76,7 @@
 
 - (void)stop;
 {
-//    [self doesNotRecognizeSelector:_cmd];
+    [self doesNotRecognizeSelector:_cmd];
 }
 
 #pragma mark For Subclasses to Customize
