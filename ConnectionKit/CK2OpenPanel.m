@@ -223,8 +223,7 @@
         error = nil;
         if (![[self delegate] panel:self validateURL:[self URL] error:&error])
         {
-            NSBeginCriticalAlertSheet([NSString stringWithFormat: @"The operation couldn't be completed. %@ error %ld", [error domain], [error code]], @"OK", nil, nil, self, self, NULL, NULL, NULL, @"");
-
+            [self presentError:error modalForWindow:self delegate:nil didPresentSelector:NULL contextInfo:NULL];
             return;
         }
     }
