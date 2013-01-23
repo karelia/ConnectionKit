@@ -572,9 +572,6 @@
     completionHandler:
      ^(NSError *blockError)
      {
-         // Get this off of the file manager's queue so that we don't deadlock if we call back into it.
-         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-         ^{
              __block NSError *tempError;
              
              tempError = nil;
@@ -628,7 +625,6 @@
              });
              
              [resolvedURL autorelease];
-         });
      }];
     
     [_currentBootstrapOperation retain];
