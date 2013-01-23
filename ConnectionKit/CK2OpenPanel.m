@@ -112,11 +112,6 @@
     [super setDelegate:(id <NSWindowDelegate>)delegate];
 }
 
-- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
-{
-    [_viewController changeDirectory:directoryURL completionBlock:block];
-}
-
 - (NSView *)accessoryView
 {
     return [_viewController accessoryView];
@@ -127,9 +122,19 @@
     [_viewController setAccessoryView:accessoryView];
 }
 
-- (NSURL *)directoryURL
+@synthesize directoryURL = _directoryURL;
+- (void)setDirectoryURL:(NSURL *)directoryURL;
 {
-    return [_viewController directoryURL];
+    [self setDirectoryURL:directoryURL completionBlock:nil];
+}
+
+- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *))block;
+{
+    // Kick off async loading of the URL, but also store our own copy for clients to immediately pull out again if they wish
+    [_viewController changeDirectory:directoryURL completionBlock:block];
+    
+    directoryURL = [directoryURL copy];
+    [_directoryURL release]; _directoryURL = directoryURL;
 }
 
 - (NSURL *)URL

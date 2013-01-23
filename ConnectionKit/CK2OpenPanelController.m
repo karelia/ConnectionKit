@@ -976,7 +976,7 @@
 - (void)addToHistory
 {
     [_historyManager registerUndoWithTarget:self selector:@selector(changeView:)
-                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [_openPanel directoryURL],
+                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [self directoryURL],
        HISTORY_DIRECTORY_VIEW_INDEX_KEY : [NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:[_tabView selectedTabViewItem]]] }];
     
     [self validateHistoryButtons];
@@ -1000,7 +1000,7 @@
     
     url = [_pathControl URL];
     
-    if (![url isEqual:[_openPanel directoryURL]])
+    if (![url isEqual:[self directoryURL]])
     {
         [self addToHistory];
         [self setURLs:@[ url ] updateDirectory:YES sender:_pathControl];

@@ -69,8 +69,8 @@
 @property (readwrite, assign) BOOL      treatsFilePackagesAsDirectories;
 @property (readwrite, assign) BOOL      canCreateDirectories;
 @property (readwrite, copy) NSArray     *allowedFileTypes;
+@property (nonatomic, copy) NSURL       *directoryURL;
 
-@property (readonly, copy) NSURL       *directoryURL;
 @property (readonly, copy) NSURL        *URL;
 @property (readonly, copy) NSArray      *URLs;
 
@@ -89,6 +89,7 @@
 // the panel beforehand but much of the UI will be disabled until the URLs are loaded. The UI will still be responsive
 // in that you'll see progress indicators spinning and you can still cancel.
 // Note that the completion block is called on the main thread.
+// .directoryURL immediately reflects the URL called with
 - (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
