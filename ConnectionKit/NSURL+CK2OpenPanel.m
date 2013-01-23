@@ -34,9 +34,6 @@
 #import <dispatch/dispatch.h>
 
 @interface CK2PlaceholderURL : NSURL
-{
-}
-
 @end
 
 
