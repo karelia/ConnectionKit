@@ -78,7 +78,6 @@
         [self setFrame:rect display:NO];
         [self setContentView:view];
         
-        [self setDirectoryURL:[NSURL fileURLWithPath:@"/"] completionBlock:NULL];
         [self setCanChooseDirectories:YES];
         [self setCanChooseFiles:NO];
         [self setCanCreateDirectories:NO];
@@ -147,8 +146,16 @@
     return [_viewController URLs];
 }
 
+- (void)willAppear;
+{
+    // Default to root if no-one's supplied anything better
+    if (![self directoryURL]) [self setDirectoryURL:[NSURL fileURLWithPath:@"/"]];
+}
+
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler
 {
+    [self willAppear];
+    
     CFRetain(self);
     [NSApp beginSheet:self modalForWindow:window modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:[handler copy]];
 }
@@ -175,6 +182,8 @@
 
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler
 {
+    [self willAppear];
+    
     CFRetain(self);
     
     [self setCompletionBlock:handler];
@@ -184,6 +193,8 @@
 
 - (NSInteger)runModal
 {
+    [self willAppear];
+    
     // NSFileHandlingPanelOKButton, NSFileHandlingPanelCancelButton
     [self center];
     return [NSApp runModalForWindow:self];
