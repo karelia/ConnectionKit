@@ -279,7 +279,7 @@
     }
     else
     {
-        return [CK2FileManager URLWithPath:@"/" relativeToURL:self];
+        return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
     }
 }
 
