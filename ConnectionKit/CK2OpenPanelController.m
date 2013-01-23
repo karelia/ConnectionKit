@@ -1043,6 +1043,10 @@
     {
         [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
     }
+    else
+    {
+        [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
+    }
 }
 
 @end
