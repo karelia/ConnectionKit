@@ -85,6 +85,8 @@
 @synthesize URLs = _urls;
 @synthesize homeURL = _home;
 
+#pragma mark Lifecycle
+
 - (id)initWithPanel:(CK2OpenPanel *)panel
 {
     NSBundle        *bundle;
@@ -116,6 +118,27 @@
     return self;
 }
 
+- (void)close;
+{
+    [_openPanel removeObserver:self forKeyPath:@"prompt"];
+    [_openPanel removeObserver:self forKeyPath:@"message"];
+    [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
+    [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
+    [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
+    [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowedFileTypes"];
+    [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
+    
+    if (_openPanel)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
+    }
+    
+    _openPanel = nil;
+}
+
 - (void)dealloc
 {
     [_initialAccessoryView release];
@@ -132,17 +155,7 @@
     
     [_fileManager release];
     
-    [_openPanel removeObserver:self forKeyPath:@"prompt"];
-    [_openPanel removeObserver:self forKeyPath:@"message"];
-    [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
-    [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
-    [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
-    [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
-    [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
-    [_openPanel removeObserver:self forKeyPath:@"allowedFileTypes"];
-    [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
+    [self close];   // just to be sure
 
     [_urls release];
     [_urlCache release];

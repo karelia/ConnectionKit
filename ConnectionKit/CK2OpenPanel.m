@@ -91,6 +91,8 @@
 
 - (void)dealloc
 {
+    [_viewController close]; // holds a weak ref to us which needs breaking
+    
     [self setCompletionBlock:nil];
     [_viewController release];
     [super dealloc];
