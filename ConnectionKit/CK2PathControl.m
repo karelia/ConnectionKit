@@ -81,7 +81,7 @@
             size = NSMakeSize(ICON_SIZE, ICON_SIZE);
             
             isFirst = YES;
-            [url enumerateFromRoot:
+            [url ck2_enumerateFromRoot:
              ^(NSURL *blockURL, BOOL *stop)
             {
                 NSString        *title;
@@ -97,7 +97,7 @@
                 else
                 {
                     title = [blockURL lastPathComponent];
-                    image = [[[blockURL icon] copy] autorelease];
+                    image = [[[blockURL ck2_icon] copy] autorelease];
                 }
                 
                 item = [[NSMenuItem alloc] initWithTitle:title action:@selector(urlSelected:) keyEquivalent:@""];

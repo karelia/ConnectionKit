@@ -451,7 +451,7 @@
     // Have to be synchronous here as we want all the "enters" to occur before we do the "wait" below
     dispatch_sync(dispatch_get_main_queue(),
     ^{
-        [url enumerateFromRoot:
+        [url ck2_enumerateFromRoot:
          ^(NSURL *blockURL, BOOL *stop)
          {
              NSArray    *children;
@@ -459,7 +459,7 @@
              //PENDING: Is completion block called if an operation is cancelled?
              children = [self childrenForURL:blockURL];
              
-             if (([children count] == 1) && [[children objectAtIndex:0] isPlaceholder])
+             if (([children count] == 1) && [[children objectAtIndex:0] ck2_isPlaceholder])
              {
                  // URL contents haven't been loaded yet. We will get a notification for this later via the block above.
                  dispatch_group_enter(dispatchGroup);
@@ -486,7 +486,7 @@
 // loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
-    if (![[directoryURL root] isEqual:[[self URL] root]])
+    if (![[directoryURL ck2_root] isEqual:[[self URL] ck2_root]])
     {
         [self loadRoot:directoryURL completionBlock:block];
     }
@@ -564,7 +564,7 @@
              tempError = nil;
              if (blockError != nil)
              {
-                 [children addObject:[NSURL errorURL]];                 
+                 [children addObject:[NSURL ck2_errorURL]];                 
                  tempError = [blockError retain];
              }
              else
@@ -588,7 +588,7 @@
                      if (range.location != NSNotFound)
                      {
                          resolvedPath = [resolvedPath substringToIndex:range.location];
-                         [self setHomeURL:[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL root]]];
+                         [self setHomeURL:[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL ck2_root]]];
                      }
                  }
                  
@@ -639,7 +639,7 @@
         NSURL       *directoryURL;
 
         directoryURL = [urls objectAtIndex:0];
-        if (![directoryURL canHazChildren])
+        if (![directoryURL ck2_canHazChildren])
         {
             directoryURL = [directoryURL URLByDeletingLastPathComponent];
         }
@@ -682,7 +682,7 @@
         
     children = nil;
     
-    if ((url != nil) && [url canHazChildren])
+    if ((url != nil) && [url ck2_canHazChildren])
     {
         children = [_urlCache objectForKey:url];
         
@@ -693,7 +693,7 @@
             NSArray                         *blockChildren;
             
             // Placeholder while children are being fetched
-            children = @[ [NSURL loadingURL] ];
+            children = @[ [NSURL ck2_loadingURL] ];
             
             blockChildren = children;
             
@@ -726,7 +726,7 @@
                     {
                         if (blockError != nil)
                         {
-                            value = @[ [NSURL errorURL] ];
+                            value = @[ [NSURL ck2_errorURL] ];
                         }
                         else
                         {
@@ -778,7 +778,7 @@
 
 - (BOOL)isURLValid:(NSURL *)url
 {
-    if (![url isPlaceholder])
+    if (![url ck2_isPlaceholder])
     {
         id <CK2OpenPanelDelegate>   delegate;
         BOOL                        delegateValid, fileTypeValid;
@@ -791,7 +791,7 @@
         allowedFileTypes = [_openPanel allowedFileTypes];
         fileTypeValid = ([allowedFileTypes count] == 0) || [allowedFileTypes containsObject:[url pathExtension]];
         
-        if ([url canHazChildren])
+        if ([url ck2_canHazChildren])
         {
             return [_openPanel canChooseDirectories] && delegateValid && fileTypeValid;
         }

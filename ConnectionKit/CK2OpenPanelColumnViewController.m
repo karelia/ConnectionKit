@@ -86,12 +86,12 @@
     {
         directoryURL = [*urls objectAtIndex:0];
     }
-    if (![directoryURL canHazChildren])
+    if (![directoryURL ck2_canHazChildren])
     {
         directoryURL = [directoryURL URLByDeletingLastPathComponent];
     }
     
-    root = [directoryURL root];
+    root = [directoryURL ck2_root];
 
     targetComponents = [directoryURL pathComponents];
     count = [targetComponents count];
@@ -118,7 +118,7 @@
             {
                 if (i == count - 1)
                 {
-                    tempURL = [tempURL URLByDeletingTrailingSlash];
+                    tempURL = [tempURL ck2_URLByDeletingTrailingSlash];
                     
                     row = [children indexOfObject:tempURL];
                 }
@@ -156,7 +156,7 @@
         
         if (row == NSNotFound)
         {
-            tempURL = [tempURL URLByDeletingTrailingSlash];
+            tempURL = [tempURL ck2_URLByDeletingTrailingSlash];
             
             row = [children indexOfObject:tempURL];
         }
@@ -304,7 +304,7 @@
 
 - (id)rootItemForBrowser:(NSBrowser *)browser
 {
-    return [[[_controller openPanel] directoryURL] root];
+    return [[[_controller openPanel] directoryURL] ck2_root];
 }
 
 - (id)browser:(NSBrowser *)browser child:(NSInteger)index ofItem:(id)item
@@ -322,7 +322,7 @@
 
 - (BOOL)browser:(NSBrowser *)browser isLeafItem:(id)item
 {
-    return ![item canHazChildren];
+    return ![item ck2_canHazChildren];
 }
 
 - (NSInteger)browser:(NSBrowser *)browser numberOfChildrenOfItem:(id)item
@@ -332,7 +332,7 @@
 
 - (id)browser:(NSBrowser *)browser objectValueForItem:(id)item
 {
-    return [item displayName];
+    return [item ck2_displayName];
 }
 
 - (BOOL)browser:(NSBrowser *)browser shouldEditItem:(id)item
@@ -345,11 +345,11 @@
     NSURL       *url;
     
     url = [browser itemAtRow:row inColumn:column];
-    [cell setImage:[url icon]];
+    [cell setImage:[url ck2_icon]];
     
-    [cell setStringValue:[url displayName]];
+    [cell setStringValue:[url ck2_displayName]];
     
-    if ([_controller isURLValid:url] || [url canHazChildren])
+    if ([_controller isURLValid:url] || [url ck2_canHazChildren])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -374,7 +374,7 @@
          
          url = [browser itemAtRow:idx inColumn:column];
          
-         if ([_controller isURLValid:url] || [url canHazChildren])
+         if ([_controller isURLValid:url] || [url ck2_canHazChildren])
          {
              [indexSet addIndex:idx];
          }
@@ -414,7 +414,7 @@
     NSURL   *item;
     
     item = [browser itemAtRow:row inColumn:column];
-    return [item displayName];
+    return [item ck2_displayName];
 }
 
 @end

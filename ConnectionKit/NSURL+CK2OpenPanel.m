@@ -39,23 +39,23 @@
 
 @implementation NSURL (CK2OpenPanel)
 
-+ (NSURL *)loadingURL
++ (NSURL *)ck2_loadingURL
 {
     return [[[CK2PlaceholderURL alloc] initWithString:@"Loading…"] autorelease];
 }
 
-+ (NSURL *)errorURL
++ (NSURL *)ck2_errorURL
 {
     return [[[CK2PlaceholderURL alloc] initWithString:@"Error"] autorelease];
 }
 
 
-- (BOOL)isPlaceholder
+- (BOOL)ck2_isPlaceholder
 {
     return NO;
 }
 
-- (NSString *)displayName
+- (NSString *)ck2_displayName
 {
     id          value;
     NSError     *error;
@@ -71,7 +71,7 @@
     return @"";
 }
 
-- (NSImage *)icon
+- (NSImage *)ck2_icon
 {
     if ([self isFileURL])
     {
@@ -91,7 +91,7 @@
     {
         NSString        *type;
         
-        if ([self canHazChildren])
+        if ([self ck2_canHazChildren])
         {
             return [NSImage imageNamed:NSImageNameFolder];
         }
@@ -106,7 +106,7 @@
     return nil;
 }
 
-- (NSDate *)dateModified
+- (NSDate *)ck2_dateModified
 {
     id          value;
     NSError     *error;
@@ -122,7 +122,7 @@
     return nil;
 }
 
-- (NSString *)kind
+- (NSString *)ck2_kind
 {
     if ([self isFileURL])
     {
@@ -144,7 +144,7 @@
         OSStatus        status;
         CFStringRef     kindString;
 
-        if ([self canHazChildren])
+        if ([self ck2_canHazChildren])
         {
             return @"Folder";
         }
@@ -164,7 +164,7 @@
     return @"";
 }
 
-- (NSNumber *)size
+- (NSNumber *)ck2_size
 {
     id          value;
     NSError     *error;
@@ -180,7 +180,7 @@
     return nil;
 }
 
-- (BOOL)isDirectory
+- (BOOL)ck2_isDirectory
 {
     id          value;
     NSError     *error;
@@ -202,7 +202,7 @@
     return NO;
 }
 
-- (BOOL)isPackage
+- (BOOL)ck2_isPackage
 {
     if ([self isFileURL])
     {
@@ -255,12 +255,12 @@
     return NO;
 }
 
-- (BOOL)canHazChildren
+- (BOOL)ck2_canHazChildren
 {
-    return [self isDirectory] && ![self isPackage];
+    return [self ck2_isDirectory] && ![self ck2_isPackage];
 }
 
-- (NSURL *)root
+- (NSURL *)ck2_root
 {
     if ([self isFileURL])
     {
@@ -283,7 +283,7 @@
     }
 }
 
-- (void)enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
+- (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
 {
     NSURL               *tempURL;
     NSArray             *targetComponents;
@@ -296,7 +296,7 @@
         targetComponents = [self pathComponents];
         count = [targetComponents count];
         
-        tempURL = [self root];
+        tempURL = [self ck2_root];
         
         stop = NO;
         
@@ -314,7 +314,7 @@
     }
 }
 
-- (NSURL *)URLByDeletingTrailingSlash
+- (NSURL *)ck2_URLByDeletingTrailingSlash
 {
     NSString    *path;
     
@@ -324,7 +324,7 @@
         path = [path substringToIndex:[path length] - 1];
     }
     // Quite the rigamarole just to get an URL without the trailing slash
-    return [[NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] relativeToURL:[self root]] absoluteURL];
+    return [[NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] relativeToURL:[self ck2_root]] absoluteURL];
 }
 
 @end
@@ -332,27 +332,27 @@
 
 @implementation CK2PlaceholderURL
 
-- (BOOL)isPlaceholder
+- (BOOL)ck2_isPlaceholder
 {
     return YES;
 }
 
-- (NSString *)displayName
+- (NSString *)ck2_displayName
 {
     return [[self absoluteString] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
 }
 
-- (NSImage *)icon
+- (NSImage *)ck2_icon
 {
     return nil;
 }
 
-- (NSDate *)dateModified
+- (NSDate *)ck2_dateModified
 {
     return nil;
 }
 
-- (NSString *)kind
+- (NSString *)ck2_kind
 {
     return @"";
 }
@@ -362,12 +362,12 @@
     return @"";
 }
 
-- (BOOL)isDirectory
+- (BOOL)ck2_isDirectory
 {
     return NO;
 }
 
-- (BOOL)canHazChildren
+- (BOOL)ck2_canHazChildren
 {
     return NO;
 }
