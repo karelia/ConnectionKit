@@ -413,14 +413,7 @@
 
 - (void)setURL:(NSURL *)URL
 {
-    if (URL != nil)
-    {
-        [self setURLs:@[ URL ]];
-    }
-    else
-    {
-        [self setURLs:nil];
-    }
+    [self setURLs:(URL ? @[URL] : nil)];
 }
 
 // This pre-loads all the URLs up to the given one. Used in the bootstrapping process. This method
