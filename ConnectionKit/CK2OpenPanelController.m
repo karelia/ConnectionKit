@@ -541,6 +541,9 @@
     NSMutableArray          *children;
     __block NSURL           *resolvedURL;
     
+    // Make sure URL is absolute so can safely use it for comparisons later
+    rootURL = [rootURL absoluteURL];
+    
     children = [NSMutableArray array];
     
     //PENDING: compare url
