@@ -678,6 +678,7 @@
         if (![directoryURL isEqual:[self directoryURL]])
         {
             [self setDirectoryURL:directoryURL];
+            [_openPanel setDirectoryURL:directoryURL];
             
             if (sender != _pathControl)
             {
