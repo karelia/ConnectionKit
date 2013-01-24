@@ -262,25 +262,7 @@
 
 - (NSURL *)ck2_root
 {
-    if ([self isFileURL])
-    {
-        id          value;
-        NSError     *error;
-        
-        if ([self getResourceValue:&value forKey:NSURLVolumeURLKey error:&error])
-        {
-            return value;
-        }
-        else
-        {
-            NSLog(@"Error getting root for URL %@: %@", [self absoluteString], error);
-        }
-        return nil;
-    }
-    else
-    {
-        return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
-    }
+    return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
 }
 
 - (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
