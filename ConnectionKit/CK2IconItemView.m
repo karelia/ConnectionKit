@@ -33,6 +33,8 @@
 #import "CK2IconItemView.h"
 #import "CK2IconViewItem.h"
 
+#import "NSURL+CK2OpenPanel.h"
+
 #define ICON_SIZE             64.0
 #define ICON_SELECTION_MARGIN 4.0
 #define ICON_TEXT_MARGIN      8.0
@@ -136,7 +138,7 @@
         [path fill];
     }
     
-    [[[[self item] representedObject] icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    [[[[self item] representedObject] ck2_icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     
     color = [NSColor controlTextColor];
     if (![[self item] isEnabled])
@@ -149,7 +151,7 @@
     
     rect = [self textRectForBounds:bounds];
     
-    label = [[[self item] representedObject] displayName];
+    label = [[[self item] representedObject] ck2_displayName];
     [_textCell setStringValue:label];
     
     if ([[self item] isSelected])

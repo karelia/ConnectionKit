@@ -76,7 +76,7 @@
     id                              _currentBootstrapOperation;
 }
 
-@property (readwrite, assign) CK2OpenPanel      *openPanel;
+@property (readonly, assign) CK2OpenPanel      *openPanel;
 @property (readonly, copy) NSURL                *directoryURL;
 @property (readwrite, copy) NSURL               *URL;
 @property (readwrite, copy) NSArray             *URLs;
@@ -85,6 +85,7 @@
 
 
 - (id)initWithPanel:(CK2OpenPanel *)panel;
+- (void)close;  // Open panel MUST call this to clear out weak reference to itself, otherwise BOOM dangling pointer!
 
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
 

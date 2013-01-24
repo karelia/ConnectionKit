@@ -47,11 +47,11 @@
 {
     if (url != nil)
     {
-     [_iconView setObjectValue:[url icon]];
-     [_nameField setStringValue:[url displayName]];
-     [_sizeField setObjectValue:[url size]];
-     [_kindField setStringValue:[url kind]];
-     [_dateModifiedField setObjectValue:[url dateModified]];
+     [_iconView setObjectValue:[url ck2_icon]];
+     [_nameField setStringValue:[url ck2_displayName]];
+     [_sizeField setObjectValue:[url ck2_size]];
+     [_kindField setStringValue:[url ck2_kind]];
+     [_dateModifiedField setObjectValue:[url ck2_dateModified]];
     }
     else
     {

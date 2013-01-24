@@ -125,12 +125,12 @@
              string1 = obj1;
              if ([obj1 isKindOfClass:[NSURL class]])
              {
-                 string1 = [obj1 displayName];
+                 string1 = [obj1 ck2_displayName];
              }
              string2 = obj2;
              if ([obj2 isKindOfClass:[NSURL class]])
              {
-                 string2 = [obj2 displayName];
+                 string2 = [obj2 ck2_displayName];
              }
              
              return [string1 caseInsensitiveCompare:string2];

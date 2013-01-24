@@ -33,24 +33,24 @@
 
 @interface NSURL (CK2OpenPanel)
 
-+ (NSURL *)loadingURL;
-+ (NSURL *)errorURL;
++ (NSURL *)ck2_loadingURL;
++ (NSURL *)ck2_errorURL;
 
-- (BOOL)isPlaceholder;
+- (BOOL)ck2_isPlaceholder;
 
-- (NSString *)displayName;
-- (NSImage *)icon;
-- (NSNumber *)size;
-- (NSDate *)dateModified;
-- (NSString *)kind;
-- (BOOL)isDirectory;
-- (BOOL)isPackage;
-- (BOOL)canHazChildren;
+- (NSString *)ck2_displayName;
+- (NSImage *)ck2_icon;
+- (NSNumber *)ck2_size;
+- (NSDate *)ck2_dateModified;
+- (NSString *)ck2_kind;
+- (BOOL)ck2_isDirectory;
+- (BOOL)ck2_isPackage;
+- (BOOL)ck2_canHazChildren;
 
-- (NSURL *)root;
+- (NSURL *)ck2_root;
 
-- (void)enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block;
+- (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block;
 
-- (NSURL *)URLByDeletingTrailingSlash;
+- (NSURL *)ck2_URLByDeletingTrailingSlash;
 
 @end

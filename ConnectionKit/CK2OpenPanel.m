@@ -78,7 +78,6 @@
         [self setFrame:rect display:NO];
         [self setContentView:view];
         
-        [self setDirectoryURL:[NSURL fileURLWithPath:@"/"] completionBlock:NULL];
         [self setCanChooseDirectories:YES];
         [self setCanChooseFiles:NO];
         [self setCanCreateDirectories:NO];
@@ -91,6 +90,8 @@
 
 - (void)dealloc
 {
+    [_viewController close]; // holds a weak ref to us which needs breaking
+    
     [self setCompletionBlock:nil];
     [_viewController release];
     [super dealloc];
@@ -110,11 +111,6 @@
     [super setDelegate:(id <NSWindowDelegate>)delegate];
 }
 
-- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
-{
-    [_viewController changeDirectory:directoryURL completionBlock:block];
-}
-
 - (NSView *)accessoryView
 {
     return [_viewController accessoryView];
@@ -125,9 +121,19 @@
     [_viewController setAccessoryView:accessoryView];
 }
 
-- (NSURL *)directoryURL
+@synthesize directoryURL = _directoryURL;
+- (void)setDirectoryURL:(NSURL *)directoryURL;
 {
-    return [_viewController directoryURL];
+    [self setDirectoryURL:directoryURL completionBlock:nil];
+}
+
+- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *))block;
+{
+    // Kick off async loading of the URL, but also store our own copy for clients to immediately pull out again if they wish
+    [_viewController changeDirectory:directoryURL completionBlock:block];
+    
+    directoryURL = [directoryURL copy];
+    [_directoryURL release]; _directoryURL = directoryURL;
 }
 
 - (NSURL *)URL
@@ -140,8 +146,16 @@
     return [_viewController URLs];
 }
 
+- (void)willAppear;
+{
+    // Default to root if no-one's supplied anything better
+    if (![self directoryURL]) [self setDirectoryURL:[NSURL fileURLWithPath:@"/"]];
+}
+
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler
 {
+    [self willAppear];
+    
     CFRetain(self);
     [NSApp beginSheet:self modalForWindow:window modalDelegate:self didEndSelector:@selector(sheetDidEnd:returnCode:contextInfo:) contextInfo:[handler copy]];
 }
@@ -168,6 +182,8 @@
 
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler
 {
+    [self willAppear];
+    
     CFRetain(self);
     
     [self setCompletionBlock:handler];
@@ -177,6 +193,8 @@
 
 - (NSInteger)runModal
 {
+    [self willAppear];
+    
     // NSFileHandlingPanelOKButton, NSFileHandlingPanelCancelButton
     [self center];
     return [NSApp runModalForWindow:self];
@@ -223,8 +241,7 @@
         error = nil;
         if (![[self delegate] panel:self validateURL:[self URL] error:&error])
         {
-            NSBeginCriticalAlertSheet([NSString stringWithFormat: @"The operation couldn't be completed. %@ error %ld", [error domain], [error code]], @"OK", nil, nil, self, self, NULL, NULL, NULL, @"");
-
+            [self presentError:error modalForWindow:self delegate:nil didPresentSelector:NULL contextInfo:NULL];
             return;
         }
     }

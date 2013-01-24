@@ -81,7 +81,7 @@
     {
         url = [children objectAtIndex:i];
         
-        [(CK2IconViewItem *)[_iconView itemAtIndex:i] setEnabled:([controller isURLValid:url] || [url canHazChildren])];
+        [(CK2IconViewItem *)[_iconView itemAtIndex:i] setEnabled:([controller isURLValid:url] || [url ck2_canHazChildren])];
     }
     [_iconView setNeedsDisplay:YES];
 }
@@ -170,7 +170,7 @@
         NSURL                   *url;
         
         url = [urls objectAtIndex:0];
-        if ([url canHazChildren])
+        if ([url ck2_canHazChildren])
         {
             if (![url isEqual:[[controller openPanel] directoryURL]])
             {

@@ -43,6 +43,8 @@
     return self;
 }
 
+@synthesize controller = _controller;
+
 - (BOOL)allowsMutipleSelection
 {
     return NO;

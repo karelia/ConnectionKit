@@ -144,7 +144,7 @@
         NSURL                   *url;
         
         url = [urls objectAtIndex:0];
-        if ([url canHazChildren])
+        if ([url ck2_canHazChildren])
         {
             if (![url isEqual:[[controller openPanel] directoryURL]])
             {
@@ -182,7 +182,7 @@
     {
         item = [[[self controller] openPanel] directoryURL];
     }
-    return [item canHazChildren];
+    return [item ck2_canHazChildren];
 }
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
@@ -210,17 +210,17 @@
     identifier = [tableColumn identifier];
     if ([identifier isEqual:@"Name"])
     {
-        return [item displayName];
+        return [item ck2_displayName];
     }
     else if ([identifier isEqual:@"Date Modified"])
     {
-        return [item dateModified];
+        return [item ck2_dateModified];
     }
     else if ([identifier isEqual:@"Size"])
     {
         id      value;
         
-        value = [(NSURL *)item size];
+        value = [(NSURL *)item ck2_size];
         
         if (value == nil)
         {
@@ -230,7 +230,7 @@
     }
     else if ([identifier isEqual:@"Kind"])
     {
-        return [(NSURL *)item kind];
+        return [(NSURL *)item ck2_kind];
     }
     return nil;
 }
@@ -239,10 +239,10 @@
 {
     if ([[tableColumn identifier] isEqual:@"Name"])
     {
-        [cell setImage:[item icon]];
+        [cell setImage:[item ck2_icon]];
     }
     
-    if ([[self controller] isURLValid:item] || [item canHazChildren])
+    if ([[self controller] isURLValid:item] || [item ck2_canHazChildren])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -254,7 +254,7 @@
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item
 {
-    return [[self controller] isURLValid:item] || [item canHazChildren];
+    return [[self controller] isURLValid:item] || [item ck2_canHazChildren];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id < NSDraggingInfo >)info item:(id)item childIndex:(NSInteger)index

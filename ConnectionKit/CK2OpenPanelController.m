@@ -90,6 +90,8 @@
 @synthesize URLs = _urls;
 @synthesize homeURL = _home;
 
+#pragma mark Lifecycle
+
 - (id)initWithPanel:(CK2OpenPanel *)panel
 {
     NSBundle        *bundle;
@@ -121,6 +123,27 @@
     return self;
 }
 
+- (void)close;
+{
+    [_openPanel removeObserver:self forKeyPath:@"prompt"];
+    [_openPanel removeObserver:self forKeyPath:@"message"];
+    [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
+    [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
+    [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
+    [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
+    [_openPanel removeObserver:self forKeyPath:@"allowedFileTypes"];
+    [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
+    
+    if (_openPanel)
+    {
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
+        [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
+    }
+    
+    _openPanel = nil;
+}
+
 - (void)dealloc
 {
     [_initialAccessoryView release];
@@ -137,17 +160,7 @@
     
     [_fileManager release];
     
-    [_openPanel removeObserver:self forKeyPath:@"prompt"];
-    [_openPanel removeObserver:self forKeyPath:@"message"];
-    [_openPanel removeObserver:self forKeyPath:@"canChooseFiles"];
-    [_openPanel removeObserver:self forKeyPath:@"canChooseDirectories"];
-    [_openPanel removeObserver:self forKeyPath:@"allowsMultipleSelection"];
-    [_openPanel removeObserver:self forKeyPath:@"showsHiddenFiles"];
-    [_openPanel removeObserver:self forKeyPath:@"treatsFilePackagesAsDirectories"];
-    [_openPanel removeObserver:self forKeyPath:@"allowedFileTypes"];
-    [_openPanel removeObserver:self forKeyPath:@"canCreateDirectories"];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidBecomeKeyNotification object:_openPanel];
-    [[NSNotificationCenter defaultCenter] removeObserver:self name:NSWindowDidResignKeyNotification object:_openPanel];
+    [self close];   // just to be sure
 
     [_urls release];
     [_urlCache release];
@@ -406,14 +419,7 @@
 
 - (void)setURL:(NSURL *)URL
 {
-    if (URL != nil)
-    {
-        [self setURLs:@[ URL ]];
-    }
-    else
-    {
-        [self setURLs:nil];
-    }
+    [self setURLs:(URL ? @[URL] : nil)];
 }
 
 - (void)cacheChildren:(NSArray *)children forURL:(NSURL *)url
@@ -476,7 +482,7 @@
     // Have to be synchronous here as we want all the "enters" to occur before we do the "wait" below
     dispatch_sync(dispatch_get_main_queue(),
     ^{
-        [url enumerateFromRoot:
+        [url ck2_enumerateFromRoot:
          ^(NSURL *blockURL, BOOL *stop)
          {
              NSArray    *children;
@@ -484,7 +490,7 @@
              //PENDING: Is completion block called if an operation is cancelled?
              children = [self childrenForURL:blockURL];
              
-             if (([children count] == 1) && [[children objectAtIndex:0] isPlaceholder])
+             if (([children count] == 1) && [[children objectAtIndex:0] ck2_isPlaceholder])
              {
                  // URL contents haven't been loaded yet. We will get a notification for this later via the block above.
                  dispatch_group_enter(dispatchGroup);
@@ -511,7 +517,7 @@
 // loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
-    if (![[directoryURL root] isEqual:[[self URL] root]])
+    if (![[directoryURL ck2_root] isEqual:[[self URL] ck2_root]])
     {
         [self loadRoot:directoryURL completionBlock:block];
     }
@@ -553,6 +559,9 @@
     NSMutableArray          *children;
     __block NSURL           *resolvedURL;
     
+    // Make sure URL is absolute so can safely use it for comparisons later
+    rootURL = [rootURL absoluteURL];
+    
     children = [NSMutableArray array];
     
     //PENDING: compare url
@@ -581,15 +590,12 @@
     completionHandler:
      ^(NSError *blockError)
      {
-         // Get this off of the file manager's queue so that we don't deadlock if we call back into it.
-         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-         ^{
              __block NSError *tempError;
              
              tempError = nil;
              if (blockError != nil)
              {
-                 [children addObject:[NSURL errorURL]];                 
+                 [children addObject:[NSURL ck2_errorURL]];                 
                  tempError = [blockError retain];
              }
              else
@@ -613,7 +619,7 @@
                      if (range.location != NSNotFound)
                      {
                          resolvedPath = [resolvedPath substringToIndex:range.location];
-                         [self setHomeURL:[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL root]]];
+                         [self setHomeURL:[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL ck2_root]]];
                      }
                  }
                  
@@ -637,7 +643,6 @@
              });
              
              [resolvedURL autorelease];
-         });
      }];
     
     [_currentBootstrapOperation retain];
@@ -665,7 +670,7 @@
         NSURL       *directoryURL;
 
         directoryURL = [urls objectAtIndex:0];
-        if (![directoryURL canHazChildren])
+        if (![directoryURL ck2_canHazChildren])
         {
             directoryURL = [directoryURL URLByDeletingLastPathComponent];
         }
@@ -712,7 +717,7 @@
         
     children = nil;
     
-    if ((url != nil) && [url canHazChildren])
+    if ((url != nil) && [url ck2_canHazChildren])
     {
         children = [_urlCache objectForKey:url];
         
@@ -723,7 +728,7 @@
             NSArray                         *blockChildren;
             
             // Placeholder while children are being fetched
-            children = @[ [NSURL loadingURL] ];
+            children = @[ [NSURL ck2_loadingURL] ];
             
             blockChildren = children;
             
@@ -755,7 +760,7 @@
                     {
                         if (blockError != nil)
                         {
-                            value = @[ [NSURL errorURL] ];
+                            value = @[ [NSURL ck2_errorURL] ];
                         }
                         else
                         {
@@ -807,7 +812,7 @@
 
 - (BOOL)isURLValid:(NSURL *)url
 {
-    if (![url isPlaceholder])
+    if (![url ck2_isPlaceholder])
     {
         id <CK2OpenPanelDelegate>   delegate;
         BOOL                        delegateValid, fileTypeValid;
@@ -820,7 +825,7 @@
         allowedFileTypes = [_openPanel allowedFileTypes];
         fileTypeValid = ([allowedFileTypes count] == 0) || [allowedFileTypes containsObject:[url pathExtension]];
         
-        if ([url canHazChildren])
+        if ([url ck2_canHazChildren])
         {
             return [_openPanel canChooseDirectories] && delegateValid && fileTypeValid;
         }
@@ -1067,7 +1072,7 @@
 - (void)addToHistory
 {
     [_historyManager registerUndoWithTarget:self selector:@selector(changeView:)
-                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [_openPanel directoryURL],
+                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [self directoryURL],
        HISTORY_DIRECTORY_VIEW_INDEX_KEY : [NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:[_tabView selectedTabViewItem]]] }];
     
     [self validateHistoryButtons];
@@ -1091,7 +1096,7 @@
     
     url = [_pathControl URL];
     
-    if (![url isEqual:[_openPanel directoryURL]])
+    if (![url isEqual:[self directoryURL]])
     {
         [self addToHistory];
         [self setURLs:@[ url ] updateDirectory:YES sender:_pathControl];
@@ -1133,6 +1138,10 @@
     if ([delegate respondsToSelector:@selector(panel:didReceiveAuthenticationChallenge:)])
     {
         [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
     }
 }
 
