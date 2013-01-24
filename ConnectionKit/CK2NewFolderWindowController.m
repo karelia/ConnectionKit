@@ -10,6 +10,8 @@
 #import "CK2OpenPanelController.h"
 #import "CK2FileManager.h"
 
+#define DEFAULT_NAME        @"untitled folder"
+
 @interface CK2NewFolderWindowController ()
 
 @property (readwrite, copy) NSURL           *folderURL;
@@ -64,10 +66,24 @@
 {
     NSArray     *children;
     NSInteger   resultCode;
+    NSString    *name;
+    NSUInteger  i;
     
     [self setFolderURL:url];
     children = [_controller childrenForURL:url];
     _existingNames = [[children valueForKey:@"lastPathComponent"] retain];
+    
+    name = DEFAULT_NAME;
+    i = 2;
+    while ([_existingNames containsObject:name])
+    {
+        name = [NSString stringWithFormat:@"%@ %ld", DEFAULT_NAME, i++];
+    }
+    // Window may not be loaded yet.
+    [self window];
+    
+    [_nameField setStringValue:name];
+
     resultCode = [NSApp runModalForWindow:[self window]];
 
     return ((resultCode == NSOKButton) && (_error == nil));
