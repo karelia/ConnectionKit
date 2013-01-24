@@ -53,7 +53,7 @@
 {
     return [[^NSComparisonResult(id obj1, id obj2)
              {
-                 return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
+                  return [[[obj1 lastPathComponent] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding] caseInsensitiveCompare:[[obj2 lastPathComponent] stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
              } copy] autorelease];
 }
 
