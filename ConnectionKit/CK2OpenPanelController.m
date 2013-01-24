@@ -953,7 +953,7 @@
     
     children = [self childrenForURL:[self directoryURL]];
     
-    childrenLoaded = (children != nil) && (([children count] != 1) || ![[children objectAtIndex:0] isPlaceholder]);
+    childrenLoaded = (children != nil) && (([children count] != 1) || ![[children objectAtIndex:0] ck2_isPlaceholder]);
     [_newFolderButton setEnabled:childrenLoaded];
 }
 
