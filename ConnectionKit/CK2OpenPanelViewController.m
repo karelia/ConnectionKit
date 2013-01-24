@@ -83,7 +83,7 @@
     
     if ([urls count] > 0)
     {
-        [[self controller] setURLs:urls updateDirectory:NO sender:self];
+        [[self controller] setURLs:urls updateDirectory:[self hasFixedRoot] sender:self];
     }
 }
 
