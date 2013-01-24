@@ -53,7 +53,6 @@
     BOOL                        _treatsFilePackagesAsDirectories;
     BOOL                        _canCreateDirectories;
     NSArray                     *_allowedFileTypes;
-    NSURL                       *_directoryURL;
     
     void                        (^_completionBlock)(NSInteger result);
 }
@@ -69,7 +68,7 @@
 @property (readwrite, assign) BOOL      treatsFilePackagesAsDirectories;
 @property (readwrite, assign) BOOL      canCreateDirectories;
 @property (readwrite, copy) NSArray     *allowedFileTypes;
-@property (nonatomic, copy) NSURL       *directoryURL;
+@property (readwrite, copy, nonatomic) NSURL       *directoryURL;
 
 @property (readonly, copy) NSURL        *URL;
 @property (readonly, copy) NSArray      *URLs;

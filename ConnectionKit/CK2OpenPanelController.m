@@ -517,6 +517,10 @@
 // loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
+    // Set it now so that the value can be returned if queried. Don't bother syncing with the UI as it will be set
+    // again (possibly with a different value) later.
+    [self setDirectoryURL:directoryURL];
+
     if (![[directoryURL ck2_root] isEqual:[[self URL] ck2_root]])
     {
         [self loadRoot:directoryURL completionBlock:block];
@@ -678,7 +682,6 @@
         if (![directoryURL isEqual:[self directoryURL]])
         {
             [self setDirectoryURL:directoryURL];
-            [_openPanel setDirectoryURL:directoryURL];
             
             if (sender != _pathControl)
             {

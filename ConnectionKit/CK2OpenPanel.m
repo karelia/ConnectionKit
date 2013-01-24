@@ -121,7 +121,11 @@
     [_viewController setAccessoryView:accessoryView];
 }
 
-@synthesize directoryURL = _directoryURL;
+- (NSURL *)directoryURL
+{
+    return [_viewController directoryURL];
+}
+
 - (void)setDirectoryURL:(NSURL *)directoryURL;
 {
     [self setDirectoryURL:directoryURL completionBlock:nil];
@@ -131,9 +135,6 @@
 {
     // Kick off async loading of the URL, but also store our own copy for clients to immediately pull out again if they wish
     [_viewController changeDirectory:directoryURL completionBlock:block];
-    
-    directoryURL = [directoryURL copy];
-    [_directoryURL release]; _directoryURL = directoryURL;
 }
 
 - (NSURL *)URL
