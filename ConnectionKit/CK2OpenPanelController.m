@@ -53,7 +53,10 @@
 #import "CK2OpenPanelListViewController.h"
 #import "CK2OpenPanelColumnViewController.h"
 #import "CK2PathControl.h"
+#import "CK2NewFolderWindowController.h"
 #import <Connection/CK2FileManager.h>
+
+#define DEFAULT_OPERATION_TIMEOUT       20
 
 #define MIN_PROMPT_BUTTON_WIDTH         82
 #define PROMPT_BUTTON_RIGHT_MARGIN      18
@@ -71,6 +74,8 @@
 #define CK2OpenPanelDidLoadURL              @"CK2OpenPanelDidLoadURL"
 #define CK2ErrorNotificationKey             @"error"
 #define CK2URLNotificationKey               @"url"
+
+#define CK2OpenPanelErrorDomain             @"CK2OpenPanelErrorDomain"
 
 @interface CK2OpenPanelController ()
 
@@ -156,6 +161,7 @@
     NSTabViewItem       *item;
    
     _initialAccessoryView = [[_accessoryContainer contentView] retain];
+    
     [_hostField setStringValue:@""];
     [self validateHistoryButtons];
     [self validateOKButton];
@@ -410,6 +416,25 @@
     }
 }
 
+- (void)cacheChildren:(NSArray *)children forURL:(NSURL *)url
+{
+    if (children == nil)
+    {
+        [_urlCache removeObjectForKey:url];
+    }
+    else
+    {
+        NSArray     *sortedChildren;
+    
+        sortedChildren = [children sortedArrayUsingComparator:
+                          ^NSComparisonResult(id obj1, id obj2)
+                          {
+                              return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
+                          }];
+        [_urlCache setObject:sortedChildren forKey:url];
+    }
+}
+
 // This pre-loads all the URLs up to the given one. Used in the bootstrapping process. This method
 // should NOT be called from the main thread as it will deadlock. It is meant to block until all the URLs are loaded.
 - (BOOL)loadURLsUpToURL:(NSURL *)url error:(NSError **)error
@@ -571,7 +596,7 @@
              {
                  dispatch_async(dispatch_get_main_queue(),
                  ^{
-                     [_urlCache setObject:children forKey:resolvedURL];
+                     [self cacheChildren:children forURL:resolvedURL];
                      [self urlDidLoad:resolvedURL];
                  });
                  
@@ -630,6 +655,7 @@
 - (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender
 {
     CK2OpenPanelViewController  *currentController;
+    NSTabViewItem               *selectedTab;
     
     [self setURLs:urls];
     [self validateOKButton];
@@ -659,8 +685,11 @@
             }
         }
     }
-    
-    currentController = [self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]];
+ 
+    [self validateNewFolderButton];
+
+    selectedTab = [_tabView selectedTabViewItem];
+    currentController = [self viewControllerForIdentifier:[selectedTab identifier]];
     if ((sender != currentController) || (![currentController hasFixedRoot] && flag))
     {
         if (flag)
@@ -669,7 +698,8 @@
         }
         [currentController update];
     }
-        
+    [_openPanel makeFirstResponder:[selectedTab initialFirstResponder]];
+    
     if ([[_openPanel delegate] respondsToSelector:@selector(panelSelectionDidChange:)])
     {
         [[_openPanel delegate] panelSelectionDidChange:_openPanel];
@@ -697,8 +727,7 @@
             
             blockChildren = children;
             
-            [_urlCache setObject:blockChildren forKey:url];
-            [self urlDidLoad:url];
+            [self cacheChildren:blockChildren forURL:url];
             
             if ([_runningOperations objectForKey:url] == nil)
             {                
@@ -720,7 +749,7 @@
                 ^(NSArray *contents, NSError *blockError)
                 {
                     id             value;
-           
+
                     value = contents;
                     if (value == nil)
                     {
@@ -741,7 +770,7 @@
                         NSNotification      *notification;
                         NSMutableDictionary *userInfo;
                         
-                        [_urlCache setObject:value forKey:url];
+                        [self cacheChildren:value forURL:url];
 
                         [_runningOperations removeObjectForKey:url];
                         
@@ -806,6 +835,7 @@
 - (void)urlDidLoad:(NSURL *)url
 {
     [[self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]] urlDidLoad:url];
+    [self validateNewFolderButton];
 }
 
 - (CK2OpenPanelViewController *)viewControllerForIdentifier:(NSString *)identifier
@@ -910,9 +940,86 @@
     [_openPanel cancel:sender];
 }
 
+- (void)validateNewFolderButton
+{
+    NSArray     *children;
+    BOOL        childrenLoaded;
+    
+    children = [self childrenForURL:[self directoryURL]];
+    
+    childrenLoaded = (children != nil) && (([children count] != 1) || ![[children objectAtIndex:0] isPlaceholder]);
+    [_newFolderButton setEnabled:childrenLoaded];
+}
+
 - (IBAction)newFolder:(id)sender
 {
-    //PENDING:
+    CK2NewFolderWindowController    *controller;
+    NSInteger                       returnCode;
+    NSArray                         *children;
+    
+    controller = [[CK2NewFolderWindowController alloc] init];
+    children = [self childrenForURL:[self directoryURL]];
+    [controller setExistingNames:[children valueForKey:@"lastPathComponent"]];
+    returnCode = [NSApp runModalForWindow:[controller window]];
+    
+    if (returnCode == NSOKButton)
+    {
+        NSString                *filename;
+        NSURL                   *url, *parentURL;;
+        dispatch_semaphore_t    semaphore;
+        __block NSError         *error;
+    
+        filename = [controller folderName];
+        parentURL = [self directoryURL];
+        url = [parentURL URLByAppendingPathComponent:filename isDirectory:YES];
+        
+        semaphore = dispatch_semaphore_create(0);
+
+        error = nil;
+        [_fileManager createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:
+        ^(NSError *blockError)
+        {
+            error = blockError;
+            dispatch_semaphore_signal(semaphore);
+        }];
+        
+        // PENDING: We are blocking (for now). Don't want the user to switch away to another directory while this is
+        // happening. May consider showing the progress indicator but disabling the UI or showing a modal panel with a
+        // progress indicator and cancel button.
+        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, DEFAULT_OPERATION_TIMEOUT * NSEC_PER_SEC)) != 0)
+        {
+            error = [NSError errorWithDomain:CK2OpenPanelErrorDomain code:-1 userInfo:
+                     @{
+                        NSLocalizedDescriptionKey : @"Server timed out while creating a new folder.",
+                        NSURLErrorFailingURLStringErrorKey : [url absoluteString],
+                        NSLocalizedRecoverySuggestionErrorKey : @"Please try again later."
+                     }];
+        }
+        
+        if (error != nil)
+        {
+            [self presentError:error];
+        }
+        else
+        {
+            NSArray             *children;
+            NSMutableArray      *newChildren;
+            NSUInteger          i;
+            
+            children = [_urlCache objectForKey:parentURL];
+            newChildren = [NSMutableArray arrayWithArray:children];
+            
+            i = [newChildren indexOfObject:url inSortedRange:NSMakeRange(0, [newChildren count]) options:NSBinarySearchingInsertionIndex usingComparator:^NSComparisonResult(id obj1, id obj2)
+                 {
+                     return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
+                 }];
+            [newChildren insertObject:url atIndex:i];
+            
+            [self cacheChildren:newChildren forURL:parentURL];
+            [self setURLs:@[ url ] updateDirectory:YES sender:nil];
+        }
+    }
+    [controller release];
 }
 
 - (void)validateHistoryButtons
