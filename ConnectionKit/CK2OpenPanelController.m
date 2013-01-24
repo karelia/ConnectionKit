@@ -623,7 +623,7 @@
                      if (range.location != NSNotFound)
                      {
                          resolvedPath = [resolvedPath substringToIndex:range.location];
-                         [self setHomeURL:[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL ck2_root]]];
+                         [self setHomeURL:[[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
                      }
                  }
                  
