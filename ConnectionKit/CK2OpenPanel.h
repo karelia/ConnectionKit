@@ -31,11 +31,12 @@
 
 #import <Cocoa/Cocoa.h>
 
+//TODO: Provide support for symlinks
 //TODO: Handle/display errors better
-//TODO: Implement rest of API (see properties below)
 //TODO: Save window/view dimensions and state (like which view is selected)
 //TODO: Implement "form-fitting" text selection in icon view
 //TODO: Restore outlineview expanded items when reverting history
+//TODO: Implement "hidden" feature where you can type in a path (a little sheet shows up when you type / or ~)
 
 @protocol CK2OpenPanelDelegate;
 @class CK2OpenPanelController;
@@ -74,9 +75,6 @@
 @property (readonly, copy) NSArray      *URLs;
 
 
-
-
-//?@property (readwrite, assign) BOOL canCreateDirectories; - seems to be possible with some protocols
 
 + (CK2OpenPanel *)openPanel;
 
