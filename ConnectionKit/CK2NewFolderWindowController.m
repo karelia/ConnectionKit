@@ -127,9 +127,7 @@
      ^(NSError *blockError)
      {
          NSEvent     *event;
-         
-         sleep(3);
-         
+                  
          dispatch_async(dispatch_get_main_queue(),
          ^{
              [self setError:blockError];
