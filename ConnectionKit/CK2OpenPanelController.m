@@ -679,19 +679,16 @@
             directoryURL = [directoryURL URLByDeletingLastPathComponent];
         }
         
-        if (![directoryURL isEqual:[self directoryURL]])
+        [self setDirectoryURL:directoryURL];
+            
+        if (sender != _pathControl)
         {
-            [self setDirectoryURL:directoryURL];
-            
-            if (sender != _pathControl)
-            {
-                [_pathControl setURL:directoryURL];
-            }
-            
-            if ([[_openPanel delegate] respondsToSelector:@selector(panel:didChangeToDirectoryURL:)])
-            {
-                [[_openPanel delegate] panel:_openPanel didChangeToDirectoryURL:directoryURL];
-            }
+            [_pathControl setURL:directoryURL];
+        }
+        
+        if ([[_openPanel delegate] respondsToSelector:@selector(panel:didChangeToDirectoryURL:)])
+        {
+            [[_openPanel delegate] panel:_openPanel didChangeToDirectoryURL:directoryURL];
         }
     }
  
