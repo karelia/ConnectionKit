@@ -18,6 +18,33 @@
     [super dealloc];
 }
 
+
+- (NSURL*)temporaryFolder
+{
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerFileTests"];
+
+    return result;
+}
+
+- (void)removeTemporaryFolder
+{
+    NSError* error = nil;
+    NSURL* tempFolder = [self temporaryFolder];
+    NSFileManager* fm = [NSFileManager defaultManager];
+    [fm removeItemAtURL:tempFolder error:&error];
+}
+
+- (BOOL)makeTemporaryFolder
+{
+    NSError* error = nil;
+    NSFileManager* fm = [NSFileManager defaultManager];
+    NSURL* tempFolder = [self temporaryFolder];
+    BOOL ok = [fm createDirectoryAtURL:tempFolder withIntermediateDirectories:YES attributes:nil error:&error];
+    STAssertTrue(ok, @"couldn't make temporary directory: %@", error);
+
+    return ok;
+}
+
 - (BOOL)setupSession
 {
     self.session = [[CK2FileManager alloc] init];
@@ -146,10 +173,17 @@
     }
 }
 
+- (void)setUp
+{
+    [self removeTemporaryFolder];
+    [self makeTemporaryFolder];
+}
+
 - (void)tearDown
 {
     [super tearDown];
     NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+    [self removeTemporaryFolder];
 }
 
 @end

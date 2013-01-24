@@ -16,32 +16,6 @@
 
 @implementation CK2FileManagerFileTests
 
-- (NSURL*)temporaryFolder
-{
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerFileTests"];
-
-    return result;
-}
-
-- (void)removeTemporaryFolder
-{
-    NSError* error = nil;
-    NSURL* tempFolder = [self temporaryFolder];
-    NSFileManager* fm = [NSFileManager defaultManager];
-    [fm removeItemAtURL:tempFolder error:&error];
-}
-
-- (BOOL)makeTemporaryFolder
-{
-    NSError* error = nil;
-    NSFileManager* fm = [NSFileManager defaultManager];
-    NSURL* tempFolder = [self temporaryFolder];
-    BOOL ok = [fm createDirectoryAtURL:tempFolder withIntermediateDirectories:YES attributes:nil error:&error];
-    STAssertTrue(ok, @"couldn't make temporary directory: %@", error);
-
-    return ok;
-}
-
 - (NSURL*)makeTestContents
 {
     BOOL ok;
@@ -73,18 +47,6 @@
     }
     
     return tempFolder;
-}
-
-- (void)setUp
-{
-    [self removeTemporaryFolder];
-    [self makeTemporaryFolder];
-}
-
-- (void)tearDown
-{
-    [super tearDown];
-    [self removeTemporaryFolder];
 }
 
 #pragma mark - Tests
