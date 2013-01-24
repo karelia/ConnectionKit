@@ -49,6 +49,14 @@
     return [[[CK2PlaceholderURL alloc] initWithString:@"Error"] autorelease];
 }
 
++ (NSComparator)ck2_displayComparator
+{
+    return [[^NSComparisonResult(id obj1, id obj2)
+             {
+                 return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
+             } copy] autorelease];
+}
+
 
 - (BOOL)ck2_isPlaceholder
 {

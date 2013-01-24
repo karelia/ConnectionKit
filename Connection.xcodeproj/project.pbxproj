@@ -680,6 +680,8 @@
 				32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */,
 				32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */,
 				32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */,
+				324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */,
+				324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */,
 				32B592A516A4960B0020FFE9 /* CK2FileCell.h */,
 				32B592A616A4960B0020FFE9 /* CK2FileCell.m */,
 				32B592A916A4960B0020FFE9 /* CK2PathControl.h */,
@@ -700,8 +702,6 @@
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
 				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
 				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
-				324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */,
-				324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */,
 				324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */,
 			);
 			name = CK2OpenPanel;

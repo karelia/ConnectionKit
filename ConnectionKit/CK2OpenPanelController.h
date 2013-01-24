@@ -83,6 +83,7 @@
 @property (readwrite, copy) NSURL               *homeURL;
 @property (readwrite, retain) NSView            *accessoryView;
 
+@property (readonly, retain) CK2FileManager     *fileManager;
 
 - (id)initWithPanel:(CK2OpenPanel *)panel;
 - (void)close;  // Open panel MUST call this to clear out weak reference to itself, otherwise BOOM dangling pointer!

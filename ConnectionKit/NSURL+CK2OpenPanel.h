@@ -35,6 +35,7 @@
 
 + (NSURL *)ck2_loadingURL;
 + (NSURL *)ck2_errorURL;
++ (NSComparator)ck2_displayComparator;
 
 - (BOOL)ck2_isPlaceholder;
 

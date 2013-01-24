@@ -8,20 +8,28 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class CK2OpenPanelController;
+
 @interface CK2NewFolderWindowController : NSWindowController
 {
-    IBOutlet NSTextField    *_nameField;
-    IBOutlet NSButton       *_okButton;
-    IBOutlet NSTextField    *_statusField;
-    NSString                *_folderName;
-    NSArray                 *_existingNames;
+    IBOutlet NSTextField                *_nameField;
+    IBOutlet NSButton                   *_okButton;
+    IBOutlet NSTextField                *_statusField;
+    IBOutlet NSProgressIndicator        *_progressIndicator;
+    
+    CK2OpenPanelController              *_controller;
+    NSURL                               *_folderURL;
+    NSArray                             *_existingNames;
+    id                                  _operation;
+    NSError                             *_error;
 }
 
-@property (readwrite, copy) NSArray         *existingNames;
-@property (readonly, copy) NSString        *folderName;
+@property (readonly, copy) NSURL        *folderURL;
+@property (readonly, retain) NSError    *error;
 
+- (id)initWithController:(CK2OpenPanelController *)controller;;
 
-- (id)init;
+- (BOOL)runModalForURL:(NSURL *)url;
 
 - (IBAction)ok:(id)sender;
 - (IBAction)cancel:(id)sender;

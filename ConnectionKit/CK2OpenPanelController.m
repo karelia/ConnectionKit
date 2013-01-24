@@ -90,6 +90,8 @@
 @synthesize URLs = _urls;
 @synthesize homeURL = _home;
 
+@synthesize fileManager = _fileManager;
+
 #pragma mark Lifecycle
 
 - (id)initWithPanel:(CK2OpenPanel *)panel
@@ -432,11 +434,7 @@
     {
         NSArray     *sortedChildren;
     
-        sortedChildren = [children sortedArrayUsingComparator:
-                          ^NSComparisonResult(id obj1, id obj2)
-                          {
-                              return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
-                          }];
+        sortedChildren = [children sortedArrayUsingComparator:[NSURL ck2_displayComparator]];
         [_urlCache setObject:sortedChildren forKey:url];
     }
 }
@@ -960,71 +958,38 @@
 - (IBAction)newFolder:(id)sender
 {
     CK2NewFolderWindowController    *controller;
-    NSInteger                       returnCode;
-    NSArray                         *children;
+    NSURL                           *parentURL;
     
-    controller = [[CK2NewFolderWindowController alloc] init];
-    children = [self childrenForURL:[self directoryURL]];
-    [controller setExistingNames:[children valueForKey:@"lastPathComponent"]];
-    returnCode = [NSApp runModalForWindow:[controller window]];
+    controller = [[CK2NewFolderWindowController alloc] initWithController:self];
+    parentURL = [self directoryURL];
     
-    if (returnCode == NSOKButton)
+    if ([controller runModalForURL:parentURL])
     {
-        NSString                *filename;
-        NSURL                   *url, *parentURL;;
-        dispatch_semaphore_t    semaphore;
-        __block NSError         *error;
-    
-        filename = [controller folderName];
-        parentURL = [self directoryURL];
-        url = [parentURL URLByAppendingPathComponent:filename isDirectory:YES];
+        NSURL           *url;
+        NSArray             *children;
+        NSMutableArray      *newChildren;
+        NSUInteger          i;
         
-        semaphore = dispatch_semaphore_create(0);
+        url = [controller folderURL];
+        
+        children = [_urlCache objectForKey:parentURL];
+        newChildren = [NSMutableArray arrayWithArray:children];
+        
+        i = [newChildren indexOfObject:url inSortedRange:NSMakeRange(0, [newChildren count]) options:NSBinarySearchingInsertionIndex usingComparator:[NSURL ck2_displayComparator]];
 
-        error = nil;
-        [_fileManager createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:
-        ^(NSError *blockError)
-        {
-            error = blockError;
-            dispatch_semaphore_signal(semaphore);
-        }];
+        [newChildren insertObject:url atIndex:i];
         
-        // PENDING: We are blocking (for now). Don't want the user to switch away to another directory while this is
-        // happening. May consider showing the progress indicator but disabling the UI or showing a modal panel with a
-        // progress indicator and cancel button.
-        if (dispatch_semaphore_wait(semaphore, dispatch_time(DISPATCH_TIME_NOW, DEFAULT_OPERATION_TIMEOUT * NSEC_PER_SEC)) != 0)
-        {
-            error = [NSError errorWithDomain:CK2OpenPanelErrorDomain code:-1 userInfo:
-                     @{
-                        NSLocalizedDescriptionKey : @"Server timed out while creating a new folder.",
-                        NSURLErrorFailingURLStringErrorKey : [url absoluteString],
-                        NSLocalizedRecoverySuggestionErrorKey : @"Please try again later."
-                     }];
-        }
-        
-        if (error != nil)
-        {
-            [self presentError:error];
-        }
-        else
-        {
-            NSArray             *children;
-            NSMutableArray      *newChildren;
-            NSUInteger          i;
-            
-            children = [_urlCache objectForKey:parentURL];
-            newChildren = [NSMutableArray arrayWithArray:children];
-            
-            i = [newChildren indexOfObject:url inSortedRange:NSMakeRange(0, [newChildren count]) options:NSBinarySearchingInsertionIndex usingComparator:^NSComparisonResult(id obj1, id obj2)
-                 {
-                     return [[obj1 absoluteString] caseInsensitiveCompare:[obj2 absoluteString]];
-                 }];
-            [newChildren insertObject:url atIndex:i];
-            
-            [self cacheChildren:newChildren forURL:parentURL];
+        [self cacheChildren:newChildren forURL:parentURL];
+        dispatch_async(dispatch_get_main_queue(),
+        ^{
             [self setURLs:@[ url ] updateDirectory:YES sender:nil];
-        }
+        });
     }
+    else if ([controller error] != nil)
+    {
+        [self presentError:[controller error]];
+    }
+    
     [controller release];
 }
 
