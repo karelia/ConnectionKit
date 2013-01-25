@@ -107,7 +107,7 @@
         
         if ([type isEqual:@"app"])
         {
-            return [NSImage imageNamed:NSImageNameApplicationIcon];
+            type = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
         }
         return [[NSWorkspace sharedWorkspace] iconForFileType:type];
     }
