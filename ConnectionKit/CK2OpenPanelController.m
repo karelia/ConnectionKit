@@ -439,9 +439,9 @@
     }
 }
 
-// This pre-loads all the URLs up to the given one. Used in the bootstrapping process. This method
+// This pre-loads all the URLs from the given ancestor down to the descendant. Used in the bootstrapping process. This method
 // should NOT be called from the main thread as it will deadlock. It is meant to block until all the URLs are loaded.
-- (BOOL)loadURLsUpToURL:(NSURL *)url error:(NSError **)error
+- (BOOL)loadFromURL:(NSURL *)startURL toURL:(NSURL *)endURL error:(NSError **)error
 {
     __block NSError         *localError;
     dispatch_group_t        dispatchGroup;
@@ -480,7 +480,7 @@
     // Have to be synchronous here as we want all the "enters" to occur before we do the "wait" below
     dispatch_sync(dispatch_get_main_queue(),
     ^{
-        [url ck2_enumerateFromRoot:
+        [startURL ck2_enumerateToURL:endURL usingBlock:
          ^(NSURL *blockURL, BOOL *stop)
          {
              NSArray    *children;
@@ -521,7 +521,7 @@
 
     if (![[directoryURL ck2_root] isEqual:[[self URL] ck2_root]])
     {
-        [self loadRoot:directoryURL completionBlock:block];
+        [self loadInitialURL:directoryURL completionBlock:block];
     }
     else
     {
@@ -532,7 +532,7 @@
             
             //PENDING: blank out/disable UI as with loading root?
             error = nil;
-            success = [self loadURLsUpToURL:directoryURL error:&error];
+            success = [self loadFromURL:[directoryURL ck2_root] toURL:directoryURL error:&error];
             
             dispatch_async(dispatch_get_main_queue(),
             ^{
@@ -556,13 +556,13 @@
 // in case it's a relative path (usually to the user's home directory).
 // During this time, the UI is disabled and a progress indicator is shown. The completion block is not called until
 // everything is fully loaded.
-- (void)loadRoot:(NSURL *)rootURL completionBlock:(void (^)(NSError *error))block
+- (void)loadInitialURL:(NSURL *)initialURL completionBlock:(void (^)(NSError *error))block
 {
     NSMutableArray          *children;
     __block NSURL           *resolvedURL;
     
     // Make sure URL is absolute so can safely use it for comparisons later
-    rootURL = [rootURL absoluteURL];
+    initialURL = [initialURL absoluteURL];
     
     children = [NSMutableArray array];
     
@@ -575,7 +575,7 @@
     
     resolvedURL = nil;
     
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:rootURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey ] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey ] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -602,30 +602,28 @@
              }
              else
              {
+                 NSURL          *rootURL;
+                 
                  dispatch_async(dispatch_get_main_queue(),
                  ^{
                      [self cacheChildren:children forURL:resolvedURL];
                      [self urlDidLoad:resolvedURL];
                  });
                  
-                 if (![resolvedURL isEqual:rootURL])
+                 rootURL = [resolvedURL ck2_root];
+                 if (![resolvedURL isEqual:initialURL])
                  {
                      NSString    *resolvedPath;
-                     NSRange     range;
                      
                      // If the resolved URL is different than the original one, then we assume the URL was relative and
                      // we try and derive the user's "home" directory from that.
-                     resolvedPath = [resolvedURL path];
-                     range = [resolvedPath rangeOfString:[rootURL path] options:NSAnchoredSearch | NSBackwardsSearch];
+                     resolvedPath = [NSString stringWithFormat:@"%@/", [initialURL ck2_pathRelativeToURL:resolvedURL]];
                      
-                     if (range.location != NSNotFound)
-                     {
-                         resolvedPath = [resolvedPath substringToIndex:range.location];
-                         [self setHomeURL:[[NSURL URLWithString:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
-                     }
+                     [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
+                     rootURL = [self homeURL];
                  }
                  
-                 [self loadURLsUpToURL:resolvedURL error:&tempError];                 
+                 [self loadFromURL:rootURL toURL:resolvedURL error:&tempError];
              }
              
              dispatch_async(dispatch_get_main_queue(),
@@ -649,7 +647,7 @@
     
     [_currentBootstrapOperation retain];
     
-    [_hostField setStringValue:[rootURL host]];
+    [_hostField setStringValue:[initialURL host]];
     [self validateViews];
 }
 
@@ -670,6 +668,7 @@
     if (flag)
     {
         NSURL       *directoryURL;
+        NSImage     *homeImage;
 
         directoryURL = [urls objectAtIndex:0];
         if (![directoryURL ck2_canHazChildren])
@@ -678,7 +677,31 @@
         }
         
         [self setDirectoryURL:directoryURL];
+        
+        homeImage = [NSImage imageNamed:NSImageNameHomeTemplate];
+        if ([[self homeURL] ck2_isAncestorOfURL:directoryURL])
+        {
+            //PENDING: need to fix this to be resolution-independent
+            NSImage *image;
+            NSSize  size;
             
+            size = [homeImage size];
+
+            image = [[NSImage alloc] initWithSize:size];
+            [image lockFocus];
+            [homeImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
+            [[NSColor alternateSelectedControlColor] set];
+            NSRectFillUsingOperation(NSMakeRect(0.0, 0.0, size.width, size.height), NSCompositeSourceAtop);
+            [image unlockFocus];
+            
+            [_homeButton setImage:image forSegment:0];
+            [image release];
+        }
+        else
+        {
+            [_homeButton setImage:homeImage forSegment:0];
+        }
+        
         if (sender != _pathControl)
         {
             [_pathControl setURL:directoryURL];
@@ -724,14 +747,11 @@
         {
             NSDirectoryEnumerationOptions   options;
             id                              operation;
-            NSArray                         *blockChildren;
             
             // Placeholder while children are being fetched
             children = @[ [NSURL ck2_loadingURL] ];
-            
-            blockChildren = children;
-            
-            [self cacheChildren:blockChildren forURL:url];
+
+            [self cacheChildren:children forURL:url];
             
             if ([_runningOperations objectForKey:url] == nil)
             {                

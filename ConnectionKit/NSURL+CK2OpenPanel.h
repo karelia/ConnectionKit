@@ -51,7 +51,12 @@
 - (BOOL)ck2_canHazChildren;
 
 - (NSURL *)ck2_root;
-
+// Will return YES if receiver and given url are the same
+- (BOOL)ck2_isAncestorOfURL:(NSURL *)url;
+// Receiver must be an ancestor of the given url
+- (NSString *)ck2_pathRelativeToURL:(NSURL *)url;
+// Receiver must be an ancestor of the given url
+- (void)ck2_enumerateToURL:(NSURL *)url usingBlock:(void (^)(NSURL *url, BOOL *stop))block;
 - (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block;
 
 - (NSURL *)ck2_URLByDeletingTrailingSlash;

@@ -273,6 +273,100 @@
     return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
 }
 
+- (BOOL)ck2_isAncestorOfURL:(NSURL *)url
+{
+    NSArray     *components, *otherComponents;
+    NSUInteger  i, count, otherCount;
+    
+    components = [self pathComponents];
+    count = [components count];
+    otherComponents = [url pathComponents];
+    otherCount = [otherComponents count];
+    
+    if (otherCount >= count)
+    {
+        for (i = 0; i < count; i++)
+        {
+            if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
+            {
+                return NO;
+            }
+        }
+        return YES;
+    }
+    return NO;
+}
+
+- (NSString *)ck2_pathRelativeToURL:(NSURL *)url
+{
+    NSArray             *components, *otherComponents;
+    NSUInteger          i, count;
+    NSMutableString     *path;
+    
+    components = [self pathComponents];
+    count = [components count];
+    otherComponents = [url pathComponents];
+    
+    for (i = 0; i < count; i++)
+    {
+        if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
+        {
+            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Cannot enumerate from %@ to %@. Former is not an ancestor of the latter.", [self absoluteString], [url absoluteString]] userInfo:nil];
+        }
+    }
+    
+    path = [NSMutableString string];
+    count = [otherComponents count];
+    for (i = [components count]; (i < count); i++)
+    {
+        [path appendFormat:@"/%@", [otherComponents objectAtIndex:i]];
+    }
+
+    return path;
+}
+
+- (void)ck2_enumerateToURL:(NSURL *)url usingBlock:(void (^)(NSURL *url, BOOL *stop))block
+{
+    NSURL               *tempURL;
+    NSArray             *components, *otherComponents;
+    NSUInteger          i, count;
+    
+    if (block != NULL)
+    {
+        BOOL    stop;
+        
+        components = [self pathComponents];
+        otherComponents = [url pathComponents];
+        count = [components count];
+        
+        for (i = 0; i < count; i++)
+        {
+            if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
+            {
+                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Cannot enumerate from %@ to %@. Former is not an ancestor of the latter.", [self absoluteString], [url absoluteString]] userInfo:nil];
+            }
+        }
+        
+        tempURL = self;
+        
+        stop = NO;
+        count = [otherComponents count];
+        
+        block(tempURL, &stop);
+        
+        if (!stop)
+        {
+            for (i = [components count]; (i < count) && !stop; i++)
+            {
+                tempURL = [tempURL URLByAppendingPathComponent:[otherComponents objectAtIndex:i] isDirectory:YES];
+                
+                block(tempURL, &stop);
+            }
+        }
+    }
+}
+
+
 - (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
 {
     NSURL               *tempURL;
