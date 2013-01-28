@@ -30,7 +30,8 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import "NSURL+CK2OpenPanel.h"
-#import <Connection/CK2FileManager.h>
+#import "CK2FileManager.h"
+#import "NSImage+CK2OpenPanel.h"
 #import <dispatch/dispatch.h>
 
 @interface CK2PlaceholderURL : NSURL
@@ -97,19 +98,33 @@
     }
     else
     {
-        NSString        *type;
+        NSURL       *actualURL;
+        NSImage     *image;
+        NSString    *type;
         
-        if ([self ck2_canHazChildren])
-        {
-            return [NSImage imageNamed:NSImageNameFolder];
-        }
-        type = [self pathExtension];
+        actualURL = [self ck2_destinationURL];
         
-        if ([type isEqual:@"app"])
+        if ([actualURL ck2_canHazChildren])
         {
-            type = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
+            image = [NSImage imageNamed:NSImageNameFolder];
         }
-        return [[NSWorkspace sharedWorkspace] iconForFileType:type];
+        else
+        {
+            type = [actualURL pathExtension];
+        
+            if ([type isEqual:@"app"])
+            {
+                type = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
+            }
+            image = [[NSWorkspace sharedWorkspace] iconForFileType:type];
+        }
+        
+        if (![self isEqual:actualURL])
+        {
+            image = [image ck2_imageWithBadgeImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAliasBadgeIcon)]];
+        }
+        
+        return image;
     }
     return nil;
 }
@@ -156,6 +171,10 @@
         {
             return @"Folder";
         }
+        else if ([self ck2_isSymbolicLink])
+        {
+            return @"Alias";
+        }
 
         type = [self pathExtension];
         status = LSCopyKindStringForTypeInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)type, &kindString);
@@ -192,8 +211,11 @@
 {
     id          value;
     NSError     *error;
+    NSURL       *actualURL;
     
-    if ([self getResourceValue:&value forKey:NSURLIsDirectoryKey error:&error])
+    actualURL = [self ck2_destinationURL];
+    
+    if ([actualURL getResourceValue:&value forKey:NSURLIsDirectoryKey error:&error])
     {
         if (value == nil)
         {
@@ -263,9 +285,49 @@
     return NO;
 }
 
+- (BOOL)ck2_isSymbolicLink
+{
+    id      value;
+    NSError *error;
+    
+    error = nil;
+    if ([self getResourceValue:&value forKey:NSURLIsSymbolicLinkKey error:&error])
+    {
+        return [value boolValue];
+    }
+    else
+    {
+        NSLog(@"Error determining if symbolic link for url %@: %@", self, error);
+    }
+    return NO;
+}
+
 - (BOOL)ck2_canHazChildren
 {
     return [self ck2_isDirectory] && ![self ck2_isPackage];
+}
+
+- (NSURL *)ck2_destinationURL
+{
+    id      value;
+    NSError *error;
+
+    error = nil;
+    
+    // Not sure if CK2URLSymbolicLinkDestinationKey implies this but doing it just to be safe
+    if ([self ck2_isSymbolicLink])
+    {
+        if ([self getResourceValue:&value forKey:CK2URLSymbolicLinkDestinationKey error:&error])
+        {
+            return value;
+        }
+        else
+        {
+            NSLog(@"Error getting destination link for url %@: %@", self, error);
+        }
+    }
+
+    return self;
 }
 
 - (NSURL *)ck2_root
@@ -401,14 +463,23 @@
 - (NSURL *)ck2_URLByDeletingTrailingSlash
 {
     NSString    *path;
+    NSUInteger  startIndex, endIndex;
     
     path = [self path];
+    startIndex = 0;
+    endIndex = [path length];
+    if ([path hasPrefix:@"//"])
+    {
+        startIndex++;
+    }
     if ([path hasSuffix:@"/"])
     {
-        path = [path substringToIndex:[path length] - 1];
+        endIndex--;
     }
+    path = [path substringWithRange:NSMakeRange(startIndex, endIndex - startIndex)];
+    
     // Quite the rigamarole just to get an URL without the trailing slash
-    return [[NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding] relativeToURL:[self ck2_root]] absoluteURL];
+    return [[CK2FileManager URLWithPath:path relativeToURL:[self ck2_root]] absoluteURL];
 }
 
 @end

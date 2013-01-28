@@ -80,6 +80,8 @@
 		324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */; };
 		324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */; };
 		324D22D616AF490B001CFDE6 /* CK2NewFolderWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */; };
+		32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */; };
+		32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */; };
 		32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */; };
 		32B592BA16A4960B0020FFE9 /* CK2OpenPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */; };
@@ -312,6 +314,8 @@
 		324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2NewFolderWindowController.h; sourceTree = "<group>"; };
 		324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2NewFolderWindowController.m; sourceTree = "<group>"; };
 		324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2NewFolderWindow.xib; sourceTree = "<group>"; };
+		32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+CK2OpenPanel.h"; sourceTree = "<group>"; };
+		32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSImage+CK2OpenPanel.m"; sourceTree = "<group>"; };
 		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
 		32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanel.m; sourceTree = "<group>"; };
 		32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelController.h; sourceTree = "<group>"; };
@@ -700,6 +704,8 @@
 				324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */,
 				32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */,
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
+				32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */,
+				32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */,
 				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
 				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
 				324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */,
@@ -890,6 +896,7 @@
 				324D22C516AE1754001CFDE6 /* CK2FileSizeFormatter.h in Headers */,
 				324D22C916AE1763001CFDE6 /* CK2IconView.h in Headers */,
 				324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */,
+				32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1164,6 +1171,7 @@
 				324D22C616AE1754001CFDE6 /* CK2FileSizeFormatter.m in Sources */,
 				324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */,
 				324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */,
+				32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

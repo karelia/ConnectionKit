@@ -137,12 +137,8 @@
             
                 if (row == NSNotFound)
                 {
-                    if ([blockURL isEqual:directoryURL])
-                    {
-                        blockURL = [blockURL ck2_URLByDeletingTrailingSlash];
-                        
-                        row = [children indexOfObject:blockURL];
-                    }
+                    blockURL = [blockURL ck2_URLByDeletingTrailingSlash];
+                    row = [children indexOfObject:blockURL];
                 }
                 
                 if (row == NSNotFound)

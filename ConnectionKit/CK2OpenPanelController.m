@@ -575,7 +575,7 @@
     
     resolvedURL = nil;
     
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey ] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -592,57 +592,61 @@
     completionHandler:
      ^(NSError *blockError)
      {
-             __block NSError *tempError;
-             
-             tempError = nil;
-             if (blockError != nil)
-             {
-                 [children addObject:[NSURL ck2_errorURL]];                 
-                 tempError = [blockError retain];
-             }
-             else
-             {
-                 NSURL          *rootURL;
-                 
-                 dispatch_async(dispatch_get_main_queue(),
-                 ^{
-                     [self cacheChildren:children forURL:resolvedURL];
-                     [self urlDidLoad:resolvedURL];
-                 });
-                 
-                 rootURL = [resolvedURL ck2_root];
-                 if (![resolvedURL isEqual:initialURL])
-                 {
-                     NSString    *resolvedPath;
-                     
-                     // If the resolved URL is different than the original one, then we assume the URL was relative and
-                     // we try and derive the user's "home" directory from that.
-                     resolvedPath = [NSString stringWithFormat:@"%@/", [initialURL ck2_pathRelativeToURL:resolvedURL]];
-                     
-                     [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
-                     rootURL = [self homeURL];
-                 }
-                 
-                 [self loadFromURL:rootURL toURL:resolvedURL error:&tempError];
-             }
+         __block NSError *tempError;
+         NSURL   *blockResolvedURL;
+         
+         // Reassign here so that it will be properly retained by the blocks it's used in below
+         blockResolvedURL = resolvedURL;
+         
+         tempError = nil;
+         if (blockError != nil)
+         {
+             [children addObject:[NSURL ck2_errorURL]];
+             tempError = [blockError retain];
+         }
+         else
+         {
+             NSURL          *rootURL;
              
              dispatch_async(dispatch_get_main_queue(),
              ^{
-                 _currentBootstrapOperation = nil;
-                                
-                 if (tempError == nil)
-                 {
-                     [self setURLs:@[ resolvedURL ] updateDirectory:YES];
-                 }
-                 [self validateViews];
-                                
-                 if (block != NULL)
-                 {
-                     block([tempError autorelease]);
-                 }
+                 [self cacheChildren:children forURL:blockResolvedURL];
+                 [self urlDidLoad:blockResolvedURL];
              });
              
-             [resolvedURL autorelease];
+             rootURL = [resolvedURL ck2_root];
+             if (![resolvedURL isEqual:initialURL])
+             {
+                 NSString    *resolvedPath;
+                 
+                 // If the resolved URL is different than the original one, then we assume the URL was relative and
+                 // we try and derive the user's "home" directory from that.
+                 resolvedPath = [NSString stringWithFormat:@"%@/", [initialURL ck2_pathRelativeToURL:resolvedURL]];
+                 
+                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
+                 rootURL = [self homeURL];
+             }
+             
+             [self loadFromURL:rootURL toURL:resolvedURL error:&tempError];
+         }
+         
+         dispatch_async(dispatch_get_main_queue(),
+         ^{
+             _currentBootstrapOperation = nil;
+                            
+             if (tempError == nil)
+             {
+                 [self setURLs:@[ blockResolvedURL ] updateDirectory:YES];
+             }
+             [self validateViews];
+             
+             if (block != NULL)
+             {
+                 block([tempError autorelease]);
+             }
+         });
+         
+         [resolvedURL autorelease];
      }];
     
     [_currentBootstrapOperation retain];
@@ -767,7 +771,7 @@
                 }
                                                 
                 operation = [_fileManager contentsOfDirectoryAtURL:url
-                                        includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey ]
+                                        includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ]
                                                            options:options
                 completionHandler:
                 ^(NSArray *contents, NSError *blockError)
@@ -1000,10 +1004,7 @@
         [newChildren insertObject:url atIndex:i];
         
         [self cacheChildren:newChildren forURL:parentURL];
-        dispatch_async(dispatch_get_main_queue(),
-        ^{
-            [self setURLs:@[ url ] updateDirectory:YES sender:nil];
-        });
+        [self setURLs:@[ url ] updateDirectory:YES sender:nil];
     }
     else if ([controller error] != nil)
     {
