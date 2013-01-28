@@ -675,7 +675,7 @@
         NSImage     *homeImage;
 
         directoryURL = [urls objectAtIndex:0];
-        if (![directoryURL ck2_canHazChildren])
+        if (![self URLCanHazChildren:directoryURL])
         {
             directoryURL = [directoryURL URLByDeletingLastPathComponent];
         }
@@ -743,7 +743,7 @@
         
     children = nil;
     
-    if ((url != nil) && [url ck2_canHazChildren])
+    if ((url != nil) && [self URLCanHazChildren:url])
     {
         children = [_urlCache objectForKey:url];
         
@@ -848,7 +848,7 @@
         allowedFileTypes = [_openPanel allowedFileTypes];
         fileTypeValid = ([allowedFileTypes count] == 0) || [allowedFileTypes containsObject:[url pathExtension]];
         
-        if ([url ck2_canHazChildren])
+        if ([self URLCanHazChildren:url])
         {
             return [_openPanel canChooseDirectories] && delegateValid && fileTypeValid;
         }
@@ -858,6 +858,11 @@
         }
     }
     return NO;
+}
+
+- (BOOL)URLCanHazChildren:(NSURL *)url
+{
+    return [url ck2_isDirectory] && (![url ck2_isPackage] || [_openPanel treatsFilePackagesAsDirectories]);
 }
 
 - (void)urlDidLoad:(NSURL *)url

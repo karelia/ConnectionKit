@@ -107,6 +107,7 @@
 
 - (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender;
 - (BOOL)isURLValid:(NSURL *)url;
+- (BOOL)URLCanHazChildren:(NSURL *)url;
 - (NSArray *)childrenForURL:(NSURL *)url;
 - (void)addToHistory;
 

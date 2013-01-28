@@ -104,7 +104,7 @@
         
         actualURL = [self ck2_destinationURL];
         
-        if ([actualURL ck2_canHazChildren])
+        if ([actualURL ck2_isDirectory] && ![actualURL ck2_isPackage])
         {
             image = [NSImage imageNamed:NSImageNameFolder];
         }
@@ -167,7 +167,7 @@
         OSStatus        status;
         CFStringRef     kindString;
 
-        if ([self ck2_canHazChildren])
+        if ([self ck2_isDirectory] && ![self ck2_isPackage])
         {
             return @"Folder";
         }
@@ -300,11 +300,6 @@
         NSLog(@"Error determining if symbolic link for url %@: %@", self, error);
     }
     return NO;
-}
-
-- (BOOL)ck2_canHazChildren
-{
-    return [self ck2_isDirectory] && ![self ck2_isPackage];
 }
 
 - (NSURL *)ck2_destinationURL

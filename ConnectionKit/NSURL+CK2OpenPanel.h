@@ -48,7 +48,6 @@
 - (NSString *)ck2_kind;
 - (BOOL)ck2_isDirectory;
 - (BOOL)ck2_isPackage;
-- (BOOL)ck2_canHazChildren;
 
 - (NSURL *)ck2_root;
 // Will return YES if receiver and given url are the same

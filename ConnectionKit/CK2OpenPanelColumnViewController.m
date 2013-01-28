@@ -102,7 +102,7 @@
     {
         directoryURL = [*urls objectAtIndex:0];
     }
-    if (![directoryURL ck2_canHazChildren])
+    if (![controller URLCanHazChildren:directoryURL])
     {
         directoryURL = [directoryURL URLByDeletingLastPathComponent];
     }
@@ -352,7 +352,7 @@
 
 - (BOOL)browser:(NSBrowser *)browser isLeafItem:(id)item
 {
-    return ![item ck2_canHazChildren];
+    return ![[self controller] URLCanHazChildren:item];
 }
 
 - (NSInteger)browser:(NSBrowser *)browser numberOfChildrenOfItem:(id)item
@@ -372,14 +372,16 @@
 
 - (void)browser:(NSBrowser *)browser willDisplayCell:(id)cell atRow:(NSInteger)row column:(NSInteger)column
 {
-    NSURL       *url;
+    NSURL                       *url;
+    CK2OpenPanelController      *controller;
     
+    controller = [self controller];
     url = [browser itemAtRow:row inColumn:column];
     [cell setImage:[url ck2_icon]];
     
     [cell setStringValue:[url ck2_displayName]];
     
-    if ([[self controller] isURLValid:url] || [url ck2_canHazChildren])
+    if ([controller isURLValid:url] || [controller URLCanHazChildren:url])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -395,7 +397,9 @@
 - (NSIndexSet *)browser:(NSBrowser *)browser selectionIndexesForProposedSelection:(NSIndexSet *)proposedSelectionIndexes inColumn:(NSInteger)column
 {
     NSMutableIndexSet       *indexSet;
+    CK2OpenPanelController  *controller;
     
+    controller = [self controller];
     indexSet = [NSMutableIndexSet indexSet];
     
     [proposedSelectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop)
@@ -404,7 +408,7 @@
          
          url = [browser itemAtRow:idx inColumn:column];
          
-         if ([[self controller] isURLValid:url] || [url ck2_canHazChildren])
+         if ([controller isURLValid:url] || [controller URLCanHazChildren:url])
          {
              [indexSet addIndex:idx];
          }

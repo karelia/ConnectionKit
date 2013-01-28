@@ -144,7 +144,7 @@
         NSURL                   *url;
         
         url = [urls objectAtIndex:0];
-        if ([url ck2_canHazChildren])
+        if ([controller URLCanHazChildren:url])
         {
             if (![url isEqual:[[controller openPanel] directoryURL]])
             {
@@ -215,11 +215,14 @@
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView isItemExpandable:(id)item
 {
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
     if (item == nil)
     {
-        item = [[[self controller] openPanel] directoryURL];
+        item = [[controller openPanel] directoryURL];
     }
-    return [item ck2_canHazChildren];
+    return [controller URLCanHazChildren:item];
 }
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
@@ -274,12 +277,15 @@
 
 - (void)outlineView:(NSOutlineView *)outlineView willDisplayCell:(id)cell forTableColumn:(NSTableColumn *)tableColumn item:(id)item
 {
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
     if ([[tableColumn identifier] isEqual:@"Name"])
     {
         [cell setImage:[item ck2_icon]];
     }
     
-    if ([[self controller] isURLValid:item] || [item ck2_canHazChildren])
+    if ([controller isURLValid:item] || [controller URLCanHazChildren:item])
     {
         [cell setTextColor:[NSColor controlTextColor]];
     }
@@ -291,7 +297,10 @@
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView shouldSelectItem:(id)item
 {
-    return [[self controller] isURLValid:item] || [item ck2_canHazChildren];
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
+    return [controller isURLValid:item] || [controller URLCanHazChildren:item];
 }
 
 - (BOOL)outlineView:(NSOutlineView *)outlineView acceptDrop:(id < NSDraggingInfo >)info item:(id)item childIndex:(NSInteger)index
