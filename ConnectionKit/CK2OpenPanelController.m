@@ -1050,17 +1050,36 @@
 
 - (void)changeView:(NSDictionary *)dict
 {
+    NSTabViewItem       *tabItem;
+    NSUInteger          i;
+    
     [self addToHistory];
 
     [self setURLs:@[ [dict objectForKey:HISTORY_DIRECTORY_URL_KEY] ] updateDirectory:YES];
-    [_tabView selectTabViewItemAtIndex:[[dict objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue]];
+    
+    i = [[dict objectForKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY] unsignedIntegerValue];
+    tabItem = [_tabView tabViewItemAtIndex:i];
+    
+    [[self viewControllerForIdentifier:[tabItem identifier]] restoreViewHistoryState:dict];
+    [_tabView selectTabViewItemAtIndex:i];
 }
 
 - (void)addToHistory
 {
-    [_historyManager registerUndoWithTarget:self selector:@selector(changeView:)
-                                  object:@{ HISTORY_DIRECTORY_URL_KEY : [self directoryURL],
-       HISTORY_DIRECTORY_VIEW_INDEX_KEY : [NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:[_tabView selectedTabViewItem]]] }];
+    NSMutableDictionary         *dict;
+    CK2OpenPanelViewController  *currentController;
+    NSTabViewItem               *tabItem;
+    
+    tabItem = [_tabView selectedTabViewItem];
+    
+    dict = [NSMutableDictionary dictionary];    
+    [dict setObject:[self directoryURL] forKey:HISTORY_DIRECTORY_URL_KEY];
+    [dict setObject:[NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:tabItem]] forKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY];
+    
+    currentController = [self viewControllerForIdentifier:[tabItem identifier]];
+    [currentController saveViewHistoryState:dict];
+    
+    [_historyManager registerUndoWithTarget:self selector:@selector(changeView:) object:dict];
     
     [self validateHistoryButtons];
 }

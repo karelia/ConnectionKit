@@ -54,4 +54,7 @@
 - (IBAction)itemSelected:(id)sender;
 - (IBAction)itemDoubleClicked:(id)sender;
 
+- (void)saveViewHistoryState:(NSMutableDictionary *)dict;
+- (void)restoreViewHistoryState:(NSDictionary *)dict;
+
 @end

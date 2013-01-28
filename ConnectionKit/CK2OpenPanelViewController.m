@@ -93,4 +93,13 @@
 {
 }
 
+- (void)saveViewHistoryState:(NSMutableDictionary *)dict
+{
+}
+
+- (void)restoreViewHistoryState:(NSDictionary *)dict
+{
+}
+
+
 @end

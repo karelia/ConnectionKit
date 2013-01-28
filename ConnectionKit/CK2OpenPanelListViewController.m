@@ -162,6 +162,43 @@
     }
 }
 
+#define HISTORY_LIST_EXPANDED_ITEMS_KEY     @"listViewExpandedItems"
+
+- (void)saveViewHistoryState:(NSMutableDictionary *)dict
+{
+    NSUInteger          count, i;
+    NSMutableArray      *items;
+    id                  item;
+    
+    count = [_outlineView numberOfRows];
+    items = [NSMutableArray array];
+    
+    for (i = 0; i < count; i++)
+    {
+        item = [_outlineView itemAtRow:i];
+        
+        if ([_outlineView isItemExpanded:item])
+        {
+            [items addObject:item];
+        }
+    }
+    
+    [dict setObject:items forKey:HISTORY_LIST_EXPANDED_ITEMS_KEY];
+}
+
+- (void)restoreViewHistoryState:(NSDictionary *)dict
+{
+    NSArray     *items;
+    
+    items = [dict objectForKey:HISTORY_LIST_EXPANDED_ITEMS_KEY];
+    
+    for (id item in items)
+    {
+        [_outlineView expandItem:item];
+    }    
+}
+
+
 #pragma mark NSOutlineViewDataSource methods
 
 - (id)outlineView:(NSOutlineView *)outlineView child:(NSInteger)index ofItem:(id)item

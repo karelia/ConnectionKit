@@ -31,11 +31,9 @@
 
 #import <Cocoa/Cocoa.h>
 
-//TODO: Provide support for symlinks
 //TODO: Handle/display errors better
 //TODO: Save window/view dimensions and state (like which view is selected)
 //TODO: Implement "form-fitting" text selection in icon view
-//TODO: Restore outlineview expanded items when reverting history
 //TODO: Implement "hidden" feature where you can type in a path (a little sheet shows up when you type / or ~)
 
 @protocol CK2OpenPanelDelegate;
