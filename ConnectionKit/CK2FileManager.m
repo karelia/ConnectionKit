@@ -125,7 +125,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         
     } completionHandler:^(NSError *error) {
         
-        block(contents, error);
+        block((error ? nil : contents), // don't confuse clients should we have recieved only a partial listing
+              error);
+        
         [contents release];
     }];
     
