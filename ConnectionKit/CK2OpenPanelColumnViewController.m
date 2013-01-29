@@ -379,8 +379,6 @@
     url = [browser itemAtRow:row inColumn:column];
     [cell setImage:[url ck2_icon]];
     
-    [cell setStringValue:[url ck2_displayName]];
-    
     if ([controller isURLValid:url] || [controller URLCanHazChildren:url])
     {
         [cell setTextColor:[NSColor controlTextColor]];
@@ -389,9 +387,8 @@
     {
         [cell setTextColor:[NSColor disabledControlTextColor]];
     }
-    [cell setBackgroundColor:[NSColor controlBackgroundColor]];
-    
-    [cell setControlView:browser];
+
+    [cell setTextOnly:[url ck2_isPlaceholder]];
 }
 
 - (NSIndexSet *)browser:(NSBrowser *)browser selectionIndexesForProposedSelection:(NSIndexSet *)proposedSelectionIndexes inColumn:(NSInteger)column
@@ -441,14 +438,6 @@
         _previewController = [[CK2BrowserPreviewController alloc] init];
     }
     return _previewController;
-}
-
-- (NSString *)browser:(NSBrowser *)browser typeSelectStringForRow:(NSInteger)row inColumn:(NSInteger)column
-{
-    NSURL   *item;
-    
-    item = [browser itemAtRow:row inColumn:column];
-    return [item ck2_displayName];
 }
 
 @end

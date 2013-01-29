@@ -33,6 +33,7 @@
 #import "CK2OpenPanelListViewController.h"
 #import "CK2OpenPanelController.h"
 #import "NSURL+CK2OpenPanel.h"
+#import "CK2FileCell.h"
 
 @interface CK2OpenPanelListViewController ()
 
@@ -282,7 +283,8 @@
     controller = [self controller];
     if ([[tableColumn identifier] isEqual:@"Name"])
     {
-        [cell setImage:[item ck2_icon]];
+        [cell setImage:[item ck2_icon]];        
+        [cell setTextOnly:[item ck2_isPlaceholder]];
     }
     
     if ([controller isURLValid:item] || [controller URLCanHazChildren:item])

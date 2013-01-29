@@ -49,5 +49,6 @@
 
 @property(retain) NSImage *image;
 @property(retain) NSColor *labelColor;
+@property(assign, getter=isTextOnly, nonatomic) BOOL textOnly;
 
 @end
