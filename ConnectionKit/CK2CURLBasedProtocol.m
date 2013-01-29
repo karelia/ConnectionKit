@@ -84,7 +84,7 @@
         else
         {
             // Report directory itself
-            NSURL *url = [request URL];    // ensures it's a directory URL;
+            NSURL *url = [request URL];
             NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
             
             if (![path isAbsolutePath])
@@ -92,7 +92,7 @@
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    url = [CK2FileManager URLWithPath:home relativeToURL:url];
+                    url = [[CK2FileManager URLWithPath:home relativeToURL:url] absoluteURL];
                     url = [url URLByAppendingPathComponent:path];
                 }
             }
