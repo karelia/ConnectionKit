@@ -118,7 +118,7 @@
         indexes = NULL;
         if (count > 0)
         {
-            indexes = (NSUInteger *)malloc(sizeof(NSUInteger) * (count - 1));
+            indexes = (NSUInteger *)malloc(sizeof(NSUInteger) * count);
         }
         indexCount = 0;
         parentURL = nil;
