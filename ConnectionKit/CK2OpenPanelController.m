@@ -77,6 +77,8 @@
 
 #define CK2OpenPanelErrorDomain             @"CK2OpenPanelErrorDomain"
 
+#define CK2OpenPanelLastViewPrefKey         @"CK2NavPanelFileLastListModeForOpenModeKey"
+
 @interface CK2OpenPanelController ()
 
 @property (readwrite, copy) NSURL       *directoryURL;
@@ -174,6 +176,7 @@
 - (void)awakeFromNib
 {
     NSTabViewItem       *item;
+    id                  value;
    
     _initialAccessoryView = [[_accessoryContainer contentView] retain];
     
@@ -182,9 +185,31 @@
     [self validateOKButton];
     [self validateProgressIndicator];
    
-    //PENDING: should store last view in prefs and restore it here
-    item = [_tabView tabViewItemAtIndex:[_tabView indexOfTabViewItemWithIdentifier:COLUMN_VIEW_IDENTIFIER]];
+    value = [[NSUserDefaults standardUserDefaults] stringForKey:CK2OpenPanelLastViewPrefKey];
+    if (value == nil)
+    {
+        value = [(id)CFPreferencesCopyAppValue(CFSTR("NSNavPanelFileLastListModeForOpenModeKey"), kCFPreferencesAnyApplication) autorelease];
+
+        switch ([value integerValue])
+        {
+            case 1:
+                value = COLUMN_VIEW_IDENTIFIER;
+                break;
+            case 2:
+                value = LIST_VIEW_IDENTIFIER;
+                break;
+            case 3:
+                value = ICON_VIEW_IDENTIFIER;
+                break;
+            default:
+                value = ICON_VIEW_IDENTIFIER;
+        }
+    }
+    
+    item = [_tabView tabViewItemAtIndex:[_tabView indexOfTabViewItemWithIdentifier:value]];
+    
     [_tabView selectTabViewItem:item];
+    [_viewPicker setSelectedSegment:[_tabView indexOfTabViewItem:item]];
     [_openPanel makeFirstResponder:[item initialFirstResponder]];
 }
 
@@ -787,9 +812,9 @@
                         }
                         else
                         {
-                            // We use NSNull as an indicator that the URL has no children to differentiate it from not
-                            // being in the cache at all.
-                            value = [NSNull null];
+                            // Shouldn't happen
+                            NSLog(@"Received nil from -contentsOfDirectoryAtURL: for URL %@ but no error set", url);
+                            value = [NSArray array];
                         }
                     }
                     
@@ -824,10 +849,6 @@
 
                 [self validateProgressIndicator];
             }
-        }
-        else if ([children isEqual:[NSNull null]])
-        {
-            children = nil;
         }
     }
     return children;
@@ -1135,7 +1156,16 @@
 
 - (void)tabView:(NSTabView *)tabView didSelectTabViewItem:(NSTabViewItem *)tabViewItem
 {
+    NSString  *identifier;
+    
     [_openPanel makeFirstResponder:[tabViewItem initialFirstResponder]];
+    
+    identifier = [tabViewItem identifier];
+    
+    if (![identifier isEqual:BLANK_VIEW_IDENTIFIER])
+    {
+        [[NSUserDefaults standardUserDefaults] setObject:identifier forKey:CK2OpenPanelLastViewPrefKey];
+    }
 }
 
 #pragma mark CK2FileManagerDelegate
