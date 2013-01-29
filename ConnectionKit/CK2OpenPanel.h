@@ -85,6 +85,10 @@
 // in that you'll see progress indicators spinning and you can still cancel.
 // Note that the completion block is called on the main thread.
 // .directoryURL immediately reflects the URL called with
+//
+// Most commonly, we expect you'll want to show the user's home directory. To get that URL, consult CK2FileManager like so:
+//  NSURL *homeDir = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://example.com"]];
+//
 - (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
