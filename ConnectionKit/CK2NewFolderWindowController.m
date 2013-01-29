@@ -77,7 +77,7 @@
     i = 2;
     while ([_existingNames containsObject:name])
     {
-        name = [NSString stringWithFormat:@"%@ %ld", DEFAULT_NAME, i++];
+        name = [NSString stringWithFormat:@"%@ %lu", DEFAULT_NAME, (unsigned long)i++];
     }
     // Window may not be loaded yet.
     [self window];
