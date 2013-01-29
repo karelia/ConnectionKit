@@ -179,11 +179,11 @@
             NSRectFill(rects[i]);
         }
   */
-        NSSize  size;
         NSRect  selRect;
-        
-        size = [_textCell cellSizeForBounds:rect];
-        selRect.size = size;
+
+
+        selRect.origin = NSZeroPoint;          // Unnecessary but added to shut up the static analyzer
+        selRect.size = [_textCell cellSizeForBounds:rect];
         selRect.size.height += 1.0;
         selRect.size.width += 12.0;
         selRect.origin.x = NSMinX(rect) + (NSWidth(rect) - NSWidth(selRect)) / 2;

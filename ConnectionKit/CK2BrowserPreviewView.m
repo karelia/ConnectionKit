@@ -129,8 +129,9 @@
     _separatorRect.origin.x = NSMinX(bounds) + (NSWidth(bounds) - NSWidth(_separatorRect)) / 2.0;
     _separatorRect.origin.y = NSMaxY([_nameLabel frame]) + LABELS_TOP_MARGIN;
 
+    iconFrame.origin = NSZeroPoint;     // Unnecessary but added to shut up the static analyzer
     iconFrame.size.width = MIN(NSWidth(bounds) - 2 * MARGIN, NSHeight(bounds) - NSMaxY(_separatorRect) - 2 * MARGIN);
-    iconFrame.size.height = iconFrame.size.width;
+    iconFrame.size.height = NSWidth(iconFrame);
     iconFrame.origin.x = NSMinX(bounds) + (NSWidth(bounds) - NSWidth(iconFrame)) / 2.0;
     iconFrame.origin.y = NSMaxY(_separatorRect) + MARGIN;
     
