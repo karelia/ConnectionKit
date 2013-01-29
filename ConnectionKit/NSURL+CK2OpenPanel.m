@@ -42,13 +42,19 @@
 
 + (NSURL *)ck2_loadingURL
 {
-    return [[[CK2PlaceholderURL alloc] initWithString:@"Loading…"] autorelease];
+    return [[[CK2PlaceholderURL alloc] initWithString:[@"Loading…" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
 + (NSURL *)ck2_errorURL
 {
-    return [[[CK2PlaceholderURL alloc] initWithString:@"Error"] autorelease];
+    return [[[CK2PlaceholderURL alloc] initWithString:[@"Error" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
+
++ (NSURL *)ck2_URLWithError:(NSError *)error
+{
+    return [[[CK2PlaceholderURL alloc] initWithString:[[@"Error: " stringByAppendingString:[error localizedDescription]] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
+}
+
 
 + (NSComparator)ck2_displayComparator
 {

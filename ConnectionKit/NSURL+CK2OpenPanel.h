@@ -35,6 +35,7 @@
 
 + (NSURL *)ck2_loadingURL;
 + (NSURL *)ck2_errorURL;
++ (NSURL *)ck2_URLWithError:(NSError *)error;
 // Returns a comparator to compare URLs alphabetically. Note that this assumes that both URLs are in the same
 // directory.
 + (NSComparator)ck2_displayComparator;

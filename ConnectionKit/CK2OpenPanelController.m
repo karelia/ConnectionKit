@@ -808,7 +808,7 @@
                     {
                         if (blockError != nil)
                         {
-                            value = @[ [NSURL ck2_errorURL] ];
+                            value = @[ [NSURL ck2_URLWithError:blockError] ];
                         }
                         else
                         {
