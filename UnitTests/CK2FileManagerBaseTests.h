@@ -16,6 +16,7 @@
 @property (strong, nonatomic) NSMutableString* transcript;
 @property (assign, nonatomic) BOOL useMockServer;
 
+- (NSURL*)temporaryFolder;
 - (BOOL)setupSession;
 - (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
 

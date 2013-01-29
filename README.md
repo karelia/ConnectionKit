@@ -24,7 +24,7 @@ Contributors and Contact Info
 
 I'm Mike Abdullah, of [Karelia Software](http://karelia.com). [@mikeabdullah](http://twitter.com/mikeabdullah) on Twitter.
 
-Questions about the code should be left as issues at https://github.com/karelia/ConnectionKit or message me on Twitter.
+Questions about the code are best left as issues at https://github.com/karelia/ConnectionKit but you can also message me on Twitter (just don't expect more than a terse reply!).
 
 Big thanks to:
 

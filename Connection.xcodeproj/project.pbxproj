@@ -23,6 +23,7 @@
 		224AB387166E501C0066B1C6 /* KMSCollectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB386166E501C0066B1C6 /* KMSCollectionTests.m */; };
 		224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB389166E52680066B1C6 /* KMSTestCase.m */; };
 		224AB38C166E587F0066B1C6 /* KMSManualTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB38B166E587F0066B1C6 /* KMSManualTests.m */; };
+		225FCA3816B046F800A9F5AE /* CKUploaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 225FCA3716B046F800A9F5AE /* CKUploaderTests.m */; };
 		22662EE4165D1EE4005FCC4A /* CK2FileManagerBaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */; };
 		22662EF3165D2EEC005FCC4A /* ftp.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF1165D2EEC005FCC4A /* ftp.json */; };
 		22662EF4165D2EEC005FCC4A /* webdav.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF2165D2EEC005FCC4A /* webdav.json */; };
@@ -253,6 +254,7 @@
 		224AB388166E52680066B1C6 /* KMSTestCase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTestCase.h; sourceTree = "<group>"; };
 		224AB389166E52680066B1C6 /* KMSTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTestCase.m; sourceTree = "<group>"; };
 		224AB38B166E587F0066B1C6 /* KMSManualTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSManualTests.m; sourceTree = "<group>"; };
+		225FCA3716B046F800A9F5AE /* CKUploaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploaderTests.m; sourceTree = "<group>"; };
 		22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerBaseTests.h; sourceTree = "<group>"; };
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EF1165D2EEC005FCC4A /* ftp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ftp.json; sourceTree = "<group>"; };
@@ -463,6 +465,7 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				225FCA3716B046F800A9F5AE /* CKUploaderTests.m */,
 				22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */,
 				22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */,
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
@@ -1119,6 +1122,7 @@
 				22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */,
 				22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */,
 				22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */,
+				225FCA3816B046F800A9F5AE /* CKUploaderTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1258,7 +1262,6 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
@@ -1290,7 +1293,6 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1315,7 +1317,6 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
