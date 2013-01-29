@@ -18,7 +18,7 @@
 
 - (BOOL)setup
 {
-    BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"webdav"]);
+    BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"http://dav.test.com"] fakeResponses:@"webdav"]);
 
     return result;
 }

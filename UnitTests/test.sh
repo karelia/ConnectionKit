@@ -6,7 +6,7 @@ base=`dirname $0`
 echo "$base"
 pushd "$base/.." > /dev/null
 build="$PWD/test-build"
-ocunit2junit="$base/MockServer/UnitTests/OCUnit2JUnit/bin/ocunit2junit"
+ocunit2junit="$base/../CurlHandle/CURLHandleSource/CURLHandleTests/MockServer/UnitTests/OCUnit2JUnit/bin/ocunit2junit"
 popd > /dev/null
 
 sym="$build/sym"
