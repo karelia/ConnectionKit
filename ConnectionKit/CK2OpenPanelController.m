@@ -808,7 +808,8 @@
                     {
                         if (blockError != nil)
                         {
-                            value = @[ [NSURL ck2_URLWithError:blockError] ];
+                            value = @[ [NSURL ck2_errorURLWithMessage:@"Could not load items for this folder"] ];
+                            NSLog(@"Error loading contents of URL %@: %@", url, blockError);
                         }
                         else
                         {
@@ -1034,6 +1035,7 @@
     }
     else if ([controller error] != nil)
     {
+        NSLog(@"Could not create directory under URL %@: %@", parentURL, [controller error]);
         [self presentError:[controller error]];
     }
     

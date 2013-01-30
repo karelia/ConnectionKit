@@ -11,6 +11,8 @@
 
 @implementation CK2IconView
 
+@synthesize messageMode = _messageMode;
+
 - (id)initWithFrame:(NSRect)frame
 {
     if (self = [super initWithFrame:frame])
@@ -49,28 +51,43 @@
     [self initNotifications];
 }
 
+- (void)setMessageMode:(BOOL)messageMode
+{
+    _messageMode = messageMode;
+    [self tile];
+}
+
 - (void)tile
 {
-    NSUInteger  colCount;
-    CGFloat     calcWidth;
-    NSSize      size, minSize;
-    NSRect      frame;
+    NSRect    bounds;
     
-    
-    // NSCollectionView tends to align things towards the left. We want the icons to be evenly distributed so we
-    // set the minimum width of each item to force such a layout.
-    frame = [self frame];
-    minSize = [[[self itemPrototype] view] frame].size;
-    
-    colCount = NSWidth(frame) / minSize.width;
-    calcWidth = NSWidth(frame) / colCount;
-    
-    [self setMaxNumberOfColumns:colCount];
-    
-    size = NSMakeSize(calcWidth, minSize.width);
-    [self setMinItemSize:size];
-    // Setting the max size gets rid of odd scroller behavior
-    [self setMaxItemSize:size];
+    bounds = [self bounds];
+    if (_messageMode)
+    {
+        [self setMinItemSize:bounds.size];
+        [self setMaxItemSize:bounds.size];
+    }
+    else
+    {
+        NSUInteger  colCount;
+        CGFloat     calcWidth;
+        NSSize      size, minSize;
+        
+        // NSCollectionView tends to align things towards the left. We want the icons to be evenly distributed so we
+        // set the minimum width of each item to force such a layout.
+
+        minSize = [[[self itemPrototype] view] frame].size;
+        
+        colCount = NSWidth(bounds) / minSize.width;
+        calcWidth = NSWidth(bounds) / colCount;
+        
+        [self setMaxNumberOfColumns:colCount];
+        
+        size = NSMakeSize(calcWidth, minSize.width);
+        [self setMinItemSize:size];
+        // Setting the max size gets rid of odd scroller behavior
+        [self setMaxItemSize:size];
+    }
 }
 
 - (void)resetTypeSelectTimer

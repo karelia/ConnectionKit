@@ -35,6 +35,7 @@
 #import "NSURL+CK2OpenPanel.h"
 #import "CK2IconViewItem.h"
 #import "CK2IconItemView.h"
+#import "CK2IconView.h"
 
 @interface CK2OpenPanelIconViewController ()
 
@@ -74,6 +75,15 @@
     
     children = [controller childrenForURL:[[controller openPanel] directoryURL]];
     [_iconView setContent:children];
+    
+    if (([children count] == 1) && [[children lastObject] ck2_isPlaceholder])
+    {
+        [_iconView setMessageMode:YES];
+    }
+    else
+    {
+        [_iconView setMessageMode:NO];
+    }
     
     count = [children count];
     

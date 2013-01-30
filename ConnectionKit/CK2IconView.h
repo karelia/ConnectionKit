@@ -12,6 +12,11 @@
 {
     NSMutableString     *_typeSelectBuffer;
     NSTimer             *_typeSelectTimer;
+    
+    BOOL                _messageMode;
 }
+
+@property (readwrite, assign, nonatomic) BOOL   messageMode;
+
 
 @end

@@ -108,7 +108,24 @@
 
 - (NSRect)textRectForBounds:(NSRect)bounds
 {
-    return NSMakeRect(NSMinX(bounds) + (NSWidth(bounds) - TEXT_WIDTH) / 2.0, NSMinY(bounds) + (NSHeight(bounds) - (2 * ICON_SELECTION_MARGIN + ICON_SIZE + ICON_TEXT_MARGIN + TEXT_HEIGHT)) / 2.0, TEXT_WIDTH, TEXT_HEIGHT);
+    NSRect  rect;
+    
+    if ([[[self item] representedObject] ck2_isPlaceholder])
+    {
+        NSSize  size;
+        
+        rect = [self bounds];
+        rect.size.height = CGFLOAT_MAX;
+        rect.size.width = NSWidth(bounds) * .75;
+        size = [_textCell cellSizeForBounds:rect];
+
+        rect = NSMakeRect(NSMinX(bounds) + (NSWidth(bounds) - size.width) / 2.0, NSMinY(bounds) + (NSHeight(bounds) - size.height) / 2.0, size.width, size.height);
+    }
+    else
+    {
+        rect = NSMakeRect(NSMinX(bounds) + (NSWidth(bounds) - TEXT_WIDTH) / 2.0, NSMinY(bounds) + (NSHeight(bounds) - (2 * ICON_SELECTION_MARGIN + ICON_SIZE + ICON_TEXT_MARGIN + TEXT_HEIGHT)) / 2.0, TEXT_WIDTH, TEXT_HEIGHT);
+    }
+    return rect;
 }
 
 
@@ -118,40 +135,45 @@
     NSRect          iconRect, rect, bounds;
     NSColor         *color, *selectionColor;
     NSString        *label;
+    NSURL           *url;
     
     item = [self item];
 
     NSAssert([item view] == self, @"Item view for view %@ not properly set.", self);
     
+    url = [item representedObject];
+    
     bounds = [self bounds];
     
     selectionColor = [NSColor colorWithCalibratedWhite:0.76 alpha:1.0];
     
-    iconRect = [self iconRectForBounds:bounds];
-    if ([item isSelected])
+    if (![url ck2_isPlaceholder])
     {
-        NSBezierPath    *path;
-        
-        rect = NSInsetRect(iconRect, -ICON_SELECTION_MARGIN, -ICON_SELECTION_MARGIN);
-        path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:ICON_SELECTION_MARGIN yRadius:ICON_SELECTION_MARGIN];
-        [selectionColor set];
-        [path fill];
+        iconRect = [self iconRectForBounds:bounds];
+        if ([item isSelected])
+        {
+            NSBezierPath    *path;
+            
+            rect = NSInsetRect(iconRect, -ICON_SELECTION_MARGIN, -ICON_SELECTION_MARGIN);
+            path = [NSBezierPath bezierPathWithRoundedRect:rect xRadius:ICON_SELECTION_MARGIN yRadius:ICON_SELECTION_MARGIN];
+            [selectionColor set];
+            [path fill];
+        }
+    
+        [[url ck2_icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+    
+        if (![item isEnabled])
+        {
+            [[NSColor colorWithDeviceWhite:1.0 alpha:0.5] set];
+            NSRectFillUsingOperation(iconRect, NSCompositeSourceAtop);
+        }
     }
     
-    [[[[self item] representedObject] ck2_icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
-    
-    color = [NSColor controlTextColor];
-    if (![[self item] isEnabled])
-    {
-        [[NSColor colorWithDeviceWhite:1.0 alpha:0.5] set];
-        NSRectFillUsingOperation(iconRect, NSCompositeSourceAtop);
-        
-        color = [NSColor disabledControlTextColor];
-    }
+    color = [item isEnabled] ? [NSColor controlTextColor] : [NSColor disabledControlTextColor];
     
     rect = [self textRectForBounds:bounds];
     
-    label = [[[self item] representedObject] ck2_displayName];
+    label = [url ck2_displayName];
     [_textCell setStringValue:label];
     
     if ([[self item] isSelected])

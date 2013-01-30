@@ -50,9 +50,9 @@
     return [[[CK2PlaceholderURL alloc] initWithString:[@"Error" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
-+ (NSURL *)ck2_URLWithError:(NSError *)error
++ (NSURL *)ck2_errorURLWithMessage:(NSString *)message
 {
-    return [[[CK2PlaceholderURL alloc] initWithString:[[@"Error: " stringByAppendingString:[error localizedDescription]] stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
+    return [[[CK2PlaceholderURL alloc] initWithString:[message stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
 

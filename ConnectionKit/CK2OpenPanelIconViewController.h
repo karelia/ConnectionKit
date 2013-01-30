@@ -32,9 +32,11 @@
 
 #import "CK2OpenPanelViewController.h"
 
+@class CK2IconView;
+
 @interface CK2OpenPanelIconViewController : CK2OpenPanelViewController
 {
-    IBOutlet NSCollectionView       *_iconView;
+    IBOutlet CK2IconView       *_iconView;
 }
 
 @end
