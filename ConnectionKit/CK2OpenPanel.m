@@ -81,7 +81,7 @@
         [self setCanChooseDirectories:YES];
         [self setCanChooseFiles:NO];
         [self setCanCreateDirectories:NO];
-        [self setTreatsFilePackagesAsDirectories:YES];
+        [self setTreatsFilePackagesAsDirectories:NO];
         [self setShowsHiddenFiles:NO];
         [self setMinSize:NSMakeSize(515.0, 475.0)];
     }
