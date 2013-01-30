@@ -42,34 +42,13 @@
                   Identifier = "MockServerTests">
                </Test>
                <Test
-                  Identifier = "CK2FileManagerWebDAVTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPAuthenticationTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerBaseTests">
-               </Test>
-               <Test
-                  Identifier = "KMSCollectionTests">
+                  Identifier = "KMSTestCase">
                </Test>
                <Test
                   Identifier = "KMSManualTests">
                </Test>
                <Test
-                  Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "PathTests">
-               </Test>
-               <Test
-                  Identifier = "URLTests">
+                  Identifier = "KMSCollectionTests">
                </Test>
             </SkippedTests>
          </TestableReference>

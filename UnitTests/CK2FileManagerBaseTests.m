@@ -61,8 +61,7 @@
     self.url = realURL;
 #else
     self.useMockServer = YES;
-    NSString* scheme = [realURL.scheme isEqualToString:@"https"] ? @"http" : realURL.scheme;
-    [super setupServerWithScheme:scheme responses:responsesFile];
+    [super setupServerWithResponseFileNamed:responsesFile];
 #endif
 
     [self setupSession];

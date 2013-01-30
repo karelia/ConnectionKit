@@ -316,7 +316,9 @@
 {
     _handle = [[CURLHandle alloc] initWithRequest:[self request]
                                        credential:credential
-                                         delegate:self];
+                                         delegate:self
+                                            multi:nil
+               ];
 }
 
 - (void)endWithError:(NSError *)error;

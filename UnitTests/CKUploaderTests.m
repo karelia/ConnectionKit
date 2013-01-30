@@ -10,6 +10,8 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
+#if 0
+
 @interface CKUploaderTests : CK2FileManagerBaseTests<CKUploaderDelegate>
 
 @end
@@ -137,4 +139,6 @@
 + (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
 
 @end
+#endif
+
 #endif
