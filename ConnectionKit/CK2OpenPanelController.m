@@ -188,7 +188,8 @@
     value = [[NSUserDefaults standardUserDefaults] stringForKey:CK2OpenPanelLastViewPrefKey];
     if (value == nil)
     {
-        value = [(id)CFPreferencesCopyAppValue(CFSTR("NSNavPanelFileLastListModeForOpenModeKey"), kCFPreferencesAnyApplication) autorelease];
+        // If not set, use the global default used by NSOpenPanel
+        value = [[NSUserDefaults standardUserDefaults] stringForKey:@"NSNavPanelFileLastListModeForOpenModeKey"];
 
         switch ([value integerValue])
         {
