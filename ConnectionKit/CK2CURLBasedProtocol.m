@@ -314,11 +314,20 @@
 
 - (void)startWithCredential:(NSURLCredential *)credential;
 {
-    _handle = [[CURLHandle alloc] initWithRequest:[self request]
-                                       credential:credential
-                                         delegate:self
-                                            multi:nil
-               ];
+    if ([[self class] usesMultiHandle])
+    {
+        _handle = [[CURLHandle alloc] initWithRequest:[self request]
+                                           credential:credential
+                                             delegate:self
+                                                multi:nil];
+    }
+    else
+    {
+        CURLHandle *handle = _handle = [[CURLHandle alloc] init];
+        [handle retain];    // otherwise delegate method will dealloc it too early
+        [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
+        [handle release];
+    }
 }
 
 - (void)endWithError:(NSError *)error;
@@ -466,5 +475,9 @@
                                                                       code:NSURLErrorUserCancelledAuthentication
                                                                   userInfo:nil]];
 }
+
+#pragma mark Customization
+
++ (BOOL)usesMultiHandle; { return YES; }
 
 @end
