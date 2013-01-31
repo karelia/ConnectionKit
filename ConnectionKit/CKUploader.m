@@ -200,7 +200,7 @@
     _isCancelled = YES;
     [_fileManager cancelOperation:self.currentOperation];
     [_queue makeObjectsPerformSelector:_cmd];
-    [_queue removeAllObjects];
+    [_queue release]; _queue = nil;
 }
 
 - (BOOL)isCancelled; { return _isCancelled; }
