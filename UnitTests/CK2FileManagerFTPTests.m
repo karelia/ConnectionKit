@@ -22,15 +22,13 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (BOOL)setup
 {
-    BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"]);
+    BOOL result = ([self setupSessionWithResponses:@"ftp"]);
     self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
 
     return result;
 }
 
 #pragma mark - Tests
-
-#if !TEST_WITH_REAL_SERVER
 
 - (void)testContentsOfDirectoryAtURL
 {
@@ -149,7 +147,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testCreateDirectoryAtURLAlreadyExists
 {
-    if ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"])
+    if ([self setupSessionWithResponses:@"ftp"])
     {
         [self useResponseSet:@"mkdir fail"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
@@ -499,5 +497,4 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     [self runUntilPaused];
 }
 
-#endif
 @end

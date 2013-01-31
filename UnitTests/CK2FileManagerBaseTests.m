@@ -53,16 +53,41 @@
     return self.session != nil;
 }
 
-- (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
+- (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
-#if TEST_WITH_REAL_SERVER
-    self.user = @"demo";
-    self.password = @"demo";
-    self.url = realURL;
-#else
-    self.useMockServer = YES;
-    [super setupServerWithResponseFileNamed:responsesFile];
-#endif
+    NSString* key;
+    if ([responses isEqualToString:@"webdav"])
+    {
+        key = @"CKWebDAVTestURL";
+    }
+    else if ([responses isEqualToString:@"ftp"])
+    {
+        key = @"CKFTPTestURL";
+    }
+    else
+    {
+        key = nil;
+    }
+
+    NSString* setting = nil;
+    if (key)
+    {
+        setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
+        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead.", responses, key, key);
+    }
+
+    if (!setting || [setting isEqualToString:@"MockServer"])
+    {
+        self.useMockServer = YES;
+        [super setupServerWithResponseFileNamed:responses];
+    }
+    else
+    {
+        NSURL* url = [NSURL URLWithString:setting];
+        self.user = url.user;
+        self.password = url.password;
+        self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
+    }
 
     [self setupSession];
     return self.session != nil;
@@ -70,9 +95,10 @@
 
 - (void)useResponseSet:(NSString*)name
 {
-#if !TEST_WITH_REAL_SERVER
-    [super useResponseSet:name];
-#endif
+    if (self.useMockServer)
+    {
+        [super useResponseSet:name];
+    }
 }
 
 #pragma mark - Delegate

@@ -7,8 +7,6 @@
 #import "KMSState.h"
 #import "CK2FileManager.h"
 
-#define TEST_WITH_REAL_SERVER 0
-
 @interface CK2FileManagerBaseTests : KMSTestCase<CK2FileManagerDelegate>
 
 @property (strong, nonatomic) CK2FileManager* session;
@@ -18,6 +16,6 @@
 
 - (NSURL*)temporaryFolder;
 - (BOOL)setupSession;
-- (BOOL)setupSessionWithRealURL:(NSURL*)realURL fakeResponses:(NSString*)responsesFile;
+- (BOOL)setupSessionWithResponses:(NSString*)responsesFile;
 
 @end

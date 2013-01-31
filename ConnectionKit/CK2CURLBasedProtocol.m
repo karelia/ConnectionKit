@@ -65,6 +65,28 @@
     return self;
 }
 
+#pragma mark Directory Enumeration
+
+- (BOOL)shouldEnumerateFilename:(NSString *)name options:(NSDirectoryEnumerationOptions)mask;
+{
+    // SFTP and some FTP servers report . and .. which we don't care about
+    if ([name isEqualToString:@"."] || [name isEqualToString:@".."])
+    {
+        return NO;
+    }
+    
+    if ((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]) return NO;
+    
+    return YES;
+}
+
++ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
+{
+    if (isDirectory) pathComponent = [pathComponent stringByAppendingString:@"/"];
+    NSURL *result = [directoryURL URLByAppendingPathComponent:pathComponent];
+    return [CK2RemoteURL URLWithString:[result relativeString] relativeToURL:[result baseURL]];
+}
+
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -84,20 +106,22 @@
         else
         {
             // Report directory itself
-            NSURL *url = [request URL];
-            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
+            NSURL *directoryURL = [request URL];
+            NSString *directoryPath = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
             
-            if (![path isAbsolutePath])
+            
+            // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
+            if (![directoryPath isAbsolutePath])
             {
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    url = [[CK2FileManager URLWithPath:home relativeToURL:url] absoluteURL];
-                    url = [url URLByAppendingPathComponent:path];
+                    directoryURL = [[CK2FileManager URLWithPath:home relativeToURL:directoryURL] absoluteURL];
+                    directoryURL = [directoryURL URLByAppendingPathComponent:directoryPath];
                 }
             }
             
-            [client protocol:self didDiscoverItemAtURL:url];
+            [client protocol:self didDiscoverItemAtURL:directoryURL];
             
             
             // Process the data to make a directory listing
@@ -118,21 +142,13 @@
                     {
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
                         
-                        // SFTP and some FTP servers report . and .. which we don't care about
-                        if ([name isEqualToString:@"."] || [name isEqualToString:@".."])
-                        {
-                            CFRelease(parsedDict);
-                            continue;
-                        }
-                        
-                        if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+                        if ([self shouldEnumerateFilename:name options:mask])
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
-                            NSURL *nsURL = [url URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            CK2RemoteURL *aURL = [[CK2RemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
+                            CK2RemoteURL *aURL = [[self class] URLByAppendingPathComponent:name toURL:directoryURL isDirectory:isDirectory];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
@@ -259,13 +275,12 @@
                                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
                                         // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
                                         // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
-                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:url] forKey:aKey];
+                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:directoryURL] forKey:aKey];
                                     }
                                 }
                             }
                             
                             [client protocol:self didDiscoverItemAtURL:aURL];
-                            [aURL release];
                         }
                         
                         CFRelease(parsedDict);
@@ -297,6 +312,8 @@
     [request release];
     return self;
 }
+
+#pragma mark Dealloc
 
 - (void)dealloc;
 {

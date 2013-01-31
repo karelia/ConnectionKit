@@ -17,7 +17,7 @@
 
 - (BOOL)setup
 {
-    BOOL result = [self setupSessionWithRealURL:[NSURL URLWithString:@"https://www.crushftp.com/demo/"] fakeResponses:@"webdav"];
+    BOOL result = [self setupSessionWithResponses:@"webdav"];
     STAssertTrue(result, @"failed to setup");
 
     return result;
@@ -43,10 +43,8 @@
         }];
         [self runUntilPaused];
 
-#if TEST_WITH_REAL_SERVER
         // try to download
-        NSURL* downloadURL = [NSURL URLWithString:@"https://demo:demo@www.crushftp.com/demo/ck-test-file.txt"];
-        NSURLRequest* request = [NSURLRequest requestWithURL:downloadURL];
+        NSURLRequest* request = [NSURLRequest requestWithURL:url];
         [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
@@ -56,7 +54,6 @@
             [self pause];
         }];
         [self runUntilPaused];
-#endif
 
         // try to delete - this time we do want to check the error
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
