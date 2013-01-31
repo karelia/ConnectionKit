@@ -80,6 +80,13 @@
     return YES;
 }
 
++ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
+{
+    if (isDirectory) pathComponent = [pathComponent stringByAppendingString:@"/"];
+    NSURL *result = [directoryURL URLByAppendingPathComponent:pathComponent];
+    return [CK2RemoteURL URLWithString:[result relativeString] relativeToURL:[result baseURL]];
+}
+
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -100,15 +107,17 @@
         {
             // Report directory itself
             NSURL *directoryURL = [request URL];
-            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
+            NSString *directoryPath = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
             
-            if (![path isAbsolutePath])
+            
+            // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
+            if (![directoryPath isAbsolutePath])
             {
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
                     directoryURL = [[CK2FileManager URLWithPath:home relativeToURL:directoryURL] absoluteURL];
-                    directoryURL = [directoryURL URLByAppendingPathComponent:path];
+                    directoryURL = [directoryURL URLByAppendingPathComponent:directoryPath];
                 }
             }
             
@@ -137,10 +146,9 @@
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
-                            NSURL *nsURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            CK2RemoteURL *aURL = [[CK2RemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
+                            CK2RemoteURL *aURL = [[self class] URLByAppendingPathComponent:name toURL:directoryURL isDirectory:isDirectory];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
@@ -273,7 +281,6 @@
                             }
                             
                             [client protocol:self didDiscoverItemAtURL:aURL];
-                            [aURL release];
                         }
                         
                         CFRelease(parsedDict);
