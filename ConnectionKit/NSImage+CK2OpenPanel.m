@@ -105,6 +105,12 @@
 
 @implementation NSImage (CK2OpenPanel)
 
++ (NSImage *)ck2_homeDirectoryImage
+{
+    return [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
+}
+
+
 + (id)ck2_imageWithSize:(NSSize)size usingDrawBlock:(void (^)(CK2BlockImageRep *))block
 {
     return [[[[self class] alloc] initCK2WithSize:size usingDrawBlock:block] autorelease];

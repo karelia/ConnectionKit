@@ -63,7 +63,7 @@
     
     NSURL                           *_directoryURL;
     NSArray                         *_urls;
-    NSURL                           *_home;
+    NSURL                           *_homeURL;
     
     NSMutableDictionary             *_urlCache;
     NSMutableDictionary             *_runningOperations;
@@ -80,7 +80,7 @@
 @property (readonly, copy) NSURL                *directoryURL;
 @property (readwrite, copy) NSURL               *URL;
 @property (readwrite, copy) NSArray             *URLs;
-@property (readwrite, copy) NSURL               *homeURL;
+@property (readwrite, copy, nonatomic) NSURL    *homeURL;
 @property (readwrite, retain) NSView            *accessoryView;
 
 @property (readonly, retain) CK2FileManager     *fileManager;

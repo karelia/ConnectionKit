@@ -12,6 +12,7 @@
 @implementation CK2IconView
 
 @synthesize messageMode = _messageMode;
+@synthesize homeURL = _homeURL;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -54,6 +55,12 @@
 - (void)setMessageMode:(BOOL)messageMode
 {
     _messageMode = messageMode;
+    [self tile];
+}
+
+- (void)setContent:(NSArray *)content
+{
+    [super setContent:content];
     [self tile];
 }
 

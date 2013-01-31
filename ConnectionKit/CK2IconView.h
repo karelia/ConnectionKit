@@ -14,9 +14,11 @@
     NSTimer             *_typeSelectTimer;
     
     BOOL                _messageMode;
+    NSURL               *_homeURL;
 }
 
 @property (readwrite, assign, nonatomic) BOOL   messageMode;
+@property (readwrite, copy) NSURL               *homeURL;
 
 
 @end

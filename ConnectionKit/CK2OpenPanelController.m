@@ -54,6 +54,7 @@
 #import "CK2OpenPanelColumnViewController.h"
 #import "CK2PathControl.h"
 #import "CK2NewFolderWindowController.h"
+#import "CK2IconView.h"
 #import <Connection/CK2FileManager.h>
 
 #define DEFAULT_OPERATION_TIMEOUT       20
@@ -90,7 +91,7 @@
 @synthesize openPanel = _openPanel;
 @synthesize directoryURL = _directoryURL;
 @synthesize URLs = _urls;
-@synthesize homeURL = _home;
+@synthesize homeURL = _homeURL;
 
 @synthesize fileManager = _fileManager;
 
@@ -323,6 +324,15 @@
     }
 }
 
+- (void)setHomeURL:(NSURL *)homeURL
+{
+    [_homeURL release];
+    _homeURL = [homeURL copy];
+    
+    [_pathControl setHomeURL:_homeURL];
+    [(CK2IconView *)[_iconViewController view] setHomeURL:_homeURL];
+}
+
 - (NSView *)accessoryView
 {
     NSView  *view;
@@ -448,21 +458,6 @@
 - (void)setURL:(NSURL *)URL
 {
     [self setURLs:(URL ? @[URL] : nil)];
-}
-
-- (void)cacheChildren:(NSArray *)children forURL:(NSURL *)url
-{
-    if (children == nil)
-    {
-        [_urlCache removeObjectForKey:url];
-    }
-    else
-    {
-        NSArray     *sortedChildren;
-    
-        sortedChildren = [children sortedArrayUsingComparator:[NSURL ck2_displayComparator]];
-        [_urlCache setObject:sortedChildren forKey:url];
-    }
 }
 
 // This pre-loads all the URLs from the given ancestor down to the descendant. Used in the bootstrapping process. This method
@@ -624,6 +619,8 @@
          // Reassign here so that it will be properly retained by the blocks it's used in below
          blockResolvedURL = resolvedURL;
          
+         [self setDirectoryURL:resolvedURL];
+         
          tempError = nil;
          if (blockError != nil)
          {
@@ -760,6 +757,21 @@
     if ([[_openPanel delegate] respondsToSelector:@selector(panelSelectionDidChange:)])
     {
         [[_openPanel delegate] panelSelectionDidChange:_openPanel];
+    }
+}
+
+- (void)cacheChildren:(NSArray *)children forURL:(NSURL *)url
+{
+    if (children == nil)
+    {
+        [_urlCache removeObjectForKey:url];
+    }
+    else
+    {
+        NSArray     *sortedChildren;
+        
+        sortedChildren = [children sortedArrayUsingComparator:[NSURL ck2_displayComparator]];
+        [_urlCache setObject:sortedChildren forKey:url];
     }
 }
 

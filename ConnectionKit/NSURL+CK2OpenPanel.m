@@ -390,9 +390,10 @@
 
 - (void)ck2_enumerateToURL:(NSURL *)url usingBlock:(void (^)(NSURL *url, BOOL *stop))block
 {
-    NSURL               *tempURL;
+    NSURL               *tempURL, *root;
     NSArray             *components, *otherComponents;
     NSUInteger          i, count;
+    NSString            *path;
     
     if (block != NULL)
     {
@@ -411,17 +412,25 @@
         }
         
         tempURL = self;
+        root = [self ck2_root];
         
         stop = NO;
         count = [otherComponents count];
         
         block(tempURL, &stop);
         
+        path = [tempURL path];
+        
         if (!stop)
         {
             for (i = [components count]; (i < count) && !stop; i++)
             {
-                tempURL = [tempURL URLByAppendingPathComponent:[otherComponents objectAtIndex:i] isDirectory:YES];
+                // Note: NSURL's -URLByAddingPathComponent is broken when dealing with
+                // URLs with encoded slashes (%2F) so we just manipulate the path
+                /// directly here
+                path = [path stringByAppendingPathComponent:[otherComponents objectAtIndex:i]];
+                path = [path stringByAppendingString:@"/"];
+                tempURL = [[CK2FileManager URLWithPath:path relativeToURL:root] absoluteURL];
                 
                 block(tempURL, &stop);
             }
@@ -432,33 +441,7 @@
 
 - (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
 {
-    NSURL               *tempURL;
-    NSArray             *targetComponents;
-    NSUInteger          i, count;
-    
-    if (block != NULL)
-    {
-        BOOL    stop;
-        
-        targetComponents = [self pathComponents];
-        count = [targetComponents count];
-        
-        tempURL = [self ck2_root];
-        
-        stop = NO;
-        
-        block(tempURL, &stop);
-        
-        if (!stop)
-        {
-            for (i = 1; (i < count) && !stop; i++)
-            {
-                tempURL = [tempURL URLByAppendingPathComponent:[targetComponents objectAtIndex:i] isDirectory:YES];
-            
-                block(tempURL, &stop);
-            }
-        }
-    }
+    return [[self ck2_root] ck2_enumerateToURL:self usingBlock:block];
 }
 
 - (NSURL *)ck2_URLByDeletingTrailingSlash

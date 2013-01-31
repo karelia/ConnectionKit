@@ -32,12 +32,15 @@
 
 #import "CK2PathControl.h"
 #import "NSURL+CK2OpenPanel.h"
+#import "CK2OpenPanelController.h"
+#import "NSImage+CK2OpenPanel.h"
 
 #define ICON_SIZE       16.0
 
 @implementation CK2PathControl
 
 @synthesize URL = _url;
+@synthesize homeURL = _homeURL;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -98,6 +101,11 @@
                 {
                     title = [blockURL lastPathComponent];
                     image = [[[blockURL ck2_icon] copy] autorelease];
+                }
+                
+                if ([blockURL isEqual:_homeURL])
+                {
+                    image = [NSImage ck2_homeDirectoryImage];
                 }
                 
                 item = [[NSMenuItem alloc] initWithTitle:title action:@selector(urlSelected:) keyEquivalent:@""];

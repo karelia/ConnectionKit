@@ -32,11 +32,15 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class CK2OpenPanelController;
+
 @interface CK2PathControl : NSPopUpButton
 {
     NSURL       *_url;
+    NSURL       *_homeURL;
 }
 
-@property (readwrite, copy, nonatomic) NSURL       *URL;
+@property (readwrite, copy, nonatomic) NSURL            *URL;
+@property (readwrite, copy) NSURL                       *homeURL;
 
 @end

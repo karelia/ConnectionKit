@@ -34,6 +34,8 @@
 #import "CK2IconViewItem.h"
 
 #import "NSURL+CK2OpenPanel.h"
+#import "CK2IconView.h"
+#import "NSImage+CK2OpenPanel.h"
 
 #define ICON_SIZE             64.0
 #define ICON_SELECTION_MARGIN 4.0
@@ -149,6 +151,8 @@
     
     if (![url ck2_isPlaceholder])
     {
+        NSImage     *icon;
+        
         iconRect = [self iconRectForBounds:bounds];
         if ([item isSelected])
         {
@@ -159,8 +163,17 @@
             [selectionColor set];
             [path fill];
         }
+        
+        if ([url isEqual:[(CK2IconView *)[item collectionView] homeURL]])
+        {
+            icon = [NSImage ck2_homeDirectoryImage];
+        }
+        else
+        {
+            icon = [url ck2_icon];
+        }
     
-        [[url ck2_icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [icon drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     
         if (![item isEnabled])
         {

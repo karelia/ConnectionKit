@@ -35,6 +35,7 @@
 #import "CK2FileCell.h"
 #import "CK2BrowserPreviewController.h"
 #import "NSURL+CK2OpenPanel.h"
+#import "NSImage+CK2OpenPanel.h"
 
 @interface CK2OpenPanelColumnViewController ()
 
@@ -377,7 +378,15 @@
     
     controller = [self controller];
     url = [browser itemAtRow:row inColumn:column];
-    [cell setImage:[url ck2_icon]];
+    
+    if ([url isEqual:[controller homeURL]])
+    {
+        [cell setImage:[NSImage ck2_homeDirectoryImage]];
+    }
+    else
+    {
+        [cell setImage:[url ck2_icon]];
+    }
     
     if ([controller isURLValid:url] || [controller URLCanHazChildren:url])
     {
