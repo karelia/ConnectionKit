@@ -128,8 +128,12 @@
             [self operationDidFinish];
         }];
         
-        [result transferDidBegin:result];
-        [self.delegate uploader:self didBeginUploadToPath:path];
+        if (!self.isCancelled)
+        {
+            [result transferDidBegin:result];
+            [self.delegate uploader:self didBeginUploadToPath:path];
+        }
+        
         return op;
     }];
     
@@ -164,8 +168,12 @@
             [self operationDidFinish];
         }];
         
-        [result transferDidBegin:result];
-        [self.delegate uploader:self didBeginUploadToPath:path];
+        if (!self.isCancelled)
+        {
+            [result transferDidBegin:result];
+            [self.delegate uploader:self didBeginUploadToPath:path];
+        }
+        
         return op;
     }];
     
@@ -176,6 +184,7 @@
 {
     [self addOperationWithBlock:^id{
         
+        NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [[self delegate] uploaderDidFinishUploading:self];
         [self operationDidFinish];
         return nil;
@@ -294,7 +303,7 @@
         id <CKUploaderDelegate> delegate = [self delegate];
         if (delegate)
         {
-            [[self delegate] uploader:self didReceiveAuthenticationChallenge:challenge];
+            [delegate uploader:self didReceiveAuthenticationChallenge:challenge];
         }
         else
         {
