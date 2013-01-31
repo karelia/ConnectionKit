@@ -12,9 +12,18 @@
 
 @interface CKUploaderTests : CK2FileManagerBaseTests<CKUploaderDelegate>
 
+@property (strong, nonatomic) NSError* error;
+
 @end
 
 @implementation CKUploaderTests
+
+- (void)dealloc
+{
+    [_error release];
+
+    [super dealloc];
+}
 
 - (BOOL)setup
 {
@@ -48,6 +57,7 @@
 
 - (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error
 {
+    self.error = error;
     [self pause];
 }
 
@@ -91,13 +101,12 @@
 
         CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
-        //        STAssertTrue(record.isUpload, @"expecting an upload record");
         STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
-
         [uploader finishUploading];
 
         [self runUntilPaused];
 
+        STAssertTrue(self.error == nil, @"unexpected error %@", error);
         STAssertFalse([record hasError], @"unexpected error %@", record.error);
     }
 }
@@ -110,18 +119,28 @@
         NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
         CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
-        //        STAssertTrue(record.isUpload, @"expecting an upload record");
         STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
         [uploader finishUploading];
 
         [self runUntilPaused];
 
+        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
         STAssertFalse([record hasError], @"unexpected error %@", record.error);
     }
 }
 
 - (void)testRemoteFileAtPath
 {
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        [uploader removeFileAtPath:@"test/test.txt"];
+        [uploader finishUploading];
+
+        [self runUntilPaused];
+
+        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+    }
 
 }
 
