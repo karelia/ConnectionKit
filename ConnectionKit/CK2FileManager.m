@@ -304,7 +304,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         _manager = [manager retain];
         _URL = [url copy];
         _completionBlock = [completionBlock copy];
-        _queue = dispatch_queue_create("CK2FileOperation", NULL);
+        _queue = dispatch_queue_create("com.karelia.connection.file-operation", NULL);
         
         [CK2Protocol classForURL:url completionHandler:^(Class protocolClass) {
             
