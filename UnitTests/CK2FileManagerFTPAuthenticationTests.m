@@ -15,21 +15,23 @@
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSString* value;
+    NSString* user;
+    NSString* password;
 
-    // doesn't actually matter what we send back for the user/password, since the response is faked
-    // but we change it just to make the log clearer
     if (challenge.previousFailureCount > 0)
     {
-        value = @"good";
+        user = self.user;
+        password = self.password;
+
         [self useResponseSet:@"default"];
     }
     else
     {
-        value = @"bad";
+        user = @"bad";
+        password = @"bad";
     }
 
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:value password:value persistence:NSURLCredentialPersistenceNone];
+    NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
     [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
 
@@ -42,6 +44,7 @@
     if ([self setupSessionWithResponses:@"ftp"])
     {
         [self useResponseSet:@"bad login"];
+
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
