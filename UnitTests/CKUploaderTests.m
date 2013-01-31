@@ -12,9 +12,20 @@
 
 @interface CKUploaderTests : CK2FileManagerBaseTests<CKUploaderDelegate>
 
+@property (strong, nonatomic) NSError* error;
+@property (assign, nonatomic) BOOL finished;
+@property (assign, nonatomic) BOOL uploading;
+
 @end
 
 @implementation CKUploaderTests
+
+- (void)dealloc
+{
+    [_error release];
+
+    [super dealloc];
+}
 
 - (BOOL)setup
 {
@@ -43,11 +54,13 @@
 
 - (void)uploaderDidFinishUploading:(CKUploader *)uploader
 {
+    self.finished = YES;
     [self pause];
 }
 
 - (void)uploader:(CKUploader *)uploader didFailWithError:(NSError *)error
 {
+    self.error = error;
     [self pause];
 }
 
@@ -66,6 +79,7 @@
 
 - (void)uploader:(CKUploader *)uploader didBeginUploadToPath:(NSString *)path
 {
+    self.uploading = YES;
     NSLog(@"uploading");
 }
 
@@ -91,50 +105,93 @@
 
         CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
-
+        STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
         [uploader finishUploading];
 
         [self runUntilPaused];
+
+        STAssertTrue(self.finished, @"should be finished");
+        STAssertTrue(self.uploading, @"uploading method should have been called");
+        STAssertTrue(self.error == nil, @"unexpected error %@", error);
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
     }
 }
 
 - (void)testUploadData
 {
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
+        CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
+        STAssertNotNil(record, @"got a transfer record");
+        STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
+        [uploader finishUploading];
 
+        [self runUntilPaused];
+
+        STAssertTrue(self.finished, @"should be finished");
+        STAssertTrue(self.uploading, @"uploading method should have been called");
+        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+    }
 }
 
 - (void)testRemoteFileAtPath
 {
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        [uploader removeFileAtPath:@"test/test.txt"];
+        [uploader finishUploading];
 
-}
+        [self runUntilPaused];
 
-- (void)testFinishUploading
-{
+        STAssertTrue(self.finished, @"should be finished");
+        STAssertFalse(self.uploading, @"uploading method should not have been called");
+        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+    }
 
 }
 
 - (void)testCancel
 {
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
+        CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
+        STAssertNotNil(record, @"got a transfer record");
+        STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
+        [uploader finishUploading];
+        STAssertFalse(self.finished, @"should not be finished");
+        [uploader cancel];
 
+        [self runUntilPaused];
+
+        STAssertFalse(self.uploading, @"uploading method should not have been called");
+        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+    }
+}
+
+- (void)testPosixPermissionsForPath
+{
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        unsigned long filePerms = [uploader posixPermissionsForPath:@"test/test.txt" isDirectory:NO];
+        unsigned long dirPerms = [uploader posixPermissionsForPath:@"test/" isDirectory:YES];
+
+        STAssertTrue(filePerms == 0644, @"unexpected default file perms %lo", filePerms);
+        STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
+    }
+}
+
+- (void)testPosixPermissionsForDirectoryFromFilePermissions
+{
+    unsigned long dirPerms = [CKUploader posixPermissionsForDirectoryFromFilePermissions:0644];
+    STAssertTrue(dirPerms == 0755, @"unexpected default dir perms %lo", dirPerms);
 }
 
 @end
-
-#if 0 // STUFF TO TEST
-
-- (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path;
-- (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
-- (void)removeFileAtPath:(NSString *)path;
-
-@property (nonatomic, retain, readonly) CKTransferRecord *rootTransferRecord;
-@property (nonatomic, retain, readonly) CKTransferRecord *baseTransferRecord;
-
-- (void)finishUploading;    // will disconnect once all files are uploaded
-- (void)cancel;             // bails out as quickly as possible
-
-// The permissions given to uploaded files
-- (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
-+ (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
-
-@end
-#endif

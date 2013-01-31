@@ -314,9 +314,32 @@
 
 - (void)startWithCredential:(NSURLCredential *)credential;
 {
-    _handle = [[CURLHandle alloc] initWithRequest:[self request]
-                                       credential:credential
-                                         delegate:self];
+    if ([[self class] usesMultiHandle])
+    {
+        _handle = [[CURLHandle alloc] initWithRequest:[self request]
+                                           credential:credential
+                                             delegate:self
+                                                multi:nil];
+    }
+    else
+    {
+        // Create the queue & handle for whole app to share
+        static CURLHandle *handle;
+        static dispatch_queue_t queue;
+        
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            
+            handle = [[CURLHandle alloc] init];
+            queue = dispatch_queue_create("com.karelia.connection.fallback-curlhandle", NULL);
+        });
+        
+        // Let the work commence!
+        dispatch_async(queue, ^{
+            _handle = [handle retain];
+            [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
+        });
+    }
 }
 
 - (void)endWithError:(NSError *)error;
@@ -464,5 +487,9 @@
                                                                       code:NSURLErrorUserCancelledAuthentication
                                                                   userInfo:nil]];
 }
+
+#pragma mark Customization
+
++ (BOOL)usesMultiHandle; { return YES; }
 
 @end
