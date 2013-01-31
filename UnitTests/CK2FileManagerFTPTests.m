@@ -11,6 +11,7 @@
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
+#import <CURLHandle/CURLHandle.h>
 
 @interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
 
@@ -28,19 +29,61 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     return result;
 }
 
+- (NSString*)useBadLogin
+{
+    NSString* savedUser = self.user;
+    self.user = @"bad";
+    [self useResponseSet:@"bad login"];
+
+    return savedUser;
+}
+
 #pragma mark - Tests
+
+- (NSURL*)URLForTestFolder
+{
+    return [self URLForPath:@"CK2FileManagerFTPTests"];
+}
+
+- (NSURL*)URLForTestFile1
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file1.txt"];
+}
+
+- (NSURL*)URLForTestFile2
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file2.txt"];
+}
+
+- (void)checkURL:(NSURL*)url isNamed:(NSString*)name
+{
+    STAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
+}
+
+- (void)checkIsAuthenticationError:(NSError*)error
+{
+    STAssertNotNil(error, @"should get error");
+    STAssertTrue([error.domain isEqualToString:NSURLErrorDomain], @"unexpected domain %@", error.domain);
+    STAssertTrue(error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication, @"should get authentication error, got %@ instead", error);
+}
+
+- (void)checkNoErrorOrFileExistsError:(NSError*)error
+{
+    STAssertTrue((error == nil) || ([error.domain isEqualToString:NSURLErrorDomain] && (error.code == 21) && (error.curlResponseCode == 550)), @"unexpected error %@", error);
+}
 
 - (void)makeTestDirectory
 {
     if (!self.useMockServer)
     {
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            NSURL* file1 = [url URLByAppendingPathComponent:@"file1.txt"];
+            [self checkNoErrorOrFileExistsError:error];
             NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
-            [self.session createFileAtURL:file1 contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                NSURL* file2 = [url URLByAppendingPathComponent:@"file2.txt"];
-                [self.session createFileAtURL:file2 contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            [self.session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                [self checkNoErrorOrFileExistsError:error];
+                [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    [self checkNoErrorOrFileExistsError:error];
                     [self pause];
                 }];
             }];
@@ -50,14 +93,42 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)removeTestDirectory
+{
+    if (!self.useMockServer)
+    {
+        [self.session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
+            STAssertNil(error, @"unexpected error removing test directory %@");
+            [self.session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
+                STAssertNil(error, @"unexpected error removing test directory %@");
+                [self.session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
+                    STAssertNil(error, @"unexpected error removing test directory %@");
+                    [self pause];
+                }];
+            }];
+        }];
+    }
+
+    [self runUntilPaused];
+}
+
+- (void)testMakeRemoveOnly
+{
+    if ([self setup])
+    {
+        [self makeTestDirectory];
+        [self removeTestDirectory];
+    }
+}
+
 - (void)testContentsOfDirectoryAtURL
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
 
         [self makeTestDirectory];
 
+        NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
@@ -71,8 +142,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 STAssertTrue(count == 2, @"should have two results, had %ld", count);
                 if (count == 2)
                 {
-                    STAssertTrue([[contents[0] lastPathComponent] isEqual:@"file1.txt"], @"got %@ not %@", contents[0], @"file1.txt");
-                    STAssertTrue([[contents[1] lastPathComponent] isEqual:@"file2.txt"], @"got %@ not %@", contents[0], @"file2.txt");
+                    [self checkURL:contents[0] isNamed:[[self URLForTestFile1] lastPathComponent]];
+                    [self checkURL:contents[1] isNamed:[[self URLForTestFile2] lastPathComponent]];
                 }
             }
             
@@ -87,13 +158,13 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self useResponseSet:@"bad login"];
-        NSURL* url = [self URLForPath:@"/directory/"];
+        [self useBadLogin];
+        
+        NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
+            [self checkIsAuthenticationError:error];
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
             [self pause];
@@ -135,16 +206,18 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self useResponseSet:@"bad login"];
+        [self useBadLogin];
         NSURL* url = [self URLForPath:@"/directory/"];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
-            STFail(@"shouldn't get any items");
-        } completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
+            STFail(@"shouldn't get any items");
+
+        } completionHandler:^(NSError *error) {
+
+            [self checkIsAuthenticationError:error];
             [self pause];
+
         }];
 
         [self runUntilPaused];
@@ -155,7 +228,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        [self removeTestDirectory];
+        
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
@@ -170,7 +245,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setupSessionWithResponses:@"ftp"])
     {
+        [self makeTestDirectory];
         [self useResponseSet:@"mkdir fail"];
+        
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
@@ -188,12 +265,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self useResponseSet:@"bad login"];
+        [self useBadLogin];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
+            [self checkIsAuthenticationError:error];
             [self pause];
         }];
 
@@ -321,7 +397,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
+        NSURL* url = [[self URLForTestFolder] URLByAppendingPathComponent:@"file.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
@@ -371,8 +447,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/nonexistant.txt"];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
+            STAssertTrue(error.curlResponseCode == 550, @"should get 550 from server");
 
             [self pause];
         }];
@@ -386,12 +461,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self useResponseSet:@"bad login"];
+        [self useBadLogin];
         NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
+            [self checkIsAuthenticationError:error];
             [self pause];
         }];
 
@@ -510,14 +584,12 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSString* savedUser = self.user;
-        self.user = @"bad";
-        [self useResponseSet:@"bad login"];
+        NSString* savedUser = [self useBadLogin];
 
         NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
+
+            [self checkIsAuthenticationError:error];
 
             self.user = savedUser;
             [self useResponseSet:@"default"];
