@@ -39,7 +39,7 @@
 {
     // the server starts by rejecting the password
     // after the first challenge though, we switch to the "normal" responses so that it accepts it
-    if ([self setupSessionWithRealURL:[NSURL URLWithString:@"ftp://ftp.test.com"] fakeResponses:@"ftp"])
+    if ([self setupSessionWithResponses:@"ftp"])
     {
         [self useResponseSet:@"bad login"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];

@@ -32,7 +32,7 @@
 
 - (BOOL)setup
 {
-    BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"http://dav.test.com"] fakeResponses:@"webdav"]);
+    BOOL result = ([self setupSessionWithResponses:@"webdav"]);
 
     return result;
 }
