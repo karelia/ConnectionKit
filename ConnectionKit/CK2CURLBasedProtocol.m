@@ -323,10 +323,22 @@
     }
     else
     {
-        CURLHandle *handle = _handle = [[CURLHandle alloc] init];
-        [handle retain];    // otherwise delegate method will dealloc it too early
-        [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
-        [handle release];
+        // Create the queue & handle for whole app to share
+        static CURLHandle *handle;
+        static dispatch_queue_t queue;
+        
+        static dispatch_once_t onceToken;
+        dispatch_once(&onceToken, ^{
+            
+            handle = [[CURLHandle alloc] init];
+            queue = dispatch_queue_create("com.karelia.connection.fallback-curlhandle", NULL);
+        });
+        
+        // Let the work commence!
+        dispatch_async(queue, ^{
+            _handle = [handle retain];
+            [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
+        });
     }
 }
 
