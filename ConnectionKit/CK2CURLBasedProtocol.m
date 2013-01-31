@@ -84,20 +84,20 @@
         else
         {
             // Report directory itself
-            NSURL *url = [request URL];
-            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
+            NSURL *directoryURL = [request URL];
+            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
             
             if (![path isAbsolutePath])
             {
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    url = [[CK2FileManager URLWithPath:home relativeToURL:url] absoluteURL];
-                    url = [url URLByAppendingPathComponent:path];
+                    directoryURL = [[CK2FileManager URLWithPath:home relativeToURL:directoryURL] absoluteURL];
+                    directoryURL = [directoryURL URLByAppendingPathComponent:path];
                 }
             }
             
-            [client protocol:self didDiscoverItemAtURL:url];
+            [client protocol:self didDiscoverItemAtURL:directoryURL];
             
             
             // Process the data to make a directory listing
@@ -129,7 +129,7 @@
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
-                            NSURL *nsURL = [url URLByAppendingPathComponent:name isDirectory:isDirectory];
+                            NSURL *nsURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
                             CK2RemoteURL *aURL = [[CK2RemoteURL alloc] initWithString:[nsURL relativeString] relativeToURL:[nsURL baseURL]];
@@ -259,7 +259,7 @@
                                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
                                         // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
                                         // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
-                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:url] forKey:aKey];
+                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:directoryURL] forKey:aKey];
                                     }
                                 }
                             }
