@@ -201,7 +201,7 @@
 
 #pragma mark Home Directory
 
-- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
+/*- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
 {
     // Deliberately want a request that should avoid doing any work
     NSMutableURLRequest *request = [[self request] mutableCopy];
@@ -220,7 +220,7 @@
     }];
     
     [request release];
-}
+}*/
 
 #pragma mark CURLHandleDelegate
 
