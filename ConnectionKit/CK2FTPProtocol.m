@@ -32,10 +32,7 @@
     // The FTP spec could be interpreted that the only way to refer to the root directy is with the sequence @"%2F", which decodes as a slash
     // That makes it very clear to the library etc. this particular slash is meant to be transmitted to the server, rather than treated as a path component separator
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
-    NSString *scheme = [baseURL scheme];
-    
-    if (([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame) &&
-        [path isAbsolutePath])
+    if ([path isAbsolutePath])
     {
         path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
     }
