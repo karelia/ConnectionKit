@@ -477,19 +477,22 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
+        NSString* savedUser = self.user;
+        self.user = @"bad";
         [self useResponseSet:@"bad login"];
+
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
 
-            [self.server pause];
-            
+            self.user = savedUser;
             [self useResponseSet:@"default"];
+            
             [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 
-                [self.server pause];
+                [self pause];
             }];
         }];
     }
