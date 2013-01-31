@@ -296,6 +296,40 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)testCreateFileSerialThrash
+{
+    // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLHandle directly
+    
+    if ([self setup])
+    {
+        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+        
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            
+            STAssertNil(error, @"got unexpected error %@", error);
+            
+            [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                
+                STAssertNil(error, @"got unexpected error %@", error);
+                
+                [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    
+                    STAssertNil(error, @"got unexpected error %@", error);
+        
+                    [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                        
+                        STAssertNil(error, @"got unexpected error %@", error);
+                        [self pause];
+                    }];
+                }];
+            }];
+        }];
+        
+        [self runUntilPaused];
+    }
+}
+
 - (void)testRemoveFileAtURL
 {
     if ([self setup])
