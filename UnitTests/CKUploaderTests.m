@@ -33,10 +33,6 @@
 - (BOOL)setup
 {
     BOOL result = ([self setupSessionWithRealURL:[NSURL URLWithString:@"http://dav.test.com"] fakeResponses:@"webdav"]);
-    if (self.failAuthentication)
-    {
-        [self useResponseSet:@"authentication"];
-    }
 
     return result;
 }
@@ -74,13 +70,17 @@
 
 - (void)uploader:(CKUploader *)uploader didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if (self.failAuthentication)
+    if (challenge.previousFailureCount > 0)
     {
+        NSLog(@"cancelling authentication");
         [challenge.sender cancelAuthenticationChallenge:challenge];
     }
+
     else
     {
-        NSURLCredential* credential = [NSURLCredential credentialWithUser:@"user" password:@"pass" persistence:NSURLCredentialPersistenceNone];
+        NSString* user = self.failAuthentication ? @"wrong" : @"user";
+        NSString* pass = self.failAuthentication ? @"wrong" : @"pass";
+        NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:pass persistence:NSURLCredentialPersistenceNone];
         [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
     }
 }
@@ -105,11 +105,12 @@
 
 #pragma mark - Utilities
 
-- (void)checkUploadResultForRecord:(CKTransferRecord*)record
+- (void)checkResultForRecord:(CKTransferRecord*)record uploading:(BOOL)uploading
 {
     if (self.failAuthentication)
     {
-        STAssertTrue([self.error code] == 23, @"unexpected error %@", self.error);
+        STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
+        STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
         STAssertFalse(self.finished, @"shouldn't be finished");
     }
     else
@@ -117,8 +118,12 @@
         STAssertTrue(self.finished, @"should be finished");
         STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
     }
-    STAssertTrue(self.uploading, @"uploading method should have been called");
-    STAssertFalse([record hasError], @"unexpected error %@", record.error);
+    STAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
+
+    if (record)
+    {
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+    }
 }
 
 #pragma mark - Tests
@@ -141,7 +146,7 @@
         [uploader finishUploading];
 
         [self runUntilPaused];
-        [self checkUploadResultForRecord:record];
+        [self checkResultForRecord:record uploading:YES];
     }
 }
 
@@ -163,7 +168,7 @@
         [uploader finishUploading];
 
         [self runUntilPaused];
-        [self checkUploadResultForRecord:record];
+        [self checkResultForRecord:record uploading:YES];
     }
 }
 
@@ -173,7 +178,7 @@
     [self testUploadData];
 }
 
-- (void)testRemoteFileAtPath
+- (void)testRemoveFileAtPath
 {
     CKUploader* uploader = [self setupUploader];
     if (uploader)
@@ -182,18 +187,15 @@
         [uploader finishUploading];
 
         [self runUntilPaused];
-
-        STAssertTrue(self.finished, @"should be finished");
-        STAssertFalse(self.uploading, @"uploading method should not have been called");
-        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+        [self checkResultForRecord:nil uploading:NO];
     }
 
 }
 
-- (void)testRemoteFileAtPathNoAuthentication
+- (void)testRemoveFileAtPathNoAuthentication
 {
     self.failAuthentication = YES;
-    [self testRemoteFileAtPath];
+    [self testRemoveFileAtPath];
 }
 
 - (void)testCancel
