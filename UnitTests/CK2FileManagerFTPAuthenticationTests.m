@@ -45,7 +45,7 @@
     {
         [self useResponseSet:@"bad login"];
 
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForPath:@"directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
