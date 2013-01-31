@@ -238,7 +238,7 @@
         [_queue removeObjectAtIndex:0];
         if ([_queue count])
         {
-            [_queue objectAtIndex:0];
+            [[_queue objectAtIndex:0] start];
         }
     });
 }
