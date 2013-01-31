@@ -7,6 +7,8 @@
 
 #import "CK2FileManager.h"
 
+#import <CURLHandle/CURLHandle.h>
+
 @interface CK2FileManagerFTPAuthenticationTests : CK2FileManagerBaseTests
 
 @end
@@ -45,9 +47,10 @@
     {
         [self useResponseSet:@"bad login"];
 
-        NSURL* url = [self URLForPath:@"directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
+            STAssertTrue(error == nil ||
+                         ((error.code == 21) && (error.curlResponseCode == 550)), @"got unexpected error %@", error);
 
             [self pause];
         }];

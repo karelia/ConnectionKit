@@ -30,11 +30,34 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 #pragma mark - Tests
 
+- (void)makeTestDirectory
+{
+    if (!self.useMockServer)
+    {
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+            NSURL* file1 = [url URLByAppendingPathComponent:@"file1.txt"];
+            NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
+            [self.session createFileAtURL:file1 contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                NSURL* file2 = [url URLByAppendingPathComponent:@"file2.txt"];
+                [self.session createFileAtURL:file2 contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    [self pause];
+                }];
+            }];
+        }];
+
+        [self runUntilPaused];
+    }
+}
+
 - (void)testContentsOfDirectoryAtURL
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
+
+        [self makeTestDirectory];
+
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
@@ -45,13 +68,11 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             else
             {
                 NSUInteger count = [contents count];
-                STAssertTrue(count == 2, @"should have two results");
+                STAssertTrue(count == 2, @"should have two results, had %ld", count);
                 if (count == 2)
                 {
-                    NSURL* file1 = [self URLForPath:@"/directory/file1.txt"];
-                    STAssertTrue([contents[0] isEqual:file1], @"got %@ not %@", contents[0], file1);
-                    NSURL* file2 = [self URLForPath:@"/directory/file2.txt"];
-                    STAssertTrue([contents[1] isEqual:file2], @"got %@ not %@", contents[0], file2);
+                    STAssertTrue([[contents[0] lastPathComponent] isEqual:@"file1.txt"], @"got %@ not %@", contents[0], @"file1.txt");
+                    STAssertTrue([[contents[1] lastPathComponent] isEqual:@"file2.txt"], @"got %@ not %@", contents[0], @"file2.txt");
                 }
             }
             
@@ -300,7 +321,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
@@ -332,7 +353,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
@@ -347,7 +368,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useResponseSet:@"delete fail"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/nonexistant.txt"];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
@@ -366,7 +387,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useResponseSet:@"bad login"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
@@ -403,7 +424,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/attributes.txt"];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -422,7 +443,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testSetAttributesCHMODNotUnderstood
 {
-    if ([self setup])
+    if (self.useMockServer && [self setup]) // no way to test this on a real server (unless it actually doesn't understand CHMOD of course...)
     {
         [self useResponseSet:@"chmod not understood"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
@@ -439,7 +460,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testSetAttributesCHMODUnsupported
 {
-    if ([self setup])
+    if (self.useMockServer && [self setup]) // no way to test this on a real server (unless it actually doesn't support CHMOD of course...)
     {
         [self useResponseSet:@"chmod unsupported"];
         NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
@@ -459,13 +480,25 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useResponseSet:@"chmod not permitted"];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForPath:@"/non/existant/test.txt"];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            // For servers which don't understand or support CHMOD, treat as success, like -[NSURL setResourceValue:forKey:error:] does
-            STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain] && ([error code] == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
-                                                                                 [error code] == NSFileWriteNoPermissionError),
-                         @"should get error");
+            NSString* domain = error.domain;
+            if ([domain isEqualToString:NSURLErrorDomain])
+            {
+                // get NSURLErrorNoPermissionsToReadFile if the path doesn't exist or isn't readable on the server
+                STAssertTrue(error.code == NSURLErrorNoPermissionsToReadFile, @"unexpected error %@", error);
+            }
+            else if ([domain isEqualToString:NSCocoaErrorDomain])
+            {
+                STAssertTrue((error.code == NSFileWriteUnknownError || // FTP has no hard way to know it was a permissions error
+                              error.code == NSFileWriteNoPermissionError), @"unexpected error %@", error);
+            }
+            else
+            {
+                STFail(@"unexpected error %@", error);
+            }
+
             [self pause];
         }];
         
@@ -481,7 +514,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         self.user = @"bad";
         [self useResponseSet:@"bad login"];
 
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"should get error");
             STAssertTrue([[error domain] isEqualToString:NSURLErrorDomain] && ([error code] == NSURLErrorUserAuthenticationRequired || [error code] == NSURLErrorUserCancelledAuthentication), @"should get authentication error, got %@ instead", error);
