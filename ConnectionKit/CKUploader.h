@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "CKConnectionProtocol.h"
+#import "CK2FileManager.h"
 #import "CKTransferRecord.h"
 
 
@@ -22,17 +22,22 @@ typedef NSUInteger CKUploadingOptions;
 @protocol CKUploaderDelegate;
 
 
-@interface CKUploader : NSObject
+@interface CKUploader : NSObject <CK2FileManagerDelegate>
 {
   @private
 	NSURLRequest        *_request;
     unsigned long       _permissions;
     CKUploadingOptions  _options;
     
-    id <CKPublishingConnection> _connection;
-    CKTransferRecord            *_rootRecord;
-    CKTransferRecord            *_baseRecord;
-    BOOL                        _hasUploads;
+    CK2FileManager      *_fileManager;
+    id                  _currentOperation;
+    NSMutableArray      *_queue;
+    
+    CKTransferRecord    *_rootRecord;
+    CKTransferRecord    *_baseRecord;
+    
+    BOOL    _isFinishing;
+    BOOL    _isCancelled;
     
     id <CKUploaderDelegate> _delegate;
 }
@@ -54,6 +59,7 @@ typedef NSUInteger CKUploadingOptions;
 
 - (void)finishUploading;    // will disconnect once all files are uploaded
 - (void)cancel;             // bails out as quickly as possible
+- (BOOL)isCancelled;
 
 // The permissions given to uploaded files
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
