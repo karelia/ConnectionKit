@@ -65,6 +65,21 @@
     return self;
 }
 
+#pragma mark Directory Enumeration
+
+- (BOOL)shouldEnumerateFilename:(NSString *)name options:(NSDirectoryEnumerationOptions)mask;
+{
+    // SFTP and some FTP servers report . and .. which we don't care about
+    if ([name isEqualToString:@"."] || [name isEqualToString:@".."])
+    {
+        return NO;
+    }
+    
+    if ((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]) return NO;
+    
+    return YES;
+}
+
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -118,14 +133,7 @@
                     {
                         NSString *name = CFDictionaryGetValue(parsedDict, kCFFTPResourceName);
                         
-                        // SFTP and some FTP servers report . and .. which we don't care about
-                        if ([name isEqualToString:@"."] || [name isEqualToString:@".."])
-                        {
-                            CFRelease(parsedDict);
-                            continue;
-                        }
-                        
-                        if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
+                        if ([self shouldEnumerateFilename:name options:mask])
                         {
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
@@ -297,6 +305,8 @@
     [request release];
     return self;
 }
+
+#pragma mark Dealloc
 
 - (void)dealloc;
 {
