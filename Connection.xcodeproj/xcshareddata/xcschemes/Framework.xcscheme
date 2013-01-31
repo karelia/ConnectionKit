@@ -41,15 +41,6 @@
                <Test
                   Identifier = "MockServerTests">
                </Test>
-               <Test
-                  Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "KMSManualTests">
-               </Test>
-               <Test
-                  Identifier = "KMSCollectionTests">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
