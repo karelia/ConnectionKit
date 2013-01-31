@@ -91,6 +91,8 @@
 
         CKTransferRecord *record = [uploader uploadFileAtURL:url toPath:@"test/test.txt"];
         STAssertNotNil(record, @"got a transfer record");
+        //        STAssertTrue(record.isUpload, @"expecting an upload record");
+        STAssertTrue(record.size == [[testData dataUsingEncoding:NSUTF8StringEncoding] length], @"unexpected size %ld", record.size);
 
         [uploader finishUploading];
 
@@ -102,7 +104,20 @@
 
 - (void)testUploadData
 {
+    CKUploader* uploader = [self setupUploader];
+    if (uploader)
+    {
+        NSData* testData = [@"Some test content" dataUsingEncoding:NSUTF8StringEncoding];
+        CKTransferRecord *record = [uploader uploadData:testData toPath:@"test/test.txt"];
+        STAssertNotNil(record, @"got a transfer record");
+        //        STAssertTrue(record.isUpload, @"expecting an upload record");
+        STAssertTrue(record.size == [testData length], @"unexpected size %ld", record.size);
+        [uploader finishUploading];
 
+        [self runUntilPaused];
+
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
+    }
 }
 
 - (void)testRemoteFileAtPath
