@@ -29,6 +29,16 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     return result;
 }
 
+- (void)tearDown
+{
+    if (self.session)
+    {
+        [self removeTestDirectory];
+    }
+    
+    [super tearDown];
+}
+
 - (NSString*)useBadLogin
 {
     NSString* savedUser = self.user;
@@ -122,6 +132,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
             [self removeTestDirectory];
         }
 
+        // suppress the transcript for this stuff
+        NSMutableString* saved = self.transcript;
+        self.transcript = nil;
+
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
@@ -136,12 +150,14 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                     [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                         [self checkNoErrorOrFileExistsError:error];
                         [self pause];
+                        self.transcript = saved;
                     }];
                 }];
             }
             else
             {
                 [self pause];
+                self.transcript = saved;
             }
         }];
 
@@ -153,11 +169,18 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if (!self.useMockServer)
     {
+        // suppress the transcript for this stuff
+        NSMutableString* saved = self.transcript;
+        self.transcript = nil;
+
         // we don't care about errors here, we just want to do our best to clean up after any tests
         [self.session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
             [self.session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
                 [self.session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
                     [self pause];
+
+                    // restore the transcript
+                    self.transcript = saved;
                 }];
             }];
         }];
@@ -255,8 +278,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
         
         [self runUntilPaused];
-
-        [self removeTestDirectory];
     }
 }
 
@@ -350,8 +371,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
 
         [self runUntilPaused];
-
-        [self removeTestDirectory];
     }
 }
 
@@ -376,7 +395,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         [self runUntilPaused];
 
-        [self removeTestDirectory];
         STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
     }
 }
@@ -503,7 +521,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 
     [self runUntilPaused];
-    [self removeTestDirectory];
 }
 
 - (void)testRemoveFileAtURLFileDoesnExist
@@ -562,7 +579,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        [self makeTestDirectoryWithFiles:YES];
+        NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ @"test" : @"test" };
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -571,19 +589,14 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         
         [self runUntilPaused];
     }
-    
-    
-    //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
-    //// All other attributes are ignored
-    //- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
-    
 }
 
-- (void)testSetAttributes
+- (void)testSetAttributesOnFile
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/attributes.txt"];
+        [self makeTestDirectoryWithFiles:YES];
+        NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -592,12 +605,54 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         [self runUntilPaused];
     }
+}
 
+- (void)testSetAttributesOnFolder
+{
+    if ([self setup])
+    {
+        [self makeTestDirectoryWithFiles:NO];
+        NSURL* url = [self URLForTestFolder];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+            [self pause];
+        }];
 
-    //// Only NSFilePosixPermissions is recognised at present. Note that some servers don't support this so will return an error (code 500)
-    //// All other attributes are ignored
-    //- (void)setResourceValues:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
-    
+        [self runUntilPaused];
+    }
+}
+
+- (void)testSetAttributesOnFileDoesntExist
+{
+    if ([self setup])
+    {
+        [self makeTestDirectoryWithFiles:NO];
+        NSURL* url = [self URLForTestFile1];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            [self checkIsFileDoesntExistError:error];
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+}
+
+- (void)testSetAttributesOnFolderDoesntExist
+{
+    if ([self setup])
+    {
+        [self removeTestDirectory];
+        NSURL* url = [self URLForTestFolder];
+        NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            [self checkIsFileDoesntExistError:error];
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
 }
 
 - (void)testSetAttributesCHMODNotUnderstood
@@ -636,10 +691,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)testSetAttributesOperationNotPermitted
 {
-    if ([self setup])
+    if (self.useMockServer && [self setup]) // can't reliably target a file that we don't have permission to change on a real server, since we don't know what it has
     {
         [self useResponseSet:@"chmod not permitted"];
-        NSURL* url = [self URLForPath:@"/non/existant/test.txt"];
+        NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             NSString* domain = error.domain;
@@ -671,7 +726,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     {
         NSString* savedUser = [self useBadLogin];
 
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
             [self checkIsAuthenticationError:error];
