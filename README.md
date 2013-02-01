@@ -85,7 +85,8 @@ Usage
 
 1. Create a `CK2FileManager` instance
 2. Set the file manager's delegate if you require control over authentication, or to receive transcripts
-3. Instruct the file manager to do the thing what it is you want to do.
+3. Instruct the file manager to do the thing what it is you want to do
+4. The file manager will asynchronously call your completion handler when finished, to indicate success of the operation
 
 Be sure to read through `CK2FileManager.h` as there's plenty of helpful documentation in there.
 
