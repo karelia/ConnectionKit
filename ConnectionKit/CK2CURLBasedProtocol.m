@@ -385,14 +385,14 @@
     [_handle cancel];
 }
 
-#pragma mark Requests
+#pragma mark URLs
 
 + (NSURLRequest *)newRequestWithRequest:(NSURLRequest *)request isDirectory:(BOOL)directory;
 {
     NSURL *url = [request URL];
     
     // CURL is very particular about whether URLs passed to it have directory terminator or not
-    if (directory != CFURLHasDirectoryPath((CFURLRef)url))
+    if (directory != [self URLHasDirectoryPath:url])
     {
         if (directory)
         {
@@ -408,6 +408,11 @@
     NSMutableURLRequest *result = [request mutableCopy];
     [result setURL:url];
     return result;
+}
+
++ (BOOL)URLHasDirectoryPath:(NSURL *)url;
+{
+    return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
 #pragma mark CURLHandleDelegate
