@@ -98,7 +98,7 @@
         NSURL *url = [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
         
         return [_fileManager removeItemAtURL:url completionHandler:^(NSError *error) {
-            [self operationDidFinish];
+            [self operationDidFinish:error];
         }];
     }];
 }
@@ -124,8 +124,7 @@
                 [result transferDidFinish:result error:error];
             });
             
-            // TODO: Report errors
-            [self operationDidFinish];
+            [self operationDidFinish:error];
         }];
         
         NSAssert(op, @"Failed to create upload operation");
@@ -166,8 +165,7 @@
                 [result transferDidFinish:result error:error];
             });
             
-            // TODO: Report errors
-            [self operationDidFinish];
+            [self operationDidFinish:error];
         }];
         
         NSAssert(op, @"Failed to create upload operation");
@@ -190,7 +188,7 @@
         
         NSAssert(!self.isCancelled, @"Shouldn't be able to finish once cancelled!");
         [[self delegate] uploaderDidFinishUploading:self];
-        [self operationDidFinish];
+        [self operationDidFinish:nil];
         return nil;
     }];
     
