@@ -249,7 +249,7 @@
                                                                                        sender:self];
         
         _fingerprintSemaphore = dispatch_semaphore_create(0);   // must be setup before handing off to client
-        [[self client] protocol:self didReceiveAuthenticationChallenge:nil];
+        [[self client] protocol:self didReceiveAuthenticationChallenge:_fingerprintChallenge];
     }
     
     // Until the client replies, give libcurl a chance to process anything else. Ugly isn't it?
