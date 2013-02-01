@@ -57,6 +57,7 @@
 		2743E80A1622E47600019979 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
 		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
+		278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */; };
 		278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278D8B77167FF35D00622468 /* CK2Authentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278D8B78167FF35D00622468 /* CK2Authentication.m */; };
 		2790A8221626CA67000C9D9F /* CK2RemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CK2RemoteURL.h */; };
@@ -264,6 +265,7 @@
 		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
 		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLProtocolURLManipulationTests.m; sourceTree = "<group>"; };
 		278D8B77167FF35D00622468 /* CK2Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Authentication.h; sourceTree = "<group>"; };
 		278D8B78167FF35D00622468 /* CK2Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Authentication.m; sourceTree = "<group>"; };
 		2790A8201626CA67000C9D9F /* CK2RemoteURL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2RemoteURL.h; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */,
 				220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */,
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
+				278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
 				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
@@ -1021,6 +1024,7 @@
 				2246AF6816B99987001D39D9 /* KMSPauseCommand.m in Sources */,
 				2246AF6916B99987001D39D9 /* KMSCommand.m in Sources */,
 				2246AF6A16B99987001D39D9 /* KMSCloseCommand.m in Sources */,
+				278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

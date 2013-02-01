@@ -19,6 +19,7 @@
 
 // Force it to return correct thing
 - (NSString *)authenticationMethod; { return CK2AuthenticationMethodSSHHostFingerprint; }
+- (NSString *)protocol; { return @"ssh"; }
 
 // Make sure super doesn't create an actual copy
 - (id)copyWithZone:(NSZone *)zone; { return [self retain]; }
@@ -30,7 +31,7 @@
 
 + (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host;
 {
-    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host port:0 protocol:nil realm:nil authenticationMethod:CK2AuthenticationMethodSSHHostFingerprint] autorelease];
+    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host port:0 protocol:@"ssh" realm:nil authenticationMethod:CK2AuthenticationMethodSSHHostFingerprint] autorelease];
 }
 
 NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2AuthenticationMethodSSHHostFingerprint";

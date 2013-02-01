@@ -9,6 +9,7 @@
 #import "CK2FTPProtocol.h"
 
 #import "CK2FileManager.h"
+#import "CK2RemoteURL.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
@@ -50,6 +51,25 @@
     CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
     NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (strictPath) CFRelease(strictPath);
+    return result;
+}
+
++ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
+{
+    // -URLByAppendPathComponent can't deal quite correctly with FTP's quirks when the directory URL is root, so take over at that point
+    if ([[self pathOfURLRelativeToHomeDirectory:directoryURL] isEqualToString:@"/"])
+    {
+        NSURL *result = [self URLWithPath:[@"/" stringByAppendingString:pathComponent] relativeToURL:directoryURL];
+        return [CK2RemoteURL URLWithString:[result absoluteString]];
+    }
+    
+    return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
+}
+
++ (BOOL)URLHasDirectoryPath:(NSURL *)url;
+{
+    BOOL result = [super URLHasDirectoryPath:url];
+    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // corerct for ftp://example.com/%2F
     return result;
 }
 
@@ -255,5 +275,10 @@
     
     [super handle:handle didReceiveDebugInformation:string ofType:type];
 }
+
+#pragma mark Backend
+
+// Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
++ (BOOL)usesMultiHandle; { return NO; }
 
 @end

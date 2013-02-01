@@ -132,7 +132,7 @@
     NSURL *knownHosts = [NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO];
     
     NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:knownHosts
-                                                                              persistence:NSURLCredentialPersistenceNone];
+                                                                              persistence:NSURLCredentialPersistencePermanent];
     
     NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                                          proposedCredential:credential
@@ -188,6 +188,17 @@
     NSMutableURLRequest *result = [[[super request] mutableCopy] autorelease];
     [result curl_setSSHKnownHostsFileURL:knownHosts];
     return result;
+}
+
+- (void)endWithError:(NSError *)error;
+{
+    // Re-package host key failures as something more in the vein of NSURLConnection
+    if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+    }
+    
+    [super endWithError:error];
 }
 
 #pragma mark CURLHandleDelegate

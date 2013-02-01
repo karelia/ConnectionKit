@@ -28,3 +28,16 @@ extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 - (NSURL *)ck2_SSHKnownHostsFileURL;
 
 @end
+
+
+#pragma mark SSH Public Key Auth
+
+@interface NSURLCredential (CK2SSHPublicKey)
+
+// Authenticate using particular public & private key files
+// On OS X, libssh2 generally uses the OpenSSL encryption library, so public key URL may be nil
++ (NSURLCredential *)ck2_credentialWithUser:(NSString *)user
+                               publicKeyURL:(NSURL *)publicKey
+                              privateKeyURL:(NSURL *)privateKey;
+
+@end
