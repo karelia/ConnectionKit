@@ -64,6 +64,13 @@
     return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
 }
 
++ (BOOL)URLHasDirectoryPath:(NSURL *)url;
+{
+    BOOL result = [super URLHasDirectoryPath:url];
+    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // corerct for ftp://example.com/%2F
+    return result;
+}
+
 #pragma mark Operations
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
