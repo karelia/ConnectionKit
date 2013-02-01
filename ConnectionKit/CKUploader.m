@@ -232,12 +232,24 @@
     }
 }
 
-- (void)operationDidFinish;
+- (void)operationDidFinish:(NSError *)error;
 {
     // This method gets called on all sorts of threads, so marshall back to main queue
     dispatch_async(dispatch_get_main_queue(), ^{
         
         [_currentOperation release]; _currentOperation = nil;
+        
+        if (error)
+        {
+            if ([self.delegate respondsToSelector:@selector(uploader:shouldProceedAfterError:)])
+            {
+                if (![self.delegate uploader:self shouldProceedAfterError:error])
+                {
+                    [self.delegate uploader:self didFailWithError:error];
+                    [self cancel];
+                }
+            }
+        }
         
         [_queue removeObjectAtIndex:0];
         if ([_queue count])
