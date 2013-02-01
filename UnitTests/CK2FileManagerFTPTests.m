@@ -545,7 +545,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self removeTestDirectory];
-        [self useResponseSet:@"delete fail"];
+        [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             [self checkIsFileNotFoundError:error];
@@ -626,6 +626,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
+        [self useResponseSet:@"chmod not permitted"];
         [self makeTestDirectoryWithFiles:NO];
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
@@ -643,6 +644,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self removeTestDirectory];
+        [self useResponseSet:@"chmod not permitted"];
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
