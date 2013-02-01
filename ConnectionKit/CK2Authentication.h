@@ -11,12 +11,18 @@
 
 #pragma mark SSH Host Fingerprint
 
+typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
+    CK2KnownHostMatchOK,
+    CK2KnownHostMatchMismatch,
+    CK2KnownHostMatchMissing,
+};
+
 @interface NSURLProtectionSpace (CK2SSHHostFingerprint)
 
 // These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
-+ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(enum curl_khmatch)match;
++ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(CK2KnownHostMatch)match;
 
-- (int)ck2_SSHKnownHostsMatch;
+- (CK2KnownHostMatch)ck2_SSHKnownHostsMatch;
 
 extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 

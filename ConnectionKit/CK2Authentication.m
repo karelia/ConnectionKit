@@ -15,7 +15,7 @@
 
 @interface CK2SSHHostFingerprintProtectionSpace : NSURLProtectionSpace
 {
-    enum curl_khmatch   _match;
+    CK2KnownHostMatch   _match;
 }
 @end
 
@@ -45,12 +45,12 @@
 
 @implementation NSURLProtectionSpace (CK2SSHHostFingerprint)
 
-+ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(enum curl_khmatch)match;
++ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(CK2KnownHostMatch)match;
 {
     return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host match:match] autorelease];
 }
 
-- (enum curl_khmatch)ck2_SSHKnownHostsMatch; { return 0; }
+- (CK2KnownHostMatch)ck2_SSHKnownHostsMatch; { return 0; }
 
 NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2AuthenticationMethodSSHHostFingerprint";
 
