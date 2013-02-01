@@ -106,6 +106,11 @@ NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2Authentication
 
 @implementation NSURLCredential (CK2SSHHostFingerprint)
 
++ (NSURLCredential *)ck2_credentialForSSHHostFingerprintWithPersistence:(NSURLCredentialPersistence)persistence;
+{
+    return [[[CK2SSHKnownHostsFile alloc] initWithUser:nil password:nil persistence:persistence] autorelease];
+}
+
 + (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
 {
     return [[[CK2SSHKnownHostsFile alloc] initWithSSHKnownHostsFileURL:knownHosts persistence:persistence] autorelease];
