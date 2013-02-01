@@ -60,6 +60,24 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     STAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
 }
 
+- (void)checkURLs:(NSMutableArray*)urls containItemNamed:(NSString*)name
+{
+    BOOL found = NO;
+    NSUInteger count = [urls count];
+    for (NSUInteger n = 0; n < count; ++n)
+    {
+        NSURL* url = urls[n];
+        if ([[url lastPathComponent] isEqualToString:name])
+        {
+            [urls removeObjectAtIndex:n];
+            found = YES;
+            break;
+        }
+    }
+
+    STAssertTrue(found, @"unexpected item with name %@", name);
+}
+
 - (void)checkIsAuthenticationError:(NSError*)error
 {
     STAssertNotNil(error, @"should get error");
@@ -134,7 +152,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-
         [self makeTestDirectoryWithFiles:YES];
 
         NSURL* url = [self URLForTestFolder];
@@ -187,18 +204,19 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/"];
+        [self makeTestDirectoryWithFiles:YES];
+
+        NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         NSMutableArray* expectedURLS = [NSMutableArray arrayWithArray:@[
                                         url,
-                                        [self URLForPath:@"/directory/file1.txt"],
-                                        [self URLForPath:@"/directory/file2.txt"]
+                                        [self URLForTestFile1],
+                                        [self URLForTestFile2]
                                         ]];
 
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
             NSLog(@"got item %@", item);
-            STAssertTrue([expectedURLS containsObject:item], @"got expected item");
-            [expectedURLS removeObject:item];
+            [self checkURLs:expectedURLS containItemNamed:[item lastPathComponent]];
         } completionHandler:^(NSError *error) {
             if (error)
             {
@@ -208,6 +226,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
         
         [self runUntilPaused];
+
+        [self removeTestDirectory];
     }
 }
 
@@ -216,7 +236,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useBadLogin];
-        NSURL* url = [self URLForPath:@"/directory/"];
+        NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
 
