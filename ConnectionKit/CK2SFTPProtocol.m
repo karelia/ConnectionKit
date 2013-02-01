@@ -132,7 +132,7 @@
     NSURL *knownHosts = [NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO];
     
     NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:knownHosts
-                                                                              persistence:NSURLCredentialPersistenceNone];
+                                                                              persistence:NSURLCredentialPersistencePermanent];
     
     NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                                          proposedCredential:credential
