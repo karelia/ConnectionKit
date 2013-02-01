@@ -13,5 +13,9 @@
   @private
     NSURLCredential *_hostFingerprintCredential;
     BOOL            _haveHostFingerprintCredential;
+    
+    NSURLAuthenticationChallenge    *_fingerprintChallenge;
+    enum curl_khstat                _knownHostsStat;
+    dispatch_semaphore_t            _fingerprintSemaphore;
 }
 @end

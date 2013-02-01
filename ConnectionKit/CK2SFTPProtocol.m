@@ -147,6 +147,12 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
+    {
+        [self useKnownHostsStat:([credential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE)];
+        return;
+    }
+    
     if (_haveHostFingerprintCredential)
     {
         return [super useCredential:credential forAuthenticationChallenge:challenge];
@@ -179,6 +185,30 @@
     [challenge release];
 }
 
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+    else
+    {
+        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+    }
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+    else
+    {
+        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+    }
+}
+
 - (NSURLRequest *)request;
 {
     // Once we know the known_hosts file's location, adjust the request to include it
@@ -201,18 +231,55 @@
     [super endWithError:error];
 }
 
-#pragma mark CURLHandleDelegate
+#pragma mark Host Fingerprint
 
 - (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
 {
-    if (match == CURLKHMATCH_MISMATCH)
+    if (!_fingerprintSemaphore)
     {
-        return CURLKHSTAT_REJECT;
+        // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
+        NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:self.request.URL.host
+                                                                                                    match:match];
+        
+        _fingerprintChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                           proposedCredential:nil
+                                                                         previousFailureCount:0
+                                                                              failureResponse:nil
+                                                                                        error:nil
+                                                                                       sender:self];
+        
+        _fingerprintSemaphore = dispatch_semaphore_create(0);   // must be setup before handing off to client
+        [[self client] protocol:self didReceiveAuthenticationChallenge:nil];
     }
-    else
+    
+    // Until the client replies, give libcurl a chance to process anything else. Ugly isn't it?
+    if (dispatch_semaphore_wait(_fingerprintSemaphore, 100 * NSEC_PER_MSEC))
     {
-        return ([_hostFingerprintCredential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE);
+        return CURLKHSTAT_DEFER;
     }
+    
+    // Finished waiting; cleanup
+    dispatch_release(_fingerprintSemaphore); _fingerprintSemaphore = NULL;
+    
+    return _knownHostsStat;
+}
+
+- (void)useKnownHostsStat:(enum curl_khstat)stat;
+{
+    NSAssert(_fingerprintChallenge, @"Somehow been told to use curl_khstat without having issued a challenge");
+    [_fingerprintChallenge release]; _fingerprintChallenge = nil;
+    
+    // Use semaphore to signal we know have a result
+    _knownHostsStat = stat;
+    dispatch_semaphore_signal(_fingerprintSemaphore);   // can't dispose of yet, as might not be currently waiting on it
+}
+
+- (void)dealloc
+{
+    [_fingerprintChallenge release];
+    if (_fingerprintSemaphore) dispatch_release(_fingerprintSemaphore);
+    
+    [super dealloc];
 }
 
 @end
