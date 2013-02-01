@@ -84,11 +84,48 @@ Usage
 ### Actually, y'know, doing stuff
 
 1. Create a `CK2FileManager` instance
-2. Set the file manager's delegate if you require control over authentication, or to receive transcripts
+2. Set the file manager's delegate if you require control over authentication, or to receive transcripts. More details on auth are below
 3. Instruct the file manager to do the thing what it is you want to do
 4. The file manager will asynchronously call your completion handler when finished, to indicate success of the operation
 
 Be sure to read through `CK2FileManager.h` as there's plenty of helpful documentation in there.
+
+### Authentication
+
+ConnectionKit follows a similar pattern to `NSURLConnection`: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
+
+#### WebDAV over HTTP
+
+WebDAV servers can selectively choose whether to require authentication (e.g. public servers have no need to). If authentication is requested, you'll receive an authentication challenge encapsulating the auth method to be used (e.g. HTTP Digest). Respond with a username and password credential. ConnectionKit will do its best to supply `-proposedCredential` from the user's keychain.
+
+#### FTP 
+
+FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can ask to `-continueWithoutCredentialForAuthenticationChallenge:` for anonymous FTP login.
+
+#### WebDAV over HTTPS
+
+The validity of the server is checked first. This takes the form of potentially multiple challenges with the either of the following authentication methods:
+
+* `NSURLAuthenticationMethodServerTrust`
+* `NSURLAuthenticationMethodClientCertificate`
+	
+Generally it's best to call use `-performDefaultHandlingForAuthenticationChallenge:` to let Cocoa decide what to do.
+
+#### SFTP
+
+SFTP is a tricky blighter. Similar to HTTPS, ConnectionKit first checks the fingerprint of the server with the authentication method `CK2AuthenticationMethodSSHHostFingerprint`. The proposed "credential" is to consult `~/.ssh/known_hosts`. Note that for sandboxed apps this is inside of your container! New hosts are added to the file.
+
+Generally the proposed credential is good enough, but you might prefer to construct your own with:
+
+    +[NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:persistence:]
+
+The persistence setting controls whether the file should be merely consulted, or updated for new hosts too. Known hosts whose fingerprint has changed cause the operation to fail.
+
+After checking the host fingerprint, SFTP moves on to actually authenticating the client. You can opt to use a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:
+
+    +[NSURLCredential ck2_credentialWithUser:publicKeyURL:privateKeyURL:]
+
+The public key is generally optional, as ConnectionKit can derive it from the private key. It's also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps.
 
 Legacy
 ======
