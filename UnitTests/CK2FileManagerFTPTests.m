@@ -38,22 +38,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     return savedUser;
 }
 
-#pragma mark - Tests
-
-- (NSURL*)URLForTestFolder
-{
-    return [self URLForPath:@"CK2FileManagerFTPTests"];
-}
-
-- (NSURL*)URLForTestFile1
-{
-    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file1.txt"];
-}
-
-- (NSURL*)URLForTestFile2
-{
-    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file2.txt"];
-}
+#pragma mark - Result Checking Support
 
 - (void)checkURL:(NSURL*)url isNamed:(NSString*)name
 {
@@ -94,13 +79,55 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (void)checkIsFileDoesntExistError:(NSError*)error
+{
+    STAssertNotNil(error, @"should get error");
+    STAssertTrue([error.domain isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", error.domain);
+    STAssertTrue(error.code == NSFileWriteUnknownError, @"unexpected error code %ld", error.code);
+}
+
+- (void)checkIsFileNotFoundError:(NSError*)error
+{
+    STAssertNotNil(error, @"should get error");
+    STAssertTrue([error.domain isEqualToString:NSURLErrorDomain], @"unexpected error domain %@", error.domain);
+    STAssertTrue(error.code == NSURLErrorNoPermissionsToReadFile, @"unexpected error code %ld", error.code);
+}
+
+#pragma mark - Test File Support
+
+- (NSURL*)URLForTestFolder
+{
+    return [self URLForPath:@"CK2FileManagerFTPTests"];
+}
+
+- (NSURL*)URLForTestFile1
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file1.txt"];
+}
+
+- (NSURL*)URLForTestFile2
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file2.txt"];
+}
+
 - (void)makeTestDirectoryWithFiles:(BOOL)withFiles
 {
+    // we do report errors from here, since something going wrong is likely to affect the result of the test that called us
+    
     if (!self.useMockServer)
     {
+        // if we don't want the test files, remove everything first
+        if (!withFiles)
+        {
+            [self removeTestDirectory];
+        }
+
+        // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             [self checkNoErrorOrFileExistsError:error];
+
+            // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
@@ -138,6 +165,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
     [self runUntilPaused];
 }
+
+#pragma mark - Tests
 
 - (void)testMakeRemoveOnly
 {
@@ -310,7 +339,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self removeTestDirectory];
         [self makeTestDirectoryWithFiles:NO];
 
         NSURL* url = [self URLForTestFile1];
@@ -331,7 +359,6 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self removeTestDirectory];
         [self makeTestDirectoryWithFiles:NO];
 
         NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
@@ -467,7 +494,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
+        [self makeTestDirectoryWithFiles:YES];
+        NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
@@ -475,17 +503,18 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 
     [self runUntilPaused];
+    [self removeTestDirectory];
 }
 
 - (void)testRemoveFileAtURLFileDoesnExist
 {
     if ([self setup])
     {
+        [self makeTestDirectoryWithFiles:NO];
         [self useResponseSet:@"delete fail"];
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/nonexistant.txt"];
+        NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            STAssertTrue(error.curlResponseCode == 550, @"should get 550 from server");
+            [self checkIsFileDoesntExistError:error];
 
             [self pause];
         }];
@@ -495,12 +524,30 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 }
 
+- (void)testRemoveFileAtURLContainingFolderDoesnExist
+{
+    if ([self setup])
+    {
+        [self removeTestDirectory];
+        [self useResponseSet:@"delete fail"];
+        NSURL* url = [self URLForTestFile1];
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+            [self checkIsFileNotFoundError:error];
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+    
+}
+
 - (void)testRemoveFileAtURLBadLogin
 {
     if ([self setup])
     {
         [self useBadLogin];
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests/test.txt"];
+        NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
 
             [self checkIsAuthenticationError:error];
