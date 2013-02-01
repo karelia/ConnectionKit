@@ -113,21 +113,19 @@ Generally it's best to call use `-performDefaultHandlingForAuthenticationChallen
 
 #### SFTP
 
-SFTP is a tricky blighter. Similar to HTTPS, ConnectionKit first checks the fingerprint of the server with the authentication method `CK2AuthenticationMethodSSHHostFingerprint`. The proposed "credential" is to consult `~/.ssh/known_hosts`. Note that for sandboxed apps this is inside of your container! New hosts are added to the file.
-
-Generally the proposed credential is good enough, but you might prefer to construct your own with:
-
-    +[NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:persistence:]
-
-The persistence setting controls whether the file should be merely consulted, or updated for new hosts too. Known hosts whose fingerprint has changed cause the operation to fail.
-
-After checking the host fingerprint, SFTP moves on to actually authenticating the client. You can opt to use a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:
+SFTP is a tricky blighter. You can opt to supply a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:
 
     +[NSURLCredential ck2_credentialWithUser:publicKeyURL:privateKeyURL:]
 
 The public key is generally optional, as ConnectionKit can derive it from the private key. It's also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps.
 
-Legacy
+Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge is issued with the result of this. Your delegate can call `-cancelAuthenticationChallenge:` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
+
+	+[NSURLCredential ck2_credentialForKnownHostWithPersistence:]
+
+The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) accepts new fingerprints, adding them to the `known_hosts` file, and causes the operation to fail with an error for mismatched fingerprints.
+
+After checking the host fingerprint, SFTP moves on to actually authenticating the client. Legacy
 ======
 
 For anyone relying on one of the old branches, they have been archived to be tags:
