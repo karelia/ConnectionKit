@@ -21,6 +21,9 @@
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
 
+static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
+
+
 - (BOOL)setup
 {
     BOOL result = ([self setupSessionWithResponses:@"ftp"]);
@@ -124,13 +127,15 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     // we do report errors from here, since something going wrong is likely to affect the result of the test that called us
     
-    if (!self.useMockServer)
+    if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
         // if we don't want the test files, remove everything first
         if (!withFiles)
         {
             [self removeTestDirectory];
         }
+
+        NSLog(@"<<<< Making Test Directory");
 
         // suppress the transcript for this stuff
         NSMutableString* saved = self.transcript;
@@ -151,6 +156,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                         [self checkNoErrorOrFileExistsError:error];
                         [self pause];
                         self.transcript = saved;
+                        NSLog(@"<<<< Made Test Files");
                     }];
                 }];
             }
@@ -159,6 +165,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 [self pause];
                 self.transcript = saved;
             }
+            NSLog(@"<<<< Made Test Directory");
         }];
 
         [self runUntilPaused];
@@ -167,8 +174,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)removeTestDirectory
 {
-    if (!self.useMockServer)
+    if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
+        NSLog(@"<<<< Removing Test Files");
         // suppress the transcript for this stuff
         NSMutableString* saved = self.transcript;
         self.transcript = nil;
@@ -181,6 +189,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
                     // restore the transcript
                     self.transcript = saved;
+                    NSLog(@"<<<< Removed Test Files");
                 }];
             }];
         }];
