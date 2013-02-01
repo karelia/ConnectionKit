@@ -28,7 +28,7 @@ Questions about the code are best left as issues at https://github.com/karelia/C
 
 Big thanks to:
 
-* Sam Deane for:
+* [Sam Deane](http://twitter.com/samdeane) of [Elegant Chaos](http://www.elegantchaos.com) for:
 	* Sooo much testing, especially Mock Server
 	* The WebDAV protocol implementation
 	* Improving the File protocol implementation
