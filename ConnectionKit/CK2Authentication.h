@@ -13,8 +13,11 @@
 
 @interface NSURLProtectionSpace (CK2SSHHostFingerprint)
 
-// Creates a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
+// These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
++ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(enum curl_khmatch)match;
 + (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host;
+
+- (enum curl_khmatch)ck2_SSHKnownHostsMatch;
 
 extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 
@@ -24,7 +27,10 @@ extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 @interface NSURLCredential (CK2SSHHostFingerprint)
 
 // NSURLCredentialPersistencePermanent indicates new keys should be added to the known_hosts file
++ (NSURLCredential *)ck2_credentialForSSHHostFingerprintWithPersistence:(NSURLCredentialPersistence)persistence;
 + (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
+
+- (BOOL)ck2_isSSHHostFingerprintCredential;
 - (NSURL *)ck2_SSHKnownHostsFileURL;
 
 @end
