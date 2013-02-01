@@ -241,8 +241,11 @@
         NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:self.request.URL.host
                                                                                                     match:match];
         
+        NSURLCredential *credential = nil;
+        if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForSSHHostFingerprintWithPersistence:NSURLCredentialPersistencePermanent];
+        
         _fingerprintChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                           proposedCredential:nil
+                                                                           proposedCredential:credential
                                                                          previousFailureCount:0
                                                                               failureResponse:nil
                                                                                         error:nil
