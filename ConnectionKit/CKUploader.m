@@ -128,6 +128,8 @@
             [self operationDidFinish];
         }];
         
+        NSAssert(op, @"Failed to create upload operation");
+        
         if (!self.isCancelled)
         {
             [result transferDidBegin:result];
@@ -167,6 +169,8 @@
             // TODO: Report errors
             [self operationDidFinish];
         }];
+        
+        NSAssert(op, @"Failed to create upload operation");
         
         if (!self.isCancelled)
         {
