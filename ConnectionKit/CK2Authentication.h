@@ -20,11 +20,11 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
 @interface NSURLProtectionSpace (CK2SSHHostFingerprint)
 
 // These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
-+ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(CK2KnownHostMatch)match;
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 
-- (CK2KnownHostMatch)ck2_SSHKnownHostsMatch;
+- (CK2KnownHostMatch)ck2_knownHostMatch;
 
-extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
+extern NSString * const CK2AuthenticationMethodHostFingerprint;
 
 @end
 

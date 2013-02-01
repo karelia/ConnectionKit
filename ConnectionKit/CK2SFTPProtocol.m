@@ -214,8 +214,8 @@
     if (!_fingerprintSemaphore)
     {
         // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
-        NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:self.request.URL.host
-                                                                                                    match:match];
+        NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
+                                                                                                    knownHostMatch:match];
         
         NSURLCredential *credential = nil;
         if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];
