@@ -17,6 +17,8 @@
 
 #pragma mark URLs
 
++ (BOOL)usesMultiHandle; { return NO; } // TEMPORARY
+
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return [url ck2_isFTPURL];
@@ -59,7 +61,32 @@
              request:request
           createIntermediateDirectories:createIntermediates
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          if (error)
+                          {
+                              if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  NSUInteger responseCode = [error curlResponseCode];
+                                  if (responseCode == 550)
+                                  {
+                                      // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                                      error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                                                  code:NSFileWriteUnknownError
+                                                              userInfo:@{ NSUnderlyingErrorKey : error }];
+                                  }
+                              }
+
+
+                              [client protocol:self didFailWithError:error];
+                          }
+                          else
+                          {
+                              [client protocolDidFinish:self];
+                          }
+
+                      }
+
+            ];
 }
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
@@ -131,7 +158,7 @@
                                   // CHMOD failures for unsupported or unrecognized command should go ignored
                                   if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                                   {
-                                      NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
+                                      NSUInteger responseCode = [error curlResponseCode];
                                       if (responseCode == 500 || responseCode == 502 || responseCode == 504)
                                       {
                                           [client protocolDidFinish:self];
