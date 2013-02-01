@@ -524,7 +524,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 + (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
 {
-    // Trust the tramoline to release itself when done
+    // Trust the trampoline to release itself when done
     [[[self alloc] initWithChallenge:challenge operation:operation] release];
 }
 
