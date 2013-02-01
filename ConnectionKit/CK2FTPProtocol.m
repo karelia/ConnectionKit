@@ -18,8 +18,6 @@
 
 #pragma mark URLs
 
-+ (BOOL)usesMultiHandle; { return NO; } // TEMPORARY
-
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return [url ck2_isFTPURL];
