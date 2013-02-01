@@ -69,24 +69,35 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (void)checkNoErrorOrFileExistsError:(NSError*)error
 {
-    STAssertTrue((error == nil) || ([error.domain isEqualToString:NSURLErrorDomain] && (error.code == 21) && (error.curlResponseCode == 550)), @"unexpected error %@", error);
+    if (error)
+    {
+        STAssertTrue([error.domain isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", error.domain);
+        STAssertTrue(error.code == NSFileWriteUnknownError, @"unexpected error code %ld", error.code);
+    }
 }
 
-- (void)makeTestDirectory
+- (void)makeTestDirectoryWithFiles:(BOOL)withFiles
 {
     if (!self.useMockServer)
     {
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             [self checkNoErrorOrFileExistsError:error];
-            NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
-            [self.session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                [self checkNoErrorOrFileExistsError:error];
-                [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            if (withFiles)
+            {
+                NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
+                [self.session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                     [self checkNoErrorOrFileExistsError:error];
-                    [self pause];
+                    [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                        [self checkNoErrorOrFileExistsError:error];
+                        [self pause];
+                    }];
                 }];
-            }];
+            }
+            else
+            {
+                [self pause];
+            }
         }];
 
         [self runUntilPaused];
@@ -97,12 +108,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if (!self.useMockServer)
     {
+        // we don't care about errors here, we just want to do our best to clean up after any tests
         [self.session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
-            STAssertNil(error, @"unexpected error removing test directory %@");
             [self.session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
-                STAssertNil(error, @"unexpected error removing test directory %@");
                 [self.session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
-                    STAssertNil(error, @"unexpected error removing test directory %@");
                     [self pause];
                 }];
             }];
@@ -116,7 +125,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self makeTestDirectory];
+        [self makeTestDirectoryWithFiles:YES];
         [self removeTestDirectory];
     }
 }
@@ -126,7 +135,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
 
-        [self makeTestDirectory];
+        [self makeTestDirectoryWithFiles:YES];
 
         NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -245,7 +254,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setupSessionWithResponses:@"ftp"])
     {
-        [self makeTestDirectory];
+        [self makeTestDirectoryWithFiles:YES];
         [self useResponseSet:@"mkdir fail"];
         
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
@@ -281,7 +290,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        [self removeTestDirectory];
+        [self makeTestDirectoryWithFiles:NO];
+
+        NSURL* url = [self URLForTestFile1];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -290,6 +302,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         }];
 
         [self runUntilPaused];
+
+        [self removeTestDirectory];
     }
 }
 
@@ -297,12 +311,15 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
+        [self removeTestDirectory];
+        [self makeTestDirectoryWithFiles:NO];
+
         NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
         NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
         NSError* error = nil;
         STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
 
-        NSURL* url = [self URLForPath:@"/directory/intermediate/test.txt"];
+        NSURL* url = [self URLForTestFile1];
 
         [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -312,6 +329,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         [self runUntilPaused];
 
+        [self removeTestDirectory];
         STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
     }
 }
@@ -321,7 +339,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useResponseSet:@"stor denied"];
-        NSURL* url = [self URLForPath:@"/test.txt"];
+        NSURL* url = [self URLForPath:@"/CK2FileManagerFTPTests/test.txt"]; // should fail as it's at the root - we put it in a subfolder just in case
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
