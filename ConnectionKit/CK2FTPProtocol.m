@@ -79,7 +79,11 @@
              request:request
           createIntermediateDirectories:createIntermediates
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          [self translateStandardErrors:error client:client];
+                      }
+
+            ];
 }
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
@@ -127,7 +131,9 @@
              request:request
           createIntermediateDirectories:NO
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          [self translateStandardErrors:error client:client];
+                      }];
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -151,28 +157,15 @@
                                   // CHMOD failures for unsupported or unrecognized command should go ignored
                                   if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                                   {
-                                      NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
+                                      NSUInteger responseCode = [error curlResponseCode];
                                       if (responseCode == 500 || responseCode == 502 || responseCode == 504)
                                       {
-                                          [client protocolDidFinish:self];
-                                          return;
-                                      }
-                                      else if (responseCode == 550)
-                                      {
-                                          // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                                          error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                                                      code:NSFileWriteUnknownError
-                                                                  userInfo:@{ NSUnderlyingErrorKey : error }];
+                                          error = nil;
                                       }
                                   }
-                              
-                                  
-                                  [client protocol:self didFailWithError:error];
                               }
-                              else
-                              {
-                                  [client protocolDidFinish:self];
-                              }
+
+                              [self translateStandardErrors:error client:client];
                           }];
     }
     else
@@ -216,6 +209,33 @@
     [challenge release];
 }
 
+#pragma mark - Error Translation
+
+- (void)translateStandardErrors:(NSError*)error client:(id<CK2ProtocolClient>)client
+{
+    if (error)
+    {
+        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+        {
+            NSUInteger responseCode = [error curlResponseCode];
+            if (responseCode == 550)
+            {
+                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                            code:NSFileWriteUnknownError
+                                        userInfo:@{ NSUnderlyingErrorKey : error }];
+            }
+        }
+
+
+        [client protocol:self didFailWithError:error];
+    }
+    else
+    {
+        [client protocolDidFinish:self];
+    }
+}
+
 #pragma mark Home Directory
 
 /*- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
@@ -224,7 +244,7 @@
     NSMutableURLRequest *request = [[self request] mutableCopy];
     [request setURL:[NSURL URLWithString:@"/" relativeToURL:[request URL]]];
     [request setHTTPMethod:@"HEAD"];
-    
+
     [self sendRequest:request dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
         if (error)
         {
