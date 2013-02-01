@@ -190,6 +190,17 @@
     return result;
 }
 
+- (void)endWithError:(NSError *)error;
+{
+    // Re-package host key failures as something more in the vein of NSURLConnection
+    if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+    }
+    
+    [super endWithError:error];
+}
+
 #pragma mark CURLHandleDelegate
 
 - (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
