@@ -184,9 +184,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
                 }];
             }];
         }];
-    }
 
-    [self runUntilPaused];
+        [self runUntilPaused];
+    }
 }
 
 #pragma mark - Tests
@@ -324,15 +324,12 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setupSessionWithResponses:@"ftp"])
     {
-        [self makeTestDirectoryWithFiles:YES];
+        [self makeTestDirectoryWithFiles:NO];
         [self useResponseSet:@"mkdir fail"];
         
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"should get error");
-            long ftpCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] longValue];
-            STAssertTrue(ftpCode == 550, @"should get 550 from server");
-
+            [self checkIsFileCantWriteError:error];
             [self pause];
         }];
     }
