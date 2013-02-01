@@ -89,7 +89,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
-- (void)checkIsFileDoesntExistError:(NSError*)error
+- (void)checkIsFileCantWriteError:(NSError*)error
 {
     STAssertNotNil(error, @"should get error");
     STAssertTrue([error.domain isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", error.domain);
@@ -480,7 +480,9 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     
     if ([self setup])
     {
-        NSURL* url = [[self URLForTestFolder] URLByAppendingPathComponent:@"file.txt"];
+        [self makeTestDirectoryWithFiles:NO];
+        
+        NSURL* url = [self URLForTestFile1];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
@@ -531,7 +533,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileDoesntExistError:error];
+            [self checkIsFileCantWriteError:error];
 
             [self pause];
         }];
@@ -631,7 +633,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileDoesntExistError:error];
+            [self checkIsFileCantWriteError:error];
             [self pause];
         }];
 
@@ -647,7 +649,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileDoesntExistError:error];
+            [self checkIsFileCantWriteError:error];
             [self pause];
         }];
 
