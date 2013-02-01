@@ -218,7 +218,7 @@
                                                                                                     match:match];
         
         NSURLCredential *credential = nil;
-        if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForSSHHostFingerprintWithPersistence:NSURLCredentialPersistencePermanent];
+        if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];
         
         _fingerprintChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
                                                                            proposedCredential:credential

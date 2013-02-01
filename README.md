@@ -121,7 +121,7 @@ The public key is generally optional, as ConnectionKit can derive it from the pr
 
 Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge is issued with the result of this. Your delegate can call `-cancelAuthenticationChallenge:` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
 
-	+[NSURLCredential ck2_credentialForSSHHostFingerprintWithPersistence:]
+	+[NSURLCredential ck2_credentialForKnownHostWithPersistence:]
 
 The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) accepts new fingerprints, adding them to the `known_hosts` file, and causes the operation to fail with an error for mismatched fingerprints.
 

@@ -59,7 +59,7 @@ NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2Authentication
 
 @implementation NSURLCredential (CK2SSHHostFingerprint)
 
-+ (NSURLCredential *)ck2_credentialForSSHHostFingerprintWithPersistence:(NSURLCredentialPersistence)persistence;
++ (NSURLCredential *)ck2_credentialForKnownHostWithPersistence:(NSURLCredentialPersistence)persistence;
 {
     return [self credentialWithUser:nil password:nil persistence:persistence];
 }
