@@ -17,7 +17,7 @@
 + (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host match:(enum curl_khmatch)match;
 + (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host;
 
-- (enum curl_khmatch)ck2_SSHKnownHostsMatch;
+- (int)ck2_SSHKnownHostsMatch;
 
 extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 
