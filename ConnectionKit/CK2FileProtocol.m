@@ -344,7 +344,7 @@ static size_t kCopyBufferSize = 4096;
         NSURL* url = [request URL];
         NSAssert([url isFileURL], @"wrong URL scheme: %@", url);
         NSString* path = [url path];
-        int perms = [[attributes objectForKey:NSFilePosixPermissions] int32Value];
+        int perms = [attributes filePosixPermissions];
         if (perms == 0)
         {
             perms = 0744;
