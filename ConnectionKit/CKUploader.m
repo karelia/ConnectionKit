@@ -247,6 +247,11 @@
                     [self cancel];
                 }
             }
+            else
+            {
+                [self.delegate uploader:self didFailWithError:error];
+                [self cancel];
+            }
         }
         
         [_queue removeObjectAtIndex:0];
