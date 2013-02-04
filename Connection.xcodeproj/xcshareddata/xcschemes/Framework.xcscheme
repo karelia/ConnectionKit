@@ -42,34 +42,7 @@
                   Identifier = "MockServerTests">
                </Test>
                <Test
-                  Identifier = "CK2FileManagerBaseTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFileTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerWebDAVTests">
-               </Test>
-               <Test
-                  Identifier = "CKUploaderTests">
-               </Test>
-               <Test
-                  Identifier = "KMSCollectionTests">
-               </Test>
-               <Test
-                  Identifier = "KMSManualTests">
-               </Test>
-               <Test
                   Identifier = "KMSTestCase">
-               </Test>
-               <Test
-                  Identifier = "PathTests">
-               </Test>
-               <Test
-                  Identifier = "URLTests">
-               </Test>
-               <Test
-                  Identifier = "CK2FileManagerFTPAuthenticationTests">
                </Test>
                <Test
                   Identifier = "CK2FileManagerFTPTests/testFolder">
