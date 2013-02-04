@@ -734,6 +734,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 {
     if ([self setup])
     {
+        [self removeTestDirectory];
         NSString* savedUser = [self useBadLogin];
 
         NSURL* url = [self URLForTestFolder];
