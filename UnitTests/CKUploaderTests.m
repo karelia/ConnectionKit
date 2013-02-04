@@ -112,8 +112,11 @@
         STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
         STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
         STAssertFalse(self.finished, @"shouldn't be finished");
-        STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
-        STAssertTrue(record.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
+        if (record)
+        {
+            STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
+            STAssertTrue(record.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
+        }
     }
     else
     {
