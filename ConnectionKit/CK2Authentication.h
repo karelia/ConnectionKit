@@ -11,12 +11,20 @@
 
 #pragma mark SSH Host Fingerprint
 
+typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
+    CK2KnownHostMatchOK,
+    CK2KnownHostMatchMismatch,
+    CK2KnownHostMatchMissing,
+};
+
 @interface NSURLProtectionSpace (CK2SSHHostFingerprint)
 
-// Creates a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
-+ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host;
+// These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 
-extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
+- (CK2KnownHostMatch)ck2_knownHostMatch;
+
+extern NSString * const CK2AuthenticationMethodHostFingerprint;
 
 @end
 
@@ -24,8 +32,7 @@ extern NSString * const CK2AuthenticationMethodSSHHostFingerprint;
 @interface NSURLCredential (CK2SSHHostFingerprint)
 
 // NSURLCredentialPersistencePermanent indicates new keys should be added to the known_hosts file
-+ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
-- (NSURL *)ck2_SSHKnownHostsFileURL;
++ (NSURLCredential *)ck2_credentialForKnownHostWithPersistence:(NSURLCredentialPersistence)persistence;
 
 @end
 

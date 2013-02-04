@@ -8,18 +8,34 @@
 
 #import "CK2Authentication.h"
 
+#import <CURLHandle/CURLHandle.h>
+
 
 #pragma mark SSH Host Fingerprint
 
 @interface CK2SSHHostFingerprintProtectionSpace : NSURLProtectionSpace
+{
+    CK2KnownHostMatch   _match;
+}
 @end
 
 
 @implementation CK2SSHHostFingerprintProtectionSpace
 
+- initWithHost:(NSString *)host match:(enum curl_khmatch)match;
+{
+    if (self = [self initWithHost:host port:0 protocol:@"ssh" realm:nil authenticationMethod:CK2AuthenticationMethodHostFingerprint])
+    {
+        _match = match;
+    }
+    return self;
+}
+
 // Force it to return correct thing
-- (NSString *)authenticationMethod; { return CK2AuthenticationMethodSSHHostFingerprint; }
+- (NSString *)authenticationMethod; { return CK2AuthenticationMethodHostFingerprint; }
 - (NSString *)protocol; { return @"ssh"; }
+
+- (enum curl_khmatch)ck2_knownHostMatch; { return _match; }
 
 // Make sure super doesn't create an actual copy
 - (id)copyWithZone:(NSZone *)zone; { return [self retain]; }
@@ -29,64 +45,23 @@
 
 @implementation NSURLProtectionSpace (CK2SSHHostFingerprint)
 
-+ (NSURLProtectionSpace *)ck2_SSHHostFingerprintProtectionSpaceWithHost:(NSString *)host;
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 {
-    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host port:0 protocol:@"ssh" realm:nil authenticationMethod:CK2AuthenticationMethodSSHHostFingerprint] autorelease];
+    return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host match:match] autorelease];
 }
 
-NSString * const CK2AuthenticationMethodSSHHostFingerprint = @"CK2AuthenticationMethodSSHHostFingerprint";
+- (CK2KnownHostMatch)ck2_knownHostMatch; { return 0; }
 
-@end
-
-
-@interface CK2SSHKnownHostsFile : NSURLCredential
-{
-  @private
-    NSURL *_knownHostsFileURL;
-}
-@end
-
-@implementation CK2SSHKnownHostsFile
-
-- (id)initWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
-{
-    if (self = [self initWithUser:nil password:nil persistence:persistence])
-    {
-        _knownHostsFileURL = [knownHosts copy];
-    }
-    return self;
-}
-
-- (NSURL *)ck2_SSHKnownHostsFileURL; { return _knownHostsFileURL; }
-
-// Make sure super doesn't create an actual copy
-- (id)copyWithZone:(NSZone *)zone; { return [self retain]; }
-
-- (void)encodeWithCoder:(NSCoder *)aCoder;
-{
-    [super encodeWithCoder:aCoder];
-    [aCoder encodeObject:[self ck2_SSHKnownHostsFileURL] forKey:@"ck2_SSHKnownHostsFileURL"];
-}
-
-- (id)initWithCoder:(NSCoder *)aDecoder;
-{
-    if (self = [super initWithCoder:aDecoder])
-    {
-        _knownHostsFileURL = [[aDecoder decodeObjectForKey:@"ck2_SSHKnownHostsFileURL"] retain];
-    }
-    return self;
-}
+NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMethodHostFingerprint";
 
 @end
 
 
 @implementation NSURLCredential (CK2SSHHostFingerprint)
 
-+ (NSURLCredential *)ck2_credentialWithSSHKnownHostsFileURL:(NSURL *)knownHosts persistence:(NSURLCredentialPersistence)persistence;
++ (NSURLCredential *)ck2_credentialForKnownHostWithPersistence:(NSURLCredentialPersistence)persistence;
 {
-    return [[[CK2SSHKnownHostsFile alloc] initWithSSHKnownHostsFileURL:knownHosts persistence:persistence] autorelease];
+    return [self credentialWithUser:nil password:nil persistence:persistence];
 }
-
-- (NSURL *)ck2_SSHKnownHostsFileURL; { return nil; }
 
 @end

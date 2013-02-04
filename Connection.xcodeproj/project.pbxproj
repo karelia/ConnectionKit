@@ -72,6 +72,12 @@
 		27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */ = {isa = PBXBuildFile; fileRef = 27AE68380EE98A8400409D80 /* CKConnectionRegistry.m */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		27D03B431471787000FEA588 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
+		27F3372B16BC1FB100E70511 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
+		27F3373116BC1FB100E70511 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 27F3372F16BC1FB100E70511 /* InfoPlist.strings */; };
+		27F3373316BC1FB100E70511 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F3373216BC1FB100E70511 /* main.m */; };
+		27F3373716BC1FB100E70511 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373516BC1FB100E70511 /* Credits.rtf */; };
+		27F3373A16BC1FB100E70511 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F3373916BC1FB100E70511 /* AppDelegate.m */; };
+		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
@@ -281,6 +287,16 @@
 		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = ../CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
 		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKUploader.h; sourceTree = "<group>"; };
 		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploader.m; sourceTree = "<group>"; };
+		27F3372816BC1FB100E70511 /* AuthTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AuthTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		27F3372A16BC1FB100E70511 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
+		27F3372E16BC1FB100E70511 /* AuthTester-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AuthTester-Info.plist"; sourceTree = "<group>"; };
+		27F3373016BC1FB100E70511 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		27F3373216BC1FB100E70511 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		27F3373416BC1FB100E70511 /* AuthTester-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AuthTester-Prefix.pch"; sourceTree = "<group>"; };
+		27F3373616BC1FB100E70511 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		27F3373816BC1FB100E70511 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		27F3373916BC1FB100E70511 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		27F3373C16BC1FB100E70511 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		27F394F3162C162900944F43 /* CK2SFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2SFTPProtocol.h; sourceTree = "<group>"; };
 		27F394F4162C162900944F43 /* CK2SFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2SFTPProtocol.m; sourceTree = "<group>"; };
 		27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURL+Connection.h"; sourceTree = "<group>"; };
@@ -376,6 +392,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		27F3372516BC1FB100E70511 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27F3372B16BC1FB100E70511 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12409F702BE00172CDD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -463,6 +487,7 @@
 			children = (
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				220AD7981509019B00748655 /* UnitTests.octest */,
+				27F3372816BC1FB100E70511 /* AuthTester.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -554,6 +579,29 @@
 			name = Protocols;
 			sourceTree = "<group>";
 		};
+		27F3372C16BC1FB100E70511 /* AuthTester */ = {
+			isa = PBXGroup;
+			children = (
+				27F3373816BC1FB100E70511 /* AppDelegate.h */,
+				27F3373916BC1FB100E70511 /* AppDelegate.m */,
+				27F3373B16BC1FB100E70511 /* MainMenu.xib */,
+				27F3372D16BC1FB100E70511 /* Supporting Files */,
+			);
+			path = AuthTester;
+			sourceTree = "<group>";
+		};
+		27F3372D16BC1FB100E70511 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				27F3372E16BC1FB100E70511 /* AuthTester-Info.plist */,
+				27F3372F16BC1FB100E70511 /* InfoPlist.strings */,
+				27F3373216BC1FB100E70511 /* main.m */,
+				27F3373416BC1FB100E70511 /* AuthTester-Prefix.pch */,
+				27F3373516BC1FB100E70511 /* Credits.rtf */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
 		27FD90C10ED5BF640068D634 /* Abstract */ = {
 			isa = PBXGroup;
 			children = (
@@ -597,6 +645,7 @@
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
+				27F3372C16BC1FB100E70511 /* AuthTester */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -627,6 +676,7 @@
 			children = (
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				220AD7991509019B00748655 /* SenTestingKit.framework */,
+				27F3372A16BC1FB100E70511 /* Cocoa.framework */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -824,6 +874,23 @@
 			productReference = 220AD7981509019B00748655 /* UnitTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
+		27F3372716BC1FB100E70511 /* AuthTester */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 27F3373E16BC1FB100E70511 /* Build configuration list for PBXNativeTarget "AuthTester" */;
+			buildPhases = (
+				27F3372416BC1FB100E70511 /* Sources */,
+				27F3372516BC1FB100E70511 /* Frameworks */,
+				27F3372616BC1FB100E70511 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = AuthTester;
+			productName = AuthTester;
+			productReference = 27F3372816BC1FB100E70511 /* AuthTester.app */;
+			productType = "com.apple.product-type.application";
+		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */;
@@ -887,6 +954,7 @@
 			targets = (
 				79CFD12509F702BE00172CDD /* Framework */,
 				220AD7971509019B00748655 /* UnitTests */,
+				27F3372716BC1FB100E70511 /* AuthTester */,
 			);
 		};
 /* End PBXProject section */
@@ -929,6 +997,16 @@
 			files = (
 				22662EF3165D2EEC005FCC4A /* ftp.json in Resources */,
 				22662EF4165D2EEC005FCC4A /* webdav.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27F3372616BC1FB100E70511 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27F3373116BC1FB100E70511 /* InfoPlist.strings in Resources */,
+				27F3373716BC1FB100E70511 /* Credits.rtf in Resources */,
+				27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1028,6 +1106,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		27F3372416BC1FB100E70511 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				27F3373316BC1FB100E70511 /* main.m in Sources */,
+				27F3373A16BC1FB100E70511 /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12309F702BE00172CDD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1080,6 +1167,30 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		27F3372F16BC1FB100E70511 /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				27F3373016BC1FB100E70511 /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		27F3373516BC1FB100E70511 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				27F3373616BC1FB100E70511 /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		27F3373B16BC1FB100E70511 /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				27F3373C16BC1FB100E70511 /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
 		797CC8C509F861770063FF9B /* Localizable.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1213,6 +1324,85 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
+			};
+			name = Plugin;
+		};
+		27F3373F16BC1FB100E70511 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AuthTester/AuthTester-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "AuthTester/AuthTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		27F3374016BC1FB100E70511 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AuthTester/AuthTester-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "AuthTester/AuthTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		27F3374116BC1FB100E70511 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "AuthTester/AuthTester-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "AuthTester/AuthTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Plugin;
 		};
@@ -1386,6 +1576,15 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		27F3373E16BC1FB100E70511 /* Build configuration list for PBXNativeTarget "AuthTester" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				27F3373F16BC1FB100E70511 /* Debug */,
+				27F3374016BC1FB100E70511 /* Release */,
+				27F3374116BC1FB100E70511 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;

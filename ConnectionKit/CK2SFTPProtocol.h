@@ -10,8 +10,9 @@
 
 @interface CK2SFTPProtocol : CK2CURLBasedProtocol
 {
-  @private
-    NSURLCredential *_hostFingerprintCredential;
-    BOOL            _haveHostFingerprintCredential;
+  @private    
+    NSURLAuthenticationChallenge    *_fingerprintChallenge;
+    enum curl_khstat                _knownHostsStat;
+    dispatch_semaphore_t            _fingerprintSemaphore;
 }
 @end
