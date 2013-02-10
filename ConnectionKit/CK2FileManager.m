@@ -59,6 +59,12 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
                          progressBlock:(void (^)(NSUInteger))progressBlock
                        completionBlock:(void (^)(NSError *))block;
 
+- (id)initFileReadOperationWithRequest:(NSURLRequest *)request
+                        destinationURL:(NSURL *)destinationURL
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(void (^)(NSUInteger))progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+
 - (id)initRemovalOperationWithURL:(NSURL *)url
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
@@ -194,6 +200,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
     
+    return [operation autorelease];
+}
+
+- (id)readFileAtURL:(NSURL *)sourceURL toLocalURL:(NSURL *)destinationURL progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))completionHandler;
+{
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:sourceURL];
+    
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileReadOperationWithRequest:request
+                                                                              destinationURL:destinationURL
+                                                                                     manager:self
+                                                                               progressBlock:progressBlock
+                                                                             completionBlock:completionHandler];
     return [operation autorelease];
 }
 
@@ -427,6 +445,22 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
+- (id)initFileReadOperationWithRequest:(NSURLRequest *)request
+                        destinationURL:(NSURL *)destinationURL
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(void (^)(NSUInteger))progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+{
+    return [self initWithURL:[request URL] manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+        
+        return [[protocolClass alloc] initForReadingFileWithRequest:request
+                                                              toURL:destinationURL
+                                                             client:self
+                                                      progressBlock:progressBlock];
+        
+    }];
+}
+
 - (id)initRemovalOperationWithURL:(NSURL *)url
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
@@ -551,6 +585,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
     if (_enumerationBlock) _enumerationBlock(url);
+}
+
+- (void)protocol:(CK2Protocol *)protocol didReadFileAtURL:(NSURL *)sourceURL toURL:(NSURL *)destinationURL
+{
+    NSParameterAssert(protocol == _protocol);
+    [self finishWithError:nil];
 }
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

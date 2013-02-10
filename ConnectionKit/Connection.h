@@ -50,23 +50,30 @@ typedef unsigned int   NSUInteger;
 #import <Connection/CK2FileManager.h>
 #import <Connection/CK2Authentication.h>
 
+#if !TARGET_OS_IPHONE
 #import <Cocoa/Cocoa.h>
+#else
+#import <Foundation/Foundation.h>
+#endif
 
 #import <Connection/CKConnectionProtocol.h>
 #import <Connection/CKConnectionRegistry.h>
 #import <Connection/CKWebDAVConnection.h>
 #import <Connection/CKSFTPConnection.h>
 
+#if !TARGET_OS_IPHONE
 #import <Connection/KTLog.h>
 
 #import <Connection/CKConnectionOpenPanel.h>
+#import <Connection/NSPopUpButton+Connection.h>
+#import <Connection/NSTabView+Connection.h>
+#import <Connection/CKTransferProgressCell.h>
+#endif
+
 #import <Connection/RunLoopForwarder.h>
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSString+Connection.h>
-#import <Connection/NSPopUpButton+Connection.h>
-#import <Connection/NSTabView+Connection.h>
 
 #import <Connection/CKUploader.h>
 #import <Connection/CKTransferRecord.h>
-#import <Connection/CKTransferProgressCell.h>
 

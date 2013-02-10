@@ -31,7 +31,11 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  
  */
+#if !TARGET_OS_IPHONE
 #import <Cocoa/Cocoa.h>
+#else
+#import <Foundation/Foundation.h>
+#endif
 
 
 @interface RunLoopForwarder : NSObject 

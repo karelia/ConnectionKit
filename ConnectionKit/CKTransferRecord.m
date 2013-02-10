@@ -161,7 +161,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return _transferred;
 }
 
-- (CGFloat)speed
+- (float)speed
 {
 	if ([self isDirectory]) 
 	{
@@ -192,7 +192,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	return _speed;
 }
 
-- (void)setSpeed:(CGFloat)speed
+- (void)setSpeed:(float)speed
 {
 	if (speed != _speed)
 	{
@@ -662,7 +662,8 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         // Calculate the size of the transfer in a user-friendly manner
         NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
         NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [self name], fileSize];
-        
+      
+#if !TARGET_OS_IPHONE
         NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]
                                                                forKey:NSFontAttributeName];
         
@@ -673,7 +674,10 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
         [description addAttribute:NSForegroundColorAttributeName
                             value:[NSColor grayColor]
                             range:NSMakeRange([[self name] length] + 1, [fileSize length] + 2)];
-        
+#else
+			NSString *description = [[NSString alloc] initWithString:unattributedDescription];
+#endif
+      
         result = [NSDictionary dictionaryWithObjectsAndKeys:
                   [result objectForKey:@"progress"], @"progress",
                   description, @"name",

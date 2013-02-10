@@ -1,5 +1,11 @@
 
+#import <TargetConditionals.h>
+
+#if !TARGET_OS_IPHONE
 #import "KTLog.h"
+#else
+#define KTLog(d, l, s, args...)
+#endif
 
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog(...)

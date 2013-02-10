@@ -29,10 +29,13 @@
  */
 #import "NSData+Connection.h"
 #import <zlib.h>
+#if !TARGET_OS_IPHONE
 #include <sasl/saslutil.h>
+#endif
 
 @implementation NSData (Connection)
 
+#if !TARGET_OS_IPHONE
 - (NSString *)base64Encoding
 {
 	NSString* retVal = nil;
@@ -61,6 +64,7 @@
     free(buffer);
     return retVal;	
 }
+#endif
 
 - (NSString *)descriptionAsUTF8String
 {

@@ -27,7 +27,6 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 @protocol CKConnection;
 
 
@@ -41,7 +40,7 @@
 	NSTimeInterval _lastTransferTime;
 	NSTimeInterval _transferStartTime;
 	NSTimeInterval _lastDirectorySpeedUpdate;
-	CGFloat _speed;
+	float _speed;
 	NSUInteger _progress;
 	NSMutableArray *_contents;
 	CKTransferRecord *_parent; //not retained
@@ -57,8 +56,8 @@
 - (unsigned long long)size;
 - (void)setSize:(unsigned long long)size;
 
-- (CGFloat)speed;
-- (void)setSpeed:(CGFloat)speed;	// TODO: Switch to CGFloat
+- (float)speed;
+- (void)setSpeed:(float)speed;	// TODO: Switch to CGFloat
 
 - (NSError *)error;
 
