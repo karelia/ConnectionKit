@@ -32,7 +32,6 @@
 
 @interface CKTransferRecord : NSObject
 {
-	BOOL _isUpload;
 	NSString *_name;
 	unsigned long long _size;
 	unsigned long long _sizeWithChildren;
@@ -50,9 +49,6 @@
 	id <CKConnection> _connection; //not retained
 	NSError *_error;
 }
-
-- (BOOL)isUpload;
-- (void)setUpload:(BOOL)flag;
 
 - (NSString *)name;
 - (void)setName:(NSString *)name;

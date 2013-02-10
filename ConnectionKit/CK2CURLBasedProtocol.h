@@ -11,6 +11,8 @@
 #import <CURLHandle/CURLHandle.h>
 
 
+@class CK2RemoteURL;
+
 @interface CK2CURLBasedProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 {
     CURLHandle  *_handle;
@@ -37,6 +39,17 @@
 
 // If the protocol requires authentication, override -start to fire off an authentication challenge to the client. When a response is received to the challenge, CK2CURLBasedProtocol automatically handles it to start up the handle/request
 - (void)start;
+
+
+#pragma mark URLs
+// For subclasses to handle any quirks of their URL scheme
++ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
++ (BOOL)URLHasDirectoryPath:(NSURL *)url;
+
+
+#pragma mark Customization
++ (BOOL)usesMultiHandle;    // defaults to YES. Subclasses can override to be NO and fall back to the old synchronous "easy" backend
+- (void)endWithError:(NSError *)error;
 
 
 @end

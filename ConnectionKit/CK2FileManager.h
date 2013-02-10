@@ -109,6 +109,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 //  sftp://example.com/~/relative/path
 //
 // Takes care of the file URL bug on 10.6
+//
+// NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
+//
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 

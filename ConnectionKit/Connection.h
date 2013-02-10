@@ -48,6 +48,7 @@ typedef unsigned int   NSUInteger;
 
 
 #import <Connection/CK2FileManager.h>
+#import <Connection/CK2Authentication.h>
 
 #if !TARGET_OS_IPHONE
 #import <Cocoa/Cocoa.h>

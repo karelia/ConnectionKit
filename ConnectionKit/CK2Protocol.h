@@ -126,6 +126,7 @@
 
 
 #pragma mark Operation-Specific
+
 // Only made use of by directory enumeration at present, but hey, maybe something else will in future
 // URL should be pre-populated with properties requested by client
 - (void)protocol:(CK2Protocol *)protocol didDiscoverItemAtURL:(NSURL *)url;
@@ -133,5 +134,8 @@
 // Used by protocols initialized with `-initForReadingFileWithRequest:toURL:client:progressBlock:`
 // to indicate that the file has successfully beed transfered to the destination URL.
 - (void)protocol:(CK2Protocol *)protocol didReadFileAtURL:(NSURL *)sourceURL toURL:(NSURL *)destinationURL;
+
+// Call if reading from a stream needs to be retried. The client will provide you with a fresh, unopened stream to read from
+- (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
 
 @end

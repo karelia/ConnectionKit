@@ -29,14 +29,29 @@
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
     
-    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", @"path should start with double slash");
+    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
+}
+
+- (void)testFTPAbsoluteNonRootURL
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
+                               relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
+    
+    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
 }
 
 - (void)testFTPRoot
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"], @"path should be double slash");
+    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/%2F"], nil);
+}
+
+- (void)testFTPRootNonRootURL
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"/"
+                               relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
+    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/%2F"], nil);
 }
 
 - (void)testHTTPRelative

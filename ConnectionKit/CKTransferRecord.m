@@ -37,10 +37,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 @implementation CKTransferRecord
 
-- (BOOL)isUpload { return _isUpload; }
-
-- (void)setUpload:(BOOL)flag { _isUpload = flag; }
-
 - (NSString *)name { return _name; }
 
 - (void)setName:(NSString *)name

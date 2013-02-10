@@ -9,6 +9,7 @@
 #import "CK2FTPProtocol.h"
 
 #import "CK2FileManager.h"
+#import "CK2RemoteURL.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
@@ -24,26 +25,49 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
+    // Escape any unusual characters in the URL
+    path = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    // According to libcurl's docs that should be enough. But with our current build of it, it seems they've gotten stricter
+    // The FTP spec could be interpreted that the only way to refer to the root directy is with the sequence @"%2F", which decodes as a slash
+    // That makes it very clear to the library etc. this particular slash is meant to be transmitted to the server, rather than treated as a path component separator
+    // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
     {
-        // Get to host's URL, including single trailing slash
-        // -absoluteURL has to be called so that the real path can be properly appended
-        baseURL = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
-        return [baseURL URLByAppendingPathComponent:path];
+        path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
     }
-    else
-    {
-        return [super URLWithPath:path relativeToURL:baseURL];
-    }
+    
+    NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
+    return result;
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 {
     // FTP is special. The first slash of the path is to be ignored <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
+    // As above, the library seems to be stricter on how the slash is to be encoded these days. I'm not sure whether we should be similarly strict when decoding. Leaving it be for now
     CFStringRef strictPath = CFURLCopyStrictPath((CFURLRef)[URL absoluteURL], NULL);
     NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (strictPath) CFRelease(strictPath);
+    return result;
+}
+
++ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
+{
+    // -URLByAppendPathComponent can't deal quite correctly with FTP's quirks when the directory URL is root, so take over at that point
+    if ([[self pathOfURLRelativeToHomeDirectory:directoryURL] isEqualToString:@"/"])
+    {
+        NSURL *result = [self URLWithPath:[@"/" stringByAppendingString:pathComponent] relativeToURL:directoryURL];
+        return [CK2RemoteURL URLWithString:[result absoluteString]];
+    }
+    
+    return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
+}
+
++ (BOOL)URLHasDirectoryPath:(NSURL *)url;
+{
+    BOOL result = [super URLHasDirectoryPath:url];
+    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // corerct for ftp://example.com/%2F
     return result;
 }
 
@@ -55,7 +79,11 @@
              request:request
           createIntermediateDirectories:createIntermediates
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          [self translateStandardErrors:error client:client];
+                      }
+
+            ];
 }
 
 - (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
@@ -103,7 +131,9 @@
              request:request
           createIntermediateDirectories:NO
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          [self translateStandardErrors:error client:client];
+                      }];
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -127,28 +157,15 @@
                                   // CHMOD failures for unsupported or unrecognized command should go ignored
                                   if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                                   {
-                                      NSUInteger responseCode = [[[error userInfo] objectForKey:@(CURLINFO_RESPONSE_CODE)] unsignedIntegerValue];
+                                      NSUInteger responseCode = [error curlResponseCode];
                                       if (responseCode == 500 || responseCode == 502 || responseCode == 504)
                                       {
-                                          [client protocolDidFinish:self];
-                                          return;
-                                      }
-                                      else if (responseCode == 550)
-                                      {
-                                          // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                                          error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                                                      code:NSFileWriteUnknownError
-                                                                  userInfo:@{ NSUnderlyingErrorKey : error }];
+                                          error = nil;
                                       }
                                   }
-                              
-                                  
-                                  [client protocol:self didFailWithError:error];
                               }
-                              else
-                              {
-                                  [client protocolDidFinish:self];
-                              }
+
+                              [self translateStandardErrors:error client:client];
                           }];
     }
     else
@@ -192,15 +209,42 @@
     [challenge release];
 }
 
+#pragma mark - Error Translation
+
+- (void)translateStandardErrors:(NSError*)error client:(id<CK2ProtocolClient>)client
+{
+    if (error)
+    {
+        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+        {
+            NSUInteger responseCode = [error curlResponseCode];
+            if (responseCode == 550)
+            {
+                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                            code:NSFileWriteUnknownError
+                                        userInfo:@{ NSUnderlyingErrorKey : error }];
+            }
+        }
+
+
+        [client protocol:self didFailWithError:error];
+    }
+    else
+    {
+        [client protocolDidFinish:self];
+    }
+}
+
 #pragma mark Home Directory
 
-- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
+/*- (void)findHomeDirectoryWithCompletionHandler:(void (^)(NSString *path, NSError *error))handler;
 {
     // Deliberately want a request that should avoid doing any work
     NSMutableURLRequest *request = [[self request] mutableCopy];
     [request setURL:[NSURL URLWithString:@"/" relativeToURL:[request URL]]];
     [request setHTTPMethod:@"HEAD"];
-    
+
     [self sendRequest:request dataHandler:nil completionHandler:^(CURLHandle *handle, NSError *error) {
         if (error)
         {
@@ -213,7 +257,7 @@
     }];
     
     [request release];
-}
+}*/
 
 #pragma mark CURLHandleDelegate
 
@@ -229,5 +273,10 @@
     
     [super handle:handle didReceiveDebugInformation:string ofType:type];
 }
+
+#pragma mark Backend
+
+// Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
++ (BOOL)usesMultiHandle; { return NO; }
 
 @end
