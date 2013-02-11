@@ -6,6 +6,7 @@
 #import "CK2FileManagerBaseTests.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <DAVKit/DAVKit.h>
+#import "KMSServer.h"
 
 @interface CK2FileManagerWebDAVTests : CK2FileManagerBaseTests
 
@@ -23,46 +24,57 @@
     return result;
 }
 
-- (void)doTestCreateAndRemoveFileAtURL:(NSURL*)url
+- (void)doTestCreateAndRemoveFileAtURL:(NSURL*)url useStream:(BOOL)useStream
 {
-    if ([self setup])
-    {
-        NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+    NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
-        // try to delete in case it's left around from last time - ignore error
-        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+    // try to delete in case it's left around from last time - ignore error
+    [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+        [self pause];
+    }];
+    [self runUntilPaused];
+
+    // try to upload
+    if (useStream)
+    {
+        NSURL* tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
+        [data writeToURL:tempFile atomically:YES];
+        [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
             [self pause];
         }];
-        [self runUntilPaused];
-
-        // try to upload
+    }
+    else
+    {
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
-        [self runUntilPaused];
-
-        // try to download
-        NSURLRequest* request = [NSURLRequest requestWithURL:url];
-        [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            NSString* received = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-            STAssertTrue([received isEqualToString:@"Some test text"], @"string should have matched, was %@", received);
-
-            [self pause];
-        }];
-        [self runUntilPaused];
-
-        // try to delete - this time we do want to check the error
-        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-            [self pause];
-        }];
-        [self runUntilPaused];
-        
     }
+    [self runUntilPaused];
+
+    // try to download
+    NSURLRequest* request = [NSURLRequest requestWithURL:url];
+    self.server.data = data;
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+
+        NSString* received = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        STAssertTrue([received isEqualToString:@"Some test text"], @"string should have matched, was %@", received);
+
+        [self pause];
+    }];
+    [self runUntilPaused];
+
+    // try to delete - this time we do want to check the error
+    [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+        [self pause];
+    }];
+    [self runUntilPaused];
+    
 }
 
 - (void)doTestCreateAndRemoveDirectoryAtURL:(NSURL*)url
@@ -106,12 +118,15 @@
 
 - (void)testContentsOfDirectoryAtURL
 {
+
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@""];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
 
         // do the test with the wrong password
+
+        NSString* oldPassword = self.password;
         self.password = @"wrong";
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
@@ -123,7 +138,7 @@
         [self runUntilPaused];
 
         // do test with the right password
-        self.password = @"demo";
+        self.password = oldPassword;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
             if (error)
@@ -166,7 +181,7 @@
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@"ck-test-file.txt"];
-        [self doTestCreateAndRemoveFileAtURL:url];
+        [self doTestCreateAndRemoveFileAtURL:url useStream:NO];
     }
 }
 
@@ -175,7 +190,16 @@
     if ([self setup])
     {
         NSURL* url = [self URLForPath:@"ck-test-directory/ck-test-file.txt"];
-        [self doTestCreateAndRemoveFileAtURL:url];
+        [self doTestCreateAndRemoveFileAtURL:url useStream:NO];
+    }
+}
+
+- (void)testCreateAndRemoveFileAtURLUsingStream
+{
+    if ([self setup])
+    {
+        NSURL* url = [self URLForPath:@"ck-test-file.txt"];
+        [self doTestCreateAndRemoveFileAtURL:url useStream:YES];
     }
 }
 

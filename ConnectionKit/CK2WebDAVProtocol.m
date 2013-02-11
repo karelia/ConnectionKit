@@ -152,10 +152,12 @@
     {
         NSString* path = [self pathForRequest:request];
         NSData* data = [request HTTPBody];
+        NSInputStream* stream = [request HTTPBodyStream];
 
         CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
             DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
             davRequest.data = data;
+            davRequest.stream = stream;
             davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
             [_queue addOperation:davRequest];
             [davRequest release];
