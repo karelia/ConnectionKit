@@ -288,11 +288,6 @@
 - (void)requestDidBegin:(DAVRequest *)aRequest;
 {
     CK2WebDAVLog(@"webdav request began");
-
-    if (self.progressHandler)
-    {
-        self.progressHandler(0);
-    }
 }
 
 - (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
