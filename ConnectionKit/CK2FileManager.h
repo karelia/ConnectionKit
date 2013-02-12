@@ -24,6 +24,7 @@ extern NSString * const CK2FileMIMEType;
 {
   @private
     id <CK2FileManagerDelegate> _delegate;
+    NSMutableDictionary         *_cachedCredentials;
 }
 
 #pragma mark Discovering Directory Contents
