@@ -395,7 +395,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         if (stream)
         {
             [request setHTTPBodyStream:stream];
-            [stream release];
         }
         else
         {
