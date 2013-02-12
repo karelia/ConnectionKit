@@ -26,7 +26,10 @@
 
 - (void)doTestCreateAndRemoveFileAtURL:(NSURL*)url useStream:(BOOL)useStream
 {
-    NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+    NSString* content = @"Some test text";
+    NSData* data = [content dataUsingEncoding:NSUTF8StringEncoding];
+    NSURL* tempFile = nil;
+    NSError* error;
 
     // try to delete in case it's left around from last time - ignore error
     [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
@@ -37,8 +40,9 @@
     // try to upload
     if (useStream)
     {
-        NSURL* tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
-        [data writeToURL:tempFile atomically:YES];
+        tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
+        BOOL ok = [data writeToURL:tempFile options:NSDataWritingAtomic error:&error];
+        STAssertTrue(ok, @"failed to write temporary file with error %@", error);
         [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
@@ -54,7 +58,8 @@
         }];
     }
     [self runUntilPaused];
-
+    [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
+    
     // try to download
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
     self.server.data = data;
