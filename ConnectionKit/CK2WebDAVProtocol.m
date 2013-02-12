@@ -166,6 +166,10 @@
 
             self.progressHandler = ^(NSUInteger progress) {
                 [transfer setProgress:progress];
+                if (progressBlock)
+                {
+                    progressBlock(progress);
+                }
             };
 
             self.completionHandler =  ^(id result) {
@@ -392,7 +396,6 @@
         [self.client protocol:self didFailWithError:error];
     }];
 }
-
 
 /**
  Create a chain of createDirectory requests.
