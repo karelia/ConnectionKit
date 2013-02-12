@@ -281,13 +281,11 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Credential Cache
 
-- (NSURLCredential *)cachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space;
+- (void)cachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space completionHandler:(void (^)(NSURLCredential *))handler;
 {
-    __block NSURLCredential *result;
-    dispatch_sync(_authQueue, ^{
-        result = [_cachedCredentials objectForKey:space];
+    dispatch_async(_authQueue, ^{
+        handler([_cachedCredentials objectForKey:space]);
     });
-    return result;
 }
 
 - (void)cacheCredential:(NSURLCredential *)credential forProtectionSpace:(NSURLProtectionSpace *)space;
@@ -662,15 +660,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
             // Was the credential previously cached?
-            NSURLCredential *credential = [manager cachedCredentialForProtectionSpace:challenge.protectionSpace];
-            if (credential)
-            {
-                [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
-            }
-            else
-            {
-                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-            }
+            [manager cachedCredentialForProtectionSpace:challenge.protectionSpace completionHandler:^(NSURLCredential *credential) {
+                
+                if (credential)
+                {
+                    [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
+                }
+                else
+                {
+                    [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+                }
+            }];
         }
         else
         {
