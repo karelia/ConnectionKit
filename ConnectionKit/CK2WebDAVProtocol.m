@@ -17,12 +17,14 @@
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
 @property (copy, nonatomic) CK2ProgressBlock progressHandler;
+@property (assign, nonatomic) NSUInteger attempts;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
 
 @implementation CK2WebDAVProtocol
 
+@synthesize attempts = _attempts;
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
 @synthesize progressHandler = _progressHandler;
@@ -308,12 +310,14 @@
 
     if (self.progressHandler)
     {
-        self.progressHandler(totalBytesWritten, 0); // TODO - fill in the attempts count
+        self.progressHandler(totalBytesWritten, self.attempts);
     }
 }
 
 - (NSInputStream*)webDAVRequest:(DAVRequest *)request needNewBodyStream:(NSURLRequest *)urlRequest
 {
+    ++self.attempts;
+
     NSInputStream* result = [[self client] protocol:self needNewBodyStream:urlRequest];
 
     return result;
