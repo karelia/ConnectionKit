@@ -1585,6 +1585,7 @@
 				27F3374116BC1FB100E70511 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;
