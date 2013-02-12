@@ -30,6 +30,8 @@
     NSData* data = [content dataUsingEncoding:NSUTF8StringEncoding];
     NSURL* tempFile = nil;
     NSError* error;
+    __block NSUInteger written = 0;
+    __block NSUInteger restarts = 0;
 
     // try to delete in case it's left around from last time - ignore error
     [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
@@ -37,29 +39,52 @@
     }];
     [self runUntilPaused];
 
+    id progress = ^(NSUInteger bytesWritten) {
+        if (bytesWritten <= written)
+        {
+            restarts++;
+        }
+        written = bytesWritten;
+    };
+
+
     // try to upload
     if (useStream)
     {
         tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
         BOOL ok = [data writeToURL:tempFile options:NSDataWritingAtomic error:&error];
         STAssertTrue(ok, @"failed to write temporary file with error %@", error);
-        [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            [self pause];
-        }];
+        [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {
+                        STAssertNil(error, @"got unexpected error %@", error);
+                        
+                        [self pause];
+                    }
+         ];
     }
     else
     {
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
     }
+    
     [self runUntilPaused];
     [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
-    
+
+    if (useStream)
+    {
+        STAssertEquals(restarts, 1UL, @"expecting 1 restart when using stream, got %ld", restarts);
+    }
+    else
+    {
+        STAssertEquals(restarts, 0UL, @"expecting no restart when using stream, got %ld", restarts);
+    }
+
+    NSUInteger expected = [data length] * (restarts + 1);
+    STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
+
     // try to download
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
     self.server.data = data;
