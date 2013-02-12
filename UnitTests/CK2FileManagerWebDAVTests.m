@@ -70,14 +70,7 @@
     [self runUntilPaused];
     [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
 
-    if (useStream)
-    {
-        STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
-    }
-    else
-    {
-        STAssertEquals(attempts, 0UL, @"expecting no restart when using stream, got %ld", attempts);
-    }
+    STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
 
     NSUInteger expected = [data length] * (attempts + 1);
     STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);

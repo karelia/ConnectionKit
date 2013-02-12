@@ -157,7 +157,7 @@
         CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
 
             DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
-
+            
             [_queue addOperation:davRequest];
             [davRequest release];
 
@@ -197,7 +197,12 @@
                                               CK2WebDAVLog(@"create subdirectory failed");
                                               [self reportFailedWithError:error];
 
-                                          } completionHandler:makeFileBlock];
+                                          } completionHandler:^(id result) {
+                                              // reset the attempts count (don't count attempts whilst creating)
+                                              self.attempts = 0;
+                                              makeFileBlock(result);
+                                          }
+                 ];
             }
         }
 
@@ -316,7 +321,6 @@
 
 - (NSInputStream*)webDAVRequest:(DAVRequest *)request needNewBodyStream:(NSURLRequest *)urlRequest
 {
-    ++self.attempts;
 
     NSInputStream* result = [[self client] protocol:self needNewBodyStream:urlRequest];
 
@@ -328,6 +332,8 @@
 
 - (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
+    ++self.attempts;
+
     CK2WebDAVLog(@"webdav received challenge");
 
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
