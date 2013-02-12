@@ -38,7 +38,9 @@
                         openingAttributes:(NSDictionary *)attributes
                                    client:(id <CK2ProtocolClient>)client;
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request    // the data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
+// The data is supplied as -HTTPBodyData or -HTTPBodyStream on the request
+// For streams, ConnectionKit guarantees to provide the HTTP header @"Content-Length" indicating expected size
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request
          withIntermediateDirectories:(BOOL)createIntermediates
                    openingAttributes:(NSDictionary *)attributes
                               client:(id <CK2ProtocolClient>)client

@@ -425,13 +425,21 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         NSMutableURLRequest *request = [[manager requestWithURL:url] mutableCopy];
         
-        // Read the data using an input stream if possible
-        NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
-        if (stream)
+        // Read the data using an input stream if possible, and know file size
+        NSNumber *fileSize;
+        if ([sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
         {
-            [request setHTTPBodyStream:stream];
+            NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
+            
+            NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
+            if (stream)
+            {
+                [request setHTTPBodyStream:stream];
+                [request setValue:length forHTTPHeaderField:@"Content-Length"];
+            }
         }
-        else
+        
+        if (!request.HTTPBodyStream)
         {
             NSError *error;
             NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
