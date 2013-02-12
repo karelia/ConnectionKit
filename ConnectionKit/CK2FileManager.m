@@ -48,7 +48,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 
 - (id)initFileCreationOperationWithURL:(NSURL *)remoteURL
@@ -56,7 +56,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 
 - (id)initRemovalOperationWithURL:(NSURL *)url
@@ -186,7 +186,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:url
                                                                                         data:data
@@ -199,7 +199,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:destinationURL
                                                                                         file:sourceURL
@@ -392,7 +392,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
@@ -416,7 +416,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {

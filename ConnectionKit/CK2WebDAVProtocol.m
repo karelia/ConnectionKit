@@ -16,7 +16,7 @@
 
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
-@property (copy, nonatomic) CK2WebDAVProgressHandler progressHandler;
+@property (copy, nonatomic) CK2ProgressBlock progressHandler;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
@@ -144,7 +144,7 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
 {
     CK2WebDAVLog(@"creating file");
 
@@ -164,11 +164,11 @@
 
             CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
 
-            self.progressHandler = ^(NSUInteger progress) {
+            self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
                 [transfer setProgress:progress];
                 if (progressBlock)
                 {
-                    progressBlock(progress);
+                    progressBlock(progress, previousAttemptsCount);
                 }
             };
 
@@ -329,7 +329,7 @@
 
     if (self.progressHandler)
     {
-        self.progressHandler(totalBytesWritten);
+        self.progressHandler(totalBytesWritten, 0); // TODO - fill in the attempts count
     }
 }
 

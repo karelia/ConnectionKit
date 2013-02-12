@@ -19,7 +19,7 @@
     
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
-    void    (^_progressBlock)(NSUInteger bytesWritten);
+    CK2ProgressBlock _progressBlock;
 }
 
 #pragma mark Initialisation
@@ -27,7 +27,7 @@
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler;
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler;
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler;
 
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 

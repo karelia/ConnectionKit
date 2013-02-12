@@ -36,7 +36,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -430,7 +430,7 @@
 
 - (void)handle:(CURLHandle *)handle willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
-    if (_progressBlock) _progressBlock(bytesWritten);
+    if (_progressBlock) _progressBlock(bytesWritten, 0);
 }
 
 - (void)handleDidFinish:(CURLHandle *)handle;

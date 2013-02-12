@@ -42,7 +42,7 @@
          withIntermediateDirectories:(BOOL)createIntermediates
                    openingAttributes:(NSDictionary *)attributes
                               client:(id <CK2ProtocolClient>)client
-                       progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock;
+                       progressBlock:(CK2ProgressBlock)progressBlock;
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request
                               client:(id <CK2ProtocolClient>)client;

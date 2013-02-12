@@ -31,7 +31,7 @@
     NSURL* tempFile = nil;
     NSError* error;
     __block NSUInteger written = 0;
-    __block NSUInteger restarts = 0;
+    __block NSUInteger attempts = 0;
 
     // try to delete in case it's left around from last time - ignore error
     [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
@@ -39,11 +39,8 @@
     }];
     [self runUntilPaused];
 
-    id progress = ^(NSUInteger bytesWritten) {
-        if (bytesWritten <= written)
-        {
-            restarts++;
-        }
+    CK2ProgressBlock progress = ^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+        attempts = previousAttemptCount;
         written = bytesWritten;
     };
 
@@ -75,14 +72,14 @@
 
     if (useStream)
     {
-        STAssertEquals(restarts, 1UL, @"expecting 1 restart when using stream, got %ld", restarts);
+        STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
     }
     else
     {
-        STAssertEquals(restarts, 0UL, @"expecting no restart when using stream, got %ld", restarts);
+        STAssertEquals(attempts, 0UL, @"expecting no restart when using stream, got %ld", attempts);
     }
 
-    NSUInteger expected = [data length] * (restarts + 1);
+    NSUInteger expected = [data length] * (attempts + 1);
     STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
 
     // try to download
