@@ -176,6 +176,33 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
+    NSParameterAssert(url);
+
+    // Read the data using an input stream if possible, and know file size
+    NSNumber *fileSize;
+    if ([url getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
+    {
+        NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
+        NSInputStream *stream = [[NSInputStream alloc] initWithURL:url];
+        if (stream)
+        {
+            path = [self canonicalPathForPath:path];
+            DAVSession* session = [self webDAVSession];
+            NSURL* url = [[session rootURL] URLByAppendingPathComponent:path];
+            NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:url];
+            [urlRequest setHTTPBodyStream:stream];
+            [stream release];
+            [urlRequest setValue:length forHTTPHeaderField:@"Content-Length"];
+            DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:path originalRequest:urlRequest session:session delegate:self];
+            [self enqueueOperation:request];
+
+            CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:fileSize.unsignedLongLongValue];
+            [_transferRecordsByRequest setObject:result forKey:request];
+            [request release];
+            return result;
+        }
+    }
+
     return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path openingPosixPermissions:permissions];
 }
 
