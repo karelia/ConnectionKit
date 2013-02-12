@@ -115,6 +115,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     if (self = [super init])
     {
+        _authQueue = dispatch_queue_create("com.karelia.connection.file-manager.auth", NULL);
         _cachedCredentials = [[NSMutableDictionary alloc] init];
     }
     return self;
@@ -123,6 +124,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)dealloc;
 {
     [_cachedCredentials release];
+    dispatch_release(_authQueue);
+    
     [super dealloc];
 }
 
@@ -278,22 +281,20 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark Credential Cache
 
-// TODO: Use a serial queue rather @synchronized for this
-
 - (NSURLCredential *)cachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space;
 {
-    @synchronized(_cachedCredentials)
-    {
-        return [_cachedCredentials objectForKey:space];
-    }
+    __block NSURLCredential *result;
+    dispatch_sync(_authQueue, ^{
+        result = [_cachedCredentials objectForKey:space];
+    });
+    return result;
 }
 
 - (void)cacheCredential:(NSURLCredential *)credential forProtectionSpace:(NSURLProtectionSpace *)space;
 {
-    @synchronized(_cachedCredentials)
-    {
-        return [_cachedCredentials setObject:credential forKey:space];
-    }
+    dispatch_async(_authQueue, ^{
+        [_cachedCredentials setObject:credential forKey:space];
+    });
 }
 
 @end
