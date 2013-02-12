@@ -334,6 +334,13 @@
     }
 }
 
+- (NSInputStream*)webDAVRequest:(DAVRequest *)request needNewBodyStream:(NSURLRequest *)urlRequest
+{
+    NSInputStream* result = [[self client] protocol:self needNewBodyStream:urlRequest];
+
+    return result;
+}
+
 #pragma mark WebDAV Authentication
 
 
