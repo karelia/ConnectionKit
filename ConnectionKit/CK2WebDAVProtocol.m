@@ -151,18 +151,15 @@
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
         NSString* path = [self pathForRequest:request];
-        NSData* data = [request HTTPBody];
-        NSInputStream* stream = [request HTTPBodyStream];
 
         CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
-            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
-            davRequest.data = data;
-            davRequest.stream = stream;
-            davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
+
+            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
+
             [_queue addOperation:davRequest];
             [davRequest release];
 
-            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
+            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:davRequest.expectedLength];
 
             self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
                 [transfer setProgress:progress];
@@ -263,24 +260,6 @@
     if (!path) path = @"/";
 
     return path;
-}
-
-- (NSString*)MIMETypeForExtension:(NSString*)extension
-{
-    CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
-    NSString* mimeType = nil;
-    if (type)
-    {
-        mimeType = (NSString*)UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
-        CFRelease(type);
-        [mimeType autorelease];
-    }
-    if (!mimeType)
-    {
-        mimeType = @"application/octet-stream";
-    }
-
-    return mimeType;
 }
 
 #pragma mark Request Delegate
