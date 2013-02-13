@@ -77,11 +77,15 @@
     if (key)
     {
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead.", responses, key, key);
+        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
     }
 
     BOOL ok;
-    if (!setting || [setting isEqualToString:@"MockServer"])
+    if (!setting || [setting isEqualToString:@"Off"])
+    {
+        ok = NO;
+    }
+    else if ([setting isEqualToString:@"MockServer"])
     {
         self.useMockServer = YES;
         ok = [super setupServerWithResponseFileNamed:responses];
