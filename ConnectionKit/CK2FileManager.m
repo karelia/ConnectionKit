@@ -295,6 +295,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     });
 }
 
+- (void)removeCachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space;
+{
+    dispatch_async(_authQueue, ^{
+        [_cachedCredentials removeObjectForKey:space];
+    });
+}
+
 @end
 
 
@@ -659,18 +666,27 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         id <CK2FileManagerDelegate> delegate = [manager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
-            // Was the credential previously cached?
-            [manager cachedCredentialForProtectionSpace:challenge.protectionSpace completionHandler:^(NSURLCredential *credential) {
-                
-                if (credential)
-                {
-                    [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
-                }
-                else
-                {
-                    [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-                }
-            }];
+            if (challenge.previousFailureCount == 0)
+            {
+                // Was the credential previously cached?
+                [manager cachedCredentialForProtectionSpace:challenge.protectionSpace completionHandler:^(NSURLCredential *credential) {
+                    
+                    if (credential)
+                    {
+                        [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
+                    }
+                    else
+                    {
+                        [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+                    }
+                }];
+            }
+            else
+            {
+                // Once failure has occurred, assume our cache is invalid
+                [manager removeCachedCredentialForProtectionSpace:challenge.protectionSpace];
+                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+            }
         }
         else
         {
