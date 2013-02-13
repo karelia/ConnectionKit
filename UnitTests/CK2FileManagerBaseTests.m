@@ -80,10 +80,11 @@
         STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead.", responses, key, key);
     }
 
+    BOOL ok;
     if (!setting || [setting isEqualToString:@"MockServer"])
     {
         self.useMockServer = YES;
-        [super setupServerWithResponseFileNamed:responses];
+        ok = [super setupServerWithResponseFileNamed:responses];
     }
     else
     {
@@ -91,10 +92,16 @@
         self.user = url.user;
         self.password = url.password;
         self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
+        ok = YES;
     }
 
-    [self setupSession];
-    return self.session != nil;
+    if (ok)
+    {
+        [self setupSession];
+        ok = self.session != nil;
+    }
+
+    return ok;
 }
 
 - (void)useResponseSet:(NSString*)name
