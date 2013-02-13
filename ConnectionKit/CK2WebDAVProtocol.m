@@ -14,10 +14,11 @@
 
 @interface CK2WebDAVProtocol()
 
+@property (assign, nonatomic) NSUInteger attempts;
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
+@property (assign, nonatomic) NSUInteger expectedLength;
 @property (copy, nonatomic) CK2ProgressBlock progressHandler;
-@property (assign, nonatomic) NSUInteger attempts;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
@@ -27,6 +28,7 @@
 @synthesize attempts = _attempts;
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
+@synthesize expectedLength = _expectedLength;
 @synthesize progressHandler = _progressHandler;
 @synthesize queue = _queue;
 
@@ -161,7 +163,8 @@
             [_queue addOperation:davRequest];
             [davRequest release];
 
-            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:davRequest.expectedLength];
+            self.expectedLength = davRequest.expectedLength;
+            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:self.expectedLength];
 
             self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
                 [transfer setProgress:progress];
@@ -313,6 +316,12 @@
 {
     CK2WebDAVLog(@"webdav sent data");
 
+    if (self.expectedLength != totalBytesExpectedToWrite)
+    {
+        ++self.attempts;
+        self.expectedLength = totalBytesExpectedToWrite;
+    }
+    
     if (self.progressHandler)
     {
         self.progressHandler(totalBytesWritten, self.attempts);
@@ -332,8 +341,6 @@
 
 - (void)webDAVSession:(DAVSession *)session didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    ++self.attempts;
-
     CK2WebDAVLog(@"webdav received challenge");
 
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
