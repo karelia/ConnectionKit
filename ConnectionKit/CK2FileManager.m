@@ -111,24 +111,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @implementation CK2FileManager
 
-- (id)init;
-{
-    if (self = [super init])
-    {
-        _authQueue = dispatch_queue_create("com.karelia.connection.file-manager.auth", NULL);
-        _cachedCredentials = [[NSMutableDictionary alloc] init];
-    }
-    return self;
-}
-
-- (void)dealloc;
-{
-    [_cachedCredentials release];
-    dispatch_release(_authQueue);
-    
-    [super dealloc];
-}
-
 #pragma mark Discovering Directory Contents
 
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
@@ -277,29 +259,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)cancelOperation:(id)operation;
 {
     [operation cancel];
-}
-
-#pragma mark Credential Cache
-
-- (void)cachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space completionHandler:(void (^)(NSURLCredential *))handler;
-{
-    dispatch_async(_authQueue, ^{
-        handler([_cachedCredentials objectForKey:space]);
-    });
-}
-
-- (void)cacheCredential:(NSURLCredential *)credential forProtectionSpace:(NSURLProtectionSpace *)space;
-{
-    dispatch_async(_authQueue, ^{
-        [_cachedCredentials setObject:credential forKey:space];
-    });
-}
-
-- (void)removeCachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space;
-{
-    dispatch_async(_authQueue, ^{
-        [_cachedCredentials removeObjectForKey:space];
-    });
 }
 
 @end
@@ -666,27 +625,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         id <CK2FileManagerDelegate> delegate = [manager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
-            if (challenge.previousFailureCount == 0)
-            {
-                // Was the credential previously cached?
-                [manager cachedCredentialForProtectionSpace:challenge.protectionSpace completionHandler:^(NSURLCredential *credential) {
-                    
-                    if (credential)
-                    {
-                        [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
-                    }
-                    else
-                    {
-                        [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-                    }
-                }];
-            }
-            else
-            {
-                // Once failure has occurred, assume our cache is invalid
-                [manager removeCachedCredentialForProtectionSpace:challenge.protectionSpace];
-                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-            }
+            [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
         }
         else
         {
@@ -716,8 +655,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
         [self release];
     });
-    
-    [_operation->_manager cacheCredential:credential forProtectionSpace:challenge.protectionSpace];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
