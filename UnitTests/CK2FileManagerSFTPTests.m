@@ -17,11 +17,17 @@
 
 @implementation CK2FileManagerSFTPTests
 
+- (BOOL)setup
+{
+    BOOL result = ([self setupSessionWithResponses:@"sftp"]);
+    return result;
+}
+
 - (void)testContentsOfHomeDirectory;
 {
-    if ([self setupSession])
+    if ([self setup])
     {
-        NSURL *home = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://localhost/"]];
+        NSURL *home = [self URLForPath:@""];
         
         [self.session contentsOfDirectoryAtURL:home includingPropertiesForKeys:nil options:0 completionHandler:^(NSArray *contents, NSError *error) {
             
@@ -37,9 +43,9 @@
 
 - (void)testCreateDirectory;
 {
-    if ([self setupSession])
+    if ([self setup])
     {
-        NSURL *folder = [CK2FileManager URLWithPath:@"test" relativeToURL:[NSURL URLWithString:@"sftp://localhost/"]];
+        NSURL *folder = [self URLForPath:@"CK2FileManagerSFTPTests"];
         
         [self.session createDirectoryAtURL:folder withIntermediateDirectories:NO openingAttributes:@{ NSFilePosixPermissions : @(0700) } completionHandler:^(NSError *error) {
             
@@ -54,9 +60,9 @@
 
 - (void)testCreateFile;
 {
-    if ([self setupSession])
+    if ([self setup])
     {
-        NSURL *file = [CK2FileManager URLWithPath:@"test.txt" relativeToURL:[NSURL URLWithString:@"sftp://localhost/"]];
+        NSURL *file = [self URLForPath:@"CK2FileManagerSFTPTests/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
         
         [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:@{ NSFilePosixPermissions : @(0600) } progressBlock:nil completionHandler:^(NSError *error) {
@@ -72,9 +78,9 @@
 
 - (void)testChangeAttributes;
 {
-    if ([self setupSession])
+    if ([self setup])
     {
-        NSURL *folder = [CK2FileManager URLWithPath:@"test" relativeToURL:[NSURL URLWithString:@"sftp://localhost/"]];
+        NSURL *folder = [self URLForPath:@"CK2FileManagerSFTPTests"];
         
         [self.session setAttributes:@{ NSFilePosixPermissions : @(0755) } ofItemAtURL:folder completionHandler:^(NSError *error) {
             

@@ -64,6 +64,10 @@
     {
         key = @"CKFTPTestURL";
     }
+    else if ([responses isEqualToString:@"sftp"])
+    {
+        key = @"CKSFTPTestURL";
+    }
     else
     {
         key = nil;
