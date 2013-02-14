@@ -14,6 +14,8 @@
 @property (strong, nonatomic) NSMutableString* transcript;
 @property (strong, nonatomic) NSString* type;
 @property (assign, nonatomic) BOOL useMockServer;
+@property (strong, nonatomic) NSString* originalUser;
+@property (strong, nonatomic) NSString* originalPassword;
 
 - (NSURL*)temporaryFolder;
 - (BOOL)setupSession;

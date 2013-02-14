@@ -38,8 +38,16 @@
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:self.tests.user password:self.tests.password persistence:NSURLCredentialPersistenceNone];
-    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    if (challenge.previousFailureCount > 0)
+    {
+        NSLog(@"cancelling authentication");
+        [challenge.sender cancelAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.tests.originalUser password:self.tests.originalPassword persistence:NSURLCredentialPersistenceNone];
+        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    }
 }
 
 @end
@@ -55,7 +63,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"sftp", @"ftp"];
+    NSArray* responses = @[@"ftp" /*, @"sftp"*/];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)

@@ -106,6 +106,9 @@
 
     if (ok)
     {
+        self.originalUser = self.user;
+        self.originalPassword = self.password;
+
         [self setupSession];
         ok = self.session != nil;
     }
