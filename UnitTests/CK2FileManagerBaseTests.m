@@ -22,7 +22,8 @@
 
 - (NSURL*)temporaryFolder
 {
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", self.type]];
+    NSString* type = self.type ?: @"CK2FileTest";
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", type]];
     NSError* error = nil;
     BOOL ok = [[NSFileManager defaultManager] createDirectoryAtURL:result withIntermediateDirectories:YES attributes:nil error:&error];
     STAssertTrue(ok, @"failed to make temporary folder with error %@", error);
