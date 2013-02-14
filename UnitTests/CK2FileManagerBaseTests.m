@@ -14,14 +14,15 @@
 {
     [_session release];
     [_transcript release];
-
+    [_type release];
+    
     [super dealloc];
 }
 
 
 - (NSURL*)temporaryFolder
 {
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerFileTests"];
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", self.type]];
 
     return result;
 }
@@ -55,27 +56,28 @@
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
-    NSString* key;
     if ([responses isEqualToString:@"webdav"])
     {
-        key = @"CKWebDAVTestURL";
+        self.type = @"CKWebDAVTest";
     }
     else if ([responses isEqualToString:@"ftp"])
     {
-        key = @"CKFTPTestURL";
+        self.type = @"CKFTPTest";
     }
     else if ([responses isEqualToString:@"sftp"])
     {
-        key = @"CKSFTPTestURL";
+        self.type = @"CKSFTPTest";
     }
     else
     {
-        key = nil;
+        self.type = nil;
     }
 
+
     NSString* setting = nil;
-    if (key)
+    if (self.type)
     {
+        NSString* key = [NSString stringWithFormat:@"%@URL", self.type];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
         STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
     }
