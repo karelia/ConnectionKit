@@ -13,11 +13,37 @@
 #import <curl/curl.h>
 #import <CURLHandle/CURLHandle.h>
 
+@class CK2FileManagerFTPTests;
+@interface CleanupDelegate : CK2FileManager<CK2FileManagerDelegate>
+
+@property (strong, nonatomic) CK2FileManagerFTPTests* tests;
+
+@end
+
 @interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
 
 @property (strong, nonatomic) NSString* responsesToUse;
 
 @end
+
+@implementation CleanupDelegate
+
++ (CleanupDelegate*)delegateWithTest:(CK2FileManagerFTPTests*)tests
+{
+    CleanupDelegate* result = [[CleanupDelegate alloc] init];
+    result.tests = tests;
+
+    return [result autorelease];
+}
+
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    NSURLCredential* credential = [NSURLCredential credentialWithUser:self.tests.user password:self.tests.password persistence:NSURLCredentialPersistenceNone];
+    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+}
+
+@end
+
 
 @implementation CK2FileManagerFTPTests
 
@@ -29,7 +55,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"ftp", @"sftp"];
+    NSArray* responses = @[@"sftp", @"ftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -177,25 +203,23 @@ static NSString* gResponsesToUse = nil;
 
         NSLog(@"<<<< Making Test Directory");
 
-        // suppress the transcript for this stuff
-        NSMutableString* saved = self.transcript;
-        self.transcript = nil;
+        CK2FileManager* session = [[CK2FileManager alloc] init];
+        session.delegate = [CleanupDelegate delegateWithTest:self];
 
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+        [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             [self checkNoErrorOrFileExistsError:error];
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
-                [self.session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                     [self checkNoErrorOrFileExistsError:error];
-                    [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                         [self checkNoErrorOrFileExistsError:error];
                         [self pause];
-                        self.transcript = saved;
                         NSLog(@"<<<< Made Test Files");
                     }];
                 }];
@@ -203,12 +227,13 @@ static NSString* gResponsesToUse = nil;
             else
             {
                 [self pause];
-                self.transcript = saved;
             }
             NSLog(@"<<<< Made Test Directory");
         }];
 
         [self runUntilPaused];
+
+        [session release];
     }
 }
 
@@ -221,10 +246,13 @@ static NSString* gResponsesToUse = nil;
         NSMutableString* saved = self.transcript;
         self.transcript = nil;
 
+        CK2FileManager* session = [[CK2FileManager alloc] init];
+        session.delegate = [CleanupDelegate delegateWithTest:self];
+
         // we don't care about errors here, we just want to do our best to clean up after any tests
-        [self.session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
-            [self.session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
-                [self.session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
+        [session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
+            [session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
+                [session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
                     [self pause];
 
                     // restore the transcript
@@ -235,6 +263,7 @@ static NSString* gResponsesToUse = nil;
         }];
 
         [self runUntilPaused];
+        [session release];
     }
 }
 
