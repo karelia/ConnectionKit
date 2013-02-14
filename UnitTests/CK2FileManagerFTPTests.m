@@ -116,13 +116,10 @@ static NSString* gResponsesToUse = nil;
     [super tearDown];
 }
 
-- (NSString*)useBadLogin
+- (void)useBadLogin
 {
-    NSString* savedUser = self.user;
     self.user = @"bad";
     [self useResponseSet:@"bad login"];
-
-    return savedUser;
 }
 
 #pragma mark - Result Checking Support
@@ -812,14 +809,14 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self removeTestDirectory];
-        NSString* savedUser = [self useBadLogin];
+        [self useBadLogin];
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
             [self checkIsAuthenticationError:error];
 
-            self.user = savedUser;
+            self.user = self.originalUser;
             [self useResponseSet:@"default"];
             
             [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
