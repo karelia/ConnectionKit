@@ -45,6 +45,7 @@
 @private
     NSImage *_image;
     NSColor *_labelColor;
+    BOOL    _isTextOnly;
 }
 
 @property(retain) NSImage *image;
