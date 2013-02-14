@@ -86,11 +86,11 @@
         minSize = [[[self itemPrototype] view] frame].size;
         
         colCount = NSWidth(bounds) / minSize.width;
-        calcWidth = NSWidth(bounds) / colCount;
+        calcWidth = floor(NSWidth(bounds) / colCount);
         
         [self setMaxNumberOfColumns:colCount];
         
-        size = NSMakeSize(calcWidth, minSize.width);
+        size = NSMakeSize(MIN(calcWidth, minSize.width), minSize.height);
         [self setMinItemSize:size];
         // Setting the max size gets rid of odd scroller behavior
         [self setMaxItemSize:size];
