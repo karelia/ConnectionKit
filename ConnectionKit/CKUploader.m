@@ -11,12 +11,6 @@
 
 @implementation CKUploader
 
-
-+ (BOOL)implementedWithCK2
-{
-    return NO;
-}
-
 #pragma mark Lifecycle
 
 - (id)initWithRequest:(NSURLRequest *)request filePosixPermissions:(unsigned long)customPermissions options:(CKUploadingOptions)options;

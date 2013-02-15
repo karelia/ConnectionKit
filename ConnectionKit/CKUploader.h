@@ -65,8 +65,6 @@ typedef NSUInteger CKUploadingOptions;
 - (unsigned long)posixPermissionsForPath:(NSString *)path isDirectory:(BOOL)directory;
 + (unsigned long)posixPermissionsForDirectoryFromFilePermissions:(unsigned long)filePermissions;
 
-+ (BOOL)implementedWithCK2; // TEMPORARY reporting on which API we're implemented with, for the benefit of the unit tests (certain tests are known to fail with CK1).
-
 @end
 
 
