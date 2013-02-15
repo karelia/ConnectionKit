@@ -59,6 +59,32 @@
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
 		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
 		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
+		5FEEF1D716CD6A5A002C1CBF /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1D816CD6A63002C1CBF /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
+		5FEEF1D916CD6A67002C1CBF /* UKKQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF10B115511006905FA /* UKKQueue.h */; };
+		5FEEF1DA16CD6A6A002C1CBF /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
+		5FEEF1DB16CD6A70002C1CBF /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1DC16CD6A76002C1CBF /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83509F7048400172CDD /* KTLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1DD16CD6A7D002C1CBF /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84109F7048400172CDD /* RunLoopForwarder.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1DE16CD6A82002C1CBF /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD90009F7077900172CDD /* NSData+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1DF16CD6A87002C1CBF /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1E016CD6A96002C1CBF /* CKConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1E116CD6A96002C1CBF /* CKConnectionRegistry.h in Headers */ = {isa = PBXBuildFile; fileRef = 27AE68370EE98A8400409D80 /* CKConnectionRegistry.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1E216CD6A96002C1CBF /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1E316CD6AA1002C1CBF /* CKInternalTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B9CD9A0B1A907600FBFDB3 /* CKInternalTransferRecord.h */; };
+		5FEEF1E416CD6AA1002C1CBF /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
+		5FEEF1E516CD6AA1002C1CBF /* CK2RemoteURL.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8201626CA67000C9D9F /* CK2RemoteURL.h */; };
+		5FEEF1E916CDB38C002C1CBF /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; };
+		5FEEF1EA16CDB38C002C1CBF /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; };
+		5FEEF1EB16CDB38C002C1CBF /* CKSFTPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3DF1459CAFC0085BBC4 /* CKSFTPConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1F016CDB399002C1CBF /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1F116CDB3A3002C1CBF /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1F216CDB3AA002C1CBF /* CK2Authentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278D8B77167FF35D00622468 /* CK2Authentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5FEEF1F316CDB3E1002C1CBF /* CK2Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2Protocol.h */; };
+		5FEEF1F416CDB3E1002C1CBF /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
+		5FEEF1F516CDB3E1002C1CBF /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
+		5FEEF1F616CDB3E1002C1CBF /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
+		5FEEF1F716CDB3E1002C1CBF /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -694,6 +720,39 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		5FEEF1D616CD6A44002C1CBF /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5FEEF1D716CD6A5A002C1CBF /* Connection.h in Headers */,
+				5FEEF1D816CD6A63002C1CBF /* UKFileWatcher.h in Headers */,
+				5FEEF1D916CD6A67002C1CBF /* UKKQueue.h in Headers */,
+				5FEEF1DA16CD6A6A002C1CBF /* UKMainThreadProxy.h in Headers */,
+				5FEEF1DB16CD6A70002C1CBF /* CKTransferRecord.h in Headers */,
+				5FEEF1DC16CD6A76002C1CBF /* KTLog.h in Headers */,
+				5FEEF1DD16CD6A7D002C1CBF /* RunLoopForwarder.h in Headers */,
+				5FEEF1DE16CD6A82002C1CBF /* NSData+Connection.h in Headers */,
+				5FEEF1DF16CD6A87002C1CBF /* NSString+Connection.h in Headers */,
+				5FEEF1E016CD6A96002C1CBF /* CKConnectionProtocol.h in Headers */,
+				5FEEF1E116CD6A96002C1CBF /* CKConnectionRegistry.h in Headers */,
+				5FEEF1E216CD6A96002C1CBF /* CKUploader.h in Headers */,
+				5FEEF1E316CD6AA1002C1CBF /* CKInternalTransferRecord.h in Headers */,
+				5FEEF1E416CD6AA1002C1CBF /* NSURL+Connection.h in Headers */,
+				5FEEF1E516CD6AA1002C1CBF /* CK2RemoteURL.h in Headers */,
+				5FEEF1E916CDB38C002C1CBF /* CK2SFTPFileHandle.h in Headers */,
+				5FEEF1EA16CDB38C002C1CBF /* CK2SFTPSession.h in Headers */,
+				5FEEF1EB16CDB38C002C1CBF /* CKSFTPConnection.h in Headers */,
+				5FEEF1F016CDB399002C1CBF /* CKWebDAVConnection.h in Headers */,
+				5FEEF1F116CDB3A3002C1CBF /* CK2FileManager.h in Headers */,
+				5FEEF1F216CDB3AA002C1CBF /* CK2Authentication.h in Headers */,
+				5FEEF1F316CDB3E1002C1CBF /* CK2Protocol.h in Headers */,
+				5FEEF1F416CDB3E1002C1CBF /* CK2CURLBasedProtocol.h in Headers */,
+				5FEEF1F516CDB3E1002C1CBF /* CK2FTPProtocol.h in Headers */,
+				5FEEF1F616CDB3E1002C1CBF /* CK2SFTPProtocol.h in Headers */,
+				5FEEF1F716CDB3E1002C1CBF /* CK2FileProtocol.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12109F702BE00172CDD /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -782,6 +841,7 @@
 			buildPhases = (
 				CDDD232B16A07BD300693DE6 /* Sources */,
 				CDDD232C16A07BD300693DE6 /* Frameworks */,
+				5FEEF1D616CD6A44002C1CBF /* Headers */,
 				CDDD232D16A07BD300693DE6 /* CopyFiles */,
 			);
 			buildRules = (
@@ -1110,7 +1170,6 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
@@ -1142,7 +1201,6 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
@@ -1167,7 +1225,6 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
-				GCC_ENABLE_OBJC_GC = supported;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
 				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
