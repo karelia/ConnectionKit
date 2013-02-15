@@ -14,14 +14,19 @@
 {
     [_session release];
     [_transcript release];
-
+    [_type release];
+    
     [super dealloc];
 }
 
 
 - (NSURL*)temporaryFolder
 {
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerFileTests"];
+    NSString* type = self.type ?: @"CK2FileTest";
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", type]];
+    NSError* error = nil;
+    BOOL ok = [[NSFileManager defaultManager] createDirectoryAtURL:result withIntermediateDirectories:YES attributes:nil error:&error];
+    STAssertTrue(ok, @"failed to make temporary folder with error %@", error);
 
     return result;
 }
@@ -55,31 +60,41 @@
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
-    NSString* key;
     if ([responses isEqualToString:@"webdav"])
     {
-        key = @"CKWebDAVTestURL";
+        self.type = @"CKWebDAVTest";
     }
     else if ([responses isEqualToString:@"ftp"])
     {
-        key = @"CKFTPTestURL";
+        self.type = @"CKFTPTest";
+    }
+    else if ([responses isEqualToString:@"sftp"])
+    {
+        self.type = @"CKSFTPTest";
     }
     else
     {
-        key = nil;
+        self.type = nil;
     }
+
 
     NSString* setting = nil;
-    if (key)
+    if (self.type)
     {
+        NSString* key = [NSString stringWithFormat:@"%@URL", self.type];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead.", responses, key, key);
+        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
     }
 
-    if (!setting || [setting isEqualToString:@"MockServer"])
+    BOOL ok;
+    if (!setting || [setting isEqualToString:@"Off"])
+    {
+        ok = NO;
+    }
+    else if ([setting isEqualToString:@"MockServer"])
     {
         self.useMockServer = YES;
-        [super setupServerWithResponseFileNamed:responses];
+        ok = [super setupServerWithResponseFileNamed:responses];
     }
     else
     {
@@ -87,10 +102,19 @@
         self.user = url.user;
         self.password = url.password;
         self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
+        ok = YES;
     }
 
-    [self setupSession];
-    return self.session != nil;
+    if (ok)
+    {
+        self.originalUser = self.user;
+        self.originalPassword = self.password;
+
+        [self setupSession];
+        ok = self.session != nil;
+    }
+
+    return ok;
 }
 
 - (void)useResponseSet:(NSString*)name

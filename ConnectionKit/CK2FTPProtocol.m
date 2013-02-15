@@ -86,7 +86,7 @@
             ];
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
 {
     if ([request curl_createIntermediateDirectories] != createIntermediates)
     {
@@ -99,10 +99,10 @@
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
     
-    self = [self initWithRequest:request client:client progressBlock:^(NSUInteger bytesWritten) {
+    self = [self initWithRequest:request client:client progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptsCount) {
         
         if (bytesWritten == 0) atEnd = YES;
-        if (bytesWritten && progressBlock) progressBlock(bytesWritten);
+        if (bytesWritten && progressBlock) progressBlock(bytesWritten, 0);
         
     } completionHandler:^(NSError *error) {
         

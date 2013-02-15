@@ -48,7 +48,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 
 - (id)initFileCreationOperationWithURL:(NSURL *)remoteURL
@@ -56,7 +56,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 
 - (id)initRemovalOperationWithURL:(NSURL *)url
@@ -110,21 +110,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 
 @implementation CK2FileManager
-
-- (id)init;
-{
-    if (self = [super init])
-    {
-        _cachedCredentials = [[NSMutableDictionary alloc] init];
-    }
-    return self;
-}
-
-- (void)dealloc;
-{
-    [_cachedCredentials release];
-    [super dealloc];
-}
 
 #pragma mark Discovering Directory Contents
 
@@ -186,7 +171,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:url
                                                                                         data:data
@@ -199,7 +184,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:destinationURL
                                                                                         file:sourceURL
@@ -274,26 +259,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (void)cancelOperation:(id)operation;
 {
     [operation cancel];
-}
-
-#pragma mark Credential Cache
-
-// TODO: Use a serial queue rather @synchronized for this
-
-- (NSURLCredential *)cachedCredentialForProtectionSpace:(NSURLProtectionSpace *)space;
-{
-    @synchronized(_cachedCredentials)
-    {
-        return [_cachedCredentials objectForKey:space];
-    }
-}
-
-- (void)cacheCredential:(NSURLCredential *)credential forProtectionSpace:(NSURLProtectionSpace *)space;
-{
-    @synchronized(_cachedCredentials)
-    {
-        return [_cachedCredentials setObject:credential forKey:space];
-    }
 }
 
 @end
@@ -392,7 +357,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
@@ -416,7 +381,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
            withIntermediateDirectories:(BOOL)createIntermediates
                      openingAttributes:(NSDictionary *)attributes
                                manager:(CK2FileManager *)manager
-                         progressBlock:(void (^)(NSUInteger))progressBlock
+                         progressBlock:(CK2ProgressBlock)progressBlock
                        completionBlock:(void (^)(NSError *))block;
 {
     return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
@@ -425,13 +390,21 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         
         NSMutableURLRequest *request = [[manager requestWithURL:url] mutableCopy];
         
-        // Read the data using an input stream if possible
-        NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
-        if (stream)
+        // Read the data using an input stream if possible, and know file size
+        NSNumber *fileSize;
+        if ([sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
         {
-            [request setHTTPBodyStream:stream];
+            NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
+            
+            NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
+            if (stream)
+            {
+                [request setHTTPBodyStream:stream];
+                [request setValue:length forHTTPHeaderField:@"Content-Length"];
+            }
         }
-        else
+        
+        if (!request.HTTPBodyStream)
         {
             NSError *error;
             NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
@@ -652,16 +625,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         id <CK2FileManagerDelegate> delegate = [manager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
-            // Was the credential previously cached?
-            NSURLCredential *credential = [manager cachedCredentialForProtectionSpace:challenge.protectionSpace];
-            if (credential)
-            {
-                [self useCredential:credential forAuthenticationChallenge:_trampolineChallenge];
-            }
-            else
-            {
-                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-            }
+            [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
         }
         else
         {
@@ -691,8 +655,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
         [self release];
     });
-    
-    [_operation->_manager cacheCredential:credential forProtectionSpace:challenge.protectionSpace];
 }
 
 - (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;

@@ -12,7 +12,10 @@
 @property (strong, nonatomic) CK2FileManager* session;
 @property (assign, atomic) KMSState state;
 @property (strong, nonatomic) NSMutableString* transcript;
+@property (strong, nonatomic) NSString* type;
 @property (assign, nonatomic) BOOL useMockServer;
+@property (strong, nonatomic) NSString* originalUser;
+@property (strong, nonatomic) NSString* originalPassword;
 
 - (NSURL*)temporaryFolder;
 - (BOOL)setupSession;

@@ -13,9 +13,45 @@
 #import <curl/curl.h>
 #import <CURLHandle/CURLHandle.h>
 
-@interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
+@class CK2FileManagerFTPTests;
+@interface CleanupDelegate : CK2FileManager<CK2FileManagerDelegate>
+
+@property (strong, nonatomic) CK2FileManagerFTPTests* tests;
 
 @end
+
+@interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
+
+@property (strong, nonatomic) NSString* responsesToUse;
+
+@end
+
+@implementation CleanupDelegate
+
++ (CleanupDelegate*)delegateWithTest:(CK2FileManagerFTPTests*)tests
+{
+    CleanupDelegate* result = [[CleanupDelegate alloc] init];
+    result.tests = tests;
+
+    return [result autorelease];
+}
+
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge.previousFailureCount > 0)
+    {
+        NSLog(@"cancelling authentication");
+        [challenge.sender cancelAuthenticationChallenge:challenge];
+    }
+    else
+    {
+        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.tests.originalUser password:self.tests.originalPassword persistence:NSURLCredentialPersistenceNone];
+        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    }
+}
+
+@end
+
 
 @implementation CK2FileManagerFTPTests
 
@@ -23,10 +59,48 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
+static NSString* gResponsesToUse = nil;
+
++ (id) defaultTestSuite
+{
+    NSArray* responses = @[@"ftp" , @"sftp"];
+
+    SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
+    for (NSString* name in responses)
+    {
+        // in order to re-use the default SenTest mechanism for building up a suite of tests, we set some global variables
+        // to indicate the test configuration we want, then call on to the defaultTestSuite to get a set of tests using that configuration.
+        gResponsesToUse = name;
+        SenTestSuite* suite = [[SenTestSuite alloc] initWithName:name];
+        [suite addTest:[super defaultTestSuite]];
+        [result addTest:suite];
+        [suite release];
+    }
+
+    return [result autorelease];
+}
+
+- (id)initWithInvocation:(NSInvocation *)anInvocation
+{
+    if ((self = [super initWithInvocation:anInvocation]) != nil)
+    {
+        // store the value of the globals here, since they'll potentially be different by the time we're actually run
+        self.responsesToUse = gResponsesToUse;
+    }
+
+    return self;
+}
+
+- (void)dealloc
+{
+    [_responsesToUse release];
+
+    [super dealloc];
+}
 
 - (BOOL)setup
 {
-    BOOL result = ([self setupSessionWithResponses:@"ftp"]);
+    BOOL result = ([self setupSessionWithResponses:self.responsesToUse]);
     self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
 
     return result;
@@ -42,13 +116,10 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     [super tearDown];
 }
 
-- (NSString*)useBadLogin
+- (void)useBadLogin
 {
-    NSString* savedUser = self.user;
     self.user = @"bad";
     [self useResponseSet:@"bad login"];
-
-    return savedUser;
 }
 
 #pragma mark - Result Checking Support
@@ -137,25 +208,23 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
         NSLog(@"<<<< Making Test Directory");
 
-        // suppress the transcript for this stuff
-        NSMutableString* saved = self.transcript;
-        self.transcript = nil;
+        CK2FileManager* session = [[CK2FileManager alloc] init];
+        session.delegate = [CleanupDelegate delegateWithTest:self];
 
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+        [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             [self checkNoErrorOrFileExistsError:error];
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
-                [self.session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                     [self checkNoErrorOrFileExistsError:error];
-                    [self.session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                         [self checkNoErrorOrFileExistsError:error];
                         [self pause];
-                        self.transcript = saved;
                         NSLog(@"<<<< Made Test Files");
                     }];
                 }];
@@ -163,12 +232,13 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
             else
             {
                 [self pause];
-                self.transcript = saved;
             }
             NSLog(@"<<<< Made Test Directory");
         }];
 
         [self runUntilPaused];
+
+        [session release];
     }
 }
 
@@ -181,10 +251,13 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         NSMutableString* saved = self.transcript;
         self.transcript = nil;
 
+        CK2FileManager* session = [[CK2FileManager alloc] init];
+        session.delegate = [CleanupDelegate delegateWithTest:self];
+
         // we don't care about errors here, we just want to do our best to clean up after any tests
-        [self.session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
-            [self.session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
-                [self.session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
+        [session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
+            [session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
+                [session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
                     [self pause];
 
                     // restore the transcript
@@ -195,6 +268,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         }];
 
         [self runUntilPaused];
+        [session release];
     }
 }
 
@@ -735,14 +809,14 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     if ([self setup])
     {
         [self removeTestDirectory];
-        NSString* savedUser = [self useBadLogin];
+        [self useBadLogin];
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
             [self checkIsAuthenticationError:error];
 
-            self.user = savedUser;
+            self.user = self.originalUser;
             [self useResponseSet:@"default"];
             
             [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {

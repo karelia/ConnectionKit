@@ -26,7 +26,12 @@
 
 - (void)doTestCreateAndRemoveFileAtURL:(NSURL*)url useStream:(BOOL)useStream
 {
-    NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+    NSString* content = @"Some test text";
+    NSData* data = [content dataUsingEncoding:NSUTF8StringEncoding];
+    NSURL* tempFile = nil;
+    NSError* error;
+    __block NSUInteger written = 0;
+    __block NSUInteger attempts = 0;
 
     // try to delete in case it's left around from last time - ignore error
     [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
@@ -34,26 +39,41 @@
     }];
     [self runUntilPaused];
 
+    CK2ProgressBlock progress = ^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+        attempts = previousAttemptCount;
+        written = bytesWritten;
+    };
+
+
     // try to upload
     if (useStream)
     {
-        NSURL* tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
-        [data writeToURL:tempFile atomically:YES];
-        [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNil(error, @"got unexpected error %@", error);
-
-            [self pause];
-        }];
+        tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
+        BOOL ok = [data writeToURL:tempFile options:NSDataWritingAtomic error:&error];
+        STAssertTrue(ok, @"failed to write temporary file with error %@", error);
+        [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {
+                        STAssertNil(error, @"got unexpected error %@", error);
+                        
+                        [self pause];
+                    }
+         ];
     }
     else
     {
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
     }
+    
     [self runUntilPaused];
+    [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
+
+    STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
+
+    NSUInteger expected = [data length] * (attempts + 1);
+    STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
 
     // try to download
     NSURLRequest* request = [NSURLRequest requestWithURL:url];

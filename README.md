@@ -41,6 +41,8 @@ Requires OS X v10.6+
 
 Relies upon CURLHandle and DAVKit. They are provided as submodules and may have their own dependencies in turn. Out of the box, provided you initialise all submodules, `CURLHandle.framework` should be able to nicely build, self-containing all its dependencies.
 
+ConnectionKit supports both 64 and 32bit Macs. We hope to expand to iOS before too long too. Note that support for the legacy Objective-C runtime (32bit Mac) currently precludes switching the codebase to ARC.
+
 License
 =======
 

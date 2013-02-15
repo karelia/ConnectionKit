@@ -14,17 +14,21 @@
 
 @interface CK2WebDAVProtocol()
 
+@property (assign, nonatomic) NSUInteger attempts;
 @property (copy, nonatomic) CK2WebDAVCompletionHandler completionHandler;
 @property (copy, nonatomic) CK2WebDAVErrorHandler errorHandler;
-@property (copy, nonatomic) CK2WebDAVProgressHandler progressHandler;
+@property (assign, nonatomic) NSUInteger expectedLength;
+@property (copy, nonatomic) CK2ProgressBlock progressHandler;
 @property (strong, nonatomic) NSOperationQueue* queue;
 
 @end
 
 @implementation CK2WebDAVProtocol
 
+@synthesize attempts = _attempts;
 @synthesize completionHandler = _completionHandler;
 @synthesize errorHandler = _errorHandler;
+@synthesize expectedLength = _expectedLength;
 @synthesize progressHandler = _progressHandler;
 @synthesize queue = _queue;
 
@@ -144,28 +148,30 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
 {
     CK2WebDAVLog(@"creating file");
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
         NSString* path = [self pathForRequest:request];
-        NSData* data = [request HTTPBody];
-        NSInputStream* stream = [request HTTPBodyStream];
 
         CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
-            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path session:_session delegate:self];
-            davRequest.data = data;
-            davRequest.stream = stream;
-            davRequest.dataMIMEType = [self MIMETypeForExtension:[path pathExtension]];
+
+            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
+            
             [_queue addOperation:davRequest];
             [davRequest release];
 
-            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];
+            self.expectedLength = davRequest.expectedLength;
+            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:self.expectedLength];
 
-            self.progressHandler = ^(NSUInteger progress) {
+            self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
                 [transfer setProgress:progress];
+                if (progressBlock)
+                {
+                    progressBlock(progress, previousAttemptsCount);
+                }
             };
 
             self.completionHandler =  ^(id result) {
@@ -194,7 +200,12 @@
                                               CK2WebDAVLog(@"create subdirectory failed");
                                               [self reportFailedWithError:error];
 
-                                          } completionHandler:makeFileBlock];
+                                          } completionHandler:^(id result) {
+                                              // reset the attempts count (don't count attempts whilst creating)
+                                              self.attempts = 0;
+                                              makeFileBlock(result);
+                                          }
+                 ];
             }
         }
 
@@ -261,34 +272,11 @@
     return path;
 }
 
-- (NSString*)MIMETypeForExtension:(NSString*)extension
-{
-    CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (CFStringRef)extension, NULL);
-    NSString* mimeType = nil;
-    if (type)
-    {
-        mimeType = (NSString*)UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
-        CFRelease(type);
-        [mimeType autorelease];
-    }
-    if (!mimeType)
-    {
-        mimeType = @"application/octet-stream";
-    }
-
-    return mimeType;
-}
-
 #pragma mark Request Delegate
 
 - (void)requestDidBegin:(DAVRequest *)aRequest;
 {
     CK2WebDAVLog(@"webdav request began");
-
-    if (self.progressHandler)
-    {
-        self.progressHandler(0);
-    }
 }
 
 - (void)request:(DAVRequest *)aRequest didSucceedWithResult:(id)result;
@@ -328,10 +316,24 @@
 {
     CK2WebDAVLog(@"webdav sent data");
 
+    if (self.expectedLength != totalBytesExpectedToWrite)
+    {
+        ++self.attempts;
+        self.expectedLength = totalBytesExpectedToWrite;
+    }
+    
     if (self.progressHandler)
     {
-        self.progressHandler(totalBytesWritten);
+        self.progressHandler(totalBytesWritten, self.attempts);
     }
+}
+
+- (NSInputStream*)webDAVRequest:(DAVRequest *)request needNewBodyStream:(NSURLRequest *)urlRequest
+{
+
+    NSInputStream* result = [[self client] protocol:self needNewBodyStream:urlRequest];
+
+    return result;
 }
 
 #pragma mark WebDAV Authentication
@@ -385,7 +387,6 @@
         [self.client protocol:self didFailWithError:error];
     }];
 }
-
 
 /**
  Create a chain of createDirectory requests.
