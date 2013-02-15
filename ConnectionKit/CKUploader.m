@@ -118,7 +118,7 @@
         NSURL *url = [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten) {
+        id op = [_fileManager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [result transfer:result transferredDataOfLength:bytesWritten];
@@ -159,7 +159,7 @@
         NSURL *remoteURL = [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
         NSDictionary *attributes = @{ NSFilePosixPermissions : @([self posixPermissionsForPath:path isDirectory:NO]) };
         
-        id op = [_fileManager createFileAtURL:remoteURL withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten) {
+        id op = [_fileManager createFileAtURL:remoteURL withContentsOfURL:localURL withIntermediateDirectories:YES openingAttributes:attributes progressBlock:^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
             
             dispatch_async(dispatch_get_main_queue(), ^{
                 [result transfer:result transferredDataOfLength:bytesWritten];
