@@ -91,7 +91,8 @@
 {
     if (_options & CKUploadingDeleteExistingFileFirst)
 	{
-        [self removeFileAtPath:path];
+        // The file might not exist, so will fail in that case. We don't really care since should a deletion fail for a good reason, that ought to then cause the actual upload to fail
+        [self removeFileAtPath:path reportError:NO];
 	}
     
     return [self makeTransferRecordWithPath:path size:size];
@@ -99,12 +100,18 @@
 
 - (void)removeFileAtPath:(NSString *)path;
 {
+    [self removeFileAtPath:path reportError:YES];
+}
+
+- (void)removeFileAtPath:(NSString *)path reportError:(BOOL)reportError;
+{
     [self addOperationWithBlock:^{
         
         NSURL *url = [CK2FileManager URLWithPath:path relativeToURL:[self request].URL];
         
         return [_fileManager removeItemAtURL:url completionHandler:^(NSError *error) {
-            [self operationDidFinish:error];
+            
+            [self operationDidFinish:(reportError ? error : nil)];
         }];
     }];
 }
