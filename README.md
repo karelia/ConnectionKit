@@ -51,7 +51,7 @@ Please see https://github.com/karelia/CurlHandle for details of CURLHandle and i
 
 ### DAVKit
 
-Please see https://github.com/karelia/DAVKit for details of CURLHandle and its subcomponents' licensing.
+Please see https://github.com/karelia/DAVKit for details of DAVKit and its subcomponents' licensing.
 
 ### Legacy
 
