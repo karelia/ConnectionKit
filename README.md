@@ -84,12 +84,30 @@ Usage
 
 ### Actually, y'know, doing stuff
 
-1. Create a `CK2FileManager` instance
-2. Set the file manager's delegate if you require control over authentication, or to receive transcripts. More details on auth are below
-3. Instruct the file manager to do the thing what it is you want to do
-4. The file manager will asynchronously call your completion handler when finished, to indicate success of the operation
+Interacting with ConnectionKit is usually entirely through `CKFileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
 
-Be sure to read through `CK2FileManager.h` as there's plenty of helpful documentation in there.
+So to get a directory listing from an FTP server for example:
+
+	- (void)listDirectoryAtPath:(NSString *)path
+	{
+		NSURL *ftpServer = [NSURL URLWithString:@"ftp://example.com/"];
+		NSURL *directory = [CK2FileManager URLWithPath:path relativeToURL:ftpServer];
+		
+		CK2FileManager *fileManager = [[CK2FileManager alloc] init];
+		fileManager.delegate = self;
+		
+		[fileManager contentsOfDirectoryAtURL:directory
+		           includingPropertiesForKeys:nil
+		                              options:NSDirectoryEnumerationSkipsHiddenFiles
+		                    completionHandler:^(NSArray *contents, NSError *error) {
+			
+			// Display contents in your UI, or present the error if failed
+		}];
+	}
+
+Note how `CK2FileManager` is used to construct URLs. This is to handle the difference in URL formats different protocols require.
+
+Delegate methods are used to handle authentication (more on that below) and transcripts. Be sure to read through `CK2FileManager.h` as there's plenty of helpful documentation in there.
 
 ### Authentication
 
