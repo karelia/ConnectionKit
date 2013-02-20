@@ -79,6 +79,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Getting and Setting Attributes
+
 // It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:
 //
 //  FTP:    Only NSFilePosixPermissions is supported, and not by all servers
@@ -86,6 +87,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 //  WebDAV: No attributes are supported
 //  file:   Behaves the same as NSFileManager
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+
+// To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
 
 #pragma mark Cancelling Operations
