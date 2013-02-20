@@ -146,6 +146,16 @@ The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) acc
 
 After checking the host fingerprint, SFTP moves on to actually authenticating the client.
 
+### Resource Properties/Attributes
+
+ConnectionKit's API is a little asymmetric for handling resource properties:
+
+When creating a file or directory, *opening* attributes may be specified. Generally only `NSFilePosixPermissions` is respected. This **only** applies to protocols where permissions can be specified at creation time (i.e. SFTP). But even then there are some servers in my experience that sometimes ignore this value anyway. So:
+
+To set the properties of an existing item, use `-[CK2FileManager setAttributes:ofItemAtURL:completionHandler:]`. Again this only applies to certain protocols/servers; see `CK2FileManager.h` for up-to-date information on this.
+
+Many protocols do not have an efficient mechanism for retrieving the attributes of an individual item. Instead, you should get a listing of the *parent* directory, and pull out the properties of whichever resources you're interested in.
+
 Legacy
 ======
 
