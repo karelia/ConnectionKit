@@ -45,19 +45,19 @@ ConnectionKit supports both 64 and 32bit Macs. We hope to expand to iOS before t
 License
 =======
 
-### CURLHandle
+## CURLHandle
 
 Please see https://github.com/karelia/CurlHandle for details of CURLHandle and its subcomponents' licensing.
 
-### DAVKit
+## DAVKit
 
 Please see https://github.com/karelia/DAVKit for details of DAVKit and its subcomponents' licensing.
 
-### Legacy
+## Legacy
 
 Existing ConnectionKit code should declare its licensing at the top of the file, most likely BSD or MIT.
 
-### ConnectionKit 2 code
+## ConnectionKit 2 code
 
 Licensed under the BSD License <http://www.opensource.org/licenses/bsd-license>
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
@@ -73,7 +73,7 @@ THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 Usage
 =====
 
-### Getting the code
+## Getting the code
 
 1. Clone the ConnectionKit repository, ideally by adding it as a submodule if you're using git for your main project
 2. Checkout the `curlhandle-4` branch
@@ -82,7 +82,7 @@ Usage
 5. Add the ConnectionKit framework as a dependency of your project's build target
 6. Set `Connection.framework` to be copied into a suitable location inside your build target; e.g the `Frameworks` directory
 
-### Actually, y'know, doing stuff
+## Actually, y'know, doing stuff
 
 Interacting with ConnectionKit is usually entirely through `CKFileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
 
@@ -109,19 +109,19 @@ Note how `CK2FileManager` is used to construct URLs. This is to handle the diffe
 
 Delegate methods are used to handle authentication (more on that below) and transcripts. Be sure to read through `CK2FileManager.h` as there's plenty of helpful documentation in there.
 
-### Authentication
+## Authentication
 
 ConnectionKit follows a similar pattern to `NSURLConnection`: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
 
-#### WebDAV over HTTP
+### WebDAV over HTTP
 
 WebDAV servers can selectively choose whether to require authentication (e.g. public servers have no need to). If authentication is requested, you'll receive an authentication challenge encapsulating the auth method to be used (e.g. HTTP Digest). Respond with a username and password credential. ConnectionKit will do its best to supply `-proposedCredential` from the user's keychain.
 
-#### FTP 
+### FTP 
 
 FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can ask to `-continueWithoutCredentialForAuthenticationChallenge:` for anonymous FTP login.
 
-#### WebDAV over HTTPS
+### WebDAV over HTTPS
 
 The validity of the server is checked first. This takes the form of potentially multiple challenges with the either of the following authentication methods:
 
@@ -130,7 +130,7 @@ The validity of the server is checked first. This takes the form of potentially 
 	
 Generally it's best to call use `-performDefaultHandlingForAuthenticationChallenge:` to let Cocoa decide what to do.
 
-#### SFTP
+### SFTP
 
 SFTP is a tricky blighter. You can opt to supply a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:
 
@@ -146,7 +146,7 @@ The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) acc
 
 After checking the host fingerprint, SFTP moves on to actually authenticating the client.
 
-### Resource Properties/Attributes
+## Resource Properties/Attributes
 
 ConnectionKit's API is a little asymmetric for handling resource properties:
 
