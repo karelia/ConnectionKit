@@ -204,7 +204,15 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLFileSecurityKey])
                                 {
-                                    // Not supported yet but could be
+                                    CFFileSecurityRef security = CFFileSecurityCreate(NULL);
+                                    
+                                    NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
+                                    if (CFFileSecuritySetMode(security, mode.unsignedShortValue))
+                                    {
+                                        [aURL setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey];
+                                    }
+                                    
+                                    CFRelease(security);
                                 }
                                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                 {
