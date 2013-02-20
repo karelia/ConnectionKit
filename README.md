@@ -144,7 +144,9 @@ Once connected to the server, ConnectionKit checks its fingerprint against the `
 
 The default behaviour (`-performDefaultHandlingForAuthenticationChallenge:`) accepts new fingerprints, adding them to the `known_hosts` file, and causes the operation to fail with an error for mismatched fingerprints.
 
-After checking the host fingerprint, SFTP moves on to actually authenticating the client. Legacy
+After checking the host fingerprint, SFTP moves on to actually authenticating the client.
+
+Legacy
 ======
 
 For anyone relying on one of the old branches, they have been archived to be tags:
