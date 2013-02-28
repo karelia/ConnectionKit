@@ -40,7 +40,6 @@
  @method connectionWithRequest:delegate:
  @abstract Locates the connection class that corresponds with the URL and then creates one.
  @param request The request to create a connection for.
- @param delegate The initial delegate for the connection.
  @result An initialized connection, or nil if no suitable class could be found.
  */
 - (id <CKPublishingConnection>)connectionWithRequest:(NSURLRequest *)request;
