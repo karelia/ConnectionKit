@@ -47,7 +47,7 @@ extern NSString * const CK2AuthenticationMethodHostFingerprint;
 + (NSURLCredential *)ck2_credentialWithUser:(NSString *)user
                                publicKeyURL:(NSURL *)publicKey
                               privateKeyURL:(NSURL *)privateKey
-                                   password:(NSString *)password
+                                   password:(NSString *)passphrase
                                 persistence:(NSURLCredentialPersistence)persistence;
 
 @end
