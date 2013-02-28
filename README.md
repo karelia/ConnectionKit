@@ -134,7 +134,7 @@ Generally it's best to call use `-performDefaultHandlingForAuthenticationChallen
 
 SFTP is a tricky blighter. You can opt to supply a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:
 
-    +[NSURLCredential ck2_credentialWithUser:publicKeyURL:privateKeyURL:]
+    +[NSURLCredential ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:]
 
 The public key is generally optional, as ConnectionKit can derive it from the private key. It's also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps.
 

@@ -43,8 +43,11 @@ extern NSString * const CK2AuthenticationMethodHostFingerprint;
 
 // Authenticate using particular public & private key files
 // On OS X, libssh2 generally uses the OpenSSL encryption library, so public key URL may be nil
+// Some private keys are encrypted with a passphrase. If so, must pass in that password. Persistence specifies whether to store it in the keychain or not
 + (NSURLCredential *)ck2_credentialWithUser:(NSString *)user
                                publicKeyURL:(NSURL *)publicKey
-                              privateKeyURL:(NSURL *)privateKey;
+                              privateKeyURL:(NSURL *)privateKey
+                                   password:(NSString *)password
+                                persistence:(NSURLCredentialPersistence)persistence;
 
 @end

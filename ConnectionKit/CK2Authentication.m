@@ -65,3 +65,33 @@ NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMet
 }
 
 @end
+
+
+#pragma mark -
+
+
+@interface NSURLCredential (SFTPWrapperSuppliedMethods)
+
++ (NSURLCredential *)ck2_credentialWithUser:(NSString *)user
+                               publicKeyURL:(NSURL *)publicKey
+                              privateKeyURL:(NSURL *)privateKey;
+
+- (NSURLCredential *)ck2_credentialWithPassword:(NSString *)password persistence:(NSURLCredentialPersistence)persistence;
+
+@end
+
+
+@implementation NSURLCredential (CK2SSHPublicKey)
+
++ (NSURLCredential *)ck2_credentialWithUser:(NSString *)user
+                               publicKeyURL:(NSURL *)publicKey
+                              privateKeyURL:(NSURL *)privateKey
+                                   password:(NSString *)password
+                                persistence:(NSURLCredentialPersistence)persistence;
+{
+    NSURLCredential *result = [self ck2_credentialWithUser:user publicKeyURL:publicKey privateKeyURL:privateKey];
+    result = [result ck2_credentialWithPassword:password persistence:persistence];
+    return result;
+}
+
+@end
