@@ -1441,6 +1441,7 @@
 				PRODUCT_NAME = Connection;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = "-Wdocumentation";
 				ZERO_LINK = NO;
 			};
 			name = Plugin;
@@ -1493,6 +1494,7 @@
 				PRODUCT_NAME = Connection;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = "-Wdocumentation";
 				ZERO_LINK = NO;
 			};
 			name = Debug;
@@ -1532,6 +1534,7 @@
 				PRODUCT_NAME = Connection;
 				RUN_CLANG_STATIC_ANALYZER = YES;
 				SKIP_INSTALL = YES;
+				WARNING_CFLAGS = "-Wdocumentation";
 				ZERO_LINK = NO;
 			};
 			name = Release;
