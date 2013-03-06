@@ -107,7 +107,7 @@
         {
             // Report directory itself
             NSURL *directoryURL = [request URL];
-            NSString *directoryPath = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
+            NSString *directoryPath = [CK2FileManager pathOfURL:directoryURL];
             
             
             // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol

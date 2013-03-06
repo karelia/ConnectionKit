@@ -237,7 +237,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [protocolClass URLWithPath:path relativeToURL:baseURL];
 }
 
-+ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
++ (NSString *)pathOfURL:(NSURL *)URL;
 {
     Class protocolClass = [CK2Protocol classForURL:URL];
     if (!protocolClass) protocolClass = [CK2Protocol class];

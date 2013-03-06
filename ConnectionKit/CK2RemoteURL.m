@@ -46,7 +46,7 @@
         }
         else if ([key isEqualToString:NSURLPathKey])
         {
-            *value = [CK2FileManager pathOfURLRelativeToHomeDirectory:self];
+            *value = [CK2FileManager pathOfURL:self];
             return YES;
         }
         else

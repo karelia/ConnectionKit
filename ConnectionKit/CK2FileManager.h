@@ -113,7 +113,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
 //
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
-+ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
++ (NSString *)pathOfURL:(NSURL *)URL;
 
 /*!
  @method         canHandleURL:
