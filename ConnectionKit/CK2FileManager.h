@@ -103,6 +103,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark URLs
+
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path
 //  ftp://example.com/relative/path
@@ -113,6 +114,13 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
 //
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+
+/// \param [in] URL to extract the path from. Unlike -path, handles the subtleties of different schemes. Some examples:
+/// ftp://example.com/relative      =>  relative
+/// ftp://example.com//absolute     =>  /absolute
+/// sftp://example.com/absolute     =>  /absolute
+/// sftp://example.com/~/relative   =>  relative
+/// \returns the path.
 + (NSString *)pathOfURL:(NSURL *)URL;
 
 /*!
