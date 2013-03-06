@@ -67,7 +67,7 @@
     return self;
 }
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
@@ -126,37 +126,7 @@
     }
     
     
-    // See what the client wants to do about checking the host's fingerprint
-    NSURL *url = [[self request] URL];
-    NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_SSHHostFingerprintProtectionSpaceWithHost:[url host]];
-    NSURL *knownHosts = [NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO];
-    
-    NSURLCredential *credential = [NSURLCredential ck2_credentialWithSSHKnownHostsFileURL:knownHosts
-                                                                              persistence:NSURLCredentialPersistenceNone];
-    
-    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                                                         proposedCredential:credential
-                                                                                       previousFailureCount:0
-                                                                                            failureResponse:nil
-                                                                                                      error:nil
-                                                                                                     sender:self];
-        
-    [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
-    [challenge release];
-}
-
-- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
-{
-    if (_haveHostFingerprintCredential)
-    {
-        return [super useCredential:credential forAuthenticationChallenge:challenge];
-    }
-    
-    _hostFingerprintCredential = [credential copy];
-    _haveHostFingerprintCredential = YES;
-    
-    
-    // Now we can grab the login credential
+    // Grab the login credential
     NSURL *url = [[self request] URL];
     
     NSURLProtectionSpace *space = [[CK2SSHProtectionSpace alloc] initWithHost:[url host]
@@ -165,12 +135,12 @@
                                                                         realm:nil
                                                          authenticationMethod:NSURLAuthenticationMethodDefault];
     
-    challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
-                                                           proposedCredential:nil // client will fill it in for us
-                                                         previousFailureCount:0
-                                                              failureResponse:nil
-                                                                        error:nil
-                                                                       sender:self];
+    NSURLAuthenticationChallenge *challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                                         proposedCredential:nil // client will fill it in for us
+                                                                                       previousFailureCount:0
+                                                                                            failureResponse:nil
+                                                                                                      error:nil
+                                                                                                     sender:self];
     
     
     [space release];
@@ -179,29 +149,116 @@
     [challenge release];
 }
 
-- (NSURLRequest *)request;
+- (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    // Once we know the known_hosts file's location, adjust the request to include it
-    NSURL *knownHosts = [_hostFingerprintCredential ck2_SSHKnownHostsFileURL];
-    if (!knownHosts) return [super request];
-    
-    NSMutableURLRequest *result = [[[super request] mutableCopy] autorelease];
-    [result curl_setSSHKnownHostsFileURL:knownHosts];
-    return result;
-}
-
-#pragma mark CURLHandleDelegate
-
-- (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
-{
-    if (match == CURLKHMATCH_MISMATCH)
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
     {
-        return CURLKHSTAT_REJECT;
+        [self useKnownHostsStat:([credential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE)];
     }
     else
     {
-        return ([_hostFingerprintCredential persistence] == NSURLCredentialPersistencePermanent ? CURLKHSTAT_FINE_ADD_TO_FILE : CURLKHSTAT_FINE);
+        [super useCredential:credential forAuthenticationChallenge:challenge];
     }
+}
+
+- (void)continueWithoutCredentialForAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+    else
+    {
+        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+    }
+}
+
+- (void)cancelAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+{
+    if (challenge == _fingerprintChallenge && _fingerprintChallenge)
+    {
+        [self useKnownHostsStat:CURLKHSTAT_REJECT];
+    }
+    else
+    {
+        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+    }
+}
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    // Add the known hosts file setting to the request
+    NSMutableURLRequest *mutableRequest = [request mutableCopy];
+    [mutableRequest curl_setSSHKnownHostsFileURL:[NSURL fileURLWithPath:[@"~/.ssh/known_hosts" stringByExpandingTildeInPath] isDirectory:NO]];
+    
+    self = [super initWithRequest:request client:client];
+    [mutableRequest release];
+    return self;
+}
+
+- (void)endWithError:(NSError *)error;
+{
+    // Re-package host key failures as something more in the vein of NSURLConnection
+    if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+    }
+    
+    [super endWithError:error];
+}
+
+#pragma mark Host Fingerprint
+
+- (enum curl_khstat)handle:(CURLHandle *)handle didFindHostFingerprint:(const struct curl_khkey *)foundKey knownFingerprint:(const struct curl_khkey *)knownkey match:(enum curl_khmatch)match;
+{
+    if (!_fingerprintSemaphore)
+    {
+        // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
+        NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
+                                                                                                    knownHostMatch:match];
+        
+        NSURLCredential *credential = nil;
+        if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];
+        
+        _fingerprintChallenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
+                                                                           proposedCredential:credential
+                                                                         previousFailureCount:0
+                                                                              failureResponse:nil
+                                                                                        error:nil
+                                                                                       sender:self];
+        
+        _fingerprintSemaphore = dispatch_semaphore_create(0);   // must be setup before handing off to client
+        [[self client] protocol:self didReceiveAuthenticationChallenge:_fingerprintChallenge];
+    }
+    
+    // Until the client replies, give libcurl a chance to process anything else. Ugly isn't it?
+    if (dispatch_semaphore_wait(_fingerprintSemaphore, 100 * NSEC_PER_MSEC))
+    {
+        return CURLKHSTAT_DEFER;
+    }
+    
+    // Finished waiting; cleanup
+    dispatch_release(_fingerprintSemaphore); _fingerprintSemaphore = NULL;
+    
+    return _knownHostsStat;
+}
+
+- (void)useKnownHostsStat:(enum curl_khstat)stat;
+{
+    NSAssert(_fingerprintChallenge, @"Somehow been told to use curl_khstat without having issued a challenge");
+    [_fingerprintChallenge release]; _fingerprintChallenge = nil;
+    
+    // Use semaphore to signal we know have a result
+    _knownHostsStat = stat;
+    dispatch_semaphore_signal(_fingerprintSemaphore);   // can't dispose of yet, as might not be currently waiting on it
+}
+
+- (void)dealloc
+{
+    [_fingerprintChallenge release];
+    if (_fingerprintSemaphore) dispatch_release(_fingerprintSemaphore);
+    
+    [super dealloc];
 }
 
 @end

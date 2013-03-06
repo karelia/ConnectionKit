@@ -36,7 +36,7 @@
     return self;
 }
 
-- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))handler
+- (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *))handler
 {
     if (self = [self initWithRequest:request client:client completionHandler:handler])
     {
@@ -107,7 +107,7 @@
         {
             // Report directory itself
             NSURL *directoryURL = [request URL];
-            NSString *directoryPath = [CK2FileManager pathOfURLRelativeToHomeDirectory:directoryURL];
+            NSString *directoryPath = [CK2FileManager pathOfURL:directoryURL];
             
             
             // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
@@ -204,7 +204,15 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLFileSecurityKey])
                                 {
-                                    // Not supported yet but could be
+                                    CFFileSecurityRef security = CFFileSecurityCreate(NULL);
+                                    
+                                    NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
+                                    if (CFFileSecuritySetMode(security, mode.unsignedShortValue))
+                                    {
+                                        [aURL setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey];
+                                    }
+                                    
+                                    CFRelease(security);
                                 }
                                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                 {
@@ -430,7 +438,7 @@
 
 - (void)handle:(CURLHandle *)handle willSendBodyDataOfLength:(NSUInteger)bytesWritten
 {
-    if (_progressBlock) _progressBlock(bytesWritten);
+    if (_progressBlock) _progressBlock(bytesWritten, 0);
 }
 
 - (void)handleDidFinish:(CURLHandle *)handle;

@@ -112,18 +112,20 @@
         STAssertTrue([self.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
         STAssertTrue(self.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
         STAssertFalse(self.finished, @"shouldn't be finished");
+        if (record)
+        {
+            STAssertTrue([record.error.domain isEqualToString:NSURLErrorDomain], @"unexpected error %@", self.error);
+            STAssertTrue(record.error.code == kCFURLErrorUserCancelledAuthentication, @"unexpected error %@", self.error);
+        }
     }
     else
     {
         STAssertTrue(self.finished, @"should be finished");
         STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
+        STAssertFalse([record hasError], @"unexpected error %@", record.error);
     }
     STAssertTrue(self.uploading == uploading, @"uploading method %@ have been called", uploading ? @"should" : @"shouldn't");
 
-    if (record)
-    {
-        STAssertFalse([record hasError], @"unexpected error %@", record.error);
-    }
 }
 
 #pragma mark - Tests
@@ -210,12 +212,6 @@
         [uploader finishUploading];
         STAssertFalse(self.finished, @"should not be finished");
         [uploader cancel];
-
-        [self runUntilPaused];
-
-        STAssertFalse(self.uploading, @"uploading method should not have been called");
-        STAssertTrue(self.error == nil, @"unexpected error %@", self.error);
-        STAssertFalse([record hasError], @"unexpected error %@", record.error);
     }
 }
 

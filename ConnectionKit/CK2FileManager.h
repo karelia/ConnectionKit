@@ -17,6 +17,7 @@
 extern NSString * const CK2FileMIMEType;
 
 
+
 @protocol CK2FileManagerDelegate;
 
 
@@ -64,9 +65,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
 
 #pragma mark Deleting Items
@@ -78,6 +79,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Getting and Setting Attributes
+
 // It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:
 //
 //  FTP:    Only NSFilePosixPermissions is supported, and not by all servers
@@ -85,6 +87,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 //  WebDAV: No attributes are supported
 //  file:   Behaves the same as NSFileManager
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+
+// To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
 
 #pragma mark Cancelling Operations
@@ -99,6 +103,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark URLs
+
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path
 //  ftp://example.com/relative/path
@@ -109,7 +114,14 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
 //
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
-+ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
+
+/// \param [in] URL to extract the path from. Unlike -path, handles the subtleties of different schemes. Some examples:
+/// ftp://example.com/relative      =>  relative
+/// ftp://example.com//absolute     =>  /absolute
+/// sftp://example.com/absolute     =>  /absolute
+/// sftp://example.com/~/relative   =>  relative
+/// \returns the path.
++ (NSString *)pathOfURL:(NSURL *)URL;
 
 /*!
  @method         canHandleURL:

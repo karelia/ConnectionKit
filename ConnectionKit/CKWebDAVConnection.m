@@ -176,6 +176,7 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
 
 - (CKTransferRecord *)uploadFileAtURL:(NSURL *)url toPath:(NSString *)path openingPosixPermissions:(unsigned long)permissions;
 {
+    NSParameterAssert(url);
     return [self uploadData:[NSData dataWithContentsOfURL:url] toPath:path openingPosixPermissions:permissions];
 }
 
@@ -184,24 +185,11 @@ static void *sOpFinishObservationContext = &sOpFinishObservationContext;
     NSParameterAssert(data);
     
     path = [self canonicalPathForPath:path];
-    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:path session:[self webDAVSession] delegate:self];
-    [request setData:data];
-    
-    
-    CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
-                                                             (CFStringRef)[path pathExtension],
-                                                             NULL
-                                                             );
-    CFStringRef mimeType = NULL;
-    if (type)
-    {
-        mimeType = UTTypeCopyPreferredTagWithClass(type, kUTTagClassMIMEType);
-        CFRelease(type);
-    }
-    if (!mimeType) mimeType = CFRetain(CFSTR("application/octet-stream"));
-    [request setDataMIMEType:(NSString *)mimeType];
-    CFRelease(mimeType);
-    
+    DAVSession* session = [self webDAVSession];
+    NSURL* url = [[session rootURL] URLByAppendingPathComponent:path];
+    NSMutableURLRequest* urlRequest = [NSMutableURLRequest requestWithURL:url];
+    [urlRequest setHTTPBody:data];
+    DAVPutRequest *request = [[DAVPutRequest alloc] initWithPath:path originalRequest:urlRequest session:session delegate:self];
     [self enqueueOperation:request];
     
     CKTransferRecord *result = [CKTransferRecord recordWithName:[path lastPathComponent] size:[data length]];

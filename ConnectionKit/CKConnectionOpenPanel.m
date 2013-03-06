@@ -226,7 +226,7 @@
     
     
     // Add in cell for root/home
-    NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
+    NSString *path = [CK2FileManager pathOfURL:url];
     
     NSURL *rootURL = ([path isAbsolutePath] ?
                       [CK2FileManager URLWithPath:@"/" relativeToURL:url] :

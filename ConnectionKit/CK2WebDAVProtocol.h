@@ -10,7 +10,6 @@
 
 typedef void (^CK2WebDAVCompletionHandler)(id result);
 typedef void (^CK2WebDAVErrorHandler)(NSError* error);
-typedef void (^CK2WebDAVProgressHandler)(NSUInteger bytesWritten);
 
 @interface CK2WebDAVProtocol : CK2Protocol<DAVPutRequestDelegate, DAVSessionDelegate>
 {
@@ -18,9 +17,11 @@ typedef void (^CK2WebDAVProgressHandler)(NSUInteger bytesWritten);
     DAVSession*         _session;
     NSOperationQueue*   _queue;
 
+    NSUInteger _attempts;
+    NSUInteger _expectedLength;
     CK2WebDAVCompletionHandler _completionHandler;
     CK2WebDAVErrorHandler _errorHandler;
-    CK2WebDAVProgressHandler _progressHandler;
+    CK2ProgressBlock _progressHandler;
 }
 
 @end

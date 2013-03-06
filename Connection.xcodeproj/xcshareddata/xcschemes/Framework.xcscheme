@@ -41,6 +41,21 @@
                <Test
                   Identifier = "MockServerTests">
                </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFolder">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFile2">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerFTPTests/testFile1">
+               </Test>
+               <Test
+                  Identifier = "KMSTestCase">
+               </Test>
+               <Test
+                  Identifier = "CK2FileManagerBaseTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

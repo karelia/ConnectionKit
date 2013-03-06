@@ -91,7 +91,8 @@
         NSURL* url = [self makeTestContents];
         if (url)
         {
-            NSMutableArray* expected = [@[ @"CK2FileManagerFileTests", @"test.txt", @"subfolder" ] mutableCopy];
+            NSString* folderName = [url lastPathComponent];
+            NSMutableArray* expected = [@[ folderName, @"test.txt", @"subfolder" ] mutableCopy];
             NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
             [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
 

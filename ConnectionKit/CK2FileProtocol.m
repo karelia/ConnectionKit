@@ -112,7 +112,7 @@ static size_t kCopyBufferSize = 4096;
 }
 
 
-- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+- (id)initForCreatingFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock;
 {
     return [self initWithBlock:^{
         
@@ -245,7 +245,7 @@ static size_t kCopyBufferSize = 4096;
  The main problem with this is that CURLHandle doesn't return very good error information.
  */
 
-- (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+- (void)createFileWithCURLForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
 {
     // Hand off to CURLHandle to create the file
     __block CK2CURLBasedProtocol *curlProtocol = [[CK2CURLBasedProtocol alloc] initWithRequest:request client:nil progressBlock:progressBlock completionHandler:^(NSError *error) {
@@ -269,7 +269,7 @@ static size_t kCopyBufferSize = 4096;
  Simple file creation implementation which just works synchronously, copying between two streams.
  */
 
-- (void)createFileSyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+- (void)createFileSyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
 {
     NSInputStream *inputStream = [self inputStreamForRequest:request];
     [inputStream open];
@@ -299,7 +299,7 @@ static size_t kCopyBufferSize = 4096;
 
             if (progressBlock)
             {
-                progressBlock(length);
+                progressBlock(length, 0);
             }
         }
         
@@ -332,7 +332,7 @@ static size_t kCopyBufferSize = 4096;
  it only lives for the duration of the operation.
  */
 
-- (void)createFileAsyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock
+- (void)createFileAsyncForRequest:(NSURLRequest*)request openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client progressBlock:(CK2ProgressBlock)progressBlock
 {
     NSInputStream *inputStream = [self inputStreamForRequest:request];
     NSError* error = nil;

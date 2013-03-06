@@ -25,6 +25,7 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
     
     void    (^_completionBlock)(NSError *);
     void    (^_enumerationBlock)(NSURL *);
+    NSURL   *_localURL;
     
     BOOL    _cancelled;
 }
@@ -42,12 +43,21 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
                                     manager:(CK2FileManager *)manager
                             completionBlock:(void (^)(NSError *))block;
 
-- (id)initFileCreationOperationWithRequest:(NSURLRequest *)request
-               withIntermediateDirectories:(BOOL)createIntermediates
-                         openingAttributes:(NSDictionary *)attributes
-                                   manager:(CK2FileManager *)manager
-                             progressBlock:(void (^)(NSUInteger))progressBlock
-                           completionBlock:(void (^)(NSError *))block;
+- (id)initFileCreationOperationWithURL:(NSURL *)url
+                                  data:(NSData *)data
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+
+- (id)initFileCreationOperationWithURL:(NSURL *)remoteURL
+                                  file:(NSURL *)localURL
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
 
 - (id)initRemovalOperationWithURL:(NSURL *)url
                           manager:(CK2FileManager *)manager
@@ -161,59 +171,29 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:url];
-    [request setHTTPBody:data];
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:url
+                                                                                        data:data
+                                                                 withIntermediateDirectories:createIntermediates
+                                                                           openingAttributes:attributes
+                                                                                     manager:self
+                                                                               progressBlock:progressBlock
+                                                                             completionBlock:handler];
     
-    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock completionHandler:handler];
-    [request release];
-    return result;
+    return [operation autorelease];
 }
 
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
-    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:destinationURL];
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:destinationURL
+                                                                                        file:sourceURL
+                                                                 withIntermediateDirectories:createIntermediates
+                                                                           openingAttributes:attributes
+                                                                                     manager:self
+                                                                               progressBlock:progressBlock
+                                                                             completionBlock:handler];
     
-    // Read the data using an input stream if possible
-    NSInputStream *stream = [[NSInputStream alloc] initWithURL:sourceURL];
-    if (stream)
-    {
-        [request setHTTPBodyStream:stream];
-        [stream release];
-    }
-    else
-    {
-        NSError *error;
-        NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
-        
-        if (data)
-        {
-            [request setHTTPBody:data];
-            [data release];
-        }
-        else
-        {
-            [request release];
-            if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
-            handler(error);
-            return nil;
-        }
-    }
-    
-    id result = [self createFileWithRequest:request withIntermediateDirectories:createIntermediates openingAttributes:attributes progressBlock:progressBlock completionHandler:handler];
-    [request release];
-    return result;
-}
-
-- (id)createFileWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))handler;
-{
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithRequest:request
-                                                                     withIntermediateDirectories:createIntermediates
-                                                                               openingAttributes:attributes
-                                                                                         manager:self
-                                                                                   progressBlock:progressBlock
-                                                                                 completionBlock:handler];
     return [operation autorelease];
 }
 
@@ -257,7 +237,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [protocolClass URLWithPath:path relativeToURL:baseURL];
 }
 
-+ (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
++ (NSString *)pathOfURL:(NSURL *)URL;
 {
     Class protocolClass = [CK2Protocol classForURL:URL];
     if (!protocolClass) protocolClass = [CK2Protocol class];
@@ -372,20 +352,85 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
-- (id)initFileCreationOperationWithRequest:(NSURLRequest *)request
-               withIntermediateDirectories:(BOOL)createIntermediates
-                         openingAttributes:(NSDictionary *)attributes
-                                   manager:(CK2FileManager *)manager
-                             progressBlock:(void (^)(NSUInteger))progressBlock
-                           completionBlock:(void (^)(NSError *))block;
+- (id)initFileCreationOperationWithURL:(NSURL *)url
+                                  data:(NSData *)data
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
 {
-    return [self initWithURL:[request URL] manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
-        return [[protocolClass alloc] initForCreatingFileWithRequest:request
-                                         withIntermediateDirectories:createIntermediates
-                                                   openingAttributes:attributes
-                                                              client:self
-                                                       progressBlock:progressBlock];
+        NSMutableURLRequest *request = [[manager requestWithURL:url] mutableCopy];
+        request.HTTPBody = data;
+        
+        CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                        withIntermediateDirectories:createIntermediates
+                                                                  openingAttributes:attributes
+                                                                             client:self
+                                                                      progressBlock:progressBlock];
+        
+        [request release];
+        return result;
+    }];
+}
+
+- (id)initFileCreationOperationWithURL:(NSURL *)url
+                                  file:(NSURL *)sourceURL
+           withIntermediateDirectories:(BOOL)createIntermediates
+                     openingAttributes:(NSDictionary *)attributes
+                               manager:(CK2FileManager *)manager
+                         progressBlock:(CK2ProgressBlock)progressBlock
+                       completionBlock:(void (^)(NSError *))block;
+{
+    return [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+        
+        _localURL = [sourceURL copy];
+        
+        NSMutableURLRequest *request = [[manager requestWithURL:url] mutableCopy];
+        
+        // Read the data using an input stream if possible, and know file size
+        NSNumber *fileSize;
+        if ([sourceURL getResourceValue:&fileSize forKey:NSURLFileSizeKey error:NULL] && fileSize)
+        {
+            NSString *length = [NSString stringWithFormat:@"%llu", fileSize.unsignedLongLongValue];
+            
+            NSInputStream *stream = [self protocol:nil needNewBodyStream:nil];
+            if (stream)
+            {
+                [request setHTTPBodyStream:stream];
+                [request setValue:length forHTTPHeaderField:@"Content-Length"];
+            }
+        }
+        
+        if (!request.HTTPBodyStream)
+        {
+            NSError *error;
+            NSData *data = [[NSData alloc] initWithContentsOfURL:sourceURL options:0 error:&error];
+            
+            if (data)
+            {
+                [request setHTTPBody:data];
+                [data release];
+            }
+            else
+            {
+                [request release];
+                if (!error) error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil];
+                [self protocol:nil didFailWithError:error];
+                return nil;
+            }
+        }
+        
+        CK2Protocol *result = [[protocolClass alloc] initForCreatingFileWithRequest:request
+                                                        withIntermediateDirectories:createIntermediates
+                                                                  openingAttributes:attributes
+                                                                             client:self
+                                                                      progressBlock:progressBlock];
+        
+        [request release];
+        return result;
     }];
 }
 
@@ -438,6 +483,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (_queue) dispatch_release(_queue);
     [_completionBlock release];
     [_enumerationBlock release];
+    [_localURL release];
     
     [super dealloc];
 }
@@ -514,6 +560,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if (_enumerationBlock) _enumerationBlock(url);
 }
 
+- (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
+{
+    NSParameterAssert(protocol == _protocol);
+
+    NSInputStream *stream = [[NSInputStream alloc] initWithURL:_localURL];
+    return [stream autorelease];
+}
+
 @end
 
 
@@ -524,7 +578,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 + (void)handleChallenge:(NSURLAuthenticationChallenge *)challenge operation:(CK2FileOperation *)operation;
 {
-    // Trust the tramoline to release itself when done
+    // Trust the trampoline to release itself when done
     [[[self alloc] initWithChallenge:challenge operation:operation] release];
 }
 
@@ -567,21 +621,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 #ifndef __clang_analyzer__ // clang seems to produce an entirely spurious warning here - it says that self hasn't been set, but it has
         CK2FileManager *manager = operation->_manager;
 #endif
-
-        // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             
-            id <CK2FileManagerDelegate> delegate = [manager delegate];
-            if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
-            {
-                [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
-            }
-            else
-            {
-                [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
-            }
-        });
-        
+        id <CK2FileManagerDelegate> delegate = [manager delegate];
+        if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
+        {
+            [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
+        }
+        else
+        {
+            [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
+        }
+    
         [self retain];  // gets released when challenge is replied to
     }
     return self;
