@@ -93,7 +93,7 @@
 - (void)testFTPRootIsDirectory;
 {
     BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F"]];
-    STAssertTrue(isDirectory, nil);
+    STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPRootWithTrailingSlashIsDirectory;
