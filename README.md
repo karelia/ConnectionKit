@@ -75,12 +75,21 @@ Usage
 
 ## Getting the code
 
-1. Clone the ConnectionKit repository, ideally by adding it as a submodule if you're using git for your main project
-2. Checkout the `curlhandle-4` branch
-3. Initialise all submodules — they go several levels deep!
-4. Add `Connection.xcodeproj` to your project
-5. Add the ConnectionKit framework as a dependency of your project's build target
-6. Set `Connection.framework` to be copied into a suitable location inside your build target; e.g the `Frameworks` directory
+You want to clone ConnectionKit onto your Mac, likely as a submodule of your existing Git repository. ConnectionKit includes several (nested) submodules of its own, so have Git grab them too.
+
+Here's an example of commands you'd typically type into the Terminal to add ConnectionKit as a submodule of an existing git repo:
+
+	git submodule add https://github.com/karelia/ConnectionKit.git
+	cd ConnectionKit
+	git submodule update --recursive --init
+
+Substitute the URL for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`curlhandle-4` at present).
+
+Then:
+
+1. Add `Connection.xcodeproj` to your project
+2. Add the ConnectionKit framework as a dependency of your project's build target
+3. Set `Connection.framework` to be copied into a suitable location inside your build target; e.g the `Frameworks` directory
 
 ## Actually, y'know, doing stuff
 
