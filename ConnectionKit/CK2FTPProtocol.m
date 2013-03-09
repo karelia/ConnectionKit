@@ -67,7 +67,7 @@
 + (BOOL)URLHasDirectoryPath:(NSURL *)url;
 {
     BOOL result = [super URLHasDirectoryPath:url];
-    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // corerct for ftp://example.com/%2F
+    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // correct for ftp://example.com/%2F
     return result;
 }
 
