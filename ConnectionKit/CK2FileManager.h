@@ -14,6 +14,9 @@
 #import "CKConnectionProtocol.h"
 
 
+typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAttemptCount);
+
+
 extern NSString * const CK2FileMIMEType;
 
 
