@@ -408,8 +408,12 @@
         }
         else
         {
-            NSString *lastComponent = [url lastPathComponent];
-            url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:lastComponent isDirectory:directory];
+            CFStringRef lastComponent = CFURLCopyLastPathComponent((CFURLRef)url);    // keeps %2F kinda intact as a regular slash
+            
+            url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:(NSString *)lastComponent isDirectory:directory];
+            // any slash from %2F will go back in to give a URL containing an extra slash, which should be good enough for libcurl to handle
+            
+            CFRelease(lastComponent);
         }
     }
     
