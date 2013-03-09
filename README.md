@@ -122,6 +122,8 @@ Delegate methods are used to handle authentication (more on that below) and tran
 
 ConnectionKit follows a similar pattern to `NSURLConnection`: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they'd like to do if necessary.
 
+Authentication challenges carry a great deal of information, including `.previousFailureCount` and `.protectionSpace` which are very useful for determining how to treat an individual challenge. When responding to a challenge, supplying a credential set to `NSURLCredentialPersistencePermanent` will cause ConnectionKit to add it to the keychain if successful.
+
 ### WebDAV over HTTP
 
 WebDAV servers can selectively choose whether to require authentication (e.g. public servers have no need to). If authentication is requested, you'll receive an authentication challenge encapsulating the auth method to be used (e.g. HTTP Digest). Respond with a username and password credential. ConnectionKit will do its best to supply `-proposedCredential` from the user's keychain.
