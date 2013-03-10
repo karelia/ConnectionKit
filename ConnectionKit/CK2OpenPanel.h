@@ -30,7 +30,7 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import <Cocoa/Cocoa.h>
-#import <Connection.h>
+#import <Connection/Connection.h>
 
 //TODO: Handle/display errors better
 //TODO: Save window/view dimensions?
