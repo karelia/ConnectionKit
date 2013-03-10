@@ -265,8 +265,8 @@
 		27A207291671634800D8284D /* CK2CURLBasedProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2CURLBasedProtocol.h; sourceTree = "<group>"; };
 		27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLBasedProtocol.m; sourceTree = "<group>"; };
 		27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = CURLHandle.xcodeproj; path = ../CurlHandle/CURLHandleSource/CURLHandle.xcodeproj; sourceTree = "<group>"; };
-		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKUploader.h; sourceTree = "<group>"; };
-		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploader.m; sourceTree = "<group>"; };
+		27D03B401471787000FEA588 /* CKUploader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKUploader.h; path = ConnectionKit/CKUploader.h; sourceTree = "<group>"; };
+		27D03B411471787000FEA588 /* CKUploader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKUploader.m; path = ConnectionKit/CKUploader.m; sourceTree = "<group>"; };
 		27F3372816BC1FB100E70511 /* AuthTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AuthTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		27F3372A16BC1FB100E70511 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		27F3372E16BC1FB100E70511 /* AuthTester-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AuthTester-Info.plist"; sourceTree = "<group>"; };
@@ -284,8 +284,8 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
-		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = ../Resources/error.png; sourceTree = "<group>"; };
-		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = ../Resources/finished.png; sourceTree = "<group>"; };
+		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
+		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
 		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKS3Connection.h; sourceTree = "<group>"; };
@@ -300,10 +300,10 @@
 		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
 		7978FC140B117D7C0048168B /* bookmark.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = bookmark.tif; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
-		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferProgressCell.h; sourceTree = "<group>"; };
-		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferProgressCell.m; sourceTree = "<group>"; };
-		7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKTransferRecord.h; sourceTree = "<group>"; };
-		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKTransferRecord.m; sourceTree = "<group>"; };
+		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKTransferProgressCell.h; path = ConnectionKit/CKTransferProgressCell.h; sourceTree = "<group>"; };
+		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferProgressCell.m; path = ConnectionKit/CKTransferProgressCell.m; sourceTree = "<group>"; };
+		7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKTransferRecord.h; path = ConnectionKit/CKTransferRecord.h; sourceTree = "<group>"; };
+		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferRecord.m; path = ConnectionKit/CKTransferRecord.m; sourceTree = "<group>"; };
 		79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSPopUpButton+Connection.h"; sourceTree = "<group>"; };
 		79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSPopUpButton+Connection.m"; sourceTree = "<group>"; };
 		79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTabView+Connection.h"; sourceTree = "<group>"; };
@@ -540,6 +540,29 @@
 			name = Protocols;
 			sourceTree = "<group>";
 		};
+		274DA43516ED52BE008041B6 /* Legacy */ = {
+			isa = PBXGroup;
+			children = (
+				274DA43616ED52CC008041B6 /* Uploader */,
+			);
+			name = Legacy;
+			sourceTree = "<group>";
+		};
+		274DA43616ED52CC008041B6 /* Uploader */ = {
+			isa = PBXGroup;
+			children = (
+				27D03B401471787000FEA588 /* CKUploader.h */,
+				27D03B411471787000FEA588 /* CKUploader.m */,
+				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
+				7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */,
+				798313C70B0D67E000F5078E /* CKTransferProgressCell.h */,
+				798313C80B0D67E000F5078E /* CKTransferProgressCell.m */,
+				791E83030B0EDAC90060E5FC /* error.png */,
+				791E83040B0EDAC90060E5FC /* finished.png */,
+			);
+			name = Uploader;
+			sourceTree = "<group>";
+		};
 		27F3372C16BC1FB100E70511 /* AuthTester */ = {
 			isa = PBXGroup;
 			children = (
@@ -567,8 +590,6 @@
 			isa = PBXGroup;
 			children = (
 				79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */,
-				27D03B401471787000FEA588 /* CKUploader.h */,
-				27D03B411471787000FEA588 /* CKUploader.m */,
 			);
 			name = Abstract;
 			sourceTree = "<group>";
@@ -597,6 +618,7 @@
 			isa = PBXGroup;
 			children = (
 				080E96DDFE201D6D7F000001 /* Framework */,
+				274DA43516ED52BE008041B6 /* Legacy */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				27FD90C60ED5BFC00068D634 /* Dependencies */,
@@ -671,8 +693,6 @@
 			isa = PBXGroup;
 			children = (
 				795AFEE50B1154E2006905FA /* UKKQueue */,
-				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
-				7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */,
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
@@ -691,10 +711,6 @@
 		79CFD8A509F705FF00172CDD /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				798313C70B0D67E000F5078E /* CKTransferProgressCell.h */,
-				798313C80B0D67E000F5078E /* CKTransferProgressCell.m */,
-				791E83030B0EDAC90060E5FC /* error.png */,
-				791E83040B0EDAC90060E5FC /* finished.png */,
 				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
 				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
 				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
