@@ -28,9 +28,6 @@
  */
 
 
-@protocol CKConnection;
-
-
 @interface CKTransferRecord : NSObject
 {
 	NSString *_name;
@@ -47,7 +44,6 @@
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
 	
-	id <CKConnection> _connection; //not retained
 	NSError *_error;
 }
 
@@ -62,16 +58,12 @@
 
 - (NSError *)error;
 
-- (id <CKConnection>)connection;
-- (void)setConnection:(id <CKConnection>)connection;	// Weak ref
-
 - (CKTransferRecord *)parent;
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
 
 + (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
-- (void)cancel:(id)sender;
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
@@ -111,7 +103,6 @@ extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
 @interface CKTransferRecord (Private)
-- (void)setConnection:(id <CKConnection>)connection; 
 - (void)setSpeed:(double)bps;
 - (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;

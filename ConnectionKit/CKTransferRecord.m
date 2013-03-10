@@ -53,10 +53,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 
 - (NSError *)error { return _error; }
 
-- (id <CKConnection>)connection { return _connection; }
-
-- (void)setConnection:(id <CKConnection>)connection { _connection = connection; }
-
 - (CKTransferRecord *)parent { return _parent; }
 
 + (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size
@@ -86,14 +82,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[_properties release];
 	[_error release];
 	[super dealloc];
-}
-
-- (void)cancel:(id)sender
-{
-	if ([self connection])
-	{
-		[[self connection] cancelTransfer];
-	}
 }
 
 - (unsigned long long)size
