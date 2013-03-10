@@ -1185,6 +1185,9 @@
 
 #pragma mark CK2FileManagerDelegate
 
+/*  These delegate methods are received on arbitrary threads, but as a UI component, be nice and deliver our equivalent on the main thread
+ */
+
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
     id <CK2OpenPanelDelegate>        delegate;
@@ -1193,7 +1196,9 @@
     
     if ([delegate respondsToSelector:@selector(panel:didReceiveAuthenticationChallenge:)])
     {
-        [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [delegate panel:[self openPanel] didReceiveAuthenticationChallenge:challenge];
+        }];
     }
     else
     {
@@ -1209,7 +1214,9 @@
     
     if ([delegate respondsToSelector:@selector(panel:appendString:toTranscript:)])
     {
-        [delegate panel:[self openPanel] appendString:info toTranscript:transcript];
+        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+            [delegate panel:[self openPanel] appendString:info toTranscript:transcript];
+        }];
     }
 }
 
