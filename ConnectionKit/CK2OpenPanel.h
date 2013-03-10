@@ -33,7 +33,6 @@
 
 //TODO: Handle/display errors better
 //TODO: Save window/view dimensions?
-//TODO: Implement "form-fitting" text selection in icon view
 //TODO: Implement "hidden" feature where you can type in a path (a little sheet shows up when you type / or ~)
 
 @protocol CK2OpenPanelDelegate;
