@@ -399,7 +399,6 @@
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
-				7983E2120B0C22D600F5078E /* Keychain */,
 				79CFD8A509F705FF00172CDD /* UI */,
 			);
 			name = Framework;
@@ -660,13 +659,6 @@
 			);
 			name = UKKQueue;
 			path = ../UKQueue;
-			sourceTree = "<group>";
-		};
-		7983E2120B0C22D600F5078E /* Keychain */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Keychain;
 			sourceTree = "<group>";
 		};
 		79CFD11A09F7022900172CDD /* Connections */ = {
