@@ -100,8 +100,6 @@
 		79CFD84F09F7048500172CDD /* CKConnectionProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD87609F7048500172CDD /* KTLog.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD83509F7048400172CDD /* KTLog.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD87709F7048500172CDD /* KTLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD83609F7048400172CDD /* KTLog.m */; };
-		79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD84109F7048400172CDD /* RunLoopForwarder.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */ = {isa = PBXBuildFile; fileRef = 79CFD84209F7048400172CDD /* RunLoopForwarder.m */; };
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD8CC09F706C700172CDD /* KTLog.nib in Resources */ = {isa = PBXBuildFile; fileRef = 79CFD8CA09F706C700172CDD /* KTLog.nib */; };
 		79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD90009F7077900172CDD /* NSData+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -314,8 +312,6 @@
 		79CFD80E09F7048400172CDD /* CKConnectionProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = CKConnectionProtocol.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		79CFD83509F7048400172CDD /* KTLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTLog.h; sourceTree = "<group>"; };
 		79CFD83609F7048400172CDD /* KTLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTLog.m; sourceTree = "<group>"; };
-		79CFD84109F7048400172CDD /* RunLoopForwarder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RunLoopForwarder.h; sourceTree = "<group>"; };
-		79CFD84209F7048400172CDD /* RunLoopForwarder.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RunLoopForwarder.m; sourceTree = "<group>"; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		79CFD8CB09F706C700172CDD /* en */ = {isa = PBXFileReference; lastKnownFileType = wrapper.nib; name = en; path = en.lproj/KTLog.nib; sourceTree = "<group>"; };
 		79CFD90009F7077900172CDD /* NSData+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+Connection.h"; sourceTree = "<group>"; };
@@ -680,8 +676,6 @@
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
-				79CFD84109F7048400172CDD /* RunLoopForwarder.h */,
-				79CFD84209F7048400172CDD /* RunLoopForwarder.m */,
 				79CFD90009F7077900172CDD /* NSData+Connection.h */,
 				79CFD90109F7077900172CDD /* NSData+Connection.m */,
 				792BC8B00ABF6B2E0022415A /* NSString+Connection.h */,
@@ -751,7 +745,6 @@
 				79CFD89509F704F400172CDD /* Connection.h in Headers */,
 				79CFD84F09F7048500172CDD /* CKConnectionProtocol.h in Headers */,
 				79CFD87609F7048500172CDD /* KTLog.h in Headers */,
-				79CFD88209F7048500172CDD /* RunLoopForwarder.h in Headers */,
 				79CFD90209F7077900172CDD /* NSData+Connection.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
@@ -1043,7 +1036,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				79CFD87709F7048500172CDD /* KTLog.m in Sources */,
-				79CFD88309F7048500172CDD /* RunLoopForwarder.m in Sources */,
 				79CFD90309F7077900172CDD /* NSData+Connection.m in Sources */,
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
