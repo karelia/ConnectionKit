@@ -55,8 +55,6 @@
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2743E80A1622E47600019979 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
-		27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27447AA61458075600EB086F /* CKWebDAVConnection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27447AA71458075600EB086F /* CKWebDAVConnection.m */; };
 		278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */; };
 		278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278D8B77167FF35D00622468 /* CK2Authentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278D8B78167FF35D00622468 /* CK2Authentication.m */; };
@@ -264,8 +262,6 @@
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
 		2743E8071622E47600019979 /* CK2FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManager.h; sourceTree = "<group>"; };
 		2743E8081622E47600019979 /* CK2FileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManager.m; sourceTree = "<group>"; };
-		27447AA61458075600EB086F /* CKWebDAVConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKWebDAVConnection.h; sourceTree = "<group>"; };
-		27447AA71458075600EB086F /* CKWebDAVConnection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKWebDAVConnection.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
 		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLProtocolURLManipulationTests.m; sourceTree = "<group>"; };
@@ -703,8 +699,6 @@
 			isa = PBXGroup;
 			children = (
 				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
-				27447AA61458075600EB086F /* CKWebDAVConnection.h */,
-				27447AA71458075600EB086F /* CKWebDAVConnection.m */,
 			);
 			name = WebDAV;
 			sourceTree = "<group>";
@@ -808,7 +802,6 @@
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */,
 				27AE68390EE98A8400409D80 /* CKConnectionRegistry.h in Headers */,
-				27447AA81458075600EB086F /* CKWebDAVConnection.h in Headers */,
 				2702E3E11459CAFC0085BBC4 /* CKSFTPConnection.h in Headers */,
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
@@ -1106,7 +1099,6 @@
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */,
 				27AE683A0EE98A8400409D80 /* CKConnectionRegistry.m in Sources */,
-				27447AA91458075600EB086F /* CKWebDAVConnection.m in Sources */,
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,

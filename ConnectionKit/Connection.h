@@ -54,7 +54,6 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/CKConnectionProtocol.h>
 #import <Connection/CKConnectionRegistry.h>
-#import <Connection/CKWebDAVConnection.h>
 #import <Connection/CKSFTPConnection.h>
 
 #import <Connection/KTLog.h>
