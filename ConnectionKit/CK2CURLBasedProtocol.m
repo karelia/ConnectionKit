@@ -459,7 +459,7 @@
 
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
-    // Swap out existing handler for one that retries after an auth failure
+    // Swap out existing handler for one that retries after an auth failure. Stores credential if requested upon success
     void (^oldHandler)(NSError *) = _completionHandler;
     
     _completionHandler = ^(NSError *error) {
@@ -486,6 +486,11 @@
         }
         else
         {
+            if (!error)
+            {
+                [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential forProtectionSpace:challenge.protectionSpace];
+            }
+            
             if (oldHandler)
             {
                 oldHandler(error);
