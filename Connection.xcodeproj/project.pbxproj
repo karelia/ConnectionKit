@@ -590,12 +590,15 @@
 			name = S3;
 			sourceTree = "<group>";
 		};
-		27FD90C60ED5BFC00068D634 /* FTP */ = {
+		27FD90C60ED5BFC00068D634 /* Dependencies */ = {
 			isa = PBXGroup;
 			children = (
 				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
+				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
+				D3598B580CF3D3DF00C61A38 /* SFTP */,
 			);
-			name = FTP;
+			name = Dependencies;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
@@ -604,6 +607,7 @@
 				080E96DDFE201D6D7F000001 /* Framework */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
+				27FD90C60ED5BFC00068D634 /* Dependencies */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				27F3372C16BC1FB100E70511 /* AuthTester */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
@@ -661,9 +665,6 @@
 			isa = PBXGroup;
 			children = (
 				27FD90C10ED5BF640068D634 /* Abstract */,
-				27FD90C60ED5BFC00068D634 /* FTP */,
-				D3598B580CF3D3DF00C61A38 /* SFTP */,
-				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
 				2743E8071622E47600019979 /* CK2FileManager.h */,
 				2743E8081622E47600019979 /* CK2FileManager.m */,
@@ -672,14 +673,6 @@
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Connections;
-			sourceTree = "<group>";
-		};
-		79CFD11D09F7023D00172CDD /* WebDAV */ = {
-			isa = PBXGroup;
-			children = (
-				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
-			);
-			name = WebDAV;
 			sourceTree = "<group>";
 		};
 		79CFD8A009F705B400172CDD /* Utility */ = {
