@@ -33,11 +33,3 @@
 
 
 @class CKTransferRecord;
-
-
-typedef enum {
-	CKTranscriptSent,
-	CKTranscriptReceived,
-	CKTranscriptData,
-    CKTranscriptInfo,
-} CKTranscriptType;
