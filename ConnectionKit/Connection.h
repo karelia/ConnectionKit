@@ -33,8 +33,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import <Connection/CKConnectionProtocol.h>
-
 #import <Connection/KTLog.h>
 
 #import <Connection/NSData+Connection.h>
