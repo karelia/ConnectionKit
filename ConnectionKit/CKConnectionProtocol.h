@@ -38,20 +38,6 @@
 @class CKTransferRecord;
 
 
-// Some shared Error Codes
-enum {
-	ConnectionErrorUploading = 49101,
-	ConnectionErrorDownloading,
-	ConnectionErrorCreatingDirectory,
-	ConnectionErrorChangingDirectory,
-	ConnectionErrorDeleting,
-	ConnectionErrorConnecting,
-	ConnectionErrorDisconnecting,
-	ConnectionErrorUnexpectedlyDisconnected,
-	ConnectionErrorListingDirectory,
-	ConnectionErrorGeneric,
-};
-
 typedef enum {
 	CKTranscriptSent,
 	CKTranscriptReceived,
