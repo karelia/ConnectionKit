@@ -37,7 +37,6 @@
 
 #import <Connection/KTLog.h>
 
-#import <Connection/RunLoopForwarder.h>
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSString+Connection.h>
 #import <Connection/NSPopUpButton+Connection.h>
