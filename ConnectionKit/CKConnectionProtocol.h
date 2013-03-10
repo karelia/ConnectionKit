@@ -336,38 +336,3 @@ extern NSString *cxSymbolicLinkTargetKey;
 extern NSString *ConnectionHostKey;
 extern NSString *ConnectionDirectoryExistsKey;
 extern NSString *ConnectionDirectoryExistsFilenameKey;
-
-/*
- * The InputStream and OutputStream protocols, provides a transparent way to interchange
- * the implementation specific streams.
- */
-@protocol InputStream <NSObject>
-- (void)open;
-- (void)close;
-- (void)scheduleInRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode;
-- (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode;
-- (void)setDelegate:(id)delegate;
-- (id)delegate;
-- (BOOL)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (NSError *)streamError;
-- (NSStreamStatus)streamStatus;
-- (BOOL)hasBytesAvailable;
-- (int)read:(uint8_t *)buffer maxLength:(unsigned int)len;
-@end
-
-@protocol OutputStream <NSObject>
-- (void)open;
-- (void)close;
-- (void)scheduleInRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode;
-- (void)removeFromRunLoop:(NSRunLoop *)aRunLoop forMode:(NSString *)mode;
-- (void)setDelegate:(id)delegate;
-- (id)delegate;
-- (BOOL)setProperty:(id)property forKey:(NSString *)key;
-- (id)propertyForKey:(NSString *)key;
-- (NSError *)streamError;
-- (NSStreamStatus)streamStatus;
-- (BOOL) hasSpaceAvailable;
-
-- (int)write:(const uint8_t *)buffer maxLength:(unsigned int)len;
-@end
