@@ -102,6 +102,22 @@ extern NSString *CKTransferRecordProgressChangedNotification;
 extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
+
+#pragma mark -
+
+
+@interface NSObject (CKConnectionTransferDelegate)
+- (void)transferDidBegin:(CKTransferRecord *)transfer;
+- (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
+- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
+- (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
+- (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
+@end
+
+
+#pragma mark -
+
+
 @interface CKTransferRecord (Private)
 - (void)setSpeed:(double)bps;
 - (void)setError:(NSError *)error;
