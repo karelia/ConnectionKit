@@ -326,13 +326,3 @@ typedef enum {
 - (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
 - (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
 @end
-
-
-// Attributes for which there isn't a corresponding NSFileManager key
-extern NSString *cxFilenameKey;
-extern NSString *cxSymbolicLinkTargetKey;
-
-//User Info Keys for Errors
-extern NSString *ConnectionHostKey;
-extern NSString *ConnectionDirectoryExistsKey;
-extern NSString *ConnectionDirectoryExistsFilenameKey;
