@@ -59,7 +59,6 @@ typedef unsigned int   NSUInteger;
 
 #import <Connection/KTLog.h>
 
-#import <Connection/CKConnectionOpenPanel.h>
 #import <Connection/RunLoopForwarder.h>
 #import <Connection/NSData+Connection.h>
 #import <Connection/NSString+Connection.h>
