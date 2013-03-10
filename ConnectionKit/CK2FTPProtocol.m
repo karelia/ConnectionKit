@@ -64,13 +64,6 @@
     return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
 }
 
-+ (BOOL)URLHasDirectoryPath:(NSURL *)url;
-{
-    BOOL result = [super URLHasDirectoryPath:url];
-    if (!result && [[url lastPathComponent] isEqualToString:@"/"]) result = YES;    // corerct for ftp://example.com/%2F
-    return result;
-}
-
 #pragma mark Operations
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
@@ -80,7 +73,7 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          [self translateStandardErrors:error client:client];
+                          [self translateStandardErrors:error];
                       }
 
             ];
@@ -132,7 +125,7 @@
           createIntermediateDirectories:NO
                                  client:client
                       completionHandler:^(NSError *error) {
-                          [self translateStandardErrors:error client:client];
+                          [self translateStandardErrors:error];
                       }];
 }
 
@@ -165,7 +158,7 @@
                                   }
                               }
 
-                              [self translateStandardErrors:error client:client];
+                              [self translateStandardErrors:error];
                           }];
     }
     else
@@ -211,7 +204,7 @@
 
 #pragma mark - Error Translation
 
-- (void)translateStandardErrors:(NSError*)error client:(id<CK2ProtocolClient>)client
+- (void)translateStandardErrors:(NSError*)error
 {
     if (error)
     {
@@ -228,11 +221,11 @@
         }
 
 
-        [client protocol:self didFailWithError:error];
+        [self.client protocol:self didFailWithError:error];
     }
     else
     {
-        [client protocolDidFinish:self];
+        [self.client protocolDidFinish:self];
     }
 }
 

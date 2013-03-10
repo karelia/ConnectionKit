@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "CKConnectionProtocol.h"
+#import "CK2FileManager.h"
 
 
 @protocol CK2ProtocolClient;
