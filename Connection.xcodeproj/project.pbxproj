@@ -631,13 +631,6 @@
 			name = FTP;
 			sourceTree = "<group>";
 		};
-		27FD90C80ED5BFFD0068D634 /* Other */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Other;
-			sourceTree = "<group>";
-		};
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
@@ -712,7 +705,6 @@
 				D3598B580CF3D3DF00C61A38 /* SFTP */,
 				79CFD11D09F7023D00172CDD /* WebDAV */,
 				27FD90C20ED5BFA40068D634 /* S3 */,
-				27FD90C80ED5BFFD0068D634 /* Other */,
 				2743E8071622E47600019979 /* CK2FileManager.h */,
 				2743E8081622E47600019979 /* CK2FileManager.m */,
 				278D8B77167FF35D00622468 /* CK2Authentication.h */,
