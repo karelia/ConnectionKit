@@ -30,6 +30,7 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import <Cocoa/Cocoa.h>
+#import <Connection/Connection.h>
 
 //TODO: Handle/display errors better
 //TODO: Save window/view dimensions?
@@ -112,5 +113,6 @@
 - (void)panelSelectionDidChange:(id)sender;
 
 - (void)panel:(id)sender didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+- (void)panel:(id)sender appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
 @end
