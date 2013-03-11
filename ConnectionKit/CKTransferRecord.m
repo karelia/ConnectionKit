@@ -27,7 +27,6 @@
  WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import "CKConnectionProtocol.h"
 #import "CKTransferRecord.h"
 #import "NSString+Connection.h"
 
@@ -52,10 +51,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 }
 
 - (NSError *)error { return _error; }
-
-- (id <CKConnection>)connection { return _connection; }
-
-- (void)setConnection:(id <CKConnection>)connection { _connection = connection; }
 
 - (CKTransferRecord *)parent { return _parent; }
 
@@ -86,14 +81,6 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 	[_properties release];
 	[_error release];
 	[super dealloc];
-}
-
-- (void)cancel:(id)sender
-{
-	if ([self connection])
-	{
-		[[self connection] cancelTransfer];
-	}
 }
 
 - (unsigned long long)size

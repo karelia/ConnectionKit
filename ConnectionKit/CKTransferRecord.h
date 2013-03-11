@@ -28,9 +28,6 @@
  */
 
 
-@protocol CKConnection;
-
-
 @interface CKTransferRecord : NSObject
 {
 	NSString *_name;
@@ -47,7 +44,6 @@
 	CKTransferRecord *_parent; //not retained
 	NSMutableDictionary *_properties;
 	
-	id <CKConnection> _connection; //not retained
 	NSError *_error;
 }
 
@@ -62,16 +58,12 @@
 
 - (NSError *)error;
 
-- (id <CKConnection>)connection;
-- (void)setConnection:(id <CKConnection>)connection;	// Weak ref
-
 - (CKTransferRecord *)parent;
 - (void)setParent:(CKTransferRecord *)parent;	// Weak ref
 
 
 + (instancetype)recordWithName:(NSString *)name size:(unsigned long long)size;
 - (id)initWithName:(NSString *)name size:(unsigned long long)size;
-- (void)cancel:(id)sender;
 
 - (BOOL)isDirectory;
 - (unsigned long long)transferred;
@@ -110,8 +102,23 @@ extern NSString *CKTransferRecordProgressChangedNotification;
 extern NSString *CKTransferRecordTransferDidBeginNotification;
 extern NSString *CKTransferRecordTransferDidFinishNotification;
 
+
+#pragma mark -
+
+
+@interface NSObject (CKConnectionTransferDelegate)
+- (void)transferDidBegin:(CKTransferRecord *)transfer;
+- (void)transfer:(CKTransferRecord *)transfer transferredDataOfLength:(unsigned long long)length;
+- (void)transfer:(CKTransferRecord *)transfer progressedTo:(NSNumber *)percent;
+- (void)transfer:(CKTransferRecord *)transfer receivedError:(NSError *)error;
+- (void)transferDidFinish:(CKTransferRecord *)transfer error:(NSError *)error;
+@end
+
+
+#pragma mark -
+
+
 @interface CKTransferRecord (Private)
-- (void)setConnection:(id <CKConnection>)connection; 
 - (void)setSpeed:(double)bps;
 - (void)setError:(NSError *)error;
 - (void)setUpload:(BOOL)flag;

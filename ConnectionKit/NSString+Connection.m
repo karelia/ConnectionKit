@@ -28,7 +28,6 @@
   */
 
 #import "NSString+Connection.h"
-#import "CKConnectionProtocol.h"
 #import <CommonCrypto/CommonDigest.h>
 
 #include <math.h>

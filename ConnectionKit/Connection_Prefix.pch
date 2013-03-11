@@ -1,6 +1,9 @@
 
 #import "KTLog.h"
 
+#define LocalizedStringInConnectionKitBundle(key, comment) \
+[[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
+
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog(...)
 #endif

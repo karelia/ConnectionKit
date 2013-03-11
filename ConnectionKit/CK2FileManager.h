@@ -11,8 +11,6 @@
 
 #import <Foundation/Foundation.h>
 
-#import "CKConnectionProtocol.h"
-
 
 typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAttemptCount);
 
@@ -154,6 +152,14 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 // If left unimplemented, -performDefaultHandlingForAuthenticationChallenge: will be called
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
+
+
+typedef enum {
+	CKTranscriptSent,
+	CKTranscriptReceived,
+	CKTranscriptData,
+    CKTranscriptInfo,
+} CKTranscriptType;
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
