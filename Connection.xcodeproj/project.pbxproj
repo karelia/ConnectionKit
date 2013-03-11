@@ -75,8 +75,6 @@
 		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
-		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
-		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */; };
 		324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */; };
 		324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */; };
@@ -114,6 +112,7 @@
 		32B592CC16A4960B0020FFE9 /* CK2OpenPanelListViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */; };
 		32B592CD16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */; };
 		32B592CE16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */; };
+		32E528DF16EE677700CD0F09 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32E528DE16EE677700CD0F09 /* Quartz.framework */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -354,6 +353,7 @@
 		32B592B516A4960B0020FFE9 /* CK2OpenPanelListViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelListViewController.m; sourceTree = "<group>"; };
 		32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelColumnViewController.h; sourceTree = "<group>"; };
 		32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelColumnViewController.m; sourceTree = "<group>"; };
+		32E528DE16EE677700CD0F09 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -438,6 +438,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				32E528DF16EE677700CD0F09 /* Quartz.framework in Frameworks */,
 				22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */,
 				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
 				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
@@ -681,6 +682,7 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
+				32E528DE16EE677700CD0F09 /* Quartz.framework */,
 				080E96DDFE201D6D7F000001 /* Framework */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,

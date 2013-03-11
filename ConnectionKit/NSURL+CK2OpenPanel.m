@@ -33,6 +33,7 @@
 #import "CK2FileManager.h"
 #import "NSImage+CK2OpenPanel.h"
 #import <dispatch/dispatch.h>
+#import <Quartz/Quartz.h>
 
 @interface CK2PlaceholderURL : NSURL
 @end
@@ -129,7 +130,8 @@
         {
             image = [image ck2_imageWithBadgeImage:[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kAliasBadgeIcon)]];
         }
-        
+
+        [image setSize:NSMakeSize(64.0, 64.0)];
         return image;
     }
     return nil;
@@ -464,6 +466,34 @@
     
     // Quite the rigamarole just to get an URL without the trailing slash
     return [[CK2FileManager URLWithPath:path relativeToURL:[self ck2_root]] absoluteURL];
+}
+
+#pragma mark IKImageBrowserItem methods
+
+- (NSString *)imageUID
+{
+    return [self absoluteString];
+}
+
+- (NSString *)imageRepresentationType
+{
+    return IKImageBrowserNSImageRepresentationType;
+}
+
+- (id)imageRepresentation
+{
+    return [self ck2_icon];
+}
+
+- (NSString *)imageTitle
+{
+    return [self ck2_displayName];
+}
+
+- (BOOL)isSelectable
+{
+    //PENDING:
+    return YES;
 }
 
 @end

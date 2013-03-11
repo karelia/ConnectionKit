@@ -330,7 +330,9 @@
     _homeURL = [homeURL copy];
     
     [_pathControl setHomeURL:_homeURL];
-    [(CK2IconView *)[_iconViewController view] setHomeURL:_homeURL];
+    //PENDING:
+    
+//    [(CK2IconView *)[_iconViewController view] setHomeURL:_homeURL];
 }
 
 - (NSView *)accessoryView

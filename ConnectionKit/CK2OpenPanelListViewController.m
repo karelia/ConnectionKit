@@ -229,7 +229,7 @@
 
 - (NSInteger)outlineView:(NSOutlineView *)outlineView numberOfChildrenOfItem:(id)item
 {
-        CK2OpenPanelController  *controller;
+    CK2OpenPanelController  *controller;
     
     controller = [self controller];
     

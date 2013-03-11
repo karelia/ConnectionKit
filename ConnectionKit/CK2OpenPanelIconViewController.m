@@ -31,27 +31,18 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import "CK2OpenPanelIconViewController.h"
+#import <Quartz/Quartz.h>
 #import "CK2OpenPanelController.h"
 #import "NSURL+CK2OpenPanel.h"
 #import "CK2IconViewItem.h"
 #import "CK2IconItemView.h"
 #import "CK2IconView.h"
 
-@interface CK2OpenPanelIconViewController ()
-
-@end
-
 @implementation CK2OpenPanelIconViewController
-
 
 - (void)awakeFromNib
 {
-    CK2IconViewItem     *iconItem;
-    
-    iconItem = (CK2IconViewItem *)[_iconView itemPrototype];
-    [iconItem setTarget:self];
-    [iconItem setAction:@selector(itemSelected:)];
-    [iconItem setDoubleAction:@selector(itemDoubleClicked:)];
+    [_iconView setCellSize:NSMakeSize(64.0, 64.0)];
 }
 
 - (BOOL)allowsMutipleSelection
@@ -66,34 +57,7 @@
 
 - (void)reload
 {
-    CK2OpenPanelController  *controller;
-    NSArray                 *children;
-    NSUInteger              i, count;
-    NSURL                   *url;
-    
-    controller = [self controller];
-    
-    children = [controller childrenForURL:[[controller openPanel] directoryURL]];
-    [_iconView setContent:children];
-    
-    if (([children count] == 1) && [[children lastObject] ck2_isPlaceholder])
-    {
-        [_iconView setMessageMode:YES];
-    }
-    else
-    {
-        [_iconView setMessageMode:NO];
-    }
-    
-    count = [children count];
-    
-    for (i = 0; i < count; i++)
-    {
-        url = [children objectAtIndex:i];
-        
-        [(CK2IconViewItem *)[_iconView itemAtIndex:i] setEnabled:([controller isURLValid:url] || [controller URLCanHazChildren:url])];
-    }
-    [_iconView setNeedsDisplay:YES];
+    [_iconView reloadData];
 }
 
 - (void)update
@@ -128,12 +92,12 @@
             if (i != NSNotFound)
             {
                 [indexSet addIndex:i];
-                rect = NSUnionRect(rect, [_iconView frameForItemAtIndex:i]);
+                rect = NSUnionRect(rect, [_iconView itemFrameAtIndex:i]);
                 [newURLs addObject:url];
             }
         }
     }
-    [_iconView setSelectionIndexes:indexSet];
+    [_iconView setSelectionIndexes:indexSet byExtendingSelection:NO];
     [_iconView scrollRectToVisible:rect];
     
     if ([newURLs count] != [urls count])
@@ -151,13 +115,18 @@
 
 - (NSArray *)selectedURLs
 {
-    NSIndexSet      *indexSet;
-    NSArray         *urls;
+    NSIndexSet              *indexSet;
+    NSArray                 *urls;
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
+    
+    urls = [controller childrenForURL:[[controller openPanel] directoryURL]];
     
     indexSet = [_iconView selectionIndexes];
     if ([indexSet count] > 0)
     {
-        urls = [[_iconView content] objectsAtIndexes:indexSet];
+        urls = [urls objectsAtIndexes:indexSet];
     }
     else
     {
@@ -207,6 +176,42 @@
             [controller ok:self];
         }
     }
+}
+
+#pragma mark IKImageBrowserViewDataSource methods
+
+- (NSUInteger) numberOfItemsInImageBrowser:(IKImageBrowserView *)aBrowser
+{
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
+
+    return [[controller childrenForURL:[[controller openPanel] directoryURL]] count];
+}
+
+- (id) imageBrowser:(IKImageBrowserView *)aBrowser itemAtIndex:(NSUInteger)index
+{
+    CK2OpenPanelController  *controller;
+    
+    controller = [self controller];
+
+    return [[controller childrenForURL:[[controller openPanel] directoryURL]] objectAtIndex:index];
+}
+
+
+//- (NSUInteger) imageBrowser:(IKImageBrowserView *) aBrowser writeItemsAtIndexes:(NSIndexSet *) itemIndexes toPasteboard:(NSPasteboard *)pasteboard;
+
+
+#pragma mark IKImageBrowserViewDelegate methods
+
+- (void)imageBrowser:(IKImageBrowserView *)aBrowser cellWasDoubleClickedAtIndex:(NSUInteger) index
+{
+    [self itemDoubleClicked:aBrowser];
+}
+
+- (void)imageBrowserSelectionDidChange:(IKImageBrowserView *)aBrowser
+{
+    [self itemSelected:aBrowser];
 }
 
 @end

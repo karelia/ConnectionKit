@@ -31,12 +31,14 @@
 // WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #import "CK2OpenPanelViewController.h"
+#import <Quartz/Quartz.h>
 
-@class CK2IconView;
+@class IKImageBrowserView;
 
 @interface CK2OpenPanelIconViewController : CK2OpenPanelViewController
 {
-    IBOutlet CK2IconView       *_iconView;
+//    IBOutlet CK2IconView       *_iconView;
+    IBOutlet IKImageBrowserView     *_iconView;
 }
 
 @end
