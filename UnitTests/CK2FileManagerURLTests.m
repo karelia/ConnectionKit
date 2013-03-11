@@ -40,6 +40,22 @@
     STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
 }
 
+- (void)testFTPRelativeNonRootFolderURL
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
+                               relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
+    
+    STAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/path/relative/path/file.txt", nil);
+}
+
+- (void)testFTPRelativeNonRootFileURL
+{
+    NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
+                               relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/file"]];
+    
+    STAssertEqualObjects(url.absoluteString, @"ftp://user:pass@test.ftp.com/example/relative/path/file.txt", nil);
+}
+
 - (void)testFTPRoot
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
