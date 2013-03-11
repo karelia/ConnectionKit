@@ -332,10 +332,18 @@
 {
     NSInteger       clickCount;
     CK2IconViewItem *item;
-    
-    item = [self item];
+    NSPoint         point;
+    NSRect          bounds;
+    BOOL            isFlipped;
 
-    if ([item isEnabled])
+    point = [self convertPoint:[theEvent locationInWindow] fromView:nil];
+    bounds = [self bounds];
+    item = [self item];
+    isFlipped = [self isFlipped];
+
+    if ([item isEnabled] &&
+        (NSMouseInRect(point, [self iconRectForBounds:bounds], isFlipped) ||
+         NSMouseInRect(point, [self textRectForBounds:bounds], isFlipped)))
     {
         [super mouseDown:theEvent];
         
