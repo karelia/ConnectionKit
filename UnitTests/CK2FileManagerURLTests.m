@@ -16,6 +16,8 @@
 
 @implementation URLTests
 
+#pragma mark FTP
+
 - (void)testFTPRelative
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
@@ -70,6 +72,8 @@
     STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/%2F"], nil);
 }
 
+#pragma mark WebDAV
+
 - (void)testHTTPRelative
 {
     NSURL *url = [CK2FileManager URLWithPath:@"relative/path/file.txt"
@@ -85,6 +89,8 @@
     
     STAssertEqualObjects([url absoluteString], @"http://www.test.com:8080/absolute/path/file.txt", @"path should be normal");
 }
+
+#pragma mark SSH
 
 - (void)testSFTPRelative
 {
