@@ -222,6 +222,28 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark URLs
 
++ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
+{
+    // Strip down to just host URL
+    CFIndex length = CFURLGetBytes((CFURLRef)baseURL, NULL, 0);
+    CFRange pathRange = CFURLGetByteRangeForComponent((CFURLRef)baseURL, kCFURLComponentPath, NULL);
+    
+    if (pathRange.location != kCFNotFound &&
+        pathRange.location < length)
+    {
+        NSMutableData *data = [[NSMutableData alloc] initWithLength:pathRange.location];
+        CFURLGetBytes((CFURLRef)baseURL, data.mutableBytes, pathRange.location);
+        
+        NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        baseURL = [NSURL URLWithString:string];
+        
+        [string release];
+        [data release];
+    }
+    
+    return [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
+}
+
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
     Class protocolClass = [CK2Protocol classForURL:baseURL];
