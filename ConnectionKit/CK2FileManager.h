@@ -113,7 +113,9 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // Takes care of the file URL bug on 10.6
 //
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
+// I'm seriously considering removing +URLWithPath:relativeToURL: as it tends not to be that useful in practice. +URLWithPath:hostURL: does exactly what it says on the tin
 //
++ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 
 /// \param [in] URL to extract the path from. Unlike -path, handles the subtleties of different schemes. Some examples:

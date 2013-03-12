@@ -107,7 +107,7 @@
         {
             // Report directory itself
             NSURL *directoryURL = [request URL];
-            NSString *directoryPath = [CK2FileManager pathOfURL:directoryURL];
+            NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
             // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
@@ -116,7 +116,7 @@
                 NSString *home = [_handle initialFTPPath];
                 if ([home isAbsolutePath])
                 {
-                    directoryURL = [[CK2FileManager URLWithPath:home relativeToURL:directoryURL] absoluteURL];
+                    directoryURL = [[self.class URLWithPath:home relativeToURL:directoryURL] absoluteURL];
                     directoryURL = [directoryURL URLByAppendingPathComponent:directoryPath];
                 }
             }
@@ -283,7 +283,7 @@
                                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
                                         // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
                                         // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
-                                        [aURL setTemporaryResourceValue:[CK2FileManager URLWithPath:path relativeToURL:directoryURL] forKey:aKey];
+                                        [aURL setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey];
                                     }
                                 }
                             }
