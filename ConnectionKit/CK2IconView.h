@@ -7,8 +7,9 @@
 //
 
 #import <Cocoa/Cocoa.h>
+#import <Quartz/Quartz.h>
 
-@interface CK2IconView : NSCollectionView
+@interface CK2IconView : IKImageBrowserView
 {
     NSMutableString     *_typeSelectBuffer;
     NSTimer             *_typeSelectTimer;

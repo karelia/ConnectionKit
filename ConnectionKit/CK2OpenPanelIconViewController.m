@@ -42,7 +42,10 @@
 
 - (void)awakeFromNib
 {
-    [_iconView setCellSize:NSMakeSize(64.0, 64.0)];
+//    [_iconView setCellSize:NSMakeSize(114.0, 114.0)];
+    [_iconView setCellSize:NSMakeSize(125.0, 125.0)];
+    [_iconView setIntercellSpacing:NSZeroSize];
+//    [_iconView setIntercellSpacing:NSMakeSize(40.0, 40.0)];
 }
 
 - (BOOL)allowsMutipleSelection

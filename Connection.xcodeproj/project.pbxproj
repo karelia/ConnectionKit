@@ -113,6 +113,8 @@
 		32B592CD16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */; };
 		32B592CE16A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */; };
 		32E528DF16EE677700CD0F09 /* Quartz.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 32E528DE16EE677700CD0F09 /* Quartz.framework */; };
+		32E528ED16EE778B00CD0F09 /* CK2IconViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 32E528EB16EE778900CD0F09 /* CK2IconViewCell.h */; };
+		32E528EE16EE778B00CD0F09 /* CK2IconViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 32E528EC16EE778A00CD0F09 /* CK2IconViewCell.m */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -354,6 +356,8 @@
 		32B592B616A4960B0020FFE9 /* CK2OpenPanelColumnViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelColumnViewController.h; sourceTree = "<group>"; };
 		32B592B716A4960B0020FFE9 /* CK2OpenPanelColumnViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelColumnViewController.m; sourceTree = "<group>"; };
 		32E528DE16EE677700CD0F09 /* Quartz.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Quartz.framework; path = System/Library/Frameworks/Quartz.framework; sourceTree = SDKROOT; };
+		32E528EB16EE778900CD0F09 /* CK2IconViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconViewCell.h; sourceTree = "<group>"; };
+		32E528EC16EE778A00CD0F09 /* CK2IconViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconViewCell.m; sourceTree = "<group>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -766,6 +770,8 @@
 				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
 				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
 				324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */,
+				32E528EB16EE778900CD0F09 /* CK2IconViewCell.h */,
+				32E528EC16EE778A00CD0F09 /* CK2IconViewCell.m */,
 			);
 			name = CK2OpenPanel;
 			sourceTree = "<group>";
@@ -905,6 +911,7 @@
 				324D22C916AE1763001CFDE6 /* CK2IconView.h in Headers */,
 				324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */,
 				32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */,
+				32E528ED16EE778B00CD0F09 /* CK2IconViewCell.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1218,6 +1225,7 @@
 				324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */,
 				324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */,
 				32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */,
+				32E528EE16EE778B00CD0F09 /* CK2IconViewCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

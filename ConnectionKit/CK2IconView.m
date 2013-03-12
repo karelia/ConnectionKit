@@ -8,6 +8,7 @@
 
 #import "CK2IconView.h"
 #import "NSURL+CK2OpenPanel.h"
+#import "CK2IconViewCell.h"
 
 @implementation CK2IconView
 
@@ -37,7 +38,7 @@
     
     [super dealloc];
 }
-
+/*
 - (void)initNotifications
 {
     // Tried doing this by overriding setFrame: but it seems to cause spastic behavior. Seems to work more smoothly
@@ -46,11 +47,18 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tile) name:NSViewFrameDidChangeNotification object:self];
 }
-
+*/
 - (void)awakeFromNib
 {
-    [self initNotifications];
+//    [self initNotifications];
+    NSLog(@"AWAKE");
 }
+
+- (IKImageBrowserCell *)newCellForRepresentedItem:(id)anItem
+{
+    return [[CK2IconViewCell alloc] init];
+}
+
 
 - (void)setMessageMode:(BOOL)messageMode
 {
@@ -58,15 +66,15 @@
     [self tile];
 }
 
-- (void)setContent:(NSArray *)content
+/*- (void)setContent:(NSArray *)content
 {
     [super setContent:content];
     [self tile];
-}
+}*/
 
 - (void)tile
 {
-    NSRect    bounds;
+/*    NSRect    bounds;
     
     bounds = [self bounds];
     if (_messageMode)
@@ -94,9 +102,9 @@
         [self setMinItemSize:size];
         // Setting the max size gets rid of odd scroller behavior
         [self setMaxItemSize:size];
-    }
+    }*/
 }
-
+#if 0
 - (void)resetTypeSelectTimer
 {
     if ([_typeSelectTimer isValid])
@@ -212,6 +220,6 @@
 {
     [self setNeedsDisplay:YES];
 }
-
+#endif
 
 @end
