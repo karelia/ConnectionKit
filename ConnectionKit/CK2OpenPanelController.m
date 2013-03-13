@@ -579,8 +579,9 @@
 // everything is fully loaded.
 - (void)loadInitialURL:(NSURL *)initialURL completionBlock:(void (^)(NSError *error))block
 {
-    NSMutableArray          *children;
-    __block NSURL           *resolvedURL;
+    NSMutableArray                  *children;
+    __block NSURL                   *resolvedURL;
+    NSDirectoryEnumerationOptions   options;
     
     // Make sure URL is absolute so can safely use it for comparisons later
     initialURL = [initialURL absoluteURL];
@@ -596,7 +597,18 @@
     
     resolvedURL = nil;
     
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ] options:NSDirectoryEnumerationSkipsSubdirectoryDescendants usingBlock:
+    options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+    
+    if (![_openPanel showsHiddenFiles])
+    {
+        options |= NSDirectoryEnumerationSkipsHiddenFiles;
+    }
+    if (![_openPanel treatsFilePackagesAsDirectories])
+    {
+        options |= NSDirectoryEnumerationSkipsPackageDescendants;
+    }
+
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ] options:options usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
