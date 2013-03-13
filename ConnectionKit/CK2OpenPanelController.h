@@ -47,6 +47,7 @@
     IBOutlet NSView                 *_bottomSection;
     IBOutlet NSButton               *_okButton;
     IBOutlet NSButton               *_cancelButton;
+    IBOutlet NSButton               *_refreshButton;
     IBOutlet NSProgressIndicator    *_progressIndicator;
     IBOutlet NSSegmentedControl     *_historyButtons;
     IBOutlet NSButton               *_newFolderButton;
@@ -96,9 +97,8 @@
 
 - (IBAction)ok:(id)sender;
 - (IBAction)cancel:(id)sender;
-
+- (IBAction)refresh:(id)sender;
 - (IBAction)newFolder:(id)sender;
-
 - (IBAction)changeHistory:(id)sender;
 - (IBAction)back:(id)sender;
 - (IBAction)forward:(id)sender;

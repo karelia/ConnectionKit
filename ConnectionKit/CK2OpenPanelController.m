@@ -971,16 +971,77 @@
 
 - (void)validateProgressIndicator
 {
-    if (([_runningOperations count] == 0) && (_currentBootstrapOperation == nil))
+    NSURL       *url;
+    NSArray     *urls;
+    BOOL        urlIsLoading;
+    
+    urlIsLoading = NO;
+    urls = [self URLs];
+    
+    if ([urls count] > 0)
     {
-        [_progressIndicator stopAnimation:self];
-        [_progressIndicator setHidden:YES];
+        for (url in [self URLs])
+        {
+            if ([_runningOperations objectForKey:url] != nil)
+            {
+                urlIsLoading = YES;
+                break;
+            }
+        }
     }
     else
     {
+        urlIsLoading = ([_runningOperations objectForKey:[self directoryURL]] != nil);
+    }
+    
+    if ((_currentBootstrapOperation == nil) && !urlIsLoading)
+    {
+        [_progressIndicator stopAnimation:self];
+        [_progressIndicator setHidden:YES];
+        [_refreshButton setHidden:NO];
+    }
+    else
+    {
+        [_refreshButton setHidden:YES];
         [_progressIndicator startAnimation:self];
         [_progressIndicator setHidden:NO];
     }
+}
+
+- (IBAction)refresh:(id)sender
+{
+    NSURL       *url;
+    NSArray     *urls;
+    BOOL        urlIsLoading;
+    
+    urlIsLoading = NO;
+    urls = [self URLs];
+    
+    if ([urls count] == 0)
+    {
+        urls = @[ [self directoryURL] ];
+    }
+    
+    for (url in urls)
+    {
+        if ([_runningOperations objectForKey:url] != nil)
+        {
+            urlIsLoading = YES;
+            break;
+        }
+    }
+    
+    if (!urlIsLoading)
+    {
+        for (url in urls)
+        {
+            [self cacheChildren:nil forURL:url];
+        }
+    }
+    
+    [[self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]] reload];
+    [self validateNewFolderButton];
+    [self validateProgressIndicator];
 }
 
 - (void)validateHomeButton
