@@ -833,7 +833,10 @@
                     {
                         if (blockError != nil)
                         {
-                            value = @[ [NSURL ck2_errorURLWithMessage:@"Could not load items for this folder"] ];
+                            NSString *errorMessage = blockError.localizedFailureReason;
+                            if (!errorMessage) errorMessage = blockError.localizedDescription;
+                            
+                            value = @[ [NSURL ck2_errorURLWithMessage:errorMessage] ];
                             NSLog(@"Error loading contents of URL %@: %@", url, blockError);
                         }
                         else
