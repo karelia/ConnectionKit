@@ -333,7 +333,7 @@
 
 - (NSURL *)ck2_root
 {
-    return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
+    return [CK2FileManager URLWithPath:@"/" hostURL:self];
 }
 
 - (BOOL)ck2_isAncestorOfURL:(NSURL *)url
