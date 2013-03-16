@@ -23,7 +23,7 @@
     STAssertEqualObjects([CK2FTPProtocol URLByAppendingPathComponent:@"test1.txt"
                                                                toURL:[NSURL URLWithString:@"ftp://example.com/%2F"]
                                                          isDirectory:NO],
-                         [NSURL URLWithString:@"ftp://example.com/%2Ftest1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com/%2F/test1.txt"],
                          nil);
 }
 

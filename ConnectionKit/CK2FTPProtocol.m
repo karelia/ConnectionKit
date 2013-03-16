@@ -54,18 +54,6 @@
     return result;
 }
 
-+ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
-{
-    // -URLByAppendPathComponent can't deal quite correctly with FTP's quirks when the directory URL is root, so take over at that point
-    if ([[self pathOfURLRelativeToHomeDirectory:directoryURL] isEqualToString:@"/"])
-    {
-        NSURL *result = [self URLWithPath:[@"/" stringByAppendingString:pathComponent] relativeToURL:directoryURL];
-        return [CK2RemoteURL URLWithString:[result absoluteString]];
-    }
-    
-    return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
-}
-
 #pragma mark Operations
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
