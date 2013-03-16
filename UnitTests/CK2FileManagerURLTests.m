@@ -33,22 +33,22 @@
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
+    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
     
     url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                               hostURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertEqualObjects(url.relativeString, @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
+    STAssertEqualObjects(url.relativeString, @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
 }
 
 - (void)testFTPAbsoluteNonRootURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
+    STAssertEqualObjects([url absoluteString], @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
     
     url = [CK2FileManager URLWithPath:@"/absolute/path/file.txt"
                               hostURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertEqualObjects(url.relativeString, @"ftp://user:pass@test.ftp.com/%2Fabsolute/path/file.txt", nil);
+    STAssertEqualObjects(url.relativeString, @"ftp://user:pass@test.ftp.com//absolute/path/file.txt", nil);
 }
 
 - (void)testFTPRelativeNonRootFolderURL
@@ -77,14 +77,14 @@
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
                                                                 relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/%2F"], nil);
+    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"], nil);
 }
 
 - (void)testFTPRootNonRootURL
 {
     NSURL *url = [CK2FileManager URLWithPath:@"/"
                                relativeToURL:[NSURL URLWithString:@"ftp://user:pass@test.ftp.com/example/path/"]];
-    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com/%2F"], nil);
+    STAssertTrue([[url absoluteString] isEqualToString:@"ftp://user:pass@test.ftp.com//"], nil);
 }
 
 #pragma mark WebDAV

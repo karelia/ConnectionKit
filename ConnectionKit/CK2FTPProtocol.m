@@ -35,7 +35,9 @@
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
     {
-        path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
+        NSURL *result = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
+        result = [result URLByAppendingPathComponent:path];
+        return result;
     }
     
     NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
