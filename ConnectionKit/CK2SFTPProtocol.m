@@ -44,7 +44,7 @@
     }
     else if ([result isEqualToString:@"/~"])
     {
-        result = @".";
+        result = @"";   // seems a bit weird to have empty path, but enumeration acts badly if we return @"." instead
     }
     
     return result;
