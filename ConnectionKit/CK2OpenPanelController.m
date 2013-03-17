@@ -583,8 +583,8 @@
     __block NSURL                   *resolvedURL;
     NSDirectoryEnumerationOptions   options;
     
-    // Make sure URL is absolute so can safely use it for comparisons later
-    initialURL = [initialURL absoluteURL];
+    // Make sure URL is canonical so can safely use it for comparisons later
+    initialURL = [initialURL ck2_canonicalURL];
     
     children = [NSMutableArray array];
     
@@ -652,14 +652,30 @@
              rootURL = [resolvedURL ck2_root];
              if (![resolvedURL isEqual:initialURL])
              {
-                 NSString    *resolvedPath;
+                 NSString       *resolvedPath;
+                 NSArray        *resolvedComponents, *initialComponents;
+                 NSUInteger     i, j, count;;
                  
                  // If the resolved URL is different than the original one, then we assume the URL was relative and
                  // we try and derive the user's "home" directory from that.
-                 resolvedPath = [NSString stringWithFormat:@"%@/", [initialURL ck2_pathRelativeToURL:resolvedURL]];
+                 resolvedComponents = [resolvedURL pathComponents];
+                 initialComponents = [initialURL pathComponents];
+                 count = [resolvedComponents count];
+                 i = count;
+                 j = [initialComponents count];
                  
-                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath relativeToURL:[resolvedURL ck2_root]] absoluteURL]];
+                 while ((i-- > 1) && (j-- > 1)  && [[resolvedComponents objectAtIndex:i] isEqual:[initialComponents objectAtIndex:j]])
+                 {
+                 }
+
+                 resolvedPath = [NSString stringWithFormat:@"/%@/", [[resolvedComponents subarrayWithRange:NSMakeRange(1, i)] componentsJoinedByString:@"/"]];
+                 
+                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath hostURL:rootURL] absoluteURL]];
                  rootURL = [self homeURL];
+             }
+             else
+             {
+                 [self setHomeURL:[[[CK2FileManager URLWithPath:@"" hostURL:initialURL] URLByAppendingPathComponent:@""] absoluteURL]];
              }
              
              [self loadFromURL:rootURL toURL:resolvedURL error:&tempError];

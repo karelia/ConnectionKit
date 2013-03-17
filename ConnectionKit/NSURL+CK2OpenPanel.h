@@ -50,6 +50,8 @@
 - (BOOL)ck2_isDirectory;
 - (BOOL)ck2_isPackage;
 
+- (NSURL *)ck2_canonicalURL;
+
 - (NSURL *)ck2_root;
 // Will return YES if receiver and given url are the same
 - (BOOL)ck2_isAncestorOfURL:(NSURL *)url;

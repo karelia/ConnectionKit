@@ -331,9 +331,23 @@
     return self;
 }
 
+- (NSURL *)ck2_canonicalURL
+{
+    NSURL       *url;
+    
+    url = [CK2FileManager URLWithPath:[self path] hostURL:self];
+    
+    if ([[self absoluteString] hasSuffix:@"/"])
+    {
+        url = [url URLByAppendingPathComponent:@""];
+    }
+    return [url absoluteURL];
+}
+
+
 - (NSURL *)ck2_root
 {
-    return [[CK2FileManager URLWithPath:@"/" relativeToURL:self] absoluteURL];
+    return [[CK2FileManager URLWithPath:@"/" hostURL:self] absoluteURL];
 }
 
 - (BOOL)ck2_isAncestorOfURL:(NSURL *)url
@@ -430,7 +444,7 @@
                 /// directly here
                 path = [path stringByAppendingPathComponent:[otherComponents objectAtIndex:i]];
                 path = [path stringByAppendingString:@"/"];
-                tempURL = [[CK2FileManager URLWithPath:path relativeToURL:root] absoluteURL];
+                tempURL = [[CK2FileManager URLWithPath:path hostURL:root] absoluteURL];
                 
                 block(tempURL, &stop);
             }
