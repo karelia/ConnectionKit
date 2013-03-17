@@ -42,8 +42,6 @@
 
 
 #pragma mark URLs
-// For subclasses to handle any quirks of their URL scheme
-+ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
 + (BOOL)URLHasDirectoryPath:(NSURL *)url;
 
 

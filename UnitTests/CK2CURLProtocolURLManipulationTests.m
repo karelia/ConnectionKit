@@ -20,72 +20,64 @@
 
 - (void)testFTPAppendToRoot;
 {
-    STAssertEqualObjects([CK2FTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                               toURL:[NSURL URLWithString:@"ftp://example.com/%2F"]
-                                                         isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2F"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"ftp://example.com/%2F/test1.txt"],
+                         nil);
+    
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com//test1.txt"],
                          nil);
 }
 
 - (void)testFTPAppendToAbsoluteDirectory;
 {
-    STAssertEqualObjects([CK2FTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                               toURL:[NSURL URLWithString:@"ftp://example.com/%2Ftest/"]
-                                                         isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/%2Ftest/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"ftp://example.com/%2Ftest/test1.txt"],
+                         nil);
+    
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com//test/"] URLByAppendingPathComponent:@"test1.txt"],
+                         [NSURL URLWithString:@"ftp://example.com//test/test1.txt"],
                          nil);
 }
 
 - (void)testFTPAppendToHome;
 {
-    STAssertEqualObjects([CK2FTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                               toURL:[NSURL URLWithString:@"ftp://example.com/"]
-                                                         isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"ftp://example.com/test1.txt"],
                          nil);
 }
 
 - (void)testFTPAppendToHomeSubdirectory;
 {
-    STAssertEqualObjects([CK2FTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                               toURL:[NSURL URLWithString:@"ftp://example.com/test/"]
-                                                         isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"ftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"ftp://example.com/test/test1.txt"],
                          nil);
 }
 
 - (void)testSFTPAppendToRoot;
 {
-    STAssertEqualObjects([CK2SFTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                                toURL:[NSURL URLWithString:@"sftp://example.com/"]
-                                                          isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"sftp://example.com/test1.txt"],
                          nil);
 }
 
 - (void)testSFTPAppendToAbsoluteDirectory;
 {
-    STAssertEqualObjects([CK2SFTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                                toURL:[NSURL URLWithString:@"sftp://example.com/test/"]
-                                                          isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/test/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"sftp://example.com/test/test1.txt"],
                          nil);
 }
 
 - (void)testSFTPAppendToHome;
 {
-    STAssertEqualObjects([CK2SFTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                                toURL:[NSURL URLWithString:@"sftp://example.com/~/"]
-                                                          isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"sftp://example.com/~/test1.txt"],
                          nil);
 }
 
 - (void)testSFTPAppendToHomeSubdirectory;
 {
-    STAssertEqualObjects([CK2SFTPProtocol URLByAppendingPathComponent:@"test1.txt"
-                                                                toURL:[NSURL URLWithString:@"sftp://example.com/~/test/"]
-                                                          isDirectory:NO],
+    STAssertEqualObjects([[NSURL URLWithString:@"sftp://example.com/~/test/"] URLByAppendingPathComponent:@"test1.txt"],
                          [NSURL URLWithString:@"sftp://example.com/~/test/test1.txt"],
                          nil);
 }

@@ -80,13 +80,6 @@
     return YES;
 }
 
-+ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
-{
-    if (isDirectory) pathComponent = [pathComponent stringByAppendingString:@"/"];
-    NSURL *result = [directoryURL URLByAppendingPathComponent:pathComponent];
-    return [CK2RemoteURL URLWithString:[result relativeString] relativeToURL:[result baseURL]];
-}
-
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -148,7 +141,8 @@
                             BOOL isDirectory = [type intValue] == DT_DIR;
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            CK2RemoteURL *aURL = [[self class] URLByAppendingPathComponent:name toURL:directoryURL isDirectory:isDirectory];
+                            NSURL *anNSURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
+                            CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
