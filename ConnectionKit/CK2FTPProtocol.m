@@ -79,6 +79,21 @@
     }
     
     
+    // Correct for files at root level (libcurl treats them as if creating in home folder)
+    NSURL *url = request.URL;
+    NSString *path = [self.class pathOfURLRelativeToHomeDirectory:url];
+    
+    if (path.isAbsolutePath && path.pathComponents.count == 2)
+    {
+        path = [@"/%2F" stringByAppendingPathComponent:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        url = [NSURL URLWithString:path relativeToURL:url];
+        
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
+        mutableRequest.URL = url.absoluteURL;
+        request = mutableRequest;
+    }
+    
+    
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
     
