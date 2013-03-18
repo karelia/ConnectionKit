@@ -104,12 +104,13 @@
             
             
             // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
+            NSString *homeDirectoryPath = [_handle initialFTPPath];
+            
             if (![directoryPath isAbsolutePath])
             {
-                NSString *home = [_handle initialFTPPath];
-                if ([home isAbsolutePath])
+                if ([homeDirectoryPath isAbsolutePath])
                 {
-                    directoryURL = [[self.class URLWithPath:home relativeToURL:directoryURL] absoluteURL];
+                    directoryURL = [[self.class URLWithPath:homeDirectoryPath relativeToURL:directoryURL] absoluteURL];
                     directoryURL = [directoryURL URLByAppendingPathComponent:directoryPath];
                 }
             }
@@ -169,7 +170,14 @@
                                     NSImage *icon;
                                     if (isDirectory && ![self.class isPackage:aURL])
                                     {
-                                        icon = [NSImage imageNamed:NSImageNameFolder];
+                                        if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:homeDirectoryPath])
+                                        {
+                                            icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
+                                        }
+                                        else
+                                        {
+                                            icon = [NSImage imageNamed:NSImageNameFolder];
+                                        }
                                     }
                                     else
                                     {
