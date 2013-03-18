@@ -165,7 +165,20 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                 {
-                                    // Not supported yet but could be
+                                    // Guess based on file type, and what we know the home directory to be
+                                    NSImage *icon;
+                                    if (isDirectory && ![self.class isPackage:aURL])
+                                    {
+                                        icon = [NSImage imageNamed:NSImageNameFolder];
+                                    }
+                                    else
+                                    {
+                                        NSString *fileType = aURL.pathExtension;
+                                        if ([fileType isEqual:@"app"]) fileType = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
+                                        icon = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
+                                    }
+                                    
+                                    [aURL setTemporaryResourceValue:icon forKey:aKey];
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {
@@ -313,6 +326,42 @@
     
     [request release];
     return self;
+}
+
++ (BOOL)isPackage:(NSURL *)url;
+{
+    NSString        *extension;
+    
+    extension = [url pathExtension];
+    
+    if ([extension length] > 0)
+    {
+        if ([extension isEqual:@"app"])
+        {
+            return YES;
+        }
+        else
+        {
+            OSStatus        status;
+            
+            status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
+            
+            if (status == kLSApplicationNotFoundErr)
+            {
+                return NO;
+            }
+            else if (status != noErr)
+            {
+                NSLog(@"Error getting app info for extension for URL %@: %s", [url absoluteString], GetMacOSStatusCommentString(status));
+            }
+            else
+            {
+                return YES;
+            }
+        }
+    }
+    
+    return NO;
 }
 
 #pragma mark Dealloc
