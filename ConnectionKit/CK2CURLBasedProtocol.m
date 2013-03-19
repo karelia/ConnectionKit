@@ -80,6 +80,8 @@
     return YES;
 }
 
+static NSMutableDictionary *sHomeURLsByHostURL;
+
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -420,6 +422,24 @@
 
 - (void)endWithError:(NSError *)error;
 {
+    // Update cache
+    if (!error)
+    {
+        NSString *homeDirectoryPath = [_handle initialFTPPath];
+        
+        if ([homeDirectoryPath isAbsolutePath])
+        {
+            if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
+            
+            NSURL *request = self.request.URL;
+            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:request].absoluteURL;
+            NSString *host = [[NSURL URLWithString:@"/" relativeToURL:request] absoluteString].lowercaseString;
+            
+            [sHomeURLsByHostURL setObject:homeDirectoryURL forKey:host];
+        }
+    }
+    
+    
     if (_completionHandler)
     {
         _completionHandler(error);
