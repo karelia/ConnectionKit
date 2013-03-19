@@ -107,6 +107,7 @@
             NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
             if (home && ![directoryPath isAbsolutePath])
             {
+                if (directoryPath.length && ![directoryPath hasSuffix:@"/"]) directoryPath = [directoryPath stringByAppendingString:@"/"];
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
