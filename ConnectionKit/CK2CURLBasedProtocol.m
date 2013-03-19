@@ -80,8 +80,6 @@
     return YES;
 }
 
-static NSMutableDictionary *sHomeURLsByHostURL;
-
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -429,13 +427,8 @@ static NSMutableDictionary *sHomeURLsByHostURL;
         
         if ([homeDirectoryPath isAbsolutePath])
         {
-            if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
-            
-            NSURL *request = self.request.URL;
-            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:request].absoluteURL;
-            NSString *host = [[NSURL URLWithString:@"/" relativeToURL:request] absoluteString].lowercaseString;
-            
-            [sHomeURLsByHostURL setObject:homeDirectoryURL forKey:host];
+            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
+            [self.class storeHomeDirectoryURL:homeDirectoryURL];
         }
     }
     
@@ -496,6 +489,20 @@ static NSMutableDictionary *sHomeURLsByHostURL;
 + (BOOL)URLHasDirectoryPath:(NSURL *)url;
 {
     return CFURLHasDirectoryPath((CFURLRef)url);
+}
+
+static NSMutableDictionary *sHomeURLsByHostURL;
++ (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
+{
+    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
+    return [sHomeURLsByHostURL objectForKey:host];
+}
++ (void)storeHomeDirectoryURL:(NSURL *)home;
+{
+    if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
+    
+    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
+    [sHomeURLsByHostURL setObject:home forKey:host];
 }
 
 #pragma mark CURLHandleDelegate
