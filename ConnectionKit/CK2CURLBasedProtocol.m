@@ -423,6 +423,11 @@
         
         if ([homeDirectoryPath isAbsolutePath])
         {
+            if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
+            {
+                homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
+            }
+            
             NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
             [self.class storeHomeDirectoryURL:homeDirectoryURL];
         }
