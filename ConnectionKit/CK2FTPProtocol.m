@@ -35,7 +35,9 @@
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
     {
-        path = [path stringByReplacingCharactersInRange:NSMakeRange(1, 0) withString:@"%2F"];
+        NSURL *result = [[NSURL URLWithString:@"/" relativeToURL:baseURL] absoluteURL];
+        result = [result URLByAppendingPathComponent:path];
+        return result;
     }
     
     NSURL *result = [NSURL URLWithString:path relativeToURL:baseURL];
@@ -50,18 +52,6 @@
     NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (strictPath) CFRelease(strictPath);
     return result;
-}
-
-+ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
-{
-    // -URLByAppendPathComponent can't deal quite correctly with FTP's quirks when the directory URL is root, so take over at that point
-    if ([[self pathOfURLRelativeToHomeDirectory:directoryURL] isEqualToString:@"/"])
-    {
-        NSURL *result = [self URLWithPath:[@"/" stringByAppendingString:pathComponent] relativeToURL:directoryURL];
-        return [CK2RemoteURL URLWithString:[result absoluteString]];
-    }
-    
-    return [super URLByAppendingPathComponent:pathComponent toURL:directoryURL isDirectory:isDirectory];
 }
 
 #pragma mark Operations
@@ -85,6 +75,21 @@
     {
         NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
         [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
+        request = mutableRequest;
+    }
+    
+    
+    // Correct for files at root level (libcurl treats them as if creating in home folder)
+    NSURL *url = request.URL;
+    NSString *path = [self.class pathOfURLRelativeToHomeDirectory:url];
+    
+    if (path.isAbsolutePath && path.pathComponents.count == 2)
+    {
+        path = [@"/%2F" stringByAppendingPathComponent:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
+        url = [NSURL URLWithString:path relativeToURL:url];
+        
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
+        mutableRequest.URL = url.absoluteURL;
         request = mutableRequest;
     }
     

@@ -529,7 +529,7 @@ static NSString* gResponsesToUse = nil;
                     else
                     {
                         // Search back for the preceeding CWD command
-                        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, index)];
+                        NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, idx)];
                         __block BOOL haveChangedDirectory = NO;
                         
                         [self.server.transcript enumerateObjectsAtIndexes:indexes options:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
