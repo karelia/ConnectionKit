@@ -44,11 +44,18 @@
             *value = [self lastPathComponent];
             return YES;
         }
+        
+        // Have to define NSURLPathKey as a macro for older releases:
+#if (!defined MAC_OS_X_VERSION_10_8) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8
+#define NSURLPathKey @"_NSURLPathKey"
+#endif
         else if ([key isEqualToString:NSURLPathKey])
         {
             *value = [CK2FileManager pathOfURL:self];
             return YES;
         }
+#undef NSURLPathKey
+        
         else
         {
             return [super getResourceValue:value forKey:key error:error];
