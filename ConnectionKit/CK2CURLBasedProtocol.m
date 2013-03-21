@@ -218,10 +218,6 @@
                                 {
                                     [aURL setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey];
                                 }
-                                else if ([aKey isEqualToString:NSURLIsPackageKey])
-                                {
-                                    // Could guess based on extension
-                                }
                                 else if ([aKey isEqualToString:NSURLIsRegularFileKey])
                                 {
                                     [aURL setTemporaryResourceValue:@([type intValue] == DT_REG) forKey:aKey];

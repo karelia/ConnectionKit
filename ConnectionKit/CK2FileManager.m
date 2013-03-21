@@ -364,7 +364,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 }
                 
                 // Guess based on file type
-                if (isDirectory.boolValue && ![self.class isPackage:aURL])
+                NSNumber *package;
+                if (isDirectory.boolValue && (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || !package.boolValue))
                 {
                     icon = [NSImage imageNamed:NSImageNameFolder];
                 }
@@ -394,42 +395,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
     
     return self;
-}
-
-+ (BOOL)isPackage:(NSURL *)url;
-{
-    NSString        *extension;
-    
-    extension = [url pathExtension];
-    
-    if ([extension length] > 0)
-    {
-        if ([extension isEqual:@"app"])
-        {
-            return YES;
-        }
-        else
-        {
-            OSStatus        status;
-            
-            status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
-            
-            if (status == kLSApplicationNotFoundErr)
-            {
-                return NO;
-            }
-            else if (status != noErr)
-            {
-                NSLog(@"Error getting app info for extension for URL %@: %s", [url absoluteString], GetMacOSStatusCommentString(status));
-            }
-            else
-            {
-                return YES;
-            }
-        }
-    }
-    
-    return NO;
 }
 
 - (id)initDirectoryCreationOperationWithURL:(NSURL *)url
