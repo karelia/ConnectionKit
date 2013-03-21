@@ -88,41 +88,38 @@
 
 - (NSImage *)ck2_icon
 {
-    if ([self isFileURL])
-    {
-        id          value;
-        NSError     *error;
+    id          value;
+    NSError     *error;
         
-        if ([self getResourceValue:&value forKey:NSURLEffectiveIconKey error:&error])
-        {
-            return value;
-        }
-        else
-        {
-            NSLog(@"Error getting icon for URL %@: %@", [self absoluteString], error);
-        }
-    }
-    else
+    if ([self getResourceValue:&value forKey:NSURLEffectiveIconKey error:&error])
     {
-        NSURL       *actualURL;
         NSImage     *image;
-        NSString    *type;
-        
+        NSURL       *actualURL;
+
+        image = nil;
         actualURL = [self ck2_destinationURL];
         
-        if ([actualURL ck2_isDirectory] && ![actualURL ck2_isPackage])
+        if (value == nil)
         {
-            image = [NSImage imageNamed:NSImageNameFolder];
+            // Value may not be set (i.e. we created this URL instead of having it returned from CK2FileManager). We
+            // provide some default images in this case.
+            if ([actualURL ck2_isDirectory] && ![actualURL ck2_isPackage])
+            {
+                image = [NSImage imageNamed:NSImageNameFolder];
+            }
+            else
+            {
+                image = [[NSWorkspace sharedWorkspace] iconForFileType: NSFileTypeForHFSTypeCode(kGenericDocumentIcon)];
+            }
+        }
+        else if ([value isKindOfClass:[NSImage class]])
+        {
+            image = value;
         }
         else
         {
-            type = [actualURL pathExtension];
-        
-            if ([type isEqual:@"app"])
-            {
-                type = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
-            }
-            image = [[NSWorkspace sharedWorkspace] iconForFileType:type];
+            NSLog(@"Received unexpected type for icon: %@", [value class]);
+            return nil;
         }
         
         if (![self isEqual:actualURL])
@@ -132,6 +129,11 @@
         
         return image;
     }
+    else
+    {
+        NSLog(@"Error getting icon for URL %@: %@", [self absoluteString], error);
+    }
+
     return nil;
 }
 
