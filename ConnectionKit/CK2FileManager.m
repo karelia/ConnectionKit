@@ -346,9 +346,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    // Custom enumeration block to fill in icons if requested
     if ([keys containsObject:NSURLEffectiveIconKey])
     {
+        // Custom enumeration block to fill in icons if requested
         enumBlock = ^(NSURL *anNSURL) {
             
             CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
@@ -377,6 +377,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 }
                 
                 [aURL setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey];
+            }
+            
+            enumBlock(aURL);
+        };
+    }
+    else if ([keys containsObject:NSURLIsPackageKey])
+    {
+        enumBlock = ^(NSURL *aURL) {
+            
+            // Just need to ensure the result is a CK2RemoteURL so can guess
+            NSNumber *package;
+            if (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || package == nil)
+            {
+                aURL = [CK2RemoteURL URLWithURL:aURL];
             }
             
             enumBlock(aURL);
