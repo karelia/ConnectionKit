@@ -60,6 +60,7 @@
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
+    NSLog(@"==SETUP=============================================================");
     if ([responses isEqualToString:@"webdav"])
     {
         self.type = @"CKWebDAVTest";
@@ -89,16 +90,19 @@
     BOOL ok;
     if (!setting || [setting isEqualToString:@"Off"])
     {
+        NSLog(@"Tests turned off for %@", responses);
         ok = NO;
     }
     else if ([setting isEqualToString:@"MockServer"])
     {
+        NSLog(@"Tests using MockServer for %@", responses);
         self.useMockServer = YES;
         ok = [super setupServerWithResponseFileNamed:responses];
     }
     else
     {
         NSURL* url = [NSURL URLWithString:setting];
+        NSLog(@"Tests using server %@ for %@", url, responses);
         self.user = url.user;
         self.password = url.password;
         self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
@@ -113,6 +117,17 @@
         [self setupSession];
         ok = self.session != nil;
     }
+
+    if (ok)
+    {
+        NSLog(@"Tests setup for %@, user: %@, password:%@ url:%@", responses, self.user, self.password, self.url);
+    }
+    else
+    {
+        NSLog(@"Tests not setup for %@", responses);
+    }
+
+    NSLog(@"====================================================================");
 
     return ok;
 }
