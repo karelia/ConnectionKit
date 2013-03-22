@@ -86,12 +86,3 @@
 }
 
 @end
-
-@implementation NSAttributedString (Connection)
-
-+ (NSAttributedString *)attributedStringWithString:(NSString *)str attributes:(NSDictionary *)attribs
-{
-	return [[[NSAttributedString alloc] initWithString:str attributes:attribs] autorelease];
-}
-
-@end

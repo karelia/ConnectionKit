@@ -41,7 +41,3 @@
 - (NSString *)stringByDeletingFirstPathComponent2;
 
 @end
-
-@interface NSAttributedString (Connection)
-+ (NSAttributedString *)attributedStringWithString:(NSString *)str attributes:(NSDictionary *)attribs;
-@end
