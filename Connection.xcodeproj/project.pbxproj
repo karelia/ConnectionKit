@@ -208,6 +208,7 @@
 		224AB389166E52680066B1C6 /* KMSTestCase.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTestCase.m; sourceTree = "<group>"; };
 		224AB38B166E587F0066B1C6 /* KMSManualTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSManualTests.m; sourceTree = "<group>"; };
 		225FCA3716B046F800A9F5AE /* CKUploaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKUploaderTests.m; sourceTree = "<group>"; };
+		2264399116FCB702001FDC20 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerBaseTests.h; sourceTree = "<group>"; };
 		22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerBaseTests.m; sourceTree = "<group>"; };
 		22662EF1165D2EEC005FCC4A /* ftp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ftp.json; sourceTree = "<group>"; };
@@ -348,6 +349,7 @@
 		09D6602E09FD37B70000BA00 /* Unit Tests */ = {
 			isa = PBXGroup;
 			children = (
+				2264399116FCB702001FDC20 /* README.md */,
 				225FCA3716B046F800A9F5AE /* CKUploaderTests.m */,
 				22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */,
 				22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */,
