@@ -112,7 +112,7 @@
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
-            [client protocol:self didDiscoverItemAtURL:directoryURL];
+            [self reportDiscoveryOfItemAtURL:directoryURL];
             
             
             // Process the data to make a directory listing
@@ -279,7 +279,7 @@
                                 }
                             }
                             
-                            [client protocol:self didDiscoverItemAtURL:aURL];
+                            [self reportDiscoveryOfItemAtURL:aURL];
                         }
                         
                         CFRelease(parsedDict);
@@ -312,11 +312,42 @@
     return self;
 }
 
+- (NSURL *)reportDiscoveryOfItemAtURL:(NSURL *)aURL;
+{
+    // Canonicalize URLs by making sure username is included. Strip out password in the process
+    NSString *user = [_user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    CFIndex length = CFURLGetBytes((CFURLRef)aURL, NULL, 0);
+    NSMutableData *data = [[NSMutableData alloc] initWithLength:length];
+    CFURLGetBytes((CFURLRef)aURL, [data mutableBytes], length);
+    
+    CFRange authSeparatorsRange;
+    CFRange authRange = CFURLGetByteRangeForComponent((CFURLRef)aURL, kCFURLComponentUserInfo, &authSeparatorsRange);
+    
+    if (authRange.location == kCFNotFound)
+    {
+        NSData *replacement = [[user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authSeparatorsRange, [replacement bytes], replacement.length);
+    }
+    else
+    {
+        NSData *replacement = [user dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
+    }
+    
+    aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
+    [data release];
+    
+    [self.client protocol:self didDiscoverItemAtURL:aURL];
+    return [aURL autorelease];
+}
+
 #pragma mark Dealloc
 
 - (void)dealloc;
 {
     [_handle release];
+    [_user release];
     [_completionHandler release];
     [_dataBlock release];
     [_progressBlock release];
@@ -330,6 +361,8 @@
 
 - (void)startWithCredential:(NSURLCredential *)credential;
 {
+    _user = [credential.user copy];
+    
     if ([[self class] usesMultiHandle])
     {
         _handle = [[CURLHandle alloc] initWithRequest:[self request]
