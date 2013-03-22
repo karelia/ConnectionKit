@@ -9,8 +9,6 @@
 #import "CK2Protocol.h"
 
 
-@class CK2FileManager;
-
 @interface CK2FileOperation : NSObject <CK2ProtocolClient>
 {
 @public   // HACK so auth trampoline can get at them
