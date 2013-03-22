@@ -28,6 +28,9 @@
  */
 
 
+#import <Foundation/Foundation.h>
+
+
 @interface CKTransferRecord : NSObject
 {
 	NSString *_name;

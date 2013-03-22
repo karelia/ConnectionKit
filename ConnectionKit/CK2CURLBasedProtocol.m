@@ -14,6 +14,8 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
+#import <AppKit/AppKit.h>   // for NSImage
+
 
 @implementation CK2CURLBasedProtocol
 
@@ -80,13 +82,6 @@
     return YES;
 }
 
-+ (CK2RemoteURL *)URLByAppendingPathComponent:(NSString *)pathComponent toURL:(NSURL *)directoryURL isDirectory:(BOOL)isDirectory;
-{
-    if (isDirectory) pathComponent = [pathComponent stringByAppendingString:@"/"];
-    NSURL *result = [directoryURL URLByAppendingPathComponent:pathComponent];
-    return [CK2RemoteURL URLWithString:[result relativeString] relativeToURL:[result baseURL]];
-}
-
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -110,15 +105,12 @@
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
-            // Correct relative FTP paths if we can. TODO: Shift this logic down to FTP protocol
-            if (![directoryPath isAbsolutePath])
+            // Correct relative paths if we can
+            NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
+            if (home && ![directoryPath isAbsolutePath])
             {
-                NSString *home = [_handle initialFTPPath];
-                if ([home isAbsolutePath])
-                {
-                    directoryURL = [[self.class URLWithPath:home relativeToURL:directoryURL] absoluteURL];
-                    directoryURL = [directoryURL URLByAppendingPathComponent:directoryPath];
-                }
+                if (directoryPath.length && ![directoryPath hasSuffix:@"/"]) directoryPath = [directoryPath stringByAppendingString:@"/"];
+                directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
             [client protocol:self didDiscoverItemAtURL:directoryURL];
@@ -148,7 +140,8 @@
                             BOOL isDirectory = [type intValue] == DT_DIR;
                             
                             // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            CK2RemoteURL *aURL = [[self class] URLByAppendingPathComponent:name toURL:directoryURL isDirectory:isDirectory];
+                            NSURL *anNSURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
+                            CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
@@ -171,7 +164,12 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                 {
-                                    // Not supported yet but could be
+                                    // Client takes care of filling in icons for us; we just have to special case the home directory
+                                    if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
+                                    {
+                                        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
+                                        [aURL setTemporaryResourceValue:icon forKey:aKey];
+                                    }
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {
@@ -221,10 +219,6 @@
                                 else if ([aKey isEqualToString:NSURLIsHiddenKey])
                                 {
                                     [aURL setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey];
-                                }
-                                else if ([aKey isEqualToString:NSURLIsPackageKey])
-                                {
-                                    // Could guess based on extension
                                 }
                                 else if ([aKey isEqualToString:NSURLIsRegularFileKey])
                                 {
@@ -369,6 +363,24 @@
 
 - (void)endWithError:(NSError *)error;
 {
+    // Update cache
+    if (!error)
+    {
+        NSString *homeDirectoryPath = [_handle initialFTPPath];
+        
+        if ([homeDirectoryPath isAbsolutePath])
+        {
+            if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
+            {
+                homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
+            }
+            
+            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
+            [self.class storeHomeDirectoryURL:homeDirectoryURL];
+        }
+    }
+    
+    
     if (_completionHandler)
     {
         _completionHandler(error);
@@ -425,6 +437,20 @@
 + (BOOL)URLHasDirectoryPath:(NSURL *)url;
 {
     return CFURLHasDirectoryPath((CFURLRef)url);
+}
+
+static NSMutableDictionary *sHomeURLsByHostURL;
++ (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
+{
+    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
+    return [sHomeURLsByHostURL objectForKey:host];
+}
++ (void)storeHomeDirectoryURL:(NSURL *)home;
+{
+    if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
+    
+    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
+    [sHomeURLsByHostURL setObject:home forKey:host];
 }
 
 #pragma mark CURLHandleDelegate

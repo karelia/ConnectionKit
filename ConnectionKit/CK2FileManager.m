@@ -8,6 +8,9 @@
 
 #import "CK2FileManager.h"
 #import "CK2Protocol.h"
+#import "CK2RemoteURL.h"
+
+#import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
@@ -345,6 +348,57 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
+    if ([keys containsObject:NSURLEffectiveIconKey])
+    {
+        // Custom enumeration block to fill in icons if requested
+        enumBlock = ^(NSURL *anNSURL) {
+            
+            CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
+            
+            // Only need supply icon if protocol hasn't done so
+            NSImage *icon;
+            if (![aURL getResourceValue:&icon forKey:NSURLEffectiveIconKey error:NULL] || !icon)
+            {
+                NSNumber *isDirectory;
+                if (![aURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] || isDirectory == nil)
+                {
+                    isDirectory = @(CFURLHasDirectoryPath((CFURLRef)anNSURL));
+                }
+                
+                // Guess based on file type
+                NSNumber *package;
+                if (isDirectory.boolValue && (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || !package.boolValue))
+                {
+                    icon = [NSImage imageNamed:NSImageNameFolder];
+                }
+                else
+                {
+                    NSString *fileType = aURL.pathExtension;
+                    if ([fileType isEqual:@"app"]) fileType = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
+                    icon = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
+                }
+                
+                [aURL setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey];
+            }
+            
+            enumBlock(aURL);
+        };
+    }
+    else if ([keys containsObject:NSURLIsPackageKey])
+    {
+        enumBlock = ^(NSURL *aURL) {
+            
+            // Just need to ensure the result is a CK2RemoteURL so can guess
+            NSNumber *package;
+            if (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || package == nil)
+            {
+                aURL = [CK2RemoteURL URLWithURL:aURL];
+            }
+            
+            enumBlock(aURL);
+        };
+    }
+    
     self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
