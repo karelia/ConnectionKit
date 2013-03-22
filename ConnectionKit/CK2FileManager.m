@@ -225,11 +225,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     });
 }
 
-+ (const void *)associateObjectsKeyForURLResourceKey:(NSString *)key;
-{
-    return [[@"com.karelia.connection.resource-property." stringByAppendingString:key] UTF8String];
-}
-
 /*!
  @method         canHandleURL:
  
