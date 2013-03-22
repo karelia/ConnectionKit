@@ -32,9 +32,6 @@
 
 @interface NSString (Connection)
 
-- (NSString *)encodeLegally;
-- (NSString *)encodeLegallyForS3;
-
 // Paths
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;

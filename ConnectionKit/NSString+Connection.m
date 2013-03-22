@@ -34,21 +34,6 @@
 
 @implementation NSString (Connection)
 
-- (NSString *)encodeLegally
-{
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef)self, (CFStringRef)@"%+#", 
-																			NULL, CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-	return [result autorelease];
-}
-- (NSString *)encodeLegallyForS3
-{
-	NSString *result = (NSString *) CFURLCreateStringByAddingPercentEscapes(
-																			NULL, (CFStringRef)self, NULL, (CFStringRef)@"+",
-																			CFStringConvertNSStringEncodingToEncoding(NSUTF8StringEncoding));
-	return [result autorelease];
-}	
-
 - (NSString *)firstPathComponent
 {
 	NSString *str = self;
