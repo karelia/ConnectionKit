@@ -8,8 +8,6 @@
 
 #import "CK2FTPProtocol.h"
 
-#import "CK2RemoteURL.h"
-
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
 

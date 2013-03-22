@@ -10,6 +10,8 @@
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
 
+#import <objc/runtime.h>
+
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 
@@ -197,6 +199,37 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
 }
 
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
+{
+    // File URLs are already handled by the system
+    // Ideally, would use CFURLSetTemporaryResourcePropertyForKey() first for all URLs as a test, but on 10.7.5 at least, it crashes with non-file URLs
+    if ([url isFileURL])
+    {
+        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)value, (CFStringRef)key, value);
+        return;
+    }
+    
+    // Store the value as an associated object
+    if (!value) value = [NSNull null];
+    objc_setAssociatedObject(url, key, value, OBJC_ASSOCIATION_RETAIN);
+    
+    
+    // Swizzle so getter method includes cache in its search
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        
+        Class class = NSURL.class;
+        Method originalMethod = class_getInstanceMethod(class, @selector(getResourceValue:forKey:error:));
+        Method overrideMethod = class_getInstanceMethod(class, @selector(ck2_getResourceValue:forKey:error:));
+        method_exchangeImplementations(originalMethod, overrideMethod);
+    });
+}
+
++ (const void *)associateObjectsKeyForURLResourceKey:(NSString *)key;
+{
+    return [[@"com.karelia.connection.resource-property." stringByAppendingString:key] UTF8String];
+}
+
 /*!
  @method         canHandleURL:
  
@@ -217,6 +250,98 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return ([CK2Protocol classForURL:url] != nil);
+}
+
+@end
+
+
+#pragma mark -
+
+
+@implementation NSURL (CK2TemporaryResourceProperties)
+
+#pragma mark Getting and Setting File System Resource Properties
+
+- (BOOL)ck2_getResourceValue:(out id *)value forKey:(NSString *)key error:(out NSError **)error;
+{
+    // Special case, as for the setter method
+    if ([self isFileURL])
+    {
+        return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
+    }
+    
+    *value = objc_getAssociatedObject(self, key);
+    if (*value == nil)
+    {
+        // A few keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
+        if ([key isEqualToString:NSURLHasHiddenExtensionKey])
+        {
+            *value = [NSNumber numberWithBool:NO];
+            return YES;
+        }
+        else if ([key isEqualToString:NSURLLocalizedNameKey])
+        {
+            *value = [self lastPathComponent];
+            return YES;
+        }
+        
+        // Have to define NSURLPathKey as a macro for older releases:
+#if (!defined MAC_OS_X_VERSION_10_8) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8
+#define NSURLPathKey @"_NSURLPathKey"
+#endif
+        else if ([key isEqualToString:NSURLPathKey])
+        {
+            *value = [CK2FileManager pathOfURL:self];
+            return YES;
+        }
+#undef NSURLPathKey
+        
+        else if ([key isEqualToString:NSURLIsPackageKey])
+        {
+            NSString        *extension;
+            
+            extension = [self pathExtension];
+            
+            if ([extension length] > 0)
+            {
+                if ([extension isEqual:@"app"])
+                {
+                    return YES;
+                }
+                else
+                {
+                    OSStatus        status;
+                    
+                    status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
+                    
+                    if (status == kLSApplicationNotFoundErr)
+                    {
+                        return NO;
+                    }
+                    else if (status != noErr)
+                    {
+                        NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
+                    }
+                    else
+                    {
+                        return YES;
+                    }
+                }
+            }
+            
+            return NO;
+        }
+        else
+        {
+            return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
+        }
+    }
+    else if (*value == [NSNull null])
+    {
+        *value = nil;
+    }
+    
+    return YES;
 }
 
 @end

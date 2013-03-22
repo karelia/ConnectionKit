@@ -129,6 +129,16 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /// \returns the path.
 + (NSString *)pathOfURL:(NSURL *)URL;
 
+// CFURLSetTemporaryResourcePropertyForKey() is a very handy function, but currently only supports file URLs
+// This method calls through to Core Foundation for file URLs, but provides its own storage for others
+// When first used for a non-file URL, -[NSURL getResourceValue:forKey:error:] is swizzled so the value can be easily retreived by clients later
+// This method is primarily used by non-file protocols to populate URLs returned during a directory listing. But it could be helpful to clients for adding in other info
+// CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must pass in a CONSTANT
+/// \param [in] value to cache. Retained
+/// \param [in] key to store under. Any existing value is overwritten
+/// \param [in] url to cache for
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
+
 @end
 
 
