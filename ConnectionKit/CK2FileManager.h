@@ -150,11 +150,3 @@ typedef enum {
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
 @end
-
-
-#pragma mark -
-
-
-@interface NSURL (ConnectionKit)
-- (BOOL)ck2_isFTPURL;   // YES if the scheme is ftp or ftps
-@end

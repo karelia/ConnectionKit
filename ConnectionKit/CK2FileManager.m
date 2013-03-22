@@ -220,17 +220,3 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 }
 
 @end
-
-
-#pragma mark -
-
-
-@implementation NSURL (ConnectionKit)
-
-- (BOOL)ck2_isFTPURL;
-{
-    NSString *scheme = [self scheme];
-    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
-}
-
-@end
