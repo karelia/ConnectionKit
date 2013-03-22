@@ -115,13 +115,6 @@
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEEC0B115511006905FA /* UKFileWatcher.h */; };
-		795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEED0B115511006905FA /* UKFileWatcher.m */; };
-		795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */ = {isa = PBXBuildFile; fileRef = 795AFEF00B115511006905FA /* UKKQueue Readme.txt */; };
-		795AFEFA0B115511006905FA /* UKKQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF10B115511006905FA /* UKKQueue.h */; };
-		795AFEFB0B115511006905FA /* UKKQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF20B115511006905FA /* UKKQueue.m */; };
-		795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = 795AFEF30B115511006905FA /* UKMainThreadProxy.h */; };
-		795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = 795AFEF40B115511006905FA /* UKMainThreadProxy.m */; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		7978FC150B117D7C0048168B /* bookmark.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7978FC140B117D7C0048168B /* bookmark.tif */; };
@@ -350,13 +343,6 @@
 		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Connection.m"; path = "ConnectionKit/NSString+Connection.m"; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKS3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKS3Connection.m; sourceTree = "<group>"; };
-		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
-		795AFEED0B115511006905FA /* UKFileWatcher.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKFileWatcher.m; sourceTree = "<group>"; };
-		795AFEF00B115511006905FA /* UKKQueue Readme.txt */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text; path = "UKKQueue Readme.txt"; sourceTree = "<group>"; };
-		795AFEF10B115511006905FA /* UKKQueue.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKKQueue.h; sourceTree = "<group>"; };
-		795AFEF20B115511006905FA /* UKKQueue.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKKQueue.m; sourceTree = "<group>"; };
-		795AFEF30B115511006905FA /* UKMainThreadProxy.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKMainThreadProxy.h; sourceTree = "<group>"; };
-		795AFEF40B115511006905FA /* UKMainThreadProxy.m */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.objc; path = UKMainThreadProxy.m; sourceTree = "<group>"; };
 		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
 		7978FC140B117D7C0048168B /* bookmark.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = bookmark.tif; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -420,14 +406,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Framework */ = {
+		080E96DDFE201D6D7F000001 /* Public */ = {
 			isa = PBXGroup;
 			children = (
 				79CFD89409F704F400172CDD /* Connection.h */,
-				79CFD8A009F705B400172CDD /* Utility */,
-				79CFD11A09F7022900172CDD /* Connections */,
+				2743E8071622E47600019979 /* CK2FileManager.h */,
+				2743E8081622E47600019979 /* CK2FileManager.m */,
+				278D8B77167FF35D00622468 /* CK2Authentication.h */,
+				278D8B78167FF35D00622468 /* CK2Authentication.m */,
 			);
-			name = Framework;
+			name = Public;
 			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
@@ -650,7 +638,8 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				080E96DDFE201D6D7F000001 /* Framework */,
+				080E96DDFE201D6D7F000001 /* Public */,
+				79CFD8A009F705B400172CDD /* Private */,
 				79CFD8A509F705FF00172CDD /* UI */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				27FD90C20ED5BFA40068D634 /* Experimental */,
@@ -739,41 +728,15 @@
 			name = CK2OpenPanel;
 			sourceTree = "<group>";
 		};
-		795AFEE50B1154E2006905FA /* UKKQueue */ = {
+		79CFD8A009F705B400172CDD /* Private */ = {
 			isa = PBXGroup;
 			children = (
-				795AFEEC0B115511006905FA /* UKFileWatcher.h */,
-				795AFEED0B115511006905FA /* UKFileWatcher.m */,
-				795AFEF00B115511006905FA /* UKKQueue Readme.txt */,
-				795AFEF10B115511006905FA /* UKKQueue.h */,
-				795AFEF20B115511006905FA /* UKKQueue.m */,
-				795AFEF30B115511006905FA /* UKMainThreadProxy.h */,
-				795AFEF40B115511006905FA /* UKMainThreadProxy.m */,
-			);
-			name = UKKQueue;
-			path = ../UKQueue;
-			sourceTree = "<group>";
-		};
-		79CFD11A09F7022900172CDD /* Connections */ = {
-			isa = PBXGroup;
-			children = (
-				2743E8071622E47600019979 /* CK2FileManager.h */,
-				2743E8081622E47600019979 /* CK2FileManager.m */,
-				278D8B77167FF35D00622468 /* CK2Authentication.h */,
-				278D8B78167FF35D00622468 /* CK2Authentication.m */,
-				273F0E13164E8D3E00588885 /* Protocols */,
-			);
-			name = Connections;
-			sourceTree = "<group>";
-		};
-		79CFD8A009F705B400172CDD /* Utility */ = {
-			isa = PBXGroup;
-			children = (
-				795AFEE50B1154E2006905FA /* UKKQueue */,
 				2790A8201626CA67000C9D9F /* CK2RemoteURL.h */,
 				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
+				273F0E13164E8D3E00588885 /* Protocols */,
 			);
-			name = Utility;
+			name = Private;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		79CFD8A509F705FF00172CDD /* UI */ = {
@@ -824,9 +787,6 @@
 				79CFD89509F704F400172CDD /* Connection.h in Headers */,
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
-				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
-				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
-				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
@@ -1025,7 +985,6 @@
 				797CC8C709F861770063FF9B /* Localizable.strings in Resources */,
 				791E83050B0EDAC90060E5FC /* error.png in Resources */,
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
-				795AFEF90B115511006905FA /* UKKQueue Readme.txt in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				227113BF168388FD00280005 /* http.json in Resources */,
 				32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */,
@@ -1131,9 +1090,6 @@
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
-				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
-				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
-				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
