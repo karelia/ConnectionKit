@@ -405,7 +405,7 @@ static NSString* gResponsesToUse = nil;
 
 - (void)testCreateDirectoryAtURLAlreadyExists
 {
-    if ([self setupSessionWithResponses:@"ftp"])
+    if ([self setup])
     {
         [self makeTestDirectoryWithFiles:NO];
         [self useResponseSet:@"mkdir fail"];
