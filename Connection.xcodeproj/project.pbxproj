@@ -75,8 +75,6 @@
 		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
-		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
-		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */; };
 		324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */; };
 		324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */; };
