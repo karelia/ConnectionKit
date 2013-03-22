@@ -33,8 +33,6 @@
 
 #import <Cocoa/Cocoa.h>
 
-#import <Connection/KTLog.h>
-
 #import <Connection/NSPopUpButton+Connection.h>
 #import <Connection/NSTabView+Connection.h>
 
