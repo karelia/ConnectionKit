@@ -35,7 +35,6 @@
 
 #import <Connection/KTLog.h>
 
-#import <Connection/NSData+Connection.h>
 #import <Connection/NSString+Connection.h>
 #import <Connection/NSPopUpButton+Connection.h>
 #import <Connection/NSTabView+Connection.h>
