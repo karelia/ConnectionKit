@@ -31,15 +31,7 @@
 #import <Connection/CK2FileManager.h>
 #import <Connection/CK2Authentication.h>
 
-#import <Cocoa/Cocoa.h>
-
-#import <Connection/KTLog.h>
-
-#import <Connection/NSData+Connection.h>
-#import <Connection/NSString+Connection.h>
-#import <Connection/NSPopUpButton+Connection.h>
-#import <Connection/NSTabView+Connection.h>
-
+// Legacy
 #import <Connection/CKUploader.h>
 #import <Connection/CKTransferRecord.h>
 #import <Connection/CKTransferProgressCell.h>

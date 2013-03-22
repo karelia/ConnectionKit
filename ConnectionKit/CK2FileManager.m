@@ -10,6 +10,8 @@
 #import "CK2Protocol.h"
 #import "CK2RemoteURL.h"
 
+#import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
+
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 
@@ -346,9 +348,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    // Custom enumeration block to fill in icons if requested
     if ([keys containsObject:NSURLEffectiveIconKey])
     {
+        // Custom enumeration block to fill in icons if requested
         enumBlock = ^(NSURL *anNSURL) {
             
             CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
@@ -364,7 +366,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 }
                 
                 // Guess based on file type
-                if (isDirectory.boolValue && ![self.class isPackage:aURL])
+                NSNumber *package;
+                if (isDirectory.boolValue && (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || !package.boolValue))
                 {
                     icon = [NSImage imageNamed:NSImageNameFolder];
                 }
@@ -376,6 +379,20 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 }
                 
                 [aURL setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey];
+            }
+            
+            enumBlock(aURL);
+        };
+    }
+    else if ([keys containsObject:NSURLIsPackageKey])
+    {
+        enumBlock = ^(NSURL *aURL) {
+            
+            // Just need to ensure the result is a CK2RemoteURL so can guess
+            NSNumber *package;
+            if (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || package == nil)
+            {
+                aURL = [CK2RemoteURL URLWithURL:aURL];
             }
             
             enumBlock(aURL);
@@ -394,42 +411,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
     
     return self;
-}
-
-+ (BOOL)isPackage:(NSURL *)url;
-{
-    NSString        *extension;
-    
-    extension = [url pathExtension];
-    
-    if ([extension length] > 0)
-    {
-        if ([extension isEqual:@"app"])
-        {
-            return YES;
-        }
-        else
-        {
-            OSStatus        status;
-            
-            status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
-            
-            if (status == kLSApplicationNotFoundErr)
-            {
-                return NO;
-            }
-            else if (status != noErr)
-            {
-                NSLog(@"Error getting app info for extension for URL %@: %s", [url absoluteString], GetMacOSStatusCommentString(status));
-            }
-            else
-            {
-                return YES;
-            }
-        }
-    }
-    
-    return NO;
 }
 
 - (id)initDirectoryCreationOperationWithURL:(NSURL *)url

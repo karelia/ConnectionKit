@@ -58,6 +58,41 @@
         }
 #undef NSURLPathKey
         
+        else if ([key isEqualToString:NSURLIsPackageKey])
+        {
+            NSString        *extension;
+            
+            extension = [self pathExtension];
+            
+            if ([extension length] > 0)
+            {
+                if ([extension isEqual:@"app"])
+                {
+                    return YES;
+                }
+                else
+                {
+                    OSStatus        status;
+                    
+                    status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
+                    
+                    if (status == kLSApplicationNotFoundErr)
+                    {
+                        return NO;
+                    }
+                    else if (status != noErr)
+                    {
+                        NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
+                    }
+                    else
+                    {
+                        return YES;
+                    }
+                }
+            }
+            
+            return NO;
+        }
         else
         {
             return [super getResourceValue:value forKey:key error:error];

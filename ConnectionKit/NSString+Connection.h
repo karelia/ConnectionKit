@@ -32,18 +32,9 @@
 
 @interface NSString (Connection)
 
-- (NSString *)encodeLegally;
-- (NSString *)encodeLegallyForS3;
-
 // Paths
 - (NSString *)firstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
 
-+ (NSString *)formattedFileSize:(double)size;
-
-@end
-
-@interface NSAttributedString (Connection)
-+ (NSAttributedString *)attributedStringWithString:(NSString *)str attributes:(NSDictionary *)attribs;
 @end

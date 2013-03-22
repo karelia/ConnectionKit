@@ -14,6 +14,8 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
+#import <AppKit/AppKit.h>   // for NSImage
+
 
 @implementation CK2CURLBasedProtocol
 
@@ -217,10 +219,6 @@
                                 else if ([aKey isEqualToString:NSURLIsHiddenKey])
                                 {
                                     [aURL setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey];
-                                }
-                                else if ([aKey isEqualToString:NSURLIsPackageKey])
-                                {
-                                    // Could guess based on extension
                                 }
                                 else if ([aKey isEqualToString:NSURLIsRegularFileKey])
                                 {
