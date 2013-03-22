@@ -75,8 +75,6 @@
 		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
-		27F6AF020EE95F1200B3BDB3 /* NSURL+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F6AF000EE95F1200B3BDB3 /* NSURL+Connection.h */; };
-		27F6AF030EE95F1200B3BDB3 /* NSURL+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F6AF010EE95F1200B3BDB3 /* NSURL+Connection.m */; };
 		324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */; };
 		324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */; };
 		324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */; };
@@ -646,6 +644,7 @@
 				22C7A9E316FCC8C300C88317 /* README.md */,
 				080E96DDFE201D6D7F000001 /* Public */,
 				79CFD8A009F705B400172CDD /* Private */,
+				79CFD8A509F705FF00172CDD /* UI */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				27FD90C20ED5BFA40068D634 /* Experimental */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
@@ -741,42 +740,16 @@
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Private;
-                        path = ConnectionKit;
-			sourceTree = "<group>";
-		};
-		79CFD8A009F705B400172CDD /* Utility */ = {
-			isa = PBXGroup;
-			children = (
-				795AFEE50B1154E2006905FA /* UKKQueue */,
-				79CFD83509F7048400172CDD /* KTLog.h */,
-				79CFD83609F7048400172CDD /* KTLog.m */,
-				79CFD8CA09F706C700172CDD /* KTLog.nib */,
-				79CFD90009F7077900172CDD /* NSData+Connection.h */,
-				79CFD90109F7077900172CDD /* NSData+Connection.m */,
-				792BC8B00ABF6B2E0022415A /* NSString+Connection.h */,
-				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
-				2790A8201626CA67000C9D9F /* CK2RemoteURL.h */,
-				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
-			);
-			name = Utility;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		79CFD8A509F705FF00172CDD /* UI */ = {
 			isa = PBXGroup;
 			children = (
 				32B592A016A1016A0020FFE9 /* CK2OpenPanel */,
-				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
-				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
-				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
-				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
-				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
-				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 			);
 			name = UI;
-=======
-			name = Private;
 			path = ConnectionKit;
->>>>>>> upstream/curlhandle-4
 			sourceTree = "<group>";
 		};
 		79CFD8E409F7071E00172CDD /* Images */ = {
@@ -1132,6 +1105,7 @@
 				2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */,
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
+				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
 				32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */,
 				32B592BB16A4960B0020FFE9 /* CK2OpenPanelController.m in Sources */,
 				32B592BD16A4960B0020FFE9 /* CK2FileCell.m in Sources */,
@@ -1149,7 +1123,6 @@
 				324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */,
 				324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */,
 				32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */,
-				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
