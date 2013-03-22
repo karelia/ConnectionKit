@@ -473,131 +473,19 @@
     [self setURLs:(URL ? @[URL] : nil)];
 }
 
-// This pre-loads all the URLs from the given ancestor down to the descendant. Used in the bootstrapping process. This method
-// should NOT be called from the main thread as it will deadlock. It is meant to block until all the URLs are loaded.
-- (BOOL)loadFromURL:(NSURL *)startURL toURL:(NSURL *)endURL error:(NSError **)error
-{
-    __block NSError         *localError;
-    dispatch_group_t        dispatchGroup;
-    id                      observer;
-    NSMutableArray          *observedURLs;
-    
-    localError = nil;
-
-    dispatchGroup = dispatch_group_create();
-    
-    observedURLs = [NSMutableArray array];
-    
-    // We can't just thread a completion block through to find out when an URL is loaded. The problem is that the
-    // URL-load may already have been triggered. Instead, we set up a notification to be posted so that we can react
-    // to it even if we didn't trigger the initial load operation.
-    observer = [[NSNotificationCenter defaultCenter] addObserverForName:CK2OpenPanelDidLoadURL object:self queue:nil usingBlock:
-                ^ (NSNotification *notification)
-                {
-                    NSURL       *loadedURL;
-                    
-                    loadedURL = [[notification userInfo] objectForKey:CK2URLNotificationKey];
-                    
-                    if ([observedURLs containsObject:loadedURL])
-                    {
-                        NSError    *blockError;
-                                        
-                        blockError = [[notification userInfo] objectForKey:CK2ErrorNotificationKey];
-                        if (blockError != nil)
-                        {
-                            localError = [blockError retain];
-                        }
-                        dispatch_group_leave(dispatchGroup);
-                    }
-                }];
-
-    // Have to be synchronous here as we want all the "enters" to occur before we do the "wait" below
-    dispatch_sync(dispatch_get_main_queue(),
-    ^{
-        [startURL ck2_enumerateToURL:endURL usingBlock:
-         ^(NSURL *blockURL, BOOL *stop)
-         {
-             NSArray    *children;
-
-             //PENDING: Is completion block called if an operation is cancelled?
-             children = [self childrenForURL:blockURL];
-             
-             if (([children count] == 1) && [[children objectAtIndex:0] ck2_isPlaceholder])
-             {
-                 // URL contents haven't been loaded yet. We will get a notification for this later via the block above.
-                 dispatch_group_enter(dispatchGroup);
-                 [observedURLs addObject:blockURL];
-             }
-         }];
-    });
-    
-    dispatch_group_wait(dispatchGroup, DISPATCH_TIME_FOREVER);
-    dispatch_release(dispatchGroup);
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:observer];
-    
-    [localError autorelease];
-    if (error != NULL)
-    {
-        *error = localError;
-    }
-    
-    return (localError == nil);
-}
-
 // Called by the open panel. The completion block will not be called until the given URL and all URLs up to it are
 // loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
+    NSMutableArray                  *children;
+    __block NSURL                   *resolvedURL;
+    
     // Set it now so that the value can be returned if queried. Don't bother syncing with the UI as it will be set
     // again (possibly with a different value) later.
     [self setDirectoryURL:directoryURL];
-
-    if (![[directoryURL ck2_root] isEqual:[[self URL] ck2_root]])
-    {
-        [self loadInitialURL:directoryURL completionBlock:block];
-    }
-    else
-    {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0),
-        ^{
-            NSError *error;
-            BOOL    success;
-            
-            //PENDING: blank out/disable UI as with loading root?
-            error = nil;
-            success = [self loadFromURL:[directoryURL ck2_root] toURL:directoryURL error:&error];
-            
-            dispatch_async(dispatch_get_main_queue(),
-            ^{
-                if (success)
-                {
-                    [self setURLs:@[ directoryURL ] updateDirectory:YES sender:_openPanel];
-                }
-                
-                if (block != NULL)
-                {
-                    block(error);
-                }
-            });
-        });
-    }
-}
-
-
-// This is the "bootstrap" method which loads up the initial URL, including the directory entries of its ancestors.
-// This is different than just loading up any directory in that we need to do an initial query to resolve the URL
-// in case it's a relative path (usually to the user's home directory).
-// During this time, the UI is disabled and a progress indicator is shown. The completion block is not called until
-// everything is fully loaded.
-- (void)loadInitialURL:(NSURL *)initialURL completionBlock:(void (^)(NSError *error))block
-{
-    NSMutableArray                  *children;
-    __block NSURL                   *resolvedURL;
-    NSDirectoryEnumerationOptions   options;
     
     // Make sure URL is canonical so can safely use it for comparisons later
-    initialURL = [initialURL ck2_canonicalURL];
+    directoryURL = [directoryURL ck2_canonicalURL];
     
     children = [NSMutableArray array];
     
@@ -643,16 +531,13 @@
          }
          else
          {
-             NSURL          *rootURL;
-             
              dispatch_async(dispatch_get_main_queue(),
              ^{
                  [self cacheChildren:children forURL:blockResolvedURL];
                  [self urlDidLoad:blockResolvedURL];
              });
              
-             rootURL = [resolvedURL ck2_root];
-             if (![resolvedURL isEqual:initialURL])
+             if (![resolvedURL isEqual:directoryURL])
              {
                  NSString       *resolvedPath;
                  NSArray        *resolvedComponents, *initialComponents;
@@ -661,7 +546,7 @@
                  // If the resolved URL is different than the original one, then we assume the URL was relative and
                  // we try and derive the user's "home" directory from that.
                  resolvedComponents = [resolvedURL pathComponents];
-                 initialComponents = [initialURL pathComponents];
+                 initialComponents = [directoryURL pathComponents];
                  count = [resolvedComponents count];
                  i = count;
                  j = [initialComponents count];
@@ -672,15 +557,8 @@
 
                  resolvedPath = [NSString stringWithFormat:@"/%@/", [[resolvedComponents subarrayWithRange:NSMakeRange(1, i)] componentsJoinedByString:@"/"]];
                  
-                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath hostURL:rootURL] absoluteURL]];
-                 rootURL = [self homeURL];
+                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath hostURL:[resolvedURL ck2_root]] absoluteURL]];
              }
-             else
-             {
-                 [self setHomeURL:[[[CK2FileManager URLWithPath:@"" hostURL:initialURL] URLByAppendingPathComponent:@""] absoluteURL]];
-             }
-             
-             [self loadFromURL:rootURL toURL:resolvedURL error:&tempError];
          }
          
          dispatch_async(dispatch_get_main_queue(),
@@ -689,7 +567,7 @@
                             
              if (tempError == nil)
              {
-                 [self setURLs:@[ blockResolvedURL ] updateDirectory:YES];
+                 [self setURLs:@[ blockResolvedURL ] updateDirectory:YES updateRoot:YES sender:self];
              }
              [self validateViews];
              
@@ -704,17 +582,22 @@
     
     [_currentBootstrapOperation retain];
     
-    [_hostField setStringValue:[initialURL host]];
+    [_hostField setStringValue:[directoryURL host]];
     [self validateViews];
 }
 
 
 - (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag
 {
-    [self setURLs:urls updateDirectory:flag sender:nil];
+    [self setURLs:urls updateDirectory:flag updateRoot:NO sender:nil];
 }
 
-- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir sender:(id)sender
+{
+    [self setURLs:urls updateDirectory:updateDir updateRoot:NO sender:sender];
+}
+
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir updateRoot:(BOOL)updateRoot sender:(id)sender
 {
     CK2OpenPanelViewController  *currentController;
     NSTabViewItem               *selectedTab;
@@ -722,10 +605,9 @@
     [self setURLs:urls];
     [self validateOKButton];
     
-    if (flag)
+    if (updateDir)
     {
         NSURL       *directoryURL;
-        NSImage     *homeImage;
 
         directoryURL = [urls objectAtIndex:0];
         if (![self URLCanHazChildren:directoryURL])
@@ -750,9 +632,14 @@
 
     selectedTab = [_tabView selectedTabViewItem];
     currentController = [self viewControllerForIdentifier:[selectedTab identifier]];
-    if ((sender != currentController) || (![currentController hasFixedRoot] && flag))
+    if ((sender != currentController) || (![currentController hasFixedRoot] && updateDir))
     {
-        if (flag)
+        if (updateRoot)
+        {
+            [_browserController setRootURL:[self directoryURL]];
+        }
+        
+        if (updateDir)
         {
             [currentController reload];
         }
@@ -1031,7 +918,6 @@
 
 - (void)validateHomeButton
 {
-    [_homeButton setEnabled:([self homeURL] != nil)];
 }
 
 - (void)validateOKButton
@@ -1102,7 +988,7 @@
         [newChildren insertObject:url atIndex:i];
         
         [self cacheChildren:newChildren forURL:parentURL];
-        [self setURLs:@[ url ] updateDirectory:YES sender:nil];
+        [self setURLs:@[ url ] updateDirectory:YES updateRoot:NO sender:nil];
     }
     else if ([controller error] != nil)
     {
@@ -1189,9 +1075,77 @@
     
     homeURL = [self homeURL];
     
-    if (homeURL != nil)
+    if (homeURL == nil)
     {
-        [self setURLs:@[ homeURL ] updateDirectory:YES];
+        // The homeURL isn't resolved so we resolve it here and also load/cache it children.        
+        NSMutableArray                  *children;
+        __block NSURL                   *resolvedURL;
+        id                              operation;
+
+        resolvedURL = nil;
+        homeURL = [[[CK2FileManager URLWithPath:@"" hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
+        
+        children = [NSMutableArray array];
+        
+        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:[self fileEnumerationOptions] usingBlock:
+        ^ (NSURL *blockURL)
+        {
+            if (resolvedURL == nil)
+            {
+                // The first url returned is the rootURL properly resolved (in case the URL is relative to the user's home
+                // directory, for instance).
+                resolvedURL = [blockURL retain];
+            }
+            else
+            {
+                [children addObject:blockURL];
+            }
+        }
+        completionHandler:
+        ^(NSError *blockError)
+        {
+            __block NSError *tempError;
+            NSURL   *blockResolvedURL;
+            
+            // Reassign here so that it will be properly retained by the blocks it's used in below
+            blockResolvedURL = resolvedURL;
+            
+            tempError = nil;
+            if (blockError != nil)
+            {
+                NSString *errorMessage = blockError.localizedFailureReason;
+                if (!errorMessage) errorMessage = blockError.localizedDescription;
+                
+                [children addObject:[NSURL ck2_errorURLWithMessage:errorMessage]];
+                NSLog(@"Error loading contents of URL %@: %@", homeURL, blockError);
+            }
+            
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [self setHomeURL:blockResolvedURL];
+                [self cacheChildren:children forURL:blockResolvedURL];
+                
+                [_runningOperations removeObjectForKey:homeURL];
+                
+                [self validateProgressIndicator];
+                [self urlDidLoad:blockResolvedURL];
+                
+                [self setURLs:@[ blockResolvedURL ] updateDirectory:YES updateRoot:YES sender:self ];
+             });
+            
+            [resolvedURL autorelease];
+        }];
+        
+                    
+        // There shouldn't be a race condition with the block above since this should be on the main thread and
+        // the above block won't run on the main thread until this code completes and returns to the run loop.
+        [_runningOperations setObject:operation forKey:homeURL];
+        
+        [self validateProgressIndicator];
+    }
+    else
+    {
+        [self setURLs:@[ homeURL ] updateDirectory:YES updateRoot:YES sender:self ];
     }
 }
 
@@ -1204,7 +1158,7 @@
     if (![url isEqual:[self directoryURL]])
     {
         [self addToHistory];
-        [self setURLs:@[ url ] updateDirectory:YES sender:_pathControl];
+        [self setURLs:@[ url ] updateDirectory:YES updateRoot:YES sender:_pathControl];
     }
 }
 

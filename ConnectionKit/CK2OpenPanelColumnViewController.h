@@ -39,6 +39,9 @@
 {
     IBOutlet NSBrowser                  *_browser;
     CK2BrowserPreviewController         *_previewController;
+    NSURL                               *_rootURL;
 }
+
+@property (readwrite, copy) NSURL   *rootURL;
 
 @end

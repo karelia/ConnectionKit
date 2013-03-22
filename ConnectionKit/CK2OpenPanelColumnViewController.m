@@ -37,12 +37,9 @@
 #import "NSURL+CK2OpenPanel.h"
 #import "NSImage+CK2OpenPanel.h"
 
-@interface CK2OpenPanelColumnViewController ()
-
-@end
-
 @implementation CK2OpenPanelColumnViewController
 
+@synthesize rootURL = _rootURL;
 
 - (void)awakeFromNib
 {
@@ -64,22 +61,6 @@
 {
     return YES;
 }
-
-- (NSURL *)currentRoot
-{
-    CK2OpenPanelController  *controller;
-    NSURL                   *homeURL;
-    
-    controller = [self controller];
-    homeURL = [controller homeURL];
-    
-    if ((homeURL != nil) && [[controller homeURL] ck2_isAncestorOfURL:[controller directoryURL]])
-    {
-        return homeURL;
-    }
-    return [[[_controller openPanel] directoryURL] ck2_root];
-}
-
 
 // Gets the index path of the directory url and the indexset of the URLs under it. "urls" is passed by reference as
 // this method can change the list if only a subset can be selected (like when switching from the outline view to this
@@ -108,7 +89,7 @@
         directoryURL = [directoryURL URLByDeletingLastPathComponent];
     }
     
-    root = [self currentRoot];
+    root = [self rootURL];
 
     if (indexPath != NULL)
     {
@@ -251,7 +232,7 @@
 {
     NSURL       *viewRoot;
     
-    viewRoot = [self currentRoot];
+    viewRoot = [self rootURL];
     
     // Only care about the url if it's visible (under the current view root).
     if ([viewRoot ck2_isAncestorOfURL:url])
@@ -335,7 +316,7 @@
 
 - (id)rootItemForBrowser:(NSBrowser *)browser
 {
-    return [self currentRoot];
+    return [self rootURL];
 }
 
 - (id)browser:(NSBrowser *)browser child:(NSInteger)index ofItem:(id)item

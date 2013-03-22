@@ -105,7 +105,8 @@
 
 - (IBAction)home:(id)sender;
 
-- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)flag sender:(id)sender;
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir sender:(id)sender;
+- (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir updateRoot:(BOOL)updateRoot sender:(id)sender;
 - (BOOL)isURLValid:(NSURL *)url;
 - (BOOL)URLCanHazChildren:(NSURL *)url;
 - (NSArray *)childrenForURL:(NSURL *)url;
