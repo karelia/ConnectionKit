@@ -28,9 +28,7 @@
   */
 
 #import "NSString+Connection.h"
-#import <CommonCrypto/CommonDigest.h>
 
-#include <math.h>
 
 @implementation NSString (Connection)
 
