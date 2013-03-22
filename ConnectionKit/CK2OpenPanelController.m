@@ -326,7 +326,24 @@
 
 - (NSArray *)fileProperties
 {
-    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLEffectiveIconKey ];
+    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLIsPackageKey, NSURLEffectiveIconKey ];
+}
+
+- (NSDirectoryEnumerationOptions)fileEnumerationOptions
+{
+    NSDirectoryEnumerationOptions   options;
+    
+    options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+    
+    if (![_openPanel showsHiddenFiles])
+    {
+        options |= NSDirectoryEnumerationSkipsHiddenFiles;
+    }
+    if (![_openPanel treatsFilePackagesAsDirectories])
+    {
+        options |= NSDirectoryEnumerationSkipsPackageDescendants;
+    }
+    return options;
 }
 
 - (NSView *)accessoryView
@@ -593,18 +610,7 @@
     
     resolvedURL = nil;
     
-    options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-    
-    if (![_openPanel showsHiddenFiles])
-    {
-        options |= NSDirectoryEnumerationSkipsHiddenFiles;
-    }
-    if (![_openPanel treatsFilePackagesAsDirectories])
-    {
-        options |= NSDirectoryEnumerationSkipsPackageDescendants;
-    }
-
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:[self fileProperties] options:options usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:[self fileEnumerationOptions] usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -811,7 +817,6 @@
         
         if (children == nil)
         {
-            NSDirectoryEnumerationOptions   options;
             id                              operation;
             
             // Placeholder while children are being fetched
@@ -820,21 +825,10 @@
             [self cacheChildren:children forURL:url];
             
             if ([_runningOperations objectForKey:url] == nil)
-            {                
-                options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-                
-                if (![_openPanel showsHiddenFiles])
-                {
-                    options |= NSDirectoryEnumerationSkipsHiddenFiles;
-                }
-                if (![_openPanel treatsFilePackagesAsDirectories])
-                {
-                    options |= NSDirectoryEnumerationSkipsPackageDescendants;
-                }
-                                                
+            {
                 operation = [_fileManager contentsOfDirectoryAtURL:url
                                         includingPropertiesForKeys:[self fileProperties]
-                                                           options:options
+                                                           options:[self fileEnumerationOptions]
                 completionHandler:
                 ^(NSArray *contents, NSError *blockError)
                 {

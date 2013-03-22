@@ -242,56 +242,19 @@
 
 - (BOOL)ck2_isPackage
 {
-    if ([self isFileURL])
-    {
-        id          value;
-        NSError     *error;
+    id          value;
+    NSError     *error;
         
-        if ([self getResourceValue:&value forKey:NSURLIsPackageKey error:&error])
-        {
-            return [value boolValue];
-        }
-        else
-        {
-            NSLog(@"Error getting isPackage for URL %@: %@", [self absoluteString], error);
-        }
-        return NO;
+    if ([self getResourceValue:&value forKey:NSURLIsPackageKey error:&error])
+    {
+        return [value boolValue];
     }
     else
     {
-        NSString        *extension;
-        
-        extension = [self pathExtension];
-        
-        if ([extension length] > 0)
-        {
-            if ([extension isEqual:@"app"])
-            {
-                return YES;
-            }
-            else
-            {
-                OSStatus        status;
-                
-                status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
-                
-                if (status == kLSApplicationNotFoundErr)
-                {
-                    return NO;
-                }
-                else if (status != noErr)
-                {
-                    NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
-                }
-                else
-                {
-                    return YES;
-                }
-            }
-        }
+        NSLog(@"Error getting isPackage for URL %@: %@", [self absoluteString], error);
     }
     return NO;
-}
+ }
 
 - (BOOL)ck2_isSymbolicLink
 {
