@@ -27,6 +27,9 @@ Questions about the code are best left as issues at https://github.com/karelia/C
 
 Big thanks to:
 
+* Paul Kim of [Noodlesoft](http://www.noodlesoft.com) for:
+	* `CK2OpenPanel`
+	* Logic for guessing icon etc. of remote files
 * [Sam Deane](http://twitter.com/samdeane) of [Elegant Chaos](http://www.elegantchaos.com) for:
 	* Sooo much testing, especially Mock Server
 	* The WebDAV protocol implementation
