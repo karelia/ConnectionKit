@@ -352,7 +352,6 @@
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
-				79CFD8A509F705FF00172CDD /* UI */,
 			);
 			name = Framework;
 			path = ConnectionKit;
@@ -656,13 +655,6 @@
 				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
 			);
 			name = Utility;
-			sourceTree = "<group>";
-		};
-		79CFD8A509F705FF00172CDD /* UI */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = UI;
 			sourceTree = "<group>";
 		};
 		79CFD8E409F7071E00172CDD /* Images */ = {
