@@ -281,8 +281,8 @@
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
 		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
 		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
-		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSString+Connection.h"; sourceTree = "<group>"; };
-		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSString+Connection.m"; sourceTree = "<group>"; };
+		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Connection.h"; path = "ConnectionKit/NSString+Connection.h"; sourceTree = "<group>"; };
+		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Connection.m"; path = "ConnectionKit/NSString+Connection.m"; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKS3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKS3Connection.m; sourceTree = "<group>"; };
 		795AFEEC0B115511006905FA /* UKFileWatcher.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = UKFileWatcher.h; sourceTree = "<group>"; };
@@ -547,6 +547,8 @@
 				27D03B411471787000FEA588 /* CKUploader.m */,
 				7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */,
 				7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */,
+				792BC8B00ABF6B2E0022415A /* NSString+Connection.h */,
+				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
 				798313C70B0D67E000F5078E /* CKTransferProgressCell.h */,
 				798313C80B0D67E000F5078E /* CKTransferProgressCell.m */,
 				791E83030B0EDAC90060E5FC /* error.png */,
@@ -680,8 +682,6 @@
 				79CFD83509F7048400172CDD /* KTLog.h */,
 				79CFD83609F7048400172CDD /* KTLog.m */,
 				79CFD8CA09F706C700172CDD /* KTLog.nib */,
-				792BC8B00ABF6B2E0022415A /* NSString+Connection.h */,
-				792BC8B10ABF6B2E0022415A /* NSString+Connection.m */,
 				2790A8201626CA67000C9D9F /* CK2RemoteURL.h */,
 				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
 			);
