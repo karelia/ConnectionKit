@@ -324,13 +324,9 @@
     }
 }
 
-- (void)setHomeURL:(NSURL *)homeURL
+- (NSArray *)fileProperties
 {
-    [_homeURL release];
-    _homeURL = [homeURL copy];
-    
-    [_pathControl setHomeURL:_homeURL];
-    [(CK2IconView *)[_iconViewController view] setHomeURL:_homeURL];
+    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLEffectiveIconKey ];
 }
 
 - (NSView *)accessoryView
@@ -608,7 +604,7 @@
         options |= NSDirectoryEnumerationSkipsPackageDescendants;
     }
 
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ] options:options usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:initialURL includingPropertiesForKeys:[self fileProperties] options:options usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -837,7 +833,7 @@
                 }
                                                 
                 operation = [_fileManager contentsOfDirectoryAtURL:url
-                                        includingPropertiesForKeys:@[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey ]
+                                        includingPropertiesForKeys:[self fileProperties]
                                                            options:options
                 completionHandler:
                 ^(NSArray *contents, NSError *blockError)
