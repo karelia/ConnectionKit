@@ -112,8 +112,9 @@
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
-            [self reportDiscoveryOfItemAtURL:directoryURL];
-            
+            directoryURL = [self canonicalizedURLForReporting:directoryURL];
+            [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+
             
             // Process the data to make a directory listing
             while (1)
@@ -279,7 +280,7 @@
                                 }
                             }
                             
-                            [self reportDiscoveryOfItemAtURL:aURL];
+                            [self.client protocol:self didDiscoverItemAtURL:aURL];
                         }
                         
                         CFRelease(parsedDict);
@@ -312,7 +313,7 @@
     return self;
 }
 
-- (NSURL *)reportDiscoveryOfItemAtURL:(NSURL *)aURL;
+- (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
 {
     // Canonicalize URLs by making sure username is included. Strip out password in the process
     NSString *user = [_user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
@@ -338,7 +339,6 @@
     aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
     [data release];
     
-    [self.client protocol:self didDiscoverItemAtURL:aURL];
     return [aURL autorelease];
 }
 
