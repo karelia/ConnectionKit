@@ -153,8 +153,6 @@
     if (![url ck2_isPlaceholder])
     {
         // Draw icon (and its selection)
-        NSImage     *icon;
-        
         iconRect = [self iconRectForBounds:bounds];
         if ([item isSelected])
         {
@@ -166,16 +164,7 @@
             [path fill];
         }
         
-        if ([url isEqual:[(CK2IconView *)[item collectionView] homeURL]])
-        {
-            icon = [NSImage ck2_homeDirectoryImage];
-        }
-        else
-        {
-            icon = [url ck2_icon];
-        }
-    
-        [icon drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
+        [[url ck2_icon] drawInRect:iconRect fromRect:NSZeroRect operation:NSCompositeSourceOver fraction:1.0];
     
         if (![item isEnabled])
         {

@@ -735,30 +735,6 @@
         
         [self setDirectoryURL:directoryURL];
         
-        homeImage = [NSImage imageNamed:NSImageNameHomeTemplate];
-        if ([[self homeURL] ck2_isAncestorOfURL:directoryURL])
-        {
-            //PENDING: need to fix this to be resolution-independent
-            NSImage *image;
-            NSSize  size;
-            
-            size = [homeImage size];
-
-            image = [[NSImage alloc] initWithSize:size];
-            [image lockFocus];
-            [homeImage drawAtPoint:NSZeroPoint fromRect:NSZeroRect operation:NSCompositeCopy fraction:1.0];
-            [[NSColor alternateSelectedControlColor] set];
-            NSRectFillUsingOperation(NSMakeRect(0.0, 0.0, size.width, size.height), NSCompositeSourceAtop);
-            [image unlockFocus];
-            
-            [_homeButton setImage:image forSegment:0];
-            [image release];
-        }
-        else
-        {
-            [_homeButton setImage:homeImage forSegment:0];
-        }
-        
         if (sender != _pathControl)
         {
             [_pathControl setURL:directoryURL];

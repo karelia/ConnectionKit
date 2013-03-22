@@ -284,14 +284,7 @@
     controller = [self controller];
     if ([[tableColumn identifier] isEqual:@"Name"])
     {
-        if ([item isEqual:[controller homeURL]])
-        {
-            [cell setImage:[NSImage ck2_homeDirectoryImage]];
-        }
-        else
-        {
-            [cell setImage:[item ck2_icon]];
-        }
+        [cell setImage:[item ck2_icon]];
         [cell setTextOnly:[item ck2_isPlaceholder]];
     }
     

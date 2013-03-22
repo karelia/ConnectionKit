@@ -12,7 +12,6 @@
 @implementation CK2IconView
 
 @synthesize messageMode = _messageMode;
-@synthesize homeURL = _homeURL;
 
 - (id)initWithFrame:(NSRect)frame
 {
