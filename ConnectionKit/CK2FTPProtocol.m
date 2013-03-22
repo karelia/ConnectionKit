@@ -8,9 +8,6 @@
 
 #import "CK2FTPProtocol.h"
 
-#import "CK2FileManager.h"
-#import "CK2RemoteURL.h"
-
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
 
@@ -20,7 +17,8 @@
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
-    return [url ck2_isFTPURL];
+    NSString *scheme = [url scheme];
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
@@ -63,7 +61,8 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          [self translateStandardErrors:error];
+                          error = [self translateStandardErrors:error];
+                          [self reportToProtocolWithError:error];
                       }
 
             ];
@@ -130,7 +129,8 @@
           createIntermediateDirectories:NO
                                  client:client
                       completionHandler:^(NSError *error) {
-                          [self translateStandardErrors:error];
+                          error = [self translateStandardErrors:error];
+                          [self reportToProtocolWithError:error];
                       }];
 }
 
@@ -163,7 +163,8 @@
                                   }
                               }
 
-                              [self translateStandardErrors:error];
+                              error = [self translateStandardErrors:error];
+                              [self reportToProtocolWithError:error];
                           }];
     }
     else
@@ -205,33 +206,6 @@
     
     [[self client] protocol:self didReceiveAuthenticationChallenge:challenge];
     [challenge release];
-}
-
-#pragma mark - Error Translation
-
-- (void)translateStandardErrors:(NSError*)error
-{
-    if (error)
-    {
-        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
-        {
-            NSUInteger responseCode = [error curlResponseCode];
-            if (responseCode == 550)
-            {
-                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                error = [NSError errorWithDomain:NSCocoaErrorDomain
-                                            code:NSFileWriteUnknownError
-                                        userInfo:@{ NSUnderlyingErrorKey : error }];
-            }
-        }
-
-
-        [self.client protocol:self didFailWithError:error];
-    }
-    else
-    {
-        [self.client protocolDidFinish:self];
-    }
 }
 
 #pragma mark Home Directory

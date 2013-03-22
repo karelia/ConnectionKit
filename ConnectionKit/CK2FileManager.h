@@ -103,7 +103,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
-#pragma mark URLs
+@end
+
+
+@interface CK2FileManager (URLs)
 
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path
@@ -126,24 +129,15 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /// \returns the path.
 + (NSString *)pathOfURL:(NSURL *)URL;
 
-/*!
- @method         canHandleURL:
- 
- @abstract
- Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
- 
- @discussion
- The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
- 
- @param
- url     The URL to preflight.
- 
- @result
- YES         if it is likely that the given request can be used to
- perform a file operation and the associated I/O can be
- started
- */
-+ (BOOL)canHandleURL:(NSURL *)url;
+// CFURLSetTemporaryResourcePropertyForKey() is a very handy function, but currently only supports file URLs
+// This method calls through to Core Foundation for file URLs, but provides its own storage for others
+// When first used for a non-file URL, -[NSURL getResourceValue:forKey:error:] is swizzled so the value can be easily retreived by clients later
+// This method is primarily used by non-file protocols to populate URLs returned during a directory listing. But it could be helpful to clients for adding in other info
+// CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must pass in a CONSTANT
+/// \param [in] value to cache. Retained
+/// \param [in] key to store under. Any existing value is overwritten
+/// \param [in] url to cache for
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
 
 @end
 
@@ -165,12 +159,4 @@ typedef enum {
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
-@end
-
-
-#pragma mark -
-
-
-@interface NSURL (ConnectionKit)
-- (BOOL)ck2_isFTPURL;   // YES if the scheme is ftp or ftps
 @end
