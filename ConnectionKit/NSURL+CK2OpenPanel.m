@@ -406,10 +406,9 @@
 
 - (void)ck2_enumerateToURL:(NSURL *)url usingBlock:(void (^)(NSURL *url, BOOL *stop))block
 {
-    NSURL               *tempURL, *root;
+    NSURL               *tempURL;
     NSArray             *components, *otherComponents;
     NSUInteger          i, count;
-    NSString            *path;
     
     if (block != NULL)
     {
@@ -428,26 +427,17 @@
         }
         
         tempURL = self;
-        root = [self ck2_root];
         
         stop = NO;
         count = [otherComponents count];
         
         block(tempURL, &stop);
         
-        path = [tempURL path];
-        
         if (!stop)
         {
             for (i = [components count]; (i < count) && !stop; i++)
             {
-                // Note: NSURL's -URLByAddingPathComponent is broken when dealing with
-                // URLs with encoded slashes (%2F) so we just manipulate the path
-                /// directly here
-                path = [path stringByAppendingPathComponent:[otherComponents objectAtIndex:i]];
-                path = [path stringByAppendingString:@"/"];
-                tempURL = [[CK2FileManager URLWithPath:path hostURL:root] absoluteURL];
-                
+                tempURL = [tempURL URLByAppendingPathComponent:[otherComponents objectAtIndex:i] isDirectory:YES];
                 block(tempURL, &stop);
             }
         }
