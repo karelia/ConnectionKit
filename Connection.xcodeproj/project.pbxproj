@@ -93,8 +93,6 @@
 		798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 798313C80B0D67E000F5078E /* CKTransferProgressCell.m */; };
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
-		79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */; };
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
 		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
@@ -292,8 +290,6 @@
 		798313C80B0D67E000F5078E /* CKTransferProgressCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferProgressCell.m; path = ConnectionKit/CKTransferProgressCell.m; sourceTree = "<group>"; };
 		7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKTransferRecord.h; path = ConnectionKit/CKTransferRecord.h; sourceTree = "<group>"; };
 		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferRecord.m; path = ConnectionKit/CKTransferRecord.m; sourceTree = "<group>"; };
-		79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSPopUpButton+Connection.h"; sourceTree = "<group>"; };
-		79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSPopUpButton+Connection.m"; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
@@ -665,8 +661,6 @@
 		79CFD8A509F705FF00172CDD /* UI */ = {
 			isa = PBXGroup;
 			children = (
-				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
-				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
 			);
 			name = UI;
 			sourceTree = "<group>";
@@ -713,7 +707,6 @@
 				795AFEF50B115511006905FA /* UKFileWatcher.h in Headers */,
 				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
-				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
@@ -1001,7 +994,6 @@
 				795AFEF60B115511006905FA /* UKFileWatcher.m in Sources */,
 				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
-				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
