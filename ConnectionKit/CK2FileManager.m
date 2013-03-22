@@ -10,6 +10,8 @@
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
 
+#import <objc/runtime.h>
+
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 
@@ -139,6 +141,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @synthesize delegate = _delegate;
 
+#pragma mark Operations
+
+- (void)cancelOperation:(id)operation;
+{
+    [operation cancel];
+}
+
+@end
+
+
+@implementation CK2FileManager (URLs)
+
 #pragma mark URLs
 
 + (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
@@ -185,16 +199,52 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [protocolClass pathOfURLRelativeToHomeDirectory:URL];
 }
 
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
+{
+    // File URLs are already handled by the system
+    // Ideally, would use CFURLSetTemporaryResourcePropertyForKey() first for all URLs as a test, but on 10.7.5 at least, it crashes with non-file URLs
+    if ([url isFileURL])
+    {
+        CFURLSetTemporaryResourcePropertyForKey((CFURLRef)value, (CFStringRef)key, value);
+        return;
+    }
+    
+    // Store the value as an associated object
+    if (!value) value = [NSNull null];
+    objc_setAssociatedObject(url, key, value, OBJC_ASSOCIATION_RETAIN);
+    
+    
+    // Swizzle so getter method includes cache in its search
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        
+        Class class = NSURL.class;
+        Method originalMethod = class_getInstanceMethod(class, @selector(getResourceValue:forKey:error:));
+        Method overrideMethod = class_getInstanceMethod(class, @selector(ck2_getResourceValue:forKey:error:));
+        method_exchangeImplementations(originalMethod, overrideMethod);
+    });
+}
+
+/*!
+ @method         canHandleURL:
+ 
+ @abstract
+ Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
+ 
+ @discussion
+ The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
+ 
+ @param
+ url     The URL to preflight.
+ 
+ @result
+ YES         if it is likely that the given request can be used to
+ perform a file operation and the associated I/O can be
+ started
+ */
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return ([CK2Protocol classForURL:url] != nil);
-}
-
-#pragma mark Operations
-
-- (void)cancelOperation:(id)operation;
-{
-    [operation cancel];
 }
 
 @end
@@ -203,12 +253,94 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 #pragma mark -
 
 
-@implementation NSURL (ConnectionKit)
+@implementation NSURL (CK2TemporaryResourceProperties)
 
-- (BOOL)ck2_isFTPURL;
+#pragma mark Getting and Setting File System Resource Properties
+
+- (BOOL)ck2_getResourceValue:(out id *)value forKey:(NSString *)key error:(out NSError **)error;
 {
-    NSString *scheme = [self scheme];
-    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
+    // Special case, as for the setter method
+    if ([self isFileURL])
+    {
+        return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
+    }
+    
+    *value = objc_getAssociatedObject(self, key);
+    if (*value == nil)
+    {
+        // A few keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
+        if ([key isEqualToString:NSURLHasHiddenExtensionKey])
+        {
+            *value = [NSNumber numberWithBool:NO];
+            return YES;
+        }
+        else if ([key isEqualToString:NSURLLocalizedNameKey])
+        {
+            *value = [self lastPathComponent];
+            return YES;
+        }
+        
+        // Have to define NSURLPathKey as a macro for older releases:
+#if (!defined MAC_OS_X_VERSION_10_8) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8
+#define NSURLPathKey @"_NSURLPathKey"
+#endif
+        else if ([key isEqualToString:NSURLPathKey])
+        {
+            *value = [CK2FileManager pathOfURL:self];
+            return YES;
+        }
+#undef NSURLPathKey
+        
+        else if ([key isEqualToString:NSURLIsPackageKey])
+        {
+            NSString        *extension;
+            
+            extension = [self pathExtension];
+            
+            if ([extension length] > 0)
+            {
+                if ([extension isEqual:@"app"])
+                {
+                    *value = @YES;
+                    return YES;
+                }
+                else
+                {
+                    OSStatus        status;
+                    
+                    status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
+                    
+                    if (status == kLSApplicationNotFoundErr)
+                    {
+                        *value = @NO;
+                        return YES;
+                    }
+                    else if (status != noErr)
+                    {
+                        NSLog(@"Error getting app info for extension for URL %@: %s", [self absoluteString], GetMacOSStatusCommentString(status));
+                    }
+                    else
+                    {
+                        *value = @YES;
+                        return YES;
+                    }
+                }
+            }
+            
+            *value = @NO;
+            return YES;
+        }
+        else
+        {
+            return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
+        }
+    }
+    else if (*value == [NSNull null])
+    {
+        *value = nil;
+    }
+    
+    return YES;
 }
 
 @end
