@@ -103,7 +103,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
-#pragma mark URLs
+@end
+
+
+@interface CK2FileManager (URLs)
 
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path

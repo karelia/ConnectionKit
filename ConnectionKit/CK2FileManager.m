@@ -139,6 +139,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 @synthesize delegate = _delegate;
 
+#pragma mark Operations
+
+- (void)cancelOperation:(id)operation;
+{
+    [operation cancel];
+}
+
+@end
+
+
+@implementation CK2FileManager (URLs)
+
 #pragma mark URLs
 
 + (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
@@ -205,13 +217,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     return ([CK2Protocol classForURL:url] != nil);
-}
-
-#pragma mark Operations
-
-- (void)cancelOperation:(id)operation;
-{
-    [operation cancel];
 }
 
 @end
