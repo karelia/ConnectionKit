@@ -428,7 +428,6 @@
 				79CFD89409F704F400172CDD /* Connection.h */,
 				79CFD8A009F705B400172CDD /* Utility */,
 				79CFD11A09F7022900172CDD /* Connections */,
-				79CFD8A509F705FF00172CDD /* UI */,
 			);
 			name = Framework;
 			path = ConnectionKit;
@@ -654,6 +653,7 @@
 			isa = PBXGroup;
 			children = (
 				080E96DDFE201D6D7F000001 /* Framework */,
+				79CFD8A509F705FF00172CDD /* UI */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				27FD90C20ED5BFA40068D634 /* Experimental */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
@@ -784,6 +784,7 @@
 				32B592A016A1016A0020FFE9 /* CK2OpenPanel */,
 			);
 			name = UI;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		79CFD8E409F7071E00172CDD /* Images */ = {
