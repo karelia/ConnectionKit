@@ -152,7 +152,7 @@ SFTP is a tricky blighter. You can opt to supply a username and password like ot
 
 The public key is generally optional, as ConnectionKit can derive it from the private key. It's also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps. Detailed documentation on the above method can be found in `CK2Authentication.h`.
 
-Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge is issued with the result of this. Your delegate can call `-cancelAuthenticationChallenge:` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
+Once connected to the server, ConnectionKit checks its fingerprint against the `~/.ssh/known_hosts` file. Note that for sandboxed apps this is inside of your container! An authentication challenge (`CK2AuthenticationMethodHostFingerprint`) is issued with the result of this. Your delegate can call `-cancelAuthenticationChallenge:` to reject the fingerprint, or reply with a credential for acceptance, constructed using:
 
 	+[NSURLCredential ck2_credentialForKnownHostWithPersistence:]
 

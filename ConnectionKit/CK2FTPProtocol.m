@@ -8,9 +8,6 @@
 
 #import "CK2FTPProtocol.h"
 
-#import "CK2FileManager.h"
-#import "CK2RemoteURL.h"
-
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 
 
@@ -20,7 +17,8 @@
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
-    return [url ck2_isFTPURL];
+    NSString *scheme = [url scheme];
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
