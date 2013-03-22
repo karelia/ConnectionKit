@@ -301,6 +301,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             {
                 if ([extension isEqual:@"app"])
                 {
+                    *value = @YES;
                     return YES;
                 }
                 else
@@ -311,7 +312,8 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                     
                     if (status == kLSApplicationNotFoundErr)
                     {
-                        return NO;
+                        *value = @NO;
+                        return YES;
                     }
                     else if (status != noErr)
                     {
@@ -319,12 +321,14 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                     }
                     else
                     {
+                        *value = @YES;
                         return YES;
                     }
                 }
             }
             
-            return NO;
+            *value = @NO;
+            return YES;
         }
         else
         {
