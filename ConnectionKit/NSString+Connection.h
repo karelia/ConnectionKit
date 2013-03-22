@@ -40,8 +40,6 @@
 - (NSString *)stringByDeletingFirstPathComponent;
 - (NSString *)stringByDeletingFirstPathComponent2;
 
-+ (NSString *)formattedFileSize:(double)size;
-
 @end
 
 @interface NSAttributedString (Connection)

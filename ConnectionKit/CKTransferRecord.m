@@ -647,7 +647,7 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
     if (_size > 0 && [[self contents] count] == 0)  // Use _size to ignore children's sizes
     {
         // Calculate the size of the transfer in a user-friendly manner
-        NSString *fileSize = [NSString formattedFileSize:(double)[self size]];
+        NSString *fileSize = [self.class formattedFileSize:(double)[self size]];
         NSString *unattributedDescription = [[NSString alloc] initWithFormat:@"%@ (%@)", [self name], fileSize];
         
         NSDictionary *attributes = [NSDictionary dictionaryWithObject:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSRegularControlSize]]
@@ -674,6 +674,30 @@ NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTran
 + (NSSet *)keyPathsForValuesAffectingNameWithProgressAndFileSize
 {
     return [NSSet setWithObjects:@"progress", @"name", @"size", nil];
+}
+
++ (NSString *)formattedFileSize:(double)size
+{
+	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];
+	NSString *suffix[] = {
+		LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes"),
+		LocalizedStringInConnectionKitBundle(@"KB", @"filesize: kilobytes"),
+		LocalizedStringInConnectionKitBundle(@"MB", @"filesize: megabytes"),
+		LocalizedStringInConnectionKitBundle(@"GB", @"filesize: gigabytes"),
+		LocalizedStringInConnectionKitBundle(@"TB", @"filesize: terabytes"),
+		LocalizedStringInConnectionKitBundle(@"PB", @"filesize: petabytes"),
+		LocalizedStringInConnectionKitBundle(@"EB", @"filesize: exabytes")
+	};
+	
+	int power = floor(log(size) / log(1024));
+	if (power > 1)
+	{
+		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
+	}
+	else
+	{
+		return [NSString stringWithFormat:@"%01.0lf %@", size / pow(1024, power), suffix[power]];
+	}
 }
 
 @end

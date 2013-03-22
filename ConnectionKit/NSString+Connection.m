@@ -85,30 +85,6 @@
 	return [comps componentsJoinedByString:@"/"];
 }
 
-+ (NSString *)formattedFileSize:(double)size
-{
-	if (size == 0) return [NSString stringWithFormat:@"0 %@", LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes")];
-	NSString *suffix[] = {
-		LocalizedStringInConnectionKitBundle(@"bytes", @"filesize: bytes"),
-		LocalizedStringInConnectionKitBundle(@"KB", @"filesize: kilobytes"),
-		LocalizedStringInConnectionKitBundle(@"MB", @"filesize: megabytes"),
-		LocalizedStringInConnectionKitBundle(@"GB", @"filesize: gigabytes"),
-		LocalizedStringInConnectionKitBundle(@"TB", @"filesize: terabytes"),
-		LocalizedStringInConnectionKitBundle(@"PB", @"filesize: petabytes"),
-		LocalizedStringInConnectionKitBundle(@"EB", @"filesize: exabytes")
-	};
-	
-	int power = floor(log(size) / log(1024));
-	if (power > 1)
-	{
-		return [NSString stringWithFormat:@"%01.02lf %@", size / pow(1024, power), suffix[power]];
-	}
-	else
-	{
-		return [NSString stringWithFormat:@"%01.0lf %@", size / pow(1024, power), suffix[power]];
-	}
-}
-
 @end
 
 @implementation NSAttributedString (Connection)
