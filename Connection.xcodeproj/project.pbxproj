@@ -95,8 +95,6 @@
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
 		79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */; };
-		79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */; };
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
 		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
@@ -298,8 +296,6 @@
 		7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CKTransferRecord.m; path = ConnectionKit/CKTransferRecord.m; sourceTree = "<group>"; };
 		79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSPopUpButton+Connection.h"; sourceTree = "<group>"; };
 		79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSPopUpButton+Connection.m"; sourceTree = "<group>"; };
-		79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSTabView+Connection.h"; sourceTree = "<group>"; };
-		79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSTabView+Connection.m"; sourceTree = "<group>"; };
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
@@ -675,8 +671,6 @@
 			children = (
 				79B09ABF0C85DFD500E7F1CC /* NSPopUpButton+Connection.h */,
 				79B09AC00C85DFD500E7F1CC /* NSPopUpButton+Connection.m */,
-				79B09C5A0C85E21300E7F1CC /* NSTabView+Connection.h */,
-				79B09C5B0C85E21300E7F1CC /* NSTabView+Connection.m */,
 				79F18B420CFF3AAE009F0324 /* NSMatrix+Connection.h */,
 				79F18B430CFF3AAE009F0324 /* NSMatrix+Connection.m */,
 			);
@@ -727,7 +721,6 @@
 				795AFEFA0B115511006905FA /* UKKQueue.h in Headers */,
 				795AFEFC0B115511006905FA /* UKMainThreadProxy.h in Headers */,
 				79B09AC10C85DFD500E7F1CC /* NSPopUpButton+Connection.h in Headers */,
-				79B09C5C0C85E21300E7F1CC /* NSTabView+Connection.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
 				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
@@ -1016,7 +1009,6 @@
 				795AFEFB0B115511006905FA /* UKKQueue.m in Sources */,
 				795AFEFD0B115511006905FA /* UKMainThreadProxy.m in Sources */,
 				79B09AC20C85DFD500E7F1CC /* NSPopUpButton+Connection.m in Sources */,
-				79B09C5D0C85E21300E7F1CC /* NSTabView+Connection.m in Sources */,
 				79F18B450CFF3AAE009F0324 /* NSMatrix+Connection.m in Sources */,
 				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,

@@ -34,7 +34,6 @@
 #import <Cocoa/Cocoa.h>
 
 #import <Connection/NSPopUpButton+Connection.h>
-#import <Connection/NSTabView+Connection.h>
 
 #import <Connection/CKUploader.h>
 #import <Connection/CKTransferRecord.h>
