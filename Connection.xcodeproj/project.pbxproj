@@ -332,14 +332,16 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		080E96DDFE201D6D7F000001 /* Framework */ = {
+		080E96DDFE201D6D7F000001 /* Public */ = {
 			isa = PBXGroup;
 			children = (
 				79CFD89409F704F400172CDD /* Connection.h */,
-				79CFD8A009F705B400172CDD /* Utility */,
-				79CFD11A09F7022900172CDD /* Connections */,
+				2743E8071622E47600019979 /* CK2FileManager.h */,
+				2743E8081622E47600019979 /* CK2FileManager.m */,
+				278D8B77167FF35D00622468 /* CK2Authentication.h */,
+				278D8B78167FF35D00622468 /* CK2Authentication.m */,
 			);
-			name = Framework;
+			name = Public;
 			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
@@ -562,7 +564,8 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				080E96DDFE201D6D7F000001 /* Framework */,
+				080E96DDFE201D6D7F000001 /* Public */,
+				79CFD8A009F705B400172CDD /* Private */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				27FD90C20ED5BFA40068D634 /* Experimental */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
@@ -606,25 +609,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		79CFD11A09F7022900172CDD /* Connections */ = {
-			isa = PBXGroup;
-			children = (
-				2743E8071622E47600019979 /* CK2FileManager.h */,
-				2743E8081622E47600019979 /* CK2FileManager.m */,
-				278D8B77167FF35D00622468 /* CK2Authentication.h */,
-				278D8B78167FF35D00622468 /* CK2Authentication.m */,
-				273F0E13164E8D3E00588885 /* Protocols */,
-			);
-			name = Connections;
-			sourceTree = "<group>";
-		};
-		79CFD8A009F705B400172CDD /* Utility */ = {
+		79CFD8A009F705B400172CDD /* Private */ = {
 			isa = PBXGroup;
 			children = (
 				2790A8201626CA67000C9D9F /* CK2RemoteURL.h */,
 				2790A8211626CA67000C9D9F /* CK2RemoteURL.m */,
+				273F0E13164E8D3E00588885 /* Protocols */,
 			);
-			name = Utility;
+			name = Private;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		79CFD8E409F7071E00172CDD /* Images */ = {
