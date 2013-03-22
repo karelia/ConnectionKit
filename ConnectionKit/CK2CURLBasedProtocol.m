@@ -361,6 +361,18 @@
     }
 }
 
+- (void)reportToProtocolWithError:(NSError*)error
+{
+    if (error)
+    {
+        [[self client] protocol:self didFailWithError:error];
+    }
+    else
+    {
+        [[self client] protocolDidFinish:self];
+    }
+}
+
 - (void)endWithError:(NSError *)error;
 {
     // Update cache
@@ -379,25 +391,37 @@
             [self.class storeHomeDirectoryURL:homeDirectoryURL];
         }
     }
-    
-    
+
     if (_completionHandler)
     {
         _completionHandler(error);
     }
     else
     {
-        if (error)
+        [self reportToProtocolWithError:error];
+    }
+
+    [_handle release]; _handle = nil;
+}
+
+- (NSError*)translateStandardErrors:(NSError*)error
+{
+    if (error)
+    {
+        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
         {
-            [[self client] protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [[self client] protocolDidFinish:self];
+            NSUInteger responseCode = [error curlResponseCode];
+            if (responseCode == 550)
+            {
+                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                            code:NSFileWriteUnknownError
+                                        userInfo:@{ NSUnderlyingErrorKey : error }];
+            }
         }
     }
-    
-    [_handle release]; _handle = nil;
+
+    return error;
 }
 
 - (void)stop;

@@ -4,6 +4,7 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
+#import "CK2Authentication.h"
 
 #import "CK2FileManager.h"
 #import <DAVKit/DAVKit.h>
@@ -162,11 +163,19 @@
             NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
             [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
         }
+        else if ([authMethod isEqualToString:CK2AuthenticationMethodHostFingerprint])
+        {
+            NSLog(@"checking fingerprint");
+            NSURLCredential* credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistenceNone];
+            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        }
         else
         {
+            NSLog(@"performing default authentication");
             [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
         }
     }
+
 }
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
