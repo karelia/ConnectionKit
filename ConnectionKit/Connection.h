@@ -31,8 +31,6 @@
 #import <Connection/CK2FileManager.h>
 #import <Connection/CK2Authentication.h>
 
-#import <Cocoa/Cocoa.h>
-
 #import <Connection/NSPopUpButton+Connection.h>
 
 #import <Connection/CKUploader.h>
