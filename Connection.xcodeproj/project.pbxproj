@@ -582,13 +582,14 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		27FD90C20ED5BFA40068D634 /* S3 */ = {
+		27FD90C20ED5BFA40068D634 /* Experimental */ = {
 			isa = PBXGroup;
 			children = (
 				7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */,
 				7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */,
 			);
-			name = S3;
+			name = Experimental;
+			path = ConnectionKit;
 			sourceTree = "<group>";
 		};
 		27FD90C60ED5BFC00068D634 /* Dependencies */ = {
@@ -607,6 +608,7 @@
 			children = (
 				080E96DDFE201D6D7F000001 /* Framework */,
 				274DA43516ED52BE008041B6 /* Legacy */,
+				27FD90C20ED5BFA40068D634 /* Experimental */,
 				09D6602E09FD37B70000BA00 /* Unit Tests */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				27FD90C60ED5BFC00068D634 /* Dependencies */,
@@ -666,7 +668,6 @@
 		79CFD11A09F7022900172CDD /* Connections */ = {
 			isa = PBXGroup;
 			children = (
-				27FD90C20ED5BFA40068D634 /* S3 */,
 				2743E8071622E47600019979 /* CK2FileManager.h */,
 				2743E8081622E47600019979 /* CK2FileManager.m */,
 				278D8B77167FF35D00622468 /* CK2Authentication.h */,
