@@ -14,6 +14,8 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
+#import <AppKit/AppKit.h>   // for NSImage
+
 
 @implementation CK2CURLBasedProtocol
 

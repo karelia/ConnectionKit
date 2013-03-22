@@ -10,6 +10,8 @@
 #import "CK2Protocol.h"
 #import "CK2RemoteURL.h"
 
+#import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
+
 
 NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 

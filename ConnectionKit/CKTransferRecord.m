@@ -30,6 +30,9 @@
 #import "CKTransferRecord.h"
 #import "NSString+Connection.h"
 
+#import <AppKit/AppKit.h>   // for NSColor
+
+
 NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";
 NSString *CKTransferRecordTransferDidBeginNotification = @"CKTransferRecordTransferDidBeginNotification";
 NSString *CKTransferRecordTransferDidFinishNotification = @"CKTransferRecordTransferDidFinishNotification";
