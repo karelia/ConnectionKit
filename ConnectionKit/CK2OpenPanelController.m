@@ -820,16 +820,19 @@
 
 - (void)validateProgressIndicator
 {
-    NSURL       *url;
-    NSArray     *urls;
-    BOOL        urlIsLoading;
+    NSURL                       *url;
+    NSArray                     *urls;
+    BOOL                        urlIsLoading;
+    CK2OpenPanelViewController  *currentController;
     
     urlIsLoading = NO;
-    urls = [self URLs];
+    currentController = [self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]];
+
+    urls = [currentController selectedURLs];
     
     if ([urls count] > 0)
     {
-        for (url in [self URLs])
+        for (url in urls)
         {
             if ([_runningOperations objectForKey:url] != nil)
             {
