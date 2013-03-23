@@ -536,29 +536,6 @@
                  [self cacheChildren:children forURL:blockResolvedURL];
                  [self urlDidLoad:blockResolvedURL];
              });
-             
-             if (![resolvedURL isEqual:directoryURL])
-             {
-                 NSString       *resolvedPath;
-                 NSArray        *resolvedComponents, *initialComponents;
-                 NSUInteger     i, j, count;;
-                 
-                 // If the resolved URL is different than the original one, then we assume the URL was relative and
-                 // we try and derive the user's "home" directory from that.
-                 resolvedComponents = [resolvedURL pathComponents];
-                 initialComponents = [directoryURL pathComponents];
-                 count = [resolvedComponents count];
-                 i = count;
-                 j = [initialComponents count];
-                 
-                 while ((i-- > 1) && (j-- > 1)  && [[resolvedComponents objectAtIndex:i] isEqual:[initialComponents objectAtIndex:j]])
-                 {
-                 }
-
-                 resolvedPath = [NSString stringWithFormat:@"/%@/", [[resolvedComponents subarrayWithRange:NSMakeRange(1, i)] componentsJoinedByString:@"/"]];
-                 
-                 [self setHomeURL:[[CK2FileManager URLWithPath:resolvedPath hostURL:[resolvedURL ck2_root]] absoluteURL]];
-             }
          }
          
          dispatch_async(dispatch_get_main_queue(),
