@@ -94,7 +94,8 @@
                 if (isFirst)
                 {
                     title = [blockURL host];
-                    image = [[[NSImage imageNamed:NSImageNameComputer] copy] autorelease];
+                    image = [[[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFileServerIcon)] copy] autorelease];
+                    [image setSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
                     isFirst = NO;
                 }
                 else
