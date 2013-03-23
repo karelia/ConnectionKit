@@ -100,7 +100,7 @@
         else
         {
             // Correct relative paths if we can
-            NSURL *directoryURL = [request URL];
+            NSURL *directoryURL = [self canonicalizedURLForReporting:request.URL];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
@@ -110,8 +110,6 @@
                 if (directoryPath.length && ![directoryPath hasSuffix:@"/"]) directoryPath = [directoryPath stringByAppendingString:@"/"];
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
-            
-            directoryURL = [self canonicalizedURLForReporting:directoryURL];
             
             
             // Report directory itself
@@ -423,7 +421,7 @@
             }
             
             NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
-            [self.class storeHomeDirectoryURL:homeDirectoryURL];
+            [self storeHomeDirectoryURL:homeDirectoryURL];
         }
     }
 
@@ -504,10 +502,11 @@ static NSMutableDictionary *sHomeURLsByHostURL;
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
     return [sHomeURLsByHostURL objectForKey:host];
 }
-+ (void)storeHomeDirectoryURL:(NSURL *)home;
+- (void)storeHomeDirectoryURL:(NSURL *)home;
 {
     if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
     
+    home = [self canonicalizedURLForReporting:home];    // include username
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
     [sHomeURLsByHostURL setObject:home forKey:host];
 }
