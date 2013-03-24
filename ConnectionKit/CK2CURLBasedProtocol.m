@@ -411,18 +411,7 @@
     // Update cache
     if (!error)
     {
-        NSString *homeDirectoryPath = [_handle initialFTPPath];
-        
-        if ([homeDirectoryPath isAbsolutePath])
-        {
-            if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
-            {
-                homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
-            }
-            
-            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
-            [self storeHomeDirectoryURL:homeDirectoryURL];
-        }
+        [self updateHomeDirectoryStore];
     }
 
     if (_completionHandler)
@@ -509,15 +498,27 @@
     }
 }
 
-- (void)storeHomeDirectoryURL:(NSURL *)home;
+- (void)updateHomeDirectoryStore;
 {
-    home = [self canonicalizedURLForReporting:home];    // include username
-    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
+    NSString *homeDirectoryPath = [_handle initialFTPPath];
     
-    NSMutableDictionary *store = [self.class homeURLsByHostURL];
-    @synchronized (store)
+    if ([homeDirectoryPath isAbsolutePath])
     {
-        [store setObject:home forKey:host];
+        if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
+        {
+            homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
+        }
+        
+        NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
+        
+        homeDirectoryURL = [self canonicalizedURLForReporting:homeDirectoryURL];    // include username
+        NSString *host = [[NSURL URLWithString:@"/" relativeToURL:homeDirectoryURL] absoluteString].lowercaseString;
+        
+        NSMutableDictionary *store = [self.class homeURLsByHostURL];
+        @synchronized (store)
+        {
+            [store setObject:homeDirectoryURL forKey:host];
+        }
     }
 }
 
@@ -542,6 +543,7 @@
 
 - (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
 {
+    [self updateHomeDirectoryStore];    // Make sure is updated before parsing of directory listing
     if (_dataBlock) _dataBlock(data);
 }
 
