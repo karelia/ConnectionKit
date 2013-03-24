@@ -18,6 +18,10 @@ typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAtt
 extern NSString * const CK2FileMIMEType;
 
 
+typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
+    CK2DirectoryEnumerationIncludesDirectory = 1L << 31,    // see directory methods below for details
+};
+
 
 @protocol CK2FileManagerDelegate;
 
@@ -31,7 +35,7 @@ extern NSString * const CK2FileMIMEType;
 #pragma mark Discovering Directory Contents
 
 // NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
-// In order to supply resource values, have to work around rdar://problem/11069131 by returning a custom NSURL subclass. Can't guarantee therefore that they will work correctly with the CFURL APIs. So far in practice the only incompatibility I've found is CFURLHasDirectoryPath() always returning NO
+// You can pass in CK2DirectoryEnumerationIncludesDirectory if you wish (see below for details) but that would be a little odd for this method!
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask
@@ -42,6 +46,7 @@ extern NSString * const CK2FileMIMEType;
 //  * FIRST result is the directory itself, with relative path resolved if possible
 //  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
 //
+// Pass in CK2DirectoryEnumerationIncludesDirectory for the first URL received to be that of the URL being enumerated. Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved)
 // All docs for -contentsOfDirectoryAtURL:… should apply here too
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
@@ -103,7 +108,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
-#pragma mark URLs
+@end
+
+
+@interface CK2FileManager (URLs)
 
 // These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
 //  http://example.com/relative/path
@@ -126,24 +134,15 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /// \returns the path.
 + (NSString *)pathOfURL:(NSURL *)URL;
 
-/*!
- @method         canHandleURL:
- 
- @abstract
- Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
- 
- @discussion
- The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
- 
- @param
- url     The URL to preflight.
- 
- @result
- YES         if it is likely that the given request can be used to
- perform a file operation and the associated I/O can be
- started
- */
-+ (BOOL)canHandleURL:(NSURL *)url;
+// CFURLSetTemporaryResourcePropertyForKey() is a very handy function, but currently only supports file URLs
+// This method calls through to Core Foundation for file URLs, but provides its own storage for others
+// When first used for a non-file URL, -[NSURL getResourceValue:forKey:error:] is swizzled so the value can be easily retreived by clients later
+// This method is primarily used by non-file protocols to populate URLs returned during a directory listing. But it could be helpful to clients for adding in other info
+// CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must pass in a CONSTANT
+/// \param [in] value to cache. Retained
+/// \param [in] key to store under. Any existing value is overwritten
+/// \param [in] url to cache for
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
 
 @end
 
@@ -165,12 +164,4 @@ typedef enum {
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 
-@end
-
-
-#pragma mark -
-
-
-@interface NSURL (ConnectionKit)
-- (BOOL)ck2_isFTPURL;   // YES if the scheme is ftp or ftps
 @end

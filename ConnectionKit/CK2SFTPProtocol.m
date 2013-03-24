@@ -61,7 +61,19 @@
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          // standard error translation
+                          error = [self translateStandardErrors:error];
+
+                          // it seems that the curlResponseCode isn't set on errors, so the standard translation currently isn't helping,
+                          // so we just translate any quote error into an NSFileWriteUnknownError.
+                          if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                          {
+                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                          }
+
+                          [self reportToProtocolWithError:error];
+                      }];
     
     [mutableRequest release];
     return self;

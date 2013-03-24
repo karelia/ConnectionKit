@@ -4,6 +4,7 @@
 //
 
 #import "CK2FileManagerBaseTests.h"
+#import "CK2Authentication.h"
 
 #import "CK2FileManager.h"
 #import <DAVKit/DAVKit.h>
@@ -60,6 +61,7 @@
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
+    NSLog(@"==SETUP=============================================================");
     if ([responses isEqualToString:@"webdav"])
     {
         self.type = @"CKWebDAVTest";
@@ -89,16 +91,19 @@
     BOOL ok;
     if (!setting || [setting isEqualToString:@"Off"])
     {
+        NSLog(@"Tests turned off for %@", responses);
         ok = NO;
     }
     else if ([setting isEqualToString:@"MockServer"])
     {
+        NSLog(@"Tests using MockServer for %@", responses);
         self.useMockServer = YES;
         ok = [super setupServerWithResponseFileNamed:responses];
     }
     else
     {
         NSURL* url = [NSURL URLWithString:setting];
+        NSLog(@"Tests using server %@ for %@", url, responses);
         self.user = url.user;
         self.password = url.password;
         self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
@@ -113,6 +118,17 @@
         [self setupSession];
         ok = self.session != nil;
     }
+
+    if (ok)
+    {
+        NSLog(@"Tests setup for %@, user: %@, password:%@ url:%@", responses, self.user, self.password, self.url);
+    }
+    else
+    {
+        NSLog(@"Tests not setup for %@", responses);
+    }
+
+    NSLog(@"====================================================================");
 
     return ok;
 }
@@ -147,11 +163,19 @@
             NSURLCredential* credential = [NSURLCredential credentialWithUser:self.user password:self.password persistence:NSURLCredentialPersistenceNone];
             [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
         }
+        else if ([authMethod isEqualToString:CK2AuthenticationMethodHostFingerprint])
+        {
+            NSLog(@"checking fingerprint");
+            NSURLCredential* credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistenceNone];
+            [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+        }
         else
         {
+            NSLog(@"performing default authentication");
             [[challenge sender] performDefaultHandlingForAuthenticationChallenge:challenge];
         }
     }
+
 }
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType

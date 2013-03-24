@@ -9,7 +9,6 @@
 #import "CK2CURLBasedProtocol.h"
 
 #import "CK2FileManager.h"
-#import "CK2RemoteURL.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
@@ -100,12 +99,11 @@
         }
         else
         {
-            // Report directory itself
-            NSURL *directoryURL = [request URL];
+            // Correct relative paths if we can
+            NSURL *directoryURL = [self canonicalizedURLForReporting:request.URL];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
-            // Correct relative paths if we can
             NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
             if (home && ![directoryPath isAbsolutePath])
             {
@@ -113,8 +111,13 @@
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
-            [client protocol:self didDiscoverItemAtURL:directoryURL];
             
+            // Report directory itself
+            if (mask & CK2DirectoryEnumerationIncludesDirectory)
+            {
+                [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+            }
+
             
             // Process the data to make a directory listing
             while (1)
@@ -139,9 +142,7 @@
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
                             
-                            // Switch over to custom URL class that actually accepts temp values. rdar://problem/11069131
-                            NSURL *anNSURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
-                            CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
+                            NSURL *aURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
@@ -160,7 +161,7 @@
                             {
                                 if ([aKey isEqualToString:NSURLContentModificationDateKey])
                                 {
-                                    [aURL setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                 {
@@ -168,7 +169,7 @@
                                     if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
                                     {
                                         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
-                                        [aURL setTemporaryResourceValue:icon forKey:aKey];
+                                        [CK2FileManager setTemporaryResourceValue:icon forKey:aKey inURL:aURL];
                                     }
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
@@ -198,7 +199,7 @@
                                             typeValue = NSURLFileResourceTypeUnknown;
                                     }
                                     
-                                    [aURL setTemporaryResourceValue:typeValue forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:typeValue forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLFileSecurityKey])
                                 {
@@ -207,26 +208,26 @@
                                     NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
                                     if (CFFileSecuritySetMode(security, mode.unsignedShortValue))
                                     {
-                                        [aURL setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey];
+                                        [CK2FileManager setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey inURL:aURL];
                                     }
                                     
                                     CFRelease(security);
                                 }
                                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                 {
-                                    [aURL setTemporaryResourceValue:@(isDirectory) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:@(isDirectory) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLIsHiddenKey])
                                 {
-                                    [aURL setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLIsRegularFileKey])
                                 {
-                                    [aURL setTemporaryResourceValue:@([type intValue] == DT_REG) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:@([type intValue] == DT_REG) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLIsSymbolicLinkKey])
                                 {
-                                    [aURL setTemporaryResourceValue:@([type intValue] == DT_LNK) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:@([type intValue] == DT_LNK) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLLocalizedTypeDescriptionKey])
                                 {
@@ -234,7 +235,7 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLNameKey])
                                 {
-                                    [aURL setTemporaryResourceValue:name forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:name forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                 {
@@ -245,7 +246,7 @@
                                     // Guess from symlink, extension, and directory
                                     if ([type intValue] == DT_LNK)
                                     {
-                                        [aURL setTemporaryResourceValue:(NSString *)kUTTypeSymLink forKey:aKey];
+                                        [CK2FileManager setTemporaryResourceValue:(NSString *)kUTTypeSymLink forKey:aKey inURL:aURL];
                                     }
                                     else
                                     {
@@ -256,18 +257,18 @@
                                                                                                      (CFStringRef)extension,
                                                                                                      (isDirectory ? kUTTypeDirectory : kUTTypeData));
                                             
-                                            [aURL setTemporaryResourceValue:(NSString *)type forKey:aKey];
+                                            [CK2FileManager setTemporaryResourceValue:(NSString *)type forKey:aKey inURL:aURL];
                                             CFRelease(type);
                                         }
                                         else
                                         {
-                                            [aURL setTemporaryResourceValue:(NSString *)kUTTypeData forKey:aKey];
+                                            [CK2FileManager setTemporaryResourceValue:(NSString *)kUTTypeData forKey:aKey inURL:aURL];
                                         }
                                     }
                                 }
                                 else if ([aKey isEqualToString:NSURLFileSizeKey])
                                 {
-                                    [aURL setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceSize) forKey:aKey];
+                                    [CK2FileManager setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceSize) forKey:aKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
                                 {
@@ -277,12 +278,12 @@
                                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
                                         // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
                                         // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
-                                        [aURL setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey];
+                                        [CK2FileManager setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey inURL:aURL];
                                     }
                                 }
                             }
                             
-                            [client protocol:self didDiscoverItemAtURL:aURL];
+                            [self.client protocol:self didDiscoverItemAtURL:aURL];
                         }
                         
                         CFRelease(parsedDict);
@@ -315,11 +316,41 @@
     return self;
 }
 
+- (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
+{
+    // Canonicalize URLs by making sure username is included. Strip out password in the process
+    NSString *user = [_user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    
+    CFIndex length = CFURLGetBytes((CFURLRef)aURL, NULL, 0);
+    NSMutableData *data = [[NSMutableData alloc] initWithLength:length];
+    CFURLGetBytes((CFURLRef)aURL, [data mutableBytes], length);
+    
+    CFRange authSeparatorsRange;
+    CFRange authRange = CFURLGetByteRangeForComponent((CFURLRef)aURL, kCFURLComponentUserInfo, &authSeparatorsRange);
+    
+    if (authRange.location == kCFNotFound)
+    {
+        NSData *replacement = [[user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authSeparatorsRange, [replacement bytes], replacement.length);
+    }
+    else
+    {
+        NSData *replacement = [user dataUsingEncoding:NSUTF8StringEncoding];
+        CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
+    }
+    
+    aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
+    [data release];
+    
+    return [aURL autorelease];
+}
+
 #pragma mark Dealloc
 
 - (void)dealloc;
 {
     [_handle release];
+    [_user release];
     [_completionHandler release];
     [_dataBlock release];
     [_progressBlock release];
@@ -333,6 +364,8 @@
 
 - (void)startWithCredential:(NSURLCredential *)credential;
 {
+    _user = [credential.user copy];
+    
     if ([[self class] usesMultiHandle])
     {
         _handle = [[CURLHandle alloc] initWithRequest:[self request]
@@ -361,6 +394,18 @@
     }
 }
 
+- (void)reportToProtocolWithError:(NSError*)error
+{
+    if (error)
+    {
+        [[self client] protocol:self didFailWithError:error];
+    }
+    else
+    {
+        [[self client] protocolDidFinish:self];
+    }
+}
+
 - (void)endWithError:(NSError *)error;
 {
     // Update cache
@@ -376,28 +421,40 @@
             }
             
             NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
-            [self.class storeHomeDirectoryURL:homeDirectoryURL];
+            [self storeHomeDirectoryURL:homeDirectoryURL];
         }
     }
-    
-    
+
     if (_completionHandler)
     {
         _completionHandler(error);
     }
     else
     {
-        if (error)
+        [self reportToProtocolWithError:error];
+    }
+
+    [_handle release]; _handle = nil;
+}
+
+- (NSError*)translateStandardErrors:(NSError*)error
+{
+    if (error)
+    {
+        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
         {
-            [[self client] protocol:self didFailWithError:error];
-        }
-        else
-        {
-            [[self client] protocolDidFinish:self];
+            NSUInteger responseCode = [error curlResponseCode];
+            if (responseCode == 550)
+            {
+                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                error = [NSError errorWithDomain:NSCocoaErrorDomain
+                                            code:NSFileWriteUnknownError
+                                        userInfo:@{ NSUnderlyingErrorKey : error }];
+            }
         }
     }
-    
-    [_handle release]; _handle = nil;
+
+    return error;
 }
 
 - (void)stop;
@@ -439,18 +496,40 @@
     return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
-static NSMutableDictionary *sHomeURLsByHostURL;
+#pragma mark Home Directory Store
+
 + (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
 {
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
-    return [sHomeURLsByHostURL objectForKey:host];
-}
-+ (void)storeHomeDirectoryURL:(NSURL *)home;
-{
-    if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
     
+    NSMutableDictionary *store = [self homeURLsByHostURL];
+    @synchronized (store)
+    {
+        return [store objectForKey:host];
+    }
+}
+
+- (void)storeHomeDirectoryURL:(NSURL *)home;
+{
+    home = [self canonicalizedURLForReporting:home];    // include username
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
-    [sHomeURLsByHostURL setObject:home forKey:host];
+    
+    NSMutableDictionary *store = [self.class homeURLsByHostURL];
+    @synchronized (store)
+    {
+        [store setObject:home forKey:host];
+    }
+}
+
++ (NSMutableDictionary *)homeURLsByHostURL;
+{
+    static NSMutableDictionary *sHomeURLsByHostURL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
+    });
+    
+    return sHomeURLsByHostURL;
 }
 
 #pragma mark CURLHandleDelegate

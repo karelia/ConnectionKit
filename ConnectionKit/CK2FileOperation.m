@@ -8,7 +8,6 @@
 
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
-#import "CK2RemoteURL.h"
 
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
 
@@ -98,9 +97,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     if ([keys containsObject:NSURLEffectiveIconKey])
     {
         // Custom enumeration block to fill in icons if requested
-        enumBlock = ^(NSURL *anNSURL) {
-            
-            CK2RemoteURL *aURL = [CK2RemoteURL URLWithURL:anNSURL];
+        enumBlock = ^(NSURL *aURL) {
             
             // Only need supply icon if protocol hasn't done so
             NSImage *icon;
@@ -109,7 +106,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                 NSNumber *isDirectory;
                 if (![aURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] || isDirectory == nil)
                 {
-                    isDirectory = @(CFURLHasDirectoryPath((CFURLRef)anNSURL));
+                    isDirectory = @(CFURLHasDirectoryPath((CFURLRef)aURL));
                 }
                 
                 // Guess based on file type
@@ -125,21 +122,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     icon = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
                 }
                 
-                [aURL setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey];
-            }
-            
-            enumBlock(aURL);
-        };
-    }
-    else if ([keys containsObject:NSURLIsPackageKey])
-    {
-        enumBlock = ^(NSURL *aURL) {
-            
-            // Just need to ensure the result is a CK2RemoteURL so can guess
-            NSNumber *package;
-            if (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || package == nil)
-            {
-                aURL = [CK2RemoteURL URLWithURL:aURL];
+                [CK2FileManager setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey inURL:aURL];
             }
             
             enumBlock(aURL);
@@ -388,6 +371,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
     if (_enumerationBlock) _enumerationBlock(url);
+    
+    // It seems poor security to vend out passwords here, so have a quick sanity check
+    if (CFURLGetByteRangeForComponent((CFURLRef)url, kCFURLComponentPassword, NULL).location != kCFNotFound)
+    {
+        NSLog(@"%@ is reporting URLs with a password, such as %@\nThis seems poor security practice", protocol, url);
+    }
 }
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;

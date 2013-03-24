@@ -9,6 +9,8 @@
 #import "KMSTranscriptEntry.h"
 
 #import "CK2FileManager.h"
+#import "CK2Authentication.h"
+
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 #import <CURLHandle/CURLHandle.h>
@@ -26,6 +28,13 @@
 
 @end
 
+/**
+ This delegate is used instead of the test itself for operations which are either creating or
+ removing the test files and folders on the server.
+ 
+ This helps to prevent those operations from interfering with the state of the actual tests themselves.
+ */
+
 @implementation CleanupDelegate
 
 + (CleanupDelegate*)delegateWithTest:(CK2FileManagerFTPTests*)tests
@@ -40,14 +49,23 @@
 {
     if (challenge.previousFailureCount > 0)
     {
-        NSLog(@"cancelling authentication");
         [challenge.sender cancelAuthenticationChallenge:challenge];
     }
     else
     {
-        NSURLCredential* credential = [NSURLCredential credentialWithUser:self.tests.originalUser password:self.tests.originalPassword persistence:NSURLCredentialPersistenceNone];
+
+        NSURLCredential* credential;
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString:CK2AuthenticationMethodHostFingerprint])
+        {
+            credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistenceNone];
+        }
+        else
+        {
+            credential = [NSURLCredential credentialWithUser:self.tests.user password:self.tests.password persistence:NSURLCredentialPersistenceNone];
+        }
         [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
     }
+
 }
 
 @end
@@ -63,7 +81,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"ftp" , @"sftp"];
+    NSArray* responses = @[@"sftp", @"ftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -112,7 +130,7 @@ static NSString* gResponsesToUse = nil;
     {
         [self removeTestDirectory];
     }
-    
+
     [super tearDown];
 }
 
@@ -147,34 +165,57 @@ static NSString* gResponsesToUse = nil;
     STAssertTrue(found, @"unexpected item with name %@", name);
 }
 
-- (void)checkIsAuthenticationError:(NSError*)error
-{
-    STAssertNotNil(error, @"should get error");
-    STAssertTrue([error.domain isEqualToString:NSURLErrorDomain], @"unexpected domain %@", error.domain);
-    STAssertTrue(error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication, @"should get authentication error, got %@ instead", error);
-}
 
-- (void)checkNoErrorOrFileExistsError:(NSError*)error
+- (void)logError:(NSError*)error mustHaveError:(BOOL)mustHaveError domainOK:(BOOL)domainOK codeOK:(BOOL)codeOK
 {
-    if (error)
+    if (!error && mustHaveError)
     {
-        STAssertTrue([error.domain isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", error.domain);
-        STAssertTrue(error.code == NSFileWriteUnknownError, @"unexpected error code %ld", error.code);
+        NSLog(@"expecting error, got none");
+    }
+    else if (!domainOK)
+    {
+        NSLog(@"unexpected error domain %@", error.domain);
+    }
+    else if (!codeOK)
+    {
+        NSLog(@"unexpected error code %ld", error.code);
     }
 }
 
-- (void)checkIsFileCantWriteError:(NSError*)error
+- (BOOL)checkIsAuthenticationError:(NSError*)error
 {
-    STAssertNotNil(error, @"should get error");
-    STAssertTrue([error.domain isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", error.domain);
-    STAssertTrue(error.code == NSFileWriteUnknownError, @"unexpected error code %ld", error.code);
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
+    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+
+    return (error != nil) && domainOK && codeOK;
 }
 
-- (void)checkIsFileNotFoundError:(NSError*)error
+- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error
 {
-    STAssertNotNil(error, @"should get error");
-    STAssertTrue([error.domain isEqualToString:NSURLErrorDomain], @"unexpected error domain %@", error.domain);
-    STAssertTrue(error.code == NSURLErrorNoPermissionsToReadFile, @"unexpected error code %ld", error.code);
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return error == nil || (domainOK && codeOK);
+}
+
+- (BOOL)checkIsFileCantWriteError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+
+    return (error != nil) && domainOK && codeOK;
+}
+
+- (BOOL)checkIsFileNotFoundError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
+    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+
+    return (error != nil) && domainOK && codeOK;
 }
 
 #pragma mark - Test File Support
@@ -197,7 +238,7 @@ static NSString* gResponsesToUse = nil;
 - (void)makeTestDirectoryWithFiles:(BOOL)withFiles
 {
     // we do report errors from here, since something going wrong is likely to affect the result of the test that called us
-    
+
     if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
         // if we don't want the test files, remove everything first
@@ -214,16 +255,16 @@ static NSString* gResponsesToUse = nil;
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            [self checkNoErrorOrFileExistsError:error];
+            STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
                 [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                    [self checkNoErrorOrFileExistsError:error];
+                    STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                        [self checkNoErrorOrFileExistsError:error];
+                        STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
                         [self pause];
                         NSLog(@"<<<< Made Test Files");
                     }];
@@ -307,10 +348,10 @@ static NSString* gResponsesToUse = nil;
                     [self checkURL:contents[1] isNamed:[[self URLForTestFile2] lastPathComponent]];
                 }
             }
-            
+
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -320,17 +361,17 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self useBadLogin];
-        
+
         NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
-            [self checkIsAuthenticationError:error];
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             STAssertTrue([contents count] == 0, @"shouldn't get content");
 
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -342,7 +383,7 @@ static NSString* gResponsesToUse = nil;
         [self makeTestDirectoryWithFiles:YES];
 
         NSURL* url = [self URLForTestFolder];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         NSMutableArray* expectedURLS = [NSMutableArray arrayWithArray:@[
                                         url,
                                         [self URLForTestFile1],
@@ -359,7 +400,7 @@ static NSString* gResponsesToUse = nil;
             }
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -370,14 +411,14 @@ static NSString* gResponsesToUse = nil;
     {
         [self useBadLogin];
         NSURL* url = [self URLForTestFolder];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
 
             STFail(@"shouldn't get any items");
 
         } completionHandler:^(NSError *error) {
 
-            [self checkIsAuthenticationError:error];
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             [self pause];
 
         }];
@@ -391,7 +432,7 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self removeTestDirectory];
-        
+
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
@@ -409,10 +450,11 @@ static NSString* gResponsesToUse = nil;
     {
         [self makeTestDirectoryWithFiles:NO];
         [self useResponseSet:@"mkdir fail"];
-        
+
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            [self checkIsFileCantWriteError:error];
+            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+
             [self pause];
         }];
     }
@@ -428,7 +470,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
-            [self checkIsAuthenticationError:error];
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             [self pause];
         }];
 
@@ -486,14 +528,14 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"stor denied"];
         NSURL* url = [self URLForPath:@"/CK2FileManagerFTPTests/test.txt"]; // should fail as it's at the root - we put it in a subfolder just in case
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        
+
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, nil);
             // TODO: Test for specific error
-            
+
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -502,38 +544,38 @@ static NSString* gResponsesToUse = nil;
 {
     // I found we were constructing URLs wrong for the paths like: /example.txt
     // Such files were ending up in the home folder, rather than root
-    
+
     if ([self setup])
     {
         [self useResponseSet:@"chroot jail"];
         NSURL* url = [self URLForPath:@"/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        
+
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"got unexpected error %@", error);
-            
+
             // Make sure the file went into root, rather than home
             // This could be done by changing directory to /, or storing directly to /test.txt
             [self.server.transcript enumerateObjectsWithOptions:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
-                
+
                 // Search back for the STOR command
                 if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"STOR "])
                 {
                     *stop = YES;
-                    
+
                     // Was the STOR command itself valid?
                     if ([aTranscriptEntry.value hasPrefix:@"STOR /test.txt"])
                     {
-                        
+
                     }
                     else
                     {
                         // Search back for the preceeding CWD command
                         NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, idx)];
                         __block BOOL haveChangedDirectory = NO;
-                        
+
                         [self.server.transcript enumerateObjectsAtIndexes:indexes options:NSEnumerationReverse usingBlock:^(KMSTranscriptEntry *aTranscriptEntry, NSUInteger idx, BOOL *stop) {
-                            
+
                             if (aTranscriptEntry.type == KMSTranscriptInput && [aTranscriptEntry.value hasPrefix:@"CWD "])
                             {
                                 *stop = YES;
@@ -541,15 +583,15 @@ static NSString* gResponsesToUse = nil;
                                 STAssertTrue([aTranscriptEntry.value isEqualToString:@"CWD /\r\n"], @"libcurl changed to the wrong directory: %@", aTranscriptEntry.value);
                             }
                         }];
-                        
+
                         STAssertTrue(haveChangedDirectory, @"libcurl never changed directory");
                     }
                 }
             }];
-            
+
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -557,35 +599,35 @@ static NSString* gResponsesToUse = nil;
 - (void)testCreateFileSerialThrash
 {
     // Create the same file multiple times in a row. This has been tending to fail weirdly when testing CURLHandle directly
-    
+
     if ([self setup])
     {
         [self makeTestDirectoryWithFiles:NO];
-        
+
         NSURL* url = [self URLForTestFile1];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
-        
+
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            
+
             STAssertNil(error, @"got unexpected error %@", error);
-            
+
             [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                
+
                 STAssertNil(error, @"got unexpected error %@", error);
-                
+
                 [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                    
+
                     STAssertNil(error, @"got unexpected error %@", error);
-        
+
                     [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                        
+
                         STAssertNil(error, @"got unexpected error %@", error);
                         [self pause];
                     }];
                 }];
             }];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -613,7 +655,7 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileCantWriteError:error];
+            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
@@ -631,14 +673,14 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileNotFoundError:error];
+            STAssertTrue([self checkIsFileNotFoundError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
 
         [self runUntilPaused];
     }
-    
+
 }
 
 - (void)testRemoveFileAtURLBadLogin
@@ -649,7 +691,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
 
-            [self checkIsAuthenticationError:error];
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
             [self pause];
         }];
 
@@ -668,7 +710,7 @@ static NSString* gResponsesToUse = nil;
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -714,7 +756,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileCantWriteError:error];
+            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -731,7 +773,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            [self checkIsFileCantWriteError:error];
+            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -799,7 +841,7 @@ static NSString* gResponsesToUse = nil;
 
             [self pause];
         }];
-        
+
         [self runUntilPaused];
     }
 }
@@ -813,9 +855,9 @@ static NSString* gResponsesToUse = nil;
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-
-            [self checkIsAuthenticationError:error];
-
+            
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            
             self.user = self.originalUser;
             [self useResponseSet:@"default"];
             
@@ -826,7 +868,7 @@ static NSString* gResponsesToUse = nil;
             }];
         }];
     }
-
+    
     [self runUntilPaused];
 }
 

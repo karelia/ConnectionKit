@@ -93,7 +93,7 @@
         {
             NSString* folderName = [url lastPathComponent];
             NSMutableArray* expected = [@[ folderName, @"test.txt", @"subfolder" ] mutableCopy];
-            NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+            NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
             [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
 
                 NSString* name = [url lastPathComponent];

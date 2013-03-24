@@ -16,6 +16,7 @@
 @interface CK2CURLBasedProtocol : CK2Protocol <CURLHandleDelegate, NSURLAuthenticationChallengeSender>
 {
     CURLHandle  *_handle;
+    NSString    *_user;
     
     void    (^_completionHandler)(NSError *error);
     void    (^_dataBlock)(NSData *data);
@@ -48,6 +49,7 @@
 #pragma mark Customization
 + (BOOL)usesMultiHandle;    // defaults to YES. Subclasses can override to be NO and fall back to the old synchronous "easy" backend
 - (void)endWithError:(NSError *)error;
-
+- (void)reportToProtocolWithError:(NSError*)error;
+- (NSError*)translateStandardErrors:(NSError*)error;
 
 @end

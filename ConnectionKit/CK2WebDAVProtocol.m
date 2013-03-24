@@ -5,7 +5,6 @@
 //
 
 #import "CK2WebDAVProtocol.h"
-#import "CK2RemoteURL.h"
 #import "CKTransferRecord.h"
 
 #ifndef CK2WebDAVLog
@@ -79,20 +78,26 @@
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"enumerating directory results");
 
+            if (mask & CK2DirectoryEnumerationIncludesDirectory && result)
+            {
+                NSURL *directoryURL = [request.URL URLByAppendingPathComponent:@""];    // ensure has a trailing slash
+                [client protocol:self didDiscoverItemAtURL:directoryURL];
+            }
+            
             for (DAVResponseItem* item in result)
             {
                 NSString *name = [[item href] lastPathComponent];
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
                 {
 
-                    CK2RemoteURL* url = [CK2RemoteURL URLWithURL:[davRequest concatenatedURLWithPath:[item href]]];
-                    [url setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey];
-                    [url setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey];
-                    [url setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey];
+                    NSURL* url = [davRequest concatenatedURLWithPath:[item href]];
+                    [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
+                    [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
+                    [CK2FileManager setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey inURL:url];
                     [item.fileAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
-                        [url setTemporaryResourceValue:obj forKey:key];
+                        [CK2FileManager setTemporaryResourceValue:obj forKey:key inURL:url];
                     }];
-                    [url setTemporaryResourceValue:[item contentType] forKey:NSURLFileResourceTypeKey]; // 10.7 properties go last because might be nil at runtime
+                    [CK2FileManager setTemporaryResourceValue:[item contentType] forKey:NSURLFileResourceTypeKey inURL:url];
                     [client protocol:self didDiscoverItemAtURL:url];
                     CK2WebDAVLog(@"%@", url);
                 }
