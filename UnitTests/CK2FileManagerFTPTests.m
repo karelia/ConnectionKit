@@ -383,7 +383,7 @@ static NSString* gResponsesToUse = nil;
         [self makeTestDirectoryWithFiles:YES];
 
         NSURL* url = [self URLForTestFolder];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         NSMutableArray* expectedURLS = [NSMutableArray arrayWithArray:@[
                                         url,
                                         [self URLForTestFile1],
@@ -411,7 +411,7 @@ static NSString* gResponsesToUse = nil;
     {
         [self useBadLogin];
         NSURL* url = [self URLForTestFolder];
-        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
         [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
 
             STFail(@"shouldn't get any items");

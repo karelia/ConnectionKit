@@ -40,19 +40,10 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                completionHandler:(void (^)(NSArray *, NSError *))block;
 {
     NSMutableArray *contents = [[NSMutableArray alloc] init];
-    __block BOOL resolved = NO;
     
     id result = [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
-        // Ignore first URL as it's the directory itself
-        if (resolved)
-        {
-            [contents addObject:aURL];
-        }
-        else
-        {
-            resolved = YES;
-        }
+        [contents addObject:aURL];
         
     } completionHandler:^(NSError *error) {
         

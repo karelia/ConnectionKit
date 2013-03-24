@@ -99,12 +99,11 @@
         }
         else
         {
-            // Report directory itself
-            NSURL *directoryURL = [request URL];
+            // Correct relative paths if we can
+            NSURL *directoryURL = [self canonicalizedURLForReporting:request.URL];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
-            // Correct relative paths if we can
             NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
             if (home && ![directoryPath isAbsolutePath])
             {
@@ -112,8 +111,12 @@
                 directoryURL = [home URLByAppendingPathComponent:directoryPath];
             }
             
-            directoryURL = [self canonicalizedURLForReporting:directoryURL];
-            [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+            
+            // Report directory itself
+            if (mask & CK2DirectoryEnumerationIncludesDirectory)
+            {
+                [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+            }
 
             
             // Process the data to make a directory listing
@@ -418,7 +421,7 @@
             }
             
             NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
-            [self.class storeHomeDirectoryURL:homeDirectoryURL];
+            [self storeHomeDirectoryURL:homeDirectoryURL];
         }
     }
 
@@ -493,18 +496,40 @@
     return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
-static NSMutableDictionary *sHomeURLsByHostURL;
+#pragma mark Home Directory Store
+
 + (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
 {
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
-    return [sHomeURLsByHostURL objectForKey:host];
-}
-+ (void)storeHomeDirectoryURL:(NSURL *)home;
-{
-    if (!sHomeURLsByHostURL) sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
     
+    NSMutableDictionary *store = [self homeURLsByHostURL];
+    @synchronized (store)
+    {
+        return [store objectForKey:host];
+    }
+}
+
+- (void)storeHomeDirectoryURL:(NSURL *)home;
+{
+    home = [self canonicalizedURLForReporting:home];    // include username
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
-    [sHomeURLsByHostURL setObject:home forKey:host];
+    
+    NSMutableDictionary *store = [self.class homeURLsByHostURL];
+    @synchronized (store)
+    {
+        [store setObject:home forKey:host];
+    }
+}
+
++ (NSMutableDictionary *)homeURLsByHostURL;
+{
+    static NSMutableDictionary *sHomeURLsByHostURL;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sHomeURLsByHostURL = [[NSMutableDictionary alloc] initWithCapacity:1];
+    });
+    
+    return sHomeURLsByHostURL;
 }
 
 #pragma mark CURLHandleDelegate
