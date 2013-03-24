@@ -36,6 +36,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
 
 // NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
 // You can pass in CK2DirectoryEnumerationIncludesDirectory if you wish (see below for details) but that would be a little odd for this method!
+// Adding into the mix NSURLParentDirectoryURLKey as well will fill that key in all the way up to the root/volume URL
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask

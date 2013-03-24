@@ -115,6 +115,7 @@
             // Report directory itself
             if (mask & CK2DirectoryEnumerationIncludesDirectory)
             {
+                [self includePropertiesForKeys:keys forDirectoryAtURL:directoryURL];
                 [self.client protocol:self didDiscoverItemAtURL:directoryURL];
             }
 
@@ -343,6 +344,34 @@
     [data release];
     
     return [aURL autorelease];
+}
+
+- (void)includePropertiesForKeys:(NSArray *)keys forDirectoryAtURL:(NSURL *)directoryURL;
+{
+     // Fill in the generic keys we support
+    if ([keys containsObject:NSURLParentDirectoryURLKey])
+    {
+        NSString *path = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
+        if ([path isAbsolutePath])
+        {
+            if (path.pathComponents.count > 1)   // stop at root
+            {
+                NSURL *parent = [self.class URLWithPath:[path stringByDeletingLastPathComponent] relativeToURL:directoryURL].absoluteURL;
+                [CK2FileManager setTemporaryResourceValue:parent forKey:NSURLParentDirectoryURLKey inURL:directoryURL];
+                
+                // Recurse
+                [self includePropertiesForKeys:keys forDirectoryAtURL:parent];
+            }
+            else
+            {
+                [CK2FileManager setTemporaryResourceValue:nil forKey:NSURLParentDirectoryURLKey inURL:directoryURL];
+            }
+        }
+    }
+    if ([keys containsObject:NSURLIsDirectoryKey])
+    {
+        [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:directoryURL];
+    }
 }
 
 #pragma mark Dealloc
