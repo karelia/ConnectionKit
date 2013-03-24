@@ -166,12 +166,8 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                 {
-                                    // Client takes care of filling in icons for us; we just have to special case the home directory
-                                    if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
-                                    {
-                                        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
-                                        [CK2FileManager setTemporaryResourceValue:icon forKey:aKey inURL:aURL];
-                                    }
+                                    // Only the home directory needs any special behaviour
+                                    if (isDirectory) [self includePropertiesForKeys:@[NSURLEffectiveIconKey] forDirectoryAtURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {
@@ -348,10 +344,11 @@
 
 - (void)includePropertiesForKeys:(NSArray *)keys forDirectoryAtURL:(NSURL *)directoryURL;
 {
-     // Fill in the generic keys we support
+    // Fill in the generic keys we support
+    NSString *path = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
+    
     if ([keys containsObject:NSURLParentDirectoryURLKey])
     {
-        NSString *path = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
         if ([path isAbsolutePath])
         {
             if (path.pathComponents.count > 1)   // stop at root
@@ -371,6 +368,16 @@
     if ([keys containsObject:NSURLIsDirectoryKey])
     {
         [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:directoryURL];
+    }
+    if ([keys containsObject:NSURLEffectiveIconKey])
+    {
+        // Client takes care of filling in icons for us; we just have to special case the home directory
+        NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
+        if ([path isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
+        {
+            NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
+            [CK2FileManager setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey inURL:directoryURL];
+        }
     }
 }
 
