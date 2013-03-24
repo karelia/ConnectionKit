@@ -99,12 +99,11 @@
         }
         else
         {
-            // Report directory itself
+            // Correct relative paths if we can
             NSURL *directoryURL = [request URL];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
-            // Correct relative paths if we can
             NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
             if (home && ![directoryPath isAbsolutePath])
             {
@@ -113,7 +112,13 @@
             }
             
             directoryURL = [self canonicalizedURLForReporting:directoryURL];
-            [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+            
+            
+            // Report directory itself
+            if (mask & CK2DirectoryEnumerationIncludesDirectory)
+            {
+                [self.client protocol:self didDiscoverItemAtURL:directoryURL];
+            }
 
             
             // Process the data to make a directory listing

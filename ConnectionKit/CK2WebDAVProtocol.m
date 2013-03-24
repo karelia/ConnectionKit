@@ -78,6 +78,12 @@
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"enumerating directory results");
 
+            if (mask & CK2DirectoryEnumerationIncludesDirectory && result)
+            {
+                NSURL *directoryURL = [request.URL URLByAppendingPathComponent:@""];    // ensure has a trailing slash
+                [client protocol:self didDiscoverItemAtURL:directoryURL];
+            }
+            
             for (DAVResponseItem* item in result)
             {
                 NSString *name = [[item href] lastPathComponent];

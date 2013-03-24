@@ -62,6 +62,20 @@ static size_t kCopyBufferSize = 4096;
 {
     return [self initWithBlock:^{
         
+        // Report the main directory first
+        if (mask & CK2DirectoryEnumerationIncludesDirectory)
+        {
+            NSURL *directory = [request.URL URLByStandardizingPath];
+            if (!directory)
+            {
+                [client protocol:self didFailWithError:[NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:nil]];
+                return;
+            }
+            
+            [client protocol:self didDiscoverItemAtURL:directory];
+        }
+        
+        
         // Enumerate contents
         NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtURL:[request URL]
                                                                  includingPropertiesForKeys:keys
@@ -71,21 +85,12 @@ static size_t kCopyBufferSize = 4096;
                                                                                    NSLog(@"enumeration error: %@", error);
                                                                                    return YES;
                                                                                }];
-                
-        BOOL reportedDirectory = NO;
         
-        if (_cancelled) return; // bail should we be cancelled
+         if (_cancelled) return; // bail should we be cancelled
         
         NSURL *aURL;
         while (aURL = [enumerator nextObject])
         {
-            // Report the main directory first
-            if (!reportedDirectory)
-            {
-                [client protocol:self didDiscoverItemAtURL:[request URL]];
-                reportedDirectory = YES;
-            }
-            
             [client protocol:self didDiscoverItemAtURL:aURL];
             
             if (_cancelled) return;
