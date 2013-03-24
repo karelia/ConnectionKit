@@ -143,7 +143,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /// \param [in] value to cache. Retained
 /// \param [in] key to store under. Any existing value is overwritten
 /// \param [in] url to cache for
-+ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url __attribute((nonnull(2,3)));
 
 @end
 
