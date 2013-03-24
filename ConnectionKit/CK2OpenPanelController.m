@@ -498,7 +498,7 @@
     
     resolvedURL = nil;
     
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:[self fileEnumerationOptions] usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:([self fileEnumerationOptions]|CK2DirectoryEnumerationIncludesDirectory) usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -1067,7 +1067,7 @@
         
         children = [NSMutableArray array];
         
-        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:[self fileEnumerationOptions] usingBlock:
+        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:([self fileEnumerationOptions]|CK2DirectoryEnumerationIncludesDirectory) usingBlock:
         ^ (NSURL *blockURL)
         {
             if (resolvedURL == nil)
