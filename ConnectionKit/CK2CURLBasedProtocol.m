@@ -239,7 +239,7 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                 {
-                                    // Can derive by deleting last path component. Always true though?
+                                    [CK2FileManager setTemporaryResourceValue:directoryPath forKey:NSURLParentDirectoryURLKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
