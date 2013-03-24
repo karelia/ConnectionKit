@@ -115,7 +115,6 @@
             // Report directory itself
             if (mask & CK2DirectoryEnumerationIncludesDirectory)
             {
-                [self includePropertiesForKeys:keys forDirectoryAtURL:directoryURL];
                 [self.client protocol:self didDiscoverItemAtURL:directoryURL];
             }
 
@@ -163,11 +162,6 @@
                                 if ([aKey isEqualToString:NSURLContentModificationDateKey])
                                 {
                                     [CK2FileManager setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey inURL:aURL];
-                                }
-                                else if ([aKey isEqualToString:NSURLEffectiveIconKey])
-                                {
-                                    // Only the home directory needs any special behaviour
-                                    if (isDirectory) [self includePropertiesForKeys:@[NSURLEffectiveIconKey] forDirectoryAtURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {
@@ -340,45 +334,6 @@
     [data release];
     
     return [aURL autorelease];
-}
-
-- (void)includePropertiesForKeys:(NSArray *)keys forDirectoryAtURL:(NSURL *)directoryURL;
-{
-    // Fill in the generic keys we support
-    NSString *path = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
-    
-    if ([keys containsObject:NSURLParentDirectoryURLKey])
-    {
-        if ([path isAbsolutePath])
-        {
-            if (path.pathComponents.count > 1)   // stop at root
-            {
-                NSURL *parent = [self.class URLWithPath:[path stringByDeletingLastPathComponent] relativeToURL:directoryURL].absoluteURL;
-                [CK2FileManager setTemporaryResourceValue:parent forKey:NSURLParentDirectoryURLKey inURL:directoryURL];
-                
-                // Recurse
-                [self includePropertiesForKeys:keys forDirectoryAtURL:parent];
-            }
-            else
-            {
-                [CK2FileManager setTemporaryResourceValue:nil forKey:NSURLParentDirectoryURLKey inURL:directoryURL];
-            }
-        }
-    }
-    if ([keys containsObject:NSURLIsDirectoryKey])
-    {
-        [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:directoryURL];
-    }
-    if ([keys containsObject:NSURLEffectiveIconKey])
-    {
-        // Client takes care of filling in icons for us; we just have to special case the home directory
-        NSURL *home = [self.class homeDirectoryURLForServerAtURL:directoryURL];
-        if ([path isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
-        {
-            NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
-            [CK2FileManager setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey inURL:directoryURL];
-        }
-    }
 }
 
 #pragma mark Dealloc
