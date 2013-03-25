@@ -62,14 +62,17 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          // standard error translation
-                          error = [self translateStandardErrors:error];
-
-                          // it seems that the curlResponseCode isn't set on errors, so the standard translation currently isn't helping,
-                          // so we just translate any quote error into an NSFileWriteUnknownError.
-                          if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                          if (error)
                           {
-                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                              // standard error translation
+                              error = [self translateStandardErrors:error];
+
+                              // it seems that the curlResponseCode isn't set on errors, so the standard translation currently isn't helping,
+                              // so we just translate any quote error into an NSFileWriteUnknownError.
+                              if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                              }
                           }
 
                           [self reportToProtocolWithError:error];
@@ -95,7 +98,8 @@
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"rm " stringByAppendingString:[[request URL] lastPathComponent]]]
+    NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+    return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
                                  client:client
@@ -107,10 +111,11 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
+        NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
-                                                      [[request URL] lastPathComponent]]];
+                                                      path]];
         
         return [self initWithCustomCommands:commands
                                     request:request
@@ -210,12 +215,25 @@
 
 - (void)endWithError:(NSError *)error;
 {
-    // Re-package host key failures as something more in the vein of NSURLConnection
-    if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+    if (error)
     {
-        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+        // adjust the reported URL so that it's actually the full one (libcurl only got given one with the last component removed)
+        NSURL* url = [self.request URL];
+        if (![[error.userInfo objectForKey:NSURLErrorFailingURLErrorKey] isEqualTo:url])
+        {
+            NSMutableDictionary* modifiedInfo = [NSMutableDictionary dictionaryWithDictionary:error.userInfo];
+            [modifiedInfo setObject:url forKey:NSURLErrorFailingURLErrorKey];
+            [modifiedInfo setObject:[url absoluteString] forKey:NSURLErrorFailingURLStringErrorKey];
+            error = [NSError errorWithDomain:error.domain code:error.code userInfo:modifiedInfo];
+        }
+
+        // Re-package host key failures as something more in the vein of NSURLConnection
+        if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+        {
+            error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+        }
     }
-    
+
     [super endWithError:error];
 }
 
