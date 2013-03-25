@@ -27,7 +27,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 @implementation TestFileDelegate
 
-#define LogSetupCleanup NSLog
+#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
 
 + (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
 {
@@ -62,7 +62,16 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
 {
-    LogSetupCleanup(@"setup/cleanup %d: %@", transcriptType, info);
+    switch (transcriptType)
+    {
+        case CKTranscriptReceived:
+        case CKTranscriptSent:
+            LogHousekeeping(@"housekeeping %d: %@", transcriptType, info);
+            break;
+
+        default:
+            break;
+    }
 }
 
 @end
@@ -395,11 +404,11 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
         // we don't care about errors here, we just want to do our best to clean up after any tests
         [session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
-            if (error) LogSetupCleanup(@"error : %@", error);
+            if (error) LogHousekeeping(@"housekeeping error : %@", error);
             [session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
-                if (error) LogSetupCleanup(@"error : %@", error);
+                if (error) LogHousekeeping(@"housekeeping error : %@", error);
                 [session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
-                    if (error) LogSetupCleanup(@"error : %@", error);
+                    if (error) LogHousekeeping(@"housekeeping error : %@", error);
                     [self pause];
 
                     NSLog(@"<<<< Removed Test Files");
