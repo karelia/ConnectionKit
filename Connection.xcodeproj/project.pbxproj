@@ -8,9 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		220526BA165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */; };
-		220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
@@ -40,16 +38,9 @@
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
-		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
-		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
 		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
 		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
-		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		271059541671441700E20511 /* libssh2.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
-		27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5D166FA17600E1EAD4 /* libcrypto.dylib */; };
-		27105BC21671599700E20511 /* libssl.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22407D5A166FA12500E1EAD4 /* libssl.dylib */; };
 		27431CA01630381D00F6FB58 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
 		27431CA11630381D00F6FB58 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
 		2743E8091622E47600019979 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -75,6 +66,34 @@
 		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
+		5F7A498F17006B570000D203 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A498E17006B570000D203 /* Foundation.framework */; };
+		5F7A49A517006EAA0000D203 /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49A617006EAA0000D203 /* CK2FileManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 2743E8071622E47600019979 /* CK2FileManager.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49A717006EAA0000D203 /* CK2Authentication.h in Headers */ = {isa = PBXBuildFile; fileRef = 278D8B77167FF35D00622468 /* CK2Authentication.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49A817006EB00000D203 /* CK2FileManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 2743E8081622E47600019979 /* CK2FileManager.m */; };
+		5F7A49A917006EB00000D203 /* CK2Authentication.m in Sources */ = {isa = PBXBuildFile; fileRef = 278D8B78167FF35D00622468 /* CK2Authentication.m */; };
+		5F7A49AA17006EC60000D203 /* CK2FileOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */; };
+		5F7A49AB17006EC90000D203 /* CK2FileOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */; };
+		5F7A49AC17006EDA0000D203 /* CK2Protocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A8271627636E000C9D9F /* CK2Protocol.h */; };
+		5F7A49AD17006EDA0000D203 /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
+		5F7A49AE17006EDA0000D203 /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
+		5F7A49AF17006EDA0000D203 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
+		5F7A49B017006EDA0000D203 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
+		5F7A49B117006EFF0000D203 /* CK2WebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */; };
+		5F7A49B217006F040000D203 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
+		5F7A49B317006F070000D203 /* CK2WebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */; };
+		5F7A49B417006F130000D203 /* CK2Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2Protocol.m */; };
+		5F7A49B517006F130000D203 /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
+		5F7A49B617006F130000D203 /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
+		5F7A49B717006F130000D203 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
+		5F7A49B817006F130000D203 /* CK2FileProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */; };
+		5F7A49B917006F3A0000D203 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49BA17006F3A0000D203 /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49BB17006F3A0000D203 /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		5F7A49BC17006F460000D203 /* CKUploader.m in Sources */ = {isa = PBXBuildFile; fileRef = 27D03B411471787000FEA588 /* CKUploader.m */; };
+		5F7A49BD17006F460000D203 /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
+		5F7A49BE17006F460000D203 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
+		5F7A49C317006FBF0000D203 /* libCURLHandle-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A499D17006B570000D203 /* libCURLHandle-iOS.a */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -138,6 +157,20 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
+		5F7A499C17006B570000D203 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5F7A490D16FFB4190000D203;
+			remoteInfo = "CURLHandle-iOS";
+		};
+		5F7A49A117006B570000D203 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5FEEF26016CE830C002C1CBF;
+			remoteInfo = "DAVKit-iOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -156,11 +189,16 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				271059521671334500E20511 /* DAVKit.framework in CopyFiles */,
 				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
-				271059541671441700E20511 /* libssh2.dylib in CopyFiles */,
-				27105BC1167157D200E20511 /* libcrypto.dylib in CopyFiles */,
-				27105BC21671599700E20511 /* libssl.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F7A498B17006B560000D203 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/${PRODUCT_NAME}";
+			dstSubfolderSpec = 16;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,8 +213,6 @@
 		220526F6165E98B400A2BBC9 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ConnectionKit/main.m; sourceTree = "<group>"; };
 		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = CurlHandle/SFTP/libssl.dylib; sourceTree = "<group>"; };
-		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = CurlHandle/SFTP/libcrypto.dylib; sourceTree = "<group>"; };
 		22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFileTests.m; sourceTree = "<group>"; };
 		2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSSendStringCommand.m; sourceTree = "<group>"; };
 		2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSSendDataCommand.m; sourceTree = "<group>"; };
@@ -217,23 +253,19 @@
 		2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests.m; sourceTree = "<group>"; };
 		2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2WebDAVProtocol.h; sourceTree = "<group>"; };
 		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
-		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = file; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
+		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
 		22FEB6671680818800BB778B /* KMSTranscriptEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTranscriptEntry.m; sourceTree = "<group>"; };
 		22FEB6681680818800BB778B /* KMSTranscriptEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTranscriptEntry.h; sourceTree = "<group>"; };
-		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = ../SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
-		2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = ../SFTP/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
-		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = ../SFTP/CK2SFTPSession.h; sourceTree = "<group>"; };
-		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = ../SFTP/CK2SFTPSession.m; sourceTree = "<group>"; };
-		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = CurlHandle/SFTP/libssh2.dylib; sourceTree = "<group>"; };
+		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = Sources/CK2SFTPSession.h; sourceTree = "<group>"; };
+		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = Sources/CK2SFTPSession.m; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
 		2743E8071622E47600019979 /* CK2FileManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManager.h; sourceTree = "<group>"; };
 		2743E8081622E47600019979 /* CK2FileManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManager.m; sourceTree = "<group>"; };
 		27448C2414580F7500EB086F /* DAVKit.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = DAVKit.xcodeproj; path = ../DAVKit/DAVKit.xcodeproj; sourceTree = "<group>"; };
-		27448C371458100D00EB086F /* DAVKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = DAVKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2CURLProtocolURLManipulationTests.m; sourceTree = "<group>"; };
 		278D8B77167FF35D00622468 /* CK2Authentication.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2Authentication.h; sourceTree = "<group>"; };
 		278D8B78167FF35D00622468 /* CK2Authentication.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2Authentication.m; sourceTree = "<group>"; };
@@ -265,6 +297,8 @@
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5F7A498D17006B560000D203 /* libConnection-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libConnection-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F7A498E17006B570000D203 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
 		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Connection.h"; path = "ConnectionKit/NSString+Connection.h"; sourceTree = "<group>"; };
@@ -303,7 +337,6 @@
 			files = (
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
-				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -312,6 +345,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				27F3372B16BC1FB100E70511 /* Cocoa.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F7A498A17006B560000D203 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F7A49C317006FBF0000D203 /* libCURLHandle-iOS.a in Frameworks */,
+				5F7A498F17006B570000D203 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -326,8 +368,6 @@
 				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
 				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
-				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
-				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,12 +415,8 @@
 				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
 				79FB807109F74185006E7D11 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				27448C371458100D00EB086F /* DAVKit.framework */,
-				22407D5D166FA17600E1EAD4 /* libcrypto.dylib */,
 				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
 				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
-				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
-				22407D5A166FA12500E1EAD4 /* libssl.dylib */,
 				79CFD92D09F7080B00172CDD /* libz.dylib */,
 				79CFD93609F7084000172CDD /* Security.framework */,
 				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
@@ -404,6 +440,7 @@
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				220AD7981509019B00748655 /* UnitTests.octest */,
 				27F3372816BC1FB100E70511 /* AuthTester.app */,
+				5F7A498D17006B560000D203 /* libConnection-iOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -413,6 +450,7 @@
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
 				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
+				5F7A499D17006B570000D203 /* libCURLHandle-iOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -422,6 +460,7 @@
 			children = (
 				220526F1165E97B400A2BBC9 /* DAVKit.framework */,
 				220526F3165E97B400A2BBC9 /* Tests.octest */,
+				5F7A49A217006B570000D203 /* libDAVKit-iOS.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -608,6 +647,7 @@
 				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
 				220AD7991509019B00748655 /* SenTestingKit.framework */,
 				27F3372A16BC1FB100E70511 /* Cocoa.framework */,
+				5F7A498E17006B570000D203 /* Foundation.framework */,
 				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
@@ -635,26 +675,36 @@
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
 			isa = PBXGroup;
 			children = (
-				2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */,
-				2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */,
 				2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */,
 				2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */,
-				D3598B590CF3D3E400C61A38 /* Other */,
 			);
 			name = SFTP;
 			path = ../CurlHandle/SFTP;
 			sourceTree = "<group>";
 		};
-		D3598B590CF3D3E400C61A38 /* Other */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Other;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
+		5F7A49A417006E9C0000D203 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F7A49A517006EAA0000D203 /* Connection.h in Headers */,
+				5F7A49A617006EAA0000D203 /* CK2FileManager.h in Headers */,
+				5F7A49A717006EAA0000D203 /* CK2Authentication.h in Headers */,
+				5F7A49AA17006EC60000D203 /* CK2FileOperation.h in Headers */,
+				5F7A49AC17006EDA0000D203 /* CK2Protocol.h in Headers */,
+				5F7A49AD17006EDA0000D203 /* CK2CURLBasedProtocol.h in Headers */,
+				5F7A49AE17006EDA0000D203 /* CK2FTPProtocol.h in Headers */,
+				5F7A49AF17006EDA0000D203 /* CK2SFTPProtocol.h in Headers */,
+				5F7A49B017006EDA0000D203 /* CK2FileProtocol.h in Headers */,
+				5F7A49B317006F070000D203 /* CK2WebDAVProtocol.h in Headers */,
+				5F7A49B917006F3A0000D203 /* CKUploader.h in Headers */,
+				5F7A49BA17006F3A0000D203 /* CKTransferRecord.h in Headers */,
+				5F7A49BB17006F3A0000D203 /* NSString+Connection.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12109F702BE00172CDD /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -664,7 +714,6 @@
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
-				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
 				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
@@ -675,6 +724,7 @@
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
+				5F7A49B117006EFF0000D203 /* CK2WebDAVProtocol.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -717,6 +767,24 @@
 			productName = AuthTester;
 			productReference = 27F3372816BC1FB100E70511 /* AuthTester.app */;
 			productType = "com.apple.product-type.application";
+		};
+		5F7A498C17006B560000D203 /* Connection-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F7A49A317006B570000D203 /* Build configuration list for PBXNativeTarget "Connection-iOS" */;
+			buildPhases = (
+				5F7A498917006B560000D203 /* Sources */,
+				5F7A498A17006B560000D203 /* Frameworks */,
+				5F7A49A417006E9C0000D203 /* Headers */,
+				5F7A498B17006B560000D203 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Connection-iOS";
+			productName = "Connection-iOS";
+			productReference = 5F7A498D17006B560000D203 /* libConnection-iOS.a */;
+			productType = "com.apple.product-type.library.static";
 		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
@@ -782,6 +850,7 @@
 				79CFD12509F702BE00172CDD /* Framework */,
 				220AD7971509019B00748655 /* UnitTests */,
 				27F3372716BC1FB100E70511 /* AuthTester */,
+				5F7A498C17006B560000D203 /* Connection-iOS */,
 			);
 		};
 /* End PBXProject section */
@@ -813,6 +882,20 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5F7A499D17006B570000D203 /* libCURLHandle-iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libCURLHandle-iOS.a";
+			remoteRef = 5F7A499C17006B570000D203 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5F7A49A217006B570000D203 /* libDAVKit-iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libDAVKit-iOS.a";
+			remoteRef = 5F7A49A117006B570000D203 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -939,6 +1022,25 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5F7A498917006B560000D203 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F7A49A817006EB00000D203 /* CK2FileManager.m in Sources */,
+				5F7A49A917006EB00000D203 /* CK2Authentication.m in Sources */,
+				5F7A49AB17006EC90000D203 /* CK2FileOperation.m in Sources */,
+				5F7A49B217006F040000D203 /* CK2WebDAVProtocol.m in Sources */,
+				5F7A49B417006F130000D203 /* CK2Protocol.m in Sources */,
+				5F7A49B517006F130000D203 /* CK2CURLBasedProtocol.m in Sources */,
+				5F7A49B617006F130000D203 /* CK2FTPProtocol.m in Sources */,
+				5F7A49B717006F130000D203 /* CK2SFTPProtocol.m in Sources */,
+				5F7A49B817006F130000D203 /* CK2FileProtocol.m in Sources */,
+				5F7A49BC17006F460000D203 /* CKUploader.m in Sources */,
+				5F7A49BD17006F460000D203 /* CKTransferRecord.m in Sources */,
+				5F7A49BE17006F460000D203 /* NSString+Connection.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12309F702BE00172CDD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -946,7 +1048,6 @@
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
-				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
 				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
@@ -1180,6 +1281,96 @@
 			};
 			name = Plugin;
 		};
+		5F7A499717006B570000D203 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DSTROOT = /tmp/Connection_iOS.dst;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = include/Connection;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		5F7A499817006B570000D203 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DSTROOT = /tmp/Connection_iOS.dst;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = include/Connection;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		5F7A499917006B570000D203 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				DSTROOT = /tmp/Connection_iOS.dst;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = include/Connection;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Plugin;
+		};
 		79A8578E0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1360,6 +1551,16 @@
 				27F3373F16BC1FB100E70511 /* Debug */,
 				27F3374016BC1FB100E70511 /* Release */,
 				27F3374116BC1FB100E70511 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5F7A49A317006B570000D203 /* Build configuration list for PBXNativeTarget "Connection-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F7A499717006B570000D203 /* Debug */,
+				5F7A499817006B570000D203 /* Release */,
+				5F7A499917006B570000D203 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
