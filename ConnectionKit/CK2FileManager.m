@@ -40,19 +40,10 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                completionHandler:(void (^)(NSArray *, NSError *))block;
 {
     NSMutableArray *contents = [[NSMutableArray alloc] init];
-    __block BOOL resolved = NO;
     
     id result = [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
         
-        // Ignore first URL as it's the directory itself
-        if (resolved)
-        {
-            [contents addObject:aURL];
-        }
-        else
-        {
-            resolved = YES;
-        }
+        [contents addObject:aURL];
         
     } completionHandler:^(NSError *error) {
         
@@ -206,12 +197,20 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     if ([url isFileURL])
     {
         CFURLSetTemporaryResourcePropertyForKey((CFURLRef)value, (CFStringRef)key, value);
-        return;
     }
-    
-    // Store the value as an associated object
-    if (!value) value = [NSNull null];
-    objc_setAssociatedObject(url, key, value, OBJC_ASSOCIATION_RETAIN);
+    else
+    {
+        [self setTemporaryResourceValueForKey:key inURL:url asBlock:^id{
+            return value;
+        }];
+    }
+}
+
+// The block is responsible for returning the value on-demand
++ (void)setTemporaryResourceValueForKey:(NSString *)key inURL:(NSURL *)url asBlock:(id (^)(void))block;
+{
+    // Store the block as an associated object
+    objc_setAssociatedObject(url, key, block, OBJC_ASSOCIATION_COPY);
     
     
     // Swizzle so getter method includes cache in its search
@@ -265,10 +264,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
     }
     
-    *value = objc_getAssociatedObject(self, key);
-    if (*value == nil)
+    
+    // See if key has been cached
+    id (^block)(void) = objc_getAssociatedObject(self, key);
+    
+    if (block)
     {
-        // A few keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
+        *value = block();
+        return YES;
+    }
+    
+    
+    // A few special keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
         if ([key isEqualToString:NSURLHasHiddenExtensionKey])
         {
             *value = [NSNumber numberWithBool:NO];
@@ -334,11 +341,6 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         {
             return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
         }
-    }
-    else if (*value == [NSNull null])
-    {
-        *value = nil;
-    }
     
     return YES;
 }

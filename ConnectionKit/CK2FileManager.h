@@ -18,6 +18,10 @@ typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAtt
 extern NSString * const CK2FileMIMEType;
 
 
+typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
+    CK2DirectoryEnumerationIncludesDirectory = 1L << 31,    // see directory methods below for details
+};
+
 
 @protocol CK2FileManagerDelegate;
 
@@ -31,7 +35,8 @@ extern NSString * const CK2FileMIMEType;
 #pragma mark Discovering Directory Contents
 
 // NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
-// In order to supply resource values, have to work around rdar://problem/11069131 by returning a custom NSURL subclass. Can't guarantee therefore that they will work correctly with the CFURL APIs. So far in practice the only incompatibility I've found is CFURLHasDirectoryPath() always returning NO
+// You can pass in CK2DirectoryEnumerationIncludesDirectory if you wish (see below for details) but that would be a little odd for this method!
+// Adding into the mix NSURLParentDirectoryURLKey as well will fill that key in all the way up to the root/volume URL
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask
@@ -42,6 +47,7 @@ extern NSString * const CK2FileMIMEType;
 //  * FIRST result is the directory itself, with relative path resolved if possible
 //  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
 //
+// Pass in CK2DirectoryEnumerationIncludesDirectory for the first URL received to be that of the URL being enumerated. Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved)
 // All docs for -contentsOfDirectoryAtURL:… should apply here too
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
@@ -137,7 +143,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 /// \param [in] value to cache. Retained
 /// \param [in] key to store under. Any existing value is overwritten
 /// \param [in] url to cache for
-+ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url;
++ (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url __attribute((nonnull(2,3)));
 
 @end
 
