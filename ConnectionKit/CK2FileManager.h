@@ -75,6 +75,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
+#pragma mark Reading Items
+
+- (id)readFileAtURL:(NSURL *)sourceURL toLocalURL:(NSURL *)destinationURL progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))completionHandler;
+
 
 #pragma mark Deleting Items
 // Attempts to remove the file or directory at the specified URL. At present all protocols support deleting files, but when deleting directories:

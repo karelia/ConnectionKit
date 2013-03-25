@@ -2,6 +2,8 @@
 #define LocalizedStringInConnectionKitBundle(key, comment) \
 [[NSBundle bundleForClass:[self class]] localizedStringForKey:(key) value:@"" table:nil]
 
+#import <TargetConditionals.h>
+
 #ifndef CK2WebDAVLog
 #define CK2WebDAVLog(...)
 #endif

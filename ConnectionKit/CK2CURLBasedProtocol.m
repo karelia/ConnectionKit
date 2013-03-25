@@ -13,8 +13,6 @@
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
-#import <AppKit/AppKit.h>   // for NSImage
-
 
 @implementation CK2CURLBasedProtocol
 
@@ -61,6 +59,50 @@
     [request curl_setPostTransferCommands:commands];
     
     self = [self initWithRequest:request client:client dataHandler:nil completionHandler:handler];
+    
+    [request release];
+    return self;
+}
+
+- (id)initForReadingFileWithRequest:(NSURLRequest *)request toURL:(NSURL *)destinationURL client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+{
+    request = [[self class] newRequestWithRequest:request isDirectory:NO];
+    
+    NSOutputStream *outputStream = [[NSOutputStream alloc] initWithURL:destinationURL append:NO];
+    
+    self = [self initWithRequest:request client:client dataHandler:^(NSData *data) {
+        [outputStream write:[data bytes] maxLength:[data length]];
+    } completionHandler:^(NSError *error) {
+        [outputStream close];
+        [outputStream release];
+        if (error)
+        {
+            [client protocol:self didFailWithError:error];
+        }
+        else
+        {
+            NSURL *url = [request URL];
+            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
+            
+            if (![path isAbsolutePath])
+            {
+                NSString *home = [_handle initialFTPPath];
+                if ([home isAbsolutePath])
+                {
+                    url = [CK2FileManager URLWithPath:home relativeToURL:url];
+                    url = [url URLByAppendingPathComponent:path];
+                }
+            }
+            
+            [client protocol:self didReadFileAtURL:url toURL:destinationURL];
+            [client protocolDidFinish:self];
+        }
+    }];
+    
+    if (self)
+    {
+        _progressBlock = [progressBlock copy];
+    }
     
     [request release];
     return self;
@@ -166,11 +208,13 @@
                                 else if ([aKey isEqualToString:NSURLEffectiveIconKey])
                                 {
                                     // Client takes care of filling in icons for us; we just have to special case the home directory
+#if TARGET_OS_IPHONE
                                     if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
                                     {
                                         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
                                         [CK2FileManager setTemporaryResourceValue:icon forKey:aKey inURL:aURL];
                                     }
+#endif
                                 }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {

@@ -109,6 +109,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
+- (id)readFileAtURL:(NSURL *)sourceURL toLocalURL:(NSURL *)destinationURL progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))completionHandler;
+{
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:sourceURL];
+    
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileReadOperationWithRequest:request
+                                                                              destinationURL:destinationURL
+                                                                                     manager:self
+                                                                               progressBlock:progressBlock
+                                                                             completionBlock:completionHandler];
+    return [operation autorelease];
+}
+
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     CK2FileOperation *operation = [[CK2FileOperation alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
@@ -164,7 +176,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         [string release];
         [data release];
     }
-    
+  
     return [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
 }
 

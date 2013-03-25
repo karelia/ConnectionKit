@@ -34,5 +34,4 @@
 // Legacy
 #import <Connection/CKUploader.h>
 #import <Connection/CKTransferRecord.h>
-#import <Connection/CKTransferProgressCell.h>
 

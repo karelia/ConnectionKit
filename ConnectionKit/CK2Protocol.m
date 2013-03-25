@@ -57,6 +57,12 @@
     return nil;
 }
 
+- (id)initForReadingFileWithRequest:(NSURLRequest *)request toURL:(NSURL *)destinationURL client:(id<CK2ProtocolClient>)client progressBlock:(void (^)(NSUInteger))progressBlock;
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
