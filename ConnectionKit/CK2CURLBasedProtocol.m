@@ -560,7 +560,31 @@
 
 - (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
-    [[self client] protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    CKTranscriptType ckType;
+    switch (type)
+    {
+        case CURLINFO_HEADER_IN:
+            ckType = CKTranscriptReceived;
+            break;
+
+        case CURLINFO_HEADER_OUT:
+            ckType = CKTranscriptSent;
+            break;
+
+        case CURLINFO_DATA_IN:
+        case CURLINFO_DATA_OUT:
+        case CURLINFO_SSL_DATA_IN:
+        case CURLINFO_SSL_DATA_OUT:
+            ckType = CKTranscriptData;
+            break;
+
+        case CURLINFO_TEXT:
+        default:
+            ckType = CKTranscriptInfo;
+            break;
+    }
+
+    [[self client] protocol:self appendString:string toTranscript:ckType];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
