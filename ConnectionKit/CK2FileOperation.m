@@ -384,7 +384,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             [CK2FileManager setTemporaryResourceValueForKey:NSURLEffectiveIconKey inURL:url asBlock:^id{
                 
                 NSString *fileType = url.pathExtension;
-                if ([fileType isEqual:@"app"])
+                if (path.pathComponents.count == 1)
+                {
+                    fileType = NSFileTypeForHFSTypeCode(kGenericFileServerIcon);
+                }
+                else if ([fileType isEqual:@"app"])
                 {
                     fileType = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
                 }
