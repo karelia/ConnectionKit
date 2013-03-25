@@ -163,15 +163,6 @@
                                 {
                                     [CK2FileManager setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey inURL:aURL];
                                 }
-                                else if ([aKey isEqualToString:NSURLEffectiveIconKey])
-                                {
-                                    // Client takes care of filling in icons for us; we just have to special case the home directory
-                                    if ([[self.class pathOfURLRelativeToHomeDirectory:aURL] isEqualToString:[self.class pathOfURLRelativeToHomeDirectory:home]])
-                                    {
-                                        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kUserFolderIcon)];
-                                        [CK2FileManager setTemporaryResourceValue:icon forKey:aKey inURL:aURL];
-                                    }
-                                }
                                 else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
                                 {
                                     NSString *typeValue;
@@ -239,7 +230,7 @@
                                 }
                                 else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
                                 {
-                                    // Can derive by deleting last path component. Always true though?
+                                    [CK2FileManager setTemporaryResourceValue:directoryPath forKey:NSURLParentDirectoryURLKey inURL:aURL];
                                 }
                                 else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
                                 {
@@ -411,18 +402,7 @@
     // Update cache
     if (!error)
     {
-        NSString *homeDirectoryPath = [_handle initialFTPPath];
-        
-        if ([homeDirectoryPath isAbsolutePath])
-        {
-            if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
-            {
-                homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
-            }
-            
-            NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
-            [self storeHomeDirectoryURL:homeDirectoryURL];
-        }
+        [self updateHomeDirectoryStore];
     }
 
     if (_completionHandler)
@@ -498,6 +478,13 @@
 
 #pragma mark Home Directory Store
 
++ (BOOL)isHomeDirectoryAtURL:(NSURL *)url;
+{
+    NSURL *home = [self homeDirectoryURLForServerAtURL:url];
+    BOOL result = [[self pathOfURLRelativeToHomeDirectory:url] isEqualToString:[self pathOfURLRelativeToHomeDirectory:home]];
+    return result;
+}
+
 + (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
 {
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;
@@ -509,15 +496,27 @@
     }
 }
 
-- (void)storeHomeDirectoryURL:(NSURL *)home;
+- (void)updateHomeDirectoryStore;
 {
-    home = [self canonicalizedURLForReporting:home];    // include username
-    NSString *host = [[NSURL URLWithString:@"/" relativeToURL:home] absoluteString].lowercaseString;
+    NSString *homeDirectoryPath = [_handle initialFTPPath];
     
-    NSMutableDictionary *store = [self.class homeURLsByHostURL];
-    @synchronized (store)
+    if ([homeDirectoryPath isAbsolutePath])
     {
-        [store setObject:home forKey:host];
+        if (homeDirectoryPath.length > 1 && ![homeDirectoryPath hasSuffix:@"/"])    // ensure it's a directory path
+        {
+            homeDirectoryPath = [homeDirectoryPath stringByAppendingString:@"/"];
+        }
+        
+        NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
+        
+        homeDirectoryURL = [self canonicalizedURLForReporting:homeDirectoryURL];    // include username
+        NSString *host = [[NSURL URLWithString:@"/" relativeToURL:homeDirectoryURL] absoluteString].lowercaseString;
+        
+        NSMutableDictionary *store = [self.class homeURLsByHostURL];
+        @synchronized (store)
+        {
+            [store setObject:homeDirectoryURL forKey:host];
+        }
     }
 }
 
@@ -542,6 +541,7 @@
 
 - (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
 {
+    [self updateHomeDirectoryStore];    // Make sure is updated before parsing of directory listing
     if (_dataBlock) _dataBlock(data);
 }
 

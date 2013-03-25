@@ -35,6 +35,11 @@
 @end
 
 
+@interface CK2FileManager (Internals)
++ (void)setTemporaryResourceValueForKey:(NSString *)key inURL:(NSURL *)url asBlock:(id (^)(void))block;
+@end
+
+
 #pragma mark -
 
 
@@ -94,41 +99,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                      enumerationBlock:(void (^)(NSURL *))enumBlock
                       completionBlock:(void (^)(NSError *))block;
 {
-    if ([keys containsObject:NSURLEffectiveIconKey])
-    {
-        // Custom enumeration block to fill in icons if requested
-        enumBlock = ^(NSURL *aURL) {
-            
-            // Only need supply icon if protocol hasn't done so
-            NSImage *icon;
-            if (![aURL getResourceValue:&icon forKey:NSURLEffectiveIconKey error:NULL] || !icon)
-            {
-                NSNumber *isDirectory;
-                if (![aURL getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] || isDirectory == nil)
-                {
-                    isDirectory = @(CFURLHasDirectoryPath((CFURLRef)aURL));
-                }
-                
-                // Guess based on file type
-                NSNumber *package;
-                if (isDirectory.boolValue && (![aURL getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || !package.boolValue))
-                {
-                    icon = [NSImage imageNamed:NSImageNameFolder];
-                }
-                else
-                {
-                    NSString *fileType = aURL.pathExtension;
-                    if ([fileType isEqual:@"app"]) fileType = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
-                    icon = [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
-                }
-                
-                [CK2FileManager setTemporaryResourceValue:icon forKey:NSURLEffectiveIconKey inURL:aURL];
-            }
-            
-            enumBlock(aURL);
-        };
-    }
-    
     self = [self initWithURL:url manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
         
         // If we try to do this outside the block there's a risk the protocol object will be created *before* the enum block has been stored, which ends real badly
@@ -370,12 +340,87 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
     
+    // Provide ancestry and other fairly generic keys on-demand
+    [self.class setResourceValueBlocksForURL:url protocolClass:protocol.class];
+    
     if (_enumerationBlock) _enumerationBlock(url);
     
     // It seems poor security to vend out passwords here, so have a quick sanity check
     if (CFURLGetByteRangeForComponent((CFURLRef)url, kCFURLComponentPassword, NULL).location != kCFNotFound)
     {
         NSLog(@"%@ is reporting URLs with a password, such as %@\nThis seems poor security practice", protocol, url);
+    }
+}
+
++ (void)setResourceValueBlocksForURL:(NSURL *)strongURL protocolClass:(Class)protocolClass;
+{
+    __block NSURL *url = strongURL;    // URL retains its resource values; so if the blocks retained the URL would be a cycle
+    
+    NSString *path = [protocolClass pathOfURLRelativeToHomeDirectory:url];
+    if ([path isAbsolutePath])
+    {
+        [CK2FileManager setTemporaryResourceValueForKey:NSURLParentDirectoryURLKey inURL:url asBlock:^id {
+            
+            if (path.pathComponents.count > 1)   // stop at root
+            {
+                NSURL *result = [protocolClass URLWithPath:[path stringByDeletingLastPathComponent] relativeToURL:url].absoluteURL;
+                [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:result];
+                
+                // Recurse
+                [self setResourceValueBlocksForURL:result protocolClass:protocolClass];
+                
+                return result;
+            }
+            
+            return nil;
+        }];
+        
+        
+        // Only need supply icon if protocol hasn't done so
+        NSImage *icon;
+        if (![url getResourceValue:&icon forKey:NSURLEffectiveIconKey error:NULL] || !icon)
+        {
+            // Fill in icon as best we can
+            [CK2FileManager setTemporaryResourceValueForKey:NSURLEffectiveIconKey inURL:url asBlock:^id{
+                
+                NSString *fileType = url.pathExtension;
+                if (path.pathComponents.count == 1)
+                {
+                    fileType = NSFileTypeForHFSTypeCode(kGenericFileServerIcon);
+                }
+                else if ([fileType isEqual:@"app"])
+                {
+                    fileType = NSFileTypeForHFSTypeCode(kGenericApplicationIcon);
+                }
+                else
+                {
+                    NSNumber *isDirectory;
+                    if (![url getResourceValue:&isDirectory forKey:NSURLIsDirectoryKey error:NULL] || isDirectory == nil)
+                    {
+                        isDirectory = @(CFURLHasDirectoryPath((CFURLRef)url));
+                    }
+                    
+                    // Guess based on file type
+                    if (isDirectory.boolValue)
+                    {
+                        if ([protocolClass isHomeDirectoryAtURL:url])
+                        {
+                            fileType = NSFileTypeForHFSTypeCode(kUserFolderIcon);
+                        }
+                        else
+                        {
+                            NSNumber *package;
+                            if (![url getResourceValue:&package forKey:NSURLIsPackageKey error:NULL] || !package.boolValue)
+                            {
+                                return [NSImage imageNamed:NSImageNameFolder];
+                            }
+                        }
+                    }
+                }
+                
+                return [[NSWorkspace sharedWorkspace] iconForFileType:fileType];
+            }];
+        }
     }
 }
 
