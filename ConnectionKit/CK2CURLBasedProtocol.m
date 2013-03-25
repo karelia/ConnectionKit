@@ -8,7 +8,7 @@
 
 #import "CK2CURLBasedProtocol.h"
 
-#import "CK2FileManager.h"
+#import "CK2FileManagerWithTestSupport.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
@@ -359,10 +359,13 @@
     
     if ([[self class] usesMultiHandle])
     {
-        _handle = [[CURLHandle alloc] initWithRequest:[self request]
+        NSURLRequest* request = [self request];
+        CURLMulti* multi = [request ck2_multi]; // typically this is nil, meaning use the default, but we can override it for test purposes
+
+        _handle = [[CURLHandle alloc] initWithRequest:request
                                            credential:credential
                                              delegate:self
-                                                multi:nil];
+                                                multi:multi];
     }
     else
     {

@@ -29,6 +29,9 @@ NSString * const CK2FileMIMEType = @"CK2FileMIMEType";
 
 NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestination";
 
+@interface CK2FileManager()
+- (Class)classForOperation;
+@end
 
 @implementation CK2FileManager
 
@@ -60,7 +63,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initEnumerationOperationWithURL:url
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initEnumerationOperationWithURL:url
                                                                  includingPropertiesForKeys:keys
                                                                                     options:mask
                                                                                     manager:self
@@ -75,7 +78,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(url);
     
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initDirectoryCreationOperationWithURL:url
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initDirectoryCreationOperationWithURL:url
                                                                       withIntermediateDirectories:createIntermediates
                                                                                 openingAttributes:attributes
                                                                                           manager:self
@@ -85,7 +88,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:url
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initFileCreationOperationWithURL:url
                                                                                         data:data
                                                                  withIntermediateDirectories:createIntermediates
                                                                            openingAttributes:attributes
@@ -98,7 +101,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 {
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileCreationOperationWithURL:destinationURL
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initFileCreationOperationWithURL:destinationURL
                                                                                         file:sourceURL
                                                                  withIntermediateDirectories:createIntermediates
                                                                            openingAttributes:attributes
@@ -111,7 +114,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initRemovalOperationWithURL:url manager:self completionBlock:handler];
     return [operation autorelease];
 }
 
@@ -121,7 +124,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     NSParameterAssert(keyedValues);
     
-    CK2FileOperation *operation = [[CK2FileOperation alloc] initResourceValueSettingOperationWithURL:url
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initResourceValueSettingOperationWithURL:url
                                                                                               values:keyedValues
                                                                                              manager:self
                                                                                      completionBlock:handler];
@@ -133,6 +136,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 @synthesize delegate = _delegate;
 
 #pragma mark Operations
+
+
+- (Class)classForOperation
+{
+    return [CK2FileOperation class];
+}
 
 - (void)cancelOperation:(id)operation;
 {
