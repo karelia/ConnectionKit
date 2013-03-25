@@ -37,6 +37,8 @@
 
 @implementation CleanupDelegate
 
+#define LogSetupCleanup NSLog
+
 + (CleanupDelegate*)delegateWithTest:(CK2FileManagerFTPTests*)tests
 {
     CleanupDelegate* result = [[CleanupDelegate alloc] init];
@@ -66,6 +68,11 @@
         [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
     }
 
+}
+
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+{
+    LogSetupCleanup(@"setup/cleanup %d: %@", transcriptType, info);
 }
 
 @end
@@ -184,11 +191,13 @@ static NSString* gResponsesToUse = nil;
 
 - (BOOL)checkIsAuthenticationError:(NSError*)error
 {
+    BOOL gotError = error != nil;
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
     BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
     [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+    BOOL result = ([self.responsesToUse isEqualTo:@"sftp"]) ? gotError : gotError && domainOK && codeOK;
 
-    return (error != nil) && domainOK && codeOK;
+    return result;
 }
 
 - (BOOL)checkNoErrorOrFileExistsError:(NSError*)error
@@ -288,21 +297,18 @@ static NSString* gResponsesToUse = nil;
     if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
         NSLog(@"<<<< Removing Test Files");
-        // suppress the transcript for this stuff
-        NSMutableString* saved = self.transcript;
-        self.transcript = nil;
-
         CK2FileManager* session = [[CK2FileManager alloc] init];
         session.delegate = [CleanupDelegate delegateWithTest:self];
 
         // we don't care about errors here, we just want to do our best to clean up after any tests
         [session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
+            if (error) LogSetupCleanup(@"error : %@", error);
             [session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
+                if (error) LogSetupCleanup(@"error : %@", error);
                 [session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
+                    if (error) LogSetupCleanup(@"error : %@", error);
                     [self pause];
 
-                    // restore the transcript
-                    self.transcript = saved;
                     NSLog(@"<<<< Removed Test Files");
                 }];
             }];
