@@ -124,6 +124,7 @@
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
+    // DELE is only intended to delete files, but in our testing, some FTP servers happily support deleting a directory using it
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"DELE " stringByAppendingString:[[request URL] lastPathComponent]]]
              request:request
           createIntermediateDirectories:NO

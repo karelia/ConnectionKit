@@ -11,8 +11,9 @@
 
 #import "CK2SFTPSession.h"
 
+#import <AppKit/AppKit.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
-
+#import <libssh2_sftp.h>
 
 @implementation CK2SFTPProtocol
 
@@ -62,14 +63,31 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          // standard error translation
-                          error = [self translateStandardErrors:error];
-
-                          // it seems that the curlResponseCode isn't set on errors, so the standard translation currently isn't helping,
-                          // so we just translate any quote error into an NSFileWriteUnknownError.
-                          if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                          if (error)
                           {
-                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                              // if the mkdir command failed, try to extract a more meaningful error
+                              if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  NSUInteger code = NSFileWriteUnknownError;
+                                  NSString* domain = NSCocoaErrorDomain;
+                                  NSUInteger sshError = [error curlResponseCode];
+                                  switch (sshError)
+                                  {
+                                      case LIBSSH2_FX_FAILURE:
+                                          // we're going to assume that a general failure code means that the directory already existed
+                                                                                    // quite how legitimate this is remains to be seen...
+                                                                                    //code = 0;
+
+                                      default:
+                                          break;
+                                          
+                                  }
+
+                                  if (code)
+                                      error = [NSError errorWithDomain:domain code:code userInfo:@{ NSUnderlyingErrorKey : error }];
+                                  else
+                                      error = nil;
+                              }
                           }
 
                           [self reportToProtocolWithError:error];
@@ -95,11 +113,43 @@
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    return [self initWithCustomCommands:[NSArray arrayWithObject:[@"rm " stringByAppendingString:[[request URL] lastPathComponent]]]
+    NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+    return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
                                  client:client
-                      completionHandler:nil];
+                      completionHandler:^(NSError *error) {
+                          if (error)
+                          {
+                              // if the mkdir command failed, try to extract a more meaningful error
+                              if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  NSUInteger code = NSFileWriteUnknownError;
+                                  NSString* domain = NSCocoaErrorDomain;
+                                  NSUInteger sshError = [error curlResponseCode];
+                                  switch (sshError)
+                                  {
+                                      case LIBSSH2_FX_NO_SUCH_FILE:
+                                          domain = NSURLErrorDomain;
+                                          code = NSURLErrorNoPermissionsToReadFile;
+                                          break;
+
+                                      case LIBSSH2_FX_PERMISSION_DENIED:
+                                          break;
+
+                                      case LIBSSH2_FX_FAILURE:
+                                          break;
+                                          
+                                      default:
+                                          break;
+
+                                  }
+                                  error = [NSError errorWithDomain:domain code:code userInfo:@{ NSUnderlyingErrorKey : error }];
+                              }
+                          }
+
+                          [self reportToProtocolWithError:error];
+                      }];
 }
 
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
@@ -107,10 +157,11 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
+        NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
-                                                      [[request URL] lastPathComponent]]];
+                                                      path]];
         
         return [self initWithCustomCommands:commands
                                     request:request
@@ -193,7 +244,7 @@
     }
     else
     {
-        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+        [super cancelAuthenticationChallenge:challenge];
     }
 }
 
@@ -210,12 +261,25 @@
 
 - (void)endWithError:(NSError *)error;
 {
-    // Re-package host key failures as something more in the vein of NSURLConnection
-    if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+    if (error)
     {
-        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+        // adjust the reported URL so that it's actually the full one (libcurl only got given one with the last component removed)
+        NSURL* url = [self.request URL];
+        if (![[error.userInfo objectForKey:NSURLErrorFailingURLErrorKey] isEqualTo:url])
+        {
+            NSMutableDictionary* modifiedInfo = [NSMutableDictionary dictionaryWithDictionary:error.userInfo];
+            [modifiedInfo setObject:url forKey:NSURLErrorFailingURLErrorKey];
+            [modifiedInfo setObject:[url absoluteString] forKey:NSURLErrorFailingURLStringErrorKey];
+            error = [NSError errorWithDomain:error.domain code:error.code userInfo:modifiedInfo];
+        }
+
+        // Re-package host key failures as something more in the vein of NSURLConnection
+        if (error.code == CURLE_PEER_FAILED_VERIFICATION && [error.domain isEqualToString:CURLcodeErrorDomain])
+        {
+            error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorServerCertificateUntrusted userInfo:[error userInfo]];
+        }
     }
-    
+
     [super endWithError:error];
 }
 

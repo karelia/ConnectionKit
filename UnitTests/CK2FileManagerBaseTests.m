@@ -6,8 +6,76 @@
 #import "CK2FileManagerBaseTests.h"
 #import "CK2Authentication.h"
 
-#import "CK2FileManager.h"
+#import "CK2FileManagerWithTestSupport.h"
 #import <DAVKit/DAVKit.h>
+#import <CURLHandle/CURLHandle.h>
+
+static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
+
+@interface TestFileDelegate : CK2FileManager<CK2FileManagerDelegate>
+
+@property (strong, nonatomic) CK2FileManagerBaseTests* tests;
+
+@end
+
+/**
+ This delegate is used instead of the test itself for operations which are either creating or
+ removing the test files and folders on the server.
+
+ This helps to prevent those operations from interfering with the state of the actual tests themselves.
+ */
+
+@implementation TestFileDelegate
+
+#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
+
++ (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
+{
+    TestFileDelegate* result = [[TestFileDelegate alloc] init];
+    result.tests = tests;
+
+    return [result autorelease];
+}
+
+- (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
+{
+    if (challenge.previousFailureCount > 0)
+    {
+        [challenge.sender cancelAuthenticationChallenge:challenge];
+    }
+    else
+    {
+
+        NSURLCredential* credential;
+        if ([challenge.protectionSpace.authenticationMethod isEqualToString:CK2AuthenticationMethodHostFingerprint])
+        {
+            credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistenceNone];
+        }
+        else
+        {
+            credential = [NSURLCredential credentialWithUser:self.tests.user password:self.tests.password persistence:NSURLCredentialPersistenceNone];
+        }
+        [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    }
+
+}
+
+- (void)fileManager:(CK2FileManager *)manager appendString:(NSString *)info toTranscript:(CKTranscriptType)transcriptType
+{
+    switch (transcriptType)
+    {
+        case CKTranscriptReceived:
+        case CKTranscriptSent:
+            LogHousekeeping(@"housekeeping %d: %@", transcriptType, info);
+            break;
+
+        default:
+            break;
+    }
+}
+
+@end
+
 
 @implementation CK2FileManagerBaseTests
 
@@ -257,6 +325,154 @@
     [super tearDown];
     NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
     [self removeTemporaryFolder];
+}
+
+#pragma mark - Test File Support
+
+- (NSURL*)URLForTestFolder
+{
+    return [self URLForPath:@"CK2FileManagerFTPTests"];
+}
+
+- (NSURL*)URLForTestFile1
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file1.txt"];
+}
+
+- (NSURL*)URLForTestFile2
+{
+    return [[self URLForTestFolder] URLByAppendingPathComponent:@"file2.txt"];
+}
+
+- (void)makeTestDirectoryWithFiles:(BOOL)withFiles
+{
+    // we do report errors from here, since something going wrong is likely to affect the result of the test that called us
+
+    if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
+    {
+        // if we don't want the test files, remove everything first
+        if (!withFiles)
+        {
+            [self removeTestDirectory];
+        }
+
+        NSLog(@"<<<< Making Test Directory");
+
+        CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
+        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.delegate = [TestFileDelegate delegateWithTest:self];
+
+        // make the folder if necessary
+        NSURL* url = [self URLForTestFolder];
+        [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+            STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+
+            // if we want the files, make them too
+            if (withFiles)
+            {
+                NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
+                [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                    STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                    [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+                        STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                        [self pause];
+                        NSLog(@"<<<< Made Test Files");
+                    }];
+                }];
+            }
+            else
+            {
+                [self pause];
+            }
+            NSLog(@"<<<< Made Test Directory");
+        }];
+
+        [self runUntilPaused];
+
+        [session release];
+    }
+}
+
+- (void)removeTestDirectory
+{
+    if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
+    {
+        NSLog(@"<<<< Removing Test Files");
+        CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
+        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.delegate = [TestFileDelegate delegateWithTest:self];
+
+        // we don't care about errors here, we just want to do our best to clean up after any tests
+        [session removeItemAtURL:[self URLForTestFile2] completionHandler:^(NSError *error) {
+            if (error) LogHousekeeping(@"housekeeping error : %@", error);
+            [session removeItemAtURL:[self URLForTestFile1] completionHandler:^(NSError *error) {
+                if (error) LogHousekeeping(@"housekeeping error : %@", error);
+                [session removeItemAtURL:[self URLForTestFolder] completionHandler:^(NSError *error) {
+                    if (error) LogHousekeeping(@"housekeeping error : %@", error);
+                    [self pause];
+
+                    NSLog(@"<<<< Removed Test Files");
+                }];
+            }];
+        }];
+        
+        [self runUntilPaused];
+        [session release];
+    }
+}
+
+#pragma mark - Error Checking Helpers
+
+- (void)logError:(NSError*)error mustHaveError:(BOOL)mustHaveError domainOK:(BOOL)domainOK codeOK:(BOOL)codeOK
+{
+    if (!error && mustHaveError)
+    {
+        NSLog(@"expecting error, got none");
+    }
+    else if (!domainOK)
+    {
+        NSLog(@"unexpected error domain %@", error.domain);
+    }
+    else if (!codeOK)
+    {
+        NSLog(@"unexpected error code %ld", error.code);
+    }
+}
+
+- (BOOL)checkIsAuthenticationError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
+    BOOL result = domainOK && codeOK;
+
+    return result;
+}
+
+- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return error == nil || (domainOK && codeOK);
+}
+
+- (BOOL)checkIsFileCantWriteError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+
+    return (error != nil) && domainOK && codeOK;
+}
+
+- (BOOL)checkIsFileNotFoundError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
+    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+
+    return (error != nil) && domainOK && codeOK;
 }
 
 @end

@@ -72,6 +72,9 @@
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
 
+// Default is whether path is @"". Override to have a stab at the question if your protocol does have an idea of what absolute path is the home directory
++ (BOOL)isHomeDirectoryAtURL:(NSURL *)url;
+
 
 #pragma mark For Subclasses to Use
 

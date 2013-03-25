@@ -98,6 +98,11 @@
     return [URL path];
 }
 
++ (BOOL)isHomeDirectoryAtURL:(NSURL *)url;
+{
+    return [[self pathOfURLRelativeToHomeDirectory:url] isEqualToString:@""];
+}
+
 #pragma mark For Subclasses to Use
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
