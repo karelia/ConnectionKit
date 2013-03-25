@@ -94,6 +94,7 @@
 		5F7A49BD17006F460000D203 /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
 		5F7A49BE17006F460000D203 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		5F7A49C317006FBF0000D203 /* libCURLHandle-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A499D17006B570000D203 /* libCURLHandle-iOS.a */; };
+		5F7A4A15170091780000D203 /* libDAVKit-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A49A217006B570000D203 /* libDAVKit-iOS.a */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -352,6 +353,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5F7A4A15170091780000D203 /* libDAVKit-iOS.a in Frameworks */,
 				5F7A49C317006FBF0000D203 /* libCURLHandle-iOS.a in Frameworks */,
 				5F7A498F17006B570000D203 /* Foundation.framework in Frameworks */,
 			);
@@ -1305,6 +1307,9 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				"HEADER_SEARCH_PATHS[arch=armv7]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7";
+				"HEADER_SEARCH_PATHS[arch=armv7s]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7s";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
@@ -1332,6 +1337,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				"HEADER_SEARCH_PATHS[arch=armv7]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7";
+				"HEADER_SEARCH_PATHS[arch=armv7s]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7s";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
@@ -1360,6 +1368,9 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				"HEADER_SEARCH_PATHS[arch=armv7]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7";
+				"HEADER_SEARCH_PATHS[arch=armv7s]" = "${BUILT_PRODUCTS_DIR}/${PUBLIC_HEADERS_FOLDER_PATH}-${PLATFORM_NAME}-armv7s";
+				"HEADER_SEARCH_PATHS[sdk=iphonesimulator*]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
 				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
 				OTHER_LDFLAGS = "-ObjC";
 				PRIVATE_HEADERS_FOLDER_PATH = "include/Connection-private";
@@ -1386,7 +1397,8 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				"HEADER_SEARCH_PATHS[arch=i386]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
+				"HEADER_SEARCH_PATHS[arch=x86_64]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-x86_64";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1439,7 +1451,8 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				"HEADER_SEARCH_PATHS[arch=i386]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
+				"HEADER_SEARCH_PATHS[arch=x86_64]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-x86_64";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1479,7 +1492,8 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				"HEADER_SEARCH_PATHS[arch=i386]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-i386";
+				"HEADER_SEARCH_PATHS[arch=x86_64]" = "${BUILT_PRODUCTS_DIR}/include-${PLATFORM_NAME}-x86_64";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
