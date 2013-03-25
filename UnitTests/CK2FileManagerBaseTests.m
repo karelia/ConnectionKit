@@ -441,11 +441,9 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)checkIsAuthenticationError:(NSError*)error
 {
-    BOOL gotError = error != nil;
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
     BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
-    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
-    BOOL result = ([self.url.scheme isEqualTo:@"sftp"]) ? gotError : gotError && domainOK && codeOK;
+    BOOL result = domainOK && codeOK;
 
     return result;
 }
