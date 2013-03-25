@@ -244,7 +244,7 @@
     }
     else
     {
-        [super continueWithoutCredentialForAuthenticationChallenge:challenge];
+        [super cancelAuthenticationChallenge:challenge];
     }
 }
 
