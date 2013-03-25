@@ -21,4 +21,18 @@
 - (BOOL)setupSession;
 - (BOOL)setupSessionWithResponses:(NSString*)responsesFile;
 
+#pragma mark - Test File Support
+
+- (NSURL*)URLForTestFolder;
+- (NSURL*)URLForTestFile1;
+- (NSURL*)URLForTestFile2;
+- (void)makeTestDirectoryWithFiles:(BOOL)withFiles;
+- (void)removeTestDirectory;
+
+#pragma mark - Error Checking
+
+- (BOOL)checkIsAuthenticationError:(NSError*)error;
+- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error;
+- (BOOL)checkIsFileCantWriteError:(NSError*)error;
+- (BOOL)checkIsFileNotFoundError:(NSError*)error;
 @end
