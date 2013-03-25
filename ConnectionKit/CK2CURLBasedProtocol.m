@@ -478,6 +478,13 @@
 
 #pragma mark Home Directory Store
 
++ (BOOL)isHomeDirectoryAtURL:(NSURL *)url;
+{
+    NSURL *home = [self homeDirectoryURLForServerAtURL:url];
+    BOOL result = [[self pathOfURLRelativeToHomeDirectory:url] isEqualToString:[self pathOfURLRelativeToHomeDirectory:home]];
+    return result;
+}
+
 + (NSURL *)homeDirectoryURLForServerAtURL:(NSURL *)hostURL;
 {
     NSString *host = [[NSURL URLWithString:@"/" relativeToURL:hostURL] absoluteString].lowercaseString;

@@ -399,8 +399,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     // Guess based on file type
                     if (isDirectory.boolValue)
                     {
-                        NSURL *home = [protocolClass homeDirectoryURLForServerAtURL:url];
-                        if ([path isEqualToString:[protocolClass pathOfURLRelativeToHomeDirectory:home]])
+                        if ([protocolClass isHomeDirectoryAtURL:url])
                         {
                             fileType = NSFileTypeForHFSTypeCode(kUserFolderIcon);
                         }
