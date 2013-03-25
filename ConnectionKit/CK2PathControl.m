@@ -79,44 +79,53 @@
         if (url != nil)
         {
             NSSize          size;
-            __block BOOL    isFirst;
+            NSURL           *tempURL;
 
             size = NSMakeSize(ICON_SIZE, ICON_SIZE);
+            tempURL = _url;
             
-            isFirst = YES;
-            [url ck2_enumerateFromRoot:
-             ^(NSURL *blockURL, BOOL *stop)
+            while (tempURL != nil)
             {
-                NSString        *title;
                 NSImage         *image;
+                NSString        *title;
                 NSMenuItem      *item;
+                id              value;
+                NSError         *error;
                 
-                if (isFirst)
-                {
-                    title = [blockURL host];
-                    image = [[[[NSWorkspace sharedWorkspace] iconForFileType:NSFileTypeForHFSTypeCode(kGenericFileServerIcon)] copy] autorelease];
-                    [image setSize:NSMakeSize(ICON_SIZE, ICON_SIZE)];
-                    isFirst = NO;
-                }
-                else
-                {
-                    title = [blockURL lastPathComponent];
-                    image = [[[blockURL ck2_icon] copy] autorelease];
-                }
+                image = [[[tempURL ck2_icon] copy] autorelease];
+                title = [tempURL ck2_displayName];
                 
-                if ([blockURL isEqual:_homeURL])
+                if ([title isEqual:@"/"])
                 {
-                    image = [NSImage ck2_homeDirectoryImage];
+                    title = [tempURL host];
                 }
                 
                 item = [[NSMenuItem alloc] initWithTitle:title action:@selector(urlSelected:) keyEquivalent:@""];
                 [item setTarget:self];
                 [image setSize:size];
                 [item setImage:image];
-                [item setRepresentedObject:blockURL];
-                [menu insertItem:item atIndex:0];                
+                [item setRepresentedObject:tempURL];
+                [menu addItem:item];
                 [item release];
-            }];
+                
+                if ([tempURL getResourceValue:&value forKey:NSURLParentDirectoryURLKey error:&error])
+                {
+                    if ((value == nil) || [value isKindOfClass:[NSURL class]])
+                    {
+                        tempURL = value;
+                    }
+                    else
+                    {
+                        NSLog(@"Parent of URL %@ is not an URL type: %@", tempURL, [value class]);
+                    }
+                }
+                else
+                {
+                    NSLog(@"Error getting parent URL for URL %@: %@", tempURL, error);
+                    tempURL = nil;
+                }
+                
+            }
         }
         [self selectItemAtIndex:0];
     }

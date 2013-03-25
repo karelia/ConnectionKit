@@ -326,7 +326,7 @@
 
 - (NSArray *)fileProperties
 {
-    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLIsPackageKey, NSURLEffectiveIconKey ];
+    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLIsPackageKey, NSURLEffectiveIconKey, NSURLParentDirectoryURLKey ];
 }
 
 - (NSDirectoryEnumerationOptions)fileEnumerationOptions
