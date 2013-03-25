@@ -1,6 +1,6 @@
 [submodule "DAVKit"]
 	path = DAVKit
-	url = git@github.com:EnthusiasticCode/DAVKit.git
+	url = https://github.com/EnthusiasticCode/DAVKit.git
 [submodule "CurlHandle"]
 	path = CurlHandle
-	url = git@github.com:EnthusiasticCode/CurlHandle.git
+	url = https://github.com/EnthusiasticCode/CurlHandle.git
