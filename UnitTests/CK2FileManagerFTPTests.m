@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"sftp", @"ftp"];
+    NSArray* responses = @[@"ftp", @"sftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -62,6 +62,13 @@ static NSString* gResponsesToUse = nil;
     [_responsesToUse release];
 
     [super dealloc];
+}
+
+- (NSString*)name
+{
+    NSString* name = [super name];
+    NSString* result = [NSString stringWithFormat:@"%@Using%@]", [name substringToIndex:[name length] - 1], [self.responsesToUse uppercaseString]];
+    return result;
 }
 
 - (BOOL)setup
