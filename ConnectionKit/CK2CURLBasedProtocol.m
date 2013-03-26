@@ -357,11 +357,11 @@
 {
     _user = [credential.user copy];
     
+    NSURLRequest* request = [self request];
+    CURLMulti* multi = [request ck2_multi]; // typically this is nil, meaning use the default, but we can override it for test purposes
+
     if ([[self class] usesMultiHandle])
     {
-        NSURLRequest* request = [self request];
-        CURLMulti* multi = [request ck2_multi]; // typically this is nil, meaning use the default, but we can override it for test purposes
-
         _handle = [[CURLHandle alloc] initWithRequest:request
                                            credential:credential
                                              delegate:self
@@ -379,10 +379,20 @@
             handle = [[CURLHandle alloc] init];
             queue = dispatch_queue_create("com.karelia.connection.fallback-curlhandle", NULL);
         });
-        
+
+        CURLHandle* handleToUse;
+        if (multi) // although we're not using the multi, we use it being set here as a signal to use a new handle for this transaction
+        {
+            handleToUse = [[[CURLHandle alloc] init] autorelease];
+        }
+        else
+        {
+            handleToUse = handle;
+        }
+
         // Let the work commence!
         dispatch_async(queue, ^{
-            _handle = [handle retain];
+            _handle = [handleToUse retain];
             [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
         });
     }
