@@ -141,6 +141,13 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
+		22182129170209D300584589 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 223FD091160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -703,6 +710,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				2218212A170209D300584589 /* PBXTargetDependency */,
 				220AD7AE1509021A00748655 /* PBXTargetDependency */,
 			);
 			name = UnitTests;
@@ -983,6 +991,11 @@
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 220AD7AD1509021A00748655 /* PBXContainerItemProxy */;
+		};
+		2218212A170209D300584589 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CURLHandleTests;
+			targetProxy = 22182129170209D300584589 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
