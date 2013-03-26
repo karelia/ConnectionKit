@@ -140,10 +140,11 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
+        NSString* path = [[request URL] lastPathComponent];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"SITE CHMOD %lo %@",
                                                       [permissions unsignedLongValue],
-                                                      [[request URL] lastPathComponent]]];
+                                                      path]];
         
         return [self initWithCustomCommands:commands
                  request:request
