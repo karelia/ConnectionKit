@@ -37,7 +37,7 @@ static NSString* gResponsesToUse = nil;
         // in order to re-use the default SenTest mechanism for building up a suite of tests, we set some global variables
         // to indicate the test configuration we want, then call on to the defaultTestSuite to get a set of tests using that configuration.
         gResponsesToUse = name;
-        SenTestSuite* suite = [[SenTestSuite alloc] initWithName:name];
+        SenTestSuite* suite = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Using%@", NSStringFromClass(self), [name uppercaseString]]];
         [suite addTest:[super defaultTestSuite]];
         [result addTest:suite];
         [suite release];
@@ -62,13 +62,6 @@ static NSString* gResponsesToUse = nil;
     [_responsesToUse release];
 
     [super dealloc];
-}
-
-- (NSString*)name
-{
-    NSString* name = [super name];
-    NSString* result = [NSString stringWithFormat:@"%@Using%@]", [name substringToIndex:[name length] - 1], [self.responsesToUse uppercaseString]];
-    return result;
 }
 
 - (BOOL)setup

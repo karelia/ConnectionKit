@@ -150,6 +150,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         self.type = nil;
     }
 
+    NSString* name = [self name];
+    self.extendedName = [NSString stringWithFormat:@"%@Using%@]", [name substringToIndex:[name length] - 1], [responses uppercaseString]];
 
     NSString* setting = nil;
     if (self.type)
@@ -334,7 +336,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)URLForTestFolder
 {
-    return [self URLForPath:[@"TEST" stringByAppendingString:self.name]];
+    return [self URLForPath:[@"TEST" stringByAppendingString:self.extendedName]];
 }
 
 - (NSURL*)URLForTestFile1
@@ -432,11 +434,11 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSLog(@"expecting error, got none");
     }
-    else if (!domainOK)
+    else if (!domainOK && error)
     {
         NSLog(@"unexpected error domain %@", error.domain);
     }
-    else if (!codeOK)
+    else if (!codeOK && error)
     {
         NSLog(@"unexpected error code %ld", error.code);
     }
@@ -485,6 +487,15 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
 
     return (error != nil) && domainOK && codeOK;
+}
+
+- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
 }
 
 @end
