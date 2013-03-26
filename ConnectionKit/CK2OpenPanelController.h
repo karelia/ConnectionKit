@@ -78,10 +78,10 @@
 }
 
 @property (readonly, assign) CK2OpenPanel      *openPanel;
-@property (readonly, copy) NSURL                *directoryURL;
-@property (readwrite, copy) NSURL               *URL;
+@property (readonly, retain) NSURL              *directoryURL;
+@property (readwrite, retain) NSURL             *URL;
 @property (readwrite, copy) NSArray             *URLs;
-@property (readwrite, copy, nonatomic) NSURL    *homeURL;
+@property (readwrite, retain, nonatomic) NSURL  *homeURL;
 @property (readwrite, retain) NSView            *accessoryView;
 
 @property (readonly, retain) CK2FileManager     *fileManager;

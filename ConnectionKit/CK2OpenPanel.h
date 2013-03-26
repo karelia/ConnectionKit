@@ -67,9 +67,9 @@
 @property (readwrite, assign) BOOL      treatsFilePackagesAsDirectories;
 @property (readwrite, assign) BOOL      canCreateDirectories;
 @property (readwrite, copy) NSArray     *allowedFileTypes;
-@property (readwrite, copy, nonatomic) NSURL       *directoryURL;
+@property (readwrite, retain, nonatomic) NSURL       *directoryURL;
 
-@property (readonly, copy) NSURL        *URL;
+@property (readonly, retain) NSURL        *URL;
 @property (readonly, copy) NSArray      *URLs;
 
 

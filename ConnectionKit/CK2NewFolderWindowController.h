@@ -24,7 +24,7 @@
     NSError                             *_error;
 }
 
-@property (readonly, copy) NSURL        *folderURL;
+@property (readonly, retain) NSURL      *folderURL;
 @property (readonly, retain) NSError    *error;
 
 - (id)initWithController:(CK2OpenPanelController *)controller;;

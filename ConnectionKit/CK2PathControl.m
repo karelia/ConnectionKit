@@ -40,7 +40,6 @@
 @implementation CK2PathControl
 
 @synthesize URL = _url;
-@synthesize homeURL = _homeURL;
 
 - (id)initWithFrame:(NSRect)frame
 {
@@ -71,7 +70,7 @@
         NSMenu          *menu;
         
         [_url release];
-        _url = [url copy];
+        _url = [url retain];
 
         menu = [self menu];
         [menu removeAllItems];

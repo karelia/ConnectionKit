@@ -42,6 +42,6 @@
     NSURL                               *_rootURL;
 }
 
-@property (readwrite, copy) NSURL   *rootURL;
+@property (readwrite, retain) NSURL   *rootURL;
 
 @end

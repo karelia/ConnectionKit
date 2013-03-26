@@ -14,7 +14,7 @@
 
 @interface CK2NewFolderWindowController ()
 
-@property (readwrite, copy) NSURL           *folderURL;
+@property (readwrite, retain) NSURL           *folderURL;
 @property (readwrite, retain) NSError       *error;
 
 @end

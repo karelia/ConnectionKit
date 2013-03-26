@@ -37,10 +37,8 @@
 @interface CK2PathControl : NSPopUpButton
 {
     NSURL       *_url;
-    NSURL       *_homeURL;
 }
 
-@property (readwrite, copy, nonatomic) NSURL            *URL;
-@property (readwrite, copy) NSURL                       *homeURL;
+@property (readwrite, retain, nonatomic) NSURL            *URL;
 
 @end

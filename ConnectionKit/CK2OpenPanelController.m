@@ -82,7 +82,7 @@
 
 @interface CK2OpenPanelController ()
 
-@property (readwrite, copy) NSURL       *directoryURL;
+@property (readwrite, retain) NSURL       *directoryURL;
 
 @end
 
