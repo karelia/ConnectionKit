@@ -469,6 +469,15 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return (error != nil) && domainOK && codeOK;
 }
 
+- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
+}
+
 - (BOOL)checkIsFileNotFoundError:(NSError*)error
 {
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];

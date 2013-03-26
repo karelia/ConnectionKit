@@ -34,5 +34,6 @@
 - (BOOL)checkIsAuthenticationError:(NSError*)error;
 - (BOOL)checkNoErrorOrFileExistsError:(NSError*)error;
 - (BOOL)checkIsFileCantWriteError:(NSError*)error;
+- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error;
 - (BOOL)checkIsFileNotFoundError:(NSError*)error;
 @end

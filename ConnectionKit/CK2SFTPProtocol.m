@@ -124,27 +124,22 @@
                               // if the mkdir command failed, try to extract a more meaningful error
                               if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                               {
-                                  NSUInteger code = NSFileWriteUnknownError;
-                                  NSString* domain = NSCocoaErrorDomain;
                                   NSUInteger sshError = [error curlResponseCode];
                                   switch (sshError)
                                   {
                                       case LIBSSH2_FX_NO_SUCH_FILE:
-                                          domain = NSURLErrorDomain;
-                                          code = NSURLErrorNoPermissionsToReadFile;
+                                          // we can't know if it's the rm, the rmdir or both that failed
+                                          // if it's just one of them, it wasn't actually an error
+                                          // so the best we can do here is always ignore a no file error
+                                          error = nil;
                                           break;
 
-                                      case LIBSSH2_FX_PERMISSION_DENIED:
-                                          break;
-
-                                      case LIBSSH2_FX_FAILURE:
-                                          break;
-                                          
                                       default:
+                                          // our default for other failures is a generic NSFileWriteUnknownError error
+                                          error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
                                           break;
 
                                   }
-                                  error = [NSError errorWithDomain:domain code:code userInfo:@{ NSUnderlyingErrorKey : error }];
                               }
                           }
 
