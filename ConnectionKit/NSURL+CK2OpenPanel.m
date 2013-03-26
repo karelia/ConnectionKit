@@ -315,102 +315,45 @@
     return [[CK2FileManager URLWithPath:@"/" hostURL:self] absoluteURL];
 }
 
+- (NSURL *)ck2_parentURL
+{
+    id          value;
+    NSError     *error;
+    
+    if ([self getResourceValue:&value forKey:NSURLParentDirectoryURLKey error:&error])
+    {
+        if ((value == nil) || [value isKindOfClass:[NSURL class]])
+        {
+            return value;
+        }
+        else
+        {
+            NSLog(@"Parent of URL %@ is not an URL type: %@", self, [value class]);
+        }
+    }
+    else
+    {
+        NSLog(@"Error getting parent URL for URL %@: %@", self, error);
+    }
+    return nil;
+}
+
+
 - (BOOL)ck2_isAncestorOfURL:(NSURL *)url
 {
-    NSArray     *components, *otherComponents;
-    NSUInteger  i, count, otherCount;
+    NSURL   *tempURL;
     
-    components = [self pathComponents];
-    count = [components count];
-    otherComponents = [url pathComponents];
-    otherCount = [otherComponents count];
+    tempURL = url;
     
-    if (otherCount >= count)
+    while (![tempURL isEqual:self])
     {
-        for (i = 0; i < count; i++)
+        if (tempURL == nil)
         {
-            if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
-            {
-                return NO;
-            }
+            return NO;
         }
-        return YES;
+        tempURL = [tempURL ck2_parentURL];
     }
-    return NO;
-}
-
-- (NSString *)ck2_pathRelativeToURL:(NSURL *)url
-{
-    NSArray             *components, *otherComponents;
-    NSUInteger          i, count;
-    NSMutableString     *path;
-    
-    components = [self pathComponents];
-    count = [components count];
-    otherComponents = [url pathComponents];
-    
-    for (i = 0; i < count; i++)
-    {
-        if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
-        {
-            @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Cannot enumerate from %@ to %@. Former is not an ancestor of the latter.", [self absoluteString], [url absoluteString]] userInfo:nil];
-        }
-    }
-    
-    path = [NSMutableString string];
-    count = [otherComponents count];
-    for (i = [components count]; (i < count); i++)
-    {
-        [path appendFormat:@"/%@", [otherComponents objectAtIndex:i]];
-    }
-
-    return path;
-}
-
-- (void)ck2_enumerateToURL:(NSURL *)url usingBlock:(void (^)(NSURL *url, BOOL *stop))block
-{
-    NSURL               *tempURL;
-    NSArray             *components, *otherComponents;
-    NSUInteger          i, count;
-    
-    if (block != NULL)
-    {
-        BOOL    stop;
-        
-        components = [self pathComponents];
-        otherComponents = [url pathComponents];
-        count = [components count];
-        
-        for (i = 0; i < count; i++)
-        {
-            if (![[components objectAtIndex:i] isEqual:[otherComponents objectAtIndex:i]])
-            {
-                @throw [NSException exceptionWithName:NSInternalInconsistencyException reason:[NSString stringWithFormat:@"Cannot enumerate from %@ to %@. Former is not an ancestor of the latter.", [self absoluteString], [url absoluteString]] userInfo:nil];
-            }
-        }
-        
-        tempURL = self;
-        
-        stop = NO;
-        count = [otherComponents count];
-        
-        block(tempURL, &stop);
-        
-        if (!stop)
-        {
-            for (i = [components count]; (i < count) && !stop; i++)
-            {
-                tempURL = [tempURL URLByAppendingPathComponent:[otherComponents objectAtIndex:i] isDirectory:YES];
-                block(tempURL, &stop);
-            }
-        }
-    }
-}
-
-
-- (void)ck2_enumerateFromRoot:(void (^)(NSURL *url, BOOL *stop))block
-{
-    return [[self ck2_root] ck2_enumerateToURL:self usingBlock:block];
+    return YES;
 }
 
 - (NSURL *)ck2_URLByDeletingTrailingSlash

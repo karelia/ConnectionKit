@@ -68,7 +68,7 @@
 - (BOOL)getIndexPath:(NSIndexPath **)indexPath indexSet:(NSIndexSet **)indexSet ofURLs:(NSArray **)urls inDirectory:(NSURL *)directoryURL
 {
     CK2OpenPanelController      *controller;
-    NSURL                       *root;
+    NSURL                       *root, *tempURL;
     NSUInteger                  count;
     __block NSUInteger          *indexes, indexCount;
     NSMutableIndexSet           *resultIndexes;
@@ -86,63 +86,70 @@
     }
     if (![controller URLCanHazChildren:directoryURL])
     {
-        directoryURL = [directoryURL URLByDeletingLastPathComponent];
+        directoryURL = [directoryURL ck2_parentURL];
     }
     
     root = [self rootURL];
 
     if (indexPath != NULL)
     {
-        __block NSURL   *parentURL;
+        NSMutableArray  *ancestorURLs;
+        NSURL           *parentURL;
+        NSArray         *children;
+        NSUInteger      row;
         
-        count = [[directoryURL pathComponents] count] - [[root pathComponents] count];
+        ancestorURLs = [NSMutableArray array];
+        tempURL = directoryURL;
+        while (![tempURL isEqual:root])
+        {
+            if (tempURL == nil)
+            {
+                NSLog(@"Ancestor URL not found going up from %@ to %@", directoryURL, root);
+                *urls = @[];
+                return YES;
+            }
+            [ancestorURLs insertObject:tempURL atIndex:0];
+            tempURL = [tempURL ck2_parentURL];
+        }
+        [ancestorURLs insertObject:root atIndex:0];
+        
+        count = [ancestorURLs count];
         
         indexes = NULL;
         if (count > 0)
         {
             indexes = (NSUInteger *)malloc(sizeof(NSUInteger) * count);
-        }
-        indexCount = 0;
-        parentURL = nil;
-        
-        [root ck2_enumerateToURL:directoryURL usingBlock:
-         ^(NSURL *blockURL, BOOL *stop)
-        {
-            NSArray     *children;
-            NSUInteger  row;
             
-            if (parentURL != nil)
+            indexCount = 0;
+            
+            parentURL = nil;
+            
+            for (tempURL in ancestorURLs)
             {
-                children = [controller childrenForURL:parentURL];
-            
-                row = [children indexOfObject:blockURL];
-            
-                if (row == NSNotFound)
+                if (parentURL != nil)
                 {
-                    blockURL = [blockURL ck2_URLByDeletingTrailingSlash];
-                    row = [children indexOfObject:blockURL];
+                    children = [controller childrenForURL:parentURL];
+                    
+                    row = [children indexOfObject:tempURL];
+                    
+                    if (row == NSNotFound)
+                    {
+                        NSLog(@"Can't find entry in browser %@", tempURL);
+                        break;
+                    }
+                    else
+                    {
+                        indexes[indexCount++] = row;
+                    }
                 }
-                
-                if (row == NSNotFound)
-                {
-                    NSLog(@"Can't find entry in browser %@", blockURL);
-                    *stop = YES;
-                }
-                else
-                {
-                    indexes[indexCount++] = row;
-                }
+                parentURL = tempURL;
             }
-            parentURL = blockURL;
-        }];
-         
-        if (indexCount > 0)
-        {
-            *indexPath = [NSIndexPath indexPathWithIndexes:indexes length:indexCount];
-        }
-        
-        if (indexes != NULL)
-        {
+            
+            if (indexCount > 0)
+            {
+                *indexPath = [NSIndexPath indexPathWithIndexes:indexes length:indexCount];
+            }
+            
             free(indexes);
         }
     }
@@ -150,7 +157,7 @@
     resultIndexes = [NSMutableIndexSet indexSet];
     newURLs = [NSMutableArray array];
     
-    for (NSURL *tempURL in *urls)
+    for (tempURL in *urls)
     {
         NSArray     *children;
         NSUInteger  row;

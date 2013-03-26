@@ -589,7 +589,7 @@
         directoryURL = [urls objectAtIndex:0];
         if (![self URLCanHazChildren:directoryURL])
         {
-            directoryURL = [directoryURL URLByDeletingLastPathComponent];
+            directoryURL = [directoryURL ck2_parentURL];
         }
         
         [self setDirectoryURL:directoryURL];

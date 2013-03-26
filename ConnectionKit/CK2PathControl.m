@@ -88,8 +88,6 @@
                 NSImage         *image;
                 NSString        *title;
                 NSMenuItem      *item;
-                id              value;
-                NSError         *error;
                 
                 image = [[[tempURL ck2_icon] copy] autorelease];
                 title = [tempURL ck2_displayName];
@@ -107,23 +105,7 @@
                 [menu addItem:item];
                 [item release];
                 
-                if ([tempURL getResourceValue:&value forKey:NSURLParentDirectoryURLKey error:&error])
-                {
-                    if ((value == nil) || [value isKindOfClass:[NSURL class]])
-                    {
-                        tempURL = value;
-                    }
-                    else
-                    {
-                        NSLog(@"Parent of URL %@ is not an URL type: %@", tempURL, [value class]);
-                    }
-                }
-                else
-                {
-                    NSLog(@"Error getting parent URL for URL %@: %@", tempURL, error);
-                    tempURL = nil;
-                }
-                
+                tempURL = [tempURL ck2_parentURL];
             }
         }
         [self selectItemAtIndex:0];
