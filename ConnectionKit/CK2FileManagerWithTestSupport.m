@@ -1,11 +1,22 @@
 // Additional API for debugging / unit testing only.
 
 #import "CK2FileManagerWithTestSupport.h"
+#import <CURLHandle/CURLHandle.h>
 
 @class CURLMulti;
 
+@interface CK2FileManagerWithTestSupport()
+/**
+ Set this property to force CURL based protocols use an alternative CURLMulti instead of the default one.
+ */
+
+@property (strong, readonly, nonatomic) CURLMulti* multi;
+
+@end
+
 @implementation CK2FileManagerWithTestSupport
 
+@synthesize dontShareConnections = _dontShareConnections;
 @synthesize multi = _multi;
 
 - (void)dealloc
@@ -20,6 +31,16 @@
     return [CK2FileOperationWithTestSupport class];
 }
 
+- (CURLMulti*)multi
+{
+    if (_dontShareConnections && !_multi)
+    {
+        _multi = [[CURLHandle standaloneMultiForTestPurposes] retain];
+    }
+
+    return _dontShareConnections ? _multi : nil;
+}
+
 @end
 
 @implementation CK2FileOperationWithTestSupport
@@ -27,8 +48,11 @@
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {
     NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
-    CURLMulti* multi = [(CK2FileManagerWithTestSupport*)_manager multi];
-    [request ck2_setMulti:multi];
+    CK2FileManagerWithTestSupport* manager = (CK2FileManagerWithTestSupport*)_manager;
+    if (manager.dontShareConnections)
+    {
+        [request ck2_setMulti:manager.multi];
+    }
 
     return request;
 }

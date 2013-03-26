@@ -10,14 +10,15 @@
 
 @interface CK2FileManagerWithTestSupport : CK2FileManager
 {
+    BOOL _dontShareConnections;
     CURLMulti* _multi;
 }
 
 /**
- Set this property to force CURL based protocols use an alternative CURLMulti instead of the default one.
+ Set this property to force CURL based protocols use an alternative CURL handle instead of the default one
  */
 
-@property (strong, nonatomic) CURLMulti* multi;
+@property (assign, nonatomic) BOOL dontShareConnections;
 
 @end
 

@@ -8,7 +8,6 @@
 
 #import "CK2FileManagerWithTestSupport.h"
 #import <DAVKit/DAVKit.h>
-#import <CURLHandle/CURLHandle.h>
 
 static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
@@ -359,7 +358,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         NSLog(@"<<<< Making Test Directory");
 
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
-        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
 
         // make the folder if necessary
@@ -399,7 +398,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSLog(@"<<<< Removing Test Files");
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
-        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
 
         // we don't care about errors here, we just want to do our best to clean up after any tests
