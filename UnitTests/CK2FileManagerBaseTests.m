@@ -150,8 +150,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         self.type = nil;
     }
 
-    NSString* name = [self name];
-    self.extendedName = [NSString stringWithFormat:@"%@Using%@]", [name substringToIndex:[name length] - 1], [responses uppercaseString]];
+    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
+    self.extendedName = [NSString stringWithFormat:@"%@Using%@", name, [responses uppercaseString]];
 
     NSString* setting = nil;
     if (self.type)
