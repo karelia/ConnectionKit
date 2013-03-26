@@ -334,7 +334,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)URLForTestFolder
 {
-    return [self URLForPath:@"CK2FileManagerFTPTests"];
+    return [self URLForPath:[@"TEST" stringByAppendingString:self.name]];
 }
 
 - (NSURL*)URLForTestFile1
