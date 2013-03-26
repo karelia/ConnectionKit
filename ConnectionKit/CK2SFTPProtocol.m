@@ -58,7 +58,8 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setNewDirectoryPermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:[[request URL] lastPathComponent]]]
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:path]]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
                                  client:client
