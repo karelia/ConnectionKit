@@ -548,7 +548,11 @@
 
 - (void)handle:(CURLHandle *)handle didFailWithError:(NSError *)error;
 {
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    if (!error)
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    }
+    
     [self endWithError:error];
 }
 
