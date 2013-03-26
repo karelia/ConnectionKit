@@ -120,9 +120,13 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)setupSession
 {
-    self.session = [[CK2FileManager alloc] init];
-    self.session.delegate = self;
+    CK2FileManagerWithTestSupport* fm = [[CK2FileManagerWithTestSupport alloc] init];
+    fm.dontShareConnections = YES;
+    fm.delegate = self;
+    self.session = fm;
     self.transcript = [[[NSMutableString alloc] init] autorelease];
+    [fm release];
+
     return self.session != nil;
 }
 
