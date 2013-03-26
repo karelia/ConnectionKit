@@ -162,7 +162,26 @@
                                     request:request
               createIntermediateDirectories:NO
                                      client:client
-                          completionHandler:nil];
+                          completionHandler:^(NSError *error) {
+                              if (error)
+                              {
+                                  if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                                  {
+                                      NSUInteger sshError = [error curlResponseCode];
+                                      switch (sshError)
+                                      {
+                                          case LIBSSH2_FX_NO_SUCH_FILE:
+                                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                                              break;
+
+                                          default:
+                                              break;
+                                      }
+                                  }
+                              }
+                              
+                              [self reportToProtocolWithError:error];
+                          }];
     }
     else
     {
