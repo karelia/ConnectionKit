@@ -121,7 +121,6 @@
                       completionHandler:^(NSError *error) {
                           if (error)
                           {
-                              // if the mkdir command failed, try to extract a more meaningful error
                               if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                               {
                                   NSUInteger sshError = [error curlResponseCode];
