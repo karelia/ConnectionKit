@@ -97,6 +97,12 @@
 		5F7A49BE17006F460000D203 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		5F7A49C317006FBF0000D203 /* libCURLHandle-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A499D17006B570000D203 /* libCURLHandle-iOS.a */; };
 		5F7A4A15170091780000D203 /* libDAVKit-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F7A49A217006B570000D203 /* libDAVKit-iOS.a */; };
+		5F7A4AB41701C6720000D203 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
+		5F7A4ABA1701C6880000D203 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; };
+		5F7A4ABD1701C6F20000D203 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F7A4ABB1701C6F20000D203 /* CK2SFTPFileHandle.h */; };
+		5F7A4ABE1701C6F20000D203 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 5F7A4ABB1701C6F20000D203 /* CK2SFTPFileHandle.h */; };
+		5F7A4ABF1701C6F20000D203 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F7A4ABC1701C6F20000D203 /* CK2SFTPFileHandle.m */; };
+		5F7A4AC01701C6F20000D203 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 5F7A4ABC1701C6F20000D203 /* CK2SFTPFileHandle.m */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -304,6 +310,8 @@
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
 		5F7A498D17006B560000D203 /* libConnection-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libConnection-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F7A498E17006B570000D203 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		5F7A4ABB1701C6F20000D203 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = Sources/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
+		5F7A4ABC1701C6F20000D203 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = Sources/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
 		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
 		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Connection.h"; path = "ConnectionKit/NSString+Connection.h"; sourceTree = "<group>"; };
@@ -686,6 +694,8 @@
 		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
 			isa = PBXGroup;
 			children = (
+				5F7A4ABB1701C6F20000D203 /* CK2SFTPFileHandle.h */,
+				5F7A4ABC1701C6F20000D203 /* CK2SFTPFileHandle.m */,
 				2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */,
 				2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */,
 			);
@@ -713,6 +723,8 @@
 				5F7A49B917006F3A0000D203 /* CKUploader.h in Headers */,
 				5F7A49BA17006F3A0000D203 /* CKTransferRecord.h in Headers */,
 				5F7A49BB17006F3A0000D203 /* NSString+Connection.h in Headers */,
+				5F7A4ABA1701C6880000D203 /* CK2SFTPSession.h in Headers */,
+				5F7A4ABE1701C6F20000D203 /* CK2SFTPFileHandle.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -736,6 +748,7 @@
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
 				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
+				5F7A4ABD1701C6F20000D203 /* CK2SFTPFileHandle.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1049,6 +1062,8 @@
 				5F7A49BC17006F460000D203 /* CKUploader.m in Sources */,
 				5F7A49BD17006F460000D203 /* CKTransferRecord.m in Sources */,
 				5F7A49BE17006F460000D203 /* NSString+Connection.m in Sources */,
+				5F7A4AB41701C6720000D203 /* CK2SFTPSession.m in Sources */,
+				5F7A4AC01701C6F20000D203 /* CK2SFTPFileHandle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1071,6 +1086,7 @@
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
 				228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */,
+				5F7A4ABF1701C6F20000D203 /* CK2SFTPFileHandle.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
