@@ -420,6 +420,7 @@
 		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				CD29525317019E0B007CD176 /* MobileCoreServices.framework */,
 				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
 				79FB807109F74185006E7D11 /* Carbon.framework */,
 				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
@@ -614,7 +615,6 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
-				CD29525317019E0B007CD176 /* MobileCoreServices.framework */,
 				22C7A9E316FCC8C300C88317 /* README.md */,
 				080E96DDFE201D6D7F000001 /* Public */,
 				79CFD8A009F705B400172CDD /* Private */,
