@@ -113,7 +113,7 @@
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
@@ -157,7 +157,7 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
-        NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+        NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
