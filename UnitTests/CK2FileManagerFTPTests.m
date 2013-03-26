@@ -14,7 +14,6 @@
 
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
-#import <CURLHandle/CURLHandle.h>
 
 @interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
 
