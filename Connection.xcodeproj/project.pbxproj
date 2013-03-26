@@ -82,7 +82,6 @@
 		5F7A49AE17006EDA0000D203 /* CK2FTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2790A94616278F1D000C9D9F /* CK2FTPProtocol.h */; };
 		5F7A49AF17006EDA0000D203 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		5F7A49B017006EDA0000D203 /* CK2FileProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */; };
-		5F7A49B117006EFF0000D203 /* CK2WebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */; };
 		5F7A49B217006F040000D203 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		5F7A49B317006F070000D203 /* CK2WebDAVProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */; };
 		5F7A49B417006F130000D203 /* CK2Protocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A8281627636E000C9D9F /* CK2Protocol.m */; };
@@ -326,6 +325,7 @@
 		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
 		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		ADEE5E17169C84DF006188C5 /* KMSState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSState.h; sourceTree = "<group>"; };
+		CD29525317019E0B007CD176 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE94B9101463124A00F90408 /* es */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; name = es; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -614,6 +614,7 @@
 		29B97314FDCFA39411CA2CEA /* Connection */ = {
 			isa = PBXGroup;
 			children = (
+				CD29525317019E0B007CD176 /* MobileCoreServices.framework */,
 				22C7A9E316FCC8C300C88317 /* README.md */,
 				080E96DDFE201D6D7F000001 /* Public */,
 				79CFD8A009F705B400172CDD /* Private */,

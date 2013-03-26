@@ -10,6 +10,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE
+#import <MobileCoreServices/MobileCoreServices.h>
+#endif
 
 
 typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAttemptCount);

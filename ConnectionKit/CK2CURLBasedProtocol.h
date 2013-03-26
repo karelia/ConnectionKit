@@ -9,7 +9,7 @@
 #import "CK2Protocol.h"
 
 #import <CURLHandle/CURLHandle.h>
-
+#import <Foundation/Foundation.h>
 
 @class CK2RemoteURL;
 

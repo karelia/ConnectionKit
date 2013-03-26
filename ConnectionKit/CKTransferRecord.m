@@ -30,7 +30,9 @@
 #import "CKTransferRecord.h"
 #import "NSString+Connection.h"
 
+#if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>   // for NSColor
+#endif
 
 
 NSString *CKTransferRecordProgressChangedNotification = @"CKTransferRecordProgressChangedNotification";

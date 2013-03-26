@@ -332,6 +332,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                     *value = @YES;
                     return YES;
                 }
+#if !TARGET_OS_IPHONE
                 else
                 {
                     OSStatus        status;
@@ -353,6 +354,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                         return YES;
                     }
                 }
+#endif
             }
             
             *value = @NO;

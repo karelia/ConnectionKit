@@ -9,7 +9,9 @@
 #import "CK2FileOperation.h"
 #import "CK2Protocol.h"
 
+#if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>   // so icon handling can use NSImage and NSWorkspace for now
+#endif
 
 
 @interface CK2AuthenticationChallengeTrampoline : NSObject <NSURLAuthenticationChallengeSender>
@@ -352,6 +354,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }
 }
 
+#if !TARGET_OS_IPHONE
 + (void)setResourceValueBlocksForURL:(NSURL *)strongURL protocolClass:(Class)protocolClass;
 {
     __block NSURL *url = strongURL;    // URL retains its resource values; so if the blocks retained the URL would be a cycle
@@ -423,6 +426,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         }
     }
 }
+#endif
 
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
 {

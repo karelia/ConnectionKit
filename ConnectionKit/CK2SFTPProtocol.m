@@ -11,7 +11,9 @@
 
 #import "CK2SFTPSession.h"
 
+#if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
+#endif
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <libssh2_sftp.h>
 
