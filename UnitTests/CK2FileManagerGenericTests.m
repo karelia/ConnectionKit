@@ -15,13 +15,13 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileManagerFTPTests : CK2FileManagerBaseTests
+@interface CK2FileManagerGenericTests : CK2FileManagerBaseTests
 
 @property (strong, nonatomic) NSString* responsesToUse;
 
 @end
 
-@implementation CK2FileManagerFTPTests
+@implementation CK2FileManagerGenericTests
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
 
@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"sftp", @"ftp"];
+    NSArray* responses = @[@"ftp", @"sftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -327,7 +327,7 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self useResponseSet:@"stor denied"];
-        NSURL* url = [self URLForPath:@"/CK2FileManagerFTPTests/test.txt"]; // should fail as it's at the root - we put it in a subfolder just in case
+        NSURL* url = [self URLForPath:@"/CK2FileManagerGenericTests/test.txt"]; // should fail as it's at the root - we put it in a subfolder just in case
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {

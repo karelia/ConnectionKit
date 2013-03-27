@@ -12,7 +12,7 @@
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
-		22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */; };
+		22407D54166F9A6100E1EAD4 /* CK2FileManagerGenericTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
 		2246AF6516B99987001D39D9 /* KMSSendStringCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */; };
 		2246AF6616B99987001D39D9 /* KMSSendDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */; };
@@ -247,7 +247,7 @@
 		22C9CFA71703327A004610FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		22C9CFAA1703327A004610FE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
-		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
+		22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerGenericTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
 		22FEB6671680818800BB778B /* KMSTranscriptEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTranscriptEntry.m; sourceTree = "<group>"; };
 		22FEB6681680818800BB778B /* KMSTranscriptEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTranscriptEntry.h; sourceTree = "<group>"; };
@@ -394,7 +394,7 @@
 				22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */,
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */,
-				22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */,
+				22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */,
 				220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */,
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */,
@@ -1011,7 +1011,7 @@
 				224AB387166E501C0066B1C6 /* KMSCollectionTests.m in Sources */,
 				224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */,
 				224AB38C166E587F0066B1C6 /* KMSManualTests.m in Sources */,
-				22407D54166F9A6100E1EAD4 /* CK2FileManagerFTPTests.m in Sources */,
+				22407D54166F9A6100E1EAD4 /* CK2FileManagerGenericTests.m in Sources */,
 				22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */,
 				22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */,
 				225FCA3816B046F800A9F5AE /* CKUploaderTests.m in Sources */,
@@ -1584,6 +1584,7 @@
 				22C9CFAE1703327A004610FE /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		27F3373E16BC1FB100E70511 /* Build configuration list for PBXNativeTarget "AuthTester" */ = {
 			isa = XCConfigurationList;
