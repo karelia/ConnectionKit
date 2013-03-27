@@ -1,18 +1,11 @@
-// Additional API for debugging / unit testing only.
+//
+//  Created by Sam Deane on 27/03/2013.
+//  Copyright (c) 2013 Karelia Software. All rights reserved.
 
 #import "CK2FileManagerWithTestSupport.h"
-#import <CURLHandle/CURLHandle.h>
+#import "CK2FileOperationWithTestSupport.h"
 
-@class CURLMulti;
-
-@interface CK2FileManagerWithTestSupport()
-/**
- Set this property to force CURL based protocols use an alternative CURLMulti instead of the default one.
- */
-
-@property (strong, readonly, nonatomic) CURLMulti* multi;
-
-@end
+#import <CURLHandle/CURLHandle+TestingSupport.h>
 
 @implementation CK2FileManagerWithTestSupport
 
@@ -44,21 +37,6 @@
 
 @end
 
-@implementation CK2FileOperationWithTestSupport
-
-- (NSURLRequest *)requestWithURL:(NSURL *)url;
-{
-    NSMutableURLRequest* request = [NSMutableURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalAndRemoteCacheData timeoutInterval:60.0];
-    CK2FileManagerWithTestSupport* manager = (CK2FileManagerWithTestSupport*)_manager;
-    if (manager.dontShareConnections)
-    {
-        [request ck2_setMulti:manager.multi];
-    }
-
-    return request;
-}
-
-@end
 @implementation NSURLRequest(CK2FileManagerDebugging)
 
 - (CURLMulti*)ck2_multi

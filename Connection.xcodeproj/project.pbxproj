@@ -46,6 +46,8 @@
 		22C9CFA81703327A004610FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA71703327A004610FE /* AppDelegate.m */; };
 		22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA91703327A004610FE /* MainMenu.xib */; };
 		22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
+		22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */; };
+		22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
@@ -155,6 +157,13 @@
 			remoteGlobalIDString = 223FD091160B523700BE1C80;
 			remoteInfo = CURLHandleTests;
 		};
+		22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 22C9CFBF17035A0A004610FE;
+			remoteInfo = crashtest;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -246,6 +255,8 @@
 		22C9CFA61703327A004610FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		22C9CFA71703327A004610FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		22C9CFAA1703327A004610FE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
+		22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileOperationWithTestSupport.h; sourceTree = "<group>"; };
+		22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileOperationWithTestSupport.m; sourceTree = "<group>"; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerGenericTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
@@ -452,6 +463,7 @@
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
 				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
+				22C9CFFB1703AD4D004610FE /* crashtest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -681,6 +693,8 @@
 			children = (
 				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
 				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
+				22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */,
+				22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */,
 				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
 				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
@@ -741,6 +755,7 @@
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
 				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
+				22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -898,6 +913,13 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		22C9CFFB1703AD4D004610FE /* crashtest */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.executable";
+			path = crashtest;
+			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1063,6 +1085,7 @@
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
 				228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */,
+				22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
