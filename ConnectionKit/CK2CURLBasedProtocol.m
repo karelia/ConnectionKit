@@ -421,6 +421,7 @@
     if (_completionHandler)
     {
         _completionHandler(error);
+        [_completionHandler release]; _completionHandler = nil;
     }
     else
     {
