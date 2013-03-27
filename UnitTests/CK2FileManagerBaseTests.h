@@ -16,9 +16,27 @@
 @property (assign, nonatomic) BOOL useMockServer;
 @property (strong, nonatomic) NSString* originalUser;
 @property (strong, nonatomic) NSString* originalPassword;
+@property (strong, nonatomic) NSString* extendedName;
+
 
 - (NSURL*)temporaryFolder;
 - (BOOL)setupSession;
 - (BOOL)setupSessionWithResponses:(NSString*)responsesFile;
 
+#pragma mark - Test File Support
+
+- (NSURL*)URLForTestFolder;
+- (NSURL*)URLForTestFile1;
+- (NSURL*)URLForTestFile2;
+- (void)makeTestDirectoryWithFiles:(BOOL)withFiles;
+- (void)removeTestDirectory;
+
+#pragma mark - Error Checking
+
+- (BOOL)checkIsAuthenticationError:(NSError*)error;
+- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error;
+- (BOOL)checkIsFileCantWriteError:(NSError*)error;
+- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error;
+- (BOOL)checkIsFileNotFoundError:(NSError*)error;
+- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error;
 @end

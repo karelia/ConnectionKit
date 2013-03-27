@@ -8,7 +8,7 @@
 
 #import "CK2CURLBasedProtocol.h"
 
-#import "CK2FileManager.h"
+#import "CK2FileManagerWithTestSupport.h"
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
@@ -357,12 +357,15 @@
 {
     _user = [credential.user copy];
     
+    NSURLRequest* request = [self request];
+    CURLMulti* multi = [request ck2_multi]; // typically this is nil, meaning use the default, but we can override it for test purposes
+
     if ([[self class] usesMultiHandle])
     {
-        _handle = [[CURLHandle alloc] initWithRequest:[self request]
+        _handle = [[CURLHandle alloc] initWithRequest:request
                                            credential:credential
                                              delegate:self
-                                                multi:nil];
+                                                multi:multi];
     }
     else
     {
@@ -376,10 +379,20 @@
             handle = [[CURLHandle alloc] init];
             queue = dispatch_queue_create("com.karelia.connection.fallback-curlhandle", NULL);
         });
-        
+
+        CURLHandle* handleToUse;
+        if (multi) // although we're not using the multi, we use it being set here as a signal to use a new handle for this transaction
+        {
+            handleToUse = [[[CURLHandle alloc] init] autorelease];
+        }
+        else
+        {
+            handleToUse = handle;
+        }
+
         // Let the work commence!
         dispatch_async(queue, ^{
-            _handle = [handle retain];
+            _handle = [handleToUse retain];
             [_handle sendSynchronousRequest:self.request credential:credential delegate:self];
         });
     }
@@ -535,7 +548,11 @@
 
 - (void)handle:(CURLHandle *)handle didFailWithError:(NSError *)error;
 {
-    if (!error) error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    if (!error)
+    {
+        error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
+    }
+    
     [self endWithError:error];
 }
 
@@ -557,7 +574,31 @@
 
 - (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
 {
-    [[self client] protocol:self appendString:string toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
+    CKTranscriptType ckType;
+    switch (type)
+    {
+        case CURLINFO_HEADER_IN:
+            ckType = CKTranscriptReceived;
+            break;
+
+        case CURLINFO_HEADER_OUT:
+            ckType = CKTranscriptSent;
+            break;
+
+        case CURLINFO_DATA_IN:
+        case CURLINFO_DATA_OUT:
+        case CURLINFO_SSL_DATA_IN:
+        case CURLINFO_SSL_DATA_OUT:
+            ckType = CKTranscriptData;
+            break;
+
+        case CURLINFO_TEXT:
+        default:
+            ckType = CKTranscriptInfo;
+            break;
+    }
+
+    [[self client] protocol:self appendString:string toTranscript:ckType];
 }
 
 #pragma mark NSURLAuthenticationChallengeSender

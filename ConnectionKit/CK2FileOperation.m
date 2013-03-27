@@ -363,7 +363,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             
             if (path.pathComponents.count > 1)   // stop at root
             {
-                NSURL *result = [protocolClass URLWithPath:[path stringByDeletingLastPathComponent] relativeToURL:url].absoluteURL;
+                NSURL *result = [url URLByDeletingLastPathComponent];
                 [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:result];
                 
                 // Recurse

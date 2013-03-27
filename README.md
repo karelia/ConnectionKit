@@ -78,15 +78,22 @@ Usage
 
 ## Getting the code
 
-You want to clone ConnectionKit onto your Mac, likely as a submodule of your existing Git repository. ConnectionKit includes several (nested) submodules of its own, so have Git grab them too.
-
-Here's an example of commands you'd typically type into the Terminal to add ConnectionKit as a submodule of an existing git repo:
+If you're already using Git, you likely want to add ConnectionKit as a submodule of your project:
 
 	git submodule add https://github.com/karelia/ConnectionKit.git
+
+If you're using another version control system, you can grab the code directly:
+
+	git clone https://github.com/karelia/ConnectionKit.git
+
+If you're not using version control at all, remind me to come yell at you at a mutually convenient time.
+
+ConnectionKit includes several (nested) submodules of its own, so have Git grab them too:
+
 	cd ConnectionKit
 	git submodule update --recursive --init
 
-Substitute the URL for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`curlhandle-4` at present).
+Substitute the URL above for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`curlhandle-4` at present).
 
 Then:
 

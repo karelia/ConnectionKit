@@ -36,6 +36,9 @@
 		227113BF168388FD00280005 /* http.json in Resources */ = {isa = PBXBuildFile; fileRef = 227113BE168388FD00280005 /* http.json */; };
 		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
+		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */; };
+		228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
@@ -168,11 +171,11 @@
 			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
 			remoteInfo = Framework;
 		};
-		32B5929B169E13080020FFE9 /* PBXContainerItemProxy */ = {
+		22182129170209D300584589 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 223FD092160B523700BE1C80;
+			proxyType = 1;
+			remoteGlobalIDString = 223FD091160B523700BE1C80;
 			remoteInfo = CURLHandleTests;
 		};
 /* End PBXContainerItemProxy section */
@@ -254,7 +257,9 @@
 		2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests.m; sourceTree = "<group>"; };
 		2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2WebDAVProtocol.h; sourceTree = "<group>"; };
 		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
-		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = file; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
+		228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerWithTestSupport.h; sourceTree = "<group>"; };
+		228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWithTestSupport.m; sourceTree = "<group>"; };
+		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
@@ -375,6 +380,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */,
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
@@ -737,6 +743,8 @@
 			children = (
 				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
 				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
+				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
+				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Private;
@@ -820,6 +828,7 @@
 				324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */,
 				32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
+				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -839,6 +848,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				2218212A170209D300584589 /* PBXTargetDependency */,
 				220AD7AE1509021A00748655 /* PBXTargetDependency */,
 			);
 			name = UnitTests;
@@ -1106,6 +1116,7 @@
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
+				228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */,
 				32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */,
 				32B592BB16A4960B0020FFE9 /* CK2OpenPanelController.m in Sources */,
 				32B592BD16A4960B0020FFE9 /* CK2FileCell.m in Sources */,
@@ -1138,6 +1149,11 @@
 			isa = PBXTargetDependency;
 			target = 79CFD12509F702BE00172CDD /* Framework */;
 			targetProxy = 220AD7AD1509021A00748655 /* PBXContainerItemProxy */;
+		};
+		2218212A170209D300584589 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = CURLHandleTests;
+			targetProxy = 22182129170209D300584589 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 

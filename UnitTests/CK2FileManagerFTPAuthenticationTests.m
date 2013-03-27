@@ -47,7 +47,7 @@
     {
         [self useResponseSet:@"bad login"];
 
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertTrue(error == nil ||
                          ((error.code == 21) && (error.curlResponseCode == 550)), @"got unexpected error %@", error);
