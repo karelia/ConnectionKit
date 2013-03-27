@@ -21,6 +21,7 @@
 
 - (void)dealloc
 {
+    [CURLHandle cleanupStandaloneMulti:_multi];
     [_multi release];
 
     [super dealloc];
