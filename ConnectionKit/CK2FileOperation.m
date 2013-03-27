@@ -243,6 +243,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
+
+            // chuck the protocol now, to break retain cycle
+            [_protocol release]; _protocol = nil;
         }
     });
     
