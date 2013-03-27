@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"ftp", @"sftp"];
+    NSArray* responses = @[@"sftp", @"ftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
