@@ -302,7 +302,8 @@
             }
         }
     }];
-    
+
+    [totalData release];
     [request release];
     return self;
 }
