@@ -39,6 +39,13 @@
 		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */; };
 		228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
+		22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
+		22C9CF9F1703327A004610FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CF9D1703327A004610FE /* InfoPlist.strings */; };
+		22C9CFA11703327A004610FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA01703327A004610FE /* main.m */; };
+		22C9CFA51703327A004610FE /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA31703327A004610FE /* Credits.rtf */; };
+		22C9CFA81703327A004610FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA71703327A004610FE /* AppDelegate.m */; };
+		22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA91703327A004610FE /* MainMenu.xib */; };
+		22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
@@ -230,6 +237,15 @@
 		228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerWithTestSupport.h; sourceTree = "<group>"; };
 		228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWithTestSupport.m; sourceTree = "<group>"; };
 		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
+		22C9CF981703327A004610FE /* ProfilingTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProfilingTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		22C9CF9C1703327A004610FE /* ProfilingTester-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ProfilingTester-Info.plist"; sourceTree = "<group>"; };
+		22C9CF9E1703327A004610FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
+		22C9CFA01703327A004610FE /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		22C9CFA21703327A004610FE /* ProfilingTester-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ProfilingTester-Prefix.pch"; sourceTree = "<group>"; };
+		22C9CFA41703327A004610FE /* en */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = en; path = en.lproj/Credits.rtf; sourceTree = "<group>"; };
+		22C9CFA61703327A004610FE /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		22C9CFA71703327A004610FE /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		22C9CFAA1703327A004610FE /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerPathTests.m; sourceTree = "<group>"; };
 		22F6D0E7165A8A2200443CC9 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
@@ -317,6 +333,15 @@
 				22CC578B1509068600F94154 /* Connection.framework in Frameworks */,
 				220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */,
 				22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22C9CF951703327A004610FE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */,
+				22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -417,6 +442,7 @@
 				79CFD12609F702BE00172CDD /* Connection.framework */,
 				220AD7981509019B00748655 /* UnitTests.octest */,
 				27F3372816BC1FB100E70511 /* AuthTester.app */,
+				22C9CF981703327A004610FE /* ProfilingTester.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -437,6 +463,29 @@
 				220526F3165E97B400A2BBC9 /* Tests.octest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		22C9CF9A1703327A004610FE /* ProfilingTester */ = {
+			isa = PBXGroup;
+			children = (
+				22C9CFA61703327A004610FE /* AppDelegate.h */,
+				22C9CFA71703327A004610FE /* AppDelegate.m */,
+				22C9CFA91703327A004610FE /* MainMenu.xib */,
+				22C9CF9B1703327A004610FE /* Supporting Files */,
+			);
+			path = ProfilingTester;
+			sourceTree = "<group>";
+		};
+		22C9CF9B1703327A004610FE /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				22C9CF9C1703327A004610FE /* ProfilingTester-Info.plist */,
+				22C9CF9D1703327A004610FE /* InfoPlist.strings */,
+				22C9CFA01703327A004610FE /* main.m */,
+				22C9CFA21703327A004610FE /* ProfilingTester-Prefix.pch */,
+				22C9CFA31703327A004610FE /* Credits.rtf */,
+			);
+			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
 		22F6D0E8165A8A2200443CC9 /* MockServer */ = {
@@ -590,6 +639,7 @@
 				27FD90C60ED5BFC00068D634 /* Dependencies */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
 				27F3372C16BC1FB100E70511 /* AuthTester */,
+				22C9CF9A1703327A004610FE /* ProfilingTester */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
@@ -718,6 +768,23 @@
 			productReference = 220AD7981509019B00748655 /* UnitTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
+		22C9CF971703327A004610FE /* ProfilingTester */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 22C9CFB91703327A004610FE /* Build configuration list for PBXNativeTarget "ProfilingTester" */;
+			buildPhases = (
+				22C9CF941703327A004610FE /* Sources */,
+				22C9CF951703327A004610FE /* Frameworks */,
+				22C9CF961703327A004610FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ProfilingTester;
+			productName = ProfilingTester;
+			productReference = 22C9CF981703327A004610FE /* ProfilingTester.app */;
+			productType = "com.apple.product-type.application";
+		};
 		27F3372716BC1FB100E70511 /* AuthTester */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 27F3373E16BC1FB100E70511 /* Build configuration list for PBXNativeTarget "AuthTester" */;
@@ -799,6 +866,7 @@
 				79CFD12509F702BE00172CDD /* Framework */,
 				220AD7971509019B00748655 /* UnitTests */,
 				27F3372716BC1FB100E70511 /* AuthTester */,
+				22C9CF971703327A004610FE /* ProfilingTester */,
 			);
 		};
 /* End PBXProject section */
@@ -841,6 +909,16 @@
 			files = (
 				22662EF3165D2EEC005FCC4A /* ftp.json in Resources */,
 				22662EF4165D2EEC005FCC4A /* webdav.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		22C9CF961703327A004610FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22C9CF9F1703327A004610FE /* InfoPlist.strings in Resources */,
+				22C9CFA51703327A004610FE /* Credits.rtf in Resources */,
+				22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -947,6 +1025,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		22C9CF941703327A004610FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				22C9CFA11703327A004610FE /* main.m in Sources */,
+				22C9CFA81703327A004610FE /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		27F3372416BC1FB100E70511 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1000,6 +1087,30 @@
 /* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
+		22C9CF9D1703327A004610FE /* InfoPlist.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				22C9CF9E1703327A004610FE /* en */,
+			);
+			name = InfoPlist.strings;
+			sourceTree = "<group>";
+		};
+		22C9CFA31703327A004610FE /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				22C9CFA41703327A004610FE /* en */,
+			);
+			name = Credits.rtf;
+			sourceTree = "<group>";
+		};
+		22C9CFA91703327A004610FE /* MainMenu.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				22C9CFAA1703327A004610FE /* en */,
+			);
+			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
 		27F3372F16BC1FB100E70511 /* InfoPlist.strings */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -1121,6 +1232,94 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				WRAPPER_EXTENSION = octest;
+			};
+			name = Plugin;
+		};
+		22C9CFAC1703327A004610FE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ProfilingTester/ProfilingTester-Prefix.pch";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "ProfilingTester/ProfilingTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Debug;
+		};
+		22C9CFAD1703327A004610FE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ProfilingTester/ProfilingTester-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "ProfilingTester/ProfilingTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
+			};
+			name = Release;
+		};
+		22C9CFAE1703327A004610FE /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = "ProfilingTester/ProfilingTester-Prefix.pch";
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "ProfilingTester/ProfilingTester-Info.plist";
+				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				WRAPPER_EXTENSION = app;
 			};
 			name = Plugin;
 		};
@@ -1376,6 +1575,15 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		22C9CFB91703327A004610FE /* Build configuration list for PBXNativeTarget "ProfilingTester" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				22C9CFAC1703327A004610FE /* Debug */,
+				22C9CFAD1703327A004610FE /* Release */,
+				22C9CFAE1703327A004610FE /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 		27F3373E16BC1FB100E70511 /* Build configuration list for PBXNativeTarget "AuthTester" */ = {
 			isa = XCConfigurationList;
