@@ -26,7 +26,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 @implementation TestFileDelegate
 
-#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
+//#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
+#define LogHousekeeping(...)
 
 + (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
 {
