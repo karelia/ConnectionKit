@@ -260,7 +260,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_completionBlock release];
     [_enumerationBlock release];
     [_localURL release];
-    
+
     [super dealloc];
 }
 
@@ -506,7 +506,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_originalChallenge release];
     [_operation release];
     [_trampolineChallenge release];
+
     [super dealloc];
+}
+
+- (void)cleanupAndRelease
+{
+    // release trampoline challenge now to break retain cycle
+    [_trampolineChallenge release];
+    _trampolineChallenge = nil;
+
+    [self release];
 }
 
 @synthesize originalChallenge = _originalChallenge;
@@ -517,7 +527,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 
@@ -527,7 +537,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 
@@ -537,7 +547,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 
