@@ -327,24 +327,7 @@
 
 - (NSArray *)fileProperties
 {
-    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLIsPackageKey, NSURLEffectiveIconKey, NSURLParentDirectoryURLKey ];
-}
-
-- (NSDirectoryEnumerationOptions)fileEnumerationOptions
-{
-    NSDirectoryEnumerationOptions   options;
-    
-    options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-    
-    if (![_openPanel showsHiddenFiles])
-    {
-        options |= NSDirectoryEnumerationSkipsHiddenFiles;
-    }
-    if (![_openPanel treatsFilePackagesAsDirectories])
-    {
-        options |= NSDirectoryEnumerationSkipsPackageDescendants;
-    }
-    return options;
+    return @[ NSURLIsDirectoryKey, NSURLFileSizeKey, NSURLContentModificationDateKey, NSURLLocalizedNameKey, NSURLIsSymbolicLinkKey, CK2URLSymbolicLinkDestinationKey, NSURLIsPackageKey, NSURLIsHiddenKey, NSURLEffectiveIconKey, NSURLParentDirectoryURLKey ];
 }
 
 - (NSView *)accessoryView
@@ -498,7 +481,7 @@
     
     resolvedURL = nil;
     
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:([self fileEnumerationOptions]|CK2DirectoryEnumerationIncludesDirectory) usingBlock:
+    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) usingBlock:
      ^ (NSURL *blockURL)
      {
          if (resolvedURL == nil)
@@ -668,7 +651,7 @@
             {
                 operation = [_fileManager contentsOfDirectoryAtURL:url
                                         includingPropertiesForKeys:[self fileProperties]
-                                                           options:[self fileEnumerationOptions]
+                                                           options:NSDirectoryEnumerationSkipsSubdirectoryDescendants
                 completionHandler:
                 ^(NSArray *contents, NSError *blockError)
                 {
@@ -723,6 +706,17 @@
                 [_runningOperations setObject:operation forKey:url];
 
                 [self validateProgressIndicator];
+            }
+        }
+        else
+        {
+            if (![[self openPanel] showsHiddenFiles])
+            {
+                children = [children filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:
+                                                                  ^BOOL(id evaluatedObject, NSDictionary *bindings)
+                                                                  {
+                                                                      return ![evaluatedObject ck2_isHidden];
+                                                                  }]];
             }
         }
     }
@@ -1074,7 +1068,7 @@
         
         children = [NSMutableArray array];
         
-        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:([self fileEnumerationOptions]|CK2DirectoryEnumerationIncludesDirectory) usingBlock:
+        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) usingBlock:
         ^ (NSURL *blockURL)
         {
             if (resolvedURL == nil)

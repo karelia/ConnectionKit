@@ -49,6 +49,7 @@
 - (NSString *)ck2_kind;
 - (BOOL)ck2_isDirectory;
 - (BOOL)ck2_isPackage;
+- (BOOL)ck2_isHidden;
 
 - (NSURL *)ck2_canonicalURL;
 

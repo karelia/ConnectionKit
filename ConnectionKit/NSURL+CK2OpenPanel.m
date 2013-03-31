@@ -254,7 +254,24 @@
         NSLog(@"Error getting isPackage for URL %@: %@", [self absoluteString], error);
     }
     return NO;
- }
+}
+
+- (BOOL)ck2_isHidden
+{
+    id          value;
+    NSError     *error;
+    
+    if ([self getResourceValue:&value forKey:NSURLIsHiddenKey error:&error])
+    {
+        return [value boolValue];
+    }
+    else
+    {
+        NSLog(@"Error getting isHidden for URL %@: %@", [self absoluteString], error);
+    }
+    return NO;
+}
+
 
 - (BOOL)ck2_isSymbolicLink
 {
