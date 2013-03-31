@@ -264,7 +264,12 @@
         string = [event characters];
         flags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
 
-        if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
+        if ([string isEqual:@"."] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
+        {
+            [self setShowsHiddenFiles:![self showsHiddenFiles]];
+            return;
+        }
+        else if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
         {
             [_viewController showPathFieldWithString:string];
             return;
