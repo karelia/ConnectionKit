@@ -34,7 +34,8 @@
 
 //TODO: Handle/display errors better
 //TODO: Save window/view dimensions?
-//TODO: Implement "hidden" feature where you can type in a path (a little sheet shows up when you type / or ~)
+//TODO: Autocomplete in the path field?
+//TODO: Localization support
 
 @protocol CK2OpenPanelDelegate;
 @class CK2OpenPanelController;

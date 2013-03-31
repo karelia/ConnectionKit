@@ -497,9 +497,9 @@
 									<string key="NSCellIdentifier">_NS:9</string>
 									<reference key="NSControlView" ref="526771398"/>
 									<int key="NSButtonFlags">-2038284288</int>
-									<int key="NSButtonFlags2">129</int>
+									<int key="NSButtonFlags2">268435585</int>
 									<string key="NSAlternateContents"/>
-									<string key="NSKeyEquivalent"/>
+									<string key="NSKeyEquivalent">N</string>
 									<int key="NSPeriodicDelay">200</int>
 									<int key="NSPeriodicInterval">25</int>
 								</object>
@@ -594,7 +594,7 @@
 																	<int key="NSvFlags">4370</int>
 																	<string key="NSFrameSize">{515, 333}</string>
 																	<reference key="NSSuperview" ref="918126831"/>
-																	<reference key="NSNextKeyView" ref="224021751"/>
+																	<reference key="NSNextKeyView" ref="407291080"/>
 																	<string key="NSReuseIdentifierKey">_NS:80</string>
 																	<string key="NSMinGridSize">{0, 0}</string>
 																	<string key="NSMaxGridSize">{0, 0}</string>
@@ -648,7 +648,7 @@
 													</array>
 													<string key="NSFrame">{{0, -2}, {517, 335}}</string>
 													<reference key="NSSuperview" ref="159793629"/>
-													<reference key="NSNextKeyView" ref="407291080"/>
+													<reference key="NSNextKeyView" ref="918126831"/>
 													<string key="NSReuseIdentifierKey">_NS:76</string>
 													<int key="NSsFlags">133650</int>
 													<reference key="NSVScroller" ref="224021751"/>
@@ -683,7 +683,7 @@
 																	<int key="NSvFlags">4352</int>
 																	<string key="NSFrameSize">{612, 299}</string>
 																	<reference key="NSSuperview" ref="1058804079"/>
-																	<reference key="NSNextKeyView" ref="901995093"/>
+																	<reference key="NSNextKeyView" ref="614193710"/>
 																	<string key="NSReuseIdentifierKey">_NS:13</string>
 																	<bool key="NSEnabled">YES</bool>
 																	<object class="NSTableHeaderView" key="NSHeaderView" id="719759231">
@@ -961,14 +961,13 @@
 													</array>
 													<string key="NSFrameSize">{517, 332}</string>
 													<reference key="NSSuperview" ref="403468407"/>
-													<reference key="NSNextKeyView" ref="614193710"/>
+													<reference key="NSNextKeyView" ref="1058804079"/>
 													<string key="NSReuseIdentifierKey">_NS:9</string>
 													<int key="NSsFlags">133810</int>
 													<reference key="NSVScroller" ref="901995093"/>
 													<reference key="NSHScroller" ref="462737862"/>
 													<reference key="NSContentView" ref="1058804079"/>
 													<reference key="NSHeaderClipView" ref="614193710"/>
-													<reference key="NSCornerView" ref="598956320"/>
 													<bytes key="NSScrollAmts">QSAAAEEgAABBmAAAQZgAAA</bytes>
 												</object>
 											</array>
@@ -992,7 +991,7 @@
 													<string key="NSFrameSize">{517, 332}</string>
 													<reference key="NSSuperview" ref="160686083"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView" ref="416172757"/>
+													<reference key="NSNextKeyView"/>
 													<string key="NSReuseIdentifierKey">_NS:9</string>
 													<bool key="NSEnabled">YES</bool>
 													<object class="NSBrowserCell" key="NSCellPrototype">
@@ -1003,7 +1002,7 @@
 													</object>
 													<string key="NSPathSeparator">/</string>
 													<int key="NSMinColumnWidth">210</int>
-													<int key="NSNumberOfVisibleColumns">3</int>
+													<int key="NSNumberOfVisibleColumns">2</int>
 													<int key="NSColumnResizingType">2</int>
 													<string key="NSColumnsAutosaveName">CK2OpenPanelBrowserState</string>
 													<double key="NSPreferedColumnWidth">262</double>
@@ -2371,7 +2370,6 @@
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="outlets">
 						<string key="_accessoryContainer">NSBox</string>
-						<string key="_arrayController">NSArrayController</string>
 						<string key="_bottomSection">NSView</string>
 						<string key="_browserController">CK2OpenPanelColumnViewController</string>
 						<string key="_buttonSection">NSView</string>
@@ -2397,10 +2395,6 @@
 						<object class="IBToOneOutletInfo" key="_accessoryContainer">
 							<string key="name">_accessoryContainer</string>
 							<string key="candidateClassName">NSBox</string>
-						</object>
-						<object class="IBToOneOutletInfo" key="_arrayController">
-							<string key="name">_arrayController</string>
-							<string key="candidateClassName">NSArrayController</string>
 						</object>
 						<object class="IBToOneOutletInfo" key="_bottomSection">
 							<string key="name">_bottomSection</string>

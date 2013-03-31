@@ -269,9 +269,19 @@
             [self setShowsHiddenFiles:![self showsHiddenFiles]];
             return;
         }
+        else if ([string isEqual:@"h"] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
+        {
+            [_viewController home:self];
+            return;
+        }
         else if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
         {
             [_viewController showPathFieldWithString:string];
+            return;
+        }
+        else if ([string isEqual:@"g"] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
+        {
+            [_viewController showPathFieldWithString:@""];
             return;
         }
     }
