@@ -90,6 +90,9 @@
 		324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */; };
 		324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */; };
 		324D22D616AF490B001CFDE6 /* CK2NewFolderWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */; };
+		3274F1CD170888430049DDE5 /* CK2PathFieldWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */; };
+		3274F1CE170888430049DDE5 /* CK2PathFieldWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3274F1CB170888430049DDE5 /* CK2PathFieldWindowController.h */; };
+		3274F1CF170888430049DDE5 /* CK2PathFieldWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */; };
 		32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */; };
 		32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */; };
 		32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -176,6 +179,13 @@
 			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
 			proxyType = 1;
 			remoteGlobalIDString = 223FD091160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
+		};
+		3274F1D8170888440049DDE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223FD092160B523700BE1C80;
 			remoteInfo = CURLHandleTests;
 		};
 /* End PBXContainerItemProxy section */
@@ -316,6 +326,9 @@
 		324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2NewFolderWindowController.h; sourceTree = "<group>"; };
 		324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2NewFolderWindowController.m; sourceTree = "<group>"; };
 		324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2NewFolderWindow.xib; sourceTree = "<group>"; };
+		3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2PathFieldWindow.xib; sourceTree = "<group>"; };
+		3274F1CB170888430049DDE5 /* CK2PathFieldWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2PathFieldWindowController.h; sourceTree = "<group>"; };
+		3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2PathFieldWindowController.m; sourceTree = "<group>"; };
 		32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+CK2OpenPanel.h"; sourceTree = "<group>"; };
 		32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSImage+CK2OpenPanel.m"; sourceTree = "<group>"; };
 		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
@@ -492,7 +505,7 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				32B5929C169E13080020FFE9 /* CURLHandleTests.octest */,
+				3274F1D9170888440049DDE5 /* CURLHandleTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -715,6 +728,8 @@
 				32B592A616A4960B0020FFE9 /* CK2FileCell.m */,
 				32B592A916A4960B0020FFE9 /* CK2PathControl.h */,
 				32B592AA16A4960B0020FFE9 /* CK2PathControl.m */,
+				3274F1CB170888430049DDE5 /* CK2PathFieldWindowController.h */,
+				3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */,
 				32B592AB16A4960B0020FFE9 /* CK2IconViewItem.h */,
 				32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */,
 				32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */,
@@ -734,6 +749,7 @@
 				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
 				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
 				324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */,
+				3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */,
 			);
 			name = CK2OpenPanel;
 			sourceTree = "<group>";
@@ -829,6 +845,7 @@
 				32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
 				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
+				3274F1CE170888430049DDE5 /* CK2PathFieldWindowController.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -963,11 +980,11 @@
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		32B5929C169E13080020FFE9 /* CURLHandleTests.octest */ = {
+		3274F1D9170888440049DDE5 /* CURLHandleTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
 			path = CURLHandleTests.octest;
-			remoteRef = 32B5929B169E13080020FFE9 /* PBXContainerItemProxy */;
+			remoteRef = 3274F1D8170888440049DDE5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1004,6 +1021,7 @@
 				32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */,
 				324D22CC16AE17AC001CFDE6 /* CK2FilePreview.xib in Resources */,
 				324D22D616AF490B001CFDE6 /* CK2NewFolderWindow.xib in Resources */,
+				3274F1CD170888430049DDE5 /* CK2PathFieldWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1134,6 +1152,7 @@
 				324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */,
 				324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */,
 				32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */,
+				3274F1CF170888430049DDE5 /* CK2PathFieldWindowController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

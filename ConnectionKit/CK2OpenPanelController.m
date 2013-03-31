@@ -55,6 +55,7 @@
 #import "CK2PathControl.h"
 #import "CK2NewFolderWindowController.h"
 #import "CK2IconView.h"
+#import "CK2PathFieldWindowController.h"
 #import <Connection/CK2FileManager.h>
 
 #define DEFAULT_OPERATION_TIMEOUT       20
@@ -473,8 +474,7 @@
     [self setURLs:(URL ? @[URL] : nil)];
 }
 
-// Called by the open panel. The completion block will not be called until the given URL and all URLs up to it are
-// loaded.
+// Called by the open panel. The completion block will not be called until the given URL is loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
 {
     NSMutableArray                  *children;
@@ -1034,19 +1034,26 @@
     NSMutableDictionary         *dict;
     CK2OpenPanelViewController  *currentController;
     NSTabViewItem               *tabItem;
+    NSURL                       *directoryURL;
     
-    tabItem = [_tabView selectedTabViewItem];
+    directoryURL = [self directoryURL];
     
-    dict = [NSMutableDictionary dictionary];    
-    [dict setObject:[self directoryURL] forKey:HISTORY_DIRECTORY_URL_KEY];
-    [dict setObject:[NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:tabItem]] forKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY];
-    
-    currentController = [self viewControllerForIdentifier:[tabItem identifier]];
-    [currentController saveViewHistoryState:dict];
-    
-    [_historyManager registerUndoWithTarget:self selector:@selector(changeView:) object:dict];
-    
-    [self validateHistoryButtons];
+    // If nil, indicates an error so should not push it on the undo stack
+    if (directoryURL != nil)
+    {
+        tabItem = [_tabView selectedTabViewItem];
+        
+        dict = [NSMutableDictionary dictionary];
+        [dict setObject:[self directoryURL] forKey:HISTORY_DIRECTORY_URL_KEY];
+        [dict setObject:[NSNumber numberWithUnsignedInteger:[_tabView indexOfTabViewItem:tabItem]] forKey:HISTORY_DIRECTORY_VIEW_INDEX_KEY];
+        
+        currentController = [self viewControllerForIdentifier:[tabItem identifier]];
+        [currentController saveViewHistoryState:dict];
+        
+        [_historyManager registerUndoWithTarget:self selector:@selector(changeView:) object:dict];
+        
+        [self validateHistoryButtons];
+    }
 }
 
 - (IBAction)home:(id)sender
@@ -1127,6 +1134,48 @@
     {
         [self setURLs:@[ homeURL ] updateDirectory:YES updateRoot:YES sender:self ];
     }
+}
+
+- (void)showPathFieldWithString:(NSString *)string
+{
+    if (_pathFieldController == nil)
+    {
+        _pathFieldController = [[CK2PathFieldWindowController alloc] init];
+    }
+    [_pathFieldController setStringValue:string];
+    
+    [_pathFieldController beginSheetModalForWindow:[self openPanel] completionHandler:
+     ^(NSInteger result)
+     {
+         NSString   *path;
+         
+         path = [_pathFieldController stringValue];
+         
+         if ([path hasPrefix:@"~"])
+         {
+             path = [path substringFromIndex:1];
+             
+             if ([path hasPrefix:@"/"])
+             {
+                 path = [path substringFromIndex:1];
+             }
+         }
+
+         [self addToHistory];
+
+         [self changeDirectory:[CK2FileManager URLWithPath:path hostURL:[self directoryURL]] completionBlock:
+         ^(NSError *error)
+          {
+              if (error != nil)
+              {
+                  NSBeginAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                  
+                  // NSOpenPanel will try and select as much of the URL as is valid. We don't do that here since it may
+                  // take a while to resolve each ancestor so we just revert back to the previous directory.
+                  [self back:self];
+              }
+          }];
+     }];
 }
 
 - (IBAction)pathControlItemSelected:(id)sender

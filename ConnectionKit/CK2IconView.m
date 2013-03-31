@@ -122,6 +122,26 @@
     [_typeSelectBuffer setString:@""];
 }
 
+- (void)keyDown:(NSEvent *)event
+{
+    if ([event type] == NSKeyDown)
+    {
+        NSString    *string;
+        NSUInteger  flags;
+        
+        string = [event characters];
+        flags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+        
+        if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
+        {
+            // Let the window handle it
+            [[self nextResponder] keyDown:event];
+            return;
+        }
+    }
+    [super keyDown:event];
+}
+
 - (void)insertText:(id)aString
 {
     NSUInteger      i;

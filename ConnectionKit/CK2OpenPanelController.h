@@ -33,7 +33,7 @@
 #import <dispatch/dispatch.h>
 #import <Connection/CK2FileManager.h>
 
-@class CK2OpenPanel, CK2BrowserPreviewController, CK2PathControl, CK2FileManager, CK2OpenPanelColumnViewController, CK2OpenPanelListViewController, CK2OpenPanelIconViewController;
+@class CK2OpenPanel, CK2BrowserPreviewController, CK2PathControl, CK2FileManager, CK2OpenPanelColumnViewController, CK2OpenPanelListViewController, CK2OpenPanelIconViewController, CK2PathFieldWindowController;
 
 @interface CK2OpenPanelController : NSViewController <NSTabViewDelegate, CK2FileManagerDelegate>
 {
@@ -68,13 +68,14 @@
     
     NSMutableDictionary             *_urlCache;
     NSMutableDictionary             *_runningOperations;
-    IBOutlet NSArrayController      *_arrayController;
     CK2FileManager                  *_fileManager;
     
     NSUndoManager                   *_historyManager;
     NSTabViewItem                   *_lastTab;
     
     id                              _currentBootstrapOperation;
+    
+    CK2PathFieldWindowController    *_pathFieldController;
 }
 
 @property (readonly, assign) CK2OpenPanel      *openPanel;
@@ -104,6 +105,8 @@
 - (IBAction)forward:(id)sender;
 
 - (IBAction)home:(id)sender;
+
+- (void)showPathFieldWithString:(NSString *)string;
 
 - (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir sender:(id)sender;
 - (void)setURLs:(NSArray *)urls updateDirectory:(BOOL)updateDir updateRoot:(BOOL)updateRoot sender:(id)sender;

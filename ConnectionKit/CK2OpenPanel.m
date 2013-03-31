@@ -254,6 +254,26 @@
     [self endWithCode:NSFileHandlingPanelCancelButton];
 }
 
+- (void)keyDown:(NSEvent *)event
+{
+    if ([event type] == NSKeyDown)
+    {
+        NSString    *string;
+        NSUInteger  flags;
+        
+        string = [event characters];
+        flags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
+
+        if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
+        {
+            [_viewController showPathFieldWithString:string];
+            return;
+        }
+    }
+    [super keyDown:event];
+}
+
+
 - (void)validateVisibleColumns
 {
     [_viewController validateVisibleColumns];

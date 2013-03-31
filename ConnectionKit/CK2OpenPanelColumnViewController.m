@@ -82,7 +82,14 @@
     controller = [self controller];
     if (directoryURL == nil)
     {
-        directoryURL = [*urls objectAtIndex:0];
+        if ([*urls count] > 0)
+        {
+            directoryURL = [*urls objectAtIndex:0];
+        }
+        else
+        {
+            return NO;
+        }
     }
     if (![controller URLCanHazChildren:directoryURL])
     {
