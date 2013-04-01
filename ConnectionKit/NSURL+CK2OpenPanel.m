@@ -313,20 +313,6 @@
     return self;
 }
 
-- (NSURL *)ck2_canonicalURL
-{
-    NSURL       *url;
-    
-    url = [CK2FileManager URLWithPath:[self path] hostURL:self];
-    
-    if ([[self absoluteString] hasSuffix:@"/"])
-    {
-        url = [url URLByAppendingPathComponent:@""];
-    }
-    return [url absoluteURL];
-}
-
-
 - (NSURL *)ck2_root
 {
     return [[CK2FileManager URLWithPath:@"/" hostURL:self] absoluteURL];

@@ -51,8 +51,6 @@
 - (BOOL)ck2_isPackage;
 - (BOOL)ck2_isHidden;
 
-- (NSURL *)ck2_canonicalURL;
-
 - (NSURL *)ck2_root;
 - (NSURL *)ck2_parentURL;
 

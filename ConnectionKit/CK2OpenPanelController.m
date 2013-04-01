@@ -467,9 +467,6 @@
     // again (possibly with a different value) later.
     [self setDirectoryURL:directoryURL];
     
-    // Make sure URL is canonical so can safely use it for comparisons later
-    directoryURL = [directoryURL ck2_canonicalURL];
-    
     children = [NSMutableArray array];
     
     //PENDING: compare url
