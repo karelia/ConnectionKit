@@ -757,8 +757,13 @@
 
 - (void)urlDidLoad:(NSURL *)url
 {
-    [[self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]] urlDidLoad:url];
+    [[self currentViewController] urlDidLoad:url];
     [self validateNewFolderButton];
+}
+
+- (CK2OpenPanelViewController *)currentViewController
+{
+    return [self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]];
 }
 
 - (CK2OpenPanelViewController *)viewControllerForIdentifier:(NSString *)identifier
@@ -820,7 +825,7 @@
     CK2OpenPanelViewController  *currentController;
     
     urlIsLoading = NO;
-    currentController = [self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]];
+    currentController = [self currentViewController];
 
     urls = [currentController selectedURLs];
     
@@ -885,7 +890,7 @@
         }
     }
     
-    [[self viewControllerForIdentifier:[[_tabView selectedTabViewItem] identifier]] reload];
+    [[self currentViewController] reload];
     [self validateNewFolderButton];
     [self validateProgressIndicator];
 }
