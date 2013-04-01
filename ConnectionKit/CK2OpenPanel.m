@@ -257,36 +257,65 @@
 
 - (BOOL)performKeyEquivalent:(NSEvent *)event
 {
-    NSString    *string;
-    
-    string = [event charactersIgnoringModifiers];
-    
-    if ([string isEqual:@">"])
+    // Certain keys, like up and down arrows, will trigger this method being called even if the command key isn't down
+    // so we need to check here.
+    if (([event modifierFlags] & NSDeviceIndependentModifierFlagsMask & NSCommandKeyMask) != 0)
     {
-        [self setShowsHiddenFiles:![self showsHiddenFiles]];
-        return YES;
+        NSString    *string;
+        
+        string = [event charactersIgnoringModifiers];
+        
+        if ([string isEqual:@">"])
+        {
+            [self setShowsHiddenFiles:![self showsHiddenFiles]];
+            return YES;
+        }
+        else if ([string isEqual:@"H"])
+        {
+            [_viewController home:self];
+            return YES;
+        }
+        else if ([string isEqual:@"G"])
+        {
+            [_viewController showPathFieldWithString:[[self directoryURL] path]];
+            return YES;
+        }
+        else if ([string isEqual:@"["])
+        {
+            [_viewController back:self];
+            return YES;
+        }
+        else if ([string isEqual:@"]"])
+        {
+            [_viewController forward:self];
+            return YES;
+        }
+        else if ([string isEqual:[NSString stringWithFormat:@"%C", (unichar)NSUpArrowFunctionKey]])
+        {
+            NSURL       *parentURL;
+            
+            parentURL = [[self directoryURL] ck2_parentURL];
+            
+            if (parentURL != nil)
+            {
+                [_viewController changeDirectory:parentURL completionBlock:
+                 ^(NSError *error)
+                 {
+                     if (error != nil)
+                     {
+                         NSBeginAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                         [_viewController back:self];
+                     }
+                 }];
+            }
+            return YES;
+        }
+        else if ([string isEqual:[NSString stringWithFormat:@"%C", (unichar)NSDownArrowFunctionKey]])
+        {
+            [_viewController goToSelectedItem:self];
+            return YES;
+        }
     }
-    else if ([string isEqual:@"H"])
-    {
-        [_viewController home:self];
-        return YES;
-    }
-    else if ([string isEqual:@"G"])
-    {
-        [_viewController showPathFieldWithString:[[self directoryURL] path]];
-        return YES;
-    }
-    else if ([string isEqual:@"["])
-    {
-        [_viewController back:self];
-        return YES;
-    }
-    else if ([string isEqual:@"]"])
-    {
-        [_viewController forward:self];
-        return YES;
-    }
-
     return NO;
 }
 
@@ -307,32 +336,6 @@
         }
     }
     [super keyDown:event];
-}
-
-- (void)moveToBeginningOfDocument:(id)sender
-{
-    NSURL       *parentURL;
-    
-    parentURL = [[self directoryURL] ck2_parentURL];
-    
-    if (parentURL != nil)
-    {
-        [_viewController changeDirectory:parentURL completionBlock:
-         ^(NSError *error)
-         {
-             if (error != nil)
-             {
-                 NSBeginAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
-                 [_viewController back:self];
-             }
-         }];
-    }
-    return;
-}
-
-- (void)moveToEndOfDocument:(id)sender
-{
-    [_viewController goToSelectedItem:self];
 }
 
 - (void)validateVisibleColumns
