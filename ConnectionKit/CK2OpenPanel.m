@@ -255,6 +255,41 @@
     [self endWithCode:NSFileHandlingPanelCancelButton];
 }
 
+- (BOOL)performKeyEquivalent:(NSEvent *)event
+{
+    NSString    *string;
+    
+    string = [event charactersIgnoringModifiers];
+    
+    if ([string isEqual:@">"])
+    {
+        [self setShowsHiddenFiles:![self showsHiddenFiles]];
+        return YES;
+    }
+    else if ([string isEqual:@"H"])
+    {
+        [_viewController home:self];
+        return YES;
+    }
+    else if ([string isEqual:@"G"])
+    {
+        [_viewController showPathFieldWithString:[[self directoryURL] path]];
+        return YES;
+    }
+    else if ([string isEqual:@"["])
+    {
+        [_viewController back:self];
+        return YES;
+    }
+    else if ([string isEqual:@"]"])
+    {
+        [_viewController forward:self];
+        return YES;
+    }
+
+    return NO;
+}
+
 - (void)keyDown:(NSEvent *)event
 {
     if ([event type] == NSKeyDown)
@@ -265,24 +300,9 @@
         string = [event characters];
         flags = [event modifierFlags] & NSDeviceIndependentModifierFlagsMask;
 
-        if ([string isEqual:@"."] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
-        {
-            [self setShowsHiddenFiles:![self showsHiddenFiles]];
-            return;
-        }
-        else if ([string isEqual:@"h"] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
-        {
-            [_viewController home:self];
-            return;
-        }
-        else if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
+        if (([string isEqual:@"/"] || [string isEqual:@"~"]) && ((flags & NSCommandKeyMask) == 0))
         {
             [_viewController showPathFieldWithString:string];
-            return;
-        }
-        else if ([string isEqual:@"g"] && ((flags & NSCommandKeyMask) != 0) && ((flags & NSShiftKeyMask) != 0))
-        {
-            [_viewController showPathFieldWithString:@""];
             return;
         }
     }
