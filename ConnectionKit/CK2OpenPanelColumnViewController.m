@@ -303,6 +303,11 @@
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
+    [self goToSelectedItem:sender];
+}
+
+- (IBAction)goToSelectedItem:(id)sender
+{
     NSArray                 *urls;
     BOOL                    isValid;
     CK2OpenPanelController  *controller;

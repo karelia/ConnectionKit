@@ -32,6 +32,7 @@
 
 #import "CK2OpenPanel.h"
 #import "CK2OpenPanelController.h"
+#import "NSURL+CK2OpenPanel.h"
 
 @interface CK2OpenPanel ()
 
@@ -288,6 +289,31 @@
     [super keyDown:event];
 }
 
+- (void)moveToBeginningOfDocument:(id)sender
+{
+    NSURL       *parentURL;
+    
+    parentURL = [[self directoryURL] ck2_parentURL];
+    
+    if (parentURL != nil)
+    {
+        [_viewController changeDirectory:parentURL completionBlock:
+         ^(NSError *error)
+         {
+             if (error != nil)
+             {
+                 NSBeginAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                 [_viewController back:self];
+             }
+         }];
+    }
+    return;
+}
+
+- (void)moveToEndOfDocument:(id)sender
+{
+    [_viewController goToSelectedItem:self];
+}
 
 - (void)validateVisibleColumns
 {

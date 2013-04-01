@@ -1135,6 +1135,11 @@
     }
 }
 
+- (void)goToSelectedItem:(id)sender
+{
+    [[self currentViewController] goToSelectedItem:(id)sender];
+}
+
 - (void)showPathFieldWithString:(NSString *)string
 {
     if (_pathFieldController == nil)

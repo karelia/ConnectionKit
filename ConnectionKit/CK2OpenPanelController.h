@@ -105,6 +105,7 @@
 - (IBAction)forward:(id)sender;
 
 - (IBAction)home:(id)sender;
+- (void)goToSelectedItem:(id)sender;
 
 - (void)showPathFieldWithString:(NSString *)string;
 

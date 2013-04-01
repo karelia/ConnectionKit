@@ -135,6 +135,11 @@
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
+    [self goToSelectedItem:sender];
+}
+
+- (IBAction)goToSelectedItem:(id)sender
+{
     CK2OpenPanelController      *controller;
     NSArray                     *urls;
     
@@ -199,7 +204,6 @@
         [_outlineView expandItem:item];
     }    
 }
-
 
 #pragma mark NSOutlineViewDataSource methods
 

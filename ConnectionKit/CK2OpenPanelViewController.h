@@ -57,4 +57,6 @@
 - (void)saveViewHistoryState:(NSMutableDictionary *)dict;
 - (void)restoreViewHistoryState:(NSDictionary *)dict;
 
+- (IBAction)goToSelectedItem:(id)sender;
+
 @end

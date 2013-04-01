@@ -168,6 +168,11 @@
 
 - (IBAction)itemDoubleClicked:(id)sender
 {
+    [self goToSelectedItem:sender];
+}
+
+- (IBAction)goToSelectedItem:(id)sender
+{
     CK2OpenPanelController  *controller;
     NSArray                 *urls;
     
