@@ -1141,34 +1141,37 @@
     [_pathFieldController beginSheetModalForWindow:[self openPanel] completionHandler:
      ^(NSInteger result)
      {
-         NSString   *path;
-         
-         path = [_pathFieldController stringValue];
-         
-         if ([path hasPrefix:@"~"])
+         if (result == NSOKButton)
          {
-             path = [path substringFromIndex:1];
+             NSString   *path;
              
-             if ([path hasPrefix:@"/"])
+             path = [_pathFieldController stringValue];
+             
+             if ([path hasPrefix:@"~"])
              {
                  path = [path substringFromIndex:1];
+                 
+                 if ([path hasPrefix:@"/"])
+                 {
+                     path = [path substringFromIndex:1];
+                 }
              }
-         }
-
-         [self addToHistory];
-
-         [self changeDirectory:[CK2FileManager URLWithPath:path hostURL:[self directoryURL]] completionBlock:
-         ^(NSError *error)
-          {
-              if (error != nil)
+             
+             [self addToHistory];
+             
+             [self changeDirectory:[CK2FileManager URLWithPath:path hostURL:[self directoryURL]] completionBlock:
+              ^(NSError *error)
               {
-                  NSBeginAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
-                  
-                  // NSOpenPanel will try and select as much of the URL as is valid. We don't do that here since it may
-                  // take a while to resolve each ancestor so we just revert back to the previous directory.
-                  [self back:self];
-              }
-          }];
+                  if (error != nil)
+                  {
+                      NSBeginAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                      
+                      // NSOpenPanel will try and select as much of the URL as is valid. We don't do that here since it may
+                      // take a while to resolve each ancestor so we just revert back to the previous directory.
+                      [self back:self];
+                  }
+              }];
+         }
      }];
 }
 
