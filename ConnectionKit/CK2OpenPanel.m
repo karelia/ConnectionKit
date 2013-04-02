@@ -240,11 +240,14 @@
     {
         NSError     *error;
         
-        error = nil;
-        if (![[self delegate] panel:self validateURL:[self URL] error:&error])
+        for (NSURL *url in [self URLs])
         {
-            [self presentError:error modalForWindow:self delegate:nil didPresentSelector:NULL contextInfo:NULL];
-            return;
+            error = nil;
+            if (![[self delegate] panel:self validateURL:url error:&error])
+            {
+                [self presentError:error modalForWindow:self delegate:nil didPresentSelector:NULL contextInfo:NULL];
+                return;
+            }
         }
     }
     [self endWithCode:NSFileHandlingPanelOKButton];
