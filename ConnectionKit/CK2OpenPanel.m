@@ -303,7 +303,7 @@
                  {
                      if (error != nil)
                      {
-                         NSBeginAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                         NSBeginCriticalAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
                          [_viewController back:self];
                      }
                  }];

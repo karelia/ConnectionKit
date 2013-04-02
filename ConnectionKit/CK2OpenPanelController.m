@@ -950,7 +950,7 @@
     else if ([controller error] != nil)
     {
         NSLog(@"Could not create directory under URL %@: %@", parentURL, [controller error]);
-        [self presentError:[controller error]];
+        NSBeginCriticalAlertSheet(@"Could not create folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [[controller error] localizedDescription]);
     }
     
     [controller release];
@@ -1152,7 +1152,8 @@
               {
                   if (error != nil)
                   {
-                      NSBeginAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                      NSBeginCriticalAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+
                       
                       // NSOpenPanel will try and select as much of the URL as is valid. We don't do that here since it may
                       // take a while to resolve each ancestor so we just revert back to the previous directory.
