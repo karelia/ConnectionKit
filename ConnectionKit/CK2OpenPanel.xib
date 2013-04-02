@@ -933,7 +933,6 @@
 															<int key="NSvFlags">256</int>
 															<string key="NSFrame">{{1, 316}, {515, 15}}</string>
 															<reference key="NSSuperview" ref="654578631"/>
-															<reference key="NSNextKeyView" ref="416172757"/>
 															<string key="NSReuseIdentifierKey">_NS:60</string>
 															<bool key="NSEnabled">YES</bool>
 															<int key="NSsFlags">1</int>
@@ -991,7 +990,7 @@
 													<string key="NSFrameSize">{517, 332}</string>
 													<reference key="NSSuperview" ref="160686083"/>
 													<reference key="NSWindow"/>
-													<reference key="NSNextKeyView"/>
+													<reference key="NSNextKeyView" ref="416172757"/>
 													<string key="NSReuseIdentifierKey">_NS:9</string>
 													<bool key="NSEnabled">YES</bool>
 													<object class="NSBrowserCell" key="NSCellPrototype">
@@ -1129,9 +1128,12 @@
 			<object class="NSViewController" id="576824129"/>
 			<object class="NSCollectionViewItem" id="700265320"/>
 			<object class="NSCustomView" id="687293973">
-				<nil key="NSNextResponder"/>
+				<reference key="NSNextResponder"/>
 				<int key="NSvFlags">268</int>
-				<string key="NSFrameSize">{125, 114}</string>
+				<string key="NSFrameSize">{125, 122}</string>
+				<reference key="NSSuperview"/>
+				<reference key="NSWindow"/>
+				<reference key="NSNextKeyView"/>
 				<string key="NSClassName">CK2IconItemView</string>
 			</object>
 			<object class="NSBox" id="1028213455">
@@ -2524,10 +2526,15 @@
 					<string key="className">CK2OpenPanelViewController</string>
 					<string key="superclassName">NSViewController</string>
 					<dictionary class="NSMutableDictionary" key="actions">
+						<string key="goToSelectedItem:">id</string>
 						<string key="itemDoubleClicked:">id</string>
 						<string key="itemSelected:">id</string>
 					</dictionary>
 					<dictionary class="NSMutableDictionary" key="actionInfosByName">
+						<object class="IBActionInfo" key="goToSelectedItem:">
+							<string key="name">goToSelectedItem:</string>
+							<string key="candidateClassName">id</string>
+						</object>
 						<object class="IBActionInfo" key="itemDoubleClicked:">
 							<string key="name">itemDoubleClicked:</string>
 							<string key="candidateClassName">id</string>

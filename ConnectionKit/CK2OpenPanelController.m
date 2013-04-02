@@ -73,8 +73,6 @@
 #define COLUMN_VIEW_IDENTIFIER              @"column"
 #define BLANK_VIEW_IDENTIFIER               @"blank"
 
-#define CK2OpenPanelErrorDomain             @"CK2OpenPanelErrorDomain"
-
 #define CK2OpenPanelLastViewPrefKey         @"CK2NavPanelFileLastListModeForOpenModeKey"
 
 @interface CK2OpenPanelController ()
@@ -677,7 +675,7 @@
                         [_runningOperations removeObjectForKey:url];
                         
                         [self validateProgressIndicator];
-                        [self urlDidLoad:url];                        
+                        [self urlDidLoad:url];
                     });
                 }];
 

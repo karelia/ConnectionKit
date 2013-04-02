@@ -37,6 +37,7 @@
 #import "CK2IconView.h"
 #import "NSImage+CK2OpenPanel.h"
 
+#define MARGIN                 4.0
 #define ICON_SIZE              64.0
 #define ICON_SELECTION_MARGIN  4.0
 #define ICON_TEXT_MARGIN       8.0
@@ -106,7 +107,9 @@
 
 - (NSRect)iconRectForBounds:(NSRect)bounds
 {
-    return NSMakeRect(NSMinX(bounds) + (NSWidth(bounds) - ICON_SIZE) / 2.0, NSMinY(bounds) + (NSHeight(bounds) - (2 * ICON_SELECTION_MARGIN + ICON_SIZE + ICON_TEXT_MARGIN + TEXT_HEIGHT)) / 2.0 + TEXT_HEIGHT + ICON_TEXT_MARGIN + ICON_SELECTION_MARGIN, ICON_SIZE, ICON_SIZE);
+    return NSMakeRect(NSMinX(bounds) + (NSWidth(bounds) - ICON_SIZE) / 2.0,
+                      NSMinY(bounds) + (NSHeight(bounds) - (2 * ICON_SELECTION_MARGIN + 2 * MARGIN + ICON_SIZE + ICON_TEXT_MARGIN + TEXT_HEIGHT)) / 2.0 + TEXT_HEIGHT + ICON_TEXT_MARGIN + ICON_SELECTION_MARGIN + MARGIN,
+                      ICON_SIZE, ICON_SIZE);
 }
 
 - (NSRect)textRectForBounds:(NSRect)bounds
