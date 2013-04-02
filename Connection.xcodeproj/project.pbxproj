@@ -37,8 +37,6 @@
 		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */; };
-		228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
 		22C9CF9F1703327A004610FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CF9D1703327A004610FE /* InfoPlist.strings */; };
 		22C9CFA11703327A004610FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA01703327A004610FE /* main.m */; };
@@ -46,8 +44,6 @@
 		22C9CFA81703327A004610FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA71703327A004610FE /* AppDelegate.m */; };
 		22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA91703327A004610FE /* MainMenu.xib */; };
 		22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */; };
-		22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
@@ -75,6 +71,8 @@
 		2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
 		27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */; };
 		27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */; };
+		27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
+		27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
 		27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -410,6 +408,7 @@
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
+				27999BB8170B4BDD00A54BEE /* Framework Extensions */,
 				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
@@ -594,6 +593,18 @@
 			name = Uploader;
 			sourceTree = "<group>";
 		};
+		27999BB8170B4BDD00A54BEE /* Framework Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */,
+				22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */,
+				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
+				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
+			);
+			name = "Framework Extensions";
+			path = ../ConnectionKit;
+			sourceTree = "<group>";
+		};
 		27F3372C16BC1FB100E70511 /* AuthTester */ = {
 			isa = PBXGroup;
 			children = (
@@ -693,10 +704,6 @@
 			children = (
 				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
 				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
-				22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */,
-				22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */,
-				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
-				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Private;
@@ -754,8 +761,6 @@
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
-				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
-				22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1044,6 +1049,8 @@
 				2246AF6916B99987001D39D9 /* KMSCommand.m in Sources */,
 				2246AF6A16B99987001D39D9 /* KMSCloseCommand.m in Sources */,
 				278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */,
+				27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */,
+				27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1084,8 +1091,6 @@
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
-				228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */,
-				22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
