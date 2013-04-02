@@ -73,10 +73,6 @@
 #define COLUMN_VIEW_IDENTIFIER              @"column"
 #define BLANK_VIEW_IDENTIFIER               @"blank"
 
-#define CK2OpenPanelDidLoadURL              @"CK2OpenPanelDidLoadURL"
-#define CK2ErrorNotificationKey             @"error"
-#define CK2URLNotificationKey               @"url"
-
 #define CK2OpenPanelErrorDomain             @"CK2OpenPanelErrorDomain"
 
 #define CK2OpenPanelLastViewPrefKey         @"CK2NavPanelFileLastListModeForOpenModeKey"
@@ -675,26 +671,13 @@
                     
                     dispatch_async(dispatch_get_main_queue(),
                     ^{
-                        NSNotification      *notification;
-                        NSMutableDictionary *userInfo;
                         
                         [self cacheChildren:value forURL:url];
 
                         [_runningOperations removeObjectForKey:url];
                         
                         [self validateProgressIndicator];
-                        [self urlDidLoad:url];
-                        
-                        userInfo = [NSMutableDictionary dictionaryWithObject:url forKey:CK2URLNotificationKey];
-                        
-                        if (blockError != nil)
-                        {
-                            [userInfo setObject:blockError forKey:CK2ErrorNotificationKey];
-                        }
-                        
-                        notification = [NSNotification notificationWithName:CK2OpenPanelDidLoadURL object:self
-                                                                   userInfo:userInfo];
-                        [[NSNotificationCenter defaultCenter] postNotification:notification];
+                        [self urlDidLoad:url];                        
                     });
                 }];
 
