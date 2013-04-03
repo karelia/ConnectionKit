@@ -28,7 +28,7 @@
     
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
     // According to libcurl's docs that should be enough. But with our current build of it, it seems they've gotten stricter
-    // The FTP spec could be interpreted that the only way to refer to the root directy is with the sequence @"%2F", which decodes as a slash
+    // The FTP spec could be interpreted that the only way to refer to the root directly is with the sequence @"%2F", which decodes as a slash
     // That makes it very clear to the library etc. this particular slash is meant to be transmitted to the server, rather than treated as a path component separator
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
