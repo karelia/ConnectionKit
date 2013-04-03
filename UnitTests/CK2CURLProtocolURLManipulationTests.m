@@ -227,10 +227,14 @@
 - (void)testIncludingUser;
 {
     CK2CURLBasedProtocol *protocol = [[CK2CURLBasedProtocol alloc] init];
-    [protocol setValue:@"user" forKey:@"_user"];    // HACK for testing
+    
+    // Test first with no user set. e.g. anonymous login
+    NSURL *url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://example.com/image.png", nil);
     
     // Adding user into the URL
-    NSURL *url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
+    [protocol setValue:@"user" forKey:@"_user"];    // HACK for testing
+    url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
     STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
     
     // Replacing existing user
