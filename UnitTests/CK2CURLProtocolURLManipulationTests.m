@@ -208,3 +208,43 @@
 }
 
 @end
+
+
+#pragma mark -
+
+
+@interface URLCanonicalizationTests : SenTestCase
+@end
+
+
+@interface CK2CURLBasedProtocol (URLCanonicalizationTests)
+- (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
+@end
+
+
+@implementation URLCanonicalizationTests
+
+- (void)testIncludingUser;
+{
+    CK2CURLBasedProtocol *protocol = [[CK2CURLBasedProtocol alloc] init];
+    [protocol setValue:@"user" forKey:@"_user"];    // HACK for testing
+    
+    // Adding user into the URL
+    NSURL *url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Replacing existing user
+    url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://test@example.com/image.png"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Replacing existing user + password
+    url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://test:sekret@example.com/image.png"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Escaping of unusual characters
+    [protocol setValue:@"user/:1@example.com" forKey:@"_user"];
+    url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+}
+
+@end
