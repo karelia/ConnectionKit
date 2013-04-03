@@ -309,7 +309,16 @@
 - (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
 {
     // Canonicalize URLs by making sure username is included. Strip out password in the process
-    NSString *user = [_user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    CFStringRef user = (CFStringRef)_user;
+    if (user)
+    {
+        // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so drop down CoreFoundation
+        user = CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                       user,
+                                                       NULL,
+                                                       CFSTR(":/?#[]@!$&'()*+,;="),   // going by RFC3986
+                                                       kCFStringEncodingUTF8);
+    }
     
     CFIndex length = CFURLGetBytes((CFURLRef)aURL, NULL, 0);
     NSMutableData *data = [[NSMutableData alloc] initWithLength:length];
@@ -320,17 +329,19 @@
     
     if (authRange.location == kCFNotFound)
     {
-        NSData *replacement = [[user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *replacement = [[(NSString *)user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
         CFDataReplaceBytes((CFMutableDataRef)data, authSeparatorsRange, [replacement bytes], replacement.length);
     }
     else
     {
-        NSData *replacement = [user dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *replacement = [(NSString *)user dataUsingEncoding:NSUTF8StringEncoding];
         CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
     }
     
     aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
+    
     [data release];
+    if (user) CFRelease(user);
     
     return [aURL autorelease];
 }
