@@ -248,7 +248,7 @@
     // Escaping of unusual characters
     [protocol setValue:@"user/:1@example.com" forKey:@"_user"];
     url = [protocol canonicalizedURLForReporting:[NSURL URLWithString:@"ftp://example.com/image.png"]];
-    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    STAssertEqualObjects(url.absoluteString, @"ftp://user%2F%3A1%40example.com@example.com/image.png", nil);
 }
 
 @end
