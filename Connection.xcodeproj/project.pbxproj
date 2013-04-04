@@ -1412,7 +1412,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1465,7 +1465,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1505,7 +1505,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
