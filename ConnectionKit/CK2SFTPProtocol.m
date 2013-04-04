@@ -9,7 +9,7 @@
 #import "CK2SFTPProtocol.h"
 #import "CK2Authentication.h"
 
-#import "CK2SFTPSession.h"
+#import <CURLHandle/CK2SSHCredential.h>
 
 #import <AppKit/AppKit.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
