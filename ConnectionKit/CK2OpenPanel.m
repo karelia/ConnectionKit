@@ -312,7 +312,9 @@
                  {
                      if (error != nil)
                      {
-                         NSBeginCriticalAlertSheet(@"Could not go to enclosing folder.", @"OK", nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                         NSLog(@"Could not navigate to enclosing folder from URL %@: %@", [self directoryURL], error);
+                         NSBeginCriticalAlertSheet(NSLocalizedStringFromTableInBundle(@"Could not go to enclosing folder.", nil, [NSBundle bundleForClass:[self class]], @"Enclosing folder error"),
+                                                   NSLocalizedStringFromTableInBundle(@"OK", nil, [NSBundle bundleForClass:[self class]], @"OK Button"), nil, nil, self, nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
                          [_viewController back:self];
                      }
                  }];

@@ -953,7 +953,8 @@
     else if ([controller error] != nil)
     {
         NSLog(@"Could not create directory under URL %@: %@", parentURL, [controller error]);
-        NSBeginCriticalAlertSheet(@"Could not create folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [[controller error] localizedDescription]);
+        NSBeginCriticalAlertSheet(NSLocalizedStringFromTableInBundle(@"Could not create folder", nil, [NSBundle bundleForClass:[self class]], @"Create folder error"),
+                                  NSLocalizedStringFromTableInBundle(@"OK", nil, [NSBundle bundleForClass:[self class]], @"OK Button"), nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [[controller error] localizedDescription]);
     }
     
     [controller release];
@@ -1155,7 +1156,9 @@
               {
                   if (error != nil)
                   {
-                      NSBeginCriticalAlertSheet(@"Could not switch to folder", @"OK", nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
+                      NSLog(@"Could not switch to URL %@: %@", [self directoryURL], error);
+                      NSBeginCriticalAlertSheet(NSLocalizedStringFromTableInBundle(@"Could not switch to folder", nil, [NSBundle bundleForClass:[self class]], @"Switch folder error"),
+                                                NSLocalizedStringFromTableInBundle(@"OK", nil, [NSBundle bundleForClass:[self class]], @"OK Button"), nil, nil, [self openPanel], nil, NULL, NULL, NULL, @"%@", [error localizedDescription]);
 
                       
                       // NSOpenPanel will try and select as much of the URL as is valid. We don't do that here since it may

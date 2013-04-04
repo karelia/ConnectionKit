@@ -42,12 +42,12 @@
 
 + (NSURL *)ck2_loadingURL
 {
-    return [[[CK2PlaceholderURL alloc] initWithString:[@"Loading…" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
+    return [[[CK2PlaceholderURL alloc] initWithString:[NSLocalizedStringFromTableInBundle(@"Loading…", nil, [NSBundle bundleForClass:[self class]], @"Loading placeholder")stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
 + (NSURL *)ck2_errorURL
 {
-    return [[[CK2PlaceholderURL alloc] initWithString:[@"Error" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
+    return [[[CK2PlaceholderURL alloc] initWithString:[NSLocalizedStringFromTableInBundle(@"Error", nil, [NSBundle bundleForClass:[self class]], @"Error placedholer")stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]] autorelease];
 }
 
 + (NSURL *)ck2_errorURLWithMessage:(NSString *)message
