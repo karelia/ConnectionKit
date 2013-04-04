@@ -36,8 +36,13 @@
 
 - (void)dealloc
 {
-    [self setFolderURL:nil];
-    [self setError:nil];
+    if (_operation != nil)
+    {
+        [[_controller fileManager] cancelOperation:_operation];
+    }
+    [_operation release];
+    [_folderURL release];
+    [_error release];
     [_existingNames release];
     
     [super dealloc];

@@ -33,7 +33,7 @@
 
 // CK2OpenPanel is the equivalent of NSOpenPanel, but built on ConnectionKit so that it can allow you to browse
 // filesystems on other machines via the protocols ConnectionKit supports. The goal of this was to emulate NSOpenPanel
-// as far as it made sense. It's user and programming APIs remain fairly close to NSOpenPanel with the following
+// as far as it made sense. It's user and programming interfaces remain fairly close to NSOpenPanel with the following
 // exceptions:
 //
 // User Interface:
@@ -58,9 +58,7 @@
 // on a locally dropped file.
 //
 // API:
-// - No API's related to saving files (name field, expansion state).
-// - Did not implement the ability for the user to select hidden extensions. If this is missed, one can add an
-// accessory view to do this.
+// - No API's related to saving files (name field, expansion state, hide extension).
 // - -setDirectoryURL: can also take a completion block, since the operation is asynchronous.
 //
 // Despite all of the above, CK2OpenPanel should be a near-drop-in replacement for NSOpenPanel in terms of code usage

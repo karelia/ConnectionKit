@@ -95,6 +95,12 @@
     
     [self setCompletionBlock:nil];
     [_viewController release];
+    [_title release];
+    [_prompt release];
+    [_message release];
+    [_allowedFileTypes release];
+    [_completionBlock release];
+    
     [super dealloc];
 }
 

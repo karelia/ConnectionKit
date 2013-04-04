@@ -41,6 +41,13 @@
 
 @synthesize rootURL = _rootURL;
 
+- (void)dealloc
+{
+    [_previewController release];
+    [_rootURL release];
+    [super dealloc];
+}
+
 - (void)awakeFromNib
 {
     [_browser setCellClass:[CK2FileCell class]];

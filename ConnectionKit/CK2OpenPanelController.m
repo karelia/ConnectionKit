@@ -123,7 +123,7 @@
     return self;
 }
 
-- (void)close;
+- (void)close
 {
     [_openPanel removeObserver:self forKeyPath:@"prompt"];
     [_openPanel removeObserver:self forKeyPath:@"message"];
@@ -158,13 +158,16 @@
         [_currentBootstrapOperation release];
     }
     
-    [_fileManager release];
-    
     [self close];   // just to be sure
 
+    [_directoryURL release];
     [_urls release];
+    [_homeURL release];
     [_urlCache release];
+    [_runningOperations release];
+    [_fileManager release];
     [_historyManager release];
+    [_pathFieldController release];
     
     [super dealloc];
 }
