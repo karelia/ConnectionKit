@@ -90,7 +90,7 @@ ConnectionKit includes several (nested) submodules of its own, so have Git grab 
 	cd ConnectionKit
 	git submodule update --recursive --init
 
-Substitute the URL above for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`curlhandle-4` at present).
+Substitute the URL above for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`v2.x-beta` at present).
 
 Then:
 
