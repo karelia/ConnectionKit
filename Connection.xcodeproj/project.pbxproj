@@ -37,8 +37,6 @@
 		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
-		228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */; };
-		228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
 		22C9CF9F1703327A004610FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CF9D1703327A004610FE /* InfoPlist.strings */; };
 		22C9CFA11703327A004610FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA01703327A004610FE /* main.m */; };
@@ -46,16 +44,10 @@
 		22C9CFA81703327A004610FE /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA71703327A004610FE /* AppDelegate.m */; };
 		22C9CFAB1703327A004610FE /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CFA91703327A004610FE /* MainMenu.xib */; };
 		22C9CFBA170333A2004610FE /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
-		22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */ = {isa = PBXBuildFile; fileRef = 22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */; };
-		22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
 		22CC56F91509048E00F94154 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
 		22CC578B1509068600F94154 /* Connection.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD12609F702BE00172CDD /* Connection.framework */; };
 		22F6D112165A8A2200443CC9 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
 		22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
-		2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */; settings = {ATTRIBUTES = (); }; };
-		2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */; };
-		2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */ = {isa = PBXBuildFile; fileRef = 2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */; settings = {ATTRIBUTES = (); }; };
-		2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */ = {isa = PBXBuildFile; fileRef = 2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */; };
 		2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 2702E4671459D0F50085BBC4 /* libssh2.dylib */; };
 		271059521671334500E20511 /* DAVKit.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
@@ -75,6 +67,8 @@
 		2790A94916278F1D000C9D9F /* CK2FTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2790A94716278F1D000C9D9F /* CK2FTPProtocol.m */; };
 		27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */ = {isa = PBXBuildFile; fileRef = 27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */; };
 		27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */; };
+		27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
+		27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
 		27A2072B1671634800D8284D /* CK2CURLBasedProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27A207291671634800D8284D /* CK2CURLBasedProtocol.h */; };
 		27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27A2072A1671634800D8284D /* CK2CURLBasedProtocol.m */; };
 		27D03B421471787000FEA588 /* CKUploader.h in Headers */ = {isa = PBXBuildFile; fileRef = 27D03B401471787000FEA588 /* CKUploader.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -262,10 +256,6 @@
 		22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerURLTests.m; sourceTree = "<group>"; };
 		22FEB6671680818800BB778B /* KMSTranscriptEntry.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSTranscriptEntry.m; sourceTree = "<group>"; };
 		22FEB6681680818800BB778B /* KMSTranscriptEntry.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSTranscriptEntry.h; sourceTree = "<group>"; };
-		2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPFileHandle.h; path = ../SFTP/CK2SFTPFileHandle.h; sourceTree = "<group>"; };
-		2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPFileHandle.m; path = ../SFTP/CK2SFTPFileHandle.m; sourceTree = "<group>"; };
-		2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CK2SFTPSession.h; path = ../SFTP/CK2SFTPSession.h; sourceTree = "<group>"; };
-		2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = CK2SFTPSession.m; path = ../SFTP/CK2SFTPSession.m; sourceTree = "<group>"; };
 		2702E4671459D0F50085BBC4 /* libssh2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssh2.dylib; path = CurlHandle/SFTP/libssh2.dylib; sourceTree = "<group>"; };
 		27431C9E1630381D00F6FB58 /* CK2FileProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileProtocol.h; sourceTree = "<group>"; };
 		27431C9F1630381D00F6FB58 /* CK2FileProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileProtocol.m; sourceTree = "<group>"; };
@@ -403,13 +393,14 @@
 				225FCA3716B046F800A9F5AE /* CKUploaderTests.m */,
 				22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */,
 				22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */,
+				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */,
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */,
 				220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */,
-				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
+				27999BB8170B4BDD00A54BEE /* Framework Extensions */,
 				2248933B165D48CF006C4C7F /* UnitTests_Prefix.pch */,
 				09D6601E09FD37990000BA00 /* UnitTest-Info.plist */,
 				22F6D0E8165A8A2200443CC9 /* MockServer */,
@@ -594,6 +585,18 @@
 			name = Uploader;
 			sourceTree = "<group>";
 		};
+		27999BB8170B4BDD00A54BEE /* Framework Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */,
+				22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */,
+				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
+				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
+			);
+			name = "Framework Extensions";
+			path = ../ConnectionKit;
+			sourceTree = "<group>";
+		};
 		27F3372C16BC1FB100E70511 /* AuthTester */ = {
 			isa = PBXGroup;
 			children = (
@@ -632,7 +635,6 @@
 			children = (
 				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
 				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
-				D3598B580CF3D3DF00C61A38 /* SFTP */,
 			);
 			name = Dependencies;
 			path = ConnectionKit;
@@ -693,10 +695,6 @@
 			children = (
 				27993E8216FCB30D008DC1B0 /* CK2FileOperation.h */,
 				27993E8316FCB30D008DC1B0 /* CK2FileOperation.m */,
-				22C9CFED1703AD4C004610FE /* CK2FileOperationWithTestSupport.h */,
-				22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */,
-				228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */,
-				228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */,
 				273F0E13164E8D3E00588885 /* Protocols */,
 			);
 			name = Private;
@@ -711,26 +709,6 @@
 			name = Images;
 			sourceTree = "<group>";
 		};
-		D3598B580CF3D3DF00C61A38 /* SFTP */ = {
-			isa = PBXGroup;
-			children = (
-				2702E3E91459CB550085BBC4 /* CK2SFTPFileHandle.h */,
-				2702E3EA1459CB550085BBC4 /* CK2SFTPFileHandle.m */,
-				2702E3EB1459CB550085BBC4 /* CK2SFTPSession.h */,
-				2702E3EC1459CB550085BBC4 /* CK2SFTPSession.m */,
-				D3598B590CF3D3E400C61A38 /* Other */,
-			);
-			name = SFTP;
-			path = ../CurlHandle/SFTP;
-			sourceTree = "<group>";
-		};
-		D3598B590CF3D3E400C61A38 /* Other */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Other;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -743,8 +721,6 @@
 				7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */,
 				798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */,
 				27D03B421471787000FEA588 /* CKUploader.h in Headers */,
-				2702E3EF1459CB550085BBC4 /* CK2SFTPFileHandle.h in Headers */,
-				2702E3F11459CB550085BBC4 /* CK2SFTPSession.h in Headers */,
 				2743E8091622E47600019979 /* CK2FileManager.h in Headers */,
 				2790A8291627636E000C9D9F /* CK2Protocol.h in Headers */,
 				2790A94816278F1D000C9D9F /* CK2FTPProtocol.h in Headers */,
@@ -754,8 +730,6 @@
 				278D8B79167FF35D00622468 /* CK2Authentication.h in Headers */,
 				ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
-				228E180F1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.h in Headers */,
-				22C9CFEF1703AD4D004610FE /* CK2FileOperationWithTestSupport.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1009,7 +983,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 			shellPath = /bin/sh;
-			shellScript = "echo \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\nmv en.lproj/Localizable.strings.utf8 en.lproj/Localizable.strings\n";
+			shellScript = "# Skip localization for now\nexit 0\n\necho \"Generating Localizable.strings ...\"\n\ncd \"${SRCROOT}\"\ngenstrings -littleEndian -q -u -s LocalizedStringInConnectionKitBundle -o en.lproj *.m\n\n# Convert UTF-16 into UTF-8 with BOM\necho -ne '\\xEF\\xBB\\xBF' > en.lproj/Localizable.strings.utf8\niconv -f UTF-16 -t UTF-8 en.lproj/Localizable.strings >> en.lproj/Localizable.strings.utf8\nmv en.lproj/Localizable.strings.utf8 en.lproj/Localizable.strings\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -1044,6 +1018,8 @@
 				2246AF6916B99987001D39D9 /* KMSCommand.m in Sources */,
 				2246AF6A16B99987001D39D9 /* KMSCloseCommand.m in Sources */,
 				278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */,
+				27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */,
+				27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1072,8 +1048,6 @@
 				795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */,
 				7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */,
 				798313CA0B0D67E000F5078E /* CKTransferProgressCell.m in Sources */,
-				2702E3F01459CB550085BBC4 /* CK2SFTPFileHandle.m in Sources */,
-				2702E3F21459CB550085BBC4 /* CK2SFTPSession.m in Sources */,
 				27D03B431471787000FEA588 /* CKUploader.m in Sources */,
 				2743E80A1622E47600019979 /* CK2FileManager.m in Sources */,
 				2790A82A1627636E000C9D9F /* CK2Protocol.m in Sources */,
@@ -1084,8 +1058,6 @@
 				27A2072C1671634800D8284D /* CK2CURLBasedProtocol.m in Sources */,
 				278D8B7A167FF35D00622468 /* CK2Authentication.m in Sources */,
 				27993E8516FCB30D008DC1B0 /* CK2FileOperation.m in Sources */,
-				228E18101700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m in Sources */,
-				22C9CFF01703AD4D004610FE /* CK2FileOperationWithTestSupport.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1440,7 +1412,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1493,7 +1465,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
@@ -1533,7 +1505,7 @@
 				GCC_PFE_FILE_C_DIALECTS = "objective-c c++ objective-c++";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = ConnectionKit/Connection_Prefix.pch;
-				HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include";
+				HEADER_SEARCH_PATHS = "\"$(SOURCE_ROOT)/CURLHandle/SFTP/libssh2/include\"";
 				INFOPLIST_FILE = "Resources/Framework-Info.plist";
 				INSTALL_PATH = "@rpath";
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/Frameworks";
