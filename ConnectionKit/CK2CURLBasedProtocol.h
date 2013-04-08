@@ -24,7 +24,7 @@
 }
 
 #pragma mark Initialisation
-// In any of these mehtods, if completion handler is nil, the standard behaviour of reporting to the client will be performed
+// In any of these methods, if completion handler is nil, the standard behaviour of reporting to the client will be performed
 
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
 - (id)initWithRequest:(NSURLRequest *)request client:(id <CK2ProtocolClient>)client dataHandler:(void (^)(NSData *))dataBlock completionHandler:(void (^)(NSError *))handler;
