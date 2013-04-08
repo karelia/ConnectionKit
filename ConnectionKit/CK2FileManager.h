@@ -89,6 +89,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
 
+#pragma mark Moving Items
+// Moving items between different servers/protocols is not supported at the moment, and attempting to do so produces undefined results
+- (BOOL)moveItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL completionHandler:(void (^)(NSError *error))handler;
+
+
 #pragma mark Getting and Setting Attributes
 
 // It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:

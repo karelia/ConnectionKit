@@ -61,6 +61,11 @@
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
 
+- (id)initMoveOperationWithSourceURL:(NSURL *)srcURL
+                      destinationURL:(NSURL *)dstURL
+                             manager:(CK2FileManager *)manager
+                     completionBlock:(void (^)(NSError *))block;
+
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
                                         values:(NSDictionary *)keyedValues
                                        manager:(CK2FileManager *)manager

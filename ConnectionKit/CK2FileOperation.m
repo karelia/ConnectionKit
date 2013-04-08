@@ -220,6 +220,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
+- (id)initMoveOperationWithSourceURL:(NSURL *)srcURL
+                      destinationURL:(NSURL *)dstURL
+                             manager:(CK2FileManager *)manager
+                     completionBlock:(void (^)(NSError *))block;
+{
+    return [self initWithURL:srcURL manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+        
+        return [[protocolClass alloc] initForMovingItemWithRequest:[self requestWithURL:srcURL] toURL:dstURL client:self];
+    }];
+}
+
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
                                         values:(NSDictionary *)keyedValues
                                        manager:(CK2FileManager *)manager

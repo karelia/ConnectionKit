@@ -118,6 +118,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
+#pragma mark Moving Items
+// Moving items between different servers/protocols is not supported at the moment, and attempting to do so produces undefined results
+- (BOOL)moveItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL completionHandler:(void (^)(NSError *error))handler;
+{
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initMoveOperationWithSourceURL:srcURL
+                                                                                    destinationURL:dstURL
+                                                                                           manager:self
+                                                                                   completionBlock:handler];
+    
+    return [operation autorelease];
+}
+
 #pragma mark Getting and Setting Attributes
 
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;

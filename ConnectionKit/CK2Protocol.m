@@ -63,6 +63,14 @@
     return nil;
 }
 
+- (id)initForMovingItemWithRequest:(NSURLRequest *)request
+                             toURL:(NSURL *)dstURL
+                            client:(id <CK2ProtocolClient>)client;
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
