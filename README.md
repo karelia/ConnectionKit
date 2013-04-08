@@ -100,7 +100,7 @@ Then:
 
 ## Actually, y'know, doing stuff
 
-Interacting with ConnectionKit is usually entirely through `CKFileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
+Interacting with ConnectionKit is usually entirely through `CK2FileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
 
 So to get a directory listing from an FTP server for example:
 
