@@ -353,7 +353,7 @@ static NSString* gResponsesToUse = nil;
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-            STAssertNotNil(error, @"got unexpected error %@", error);
+            STAssertNil(error, @"got unexpected error %@", error);
 
             // Make sure the file went into root, rather than home
             // This could be done by changing directory to /, or storing directly to /test.txt
