@@ -489,8 +489,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                                                           sender:self];
         }
         
-#ifndef __clang_analyzer__ // clang seems to produce an entirely spurious warning here - it says that self hasn't been set, but it has
-#endif
         CK2FileManager *manager = operation.fileManager;
         
         id <CK2FileManagerDelegate> delegate = [manager delegate];
