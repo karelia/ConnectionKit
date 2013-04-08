@@ -971,6 +971,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
+			showEnvVarsInLog = 0;
 		};
 		7931260F0B3684B2002FF80D /* Strip UKKQueue */ = {
 			isa = PBXShellScriptBuildPhase;
