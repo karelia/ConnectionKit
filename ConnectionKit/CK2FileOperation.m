@@ -491,6 +491,11 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                                                           sender:self];
         }
         
+        /*  At this point point, we are retaining _trampolineChallenge
+         *  It in turn is retaining us, as the sender. This isn't actually guaranteed by the docs, but is a fair bet rdar://problem/13602367
+         *  The cycle is broken when the challenge is replied to
+         */
+        
         CK2FileManager *manager = operation.fileManager;
         
         id <CK2FileManagerDelegate> delegate = [manager delegate];
@@ -502,8 +507,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
         }
-        
-        [self retain];  // gets released when challenge is replied to
     }
     return self;
 }
@@ -522,8 +525,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // release trampoline challenge now to break retain cycle
     [_trampolineChallenge release];
     _trampolineChallenge = nil;
-
-    [self release];
 }
 
 @synthesize originalChallenge = _originalChallenge;
