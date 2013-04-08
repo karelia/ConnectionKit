@@ -17,24 +17,17 @@
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    NSString* user;
-    NSString* password;
-
-    if (challenge.previousFailureCount > 0)
+    if (challenge.previousFailureCount == 0)
     {
-        user = self.user;
-        password = self.password;
-
-        [self useResponseSet:@"default"];
+        self.user = @"bad";
     }
     else
     {
-        user = @"bad";
-        password = @"bad";
+        self.user = self.originalUser;
+        [self useResponseSet:@"default"];
     }
 
-    NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
-    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
+    [super fileManager:manager didReceiveAuthenticationChallenge:challenge];
 }
 
 #pragma mark - Tests
@@ -45,12 +38,13 @@
     // after the first challenge though, we switch to the "normal" responses so that it accepts it
     if ([self setupSessionWithResponses:@"ftp"])
     {
+        [self removeTestDirectory];
         [self useResponseSet:@"bad login"];
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue(error == nil ||
-                         ((error.code == 21) && (error.curlResponseCode == 550)), @"got unexpected error %@", error);
+            BOOL isExpectedError = [self checkNoErrorOrFileExistsError:error];
+            STAssertTrue(isExpectedError, @"got unexpected error %@", error);
 
             [self pause];
         }];
