@@ -44,7 +44,6 @@
 
 #pragma mark URLs
 // For subclasses to make use of if they wish
-+ (BOOL)URLHasDirectoryPath:(NSURL *)url;
 + (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)user;
 
 

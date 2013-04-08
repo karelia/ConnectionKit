@@ -477,7 +477,7 @@
     NSURL *url = [request URL];
     
     // CURL is very particular about whether URLs passed to it have directory terminator or not
-    if (directory != [self URLHasDirectoryPath:url])
+    if (directory != CFURLHasDirectoryPath((CFURLRef)url))
     {
         if (directory)
         {
@@ -497,11 +497,6 @@
     NSMutableURLRequest *result = [request mutableCopy];
     [result setURL:url];
     return result;
-}
-
-+ (BOOL)URLHasDirectoryPath:(NSURL *)url;
-{
-    return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
 #pragma mark Home Directory Store

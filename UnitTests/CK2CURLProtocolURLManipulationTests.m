@@ -84,37 +84,37 @@
 
 - (void)testFTPRootIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPRootWithTrailingSlashIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F/"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/"]);
     STAssertTrue(isDirectory, nil);
 }
 
 - (void)testFTPHomeIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/"]);
     STAssertTrue(isDirectory, nil);
 }
 
 - (void)testFTPHomeWithoutTrailingSlashIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPAbsoluteFileIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F/test.txt"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/test.txt"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPRelativeFileIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/test.txt"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/test.txt"]);
     STAssertFalse(isDirectory, nil);
 }
 
