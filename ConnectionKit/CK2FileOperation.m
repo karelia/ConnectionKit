@@ -271,7 +271,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 @synthesize fileManager = _manager;
 
-#pragma mark Requests
+#pragma mark URL & Requests
+
+@synthesize originalURL = _URL;
 
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {
@@ -468,8 +470,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             // Invent the best credential available
             NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSString *user = [_operation->_URL user];
-            NSString *password = [_operation->_URL password];
+            NSString *user = _operation.originalURL.user;
+            NSString *password = _operation.originalURL.password;
             
             NSURLCredential *credential;
             if (user && password)
