@@ -44,13 +44,12 @@
     return self;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)sourceRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 {
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
     // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [childRequest mutableCopy];
-    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
+    NSMutableURLRequest *request = [sourceRequest mutableCopy];
     [request setHTTPMethod:@"HEAD"];
     [request curl_setCreateIntermediateDirectories:createIntermediates];
     

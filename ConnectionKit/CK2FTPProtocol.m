@@ -54,6 +54,21 @@
 
 #pragma mark Operations
 
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
+{
+    NSMutableURLRequest *request = [childRequest mutableCopy];
+    request.URL = [childRequest.URL URLByDeletingLastPathComponent];
+    
+    self = [super initWithCustomCommands:commands
+                                 request:request
+           createIntermediateDirectories:createIntermediates
+                                  client:client
+                       completionHandler:handler];
+    
+    [request release];
+    return self;
+}
+
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithCustomCommands:[NSArray arrayWithObject:[@"MKD " stringByAppendingString:[[request URL] lastPathComponent]]]
