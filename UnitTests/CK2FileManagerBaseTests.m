@@ -218,6 +218,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 #pragma mark - Delegate
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
+    NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
     if (challenge.previousFailureCount > 0)
     {
         NSLog(@"cancelling authentication");
@@ -225,8 +226,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     }
     else
     {
-        NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
-        
+
         if ([authMethod isEqualToString:NSURLAuthenticationMethodDefault] ||
             [authMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest] ||
             [authMethod isEqualToString:NSURLAuthenticationMethodHTMLForm] ||
