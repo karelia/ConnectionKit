@@ -526,7 +526,7 @@
 				22F6D0FF165A8A2200443CC9 /* UnitTests */,
 			);
 			name = MockServer;
-			path = ../CurlHandle/CURLHandleSource/CURLHandleTests/MockServer;
+			path = ../CurlHandle/CURLHandleSource/Tests/MockServer;
 			sourceTree = "<group>";
 		};
 		22F6D0FF165A8A2200443CC9 /* UnitTests */ = {
