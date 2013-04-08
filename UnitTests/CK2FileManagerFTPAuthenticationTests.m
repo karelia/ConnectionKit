@@ -17,17 +17,25 @@
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
-    if (challenge.previousFailureCount == 0)
+    NSString* user;
+    NSString* password;
+
+    if (challenge.previousFailureCount > 0)
     {
-        self.user = @"bad";
+        user = self.originalUser;
+        password = self.originalPassword;
+
+        [self useResponseSet:@"default"];
     }
     else
     {
-        self.user = self.originalUser;
-        [self useResponseSet:@"default"];
+        user = @"bad";
+        password = @"bad";
     }
 
-    [super fileManager:manager didReceiveAuthenticationChallenge:challenge];
+    NSLog(@"authenticating as %@ %@", self.user, self.password);
+    NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
+    [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
 
 #pragma mark - Tests
@@ -43,8 +51,7 @@
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            BOOL isExpectedError = [self checkNoErrorOrFileExistsError:error];
-            STAssertTrue(isExpectedError, @"got unexpected error %@", error);
+            STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
