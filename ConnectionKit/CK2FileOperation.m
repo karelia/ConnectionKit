@@ -267,6 +267,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [super dealloc];
 }
 
+#pragma mark Manager
+
+@synthesize fileManager = _manager;
+
 #pragma mark Requests
 
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
@@ -330,10 +334,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        id <CK2FileManagerDelegate> delegate = [_manager delegate];
+        id <CK2FileManagerDelegate> delegate = [self.fileManager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:appendString:toTranscript:)])
         {
-            [delegate fileManager:_manager appendString:info toTranscript:transcript];
+            [delegate fileManager:self.fileManager appendString:info toTranscript:transcript];
         }
     });
 }
@@ -486,8 +490,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         }
         
 #ifndef __clang_analyzer__ // clang seems to produce an entirely spurious warning here - it says that self hasn't been set, but it has
-        CK2FileManager *manager = operation->_manager;
 #endif
+        CK2FileManager *manager = operation.fileManager;
         
         id <CK2FileManagerDelegate> delegate = [manager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
