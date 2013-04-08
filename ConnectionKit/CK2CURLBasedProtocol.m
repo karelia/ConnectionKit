@@ -98,7 +98,7 @@
         else
         {
             // Correct relative paths if we can
-            NSURL *directoryURL = [self canonicalizedURLForReporting:request.URL];
+            NSURL *directoryURL = [self.class URLByReplacingUserInfoInURL:request.URL withUser:_user];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
@@ -306,10 +306,10 @@
     return self;
 }
 
-- (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
++ (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
 {
     // Canonicalize URLs by making sure username is included. Strip out password in the process
-    CFStringRef user = (CFStringRef)_user;
+    CFStringRef user = (CFStringRef)nsUser;
     if (user)
     {
         // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so drop down CoreFoundation
@@ -537,7 +537,7 @@
         
         NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
         
-        homeDirectoryURL = [self canonicalizedURLForReporting:homeDirectoryURL];    // include username
+        homeDirectoryURL = [self.class URLByReplacingUserInfoInURL:homeDirectoryURL withUser:_user];    // include username
         NSString *host = [[NSURL URLWithString:@"/" relativeToURL:homeDirectoryURL] absoluteString].lowercaseString;
         
         NSMutableDictionary *store = [self.class homeURLsByHostURL];
