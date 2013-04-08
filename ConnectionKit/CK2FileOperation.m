@@ -497,8 +497,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
          */
         
         CK2FileManager *manager = operation.fileManager;
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
         
-        id <CK2FileManagerDelegate> delegate = [manager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
             [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
