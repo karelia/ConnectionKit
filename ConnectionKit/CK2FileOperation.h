@@ -61,8 +61,8 @@
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
 
-- (id)initMoveOperationWithSourceURL:(NSURL *)srcURL
-                      destinationURL:(NSURL *)dstURL
+- (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
+                      newName:(NSString *)newName
                              manager:(CK2FileManager *)manager
                      completionBlock:(void (^)(NSError *))block;
 

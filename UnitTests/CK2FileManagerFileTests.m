@@ -369,14 +369,16 @@
             NSFileManager* fm = [NSFileManager defaultManager];
             NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
             NSURL* testFile = [subdirectory URLByAppendingPathComponent:@"another.txt"];
-            NSURL* renamedDirectory = [temp URLByAppendingPathComponent:@"renamedfolder"];
-            NSURL* renamedFile = [subdirectory URLByAppendingPathComponent:@"renamed.txt"];
+            NSString* renamedDirectoryName = @"renamedFolder";
+            NSURL* renamedDirectory = [temp URLByAppendingPathComponent:renamedDirectoryName];
+            NSString* renamedFileName = @"renamed.txt";
+            NSURL* renamedFile = [subdirectory URLByAppendingPathComponent:renamedFileName];
 
             STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
             STAssertTrue(![fm fileExistsAtPath:[renamedFile path]], @"file shouldn't exist");
 
             // rename file
-            [self.session moveItemAtURL:testFile toURL:renamedFile completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:testFile withName:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -386,7 +388,7 @@
             STAssertTrue([fm fileExistsAtPath:[renamedFile path]], @"file should exist");
 
             // rename it again - should obviously fail
-            [self.session moveItemAtURL:testFile toURL:renamedFile completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:testFile withName:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
                 STAssertEquals([error code], (NSInteger) NSFileWriteFileExistsError, @"unexpected error code %ld", [error code]);
@@ -395,7 +397,7 @@
             [self runUntilPaused];
 
             // rename directory
-            [self.session moveItemAtURL:subdirectory toURL:renamedDirectory completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:subdirectory withName:renamedDirectoryName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];

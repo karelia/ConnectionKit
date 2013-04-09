@@ -137,16 +137,13 @@
     return self;
 }
 
-- (id)initForMovingItemWithRequest:(NSURLRequest *)request
-                             toURL:(NSURL *)dstURL
-                            client:(id <CK2ProtocolClient>)client;
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
 {
     NSString* sourcePath = [[request URL] lastPathComponent];
-    NSString* dstPath = [dstURL lastPathComponent];
 
     return [self initWithCustomCommands:[NSArray arrayWithObjects:
                                          [@"RNFR " stringByAppendingString:sourcePath],
-                                         [@"RNTO " stringByAppendingString:dstPath],
+                                         [@"RNTO " stringByAppendingString:newName],
                                          nil
                                          ]
                                 request:request

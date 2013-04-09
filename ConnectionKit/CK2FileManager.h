@@ -90,8 +90,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Moving Items
-// Moving items between different servers/protocols is not supported at the moment, and attempting to do so produces undefined results
-- (BOOL)moveItemAtURL:(NSURL *)srcURL toURL:(NSURL *)dstURL completionHandler:(void (^)(NSError *error))handler;
+// This is solely for renaming an item. Moving items between different directories/servers/protocols is not supported at the moment, and attempting to do so produces undefined results
+- (BOOL)renameItemAtURL:(NSURL *)srcURL withName:(NSString *)newName completionHandler:(void (^)(NSError *error))handler;
 
 
 #pragma mark Getting and Setting Attributes

@@ -63,9 +63,7 @@
     return nil;
 }
 
-- (id)initForMovingItemWithRequest:(NSURLRequest *)request
-                             toURL:(NSURL *)dstURL
-                            client:(id <CK2ProtocolClient>)client;
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
 {
     [self doesNotRecognizeSelector:_cmd];
     return nil;
