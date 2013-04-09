@@ -137,6 +137,27 @@
     return self;
 }
 
+- (id)initForMovingItemWithRequest:(NSURLRequest *)request
+                             toURL:(NSURL *)dstURL
+                            client:(id <CK2ProtocolClient>)client;
+{
+    NSString* sourcePath = [[request URL] lastPathComponent];
+    NSString* dstPath = [dstURL lastPathComponent];
+
+    return [self initWithCustomCommands:[NSArray arrayWithObjects:
+                                         [@"RNFR " stringByAppendingString:sourcePath],
+                                         [@"RNTO " stringByAppendingString:dstPath],
+                                         nil
+                                         ]
+                                request:request
+          createIntermediateDirectories:NO
+                                 client:client
+                      completionHandler:^(NSError *error) {
+                          error = [self translateStandardErrors:error];
+                          [self reportToProtocolWithError:error];
+                      }];
+}
+
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     // DELE is only intended to delete files, but in our testing, some FTP servers happily support deleting a directory using it
