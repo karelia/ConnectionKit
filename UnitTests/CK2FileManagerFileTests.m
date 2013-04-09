@@ -389,7 +389,7 @@
             [self.session moveItemAtURL:testFile toURL:renamedFile completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
-                STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+                STAssertEquals([error code], (NSInteger) NSFileWriteFileExistsError, @"unexpected error code %ld", [error code]);
                 [self pause];
             }];
             [self runUntilPaused];
