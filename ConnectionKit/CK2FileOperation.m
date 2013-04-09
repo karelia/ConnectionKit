@@ -278,7 +278,13 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [super dealloc];
 }
 
-#pragma mark Requests
+#pragma mark Manager
+
+@synthesize fileManager = _manager;
+
+#pragma mark URL & Requests
+
+@synthesize originalURL = _URL;
 
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {
@@ -335,16 +341,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
-    NSParameterAssert(protocol == _protocol);
-    // Even if cancelled, allow through since could well be valuable debugging info
+    if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
+    {
+        NSParameterAssert(protocol == _protocol);
+    }
     
     // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        id <CK2FileManagerDelegate> delegate = [_manager delegate];
+        id <CK2FileManagerDelegate> delegate = [self.fileManager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:appendString:toTranscript:)])
         {
-            [delegate fileManager:_manager appendString:info toTranscript:transcript];
+            [delegate fileManager:self.fileManager appendString:info toTranscript:transcript];
         }
     });
 }
@@ -475,8 +483,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             // Invent the best credential available
             NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSString *user = [_operation->_URL user];
-            NSString *password = [_operation->_URL password];
+            NSString *user = _operation.originalURL.user;
+            NSString *password = _operation.originalURL.password;
             
             NSURLCredential *credential;
             if (user && password)
@@ -496,11 +504,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                                                           sender:self];
         }
         
-#ifndef __clang_analyzer__ // clang seems to produce an entirely spurious warning here - it says that self hasn't been set, but it has
-        CK2FileManager *manager = operation->_manager;
-#endif
+        /*  At this point point, we are retaining _trampolineChallenge
+         *  It in turn is retaining us, as the sender. This isn't actually guaranteed by the docs, but is a fair bet rdar://problem/13602367
+         *  The cycle is broken when the challenge is replied to
+         */
         
-        id <CK2FileManagerDelegate> delegate = [manager delegate];
+        CK2FileManager *manager = operation.fileManager;
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
+        
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
             [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
@@ -509,8 +520,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
         }
-        
-        [self retain];  // gets released when challenge is replied to
     }
     return self;
 }
@@ -529,8 +538,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     // release trampoline challenge now to break retain cycle
     [_trampolineChallenge release];
     _trampolineChallenge = nil;
-
-    [self release];
 }
 
 @synthesize originalChallenge = _originalChallenge;
