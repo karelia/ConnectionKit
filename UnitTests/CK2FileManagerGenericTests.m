@@ -322,6 +322,33 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testUploadOver16k
+{
+    if ([self setup])
+    {
+        [self makeTestDirectoryWithFiles:NO];
+
+        NSURL* url = [self URLForTestFile1];
+
+        // make a block of data and fill it with stuff in an attempt to avoid any sneaky compression speeding things up
+        NSUInteger length = 32768;
+        NSMutableData* data = [NSMutableData dataWithCapacity:length * sizeof(UInt16)];
+        UInt16* bytes = (UInt16*)data.bytes;
+        for (NSUInteger n = 0; n < length; ++n)
+        {
+            bytes[n] = n;
+        }
+
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+}
+
 - (void)testCreateFileDenied
 {
     if ([self setup])
