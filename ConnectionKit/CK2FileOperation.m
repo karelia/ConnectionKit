@@ -330,8 +330,10 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
-    NSParameterAssert(protocol == _protocol);
-    // Even if cancelled, allow through since could well be valuable debugging info
+    if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
+    {
+        NSParameterAssert(protocol == _protocol);
+    }
     
     // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
