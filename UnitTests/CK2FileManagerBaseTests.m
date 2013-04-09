@@ -195,7 +195,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
     if (ok)
     {
-        NSLog(@"Tests setup for %@, user: %@, password:%@ url:%@", responses, self.user, self.password, self.url);
+        NSLog(@"Tests setup for %@, user:%@, password:%@ url:%@", responses, self.user, self.password, self.url);
     }
     else
     {

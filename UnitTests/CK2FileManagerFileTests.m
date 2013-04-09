@@ -359,7 +359,57 @@
     }
 }
 
+- (void)testMoveFileAtURL
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self makeTestContents];
+        if (temp)
+        {
+            NSFileManager* fm = [NSFileManager defaultManager];
+            NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
+            NSURL* testFile = [subdirectory URLByAppendingPathComponent:@"another.txt"];
+            NSString* renamedDirectoryName = @"renamedFolder";
+            NSURL* renamedDirectory = [temp URLByAppendingPathComponent:renamedDirectoryName];
+            NSString* renamedFileName = @"renamed.txt";
+            NSURL* renamedFile = [subdirectory URLByAppendingPathComponent:renamedFileName];
 
+            STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
+            STAssertTrue(![fm fileExistsAtPath:[renamedFile path]], @"file shouldn't exist");
+
+            // rename file
+            [self.session renameItemAtURL:testFile withFilename:renamedFileName completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            STAssertTrue(![fm fileExistsAtPath:[testFile path]], @"file shouldn't exist");
+            STAssertTrue([fm fileExistsAtPath:[renamedFile path]], @"file should exist");
+
+            // rename it again - should obviously fail
+            [self.session renameItemAtURL:testFile withFilename:renamedFileName completionHandler:^(NSError *error) {
+                STAssertNotNil(error, @"expected error");
+                STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+                STAssertEquals([error code], (NSInteger) NSFileWriteFileExistsError, @"unexpected error code %ld", [error code]);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            // rename directory
+            [self.session renameItemAtURL:subdirectory withFilename:renamedDirectoryName completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            STAssertTrue(![fm fileExistsAtPath:[subdirectory path]], @"folder shouldn't exist");
+            STAssertTrue([fm fileExistsAtPath:[renamedDirectory path]], @"folder should exist");
+        }
+    }
+    
+
+}
 - (void)testRemoveFileAtURL
 {
     if ([self setupSession])

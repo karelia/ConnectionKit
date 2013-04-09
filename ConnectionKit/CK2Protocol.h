@@ -49,6 +49,11 @@
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request
                               client:(id <CK2ProtocolClient>)client;
 
+// The source and destination schemes or hosts might differ. If so, that's currently considered an error by the client, so do whatever the hell pleases you
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request
+                             newName:(NSString *)newName
+                            client:(id <CK2ProtocolClient>)client;
+
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues
                  ofItemWithRequest:(NSURLRequest *)request
                             client:(id <CK2ProtocolClient>)client;

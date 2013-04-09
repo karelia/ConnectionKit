@@ -118,6 +118,17 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     return [operation autorelease];
 }
 
+#pragma mark Renaming Items
+- (BOOL)renameItemAtURL:(NSURL *)srcURL withFilename:(NSString *)newName completionHandler:(void (^)(NSError *))handler
+{
+    CK2FileOperation *operation = [[[self classForOperation] alloc] initRenameOperationWithSourceURL:srcURL
+                                                                                    newName:newName
+                                                                                           manager:self
+                                                                                   completionBlock:handler];
+    
+    return [operation autorelease];
+}
+
 #pragma mark Getting and Setting Attributes
 
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;

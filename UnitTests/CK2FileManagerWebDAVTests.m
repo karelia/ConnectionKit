@@ -23,6 +23,78 @@
 
     return result;
 }
+//
+//- (NSURL*)URLForPath:(NSString*)path
+//{
+//    //    NSURL* url = [CK2FileManager URLWithPath:path relativeToURL:self.url]; // doesn't seem to produce the correct results
+//    NSURL* url = [self.url URLByAppendingPathComponent:path];
+//    return [url absoluteURL];   // account for relative URLs
+//}
+
+- (void)doTestCreateAndRenameFileAtURL:(NSURL*)url
+{
+    NSString* content = @"Some test text";
+    NSData* data = [content dataUsingEncoding:NSUTF8StringEncoding];
+    NSURL* tempFile = nil;
+    NSError* error;
+    __block NSUInteger written = 0;
+    __block NSUInteger attempts = 0;
+
+    // try to delete in case it's left around from last time - ignore error
+    [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+        [self pause];
+    }];
+    [self runUntilPaused];
+
+    CK2ProgressBlock progress = ^(NSUInteger bytesWritten, NSUInteger previousAttemptCount) {
+        attempts = previousAttemptCount;
+        written = bytesWritten;
+    };
+
+
+    [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+
+        [self pause];
+    }];
+
+    [self runUntilPaused];
+    [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
+
+    STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
+
+    NSUInteger expected = [data length] * (attempts + 1);
+    STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
+
+    // try to rename
+    NSString* extension = url.pathExtension;
+    NSString* newName = [[[url.lastPathComponent stringByDeletingPathExtension] stringByAppendingString:@"Renamed"] stringByAppendingPathExtension:extension];
+    [self.session renameItemAtURL:url withFilename:newName completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+    }];
+
+    // try to download
+    NSURL* renamedURL = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
+    NSURLRequest* request = [NSURLRequest requestWithURL:renamedURL];
+    self.server.data = data;
+    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue currentQueue] completionHandler:^(NSURLResponse* response, NSData* data, NSError* error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+
+        NSString* received = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+        STAssertTrue([received isEqualToString:@"Some test text"], @"string should have matched, was %@", received);
+
+        [self pause];
+    }];
+    [self runUntilPaused];
+
+    // try to delete - this time we do want to check the error
+    [self.session removeItemAtURL:renamedURL completionHandler:^(NSError *error) {
+        STAssertNil(error, @"got unexpected error %@", error);
+        [self pause];
+    }];
+    [self runUntilPaused];
+    
+}
 
 - (void)doTestCreateAndRemoveFileAtURL:(NSURL*)url useStream:(BOOL)useStream
 {
@@ -70,10 +142,17 @@
     [self runUntilPaused];
     [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
 
+    // The authorisation dance potentially causes the whole request to potentially be sent twice, once with no auth header,
+    // and again with the right credentials.
+    // We're sending Expect: 100-Continue, which causes NSURLConnection to wait a bit before sending the data.
+    // This is potentially enough to cause it to only send the data once - although if a server is slow in responding it may
+    // still send it both times.
+
     STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
 
-    NSUInteger expected = [data length] * (attempts + 1);
-    STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
+    NSUInteger expected = [data length];
+    BOOL amountOk = (written == expected) || (written == (expected * 2));
+    STAssertTrue(amountOk, @"expected %ld or %ld bytes written, got %ld", expected, expected * 2, written);
 
     // try to download
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
@@ -175,6 +254,15 @@
             [self pause];
         }];
         [self runUntilPaused];
+    }
+}
+
+- (void)testRenameAtURL
+{
+    if ([self setup])
+    {
+        NSURL* url = [self URLForPath:@"ck-test-file.txt"];
+        [self doTestCreateAndRenameFileAtURL:url];
     }
 }
 

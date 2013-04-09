@@ -63,6 +63,12 @@
     return nil;
 }
 
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
+{
+    [self doesNotRecognizeSelector:_cmd];
+    return nil;
+}
+
 - (id)initForSettingAttributes:(NSDictionary *)keyedValues ofItemWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     [self doesNotRecognizeSelector:_cmd];
@@ -83,8 +89,8 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                  relativeToURL:baseURL];
+    NSString* escapedPath = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [NSURL URLWithString:escapedPath relativeToURL:baseURL];
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
