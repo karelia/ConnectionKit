@@ -475,7 +475,7 @@ static NSString* gResponsesToUse = nil;
 
             // try to remove original file - if we don't get an error here it's a big hint that the move didn't work
             [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-                STAssertTrue([self checkIsFileNotFoundError:error], @"unexpected error %@", error);
+                STAssertTrue([self checkIsFileCantWriteError:error], @"unexpected error %@", error);
 
                 // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
                 [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
