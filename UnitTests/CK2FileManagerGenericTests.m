@@ -460,6 +460,35 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testMoveFileAtURL
+{
+    if ([self setup])
+    {
+        [self makeTestDirectoryWithFiles:YES];
+        NSURL* url = [self URLForTestFile1];
+        NSString* extension = [url pathExtension];
+        NSURL* renamed = [[[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:@"renamed"] URLByAppendingPathExtension:extension];
+
+        // rename file
+        [self.session moveItemAtURL:url toURL:renamed completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            // try to remove original file - if we don't get an error here it's a big hint that the move didn't work
+            [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+                STAssertTrue([self checkIsFileNotFoundError:error], @"unexpected error %@", error);
+
+                // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
+                [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
+                    STAssertNil(error, @"got unexpected error %@", error);
+                    [self pause];
+                }];
+            }];
+        }];
+    }
+
+    [self runUntilPaused];
+}
+
 - (void)testRemoveFileAtURL
 {
     if ([self setup])
