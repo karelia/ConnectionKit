@@ -378,7 +378,7 @@
             STAssertTrue(![fm fileExistsAtPath:[renamedFile path]], @"file shouldn't exist");
 
             // rename file
-            [self.session renameItemAtURL:testFile withName:renamedFileName completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:testFile withFilename:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -388,7 +388,7 @@
             STAssertTrue([fm fileExistsAtPath:[renamedFile path]], @"file should exist");
 
             // rename it again - should obviously fail
-            [self.session renameItemAtURL:testFile withName:renamedFileName completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:testFile withFilename:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
                 STAssertEquals([error code], (NSInteger) NSFileWriteFileExistsError, @"unexpected error code %ld", [error code]);
@@ -397,7 +397,7 @@
             [self runUntilPaused];
 
             // rename directory
-            [self.session renameItemAtURL:subdirectory withName:renamedDirectoryName completionHandler:^(NSError *error) {
+            [self.session renameItemAtURL:subdirectory withFilename:renamedDirectoryName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];

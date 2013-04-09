@@ -23,6 +23,13 @@
 
     return result;
 }
+//
+//- (NSURL*)URLForPath:(NSString*)path
+//{
+//    //    NSURL* url = [CK2FileManager URLWithPath:path relativeToURL:self.url]; // doesn't seem to produce the correct results
+//    NSURL* url = [self.url URLByAppendingPathComponent:path];
+//    return [url absoluteURL];   // account for relative URLs
+//}
 
 - (void)doTestCreateAndRenameFileAtURL:(NSURL*)url
 {
@@ -62,7 +69,7 @@
     // try to rename
     NSString* extension = url.pathExtension;
     NSString* newName = [[[url.lastPathComponent stringByDeletingPathExtension] stringByAppendingString:@"Renamed"] stringByAppendingPathExtension:extension];
-    [self.session renameItemAtURL:url withName:newName completionHandler:^(NSError *error) {
+    [self.session renameItemAtURL:url withFilename:newName completionHandler:^(NSError *error) {
         STAssertNil(error, @"got unexpected error %@", error);
     }];
 

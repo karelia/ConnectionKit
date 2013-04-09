@@ -119,7 +119,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 }
 
 #pragma mark Renaming Items
-- (BOOL)renameItemAtURL:(NSURL *)srcURL withName:(NSString *)newName completionHandler:(void (^)(NSError *))handler
+- (BOOL)renameItemAtURL:(NSURL *)srcURL withFilename:(NSString *)newName completionHandler:(void (^)(NSError *))handler
 {
     CK2FileOperation *operation = [[[self classForOperation] alloc] initRenameOperationWithSourceURL:srcURL
                                                                                     newName:newName

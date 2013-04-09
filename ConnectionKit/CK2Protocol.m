@@ -89,8 +89,8 @@
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 {
-    return [NSURL URLWithString:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]
-                  relativeToURL:baseURL];
+    NSString* escapedPath = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    return [NSURL URLWithString:escapedPath relativeToURL:baseURL];
 }
 
 + (NSString *)pathOfURLRelativeToHomeDirectory:(NSURL *)URL;
