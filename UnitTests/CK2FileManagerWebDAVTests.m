@@ -142,10 +142,17 @@
     [self runUntilPaused];
     [[NSFileManager defaultManager] removeItemAtURL:tempFile error:&error];
 
+    // The authorisation dance potentially causes the whole request to potentially be sent twice, once with no auth header,
+    // and again with the right credentials.
+    // We're sending Expect: 100-Continue, which causes NSURLConnection to wait a bit before sending the data.
+    // This is potentially enough to cause it to only send the data once - although if a server is slow in responding it may
+    // still send it both times.
+
     STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
 
-    NSUInteger expected = [data length] * (attempts + 1);
-    STAssertEquals(written, expected, @"expected %ld bytes written, got %ld", expected, written);
+    NSUInteger expected = [data length];
+    BOOL amountOk = (written == expected) || (written == (expected * 2));
+    STAssertTrue(amountOk, @"expected %ld or %ld bytes written, got %ld", expected, expected * 2, written);
 
     // try to download
     NSURLRequest* request = [NSURLRequest requestWithURL:url];
