@@ -233,6 +233,7 @@
         NSString* path = [self pathForRequest:request];
         DAVMoveRequest* davRequest = [[DAVMoveRequest alloc] initWithPath:path session:_session delegate:self];
         davRequest.destinationPath = [[path stringByDeletingLastPathComponent] stringByAppendingPathComponent:newName];
+        davRequest.overwrite = NO;
         [_queue addOperation:davRequest];
         [davRequest release];
 
