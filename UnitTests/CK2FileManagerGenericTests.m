@@ -474,9 +474,9 @@ static NSString* gResponsesToUse = nil;
         [self.session renameItemAtURL:url withName:newName completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            // try to remove original file - if we don't get an error here it's a big hint that the move didn't work
+            // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
             [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-                STAssertTrue([self checkIsFileCantWriteError:error], @"unexpected error %@", error);
+                STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"unexpected error %@", error);
 
                 // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
                 [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {

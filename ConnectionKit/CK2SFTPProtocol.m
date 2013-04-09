@@ -112,6 +112,28 @@
     return self;
 }
 
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
+{
+    NSString* srcPath = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSString* dstPath = [[srcPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:newName];
+
+    return [self initWithCustomCommands:[NSArray arrayWithObject:[NSString stringWithFormat:@"rename %@ %@", srcPath, dstPath]]
+                                request:request
+          createIntermediateDirectories:NO
+                                 client:client
+                      completionHandler:^(NSError *error) {
+                          if (error)
+                          {
+                              if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                              }
+                          }
+
+                          [self reportToProtocolWithError:error];
+                      }];
+}
+
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
