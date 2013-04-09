@@ -346,9 +346,9 @@ static NSString* gResponsesToUse = nil;
     // I found we were constructing URLs wrong for the paths like: /example.txt
     // Such files were ending up in the home folder, rather than root
 
-    if ([self setup] && [self.responsesToUse isEqualToString:@"ftp"]) // only perform this test for FTP
+    if ([self.responsesToUse isEqualToString:@"ftp"] && self.useMockServer && [self setup]) // only perform this test for FTP using MockServer
     {
-        [self useResponseSet:@"chroot jail"];
+        [self useResponseSet:@"chroot fail"];
         NSURL* url = [self URLForPath:@"/test.txt"];
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
