@@ -359,7 +359,55 @@
     }
 }
 
+- (void)testMoveFileAtURL
+{
+    if ([self setupSession])
+    {
+        NSURL* temp = [self makeTestContents];
+        if (temp)
+        {
+            NSFileManager* fm = [NSFileManager defaultManager];
+            NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
+            NSURL* testFile = [subdirectory URLByAppendingPathComponent:@"another.txt"];
+            NSURL* renamedDirectory = [temp URLByAppendingPathComponent:@"renamedfolder"];
+            NSURL* renamedFile = [subdirectory URLByAppendingPathComponent:@"renamed.txt"];
 
+            STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
+            STAssertTrue(![fm fileExistsAtPath:[renamedFile path]], @"file shouldn't exist");
+
+            // rename file
+            [self.session moveItemAtURL:testFile toURL:renamedFile completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            STAssertTrue(![fm fileExistsAtPath:[testFile path]], @"file shouldn't exist");
+            STAssertTrue([fm fileExistsAtPath:[renamedFile path]], @"file should exist");
+
+            // rename it again - should obviously fail
+            [self.session moveItemAtURL:testFile toURL:renamedFile completionHandler:^(NSError *error) {
+                STAssertNotNil(error, @"expected error");
+                STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
+                STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            // rename directory
+            [self.session moveItemAtURL:subdirectory toURL:renamedDirectory completionHandler:^(NSError *error) {
+                STAssertNil(error, @"got unexpected error %@", error);
+                [self pause];
+            }];
+            [self runUntilPaused];
+
+            STAssertTrue(![fm fileExistsAtPath:[subdirectory path]], @"folder shouldn't exist");
+            STAssertTrue([fm fileExistsAtPath:[renamedDirectory path]], @"folder should exist");
+        }
+    }
+    
+
+}
 - (void)testRemoveFileAtURL
 {
     if ([self setupSession])
