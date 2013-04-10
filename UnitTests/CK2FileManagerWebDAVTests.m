@@ -69,7 +69,7 @@
     // try to rename
     NSString* extension = url.pathExtension;
     NSString* newName = [[[url.lastPathComponent stringByDeletingPathExtension] stringByAppendingString:@"Renamed"] stringByAppendingPathExtension:extension];
-    [self.session renameItemAtURL:url withFilename:newName completionHandler:^(NSError *error) {
+    [self.session renameItemAtURL:url toFilename:newName completionHandler:^(NSError *error) {
         STAssertNil(error, @"got unexpected error %@", error);
     }];
 

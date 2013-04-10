@@ -471,7 +471,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* renamed = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
 
         // rename file
-        [self.session renameItemAtURL:url withFilename:newName completionHandler:^(NSError *error) {
+        [self.session renameItemAtURL:url toFilename:newName completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
