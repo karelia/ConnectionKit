@@ -401,6 +401,34 @@ static NSString* gResponsesToUse = nil;
     STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
 }
 
+- (void)testCreateFileAtURLSourceDoesntExist
+{
+    NSURL* source = [NSURL fileURLWithPath:@"/tmp/i-dont-exist.txt"];
+    NSURL* url = [self URLForTestFile1];
+
+    [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        STAssertNotNil(error, @"expected an error");
+
+        [self pause];
+    }];
+
+    [self runUntilPaused];
+}
+
+- (void)testCreateFileAtURLSourceIsntLocal
+{
+    NSURL* source = [NSURL URLWithString:@"http://karelia.com/tmp/i-dont-exist.txt"];
+    NSURL* url = [self URLForTestFile1];
+
+    [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        STAssertNotNil(error, @"expected an error");
+
+        [self pause];
+    }];
+
+    [self runUntilPaused];
+}
+
 - (void)testUploadOver16k
 {
     if ([self setup])
