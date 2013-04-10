@@ -73,7 +73,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     if (![self isCancelled])
                     {
                         _protocol = createBlock(protocolClass);
-                        // TODO: Handle protocol's init method returning nil
+                        NSAssert(_protocol, @"protocol creation failed"); // TODO: handle gracefully with an error rather than blowing up
                         
                         if (![self isCancelled]) [_protocol start];
                     }
