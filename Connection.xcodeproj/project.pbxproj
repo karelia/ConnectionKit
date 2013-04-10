@@ -12,6 +12,7 @@
 		22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
+		220C11961715C5E20086F199 /* CK2FileManagerErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220C11951715C5E10086F199 /* CK2FileManagerErrorTests.m */; };
 		22407D54166F9A6100E1EAD4 /* CK2FileManagerGenericTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */; };
 		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
 		2246AF6516B99987001D39D9 /* KMSSendStringCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */; };
@@ -208,6 +209,7 @@
 		220526F6165E98B400A2BBC9 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ConnectionKit/main.m; sourceTree = "<group>"; };
 		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
+		220C11951715C5E10086F199 /* CK2FileManagerErrorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerErrorTests.m; sourceTree = "<group>"; };
 		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = CurlHandle/SFTP/libssl.dylib; sourceTree = "<group>"; };
 		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = CurlHandle/SFTP/libcrypto.dylib; sourceTree = "<group>"; };
 		22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFileTests.m; sourceTree = "<group>"; };
@@ -408,6 +410,7 @@
 				225FCA3716B046F800A9F5AE /* CKUploaderTests.m */,
 				22662EE2165D1EE3005FCC4A /* CK2FileManagerBaseTests.h */,
 				22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */,
+				220C11951715C5E10086F199 /* CK2FileManagerErrorTests.m */,
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */,
@@ -908,7 +911,8 @@
 		22C9CFFB1703AD4D004610FE /* crashtest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
-			path = crashtest;
+			name = crashtest;
+			path = "Standalone Test";
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1037,6 +1041,7 @@
 				278CFE1316BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m in Sources */,
 				27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */,
 				27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */,
+				220C11961715C5E20086F199 /* CK2FileManagerErrorTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
