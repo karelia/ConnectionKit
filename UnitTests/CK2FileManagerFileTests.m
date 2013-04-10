@@ -359,7 +359,7 @@
     }
 }
 
-- (void)testMoveFileAtURL
+- (void)testRenameFileAtURL
 {
     if ([self setupSession])
     {

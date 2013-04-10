@@ -460,7 +460,7 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
-- (void)testMoveFileAtURL
+- (void)testRenameFileAtURL
 {
     if ([self setup])
     {
