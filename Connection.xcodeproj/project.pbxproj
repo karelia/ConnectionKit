@@ -78,6 +78,10 @@
 		27F3373D16BC1FB100E70511 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 27F3373B16BC1FB100E70511 /* MainMenu.xib */; };
 		27F394F5162C162900944F43 /* CK2SFTPProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 27F394F3162C162900944F43 /* CK2SFTPProtocol.h */; };
 		27F394F6162C162900944F43 /* CK2SFTPProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 27F394F4162C162900944F43 /* CK2SFTPProtocol.m */; };
+		323B7347170E253900219F9A /* CK2OpenPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 323B7349170E253900219F9A /* CK2OpenPanel.xib */; };
+		323B7354170E254800219F9A /* CK2FilePreview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 323B7356170E254800219F9A /* CK2FilePreview.xib */; };
+		323B7357170E255200219F9A /* CK2NewFolderWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 323B7359170E255200219F9A /* CK2NewFolderWindow.xib */; };
+		323B735A170E256000219F9A /* CK2PathFieldWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 323B735C170E256000219F9A /* CK2PathFieldWindow.xib */; };
 		324D22BF16AE1741001CFDE6 /* CK2BrowserPreviewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */; };
 		324D22C016AE1741001CFDE6 /* CK2BrowserPreviewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */; };
 		324D22C116AE1741001CFDE6 /* CK2BrowserPreviewView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */; };
@@ -86,11 +90,8 @@
 		324D22C616AE1754001CFDE6 /* CK2FileSizeFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */; };
 		324D22C916AE1763001CFDE6 /* CK2IconView.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22C716AE1762001CFDE6 /* CK2IconView.h */; };
 		324D22CA16AE1763001CFDE6 /* CK2IconView.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22C816AE1762001CFDE6 /* CK2IconView.m */; };
-		324D22CC16AE17AC001CFDE6 /* CK2FilePreview.xib in Resources */ = {isa = PBXBuildFile; fileRef = 324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */; };
 		324D22D416AF490B001CFDE6 /* CK2NewFolderWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */; };
 		324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */; };
-		324D22D616AF490B001CFDE6 /* CK2NewFolderWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */; };
-		3274F1CD170888430049DDE5 /* CK2PathFieldWindow.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */; };
 		3274F1CE170888430049DDE5 /* CK2PathFieldWindowController.h in Headers */ = {isa = PBXBuildFile; fileRef = 3274F1CB170888430049DDE5 /* CK2PathFieldWindowController.h */; };
 		3274F1CF170888430049DDE5 /* CK2PathFieldWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */; };
 		32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */; };
@@ -109,7 +110,6 @@
 		32B592C316A4960B0020FFE9 /* CK2IconViewItem.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */; };
 		32B592C416A4960B0020FFE9 /* CK2IconItemView.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */; };
 		32B592C516A4960B0020FFE9 /* CK2IconItemView.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */; };
-		32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */ = {isa = PBXBuildFile; fileRef = 32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */; };
 		32B592C716A4960B0020FFE9 /* CK2OpenPanelViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B016A4960B0020FFE9 /* CK2OpenPanelViewController.h */; };
 		32B592C816A4960B0020FFE9 /* CK2OpenPanelViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592B116A4960B0020FFE9 /* CK2OpenPanelViewController.m */; };
 		32B592C916A4960B0020FFE9 /* CK2OpenPanelIconViewController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592B216A4960B0020FFE9 /* CK2OpenPanelIconViewController.h */; };
@@ -314,6 +314,10 @@
 		27F394F4162C162900944F43 /* CK2SFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2SFTPProtocol.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
+		323B7348170E253900219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2OpenPanel.xib; sourceTree = "<group>"; };
+		323B7355170E254800219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2FilePreview.xib; sourceTree = "<group>"; };
+		323B7358170E255200219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2NewFolderWindow.xib; sourceTree = "<group>"; };
+		323B735B170E256000219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2PathFieldWindow.xib; sourceTree = "<group>"; };
 		324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewController.h; sourceTree = "<group>"; };
 		324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2BrowserPreviewController.m; sourceTree = "<group>"; };
 		324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewView.h; sourceTree = "<group>"; };
@@ -322,11 +326,8 @@
 		324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileSizeFormatter.m; sourceTree = "<group>"; };
 		324D22C716AE1762001CFDE6 /* CK2IconView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconView.h; sourceTree = "<group>"; };
 		324D22C816AE1762001CFDE6 /* CK2IconView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconView.m; sourceTree = "<group>"; };
-		324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2FilePreview.xib; sourceTree = "<group>"; };
 		324D22D116AF490A001CFDE6 /* CK2NewFolderWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2NewFolderWindowController.h; sourceTree = "<group>"; };
 		324D22D216AF490A001CFDE6 /* CK2NewFolderWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2NewFolderWindowController.m; sourceTree = "<group>"; };
-		324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2NewFolderWindow.xib; sourceTree = "<group>"; };
-		3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2PathFieldWindow.xib; sourceTree = "<group>"; };
 		3274F1CB170888430049DDE5 /* CK2PathFieldWindowController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2PathFieldWindowController.h; sourceTree = "<group>"; };
 		3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2PathFieldWindowController.m; sourceTree = "<group>"; };
 		32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+CK2OpenPanel.h"; sourceTree = "<group>"; };
@@ -345,7 +346,6 @@
 		32B592AC16A4960B0020FFE9 /* CK2IconViewItem.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconViewItem.m; sourceTree = "<group>"; };
 		32B592AD16A4960B0020FFE9 /* CK2IconItemView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2IconItemView.h; sourceTree = "<group>"; };
 		32B592AE16A4960B0020FFE9 /* CK2IconItemView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2IconItemView.m; sourceTree = "<group>"; };
-		32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = CK2OpenPanel.xib; sourceTree = "<group>"; };
 		32B592B016A4960B0020FFE9 /* CK2OpenPanelViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelViewController.h; sourceTree = "<group>"; };
 		32B592B116A4960B0020FFE9 /* CK2OpenPanelViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanelViewController.m; sourceTree = "<group>"; };
 		32B592B216A4960B0020FFE9 /* CK2OpenPanelIconViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelIconViewController.h; sourceTree = "<group>"; };
@@ -746,10 +746,10 @@
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
 				32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */,
 				32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */,
-				32B592AF16A4960B0020FFE9 /* CK2OpenPanel.xib */,
-				324D22CB16AE17AC001CFDE6 /* CK2FilePreview.xib */,
-				324D22D316AF490B001CFDE6 /* CK2NewFolderWindow.xib */,
-				3274F1CA170888430049DDE5 /* CK2PathFieldWindow.xib */,
+				323B7349170E253900219F9A /* CK2OpenPanel.xib */,
+				323B7356170E254800219F9A /* CK2FilePreview.xib */,
+				323B7359170E255200219F9A /* CK2NewFolderWindow.xib */,
+				323B735C170E256000219F9A /* CK2PathFieldWindow.xib */,
 			);
 			name = CK2OpenPanel;
 			sourceTree = "<group>";
@@ -1018,10 +1018,10 @@
 				791E83060B0EDAC90060E5FC /* finished.png in Resources */,
 				7978FC150B117D7C0048168B /* bookmark.tif in Resources */,
 				227113BF168388FD00280005 /* http.json in Resources */,
-				32B592C616A4960B0020FFE9 /* CK2OpenPanel.xib in Resources */,
-				324D22CC16AE17AC001CFDE6 /* CK2FilePreview.xib in Resources */,
-				324D22D616AF490B001CFDE6 /* CK2NewFolderWindow.xib in Resources */,
-				3274F1CD170888430049DDE5 /* CK2PathFieldWindow.xib in Resources */,
+				323B7347170E253900219F9A /* CK2OpenPanel.xib in Resources */,
+				323B7354170E254800219F9A /* CK2FilePreview.xib in Resources */,
+				323B7357170E255200219F9A /* CK2NewFolderWindow.xib in Resources */,
+				323B735A170E256000219F9A /* CK2PathFieldWindow.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1199,6 +1199,38 @@
 				27F3373C16BC1FB100E70511 /* en */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		323B7349170E253900219F9A /* CK2OpenPanel.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				323B7348170E253900219F9A /* en */,
+			);
+			name = CK2OpenPanel.xib;
+			sourceTree = "<group>";
+		};
+		323B7356170E254800219F9A /* CK2FilePreview.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				323B7355170E254800219F9A /* en */,
+			);
+			name = CK2FilePreview.xib;
+			sourceTree = "<group>";
+		};
+		323B7359170E255200219F9A /* CK2NewFolderWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				323B7358170E255200219F9A /* en */,
+			);
+			name = CK2NewFolderWindow.xib;
+			sourceTree = "<group>";
+		};
+		323B735C170E256000219F9A /* CK2PathFieldWindow.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				323B735B170E256000219F9A /* en */,
+			);
+			name = CK2PathFieldWindow.xib;
 			sourceTree = "<group>";
 		};
 		797CC8C509F861770063FF9B /* Localizable.strings */ = {
