@@ -57,9 +57,13 @@
 {
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setNewDirectoryPermissions:[attributes objectForKey:NSFilePosixPermissions]];
-    
+
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
-    self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:path]]
+    NSString* message = [NSString stringWithFormat:@"Making directory %@\n", path];
+    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+
+    NSString* command = [@"mkdir " stringByAppendingString:path];
+    self = [self initWithCustomCommands:[NSArray arrayWithObject:command]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
                                  client:client
@@ -104,7 +108,11 @@
     [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
     [mutableRequest curl_setNewFilePermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSString* name = [path lastPathComponent];
+    NSString* message = [NSString stringWithFormat:@"Uploading %@ to %@\n", name, path];
+    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+
     self = [self initWithRequest:mutableRequest client:client progressBlock:progressBlock completionHandler:nil];
     
     [mutableRequest release];
@@ -115,6 +123,9 @@
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSString* message = [NSString stringWithFormat:@"Removing %@\n", path];
+    [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+
     return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
@@ -153,6 +164,9 @@
     if (permissions)
     {
         NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+        NSString* message = [NSString stringWithFormat:@"Changing mode on %@\n", path];
+        [client protocol:self appendString:message toTranscript:CKTranscriptSent];
+
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
