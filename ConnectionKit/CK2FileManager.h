@@ -72,8 +72,13 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
+/*  Many servers will overwrite an existing file at the target URL, but not all
+ *  I don't believe any servers support overwriting a directory without first removing it
+ */
+
 - (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
+// It's at the discretion of individual protocol implementations, but generally file uploads should avoid reading the whole thing into memory at once
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
 

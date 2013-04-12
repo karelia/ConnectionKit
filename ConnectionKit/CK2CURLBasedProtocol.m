@@ -8,8 +8,6 @@
 
 #import "CK2CURLBasedProtocol.h"
 
-#import "CK2FileManagerWithTestSupport.h"
-
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
 
@@ -46,13 +44,12 @@
     return self;
 }
 
-- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)sourceRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id <CK2ProtocolClient>)client completionHandler:(void (^)(NSError *error))handler;
 {
     // Navigate to the directory
     // @"HEAD" => CURLOPT_NOBODY, which stops libcurl from trying to list the directory's contents
     // If the connection is already at that directory then curl wisely does nothing
-    NSMutableURLRequest *request = [childRequest mutableCopy];
-    [request setURL:[[childRequest URL] URLByDeletingLastPathComponent]];
+    NSMutableURLRequest *request = [sourceRequest mutableCopy];
     [request setHTTPMethod:@"HEAD"];
     [request curl_setCreateIntermediateDirectories:createIntermediates];
     
@@ -100,7 +97,7 @@
         else
         {
             // Correct relative paths if we can
-            NSURL *directoryURL = [self canonicalizedURLForReporting:request.URL];
+            NSURL *directoryURL = [self.class URLByReplacingUserInfoInURL:request.URL withUser:_user];
             NSString *directoryPath = [self.class pathOfURLRelativeToHomeDirectory:directoryURL];
             
             
@@ -302,15 +299,25 @@
             }
         }
     }];
-    
+
+    [totalData release];
     [request release];
     return self;
 }
 
-- (NSURL *)canonicalizedURLForReporting:(NSURL *)aURL;
++ (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
 {
     // Canonicalize URLs by making sure username is included. Strip out password in the process
-    NSString *user = [_user stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    CFStringRef user = (CFStringRef)nsUser;
+    if (user)
+    {
+        // -stringByAddingPercentEscapesUsingEncoding: doesn't cover things like the @ symbol, so drop down CoreFoundation
+        user = CFURLCreateStringByAddingPercentEscapes(NULL,
+                                                       user,
+                                                       NULL,
+                                                       CFSTR(":/?#[]@!$&'()*+,;="),   // going by RFC3986
+                                                       kCFStringEncodingUTF8);
+    }
     
     CFIndex length = CFURLGetBytes((CFURLRef)aURL, NULL, 0);
     NSMutableData *data = [[NSMutableData alloc] initWithLength:length];
@@ -321,17 +328,19 @@
     
     if (authRange.location == kCFNotFound)
     {
-        NSData *replacement = [[user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *replacement = [[(NSString *)user stringByAppendingString:@"@"] dataUsingEncoding:NSUTF8StringEncoding];
         CFDataReplaceBytes((CFMutableDataRef)data, authSeparatorsRange, [replacement bytes], replacement.length);
     }
     else
     {
-        NSData *replacement = [user dataUsingEncoding:NSUTF8StringEncoding];
+        NSData *replacement = [(NSString *)user dataUsingEncoding:NSUTF8StringEncoding];
         CFDataReplaceBytes((CFMutableDataRef)data, authRange, [replacement bytes], replacement.length);
     }
     
     aURL = NSMakeCollectable(CFURLCreateWithBytes(NULL, [data bytes], data.length, kCFStringEncodingUTF8, NULL));
+    
     [data release];
+    if (user) CFRelease(user);
     
     return [aURL autorelease];
 }
@@ -358,7 +367,11 @@
     _user = [credential.user copy];
     
     NSURLRequest* request = [self request];
-    CURLMulti* multi = [request ck2_multi]; // typically this is nil, meaning use the default, but we can override it for test purposes
+    CURLMulti* multi = nil;
+    if ([request respondsToSelector:@selector(ck2_multi)])  // should only be a testing/debugging feature
+    {
+        multi = [request performSelector:@selector(ck2_multi)]; // typically this is nil, meaning use the default, but we can override it for test purposes
+    }
 
     if ([[self class] usesMultiHandle])
     {
@@ -421,6 +434,7 @@
     if (_completionHandler)
     {
         _completionHandler(error);
+        [_completionHandler release]; _completionHandler = nil;
     }
     else
     {
@@ -462,7 +476,7 @@
     NSURL *url = [request URL];
     
     // CURL is very particular about whether URLs passed to it have directory terminator or not
-    if (directory != [self URLHasDirectoryPath:url])
+    if (directory != CFURLHasDirectoryPath((CFURLRef)url))
     {
         if (directory)
         {
@@ -482,11 +496,6 @@
     NSMutableURLRequest *result = [request mutableCopy];
     [result setURL:url];
     return result;
-}
-
-+ (BOOL)URLHasDirectoryPath:(NSURL *)url;
-{
-    return CFURLHasDirectoryPath((CFURLRef)url);
 }
 
 #pragma mark Home Directory Store
@@ -522,7 +531,7 @@
         
         NSURL *homeDirectoryURL = [self.class URLWithPath:homeDirectoryPath relativeToURL:self.request.URL].absoluteURL;
         
-        homeDirectoryURL = [self canonicalizedURLForReporting:homeDirectoryURL];    // include username
+        homeDirectoryURL = [self.class URLByReplacingUserInfoInURL:homeDirectoryURL withUser:_user];    // include username
         NSString *host = [[NSURL URLWithString:@"/" relativeToURL:homeDirectoryURL] absoluteString].lowercaseString;
         
         NSMutableDictionary *store = [self.class homeURLsByHostURL];

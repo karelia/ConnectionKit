@@ -9,7 +9,7 @@
 #import "CK2SFTPProtocol.h"
 #import "CK2Authentication.h"
 
-#import "CK2SFTPSession.h"
+#import <CURLHandle/CK2SSHCredential.h>
 
 #import <AppKit/AppKit.h>
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
@@ -354,7 +354,7 @@
 #pragma mark Backend
 
 // Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return YES; }
++ (BOOL)usesMultiHandle; { return NO; }
 
 
 @end

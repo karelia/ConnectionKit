@@ -1,14 +1,8 @@
 /* authorise */
 "%@\nWhat would you like to do?" = "%@\nO que você gostaria de fazer?";
 
-/* FTP Abort */
-"Action Aborted. Local Error" = "Ação Abortada. Erro Local";
-
-/* FTP no data stream types available */
-"All data connection modes have been exhausted. Check with the server administrator." = "Todos os métodos de conexão foram esgotados. Verifique com o administrador do servidor.";
-
-/* multiple connection joiner */
-"and" = "e";
+/* ConnectionOpenPanel */
+"An unknown error occurred." = "Ocorreu um erro desconhecido.";
 
 /* close window */
 "Are you sure you want to stop the upload?" = "Você deseja realmente suspender o envio?";
@@ -31,9 +25,6 @@
 /* authorise */
 "Cancel" = "Cancelar";
 
-/* FTP upload error */
-"Cannot Upload File. Storage quota on server exceeded" = "Não foi possível Enviar o arquivo. Cota de armazenamento excedida no servidor";
-
 /* connected message */
 "Connected to %@" = "Conectado a %@";
 
@@ -46,64 +37,17 @@
 /* config */
 "Couldn't find configuration file specified\n %@" = "Não foi possível encontrar a configuração do arquivo especificado\n %@";
 
-/* FTP Create directory error */
-"Create directory operation failed" = "Falha na operação de criação do diretório";
-
-/* Failed to open a data stream connection */
-"Data Stream Timed Out" = "Fluxo de Dados Esgotado";
-
 /* status */
 "Disconnected" = "Desconectado";
 
 /* filesize: exabytes */
 "EB" = "EB";
 
-/* FTP no data streams available */
-"Exhausted all connection types to server. Please contact server administrator" = "Esgotado todos os tipos de conexão para o servidor. Por favor contacte o administrador do servidor";
-
-/* Bad FTP command */
-"Failed to change to directory" = "Falha ao mudar para o diretório";
-
-/* couldn't delete the file */
-"Failed to delete directory" = "Falha ao excluir o diretório";
-
-/* couldn't delete the file */
-"Failed to delete file" = "Falha ao excluir o arquivo";
-
-/* FTP Upload error */
-"Failed to set permissions for path %@" = "Falha ao configurar permissões para o caminho %@";
-
-/* FTP file download error */
-"File %@ does not exist on server" = "O arquivo %@ não existe no servidor";
-
-/* FTP file in use */
-"File in Use" = "Arquivo em Uso";
-
-/* FTP service timed out */
-"FTP service not available; Remote server has closed connection" = "Serviço de FTP não disponível; O servidor remoto encerrou a conexão";
-
-/* FTP no service */
-"FTP Service Unavailable" = "Serviço de FTP Indisponível";
-
 /* filesize: gigabytes */
 "GB" = "GB";
 
-/* Couldn't open the port to the host
-   Host Unavailable */
-
-"Host Unavailable" = "Servidor Indisponível";
-
-/* FTP Error */
-"Invalid Account name" = "Nome Inválido da Conta";
-
-/* Stream Error before opening */
-"Is the service running on the server" = "É o serviço sendo executado no servidor";
-
 /* filesize: kilobytes */
 "KB" = "KB";
-
-/* File doesn't exist */
-"Local file %@ doesn't exist" = "O arquivo local %@ não existe";
 
 /* FTP download error */
 "Local File already exists" = "O Arquivo Local já existe";
@@ -117,20 +61,8 @@
 /* failed to find a connection class */
 "No connection available for requested connection type" = "Nenhuma conexão disponível para o tipo de conexão exigida";
 
-/* FTP Error */
-"No Storage Space Available" = "Nenhum Espaço de Armazenamento Disponível";
-
-/* No such file */
-"No such file" = "Nenhum arquivo";
-
-/* FTP Error */
-"Not Logged In" = "Não Conectado Em";
-
 /* filesize: petabytes */
 "PB" = "PB";
-
-/* Permission Denied */
-"Permission Denied" = "Permissão Recusada";
 
 /* ConnectionOpenPanel */
 "Please check your settings." = "Por favor, verifique suas configurações.";
@@ -140,17 +72,11 @@
 
 "Quit" = "Sair";
 
-/* abbreviation for seconds, e.g. 12 MB/s */
-"s" = "s";
-
 /* close window */
 "Stop Upload" = "Suspender o Envio";
 
 /* close window */
 "Stop Upload?" = "Suspender o Envio?";
-
-/* Error creating stream */
-"Stream Unavailable" = "Fluxo Indisponível";
 
 /* filesize: terabytes */
 "TB" = "TB";
@@ -158,14 +84,5 @@
 /* error */
 "This droplet is missing the original application that created it. You will need to reinstall the original application." = "Este droplet está faltando ao aplicativo original no qual foi criado. Você precisa reinstalar o aplicativo original.";
 
-/* time out */
-"Timed Out waiting for remote host." = "Tempo esgotado ao esperar pelo servidor remoto.";
-
 /* status */
 "Uploading %@" = "Enviando %@";
-
-/* FTP file upload error */
-"You do not have access to write file %@" = "Você não tem acesso a gravação para o arquivo %@";
-
-/* FTP Error */
-"You need an Account to Upload Files" = "Você precisa de uma Conta para Enviar Arquivos";

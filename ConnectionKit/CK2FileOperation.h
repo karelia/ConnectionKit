@@ -64,6 +64,9 @@
                                        manager:(CK2FileManager *)manager
                                completionBlock:(void (^)(NSError *))block;
 
+@property(readonly) CK2FileManager *fileManager;    // goes to nil once finished/failed
+@property(readonly) NSURL *originalURL;
+
 - (void)cancel;
 
 @end

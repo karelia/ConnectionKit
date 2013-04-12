@@ -16,6 +16,13 @@
 
 @implementation PathTests
 
+- (void)testNilURL
+{
+    NSString *path;
+    STAssertNoThrow(path = [CK2FileManager pathOfURL:nil], nil);
+    STAssertNil(path, nil);
+}
+
 - (void)testFTPEmptyNoTrailingSlash
 {
     NSURL* testURL = [NSURL URLWithString:@"ftp://user:pass@test.ftp.com"];

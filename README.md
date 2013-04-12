@@ -93,7 +93,7 @@ ConnectionKit includes several (nested) submodules of its own, so have Git grab 
 	cd ConnectionKit
 	git submodule update --recursive --init
 
-Substitute the URL above for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`curlhandle-4` at present).
+Substitute the URL above for your own if you've created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (`v2.x-beta` at present).
 
 Then:
 
@@ -103,7 +103,7 @@ Then:
 
 ## Actually, y'know, doing stuff
 
-Interacting with ConnectionKit is usually entirely through `CKFileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
+Interacting with ConnectionKit is usually entirely through `CK2FileManager`. It's quite a lot like `NSFileManager`, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there's no shared instance; you must create your own.
 
 So to get a directory listing from an FTP server for example:
 
