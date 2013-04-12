@@ -132,22 +132,38 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 + (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
 
-/// \param [in] URL to extract the path from. Unlike -path, handles the subtleties of different schemes. Some examples:
-/// ftp://example.com/relative      =>  relative
-/// ftp://example.com//absolute     =>  /absolute
-/// sftp://example.com/absolute     =>  /absolute
-/// sftp://example.com/~/relative   =>  relative
-/// \returns the path.
+/**
+ Extracts the path component of a URL, accounting for the subtleties of FTP etc.
+ 
+ Normally, paths in URLs are absolute. FTP and SSH-based protocols both have the
+ concept of a "home" directory though. i.e. the working directory upon login.
+ Thus, their URLs must distinguish between absolute and relative paths
+ (the latter are interpreted relative to the home directory). This method makes
+ that same distinction to return an absolute or relative path, as interpreted
+ by the specific protocol. Some examples:
+ 
+ ftp://example.com/relative      =>  relative
+ ftp://example.com//absolute     =>  /absolute
+ sftp://example.com/absolute     =>  /absolute
+ sftp://example.com/~/relative   =>  relative
+
+ @param URL to extract the path from. 
+ @return the URL's path
+ */
 + (NSString *)pathOfURL:(NSURL *)URL;
 
-// CFURLSetTemporaryResourcePropertyForKey() is a very handy function, but currently only supports file URLs
-// This method calls through to Core Foundation for file URLs, but provides its own storage for others
-// When first used for a non-file URL, -[NSURL getResourceValue:forKey:error:] is swizzled so the value can be easily retreived by clients later
-// This method is primarily used by non-file protocols to populate URLs returned during a directory listing. But it could be helpful to clients for adding in other info
-// CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must pass in a CONSTANT
-/// \param [in] value to cache. Retained
-/// \param [in] key to store under. Any existing value is overwritten
-/// \param [in] url to cache for
+/**
+ Equivalent of CFURLSetTemporaryResourcePropertyForKey() that supports non-file URLs
+ 
+ Calls through to Core Foundation for file URLs, but provides its own storage for others
+ When first used for a non-file URL, -[NSURL getResourceValue:forKey:error:] is swizzled so the value can be easily retreived by clients later
+ This method is primarily used by non-file protocols to populate URLs returned during a directory listing. But it could be helpful to clients for adding in other info
+ CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must pass in a CONSTANT
+ 
+ @param value to cache. Retained
+ @param key to store under. Any existing value is overwritten
+ @param url to cache for
+ */
 + (void)setTemporaryResourceValue:(id)value forKey:(NSString *)key inURL:(NSURL *)url __attribute((nonnull(2,3)));
 
 @end
