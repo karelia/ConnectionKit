@@ -27,6 +27,8 @@
 					<select id="jumpTo">
 	<option value="top">Jump To&#133;</option>
 	
+	<option value="overview">Overview</option>
+	
 	
 	
 	
@@ -55,6 +57,8 @@
 		<nav id="tocContainer" class="isShowingTOC">
 			<ul id="toc" role="tree">
 				
+<li role="treeitem"><span class="nodisclosure"></span><span class="sectionName"><a href="#overview">Overview</a></span></li>
+
 
 
 
@@ -109,6 +113,23 @@
 </tr>
 						</tbody></table></div>
 					
+					
+					
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>ConnectionKit&rsquo;s equivalent of NSFileManager
+All operations are asynchronous, including ones on the local file system.
+Supports remote file servers, currently over FTP, SFTP and WebDAV.
+&ldquo;Worker&rdquo; methods return an opaque object which you can pass to -cancelOperation: if needed.
+Allocate and initialise as many file managers as you wish; there is no +defaultManager method
+Provide a file manager with a delegate to handle authentication in the same fashion as NSURLConnection
+Behind the scenes, ConnectionKit takes care of creating as many connections to
+servers as are needed. This means you can perform multiple operations at once,
+but please avoid performing too many at once as that could easily upset a
+server.</p>
+					</div>
 					
 					
 					
