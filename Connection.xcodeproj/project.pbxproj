@@ -249,6 +249,8 @@
 		22662EF1165D2EEC005FCC4A /* ftp.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = ftp.json; sourceTree = "<group>"; };
 		22662EF2165D2EEC005FCC4A /* webdav.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = webdav.json; sourceTree = "<group>"; };
 		227113BE168388FD00280005 /* http.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = http.json; sourceTree = "<group>"; };
+		2280F4B1171826D100BBEF22 /* Documentation */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Documentation; sourceTree = "<group>"; };
+		2280F4B41718276E00BBEF22 /* .appledoc.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = .appledoc.plist; sourceTree = "<group>"; };
 		2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests.m; sourceTree = "<group>"; };
 		2288CD73165A98E300F34E24 /* CK2WebDAVProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2WebDAVProtocol.h; sourceTree = "<group>"; };
 		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
@@ -486,6 +488,25 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		2280F4A4171826A500BBEF22 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				2280F4B41718276E00BBEF22 /* .appledoc.plist */,
+				2280F4B1171826D100BBEF22 /* Documentation */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+		2280F4B0171826B700BBEF22 /* Testing */ = {
+			isa = PBXGroup;
+			children = (
+				09D6602E09FD37B70000BA00 /* Unit Tests */,
+				27F3372C16BC1FB100E70511 /* AuthTester */,
+				22C9CF9A1703327A004610FE /* ProfilingTester */,
+			);
+			name = Testing;
+			sourceTree = "<group>";
+		};
 		22C9CF9A1703327A004610FE /* ProfilingTester */ = {
 			isa = PBXGroup;
 			children = (
@@ -666,12 +687,11 @@
 				79CFD8A009F705B400172CDD /* Private */,
 				274DA43516ED52BE008041B6 /* Legacy */,
 				27FD90C20ED5BFA40068D634 /* Experimental */,
-				09D6602E09FD37B70000BA00 /* Unit Tests */,
+				2280F4B0171826B700BBEF22 /* Testing */,
 				29B97315FDCFA39411CA2CEA /* Other Sources */,
 				27FD90C60ED5BFC00068D634 /* Dependencies */,
 				29B97317FDCFA39411CA2CEA /* Resources */,
-				27F3372C16BC1FB100E70511 /* AuthTester */,
-				22C9CF9A1703327A004610FE /* ProfilingTester */,
+				2280F4A4171826A500BBEF22 /* Documentation */,
 				29B97323FDCFA39411CA2CEA /* Frameworks */,
 				19C28FACFE9D520D11CA2CBB /* Products */,
 			);
