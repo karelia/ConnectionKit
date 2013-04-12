@@ -4,10 +4,6 @@
 //
 //  Created by Mike on 08/10/2012.
 //
-//  Usage:
-//  Much like NSFileManager, alloc + init your own instance. Likely you'll want to give it a delegate so can handle authentication challenges. Then just use the instance methods to perform your desired file operations.
-//  An opaque object is returned from each "worker" method that represents the file operation being performed. You can hang onto this token and pass it to -cancelOperation:
-//
 
 #import <Foundation/Foundation.h>
 
@@ -25,6 +21,19 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
 
 @protocol CK2FileManagerDelegate;
 
+
+/**
+ ConnectionKit's equivalent of NSFileManager
+ All operations are asynchronous, including ones on the local file system.
+ Supports remote file servers, currently over FTP, SFTP and WebDAV.
+ "Worker" methods return an opaque object which you can pass to -cancelOperation: if needed.
+ Allocate and initialise as many file managers as you wish; there is no +defaultManager method
+ Provide a file manager with a delegate to handle authentication in the same fashion as NSURLConnection
+ Behind the scenes, ConnectionKit takes care of creating as many connections to
+ servers as are needed. This means you can perform multiple operations at once,
+ but please avoid performing too many at once as that could easily upset a
+ server.
+*/
 
 @interface CK2FileManager : NSObject
 {
