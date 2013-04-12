@@ -1,0 +1,303 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>ConnectionKit Reference</title>
+		<link rel="stylesheet" type="text/css" href="css/styles.css" media="all" />
+		<link rel="stylesheet" type="text/css" media="print" href="css/stylesPrint.css" />
+		<meta name="generator" content="appledoc 2.1 (build 858)" />
+	</head>
+	<body>
+		<header id="top_header">
+			<div id="library" class="hideInXcode">
+				<h1><a id="libraryTitle" href="index.html">ConnectionKit </a></h1>
+				<a id="developerHome" href="index.html">Karelia Systems</a>
+			</div>
+			
+			<div id="title" role="banner">
+				<h1 class="hideInXcode">ConnectionKit Reference</h1>
+			</div>
+			<ul id="headerButtons" role="toolbar"></ul>
+		</header>
+		<article>
+			<div id="overview_contents" role="main">
+				<div class="main-navigation navigation-top">
+					<a href="hierarchy.html">Next</a>
+				</div>
+				<div id="header">
+					<div class="section-header">
+						<h1 class="title title-header">ConnectionKit Reference</h1>
+					</div>		
+				</div>
+				<div id="container">
+					
+					<div class="section section-overview index-overview">
+						
+						
+						<h1>Development</h1>
+
+<p>ConnectionKit 2 is still under heavy development, but the front-end API is probably stable.</p>
+
+<p>Things someone could do if they&rsquo;re feeling nice:</p>
+
+<ul>
+<li>Cancellation support for the File protocol</li>
+<li>Improve handling of invalid certificates for FTPS</li>
+<li>Amazon S3 protocol</li>
+<li>API for downloading/reading files</li>
+</ul>
+
+
+<h1>Features</h1>
+
+<p>ConnectionKit provides a Cocoa-friendly, block-based API for asynchronously working with:</p>
+
+<ul>
+<li>FTP, SFTP and WebDAV servers</li>
+<li>Local files</li>
+</ul>
+
+
+<h1>Contributors and Contact Info</h1>
+
+<p>I&rsquo;m Mike Abdullah, of <a href="http://karelia.com">Karelia Software</a>. <a href="http://twitter.com/mikeabdullah">@mikeabdullah</a> on Twitter.</p>
+
+<p>Questions about the code are best left as issues at https://github.com/karelia/ConnectionKit but you can also message me on Twitter (just don&rsquo;t expect more than a terse reply!).</p>
+
+<p>Big thanks to:</p>
+
+<ul>
+<li><a href="http://twitter.com/samdeane">Sam Deane</a> of <a href="http://www.elegantchaos.com">Elegant Chaos</a> for:
+
+<ul>
+<li>Sooo much testing, especially Mock Server</li>
+<li>The WebDAV protocol implementation</li>
+<li>Improving the File protocol implementation</li>
+</ul>
+</li>
+<li>And all contributors to the submodules of course!</li>
+</ul>
+
+
+<h1>Dependencies</h1>
+
+<p>Requires OS X v10.6+</p>
+
+<p>Relies upon CURLHandle and DAVKit. They are provided as submodules and may have their own dependencies in turn. Out of the box, provided you initialise all submodules, <code>CURLHandle.framework</code> should be able to nicely build, self-containing all its dependencies.</p>
+
+<p>ConnectionKit supports both 64 and 32bit Macs. We hope to expand to iOS before too long too. Note that support for the legacy Objective-C runtime (32bit Mac) currently precludes switching the codebase to ARC.</p>
+
+<h1>License</h1>
+
+<h2>CURLHandle</h2>
+
+<p>Please see https://github.com/karelia/CurlHandle for details of CURLHandle and its subcomponents' licensing.</p>
+
+<h2>DAVKit</h2>
+
+<p>Please see https://github.com/karelia/DAVKit for details of DAVKit and its subcomponents' licensing.</p>
+
+<h2>Legacy</h2>
+
+<p>Existing ConnectionKit code should declare its licensing at the top of the file, most likely BSD or MIT.</p>
+
+<h2>ConnectionKit 2 code</h2>
+
+<p>Licensed under the BSD License <a href="http://www.opensource.org/licenses/bsd-license">http://www.opensource.org/licenses/bsd-license</a>
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS &ldquo;AS IS&rdquo; AND ANY
+EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+
+<h1>Usage</h1>
+
+<h2>Getting the code</h2>
+
+<p>If you&rsquo;re already using Git, you likely want to add ConnectionKit as a submodule of your project:</p>
+
+<pre><code>git submodule add https://github.com/karelia/ConnectionKit.git
+</code></pre>
+
+<p>If you&rsquo;re using another version control system, you can grab the code directly:</p>
+
+<pre><code>git clone https://github.com/karelia/ConnectionKit.git
+</code></pre>
+
+<p>If you&rsquo;re not using version control at all, remind me to come yell at you at a mutually convenient time.</p>
+
+<p>ConnectionKit includes several (nested) submodules of its own, so have Git grab them too:</p>
+
+<pre><code>cd ConnectionKit
+git submodule update --recursive --init
+</code></pre>
+
+<p>Substitute the URL above for your own if you&rsquo;ve created a fork of ConnectionKit. Git should automatically checkout the recommended branch for you (<code>v2.x-beta</code> at present).</p>
+
+<p>Then:</p>
+
+<ol>
+<li>Add <code>Connection.xcodeproj</code> to your project</li>
+<li>Add the ConnectionKit framework as a dependency of your project&rsquo;s build target</li>
+<li>Set <code>Connection.framework</code> to be copied into a suitable location inside your build target; e.g the <code>Frameworks</code> directory</li>
+</ol>
+
+
+<h2>Actually, y'know, doing stuff</h2>
+
+<p>Interacting with ConnectionKit is usually entirely through <code>CK2FileManager</code>. It&rsquo;s quite a lot like <code>NSFileManager</code>, but asynchronous, and with a few more bells and whistles to handle the complexities of remote servers. Also there&rsquo;s no shared instance; you must create your own.</p>
+
+<p>So to get a directory listing from an FTP server for example:</p>
+
+<pre><code>- (void)listDirectoryAtPath:(NSString *)path
+{
+    NSURL *ftpServer = [NSURL URLWithString:@"ftp://example.com/"];
+    NSURL *directory = [CK2FileManager URLWithPath:path relativeToURL:ftpServer];
+
+    CK2FileManager *fileManager = [[CK2FileManager alloc] init];
+    fileManager.delegate = self;
+
+    [fileManager contentsOfDirectoryAtURL:directory
+               includingPropertiesForKeys:nil
+                                  options:NSDirectoryEnumerationSkipsHiddenFiles
+                        completionHandler:^(NSArray *contents, NSError *error) {
+
+        // Display contents in your UI, or present the error if failed
+    }];
+}
+</code></pre>
+
+<p>Note how <code>CK2FileManager</code> is used to construct URLs. This is to handle the difference in URL formats different protocols require.</p>
+
+<p>Delegate methods are used to handle authentication (more on that below) and transcripts. Be sure to read through <code>CK2FileManager.h</code> as there&rsquo;s plenty of helpful documentation in there.</p>
+
+<h2>Authentication</h2>
+
+<p>ConnectionKit follows a similar pattern to <code>NSURLConnection</code>: During an operation, it may vend out as many authentication challenges as it sees fit. Your delegate is responsible for replying to the challenges, instructing the connection how it ought to behave. Replying is asynchronous, giving you a chance to present some UI asking the user what they&rsquo;d like to do if necessary.</p>
+
+<p>Authentication challenges carry a great deal of information, including <code>.previousFailureCount</code> and <code>.protectionSpace</code> which are very useful for determining how to treat an individual challenge. When responding to a challenge, supplying a credential set to <code>NSURLCredentialPersistencePermanent</code> will cause ConnectionKit to add it to the keychain if successful.</p>
+
+<h3>WebDAV over HTTP</h3>
+
+<p>WebDAV servers can selectively choose whether to require authentication (e.g. public servers have no need to). If authentication is requested, you&rsquo;ll receive an authentication challenge encapsulating the auth method to be used (e.g. HTTP Digest). Respond with a username and password credential. ConnectionKit will do its best to supply <code>-proposedCredential</code> from the user&rsquo;s keychain.</p>
+
+<h3>FTP</h3>
+
+<p>FTP is very similar to plain WebDAV, except it always asks for authentication. Usually, you respond with a username and password, but can ask to <code>-continueWithoutCredentialForAuthenticationChallenge:</code> for anonymous FTP login.</p>
+
+<h3>WebDAV over HTTPS</h3>
+
+<p>The validity of the server is checked first. This takes the form of potentially multiple challenges with the either of the following authentication methods:</p>
+
+<ul>
+<li><code>NSURLAuthenticationMethodServerTrust</code></li>
+<li><code>NSURLAuthenticationMethodClientCertificate</code></li>
+</ul>
+
+
+<p>Generally it&rsquo;s best to call use <code>-performDefaultHandlingForAuthenticationChallenge:</code> to let Cocoa decide what to do.</p>
+
+<h3>SFTP</h3>
+
+<p>SFTP is a tricky blighter. You can opt to supply a username and password like other protocols. Our implementation also supports public key authentication, whereby you reply with a credential constructed using:</p>
+
+<pre><code>+[NSURLCredential ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:]
+</code></pre>
+
+<p>The public key is generally optional, as ConnectionKit can derive it from the private key. It&rsquo;s also possible to use SSH-Agent, but Apple discourage this, and it is unavailable to sandboxed apps. Detailed documentation on the above method can be found in <code>CK2Authentication.h</code>.</p>
+
+<p>Once connected to the server, ConnectionKit checks its fingerprint against the <code>~/.ssh/known_hosts</code> file. Note that for sandboxed apps this is inside of your container! An authentication challenge (<code>CK2AuthenticationMethodHostFingerprint</code>) is issued with the result of this. Your delegate can call <code>-cancelAuthenticationChallenge:</code> to reject the fingerprint, or reply with a credential for acceptance, constructed using:</p>
+
+<pre><code>+[NSURLCredential ck2_credentialForKnownHostWithPersistence:]
+</code></pre>
+
+<p>The default behaviour (<code>-performDefaultHandlingForAuthenticationChallenge:</code>) accepts new fingerprints, adding them to the <code>known_hosts</code> file, and causes the operation to fail with an error for mismatched fingerprints.</p>
+
+<p>After checking the host fingerprint, SFTP moves on to actually authenticating the client.</p>
+
+<h2>Resource Properties/Attributes</h2>
+
+<p>ConnectionKit&rsquo;s API is a little asymmetric for handling resource properties:</p>
+
+<p>When creating a file or directory, <em>opening</em> attributes may be specified. Generally only <code>NSFilePosixPermissions</code> is respected. This <strong>only</strong> applies to protocols where permissions can be specified at creation time (i.e. SFTP). But even then there are some servers in my experience that sometimes ignore this value anyway. So:</p>
+
+<p>To set the properties of an existing item, use <code>-[CK2FileManager setAttributes:ofItemAtURL:completionHandler:]</code>. Again this only applies to certain protocols/servers; see <code>CK2FileManager.h</code> for up-to-date information on this.</p>
+
+<p>Many protocols do not have an efficient mechanism for retrieving the attributes of an individual item. Instead, you should get a listing of the <em>parent</em> directory, and pull out the properties of whichever resources you&rsquo;re interested in.</p>
+
+<h1>Legacy</h1>
+
+<p>For anyone relying on one of the old branches, they have been archived to be tags:</p>
+
+<ul>
+<li>master => v1.x</li>
+<li>release-1.2 => v1.2.x</li>
+<li>BrianWorkInProgress => brian-work-in-progress</li>
+<li>CKFTPResponse => ckftpresponse</li>
+<li>release-2.0 => experiment-2.0</li>
+</ul>
+
+						
+						
+					</div>
+					
+                        
+                    
+					
+					
+					<div class="index-column">
+						<h2 class="index-title">Class References</h2>
+						<ul>
+							
+							<li><a href="Classes/CK2FileManager.html">CK2FileManager</a></li>
+							
+							<li><a href="Classes/CK2FileManagerWithTestSupport.html">CK2FileManagerWithTestSupport</a></li>
+							
+							<li><a href="Classes/CK2Protocol.html">CK2Protocol</a></li>
+							
+						</ul>
+					</div>
+					
+					
+						
+					<div class="index-column">
+						
+						<h2 class="index-title">Protocol References</h2>
+						<ul>
+							
+							<li><a href="Protocols/CK2ProtocolClient.html">CK2ProtocolClient</a></li>
+							
+						</ul>
+						
+						
+						<h2 class="index-title">Category References</h2>
+						<ul>
+							
+							<li><a href="Categories/NSURLCredential+CK2SSHPublicKey.html">NSURLCredential(CK2SSHPublicKey)</a></li>
+							
+						</ul>
+						
+					</div>
+					
+				</div>
+				<div class="main-navigation navigation-bottom">
+					<a href="hierarchy.html">Next</a>
+				</div>
+				<div id="footer">
+					<hr />
+					<div class="footer-copyright">
+						<p><span class="copyright">&copy; 2013 Karelia Systems. All rights reserved. (Last updated: 2013-04-12)</span><br />
+						
+						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.1 (build 858)</a>.</span></p>
+						
+	
+					</div>
+				</div>
+			</div>
+		</article>		
+	</body>
+</html>
