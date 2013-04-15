@@ -43,9 +43,18 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
 
 #pragma mark Discovering Directory Contents
 
-// NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
-// You can pass in CK2DirectoryEnumerationIncludesDirectory if you wish (see below for details) but that would be a little odd for this method!
-// Adding into the mix NSURLParentDirectoryURLKey as well will fill that key in all the way up to the root/volume URL
+/**
+ Performs a shallow search of the specified directory and returns URLs for the contained items.
+ 
+ This method performs a shallow search of the directory and therefore does not traverse symbolic links or return the contents of any subdirectories. This method also does not return URLs for the current directory (“.”), parent directory (“..”) but it can return hidden files (files that begin with a period character)
+ 
+ The order of the files in the returned array generally follows that returned by the server, which is likely undefined.
+ 
+ @param url of the directory to list
+ @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
+ @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
+ @param block called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.
+ */
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask
