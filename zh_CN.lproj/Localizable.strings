@@ -1,14 +1,8 @@
 /* authorise */
 "%@\nWhat would you like to do?" = "%@\n您想要怎么做？";
 
-/* FTP Abort */
-"Action Aborted. Local Error" = "放弃操作。本机发生错误";
-
-/* FTP no data stream types available */
-"All data connection modes have been exhausted. Check with the server administrator." = "已尝试所有资料连接模式。请与服务器管理员确认。";
-
-/* multiple connection joiner */
-"and" = "和";
+/* ConnectionOpenPanel */
+"An unknown error occurred." = "发生了未知错误。";
 
 /* close window */
 "Are you sure you want to stop the upload?" = "你确定要停止上传吗？";
@@ -31,9 +25,6 @@
 /* authorise */
 "Cancel" = "取消";
 
-/* FTP upload error */
-"Cannot Upload File. Storage quota on server exceeded" = "无法上传文件。已超过服务器的存储空间";
-
 /* connected message */
 "Connected to %@" = "已连接到 %@";
 
@@ -46,64 +37,17 @@
 /* config */
 "Couldn't find configuration file specified\n %@" = "无法找到指定的配置文件\n %@";
 
-/* FTP Create directory error */
-"Create directory operation failed" = "创建目录操作失败";
-
-/* Failed to open a data stream connection */
-"Data Stream Timed Out" = "数据流逾时";
-
 /* status */
 "Disconnected" = "已断开";
 
 /* filesize: exabytes */
 "EB" = "EB";
 
-/* FTP no data streams available */
-"Exhausted all connection types to server. Please contact server administrator" = "已尝试与此服务器的所有连接类型。请与服务器管理员联系。";
-
-/* Bad FTP command */
-"Failed to change to directory" = "无法更改目录";
-
-/* couldn't delete the file */
-"Failed to delete directory" = "无法删除目录";
-
-/* couldn't delete the file */
-"Failed to delete file" = "无法删除文件";
-
-/* FTP Upload error */
-"Failed to set permissions for path %@" = "设置路径 %@ 的权限失败";
-
-/* FTP file download error */
-"File %@ does not exist on server" = "服务器上不存在文件 %@";
-
-/* FTP file in use */
-"File in Use" = "文件正在使用中";
-
-/* FTP service timed out */
-"FTP service not available; Remote server has closed connection" = "无法取得 FTP 服务；远程服务器已关闭连接";
-
-/* FTP no service */
-"FTP Service Unavailable" = "无法取得 FTP 服务";
-
 /* filesize: gigabytes */
 "GB" = "GB";
 
-/* Couldn't open the port to the host
-   Host Unavailable */
-
-"Host Unavailable" = "无法取得主机";
-
-/* FTP Error */
-"Invalid Account name" = "账号名称无效";
-
-/* Stream Error before opening */
-"Is the service running on the server" = "是在此服务器上执行的服务";
-
 /* filesize: kilobytes */
 "KB" = "KB";
-
-/* File doesn't exist */
-"Local file %@ doesn't exist" = "本机文件 %@ 不存在";
 
 /* FTP download error */
 "Local File already exists" = "本机文件已存在";
@@ -117,20 +61,8 @@
 /* failed to find a connection class */
 "No connection available for requested connection type" = "请求的连接类型没有可用的连接";
 
-/* FTP Error */
-"No Storage Space Available" = "没有可用的存储空间";
-
-/* No such file */
-"No such file" = "没有这个文件";
-
-/* FTP Error */
-"Not Logged In" = "尚未登录";
-
 /* filesize: petabytes */
 "PB" = "PB";
-
-/* Permission Denied */
-"Permission Denied" = "权限否决";
 
 /* ConnectionOpenPanel */
 "Please check your settings." = "请检查你的设置。";
@@ -140,17 +72,11 @@
 
 "Quit" = "退出";
 
-/* abbreviation for seconds, e.g. 12 MB/s */
-"s" = "秒";
-
 /* close window */
 "Stop Upload" = "停止上传";
 
 /* close window */
 "Stop Upload?" = "停止上传？";
-
-/* Error creating stream */
-"Stream Unavailable" = "数据流无法取得";
 
 /* filesize: terabytes */
 "TB" = "TB";
@@ -158,14 +84,5 @@
 /* error */
 "This droplet is missing the original application that created it. You will need to reinstall the original application." = "该 Droplet 丢失了创建它的原应用程序。你需要重新安装该应用程序。";
 
-/* time out */
-"Timed Out waiting for remote host." = "等待远程主机超时。";
-
 /* status */
 "Uploading %@" = "正在上传 %@";
-
-/* FTP file upload error */
-"You do not have access to write file %@" = "您没有权限写文件 %@";
-
-/* FTP Error */
-"You need an Account to Upload Files" = "您需要一个账号进行文件上传";
