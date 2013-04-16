@@ -31,7 +31,13 @@ extern NSString * const CK2AuthenticationMethodHostFingerprint;
 
 @interface NSURLCredential (CK2SSHHostFingerprint)
 
-// NSURLCredentialPersistencePermanent indicates new keys should be added to the known_hosts file
+/**
+ Constructs a credential to encapsulate the outcome of evaluating an SSH server's
+ host fingerprint.
+ 
+ @param persistence indicates whether new keys should be added to the known_hosts file
+ @return the credential
+ */
 + (NSURLCredential *)ck2_credentialForKnownHostWithPersistence:(NSURLCredentialPersistence)persistence;
 
 @end
