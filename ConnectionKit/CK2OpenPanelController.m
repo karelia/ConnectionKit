@@ -57,6 +57,7 @@
 #import "CK2IconView.h"
 #import "CK2PathFieldWindowController.h"
 #import <Connection/CK2FileManager.h>
+#import "NSObject+CK2OpenPanel.h"
 
 #define DEFAULT_OPERATION_TIMEOUT       20
 
@@ -528,14 +529,18 @@
          }
          else
          {
-             dispatch_async(dispatch_get_main_queue(),
+              dispatch_async(dispatch_get_main_queue(),
              ^{
                  [self cacheChildren:children forURL:blockResolvedURL];
                  [self urlDidLoad:blockResolvedURL];
              });
          }
-         
-         dispatch_async(dispatch_get_main_queue(),
+
+         // Since we are calling an arbitrary block supplied by the client, it's safer to call using
+         // -performSelectorOnMainThread:... which this method does. The reason is that if the block calls something
+         // like -runModal, it will not return for a bit thus clogging up the main GCD queue. Since we need to run
+         // blocks on the main queue during the modeal session to update the UI, this ends up deadlocking.
+         [NSObject ck2_invokeBlockOnMainThread:
          ^{
              _currentBootstrapOperation = nil;
                             
@@ -549,7 +554,7 @@
              {
                  block([tempError autorelease]);
              }
-         });
+         }];
          
          [resolvedURL autorelease];
      }];

@@ -103,6 +103,8 @@
 		3274F1CF170888430049DDE5 /* CK2PathFieldWindowController.m in Sources */ = {isa = PBXBuildFile; fileRef = 3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */; };
 		32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */; };
 		32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */; };
+		32B4622A171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */; };
+		32B4622B171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */; };
 		32B592B816A4960B0020FFE9 /* CK2OpenPanel.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		32B592B916A4960B0020FFE9 /* CK2OpenPanel.m in Sources */ = {isa = PBXBuildFile; fileRef = 32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */; };
 		32B592BA16A4960B0020FFE9 /* CK2OpenPanelController.h in Headers */ = {isa = PBXBuildFile; fileRef = 32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */; };
@@ -194,6 +196,13 @@
 			proxyType = 2;
 			remoteGlobalIDString = 22C9CFBF17035A0A004610FE;
 			remoteInfo = crashtest;
+		};
+		32B46224171DE24800FFFAAE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223FD092160B523700BE1C80;
+			remoteInfo = CURLHandleTests;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -339,10 +348,10 @@
 		27F394F4162C162900944F43 /* CK2SFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2SFTPProtocol.m; sourceTree = "<group>"; };
 		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
 		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		323B7348170E253900219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2OpenPanel.xib; sourceTree = "<group>"; };
-		323B7355170E254800219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2FilePreview.xib; sourceTree = "<group>"; };
-		323B7358170E255200219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2NewFolderWindow.xib; sourceTree = "<group>"; };
-		323B735B170E256000219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file; name = en; path = en.lproj/CK2PathFieldWindow.xib; sourceTree = "<group>"; };
+		323B7348170E253900219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/CK2OpenPanel.xib; sourceTree = "<group>"; };
+		323B7355170E254800219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/CK2FilePreview.xib; sourceTree = "<group>"; };
+		323B7358170E255200219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/CK2NewFolderWindow.xib; sourceTree = "<group>"; };
+		323B735B170E256000219F9A /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/CK2PathFieldWindow.xib; sourceTree = "<group>"; };
 		324D22BB16AE173F001CFDE6 /* CK2BrowserPreviewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewController.h; sourceTree = "<group>"; };
 		324D22BC16AE173F001CFDE6 /* CK2BrowserPreviewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2BrowserPreviewController.m; sourceTree = "<group>"; };
 		324D22BD16AE1740001CFDE6 /* CK2BrowserPreviewView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2BrowserPreviewView.h; sourceTree = "<group>"; };
@@ -357,6 +366,8 @@
 		3274F1CC170888430049DDE5 /* CK2PathFieldWindowController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2PathFieldWindowController.m; sourceTree = "<group>"; };
 		32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSImage+CK2OpenPanel.h"; sourceTree = "<group>"; };
 		32B3EA7D16B58FFB003D4836 /* NSImage+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSImage+CK2OpenPanel.m"; sourceTree = "<group>"; };
+		32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+CK2OpenPanel.h"; sourceTree = "<group>"; };
+		32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+CK2OpenPanel.m"; sourceTree = "<group>"; };
 		32B592A116A4960B0020FFE9 /* CK2OpenPanel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanel.h; sourceTree = "<group>"; };
 		32B592A216A4960B0020FFE9 /* CK2OpenPanel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2OpenPanel.m; sourceTree = "<group>"; };
 		32B592A316A4960B0020FFE9 /* CK2OpenPanelController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2OpenPanelController.h; sourceTree = "<group>"; };
@@ -544,7 +555,7 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
+				32B46225171DE24800FFFAAE /* CURLHandleTests.octest */,
 				22C9CFFB1703AD4D004610FE /* crashtest */,
 			);
 			name = Products;
@@ -817,6 +828,8 @@
 				324D22BE16AE1740001CFDE6 /* CK2BrowserPreviewView.m */,
 				324D22C316AE1754001CFDE6 /* CK2FileSizeFormatter.h */,
 				324D22C416AE1754001CFDE6 /* CK2FileSizeFormatter.m */,
+				32B46228171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h */,
+				32B46229171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m */,
 				32B592A716A4960B0020FFE9 /* NSURL+CK2OpenPanel.h */,
 				32B592A816A4960B0020FFE9 /* NSURL+CK2OpenPanel.m */,
 				32B3EA7C16B58FFA003D4836 /* NSImage+CK2OpenPanel.h */,
@@ -896,6 +909,7 @@
 				32B3EA7E16B58FFC003D4836 /* NSImage+CK2OpenPanel.h in Headers */,
 				27993E8416FCB30D008DC1B0 /* CK2FileOperation.h in Headers */,
 				3274F1CE170888430049DDE5 /* CK2PathFieldWindowController.h in Headers */,
+				32B4622A171DE27F00FFFAAE /* NSObject+CK2OpenPanel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1055,6 +1069,13 @@
 			name = crashtest;
 			path = "Standalone Test";
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		32B46225171DE24800FFFAAE /* CURLHandleTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = CURLHandleTests.octest;
+			remoteRef = 32B46224171DE24800FFFAAE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1243,6 +1264,7 @@
 				324D22D516AF490B001CFDE6 /* CK2NewFolderWindowController.m in Sources */,
 				32B3EA7F16B58FFC003D4836 /* NSImage+CK2OpenPanel.m in Sources */,
 				3274F1CF170888430049DDE5 /* CK2PathFieldWindowController.m in Sources */,
+				32B4622B171DE27F00FFFAAE /* NSObject+CK2OpenPanel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
