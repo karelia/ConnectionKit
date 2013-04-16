@@ -78,10 +78,10 @@
     CK2PathFieldWindowController    *_pathFieldController;
 }
 
-@property (readonly, assign) CK2OpenPanel      *openPanel;
+@property (readonly, assign) CK2OpenPanel       *openPanel;
 @property (readonly, retain) NSURL              *directoryURL;
 @property (readwrite, retain) NSURL             *URL;
-@property (readwrite, copy) NSArray             *URLs;
+@property (readwrite, copy, nonatomic) NSArray  *URLs;
 @property (readwrite, retain, nonatomic) NSURL  *homeURL;
 @property (readwrite, retain) NSView            *accessoryView;
 

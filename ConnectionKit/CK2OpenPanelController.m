@@ -440,11 +440,31 @@
     [self validateViews];
 }
 
+- (NSArray *)URLs
+{
+    if ([_urls count] == 0)
+    {
+        NSURL   *directoryURL;
+        
+        directoryURL = [self directoryURL];
+        
+        if (directoryURL != nil)
+        {
+            return @[ [self directoryURL] ];
+        }
+        return nil;
+    }
+    return _urls;
+}
+
 - (NSURL *)URL
 {
-    if ([_urls count] > 0)
+    NSArray     *urls;
+    
+    urls = [self URLs];
+    if ([urls count] > 0)
     {
-        return [_urls objectAtIndex:0];
+        return [urls objectAtIndex:0];
     }
     return nil;
 }
