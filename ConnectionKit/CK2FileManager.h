@@ -88,25 +88,91 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 #pragma mark Creating Items
 
-/*  In all these methods, we refer to "opening attributes". They apply *only* if the server supports supplying specific attributes at creation time. In practice at present this should give:
- *
- *  FTP:    opening attributes are ignored
- *  SFTP:   Only NSFilePosixPermissions is used, and some servers choose to ignore it
- *  WebDAV: Only CK2FileMIMEType is supported
- *  file:   The full suite of attributes supported by NSFileManager should be available, but *only* for directories
- *
- *  If you particularly care about setting permissions on a remote server then, a follow up call to -setResourceValues:… is needed.
+/**
+ Creates a directory at the specified URL.
+ 
+ If a file or directory already exists at `url`, it is at the server's discretion
+ whether the operation succeeds by replacing the existing item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a directory
+ as part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Attributes are ignored
+ - file:   The full suite of attributes supported by `NSFileManager` should be available
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ @param url A URL that specifies the directory to create. This parameter must not be nil.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ 
  */
-
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
-/*  Many servers will overwrite an existing file at the target URL, but not all
- *  I don't believe any servers support overwriting a directory without first removing it
+/**
+ Creates a file with the specified content at the specified URL.
+ 
+ If a file or directory already exists at `url`, it is at the server's discretion
+ whether the operation succeeds by replacing the existing item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a file as
+ part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Only `CK2FileMIMEType` is supported
+ - file:   Attributes are ignored
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ @param url A URL that specifies the file to create. This parameter must not be nil.
+ @param data A data object containing the contents of the new file.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
  */
-
 - (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
-// It's at the discretion of individual protocol implementations, but generally file uploads should avoid reading the whole thing into memory at once
+/**
+ Creates a file by copying the content of the specified URL.
+ 
+ If a file or directory already exists at `destinationURL`, it is at the
+ server's discretion whether the operation succeeds by replacing the existing
+ item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a file as
+ part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Only `CK2FileMIMEType` is supported
+ - file:   Attributes are ignored
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ It's up to the individual protocol implementation, but generally ConnectionKit
+ will avoid loading the entire source file into memory at once.
+ 
+ @param destinationURL A URL that specifies the file to create. This parameter must not be nil.
+ @param sourceURL The file whose contents to use for creating the new file.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ */
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
 
