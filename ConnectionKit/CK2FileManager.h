@@ -177,10 +177,16 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Deleting Items
-// Attempts to remove the file or directory at the specified URL. At present all protocols support deleting files, but when deleting directories:
-//
-//  file:               Recursively deletes directories if possible
-//  Everything else:    Supports files only
+
+/**
+ Removes the item at the specified URL.
+ 
+ Right now, deletion of files is fully implemented, but whether deleting a
+ directory succeeds is pretty much at the mercy of the server/protocol used.
+ 
+ @param url A file URL specifying the file or directory to remove.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ */
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
 
