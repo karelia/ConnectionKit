@@ -192,12 +192,23 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 #pragma mark Getting and Setting Attributes
 
-// It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:
-//
-//  FTP:    Only NSFilePosixPermissions is supported, and not by all servers
-//  SFTP:   Only NSFilePosixPermissions is supported
-//  WebDAV: No attributes are supported
-//  file:   Behaves the same as NSFileManager
+/**
+ Sets the attributes of the specified file or directory.
+ 
+ Unsupported attributes are ignored. Failure is only considered to have occurred
+ when an attribute appears to be supported by the server/protocol in use, but
+ actually fails to set. In practice at present the supported attributes should
+ be:
+ 
+ - FTP:    Only NSFilePosixPermissions is supported, and not by all servers
+ - SFTP:   Only NSFilePosixPermissions is supported
+ - WebDAV: No attributes are supported
+ - file:   Same attributes as NSFileManager supports
+ 
+ @param keyedValues A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.
+ @param url The URL of a file or directory.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ */
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
