@@ -44,6 +44,7 @@ extern NSString * const CK2AuthenticationMethodHostFingerprint;
 /**
  Constructs a credential to encapsulate the use of public key authentication
  
+ @param user to log in as
  @param publicKey is the location of the public key file. If using OpenSSL (usually the case on OS X), pass nil here to have the public key automatically derived from the private key
  @param privateKey is the location of the private key file. Pass nil to use SSH-Agent instead (note: fails when sandboxed)
  @param passphrase is used to decrypt a passphrase-protected private key file
