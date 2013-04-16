@@ -22,6 +22,20 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
 // These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
 + (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 
+/**
+ The result of ConnectionKit checking the host's fingerprint against a local known_hosts file.
+ 
+ Upon connecting to an SSH server, ConnectionKit compares its host fingerprint
+ against the contents of the local known_hosts file. An authentication challenge
+ is then issued to the delegate asking it how it would like to handle the result
+ of that check. This method encapsulates that result:
+ 
+ - `CK2KnownHostMatchOK` — the server and known_hosts match.
+ - `CK2KnownHostMatchMissing` — the server appears not to have been connected to before, as no entry for it is present in known_hosts.
+ - `CK2KnownHostMatchMismatch` — the server's fingerprint is different to that in the known_hosts file. It is likely the server has been compromised, modified, or replaced
+
+ @return One of the CK2KnownHostMatch enum. 0 for auth methods other than CK2AuthenticationMethodHostFingerprint.
+ */
 - (CK2KnownHostMatch)ck2_knownHostMatch;
 
 /**
