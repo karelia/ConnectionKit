@@ -249,18 +249,32 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 @interface CK2FileManager (URLs)
 
-// These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
-//  http://example.com/relative/path
-//  ftp://example.com/relative/path
-//  sftp://example.com/~/relative/path
-//
-// Takes care of the file URL bug on 10.6
-//
-// NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
-// I'm seriously considering removing +URLWithPath:relativeToURL: as it tends not to be that useful in practice. +URLWithPath:hostURL: does exactly what it says on the tin
-//
+/**
+ Initializes and returns a newly created NSURL object by changing `baseURL` to the specified path.
+ 
+ Some protocols differentiate between absolute paths, and those relative to the
+ user's home directory. This method constructs URLs to accomodate that and the
+ quirks of different protocols. Here are some example URLs:
+ 
+ Protocol | `/absolute` path              | `relative` path
+ -------- | ----------------------------- | -------------------------------
+ HTTP     | `http://example.com/absolute` | `http://example.com/relative`
+ FTP      | `ftp://example.com//absolute` | `ftp://example.com/relative`
+ SSH      | `sftp://example.com/absolute` | `sftp://example.com/~/relative`
+ 
+ There is a subtle bug in 10.6's handling of relative file URLs. This method
+ stops it hitting you.
+ 
+ @param path The path that the NSURL object will represent. If path is a relative path, it is treated as being relative to the user's home directory once connected to `baseURL`. Passing nil for this parameter produces an exception.
+ @param isDir A Boolean value that specifies whether path is treated as a directory path when resolving against relative path components. Pass YES if the path indicates a directory, NO otherwise.
+ @param baseURL A URL providing at least a scheme and host for the result to be based on. Any path as part of this URL is ignored.
+ @return An NSURL object initialized with path. `nil` if `baseURL` proved unsuitable.
+*/
 + (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL __attribute((nonnull(1,3)));
-+ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL  __attribute((nonnull(1,2)));
+
+// NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
+// I'm seriously considering removing this method as it tends not to be that useful in practice. +URLWithPath:isDirectory:hostURL: does exactly what it says on the tin
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL __attribute((nonnull(1,2)));
 
 /**
  Extracts the path component of a URL, accounting for the subtleties of FTP etc.
