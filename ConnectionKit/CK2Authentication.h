@@ -24,6 +24,10 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
 
 - (CK2KnownHostMatch)ck2_knownHostMatch;
 
+/**
+ @const CK2AuthenticationMethodHostFingerprint
+ @abstract The authentication method used by SSH connections for checking a host's fingerprint
+ */
 extern NSString * const CK2AuthenticationMethodHostFingerprint;
 
 @end
