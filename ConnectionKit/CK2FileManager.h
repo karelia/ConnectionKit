@@ -234,8 +234,13 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Delegate
-// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
-// Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
+
+/**
+ The file manager's delegate.
+ 
+ Delegate methods are delivered on an arbitrary queue/thread.
+ Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
+ */
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
