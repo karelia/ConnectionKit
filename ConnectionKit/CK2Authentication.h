@@ -19,9 +19,6 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
 
 @interface NSURLProtectionSpace (CK2SSHHostFingerprint)
 
-// These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
-+ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
-
 /**
  The result of ConnectionKit checking the host's fingerprint against a local known_hosts file.
  
@@ -43,6 +40,9 @@ typedef NS_ENUM(NSInteger, CK2KnownHostMatch) {
  @abstract The authentication method used by SSH connections for checking a host's fingerprint
  */
 extern NSString * const CK2AuthenticationMethodHostFingerprint;
+
+// These methods create a protection space with CK2AuthenticationMethodSSHHostFingerprint. (Other NSURLProtectionSpace APIs ignore the auth method and change it to NSURLAuthenticationDefault
++ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 
 @end
 
