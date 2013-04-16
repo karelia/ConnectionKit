@@ -60,7 +60,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask
-             completionHandler:(void (^)(NSArray *contents, NSError *error))block;
+             completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
 
 /**
  Block-based enumeration of directory contents
@@ -82,7 +82,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
   includingPropertiesForKeys:(NSArray *)keys
                      options:(NSDirectoryEnumerationOptions)mask
                   usingBlock:(void (^)(NSURL *url))block
-           completionHandler:(void (^)(NSError *error))completionBlock;
+           completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
 
 extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
 
@@ -114,7 +114,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param handler Called at the end of the operation. A non-nil error indicates failure.
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed. 
  */
-- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
+- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 /**
  Creates a file with the specified content at the specified URL.
@@ -143,7 +143,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param handler Called at the end of the operation. A non-nil error indicates failure.
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 /**
  Creates a file by copying the content of the specified URL.
@@ -176,7 +176,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param handler Called at the end of the operation. A non-nil error indicates failure.
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 
 #pragma mark Deleting Items
@@ -191,7 +191,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param handler Called at the end of the operation. A non-nil error indicates failure.
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
-- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
 #pragma mark Getting and Setting Attributes
@@ -214,7 +214,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param handler Called at the end of the operation. A non-nil error indicates failure.
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
-- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
@@ -230,7 +230,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  @param operation An opaque token object representing the operation, as returned by any of `CK2FileManager`'s worker methods.
  */
-- (void)cancelOperation:(id)operation;
+- (void)cancelOperation:(id)operation __attribute((nonnull(1)));
 
 
 #pragma mark Delegate
@@ -259,8 +259,8 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
 // I'm seriously considering removing +URLWithPath:relativeToURL: as it tends not to be that useful in practice. +URLWithPath:hostURL: does exactly what it says on the tin
 //
-+ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
-+ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
++ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL __attribute((nonnull(1,2)));
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL  __attribute((nonnull(1,2)));
 
 /**
  Extracts the path component of a URL, accounting for the subtleties of FTP etc.
