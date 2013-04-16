@@ -50,7 +50,9 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  
  The order of the files in the returned array generally follows that returned by the server, which is likely undefined.
  
- @param url of the directory to list
+ Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).
+ 
+ @param url for the directory whose contents you want to enumerate.
  @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
  @param block called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.
@@ -60,13 +62,21 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
                        options:(NSDirectoryEnumerationOptions)mask
              completionHandler:(void (^)(NSArray *contents, NSError *error))block;
 
-// More advanced version of directory listing
-//  * listing results are delivered as they arrive over the wire, if possible
-//  * FIRST result is the directory itself, with relative path resolved if possible
-//  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
-//
-// Pass in CK2DirectoryEnumerationIncludesDirectory for the first URL received to be that of the URL being enumerated. Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved)
-// All docs for -contentsOfDirectoryAtURL:… should apply here too
+/**
+ Block-based enumeration of directory contents
+ 
+ If possible, listing results are delivered as they arrive over the wire. This
+ makes it possible that the operation fails mid-way, having received only some
+ of the total directory contents.
+ 
+ All docs for -contentsOfDirectoryAtURL:… should apply here too
+  
+ @param url for the directory whose contents you want to enumerate.
+ @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get
+ @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.
+ @param block is called for each URL encountered.
+ @param completionBlock is called once enumeration finishes or fails. A non-nil error indicates failure.
+ */
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
                      options:(NSDirectoryEnumerationOptions)mask
