@@ -26,7 +26,6 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  ConnectionKit's equivalent of NSFileManager
  All operations are asynchronous, including ones on the local file system.
  Supports remote file servers, currently over FTP, SFTP and WebDAV.
- "Worker" methods return an opaque object which you can pass to -cancelOperation: if needed.
  Allocate and initialise as many file managers as you wish; there is no +defaultManager method
  Provide a file manager with a delegate to handle authentication in the same fashion as NSURLConnection
  Behind the scenes, ConnectionKit takes care of creating as many connections to
@@ -56,6 +55,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
  @param block called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
@@ -76,6 +76,7 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.
  @param block is called for each URL encountered.
  @param completionBlock is called once enumeration finishes or fails. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
@@ -111,7 +112,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
- 
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed. 
  */
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 
@@ -140,6 +141,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
@@ -172,6 +174,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
  @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
  @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
 
@@ -186,6 +189,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  @param url A file URL specifying the file or directory to remove.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
@@ -208,6 +212,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @param keyedValues A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.
  @param url The URL of a file or directory.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 
@@ -215,7 +220,16 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 
 #pragma mark Cancelling Operations
-// If an operation is cancelled, the completion handler will be called with a NSURLErrorCancelled error.
+
+/**
+ Cancels an operation.
+ 
+ If an operation is cancelled before it finishes, its completion handler is
+ called with an `NSURLErrorCancelled` error to indicate the failure can be
+ ignored.
+ 
+ @param operation An opaque token object representing the operation, as returned by any of `CK2FileManager`'s worker methods.
+ */
 - (void)cancelOperation:(id)operation;
 
 
