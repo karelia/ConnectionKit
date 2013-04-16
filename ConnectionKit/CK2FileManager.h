@@ -259,7 +259,7 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
 // I'm seriously considering removing +URLWithPath:relativeToURL: as it tends not to be that useful in practice. +URLWithPath:hostURL: does exactly what it says on the tin
 //
-+ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL __attribute((nonnull(1,2)));
++ (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL __attribute((nonnull(1,3)));
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL  __attribute((nonnull(1,2)));
 
 /**
