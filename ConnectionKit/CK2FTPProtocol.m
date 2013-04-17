@@ -20,7 +20,10 @@
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     NSString *scheme = [url scheme];
-    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
+    
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftpes" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
@@ -52,6 +55,26 @@
     NSString *result = [(NSString *)strictPath stringByReplacingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     if (strictPath) CFRelease(strictPath);
     return result;
+}
+
+#pragma mark URL Requests
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    // libcurl doesn't understand ftpes: URLs natively, so convert them back into ftp: with the appropriate connection settings
+    NSURL *url = request.URL;
+    if ([url.scheme caseInsensitiveCompare:@"ftpes"] == NSOrderedSame)
+    {
+        url = [NSURL URLWithString:[url.absoluteString stringByReplacingCharactersInRange:NSMakeRange(0, 5) // bit hacky
+                                                                               withString:@"ftp"]];
+        
+        NSMutableURLRequest *mutableRequest = [request mutableCopy];
+        mutableRequest.URL = url;
+        [mutableRequest curl_setDesiredSSLLevel:CURLUSESSL_ALL];
+        request = mutableRequest;
+    }
+    
+    return [super initWithRequest:request client:client];
 }
 
 #pragma mark Operations
