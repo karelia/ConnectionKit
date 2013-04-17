@@ -32,6 +32,19 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  servers as are needed. This means you can perform multiple operations at once,
  but please avoid performing too many at once as that could easily upset a
  server.
+ 
+ Supported protocols and their URL schemes:
+ 
+ Scheme | Protocol
+ ------ | --------
+ file   | Local files
+ ftp    | FTP
+ ftps   | FTP with Implicit SSL
+ ftpes  | FTP with TLS/SSL
+ http   | WebDAV
+ https  | WebDAV over HTTPS
+ sftp   | SFTP
+ 
 */
 
 @interface CK2FileManager : NSObject
