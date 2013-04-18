@@ -68,7 +68,7 @@
         url = [NSURL URLWithString:[url.absoluteString stringByReplacingCharactersInRange:NSMakeRange(0, 5) // bit hacky
                                                                                withString:@"ftp"]];
         
-        NSMutableURLRequest *mutableRequest = [request mutableCopy];
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
         mutableRequest.URL = url;
         [mutableRequest curl_setDesiredSSLLevel:CURLUSESSL_ALL];
         request = mutableRequest;
