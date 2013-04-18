@@ -2,7 +2,7 @@
 "%@\nWhat would you like to do?" = "%@\nQue désirez-vous faire ?";
 
 /* ConnectionOpenPanel */
-"An unknown error occurred." = "IUne erreur nconnu s'est produit.";
+"An unknown error occurred." = "Une erreur inconnue s'est produite.";
 
 /* close window */
 "Are you sure you want to stop the upload?" = "Êtes-vous sûr de vouloir arrêter le chargement ?";
