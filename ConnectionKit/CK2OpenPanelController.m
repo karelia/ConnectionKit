@@ -867,9 +867,11 @@
 
 - (IBAction)refresh:(id)sender
 {
-    NSURL       *url;
-    NSArray     *urls;
-    BOOL        urlIsLoading;
+    NSURL                       *url;
+    NSArray                     *urls;
+    BOOL                        urlIsLoading;
+    CK2OpenPanelViewController  *viewController;
+    NSResponder                 *firstResponder;
     
     urlIsLoading = NO;
     urls = [self URLs];
@@ -895,8 +897,18 @@
             [self cacheChildren:nil forURL:url];
         }
     }
+
+    viewController = [self currentViewController];
+    firstResponder = [[self openPanel] firstResponder];
+    if ([firstResponder isKindOfClass:[NSView class]] && [(NSView *)firstResponder isDescendantOf:[viewController view]])
+    {
+        firstResponder = [viewController view];
+    }
+
+    [viewController reload];
+    [viewController update];
     
-    [[self currentViewController] reload];
+    [[self openPanel] makeFirstResponder:firstResponder];
     [self validateNewFolderButton];
     [self validateProgressIndicator];
 }
