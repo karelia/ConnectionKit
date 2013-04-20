@@ -135,13 +135,13 @@
 
 - (void)setDirectoryURL:(NSURL *)directoryURL;
 {
-    [self setDirectoryURL:directoryURL completionBlock:nil];
+    [self setDirectoryURL:directoryURL completionHandler:nil];
 }
 
-- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *))block;
+- (void)setDirectoryURL:(NSURL *)directoryURL completionHandler:(void (^)(NSError *))block;
 {
     // Kick off async loading of the URL, but also store our own copy for clients to immediately pull out again if they wish
-    [_viewController changeDirectory:directoryURL completionBlock:block];
+    [_viewController changeDirectory:directoryURL completionHandler:block];
 }
 
 - (NSURL *)URL
@@ -307,7 +307,7 @@
             
             if (parentURL != nil)
             {
-                [_viewController changeDirectory:parentURL completionBlock:
+                [_viewController changeDirectory:parentURL completionHandler:
                  ^(NSError *error)
                  {
                      if (error != nil)

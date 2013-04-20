@@ -90,7 +90,7 @@
 - (id)initWithPanel:(CK2OpenPanel *)panel;
 - (void)close;  // Open panel MUST call this to clear out weak reference to itself, otherwise BOOM dangling pointer!
 
-- (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
+- (void)changeDirectory:(NSURL *)directoryURL completionHandler:(void (^)(NSError *error))block;
 
 - (IBAction)pathControlItemSelected:(id)sender;
 

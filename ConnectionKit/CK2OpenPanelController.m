@@ -476,7 +476,7 @@
 }
 
 // Called by the open panel. The completion block will not be called until the given URL is loaded.
-- (void)changeDirectory:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block
+- (void)changeDirectory:(NSURL *)directoryURL completionHandler:(void (^)(NSError *error))block
 {
     NSMutableArray                  *children;
     __block NSURL                   *resolvedURL;
@@ -1188,7 +1188,7 @@
              
              [self addToHistory];
              
-             [self changeDirectory:[CK2FileManager URLWithPath:path isDirectory:YES hostURL:[self directoryURL]] completionBlock:
+             [self changeDirectory:[CK2FileManager URLWithPath:path isDirectory:YES hostURL:[self directoryURL]] completionHandler:
               ^(NSError *error)
               {
                   if (error != nil)

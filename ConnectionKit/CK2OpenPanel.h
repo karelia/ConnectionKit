@@ -128,7 +128,7 @@
 // Most commonly, we expect you'll want to show the user's home directory. To get that URL, consult CK2FileManager like so:
 //  NSURL *homeDir = [CK2FileManager URLWithPath:@"" relativeToURL:[NSURL URLWithString:@"sftp://example.com"]];
 //
-- (void)setDirectoryURL:(NSURL *)directoryURL completionBlock:(void (^)(NSError *error))block;
+- (void)setDirectoryURL:(NSURL *)directoryURL completionHandler:(void (^)(NSError *error))block;
 
 - (void)beginSheetModalForWindow:(NSWindow *)window completionHandler:(void (^)(NSInteger result))handler;
 - (void)beginWithCompletionHandler:(void (^)(NSInteger result))handler;
