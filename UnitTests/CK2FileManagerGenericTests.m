@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"ftp", @"sftp"];
+    NSArray* responses = @[@"sftp", @"ftp"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -92,12 +92,12 @@ static NSString* gResponsesToUse = nil;
 {
     if ([self setup])
     {
-    NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder", @"karelia.com/nonexistantfolder"];
-    for (NSString* urlPart in badURLS)
-    {
-        NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", self.responsesToUse, urlPart]];
-        block(url);
-    }
+        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder", @"karelia.com/nonexistantfolder"];
+        for (NSString* urlPart in badURLS)
+        {
+            NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", self.responsesToUse, urlPart]];
+            block(url);
+        }
     }
 }
 
@@ -403,30 +403,36 @@ static NSString* gResponsesToUse = nil;
 
 - (void)testCreateFileAtURLSourceDoesntExist
 {
-    NSURL* source = [NSURL fileURLWithPath:@"/tmp/i-dont-exist.txt"];
-    NSURL* url = [self URLForTestFile1];
+    if ([self setup])
+    {
+        NSURL* source = [NSURL fileURLWithPath:@"/tmp/i-dont-exist.txt"];
+        NSURL* url = [self URLForTestFile1];
 
-    [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-        STAssertNotNil(error, @"expected an error");
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
 
-        [self pause];
-    }];
+            [self pause];
+        }];
 
-    [self runUntilPaused];
+        [self runUntilPaused];
+    }
 }
 
 - (void)testCreateFileAtURLSourceIsntLocal
 {
-    NSURL* source = [NSURL URLWithString:@"http://karelia.com/tmp/i-dont-exist.txt"];
-    NSURL* url = [self URLForTestFile1];
+    if ([self setup])
+    {
+        NSURL* source = [NSURL URLWithString:@"http://karelia.com/tmp/i-dont-exist.txt"];
+        NSURL* url = [self URLForTestFile1];
 
-    [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-        STAssertNotNil(error, @"expected an error");
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
 
-        [self pause];
-    }];
+            [self pause];
+        }];
 
-    [self runUntilPaused];
+        [self runUntilPaused];
+    }
 }
 
 - (void)testUploadOver16k
@@ -601,7 +607,7 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            
+
             STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
@@ -800,7 +806,7 @@ static NSString* gResponsesToUse = nil;
 
             [self pause];
         }];
-
+        
         [self runUntilPaused];
     }
 }
@@ -811,7 +817,7 @@ static NSString* gResponsesToUse = nil;
     {
         [self removeTestDirectory];
         [self useBadLogin];
-
+        
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>--include</key>
+	<array>
+		<string>Documentation</string>
+	</array>
+	<key>--ignore</key>
+	<array>
+		<string>CurlHandle</string>
+		<string>DAVKit</string>
+		<string>AuthTester</string>
+		<string>Example</string>
+		<string>ProfilingTester</string>
+		<string>UKQueue</string>
+		<string>.git</string>
+		<string>.gitmodules</string>
+		<string>.gitignore</string>
+	</array>
+	<key>--index-desc</key>
+	<array>
+		<string>README.md</string>
+	</array>
+	<key>--logformat</key>
+	<string>xcode</string>
+	<key>--exit-threshold</key>
+	<integer>2</integer>
+	<key>--explicit-crossref</key>
+	<true/>
+	<key>--project-company</key>
+	<string>Karelia Systems</string>
+	<key>--company-id</key>
+	<string>com.karelia</string>
+	<key>--keep-undocumented-members</key>
+	<false/>
+	<key>--keep-undocumented-objects</key>
+	<false/>
+	<key>--merge-categories</key>
+	<true/>
+	<key>--keep-merged-sections</key>
+	<true/>
+	<key>--prefix-merged-sections</key>
+	<true/>
+</dict>
+</plist>
