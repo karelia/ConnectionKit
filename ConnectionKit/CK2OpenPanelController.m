@@ -1088,7 +1088,7 @@
         id                              operation;
 
         resolvedURL = nil;
-        homeURL = [[[CK2FileManager URLWithPath:@"" hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
+        homeURL = [[[CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
         
         children = [NSMutableArray array];
         
@@ -1188,7 +1188,7 @@
              
              [self addToHistory];
              
-             [self changeDirectory:[CK2FileManager URLWithPath:path hostURL:[self directoryURL]] completionBlock:
+             [self changeDirectory:[CK2FileManager URLWithPath:path isDirectory:YES hostURL:[self directoryURL]] completionBlock:
               ^(NSError *error)
               {
                   if (error != nil)
