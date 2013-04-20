@@ -478,14 +478,10 @@
 // Called by the open panel. The completion block will not be called until the given URL is loaded.
 - (void)changeDirectory:(NSURL *)directoryURL completionHandler:(void (^)(NSError *error))block
 {
-    NSMutableArray                  *children;
-    __block NSURL                   *resolvedURL;
-    
     // Set it now so that the value can be returned if queried. Don't bother syncing with the UI as it will be set
     // again (possibly with a different value) later.
     [self setDirectoryURL:directoryURL];
     
-    children = [NSMutableArray array];
     
     //PENDING: compare url
     if (_currentBootstrapOperation != nil)
@@ -494,71 +490,58 @@
         [_currentBootstrapOperation release];
     }
     
-    resolvedURL = nil;
-    
-    _currentBootstrapOperation = [_fileManager enumerateContentsOfURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) usingBlock:
-     ^ (NSURL *blockURL)
-     {
-         if (resolvedURL == nil)
-         {
-             // The first url returned is the rootURL properly resolved (in case the URL is relative to the user's home
-             // directory, for instance).
-             resolvedURL = [blockURL retain];
-         }
-         else
-         {
-             [children addObject:blockURL];
-         }
-     }
-    completionHandler:
-     ^(NSError *blockError)
-     {
-         __block NSError *tempError;
-         NSURL   *blockResolvedURL;
-         
-         // Reassign here so that it will be properly retained by the blocks it's used in below
-         blockResolvedURL = resolvedURL;
-         
-         [self setDirectoryURL:resolvedURL];
-         
-         tempError = nil;
-         if (blockError != nil)
-         {
-             [children addObject:[NSURL ck2_errorURL]];
-             tempError = [blockError retain];
-         }
-         else
-         {
-              dispatch_async(dispatch_get_main_queue(),
-             ^{
-                 [self cacheChildren:children forURL:blockResolvedURL];
-                 [self urlDidLoad:blockResolvedURL];
-             });
-         }
-
-         // Since we are calling an arbitrary block supplied by the client, it's safer to call using
-         // -performSelectorOnMainThread:... which this method does. The reason is that if the block calls something
-         // like -runModal, it will not return for a bit thus clogging up the main GCD queue. Since we need to run
-         // blocks on the main queue during the modeal session to update the UI, this ends up deadlocking.
-         [NSObject ck2_invokeBlockOnMainThread:
+    _currentBootstrapOperation = [_fileManager contentsOfDirectoryAtURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) completionHandler:
+    ^(NSArray *contents, NSError *blockError)
+    {
+        if (blockError != nil)
+        {
+             NSLog(@"Error loading contents of URL %@: %@", directoryURL, blockError);
+        }
+        else
+        {
+            NSURL           *resolvedURL;
+            NSArray         *children;
+            
+            // The first url returned is the rootURL properly resolved (in case the URL is relative to the user's home
+            // directory, for instance).
+            resolvedURL = [[contents objectAtIndex:0] retain];
+            
+            children = [contents subarrayWithRange:NSMakeRange(1, [contents count] - 1)];
+            [self setDirectoryURL:resolvedURL];
+            
+            dispatch_async(dispatch_get_main_queue(),
+            ^{
+                [self cacheChildren:children forURL:resolvedURL];
+                [self urlDidLoad:resolvedURL];
+                
+                [_currentBootstrapOperation release];
+                _currentBootstrapOperation = nil;
+                
+                if (blockError == nil)
+                {
+                    [self setURLs:@[ resolvedURL ] updateDirectory:YES updateRoot:YES sender:self];
+                }
+                [self validateViews];
+                
+                [resolvedURL release];
+            });
+        }
+        
+        // Since we are calling an arbitrary block supplied by the client, it's safer to call using
+        // -performSelectorOnMainThread:... which this method does. The reason is that if the block calls something
+        // like -runModal, it will not return for a bit thus clogging up the main GCD queue. Since we need to run
+        // blocks on the main queue during the modeal session to update the UI, this ends up locking up the UI.
+        [NSObject ck2_invokeBlockOnMainThread:
          ^{
-             _currentBootstrapOperation = nil;
-                            
-             if (tempError == nil)
-             {
-                 [self setURLs:@[ blockResolvedURL ] updateDirectory:YES updateRoot:YES sender:self];
-             }
-             [self validateViews];
-             
              if (block != NULL)
              {
-                 block([tempError autorelease]);
+                 block(blockError);
              }
          }];
-         
-         [resolvedURL autorelease];
-     }];
+    }];
     
+    // There shouldn't be a race condition with the block above since this should be on the main thread and
+    // the above block won't run on the main thread until this code completes and returns to the run loop.
     [_currentBootstrapOperation retain];
     
     [_hostField setStringValue:[directoryURL host]];
@@ -1082,66 +1065,48 @@
     
     if (homeURL == nil)
     {
-        // The homeURL isn't resolved so we resolve it here and also load/cache it children.        
-        NSMutableArray                  *children;
-        __block NSURL                   *resolvedURL;
+        // The homeURL isn't resolved so we resolve it here and also load/cache its children.        
         id                              operation;
 
-        resolvedURL = nil;
         homeURL = [[[CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
         
-        children = [NSMutableArray array];
-        
-        operation = [_fileManager enumerateContentsOfURL:homeURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) usingBlock:
-        ^ (NSURL *blockURL)
+        operation = [_fileManager contentsOfDirectoryAtURL:homeURL includingPropertiesForKeys:[self fileProperties] options:CK2DirectoryEnumerationIncludesDirectory completionHandler:
+        ^(NSArray *contents, NSError *blockError)
         {
-            if (resolvedURL == nil)
-            {
-                // The first url returned is the rootURL properly resolved (in case the URL is relative to the user's home
-                // directory, for instance).
-                resolvedURL = [blockURL retain];
-            }
-            else
-            {
-                [children addObject:blockURL];
-            }
-        }
-        completionHandler:
-        ^(NSError *blockError)
-        {
-            __block NSError *tempError;
-            NSURL   *blockResolvedURL;
-            
-            // Reassign here so that it will be properly retained by the blocks it's used in below
-            blockResolvedURL = resolvedURL;
-            
-            tempError = nil;
+            NSArray     *children;
+            NSURL       *resolvedURL;
+
+            resolvedURL = homeURL;
             if (blockError != nil)
             {
                 NSString *errorMessage = blockError.localizedFailureReason;
                 if (!errorMessage) errorMessage = blockError.localizedDescription;
                 
-                [children addObject:[NSURL ck2_errorURLWithMessage:errorMessage]];
+                children = @[ [NSURL ck2_errorURLWithMessage:errorMessage] ];
                 NSLog(@"Error loading contents of URL %@: %@", homeURL, blockError);
+            }
+            else
+            {
+                resolvedURL = [contents objectAtIndex:0];
+                children = [contents subarrayWithRange:NSMakeRange(1, [contents count] - 1)];
             }
             
             dispatch_async(dispatch_get_main_queue(),
             ^{
-                [self setHomeURL:blockResolvedURL];
-                [self cacheChildren:children forURL:blockResolvedURL];
-                
+                [self setHomeURL:resolvedURL];
+                [self cacheChildren:children forURL:resolvedURL];
+
                 [_runningOperations removeObjectForKey:homeURL];
-                
+
                 [self validateProgressIndicator];
-                [self urlDidLoad:blockResolvedURL];
+                [self urlDidLoad:resolvedURL];
+                               
+                [self setURLs:@[ resolvedURL ] updateDirectory:YES updateRoot:YES sender:self ];
                 
-                [self setURLs:@[ blockResolvedURL ] updateDirectory:YES updateRoot:YES sender:self ];
-             });
-            
-            [resolvedURL autorelease];
+                [resolvedURL release];
+            });
         }];
         
-                    
         // There shouldn't be a race condition with the block above since this should be on the main thread and
         // the above block won't run on the main thread until this code completes and returns to the run loop.
         [_runningOperations setObject:operation forKey:homeURL];
