@@ -57,7 +57,7 @@ These test the CK2FileManager routines for creating URLs:
 These perform various URL manipulation tests.
 
 - Some tests check that NSURL is behaving as expected.
-- Some check that [CK2FTPProtocol URLHasDirectoryPath] is working.
+- Some check that CFURLHasDirectoryPath() hasn't changed behaviour.
 - Some check that [CK2FTPProtocol newRequestWithRequest:isDirectory:] is working.
 
 

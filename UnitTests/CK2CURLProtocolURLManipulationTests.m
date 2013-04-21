@@ -84,37 +84,37 @@
 
 - (void)testFTPRootIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPRootWithTrailingSlashIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F/"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/"]);
     STAssertTrue(isDirectory, nil);
 }
 
 - (void)testFTPHomeIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/"]);
     STAssertTrue(isDirectory, nil);
 }
 
 - (void)testFTPHomeWithoutTrailingSlashIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPAbsoluteFileIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/%2F/test.txt"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/%2F/test.txt"]);
     STAssertFalse(isDirectory, nil);
 }
 
 - (void)testFTPRelativeFileIsDirectory;
 {
-    BOOL isDirectory = [CK2FTPProtocol URLHasDirectoryPath:[NSURL URLWithString:@"ftp://example.com/test.txt"]];
+    BOOL isDirectory = CFURLHasDirectoryPath((CFURLRef)[NSURL URLWithString:@"ftp://example.com/test.txt"]);
     STAssertFalse(isDirectory, nil);
 }
 
@@ -205,6 +205,41 @@
     url = [CK2FTPProtocol newRequestWithRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"ftp://example.com/%2F/test/"]]
                                           isDirectory:NO].URL;
     STAssertEqualObjects(url.absoluteString, @"ftp://example.com/%2F/test", nil);
+}
+
+@end
+
+
+#pragma mark -
+
+
+@interface URLCanonicalizationTests : SenTestCase
+@end
+
+
+@implementation URLCanonicalizationTests
+
+- (void)testIncludingUser;
+{    
+    // Test first with no user set. e.g. anonymous login
+    NSURL *url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:nil];
+    STAssertEqualObjects(url.absoluteString, @"ftp://example.com/image.png", nil);
+    
+    // Adding user into the URL
+    url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:@"user"];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Replacing existing user
+    url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://test@example.com/image.png"] withUser:@"user"];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Replacing existing user + password
+    url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://test:sekret@example.com/image.png"] withUser:@"user"];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user@example.com/image.png", nil);
+    
+    // Escaping of unusual characters
+    url = [CK2CURLBasedProtocol URLByReplacingUserInfoInURL:[NSURL URLWithString:@"ftp://example.com/image.png"] withUser:@"user/:1@example.com"];
+    STAssertEqualObjects(url.absoluteString, @"ftp://user%2F%3A1%40example.com@example.com/image.png", nil);
 }
 
 @end

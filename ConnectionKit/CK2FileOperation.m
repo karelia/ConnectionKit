@@ -75,8 +75,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     if (![self isCancelled])
                     {
                         _protocol = createBlock(protocolClass);
-                        // TODO: Handle protocol's init method returning nil
-                        
+                        if (!_protocol)
+                        {
+                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
+                            // block is queue up already with an error in it
+                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
+                            // if there is one
+                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
+                            [self finishWithError:error];
+                            [error release];
+                        }
+
                         if (![self isCancelled]) [_protocol start];
                     }
                 });
@@ -245,6 +255,9 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             _completionBlock(error);
             [_completionBlock release]; _completionBlock = nil;
+
+            // chuck the protocol now, to break retain cycle
+            [_protocol release]; _protocol = nil;
         }
     });
     
@@ -262,11 +275,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_completionBlock release];
     [_enumerationBlock release];
     [_localURL release];
-    
+
     [super dealloc];
 }
 
-#pragma mark Requests
+#pragma mark Manager
+
+@synthesize fileManager = _manager;
+
+#pragma mark URL & Requests
+
+@synthesize originalURL = _URL;
 
 - (NSURLRequest *)requestWithURL:(NSURL *)url;
 {
@@ -323,16 +342,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 
 - (void)protocol:(CK2Protocol *)protocol appendString:(NSString *)info toTranscript:(CKTranscriptType)transcript;
 {
-    NSParameterAssert(protocol == _protocol);
-    // Even if cancelled, allow through since could well be valuable debugging info
+    if (_protocol)  // even if cancelled, allow through since could well be valuable debugging info
+    {
+        NSParameterAssert(protocol == _protocol);
+    }
     
     // Tell delegate on a global queue so that we don't risk blocking the op's serial queue, delaying cancellation
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
-        id <CK2FileManagerDelegate> delegate = [_manager delegate];
+        id <CK2FileManagerDelegate> delegate = [self.fileManager delegate];
         if ([delegate respondsToSelector:@selector(fileManager:appendString:toTranscript:)])
         {
-            [delegate fileManager:_manager appendString:info toTranscript:transcript];
+            [delegate fileManager:self.fileManager appendString:info toTranscript:transcript];
         }
     });
 }
@@ -366,7 +387,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
             
             if (path.pathComponents.count > 1)   // stop at root
             {
-                NSURL *result = [protocolClass URLWithPath:[path stringByDeletingLastPathComponent] relativeToURL:url].absoluteURL;
+                NSURL *result = [url URLByDeletingLastPathComponent];
                 [CK2FileManager setTemporaryResourceValue:@YES forKey:NSURLIsDirectoryKey inURL:result];
                 
                 // Recurse
@@ -465,8 +486,8 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             // Invent the best credential available
             NSURLProtectionSpace *space = [challenge protectionSpace];
-            NSString *user = [_operation->_URL user];
-            NSString *password = [_operation->_URL password];
+            NSString *user = _operation.originalURL.user;
+            NSString *password = _operation.originalURL.password;
             
             NSURLCredential *credential;
             if (user && password)
@@ -486,11 +507,14 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                                                                                           sender:self];
         }
         
-#ifndef __clang_analyzer__ // clang seems to produce an entirely spurious warning here - it says that self hasn't been set, but it has
-        CK2FileManager *manager = operation->_manager;
-#endif
+        /*  At this point point, we are retaining _trampolineChallenge
+         *  It in turn is retaining us, as the sender. This isn't actually guaranteed by the docs, but is a fair bet rdar://problem/13602367
+         *  The cycle is broken when the challenge is replied to
+         */
         
-        id <CK2FileManagerDelegate> delegate = [manager delegate];
+        CK2FileManager *manager = operation.fileManager;
+        id <CK2FileManagerDelegate> delegate = manager.delegate;
+        
         if ([delegate respondsToSelector:@selector(fileManager:didReceiveAuthenticationChallenge:)])
         {
             [delegate fileManager:manager didReceiveAuthenticationChallenge:_trampolineChallenge];
@@ -499,8 +523,6 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
         {
             [[_trampolineChallenge sender] performDefaultHandlingForAuthenticationChallenge:_trampolineChallenge];
         }
-        
-        [self retain];  // gets released when challenge is replied to
     }
     return self;
 }
@@ -510,7 +532,15 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     [_originalChallenge release];
     [_operation release];
     [_trampolineChallenge release];
+
     [super dealloc];
+}
+
+- (void)cleanupAndRelease
+{
+    // release trampoline challenge now to break retain cycle
+    [_trampolineChallenge release];
+    _trampolineChallenge = nil;
 }
 
 @synthesize originalChallenge = _originalChallenge;
@@ -521,7 +551,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] useCredential:credential forAuthenticationChallenge:_originalChallenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 
@@ -531,7 +561,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] continueWithoutCredentialForAuthenticationChallenge:_originalChallenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 
@@ -541,7 +571,7 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     
     dispatch_async(_operation->_queue, ^{
         [[_originalChallenge sender] cancelAuthenticationChallenge:challenge];
-        [self release];
+        [self cleanupAndRelease];
     });
 }
 

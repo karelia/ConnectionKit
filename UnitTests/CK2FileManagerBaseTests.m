@@ -8,7 +8,6 @@
 
 #import "CK2FileManagerWithTestSupport.h"
 #import <DAVKit/DAVKit.h>
-#import <CURLHandle/CURLHandle.h>
 
 static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
@@ -27,7 +26,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 @implementation TestFileDelegate
 
-#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
+//#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
+#define LogHousekeeping(...)
 
 + (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
 {
@@ -121,9 +121,13 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)setupSession
 {
-    self.session = [[CK2FileManager alloc] init];
-    self.session.delegate = self;
+    CK2FileManagerWithTestSupport* fm = [[CK2FileManagerWithTestSupport alloc] init];
+    fm.dontShareConnections = YES;
+    fm.delegate = self;
+    self.session = fm;
     self.transcript = [[[NSMutableString alloc] init] autorelease];
+    [fm release];
+
     return self.session != nil;
 }
 
@@ -147,6 +151,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         self.type = nil;
     }
 
+    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
+    self.extendedName = [NSString stringWithFormat:@"%@Using%@", name, [responses uppercaseString]];
 
     NSString* setting = nil;
     if (self.type)
@@ -212,6 +218,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 #pragma mark - Delegate
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
+    NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
     if (challenge.previousFailureCount > 0)
     {
         NSLog(@"cancelling authentication");
@@ -219,8 +226,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     }
     else
     {
-        NSString *authMethod = [[challenge protectionSpace] authenticationMethod];
-        
+
         if ([authMethod isEqualToString:NSURLAuthenticationMethodDefault] ||
             [authMethod isEqualToString:NSURLAuthenticationMethodHTTPDigest] ||
             [authMethod isEqualToString:NSURLAuthenticationMethodHTMLForm] ||
@@ -331,7 +337,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)URLForTestFolder
 {
-    return [self URLForPath:@"CK2FileManagerFTPTests"];
+    return [self URLForPath:[@"CK2FileManagerTests" stringByAppendingPathComponent:self.extendedName]];
 }
 
 - (NSURL*)URLForTestFile1
@@ -359,7 +365,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         NSLog(@"<<<< Making Test Directory");
 
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
-        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
 
         // make the folder if necessary
@@ -399,7 +405,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSLog(@"<<<< Removing Test Files");
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
-        session.multi = [CURLHandle standaloneMultiForTestPurposes];
+        session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
 
         // we don't care about errors here, we just want to do our best to clean up after any tests
@@ -429,11 +435,11 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSLog(@"expecting error, got none");
     }
-    else if (!domainOK)
+    else if (!domainOK && error)
     {
         NSLog(@"unexpected error domain %@", error.domain);
     }
-    else if (!codeOK)
+    else if (!codeOK && error)
     {
         NSLog(@"unexpected error code %ld", error.code);
     }
@@ -466,6 +472,15 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return (error != nil) && domainOK && codeOK;
 }
 
+- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileWriteUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
+}
+
 - (BOOL)checkIsFileNotFoundError:(NSError*)error
 {
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
@@ -473,6 +488,15 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
 
     return (error != nil) && domainOK && codeOK;
+}
+
+- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error
+{
+    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
+    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
 }
 
 @end

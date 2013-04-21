@@ -1,6 +1,8 @@
+//
+//  Created by Sam Deane on 27/03/2013.
+//  Copyright (c) 2013 Karelia Software. All rights reserved.
 
 #import "CK2FileManager.h"
-#import "CK2FileOperation.h"
 
 @class CURLMulti;
 
@@ -10,18 +12,23 @@
 
 @interface CK2FileManagerWithTestSupport : CK2FileManager
 {
+    BOOL _dontShareConnections;
     CURLMulti* _multi;
 }
 
 /**
- Set this property to force CURL based protocols use an alternative CURLMulti instead of the default one.
+ An alternative CURLMulti to use instead of the default one.
+ This is generated on demand, if dontShareConnections is set.
  */
 
-@property (strong, nonatomic) CURLMulti* multi;
+@property (strong, readonly, nonatomic) CURLMulti* multi;
 
-@end
+/**
+ Set this property to force CURL based protocols use an alternative CURL handle instead of the default one
+ */
 
-@interface CK2FileOperationWithTestSupport : CK2FileOperation
+@property (assign, nonatomic) BOOL dontShareConnections;
+
 @end
 
 @interface NSURLRequest(CK2FileManagerDebugging)

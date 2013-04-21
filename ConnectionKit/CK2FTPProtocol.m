@@ -13,12 +13,17 @@
 
 @implementation CK2FTPProtocol
 
+#define WORKAROUND_LIBCURL_BUG 1 // TODO: remove the need for this workaround
+
 #pragma mark URLs
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     NSString *scheme = [url scheme];
-    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
+    
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftpes" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
@@ -28,7 +33,7 @@
     
     // FTP is special. Absolute paths need to specified with an extra prepended slash <http://curl.haxx.se/libcurl/c/curl_easy_setopt.html#CURLOPTURL>
     // According to libcurl's docs that should be enough. But with our current build of it, it seems they've gotten stricter
-    // The FTP spec could be interpreted that the only way to refer to the root directy is with the sequence @"%2F", which decodes as a slash
+    // The FTP spec could be interpreted that the only way to refer to the root directly is with the sequence @"%2F", which decodes as a slash
     // That makes it very clear to the library etc. this particular slash is meant to be transmitted to the server, rather than treated as a path component separator
     // Happily it also simplifies our code, as coaxing a double slash into NSURL is a mite tricky
     if ([path isAbsolutePath])
@@ -52,7 +57,42 @@
     return result;
 }
 
+#pragma mark URL Requests
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    // libcurl doesn't understand ftpes: URLs natively, so convert them back into ftp: with the appropriate connection settings
+    NSURL *url = request.URL;
+    if ([url.scheme caseInsensitiveCompare:@"ftpes"] == NSOrderedSame)
+    {
+        url = [NSURL URLWithString:[url.absoluteString stringByReplacingCharactersInRange:NSMakeRange(0, 5) // bit hacky
+                                                                               withString:@"ftp"]];
+        
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
+        mutableRequest.URL = url;
+        [mutableRequest curl_setDesiredSSLLevel:CURLUSESSL_ALL];
+        request = mutableRequest;
+    }
+    
+    return [super initWithRequest:request client:client];
+}
+
 #pragma mark Operations
+
+- (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
+{
+    NSMutableURLRequest *request = [childRequest mutableCopy];
+    request.URL = [childRequest.URL URLByDeletingLastPathComponent];
+    
+    self = [super initWithCustomCommands:commands
+                                 request:request
+           createIntermediateDirectories:createIntermediates
+                                  client:client
+                       completionHandler:handler];
+    
+    [request release];
+    return self;
+}
 
 - (id)initForCreatingDirectoryWithRequest:(NSURLRequest *)request withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes client:(id<CK2ProtocolClient>)client;
 {
@@ -76,12 +116,12 @@
         [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
         request = mutableRequest;
     }
-    
-    
-    // Correct for files at root level (libcurl treats them as if creating in home folder)
+
+#if WORKAROUND_LIBCURL_BUG
+// Correct for files at root level (libcurl treats them as if creating in home folder)
     NSURL *url = request.URL;
     NSString *path = [self.class pathOfURLRelativeToHomeDirectory:url];
-    
+
     if (path.isAbsolutePath && path.pathComponents.count == 2)
     {
         path = [@"/%2F" stringByAppendingPathComponent:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
@@ -91,7 +131,7 @@
         mutableRequest.URL = url.absoluteURL;
         request = mutableRequest;
     }
-    
+#endif
     
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
@@ -140,10 +180,11 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
+        NSString* path = [[request URL] lastPathComponent];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"SITE CHMOD %lo %@",
                                                       [permissions unsignedLongValue],
-                                                      [[request URL] lastPathComponent]]];
+                                                      path]];
         
         return [self initWithCustomCommands:commands
                  request:request
@@ -250,6 +291,6 @@
 #pragma mark Backend
 
 // Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return NO; }
++ (BOOL)usesMultiHandle; { return YES; }
 
 @end

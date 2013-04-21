@@ -9,7 +9,7 @@
 #import "CK2SFTPProtocol.h"
 #import "CK2Authentication.h"
 
-#import "CK2SFTPSession.h"
+#import <CURLHandle/CK2SSHCredential.h>
 
 #if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
@@ -60,7 +60,8 @@
     NSMutableURLRequest *mutableRequest = [request mutableCopy];
     [mutableRequest curl_setNewDirectoryPermissions:[attributes objectForKey:NSFilePosixPermissions]];
     
-    self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:[[request URL] lastPathComponent]]]
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
+    self = [self initWithCustomCommands:[NSArray arrayWithObject:[@"mkdir " stringByAppendingString:path]]
                                 request:mutableRequest
           createIntermediateDirectories:createIntermediates
                                  client:client
@@ -115,7 +116,7 @@
 
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
-    NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+    NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
     return [self initWithCustomCommands:[NSArray arrayWithObjects:[@"*rm " stringByAppendingString:path], [@"rmdir " stringByAppendingString:path], nil]
                                 request:request
           createIntermediateDirectories:NO
@@ -123,30 +124,24 @@
                       completionHandler:^(NSError *error) {
                           if (error)
                           {
-                              // if the mkdir command failed, try to extract a more meaningful error
                               if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                               {
-                                  NSUInteger code = NSFileWriteUnknownError;
-                                  NSString* domain = NSCocoaErrorDomain;
                                   NSUInteger sshError = [error curlResponseCode];
                                   switch (sshError)
                                   {
                                       case LIBSSH2_FX_NO_SUCH_FILE:
-                                          domain = NSURLErrorDomain;
-                                          code = NSURLErrorNoPermissionsToReadFile;
+                                          // we can't know if it's the rm, the rmdir or both that failed
+                                          // if it's just one of them, it wasn't actually an error
+                                          // so the best we can do here is always ignore a no file error
+                                          error = nil;
                                           break;
 
-                                      case LIBSSH2_FX_PERMISSION_DENIED:
-                                          break;
-
-                                      case LIBSSH2_FX_FAILURE:
-                                          break;
-                                          
                                       default:
+                                          // our default for other failures is a generic NSFileWriteUnknownError error
+                                          error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
                                           break;
 
                                   }
-                                  error = [NSError errorWithDomain:domain code:code userInfo:@{ NSUnderlyingErrorKey : error }];
                               }
                           }
 
@@ -159,7 +154,7 @@
     NSNumber *permissions = [keyedValues objectForKey:NSFilePosixPermissions];
     if (permissions)
     {
-        NSString* path = [CK2SFTPProtocol pathOfURLRelativeToHomeDirectory:[request URL]];
+        NSString* path = [self.class pathOfURLRelativeToHomeDirectory:[request URL]];
         NSArray *commands = [NSArray arrayWithObject:[NSString stringWithFormat:
                                                       @"chmod %lo %@",
                                                       [permissions unsignedLongValue],
@@ -169,7 +164,26 @@
                                     request:request
               createIntermediateDirectories:NO
                                      client:client
-                          completionHandler:nil];
+                          completionHandler:^(NSError *error) {
+                              if (error)
+                              {
+                                  if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                                  {
+                                      NSUInteger sshError = [error curlResponseCode];
+                                      switch (sshError)
+                                      {
+                                          case LIBSSH2_FX_NO_SUCH_FILE:
+                                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                                              break;
+
+                                          default:
+                                              break;
+                                      }
+                                  }
+                              }
+                              
+                              [self reportToProtocolWithError:error];
+                          }];
     }
     else
     {
@@ -338,5 +352,11 @@
     
     [super dealloc];
 }
+
+#pragma mark Backend
+
+// Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
++ (BOOL)usesMultiHandle; { return NO; }
+
 
 @end

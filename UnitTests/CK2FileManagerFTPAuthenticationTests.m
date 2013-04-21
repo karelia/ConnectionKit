@@ -22,8 +22,8 @@
 
     if (challenge.previousFailureCount > 0)
     {
-        user = self.user;
-        password = self.password;
+        user = self.originalUser;
+        password = self.originalPassword;
 
         [self useResponseSet:@"default"];
     }
@@ -33,6 +33,7 @@
         password = @"bad";
     }
 
+    NSLog(@"authenticating as %@ %@", self.user, self.password);
     NSURLCredential* credential = [NSURLCredential credentialWithUser:user password:password persistence:NSURLCredentialPersistenceNone];
     [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
@@ -45,12 +46,12 @@
     // after the first challenge though, we switch to the "normal" responses so that it accepts it
     if ([self setupSessionWithResponses:@"ftp"])
     {
+        [self removeTestDirectory];
         [self useResponseSet:@"bad login"];
 
-        NSURL* url = [self URLForPath:@"CK2FileManagerFTPTests"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue(error == nil ||
-                         ((error.code == 21) && (error.curlResponseCode == 550)), @"got unexpected error %@", error);
+            STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
         }];
