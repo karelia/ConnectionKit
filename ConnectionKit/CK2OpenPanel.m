@@ -327,7 +327,7 @@
             return YES;
         }
     }
-    return NO;
+    return [super performKeyEquivalent:event];
 }
 
 - (void)keyDown:(NSEvent *)event
