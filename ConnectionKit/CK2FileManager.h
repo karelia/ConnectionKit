@@ -26,13 +26,25 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  ConnectionKit's equivalent of NSFileManager
  All operations are asynchronous, including ones on the local file system.
  Supports remote file servers, currently over FTP, SFTP and WebDAV.
- "Worker" methods return an opaque object which you can pass to -cancelOperation: if needed.
  Allocate and initialise as many file managers as you wish; there is no +defaultManager method
  Provide a file manager with a delegate to handle authentication in the same fashion as NSURLConnection
  Behind the scenes, ConnectionKit takes care of creating as many connections to
  servers as are needed. This means you can perform multiple operations at once,
  but please avoid performing too many at once as that could easily upset a
  server.
+ 
+ Supported protocols and their URL schemes:
+ 
+ Scheme | Protocol
+ ------ | --------
+ file   | Local files
+ ftp    | FTP
+ ftps   | FTP with Implicit SSL
+ ftpes  | FTP with TLS/SSL
+ http   | WebDAV
+ https  | WebDAV over HTTPS
+ sftp   | SFTP
+ 
 */
 
 @interface CK2FileManager : NSObject
@@ -43,83 +55,205 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
 
 #pragma mark Discovering Directory Contents
 
-// NSFileManager is poorly documented in this regard, but according to 10.6's release notes, an empty array for keys means to include nothing, whereas nil means to include "a standard set" of values. We try to do much the same by handling nil to fill in all reasonable values the connection hands us as part of doing a directory listing. If you want more specifics, supply your own keys array
-// You can pass in CK2DirectoryEnumerationIncludesDirectory if you wish (see below for details) but that would be a little odd for this method!
-// Adding into the mix NSURLParentDirectoryURLKey as well will fill that key in all the way up to the root/volume URL
+/**
+ Performs a shallow search of the specified directory and returns URLs for the contained items.
+ 
+ This method performs a shallow search of the directory and therefore does not traverse symbolic links or return the contents of any subdirectories. This method also does not return URLs for the current directory (“.”), parent directory (“..”) but it can return hidden files (files that begin with a period character)
+ 
+ The order of the files in the returned array generally follows that returned by the server, which is likely undefined.
+ 
+ Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).
+ 
+ @param url for the directory whose contents you want to enumerate.
+ @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
+ @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
+ @param block called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ */
 - (id)contentsOfDirectoryAtURL:(NSURL *)url
     includingPropertiesForKeys:(NSArray *)keys
                        options:(NSDirectoryEnumerationOptions)mask
-             completionHandler:(void (^)(NSArray *contents, NSError *error))block;
+             completionHandler:(void (^)(NSArray *contents, NSError *error))block __attribute((nonnull(1,4)));
 
-// More advanced version of directory listing
-//  * listing results are delivered as they arrive over the wire, if possible
-//  * FIRST result is the directory itself, with relative path resolved if possible
-//  * MIGHT do true recursion of the directory tree in future, so include NSDirectoryEnumerationSkipsSubdirectoryDescendants for stable results
-//
-// Pass in CK2DirectoryEnumerationIncludesDirectory for the first URL received to be that of the URL being enumerated. Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved)
-// All docs for -contentsOfDirectoryAtURL:… should apply here too
+/**
+ Block-based enumeration of directory contents
+ 
+ If possible, listing results are delivered as they arrive over the wire. This
+ makes it possible that the operation fails mid-way, having received only some
+ of the total directory contents.
+ 
+ All docs for -contentsOfDirectoryAtURL:… should apply here too
+  
+ @param url for the directory whose contents you want to enumerate.
+ @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get
+ @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.
+ @param block is called for each URL encountered.
+ @param completionBlock is called once enumeration finishes or fails. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ */
 - (id)enumerateContentsOfURL:(NSURL *)url
   includingPropertiesForKeys:(NSArray *)keys
                      options:(NSDirectoryEnumerationOptions)mask
                   usingBlock:(void (^)(NSURL *url))block
-           completionHandler:(void (^)(NSError *error))completionBlock;
+           completionHandler:(void (^)(NSError *error))completionBlock __attribute((nonnull(1,4)));
 
 extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL of a symlink
 
 
 #pragma mark Creating Items
 
-/*  In all these methods, we refer to "opening attributes". They apply *only* if the server supports supplying specific attributes at creation time. In practice at present this should give:
- *
- *  FTP:    opening attributes are ignored
- *  SFTP:   Only NSFilePosixPermissions is used, and some servers choose to ignore it
- *  WebDAV: Only CK2FileMIMEType is supported
- *  file:   The full suite of attributes supported by NSFileManager should be available, but *only* for directories
- *
- *  If you particularly care about setting permissions on a remote server then, a follow up call to -setResourceValues:… is needed.
+/**
+ Creates a directory at the specified URL.
+ 
+ If a file or directory already exists at `url`, it is at the server's discretion
+ whether the operation succeeds by replacing the existing item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a directory
+ as part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Attributes are ignored
+ - file:   The full suite of attributes supported by `NSFileManager` should be available
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ @param url A URL that specifies the directory to create. This parameter must not be nil.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed. 
  */
+- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
-- (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
-
-/*  Many servers will overwrite an existing file at the target URL, but not all
- *  I don't believe any servers support overwriting a directory without first removing it
+/**
+ Creates a file with the specified content at the specified URL.
+ 
+ If a file or directory already exists at `url`, it is at the server's discretion
+ whether the operation succeeds by replacing the existing item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a file as
+ part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Only `CK2FileMIMEType` is supported
+ - file:   Attributes are ignored
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ @param url A URL that specifies the file to create. This parameter must not be nil.
+ @param data A data object containing the contents of the new file.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
+- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
-- (id)createFileAtURL:(NSURL *)url contents:(NSData *)data withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
-
-// It's at the discretion of individual protocol implementations, but generally file uploads should avoid reading the whole thing into memory at once
-- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler;
+/**
+ Creates a file by copying the content of the specified URL.
+ 
+ If a file or directory already exists at `destinationURL`, it is at the
+ server's discretion whether the operation succeeds by replacing the existing
+ item, or fails.
+ 
+ Only some protocols/servers support/respect applying attributes to a file as
+ part of creating it. Indeed, some servers don't really support attributes at
+ all! So any attributes you pass here might well go ignored. In practice, at
+ present you should see something like this:
+ 
+ - FTP:    Attributes are completely ignored
+ - SFTP:   Only `NSFilePosixPermissions` is used; some servers choose to ignore it
+ - WebDAV: Only `CK2FileMIMEType` is supported
+ - file:   Attributes are ignored
+ 
+ If you particularly care about setting attributes on a remote server, then a
+ follow-up call to -setAttributes:… is needed.
+ 
+ It's up to the individual protocol implementation, but generally ConnectionKit
+ will avoid loading the entire source file into memory at once.
+ 
+ @param destinationURL A URL that specifies the file to create. This parameter must not be nil.
+ @param sourceURL The file whose contents to use for creating the new file.
+ @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
+ @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
+ @param progressBlock Called as each "chunk" of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ */
+- (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 
 #pragma mark Deleting Items
-// Attempts to remove the file or directory at the specified URL. At present all protocols support deleting files, but when deleting directories:
-//
-//  file:               Recursively deletes directories if possible
-//  Everything else:    Supports files only
-- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+
+/**
+ Removes the item at the specified URL.
+ 
+ Right now, deletion of files is fully implemented, but whether deleting a
+ directory succeeds is pretty much at the mercy of the server/protocol used.
+ 
+ @param url A file URL specifying the file or directory to remove.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ */
+- (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
 #pragma mark Getting and Setting Attributes
 
-// It is up to the protocol used to decide precisely how it wants to handle the attributes and any errors. In practice at present that should mean:
-//
-//  FTP:    Only NSFilePosixPermissions is supported, and not by all servers
-//  SFTP:   Only NSFilePosixPermissions is supported
-//  WebDAV: No attributes are supported
-//  file:   Behaves the same as NSFileManager
-- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
+/**
+ Sets the attributes of the specified file or directory.
+ 
+ Unsupported attributes are ignored. Failure is only considered to have occurred
+ when an attribute appears to be supported by the server/protocol in use, but
+ actually fails to set. In practice at present the supported attributes should
+ be:
+ 
+ - FTP:    Only NSFilePosixPermissions is supported, and not by all servers
+ - SFTP:   Only NSFilePosixPermissions is supported
+ - WebDAV: No attributes are supported
+ - file:   Same attributes as NSFileManager supports
+ 
+ @param keyedValues A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.
+ @param url The URL of a file or directory.
+ @param handler Called at the end of the operation. A non-nil error indicates failure.
+ @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
+ */
+- (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
 
 // To retrieve attributes, instead perform a listing of the *parent* directory, and pick out resource properties from the returned URLs that you're interested in
 
 
 #pragma mark Cancelling Operations
-// If an operation is cancelled, the completion handler will be called with a NSURLErrorCancelled error.
-- (void)cancelOperation:(id)operation;
+
+/**
+ Cancels an operation.
+ 
+ If an operation is cancelled before it finishes, its completion handler is
+ called with an `NSURLErrorCancelled` error to indicate the failure can be
+ ignored.
+ 
+ @param operation An opaque token object representing the operation, as returned by any of `CK2FileManager`'s worker methods.
+ */
+- (void)cancelOperation:(id)operation __attribute((nonnull(1)));
 
 
 #pragma mark Delegate
-// Delegate methods are delivered on an arbitrary queue/thread. Your code needs to be threadsafe to handle that.
-// Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
+
+/**
+ The file manager's delegate.
+ 
+ Delegate methods are delivered on an arbitrary queue/thread.
+ Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!
+ */
 @property(assign) id <CK2FileManagerDelegate> delegate;
 
 
@@ -128,18 +262,32 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 
 @interface CK2FileManager (URLs)
 
-// These two methods take into account the specifics of different URL schemes. e.g. for the same relative path, but different base schemes:
-//  http://example.com/relative/path
-//  ftp://example.com/relative/path
-//  sftp://example.com/~/relative/path
-//
-// Takes care of the file URL bug on 10.6
-//
+/**
+ Initializes and returns a newly created NSURL object by changing `baseURL` to the specified path.
+ 
+ Some protocols differentiate between absolute paths, and those relative to the
+ user's home directory. This method constructs URLs to accomodate that and the
+ quirks of different protocols. Here are some example URLs:
+ 
+ Protocol | `/absolute` path              | `relative` path
+ -------- | ----------------------------- | -------------------------------
+ HTTP     | `http://example.com/absolute` | `http://example.com/relative`
+ FTP      | `ftp://example.com//absolute` | `ftp://example.com/relative`
+ SSH      | `sftp://example.com/absolute` | `sftp://example.com/~/relative`
+ 
+ There is a subtle bug in 10.6's handling of relative file URLs. This method
+ stops it hitting you.
+ 
+ @param path The path that the NSURL object will represent. If path is a relative path, it is treated as being relative to the user's home directory once connected to `baseURL`. Passing nil for this parameter produces an exception.
+ @param isDir A Boolean value that specifies whether path is treated as a directory path when resolving against relative path components. Pass YES if the path indicates a directory, NO otherwise.
+ @param baseURL A URL providing at least a scheme and host for the result to be based on. Any path as part of this URL is ignored.
+ @return An NSURL object initialized with path. `nil` if `baseURL` proved unsuitable.
+*/
++ (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL __attribute((nonnull(1,3)));
+
 // NOTE: +URLWithPath:relativeToURL: tends to return relative URLs. You may well find it preferable to call -absoluteURL on the result in your app to keep things simple
-// I'm seriously considering removing +URLWithPath:relativeToURL: as it tends not to be that useful in practice. +URLWithPath:hostURL: does exactly what it says on the tin
-//
-+ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
-+ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
+// I'm seriously considering removing this method as it tends not to be that useful in practice. +URLWithPath:isDirectory:hostURL: does exactly what it says on the tin
++ (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL __attribute((nonnull(1,2)));
 
 /**
  Extracts the path component of a URL, accounting for the subtleties of FTP etc.

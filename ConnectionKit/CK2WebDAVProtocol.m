@@ -33,7 +33,8 @@
 
 + (BOOL)canHandleURL:(NSURL *)url;
 {
-    return [url.scheme isEqualToString:@"http"] || [url.scheme isEqualToString:@"https"];
+    NSString *scheme = url.scheme;
+    return [@"http" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"https" caseInsensitiveCompare:scheme] == NSOrderedSame;
 }
 
 #pragma mark Lifecycle
