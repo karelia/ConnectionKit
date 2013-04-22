@@ -362,10 +362,12 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
 {
     NSParameterAssert(protocol == _protocol);
     // Even if cancelled, allow through as the discovery still stands; might be useful for caching elsewhere
-    
+  
+#if !TARGET_OS_IPHONE
     // Provide ancestry and other fairly generic keys on-demand
     [self.class setResourceValueBlocksForURL:url protocolClass:protocol.class];
-    
+#endif
+  
     if (_enumerationBlock) _enumerationBlock(url);
     
     // It seems poor security to vend out passwords here, so have a quick sanity check

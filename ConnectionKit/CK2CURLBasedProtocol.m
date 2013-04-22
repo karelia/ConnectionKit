@@ -79,7 +79,7 @@
         else
         {
             NSURL *url = [request URL];
-            NSString *path = [CK2FileManager pathOfURLRelativeToHomeDirectory:url];
+            NSString *path = [CK2FileManager pathOfURL:url];
             
             if (![path isAbsolutePath])
             {
