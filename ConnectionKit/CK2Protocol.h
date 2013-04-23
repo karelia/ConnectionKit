@@ -78,6 +78,31 @@
 @property(nonatomic, readonly, copy) NSURLRequest *request;
 @property(nonatomic, readonly, retain) id <CK2ProtocolClient> client;
 
+/**
+ Returned to represent general failures to create or write to something, in situations where we can't get a more specific error.
+ */
+
+- (NSError*)standardCouldntWriteErrorWithUnderlyingError:(NSError*)error;
+
+/**
+ Returned to represent general failures to find or read something, in situations where we can't get a more specific error.
+ */
+
+- (NSError*)standardCouldntReadErrorWithUnderlyingError:(NSError*)error;
+
+/**
+ Returned to represent a failure that we *know* was caused by the requested item not being found.
+ If the protocol can't be that specific, it should use standardCouldntWriteErrorWithUnderlyingError
+ or standardCouldntReadErrorWithUnderlyingError instead.
+ */
+
+- (NSError*)standardFileNotFoundErrorWithUnderlyingError:(NSError*)error;
+
+/**
+ Returned to represent an authentication error, in situations where the protocol can't be more specific.
+ */
+
+- (NSError*)standardAuthenticationErrorWithUnderlyingError:(NSError*)error;
 
 #pragma mark Registration
 
@@ -133,6 +158,5 @@
 
 // Call if reading from a stream needs to be retried. The client will provide you with a fresh, unopened stream to read from
 - (NSInputStream *)protocol:(CK2Protocol *)protocol needNewBodyStream:(NSURLRequest *)request;
-
 
 @end
