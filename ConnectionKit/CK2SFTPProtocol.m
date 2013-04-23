@@ -73,25 +73,8 @@
                               // if the mkdir command failed, try to extract a more meaningful error
                               if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
                               {
-                                  NSUInteger code = NSFileWriteUnknownError;
-                                  NSString* domain = NSCocoaErrorDomain;
-                                  NSUInteger sshError = [error curlResponseCode];
-                                  switch (sshError)
-                                  {
-                                      case LIBSSH2_FX_FAILURE:
-                                          // we're going to assume that a general failure code means that the directory already existed
-                                                                                    // quite how legitimate this is remains to be seen...
-                                                                                    //code = 0;
-
-                                      default:
-                                          break;
-                                          
-                                  }
-
-                                  if (code)
-                                      error = [NSError errorWithDomain:domain code:code userInfo:@{ NSUnderlyingErrorKey : error }];
-                                  else
-                                      error = nil;
+                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                                  // TODO: can we distinguish here between failure because the directory exists, and failure for some other reason?
                               }
                           }
 
@@ -146,8 +129,8 @@
                                           break;
 
                                       default:
-                                          // our default for other failures is a generic NSFileWriteUnknownError error
-                                          error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                                          // our default for other failures is generic
+                                          error = [self standardCouldntWriteErrorWithUnderlyingError:error];
                                           break;
 
                                   }
@@ -185,10 +168,11 @@
                                       switch (sshError)
                                       {
                                           case LIBSSH2_FX_NO_SUCH_FILE:
-                                              error = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:@{ NSUnderlyingErrorKey : error }];
+                                              error = [self standardFileNotFoundErrorWithUnderlyingError:error];
                                               break;
 
                                           default:
+                                              error = [self standardCouldntWriteErrorWithUnderlyingError:error];
                                               break;
                                       }
                                   }
