@@ -87,12 +87,6 @@
     }
 }
 
-- (void)awakeFromNib
-{
-    [_item addObserver:self forKeyPath:@"selected" options:NSKeyValueObservingOptionNew context:NULL];
-    [_item addObserver:self forKeyPath:@"enabled" options:NSKeyValueObservingOptionNew context:NULL];
-}
-
 - (void)setItem:(CK2IconViewItem *)item
 {
     if (item != _item)
