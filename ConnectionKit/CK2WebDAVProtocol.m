@@ -123,22 +123,24 @@
         // when done, we just report that we're finished
         CK2WebDAVCompletionHandler handleCompletion = ^(id result) {
 
-            CK2WebDAVLog(@"create directory done");
+            CK2WebDAVLog(@"create directory done %@", path);
             [self reportFinished];
         };
 
         // when a real error occurs, report it
         CK2WebDAVErrorHandler handleRealError = ^(NSError *error) {
-            CK2WebDAVLog(@"create directory failed");
+            CK2WebDAVLog(@"create directory failed %@", path);
             [self reportFailedWithError:error];
         };
 
         // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
         CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
             // only bother trying again if we actually got a relevant error:
-            // 409 (Conflict) - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
-            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 409))
+            // 404 Not Found
+            // 409 Conflict - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
+            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
             {
+                CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
                 [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
             }
             else
@@ -163,65 +165,37 @@
     {
         NSString* path = [self pathForRequest:request];
 
-        CK2WebDAVCompletionHandler makeFileBlock = ^(id result) {
-
-            DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
-            
-            [_queue addOperation:davRequest];
-            [davRequest release];
-
-            self.expectedLength = davRequest.expectedLength;
-            CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:self.expectedLength];
-
-            self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
-                [transfer setProgress:progress];
-                if (progressBlock)
-                {
-                    progressBlock(progress, previousAttemptsCount);
-                }
-            };
-
-            self.completionHandler =  ^(id result) {
-                CK2WebDAVLog(@"creating file done");
-                [transfer transferDidFinish:transfer error:nil];
-                [self reportFinished];
-            };
-
-            self.errorHandler = ^(NSError* error) {
-                CK2WebDAVLog(@"creating file failed");
-                [transfer transferDidFinish:transfer error:error];
-                [self reportFailedWithError:error];
-            };
+        CK2WebDAVCompletionHandler handleCompletion =  ^(id result) {
+            CK2WebDAVLog(@"creating file done");
+            [self reportFinished];
         };
 
-        if (createIntermediates)
-        {
-            NSString* parent = [path stringByDeletingLastPathComponent];
-            createIntermediates = ![parent isEqualToString:@"/"];
-            if (createIntermediates)
+        CK2WebDAVErrorHandler handleRealError = ^(NSError* error) {
+            CK2WebDAVLog(@"creating file failed");
+            [self reportFailedWithError:error];
+        };
+
+        // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
+        CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
+            // only bother trying again if we actually got a relevant error:
+            // 404 Not Found
+            // 409 Conflict - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
+            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
             {
-                [self addCreateDirectoryRequestForPath:path
-                           withIntermediateDirectories:createIntermediates
-                                          errorHandler:^(NSError *error) {
-
-                                              CK2WebDAVLog(@"create subdirectory failed");
-                                              [self reportFailedWithError:error];
-
-                                          } completionHandler:^(id result) {
-                                              // reset the attempts count (don't count attempts whilst creating)
-                                              self.attempts = 0;
-                                              makeFileBlock(result);
-                                          }
-                 ];
+                CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
+                [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion progressBlock:progressBlock];
             }
-        }
+            else
+            {
+                handleRealError(error);
+            }
+        };
 
-        if (!createIntermediates)
-        {
-            makeFileBlock(nil);
-        }
+        // for the sake of efficiency, the first time we always try the creation without making intermediates
+        // if that fails, and if we were asked to make intermediates, we try again
+        [self addCreateFileRequestForPath:path originalRequest:request withIntermediateDirectories:NO errorHandler:handleFirstError completionHandler:handleCompletion progressBlock:progressBlock];
 
-   }
+    }
 
     return self;
 }
@@ -364,7 +338,7 @@
 
 - (void)webDAVSession:(DAVSession *)session appendStringToTranscript:(NSString *)string sent:(BOOL)sent;
 {
-    CK2WebDAVLog(sent ? @"<-- %@ " : @"--> %@", string);
+    CK2WebDAVLog(sent ? @"--> %@ " : @"<-- %@", string);
 
     [[self client] protocol:self appendString:string toTranscript:(sent ? CKTranscriptSent : CKTranscriptReceived)];
 }
@@ -410,6 +384,80 @@
     [self.queue addOperationWithBlock:^{
         [self.client protocol:self didFailWithError:error];
     }];
+}
+
+/**
+ Create a createFile requesst, and potentially a chain of createDirectory requests.
+ If createIntermediates is NO, we just create one request to create the file, and set the completion handler
+ for the operation to whatever we were given.
+
+ If it's YES, we queue up requests to create the parent directory and all intermediates, and we only call the
+ file creation stuff if the directory creation succeeds (or fails because the directories already existed).
+ */
+
+- (void)addCreateFileRequestForPath:(NSString*)path
+                    originalRequest:(NSURLRequest*)request
+             withIntermediateDirectories:(BOOL)createIntermediates
+                       errorHandler:(CK2WebDAVErrorHandler)errorHandler
+                       completionHandler:(CK2WebDAVCompletionHandler)completionHandler
+                      progressBlock:(CK2ProgressBlock)progressBlock
+
+{
+    CK2WebDAVLog(@"adding create file request for %@", path);
+
+    CK2WebDAVCompletionHandler createFileBlock = Block_copy(^(id result) {
+
+        DAVPutRequest* davRequest = [[DAVPutRequest alloc] initWithPath:path originalRequest:request session:_session delegate:self];
+        [_queue addOperation:davRequest];
+        [davRequest release];
+
+        self.expectedLength = davRequest.expectedLength;
+        CKTransferRecord* transfer = [CKTransferRecord recordWithName:[path lastPathComponent] size:self.expectedLength];
+
+        self.progressHandler = ^(NSUInteger progress, NSUInteger previousAttemptsCount) {
+            [transfer setProgress:progress];
+            if (progressBlock)
+            {
+                progressBlock(progress, previousAttemptsCount);
+            }
+        };
+
+        self.completionHandler = completionHandler;
+        self.errorHandler = errorHandler;
+    });
+
+    CK2WebDAVErrorHandler errorBlock = Block_copy(^(NSError* error) {
+        CK2WebDAVLog(@"create directory failed for %@ with %@", path, error);
+        if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
+        {
+            // ignore failure to create the directories
+            createFileBlock(nil);
+        }
+        else
+        {
+            // other errors are passed on
+            errorHandler(error);
+        }
+    });
+
+    BOOL recursed = NO;
+    if (createIntermediates)
+    {
+        NSString* parent = [path stringByDeletingLastPathComponent];
+        if (![parent isEqualToString:@"/"])
+        {
+            [self addCreateDirectoryRequestForPath:parent withIntermediateDirectories:YES errorHandler:errorBlock completionHandler:createFileBlock];
+            recursed = YES;
+        }
+    }
+
+    if (!recursed)
+    {
+        createFileBlock(nil);
+    }
+
+    Block_release(errorHandler);
+    Block_release(createFileBlock);
 }
 
 /**
