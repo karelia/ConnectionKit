@@ -278,6 +278,9 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     @synchronized(self.transcript)
     {
         [self.transcript appendFormat:@"%@ %@", prefix, info];
+        UniChar lastChar = [info characterAtIndex:[info length] - 1];
+        if ((lastChar != '\n') && (lastChar != '\r'))
+            [self.transcript appendString:@"\n"];
     }
 }
 
