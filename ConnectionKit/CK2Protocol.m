@@ -121,7 +121,7 @@
 
 - (NSError*)standardCouldntWriteErrorWithUnderlyingError:(NSError *)error
 {
-    NSDictionary* info = @{NSUnderlyingErrorKey : error};
+    NSDictionary* info = error ? @{NSUnderlyingErrorKey : error} : nil;
     NSError* result = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileWriteUnknownError userInfo:info];
 
     return result;
@@ -129,7 +129,7 @@
 
 - (NSError*)standardFileNotFoundErrorWithUnderlyingError:(NSError *)error
 {
-    NSDictionary* info = @{NSUnderlyingErrorKey : error};
+    NSDictionary* info = error ? @{NSUnderlyingErrorKey : error} : nil;
     NSError* result = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileNoSuchFileError userInfo:info];
 
     return result;
@@ -137,7 +137,7 @@
 
 - (NSError*)standardCouldntReadErrorWithUnderlyingError:(NSError *)error
 {
-    NSDictionary* info = @{NSUnderlyingErrorKey : error};
+    NSDictionary* info = error ? @{NSUnderlyingErrorKey : error} : nil;
     NSError* result = [NSError errorWithDomain:NSCocoaErrorDomain code:NSURLErrorNoPermissionsToReadFile userInfo:info];
 
     return result;
@@ -145,7 +145,7 @@
 
 - (NSError*)standardAuthenticationErrorWithUnderlyingError:(NSError *)error
 {
-    NSDictionary* info = @{NSUnderlyingErrorKey : error};
+    NSDictionary* info = error ? @{NSUnderlyingErrorKey : error} : nil;
     NSError* result = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUserAuthenticationRequired userInfo:info];
 
     return result;
