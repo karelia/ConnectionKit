@@ -133,7 +133,6 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
-    NSLog(@"==SETUP=============================================================");
     if ([responses isEqualToString:@"webdav"])
     {
         self.type = @"CKWebDAVTest";
@@ -177,7 +176,6 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     else
     {
         NSURL* url = [NSURL URLWithString:setting];
-        NSLog(@"Tests using server %@ for %@", url, responses);
         self.user = url.user;
         self.password = url.password;
         self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
@@ -279,7 +277,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
     @synchronized(self.transcript)
     {
-        [self.transcript appendFormat:@"%@ %@\n", prefix, info];
+        [self.transcript appendFormat:@"%@ %@", prefix, info];
     }
 }
 
@@ -329,7 +327,10 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 - (void)tearDown
 {
     [super tearDown];
-    NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+    if ([self.transcript length] > 0)
+    {
+        NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+    }
     [self removeTemporaryFolder];
 }
 
@@ -362,7 +363,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
             [self removeTestDirectory];
         }
 
-        NSLog(@"<<<< Making Test Directory");
+        LogHousekeeping(@"<<<< Making Test Directory");
 
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
         session.dontShareConnections = YES;
@@ -382,7 +383,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                         STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
                         [self pause];
-                        NSLog(@"<<<< Made Test Files");
+                        LogHousekeeping(@"<<<< Made Test Files");
                     }];
                 }];
             }
@@ -390,7 +391,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
             {
                 [self pause];
             }
-            NSLog(@"<<<< Made Test Directory");
+            LogHousekeeping(@"<<<< Made Test Directory");
         }];
 
         [self runUntilPaused];
@@ -403,7 +404,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 {
     if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
-        NSLog(@"<<<< Removing Test Files");
+        LogHousekeeping(@"<<<< Removing Test Files");
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
         session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
@@ -417,7 +418,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
                     if (error) LogHousekeeping(@"housekeeping error : %@", error);
                     [self pause];
 
-                    NSLog(@"<<<< Removed Test Files");
+                    LogHousekeeping(@"<<<< Removed Test Files");
                 }];
             }];
         }];
