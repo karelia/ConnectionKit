@@ -178,7 +178,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         NSURL* url = [NSURL URLWithString:setting];
         self.user = url.user;
         self.password = url.password;
-        self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
+        self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@/", url.scheme, url.host, url.path]];
         ok = YES;
     }
 
