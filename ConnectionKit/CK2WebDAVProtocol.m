@@ -427,6 +427,7 @@
                             errorHandler:(CK2WebDAVErrorHandler)errorHandler
                        completionHandler:(CK2WebDAVCompletionHandler)completionHandler
 {
+    CK2WebDAVLog(@"adding create directory request for %@", path);
     CK2WebDAVCompletionHandler createDirectoryBlock = Block_copy(^(id result) {
         DAVRequest* davRequest = [[DAVMakeCollectionRequest alloc] initWithPath:path session:_session delegate:self];
         [_queue addOperation:davRequest];
@@ -437,6 +438,7 @@
     });
 
     CK2WebDAVErrorHandler errorBlock = Block_copy(^(NSError* error) {
+        CK2WebDAVLog(@"create directory failed for %@ with %@", path, error);
         if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
         {
             // ignore failure to create for all but the top directory, on the basis that they may well exist already
