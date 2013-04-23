@@ -317,7 +317,7 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self useBadLogin];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForPath:@"/blah/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
             STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
