@@ -135,8 +135,9 @@
 
         // the first time an error occurs, if we were asked to create intermediates, try again with that flag actually set to YES
         CK2WebDAVErrorHandler handleFirstError = ^(NSError *error) {
-            // only bother trying again if we actually got a relevant error
-            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 405))
+            // only bother trying again if we actually got a relevant error:
+            // 409 (Conflict) - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
+            if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && (error.code == 409))
             {
                 [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
             }
@@ -389,6 +390,23 @@
 
 - (void)reportFailedWithError:(NSError*)error
 {
+    if ([error.domain isEqualToString:DAVClientErrorDomain])
+    {
+        switch (error.code)
+        {
+            case 403:
+                error = [self standardAuthenticationErrorWithUnderlyingError:error];
+                break;
+
+            case 405:
+                error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                break;
+
+            default:
+                break;
+        }
+    }
+    
     [self.queue addOperationWithBlock:^{
         [self.client protocol:self didFailWithError:error];
     }];
