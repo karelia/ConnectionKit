@@ -226,7 +226,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
-        [self reportFinished];
+        [self reportFailedWithError:[self standardCouldntWriteErrorWithUnderlyingError:nil]];
     }
 
     return self;
@@ -370,6 +370,10 @@
         {
             case 403:
                 error = [self standardAuthenticationErrorWithUnderlyingError:error];
+                break;
+
+            case 404:
+                error = [self standardFileNotFoundErrorWithUnderlyingError:error];
                 break;
 
             case 405:
