@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"sftp", @"ftp"];
+    NSArray* responses = @[@"sftp", @"ftp", @"webdav"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -608,7 +608,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsRemovalError:error], @"expected file not found error, got %@", error);
 
             [self pause];
         }];
@@ -626,7 +626,7 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkNoErrorOrIsFileNotFoundError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsRemovalError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
@@ -721,7 +721,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -738,7 +738,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 

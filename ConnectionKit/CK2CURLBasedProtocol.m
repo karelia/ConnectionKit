@@ -444,23 +444,6 @@
     [_handle release]; _handle = nil;
 }
 
-- (NSError*)translateStandardErrors:(NSError*)error
-{
-    if (error)
-    {
-        if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
-        {
-            NSUInteger responseCode = [error curlResponseCode];
-            if (responseCode == 550)
-            {
-                // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-            }
-        }
-    }
-
-    return error;
-}
 
 - (void)stop;
 {

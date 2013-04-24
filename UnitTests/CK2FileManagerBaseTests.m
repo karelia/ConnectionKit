@@ -508,10 +508,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     // failure to remove something might result in the CK2Protocol's
     // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
     // (which one it is depends on how much error information the protocol gets)
-    BOOL isURLDomain = [error.domain isEqualToString:NSURLErrorDomain];
-    BOOL isCocoaDomain = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL domainOK = isURLDomain || isCocoaDomain;
-    BOOL codeOK = (isURLDomain && (error.code == NSFileWriteUnknownError)) || (isCocoaDomain && (error.code == NSFileNoSuchFileError));
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
     [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
 
     return (error == nil) || (domainOK && codeOK);
@@ -522,10 +520,8 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     // failure to update something might result in the CK2Protocol's
     // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
     // (which one it is depends on how much error information the protocol gets)
-    BOOL isURLDomain = [error.domain isEqualToString:NSURLErrorDomain];
-    BOOL isCocoaDomain = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL domainOK = isURLDomain || isCocoaDomain;
-    BOOL codeOK = (isURLDomain && (error.code == NSFileWriteUnknownError)) || (isCocoaDomain && (error.code == NSFileNoSuchFileError));
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
     [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
 
     return (error == nil) || (domainOK && codeOK);

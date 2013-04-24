@@ -99,7 +99,31 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          error = [self translateStandardErrors:error];
+
+                          if (error)
+                          {
+                              NSString* domain = error.domain;
+                              NSInteger code = error.code;
+                              if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  NSUInteger responseCode = [error curlResponseCode];
+                                  if (responseCode == 550)
+                                  {
+                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                                  }
+                              }
+
+                              else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+                              {
+                                  // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                              }
+                              else
+                              {
+                                  NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
+                              }
+                          }
+
                           [self reportToProtocolWithError:error];
                       }
 
@@ -154,8 +178,29 @@
                       completionHandler:^(NSError *error) {
                           if (error)
                           {
-                          error = [self translateStandardErrors:error];
+                              NSString* domain = error.domain;
+                              NSInteger code = error.code;
+                              if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
+                              {
+                                  NSUInteger responseCode = [error curlResponseCode];
+                                  if (responseCode == 550)
+                                  {
+                                      // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                                  }
+                              }
+
+                              else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+                              {
+                                  // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                              }
+                              else
+                              {
+                                  NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
+                              }
                           }
+
                           [self reportToProtocolWithError:error];
                       }];
 }
@@ -179,18 +224,34 @@
                               
                               if (error)
                               {
+                                  NSString* domain = error.domain;
+                                  NSInteger code = error.code;
+
                                   // CHMOD failures for unsupported or unrecognized command should go ignored
-                                  if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                                  if (code== CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
                                   {
                                       NSUInteger responseCode = [error curlResponseCode];
                                       if (responseCode == 500 || responseCode == 502 || responseCode == 504)
                                       {
                                           error = nil;
                                       }
+                                      else if (responseCode == 550)
+                                      {
+                                          // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
+                                          error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                                      }
+                                  }
+                                  else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+                                  {
+                                      // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+                                  }
+                                  else
+                                  {
+                                      NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
                                   }
                               }
 
-                              error = [self translateStandardErrors:error];
                               [self reportToProtocolWithError:error];
                           }];
     }
@@ -276,6 +337,6 @@
 #pragma mark Backend
 
 // Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return YES; }
++ (BOOL)usesMultiHandle; { return NO; }
 
 @end
