@@ -102,26 +102,7 @@
 
                           if (error)
                           {
-                              NSString* domain = error.domain;
-                              NSInteger code = error.code;
-                              if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
-                              {
-                                  NSUInteger responseCode = [error curlResponseCode];
-                                  if (responseCode == 550)
-                                  {
-                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                                  }
-                              }
-
-                              else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
-                              {
-                                  // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
-                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                              }
-                              else
-                              {
-                                  NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
-                              }
+                              error = [self translateStandardErrors:error];
                           }
 
                           [self reportToProtocolWithError:error];
@@ -178,27 +159,7 @@
                       completionHandler:^(NSError *error) {
                           if (error)
                           {
-                              NSString* domain = error.domain;
-                              NSInteger code = error.code;
-                              if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
-                              {
-                                  NSUInteger responseCode = [error curlResponseCode];
-                                  if (responseCode == 550)
-                                  {
-                                      // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                                  }
-                              }
-
-                              else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
-                              {
-                                  // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
-                                  error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                              }
-                              else
-                              {
-                                  NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
-                              }
+                              error = [self translateStandardErrors:error];
                           }
 
                           [self reportToProtocolWithError:error];
@@ -235,20 +196,11 @@
                                       {
                                           error = nil;
                                       }
-                                      else if (responseCode == 550)
-                                      {
-                                          // Nicer Cocoa-style error. Can't definitely tell the difference between the file not existing, and permission denied, sadly
-                                          error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                                      }
                                   }
-                                  else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+
+                                  if (error)
                                   {
-                                      // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
-                                      error = [self standardCouldntWriteErrorWithUnderlyingError:error];
-                                  }
-                                  else
-                                  {
-                                      NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
+                                      error = [self translateStandardErrors:error];
                                   }
                               }
 
@@ -262,6 +214,34 @@
     }
 }
 
+#pragma mark Errors
+
+- (NSError*)translateStandardErrors:(NSError*)error
+{
+    NSString* domain = error.domain;
+    NSInteger code = error.code;
+    if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
+    {
+        NSUInteger responseCode = [error curlResponseCode];
+        if (responseCode == 550)
+        {
+            error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+        }
+    }
+
+    else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+    {
+        // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+        error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+    }
+    else
+    {
+        NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
+    }
+
+    return error;
+}
+
 #pragma mark Lifecycle
 
 - (void)start;
@@ -273,7 +253,7 @@
         [[self client] protocolDidFinish:self];
         return;
     }
-    
+
     NSURL *url = [[self request] URL];
     NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
     
