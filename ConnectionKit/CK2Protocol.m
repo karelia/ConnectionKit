@@ -138,7 +138,7 @@
 - (NSError*)standardCouldntReadErrorWithUnderlyingError:(NSError *)error
 {
     NSDictionary* info = error ? @{NSUnderlyingErrorKey : error} : nil;
-    NSError* result = [NSError errorWithDomain:NSCocoaErrorDomain code:NSURLErrorNoPermissionsToReadFile userInfo:info];
+    NSError* result = [NSError errorWithDomain:NSCocoaErrorDomain code:NSFileReadUnknownError userInfo:info];
 
     return result;
 }
