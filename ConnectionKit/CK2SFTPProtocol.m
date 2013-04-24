@@ -125,6 +125,7 @@
                                           // we can't know if it's the rm, the rmdir or both that failed
                                           // if it's just one of them, it wasn't actually an error
                                           // so the best we can do here is always ignore a no file error
+                                          // TODO - it would be better if either we could work out ahead of time whether it's a file or folder we're deleting, or failing that, if the deletion retrying happened at the CKFileManager level instead.
                                           error = nil;
                                           break;
 
