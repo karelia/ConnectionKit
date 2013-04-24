@@ -278,7 +278,7 @@
     {
         // adjust the reported URL so that it's actually the full one (libcurl only got given one with the last component removed)
         NSURL* url = [self.request URL];
-        if (![[error.userInfo objectForKey:NSURLErrorFailingURLErrorKey] isEqualTo:url])
+        if (![[error.userInfo objectForKey:NSURLErrorFailingURLErrorKey] isEqual:url])
         {
             NSMutableDictionary* modifiedInfo = [NSMutableDictionary dictionaryWithDictionary:error.userInfo];
             [modifiedInfo setObject:url forKey:NSURLErrorFailingURLErrorKey];
