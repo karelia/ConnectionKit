@@ -22,7 +22,7 @@
 
 @implementation CK2SSHHostFingerprintProtectionSpace
 
-- initWithHost:(NSString *)host match:(enum curl_khmatch)match;
+- initWithHost:(NSString *)host match:(CK2KnownHostMatch)match;
 {
     if (self = [self initWithHost:host port:0 protocol:@"ssh" realm:nil authenticationMethod:CK2AuthenticationMethodHostFingerprint])
     {
@@ -35,7 +35,7 @@
 - (NSString *)authenticationMethod; { return CK2AuthenticationMethodHostFingerprint; }
 - (NSString *)protocol; { return @"ssh"; }
 
-- (enum curl_khmatch)ck2_knownHostMatch; { return _match; }
+- (CK2KnownHostMatch)ck2_knownHostMatch; { return _match; }
 
 // Make sure super doesn't create an actual copy
 - (id)copyWithZone:(NSZone *)zone; { return [self retain]; }

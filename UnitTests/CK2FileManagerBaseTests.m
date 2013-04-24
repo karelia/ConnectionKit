@@ -449,7 +449,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     }
     else if (!codeOK && error)
     {
-        NSLog(@"unexpected error code %ld", error.code);
+        NSLog(@"unexpected error code %ld", (long)error.code);
     }
 }
 
