@@ -40,5 +40,6 @@
 - (BOOL)checkIsFileNotFoundError:(NSError*)error;
 - (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error;
 - (BOOL)checkIsRemovalError:(NSError*)error;
+- (BOOL)checkIsFileCantReadError:(NSError*)error;
 - (BOOL)checkIsUpdateError:(NSError*)error;
 @end

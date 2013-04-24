@@ -626,7 +626,7 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsRemovalError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsFileCantReadError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];

@@ -515,6 +515,18 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return (error == nil) || (domainOK && codeOK);
 }
 
+- (BOOL)checkIsFileCantReadError:(NSError*)error;
+{
+    // failure to remove something might result in the CK2Protocol's
+    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
+    // (which one it is depends on how much error information the protocol gets)
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileReadUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    
+    return (error == nil) || (domainOK && codeOK);
+}
+
 - (BOOL)checkIsUpdateError:(NSError*)error
 {
     // failure to update something might result in the CK2Protocol's
