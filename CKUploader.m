@@ -959,6 +959,7 @@
                                                                            realm:nil
                                                             authenticationMethod:nil];
         
+        NSAssert(space, @"Protection space creation failed");
         NSURLCredential *credential = [[NSURLCredentialStorage sharedCredentialStorage] defaultCredentialForProtectionSpace:space];
         
         _challenge = [[NSURLAuthenticationChallenge alloc] initWithProtectionSpace:space
