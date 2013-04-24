@@ -220,6 +220,7 @@
 {
     NSString* domain = error.domain;
     NSInteger code = error.code;
+    
     if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
     {
         NSUInteger responseCode = [error curlResponseCode];
@@ -228,7 +229,11 @@
             error = [self standardCouldntWriteErrorWithUnderlyingError:error];
         }
     }
-
+    else if (code == CURLE_REMOTE_ACCESS_DENIED && [domain isEqualToString:CURLcodeErrorDomain])
+    {
+        // Could be a permissions problem, or could be that a CWD command failed because the directory doesn't exist
+        error = [self standardCouldntReadErrorWithUnderlyingError:error];
+    }
     else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
     {
         // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
