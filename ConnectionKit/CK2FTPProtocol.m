@@ -152,7 +152,10 @@
           createIntermediateDirectories:NO
                                  client:client
                       completionHandler:^(NSError *error) {
+                          if (error)
+                          {
                           error = [self translateStandardErrors:error];
+                          }
                           [self reportToProtocolWithError:error];
                       }];
 }
