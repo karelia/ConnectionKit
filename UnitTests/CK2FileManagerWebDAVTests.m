@@ -76,7 +76,7 @@
     // This is potentially enough to cause it to only send the data once - although if a server is slow in responding it may
     // still send it both times.
 
-    STAssertEquals(attempts, 1UL, @"expecting 1 restart when using stream, got %ld", attempts);
+    STAssertEquals(attempts, (NSUInteger)1, @"expecting 1 restart when using stream, got %ld", attempts);
 
     NSUInteger expected = [data length];
     BOOL amountOk = (written == expected) || (written == (expected * 2));

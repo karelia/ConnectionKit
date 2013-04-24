@@ -114,11 +114,57 @@
 		5F53DA601724A5C800DE6269 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
 		5F53DA611724A5F000DE6269 /* KMSState.h in Headers */ = {isa = PBXBuildFile; fileRef = ADEE5E17169C84DF006188C5 /* KMSState.h */; };
 		5F53DA631724A64100DE6269 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA621724A64000DE6269 /* Security.framework */; };
+		5F53DB381727F00B00DE6269 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
+		5F53DB4A1727F28300DE6269 /* CKUploaderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 225FCA3716B046F800A9F5AE /* CKUploaderTests.m */; };
+		5F53DB4B1727F28300DE6269 /* CK2FileManagerBaseTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22662EE3165D1EE3005FCC4A /* CK2FileManagerBaseTests.m */; };
+		5F53DB4C1727F28300DE6269 /* CK2FileManagerErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220C11951715C5E10086F199 /* CK2FileManagerErrorTests.m */; };
+		5F53DB4D1727F28300DE6269 /* CK2FileManagerURLTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */; };
+		5F53DB4E1727F28300DE6269 /* CK2FileManagerPathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */; };
+		5F53DB4F1727F28300DE6269 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
+		5F53DB501727F28300DE6269 /* CK2FileManagerGenericTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */; };
+		5F53DB511727F28300DE6269 /* CK2FileManagerFTPAuthenticationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */; };
+		5F53DB521727F28300DE6269 /* CK2CURLProtocolURLManipulationTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */; };
+		5F53DB531727F28300DE6269 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
+		5F53DB541727F29200DE6269 /* KMSCloseCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF6016B99986001D39D9 /* KMSCloseCommand.m */; };
+		5F53DB551727F29200DE6269 /* KMSCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5F16B99986001D39D9 /* KMSCommand.m */; };
+		5F53DB561727F29200DE6269 /* KMSConnection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB372166E500E0066B1C6 /* KMSConnection.m */; };
+		5F53DB571727F29200DE6269 /* KMSListener.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB374166E500E0066B1C6 /* KMSListener.m */; };
+		5F53DB581727F29200DE6269 /* KMSPauseCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5E16B99986001D39D9 /* KMSPauseCommand.m */; };
+		5F53DB591727F29200DE6269 /* KMSRegExResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB376166E500E0066B1C6 /* KMSRegExResponder.m */; };
+		5F53DB5A1727F29200DE6269 /* KMSResponder.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB378166E500E0066B1C6 /* KMSResponder.m */; };
+		5F53DB5B1727F29200DE6269 /* KMSResponseCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB37A166E500E0066B1C6 /* KMSResponseCollection.m */; };
+		5F53DB5C1727F29200DE6269 /* KMSSendDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */; };
+		5F53DB5D1727F29200DE6269 /* KMSSendServerDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5C16B99986001D39D9 /* KMSSendServerDataCommand.m */; };
+		5F53DB5E1727F29200DE6269 /* KMSSendStringCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */; };
+		5F53DB5F1727F29200DE6269 /* KMSServer.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB37C166E500E0066B1C6 /* KMSServer.m */; };
+		5F53DB601727F29200DE6269 /* KMSTestCase.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB389166E52680066B1C6 /* KMSTestCase.m */; };
+		5F53DB611727F29200DE6269 /* KMSTranscriptEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 22FEB6671680818800BB778B /* KMSTranscriptEntry.m */; };
+		5F53DB621727F29800DE6269 /* KMSManualTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB38B166E587F0066B1C6 /* KMSManualTests.m */; };
+		5F53DB631727F29800DE6269 /* KMSCollectionTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 224AB386166E501C0066B1C6 /* KMSCollectionTests.m */; };
+		5F53DB641727F30600DE6269 /* CK2FileOperationWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFEE1703AD4D004610FE /* CK2FileOperationWithTestSupport.m */; };
+		5F53DB651727F30600DE6269 /* CK2FileManagerWithTestSupport.m in Sources */ = {isa = PBXBuildFile; fileRef = 228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */; };
+		5F53DB661727F32200DE6269 /* ftp.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF1165D2EEC005FCC4A /* ftp.json */; };
+		5F53DB671727F32200DE6269 /* webdav.json in Resources */ = {isa = PBXBuildFile; fileRef = 22662EF2165D2EEC005FCC4A /* webdav.json */; };
+		5F53DB681727F3C300DE6269 /* libConnection-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA341724A36C00DE6269 /* libConnection-iOS.a */; };
+		5F53DB691727F3C300DE6269 /* libDAVKit-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA2C1724A2D300DE6269 /* libDAVKit-iOS.a */; };
+		5F53DB6A1727F3DB00DE6269 /* libCURLHandle-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA271724A2D300DE6269 /* libCURLHandle-iOS.a */; };
+		5F53DB701727F3ED00DE6269 /* libcares.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB6B1727F3EC00DE6269 /* libcares.a */; };
+		5F53DB711727F3ED00DE6269 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB6C1727F3EC00DE6269 /* libcrypto.a */; };
+		5F53DB721727F3ED00DE6269 /* libcurl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB6D1727F3EC00DE6269 /* libcurl.a */; };
+		5F53DB731727F3ED00DE6269 /* libssh2.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB6E1727F3ED00DE6269 /* libssh2.a */; };
+		5F53DB741727F3ED00DE6269 /* libssl.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB6F1727F3ED00DE6269 /* libssl.a */; };
+		5F53DB751727F42800DE6269 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA621724A64000DE6269 /* Security.framework */; };
+		5F53DB771727F42E00DE6269 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB761727F42E00DE6269 /* MobileCoreServices.framework */; };
+		5F53DB7B1727F49F00DE6269 /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB7A1727F49F00DE6269 /* libz.1.2.5.dylib */; };
+		5F53DB7C1727F5D300DE6269 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA351724A36C00DE6269 /* Foundation.framework */; };
+		5F53DB871727F6F400DE6269 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DA621724A64000DE6269 /* Security.framework */; };
+		5F53DB881727F83300DE6269 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
+		5F53DBA01727F9ED00DE6269 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB9F1727F9ED00DE6269 /* CFNetwork.framework */; };
+		5F53DBA11727FA2000DE6269 /* CFNetwork.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F53DB9F1727F9ED00DE6269 /* CFNetwork.framework */; };
 		791E83050B0EDAC90060E5FC /* error.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83030B0EDAC90060E5FC /* error.png */; };
 		791E83060B0EDAC90060E5FC /* finished.png in Resources */ = {isa = PBXBuildFile; fileRef = 791E83040B0EDAC90060E5FC /* finished.png */; };
 		792BC96C0ABF7EC10022415A /* NSString+Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 792BC8B00ABF6B2E0022415A /* NSString+Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		795E44DF0AC5F748007912A2 /* NSString+Connection.m in Sources */ = {isa = PBXBuildFile; fileRef = 792BC8B10ABF6B2E0022415A /* NSString+Connection.m */; };
-		796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 796DB2F609F8BB1D0065897B /* SecurityInterface.framework */; };
 		7978FC150B117D7C0048168B /* bookmark.tif in Resources */ = {isa = PBXBuildFile; fileRef = 7978FC140B117D7C0048168B /* bookmark.tif */; };
 		797CC8C709F861770063FF9B /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 797CC8C509F861770063FF9B /* Localizable.strings */; };
 		798313C90B0D67E000F5078E /* CKTransferProgressCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 798313C70B0D67E000F5078E /* CKTransferProgressCell.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -126,10 +172,6 @@
 		7983DF8E0B0C0FAC00F5078E /* CKTransferRecord.h in Headers */ = {isa = PBXBuildFile; fileRef = 7983DF8C0B0C0FAC00F5078E /* CKTransferRecord.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		7983DF8F0B0C0FAC00F5078E /* CKTransferRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = 7983DF8D0B0C0FAC00F5078E /* CKTransferRecord.m */; };
 		79CFD89509F704F400172CDD /* Connection.h in Headers */ = {isa = PBXBuildFile; fileRef = 79CFD89409F704F400172CDD /* Connection.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD92D09F7080B00172CDD /* libz.dylib */; };
-		79CFD93709F7084000172CDD /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79CFD93609F7084000172CDD /* Security.framework */; };
-		79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79F9532B09FDC3A80041E345 /* ApplicationServices.framework */; };
-		79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 79FB807109F74185006E7D11 /* Carbon.framework */; };
 		ADEE5E18169C84DF006188C5 /* KMSState.h in Headers */ = {isa = PBXBuildFile; fileRef = ADEE5E17169C84DF006188C5 /* KMSState.h */; };
 		CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = CEB6FA0A13A696B200C8059F /* libsasl2.dylib */; };
 /* End PBXBuildFile section */
@@ -169,13 +211,6 @@
 			proxyType = 1;
 			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
 			remoteInfo = CURLHandle;
-		};
-		220AD7AD1509021A00748655 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 29B97313FDCFA39411CA2CEA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 79CFD12509F702BE00172CDD;
-			remoteInfo = Framework;
 		};
 		22182129170209D300584589 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -219,18 +254,16 @@
 			remoteGlobalIDString = 5FEEF25F16CE830C002C1CBF;
 			remoteInfo = "DAVKit-iOS";
 		};
+		5F53DB2E1727EBB700DE6269 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5F53DAB41726F3F200DE6269;
+			remoteInfo = "CURLHandleTests-iOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		22E67F1C171312B6001ECE34 /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		22FA97F715090855001728B8 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -268,8 +301,6 @@
 
 /* Begin PBXFileReference section */
 		09D6601E09FD37990000BA00 /* UnitTest-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "UnitTest-Info.plist"; sourceTree = "<group>"; };
-		1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = /System/Library/Frameworks/Cocoa.framework; sourceTree = "<absolute>"; };
-		13E42FB307B3F0F600E4EEF1 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = /System/Library/Frameworks/CoreData.framework; sourceTree = "<absolute>"; };
 		220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPAuthenticationTests.m; sourceTree = "<group>"; };
 		220526F4165E989700A2BBC9 /* Connection_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Connection_Prefix.pch; path = ConnectionKit/Connection_Prefix.pch; sourceTree = "<group>"; };
 		220526F6165E98B400A2BBC9 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = ConnectionKit/main.m; sourceTree = "<group>"; };
@@ -372,8 +403,6 @@
 		27F3373C16BC1FB100E70511 /* en */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = en; path = en.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		27F394F3162C162900944F43 /* CK2SFTPProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2SFTPProtocol.h; sourceTree = "<group>"; };
 		27F394F4162C162900944F43 /* CK2SFTPProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2SFTPProtocol.m; sourceTree = "<group>"; };
-		29B97324FDCFA39411CA2CEA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = /System/Library/Frameworks/AppKit.framework; sourceTree = "<absolute>"; };
-		29B97325FDCFA39411CA2CEA /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		3C2D8EC10A63FF31008FE1B0 /* zh_TW */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_TW; path = zh_TW.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC20A63FF3B008FE1B0 /* fr */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = fr; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		3C2D8EC30A63FF41008FE1B0 /* da */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = da; path = da.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -382,14 +411,22 @@
 		5F53DA231724A2D200DE6269 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; path = libssl.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F53DA341724A36C00DE6269 /* libConnection-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libConnection-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5F53DA351724A36C00DE6269 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		5F53DA621724A64000DE6269 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = ../../../../iPhoneOS.platform/Developer/SDKs/iPhoneOS6.1.sdk/System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		5F53DA621724A64000DE6269 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
+		5F53DB371727F00A00DE6269 /* UnitTests-iOS.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "UnitTests-iOS.octest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F53DB6B1727F3EC00DE6269 /* libcares.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcares.a; path = "../CurlHandle/build/Release-iphoneos/libcares.a"; sourceTree = "<group>"; };
+		5F53DB6C1727F3EC00DE6269 /* libcrypto.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcrypto.a; path = "../CurlHandle/SFTP/build/Release-iphoneos/libcrypto.a"; sourceTree = "<group>"; };
+		5F53DB6D1727F3EC00DE6269 /* libcurl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libcurl.a; path = "../CurlHandle/build/Release-iphoneos/libcurl.a"; sourceTree = "<group>"; };
+		5F53DB6E1727F3ED00DE6269 /* libssh2.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssh2.a; path = "../CurlHandle/SFTP/build/Release-iphoneos/libssh2.a"; sourceTree = "<group>"; };
+		5F53DB6F1727F3ED00DE6269 /* libssl.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libssl.a; path = "../CurlHandle/SFTP/build/Release-iphoneos/libssl.a"; sourceTree = "<group>"; };
+		5F53DB761727F42E00DE6269 /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = System/Library/Frameworks/MobileCoreServices.framework; sourceTree = SDKROOT; };
+		5F53DB7A1727F49F00DE6269 /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = usr/lib/libz.1.2.5.dylib; sourceTree = SDKROOT; };
+		5F53DB9F1727F9ED00DE6269 /* CFNetwork.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CFNetwork.framework; path = System/Library/Frameworks/CFNetwork.framework; sourceTree = SDKROOT; };
 		791E83030B0EDAC90060E5FC /* error.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = error.png; path = Resources/error.png; sourceTree = "<group>"; };
 		791E83040B0EDAC90060E5FC /* finished.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = finished.png; path = Resources/finished.png; sourceTree = "<group>"; };
 		792BC8B00ABF6B2E0022415A /* NSString+Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSString+Connection.h"; path = "ConnectionKit/NSString+Connection.h"; sourceTree = "<group>"; };
 		792BC8B10ABF6B2E0022415A /* NSString+Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSString+Connection.m"; path = "ConnectionKit/NSString+Connection.m"; sourceTree = "<group>"; };
 		7946B0FC0AC0F4A400CAE90F /* CKS3Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CKS3Connection.h; sourceTree = "<group>"; };
 		7946B0FD0AC0F4A400CAE90F /* CKS3Connection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CKS3Connection.m; sourceTree = "<group>"; };
-		796DB2F609F8BB1D0065897B /* SecurityInterface.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SecurityInterface.framework; path = /System/Library/Frameworks/SecurityInterface.framework; sourceTree = "<absolute>"; };
 		7978FC140B117D7C0048168B /* bookmark.tif */ = {isa = PBXFileReference; lastKnownFileType = image.tiff; path = bookmark.tif; sourceTree = "<group>"; };
 		797CC8C609F861770063FF9B /* en */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		798313C70B0D67E000F5078E /* CKTransferProgressCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CKTransferProgressCell.h; path = ConnectionKit/CKTransferProgressCell.h; sourceTree = "<group>"; };
@@ -399,10 +436,6 @@
 		79CFD12609F702BE00172CDD /* Connection.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Connection.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		79CFD89409F704F400172CDD /* Connection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Connection.h; sourceTree = "<group>"; };
 		79CFD92C09F7080B00172CDD /* libcurl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcurl.dylib; path = /usr/lib/libcurl.dylib; sourceTree = "<absolute>"; };
-		79CFD92D09F7080B00172CDD /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = /usr/lib/libz.dylib; sourceTree = "<absolute>"; };
-		79CFD93609F7084000172CDD /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = /System/Library/Frameworks/Security.framework; sourceTree = "<absolute>"; };
-		79F9532B09FDC3A80041E345 /* ApplicationServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ApplicationServices.framework; path = /System/Library/Frameworks/ApplicationServices.framework; sourceTree = "<absolute>"; };
-		79FB807109F74185006E7D11 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = /System/Library/Frameworks/Carbon.framework; sourceTree = "<absolute>"; };
 		ADEE5E17169C84DF006188C5 /* KMSState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSState.h; sourceTree = "<group>"; };
 		CE1AD3DF0A7E845A0083C01E /* it */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = it; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
 		CE55A6620AD194740091C8AE /* zh_CN */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; lineEnding = 0; name = zh_CN; path = zh_CN.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -451,6 +484,28 @@
 			files = (
 				5F53DA631724A64100DE6269 /* Security.framework in Frameworks */,
 				5F53DA361724A36C00DE6269 /* Foundation.framework in Frameworks */,
+				5F53DBA11727FA2000DE6269 /* CFNetwork.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5F53DB331727F00A00DE6269 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F53DBA01727F9ED00DE6269 /* CFNetwork.framework in Frameworks */,
+				5F53DB701727F3ED00DE6269 /* libcares.a in Frameworks */,
+				5F53DB711727F3ED00DE6269 /* libcrypto.a in Frameworks */,
+				5F53DB721727F3ED00DE6269 /* libcurl.a in Frameworks */,
+				5F53DB731727F3ED00DE6269 /* libssh2.a in Frameworks */,
+				5F53DB741727F3ED00DE6269 /* libssl.a in Frameworks */,
+				5F53DB6A1727F3DB00DE6269 /* libCURLHandle-iOS.a in Frameworks */,
+				5F53DB681727F3C300DE6269 /* libConnection-iOS.a in Frameworks */,
+				5F53DB691727F3C300DE6269 /* libDAVKit-iOS.a in Frameworks */,
+				5F53DB7B1727F49F00DE6269 /* libz.1.2.5.dylib in Frameworks */,
+				5F53DB771727F42E00DE6269 /* MobileCoreServices.framework in Frameworks */,
+				5F53DB751727F42800DE6269 /* Security.framework in Frameworks */,
+				5F53DB381727F00B00DE6269 /* SenTestingKit.framework in Frameworks */,
+				5F53DB7C1727F5D300DE6269 /* Foundation.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -459,14 +514,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */,
-				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
-				79CFD93709F7084000172CDD /* Security.framework in Frameworks */,
-				79FB807209F74185006E7D11 /* Carbon.framework in Frameworks */,
-				796DB30109F8BB1D0065897B /* SecurityInterface.framework in Frameworks */,
-				79F9533D09FDC3A80041E345 /* ApplicationServices.framework in Frameworks */,
 				CEB6FA0B13A696B200C8059F /* libsasl2.dylib in Frameworks */,
 				2702E4681459D0F50085BBC4 /* libssh2.dylib in Frameworks */,
 				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
+				5F53DB871727F6F400DE6269 /* Security.framework in Frameworks */,
+				5F53DB881727F83300DE6269 /* Cocoa.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -510,36 +562,6 @@
 			path = UnitTests;
 			sourceTree = "<group>";
 		};
-		1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				79F9532B09FDC3A80041E345 /* ApplicationServices.framework */,
-				79FB807109F74185006E7D11 /* Carbon.framework */,
-				1058C7A1FEA54F0111CA2CBB /* Cocoa.framework */,
-				27448C371458100D00EB086F /* DAVKit.framework */,
-				22407D5D166FA17600E1EAD4 /* libcrypto.dylib */,
-				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
-				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
-				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
-				22407D5A166FA12500E1EAD4 /* libssl.dylib */,
-				79CFD92D09F7080B00172CDD /* libz.dylib */,
-				5F53DA621724A64000DE6269 /* Security.framework */,
-				79CFD93609F7084000172CDD /* Security.framework */,
-				796DB2F609F8BB1D0065897B /* SecurityInterface.framework */,
-			);
-			name = "Linked Frameworks";
-			sourceTree = "<group>";
-		};
-		1058C7A2FEA54F0111CA2CBB /* Other Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				29B97324FDCFA39411CA2CEA /* AppKit.framework */,
-				13E42FB307B3F0F600E4EEF1 /* CoreData.framework */,
-				29B97325FDCFA39411CA2CEA /* Foundation.framework */,
-			);
-			name = "Other Frameworks";
-			sourceTree = "<group>";
-		};
 		19C28FACFE9D520D11CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -548,6 +570,7 @@
 				27F3372816BC1FB100E70511 /* AuthTester.app */,
 				22C9CF981703327A004610FE /* ProfilingTester.app */,
 				5F53DA341724A36C00DE6269 /* libConnection-iOS.a */,
+				5F53DB371727F00A00DE6269 /* UnitTests-iOS.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -556,9 +579,10 @@
 			isa = PBXGroup;
 			children = (
 				220526E8165E96AA00A2BBC9 /* CURLHandle.framework */,
-				5F53DA271724A2D300DE6269 /* libCURLHandle-iOS.a */,
 				220526EA165E96AA00A2BBC9 /* CURLHandleTests.octest */,
-				22C9CFFB1703AD4D004610FE /* Standalone Test */,
+				5F53DA271724A2D300DE6269 /* libCURLHandle-iOS.a */,
+				5F53DB2F1727EBB700DE6269 /* CURLHandleTests-iOS.octest */,
+				22C9CFFB1703AD4D004610FE /* crashtest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -758,8 +782,13 @@
 			isa = PBXGroup;
 			children = (
 				5F53DA211724A2D200DE6269 /* libcrypto.dylib */,
-				5F53DA221724A2D200DE6269 /* libssh2.dylib */,
+				5F53DB6C1727F3EC00DE6269 /* libcrypto.a */,
 				5F53DA231724A2D200DE6269 /* libssl.dylib */,
+				5F53DB6F1727F3ED00DE6269 /* libssl.a */,
+				5F53DA221724A2D200DE6269 /* libssh2.dylib */,
+				5F53DB6E1727F3ED00DE6269 /* libssh2.a */,
+				5F53DB6B1727F3EC00DE6269 /* libcares.a */,
+				5F53DB6D1727F3EC00DE6269 /* libcurl.a */,
 				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
 				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
 			);
@@ -808,11 +837,19 @@
 		29B97323FDCFA39411CA2CEA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1058C7A0FEA54F0111CA2CBB /* Linked Frameworks */,
+				22407D5D166FA17600E1EAD4 /* libcrypto.dylib */,
+				79CFD92C09F7080B00172CDD /* libcurl.dylib */,
+				CEB6FA0A13A696B200C8059F /* libsasl2.dylib */,
+				2702E4671459D0F50085BBC4 /* libssh2.dylib */,
+				22407D5A166FA12500E1EAD4 /* libssl.dylib */,
+				5F53DB7A1727F49F00DE6269 /* libz.1.2.5.dylib */,
+				5F53DB9F1727F9ED00DE6269 /* CFNetwork.framework */,
+				5F53DA351724A36C00DE6269 /* Foundation.framework */,
+				27448C371458100D00EB086F /* DAVKit.framework */,
+				5F53DA621724A64000DE6269 /* Security.framework */,
+				5F53DB761727F42E00DE6269 /* MobileCoreServices.framework */,
 				220AD7991509019B00748655 /* SenTestingKit.framework */,
 				27F3372A16BC1FB100E70511 /* Cocoa.framework */,
-				5F53DA351724A36C00DE6269 /* Foundation.framework */,
-				1058C7A2FEA54F0111CA2CBB /* Other Frameworks */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -894,13 +931,11 @@
 				220AD7951509019B00748655 /* Resources */,
 				22FA97F715090855001728B8 /* CopyFiles */,
 				220AD7961509019B00748655 /* ShellScript */,
-				22E67F1C171312B6001ECE34 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				2218212A170209D300584589 /* PBXTargetDependency */,
-				220AD7AE1509021A00748655 /* PBXTargetDependency */,
 			);
 			name = UnitTests;
 			productName = Tests;
@@ -960,6 +995,24 @@
 			productName = "Connection-iOS";
 			productReference = 5F53DA341724A36C00DE6269 /* libConnection-iOS.a */;
 			productType = "com.apple.product-type.library.static";
+		};
+		5F53DB361727F00A00DE6269 /* UnitTests-iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5F53DB461727F00B00DE6269 /* Build configuration list for PBXNativeTarget "UnitTests-iOS" */;
+			buildPhases = (
+				5F53DB321727F00A00DE6269 /* Sources */,
+				5F53DB331727F00A00DE6269 /* Frameworks */,
+				5F53DB341727F00A00DE6269 /* Resources */,
+				5F53DB351727F00A00DE6269 /* ShellScript */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "UnitTests-iOS";
+			productName = "UnitTests-iOS";
+			productReference = 5F53DB371727F00A00DE6269 /* UnitTests-iOS.octest */;
+			productType = "com.apple.product-type.bundle";
 		};
 		79CFD12509F702BE00172CDD /* Framework */ = {
 			isa = PBXNativeTarget;
@@ -1023,8 +1076,9 @@
 			projectRoot = "";
 			targets = (
 				79CFD12509F702BE00172CDD /* Framework */,
-				5F53DA331724A36C00DE6269 /* Connection-iOS */,
 				220AD7971509019B00748655 /* UnitTests */,
+				5F53DA331724A36C00DE6269 /* Connection-iOS */,
+				5F53DB361727F00A00DE6269 /* UnitTests-iOS */,
 				27F3372716BC1FB100E70511 /* AuthTester */,
 				22C9CF971703327A004610FE /* ProfilingTester */,
 			);
@@ -1060,9 +1114,10 @@
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		22C9CFFB1703AD4D004610FE /* Standalone Test */ = {
+		22C9CFFB1703AD4D004610FE /* crashtest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
+			name = crashtest;
 			path = "Standalone Test";
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -1079,6 +1134,13 @@
 			fileType = archive.ar;
 			path = "libDAVKit-iOS.a";
 			remoteRef = 5F53DA2B1724A2D300DE6269 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		5F53DB2F1727EBB700DE6269 /* CURLHandleTests-iOS.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "CURLHandleTests-iOS.octest";
+			remoteRef = 5F53DB2E1727EBB700DE6269 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1113,6 +1175,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5F53DB341727F00A00DE6269 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F53DB661727F32200DE6269 /* ftp.json in Resources */,
+				5F53DB671727F32200DE6269 /* webdav.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12209F702BE00172CDD /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1141,6 +1212,19 @@
 			shellPath = /bin/sh;
 			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
 			showEnvVarsInLog = 0;
+		};
+		5F53DB351727F00A00DE6269 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
 		};
 		7931260F0B3684B2002FF80D /* Strip UKKQueue */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -1247,6 +1331,41 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5F53DB321727F00A00DE6269 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5F53DB4A1727F28300DE6269 /* CKUploaderTests.m in Sources */,
+				5F53DB4B1727F28300DE6269 /* CK2FileManagerBaseTests.m in Sources */,
+				5F53DB4C1727F28300DE6269 /* CK2FileManagerErrorTests.m in Sources */,
+				5F53DB4D1727F28300DE6269 /* CK2FileManagerURLTests.m in Sources */,
+				5F53DB4E1727F28300DE6269 /* CK2FileManagerPathTests.m in Sources */,
+				5F53DB4F1727F28300DE6269 /* CK2FileManagerFileTests.m in Sources */,
+				5F53DB501727F28300DE6269 /* CK2FileManagerGenericTests.m in Sources */,
+				5F53DB511727F28300DE6269 /* CK2FileManagerFTPAuthenticationTests.m in Sources */,
+				5F53DB521727F28300DE6269 /* CK2CURLProtocolURLManipulationTests.m in Sources */,
+				5F53DB531727F28300DE6269 /* CK2FileManagerWebDAVTests.m in Sources */,
+				5F53DB541727F29200DE6269 /* KMSCloseCommand.m in Sources */,
+				5F53DB551727F29200DE6269 /* KMSCommand.m in Sources */,
+				5F53DB561727F29200DE6269 /* KMSConnection.m in Sources */,
+				5F53DB571727F29200DE6269 /* KMSListener.m in Sources */,
+				5F53DB581727F29200DE6269 /* KMSPauseCommand.m in Sources */,
+				5F53DB591727F29200DE6269 /* KMSRegExResponder.m in Sources */,
+				5F53DB5A1727F29200DE6269 /* KMSResponder.m in Sources */,
+				5F53DB5B1727F29200DE6269 /* KMSResponseCollection.m in Sources */,
+				5F53DB5C1727F29200DE6269 /* KMSSendDataCommand.m in Sources */,
+				5F53DB5D1727F29200DE6269 /* KMSSendServerDataCommand.m in Sources */,
+				5F53DB5E1727F29200DE6269 /* KMSSendStringCommand.m in Sources */,
+				5F53DB5F1727F29200DE6269 /* KMSServer.m in Sources */,
+				5F53DB601727F29200DE6269 /* KMSTestCase.m in Sources */,
+				5F53DB611727F29200DE6269 /* KMSTranscriptEntry.m in Sources */,
+				5F53DB621727F29800DE6269 /* KMSManualTests.m in Sources */,
+				5F53DB631727F29800DE6269 /* KMSCollectionTests.m in Sources */,
+				5F53DB641727F30600DE6269 /* CK2FileOperationWithTestSupport.m in Sources */,
+				5F53DB651727F30600DE6269 /* CK2FileManagerWithTestSupport.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		79CFD12309F702BE00172CDD /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1274,11 +1393,6 @@
 			isa = PBXTargetDependency;
 			name = CURLHandle;
 			targetProxy = 220526FC165EA20600A2BBC9 /* PBXContainerItemProxy */;
-		};
-		220AD7AE1509021A00748655 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 79CFD12509F702BE00172CDD /* Framework */;
-			targetProxy = 220AD7AD1509021A00748655 /* PBXContainerItemProxy */;
 		};
 		2218212A170209D300584589 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1691,6 +1805,102 @@
 			};
 			name = Plugin;
 		};
+		5F53DB471727F00B00DE6269 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Debug;
+		};
+		5F53DB481727F00B00DE6269 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Release;
+		};
+		5F53DB491727F00B00DE6269 /* Plugin */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(SDKROOT)/Developer/Library/Frameworks",
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = UnitTests/UnitTests_Prefix.pch;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				INFOPLIST_FILE = "UnitTests/UnitTest-Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.1;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				WRAPPER_EXTENSION = octest;
+			};
+			name = Plugin;
+		};
 		79A8578E0B9267CA00D9C844 /* Plugin */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1885,6 +2095,17 @@
 				5F53DA411724A36C00DE6269 /* Plugin */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		5F53DB461727F00B00DE6269 /* Build configuration list for PBXNativeTarget "UnitTests-iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5F53DB471727F00B00DE6269 /* Debug */,
+				5F53DB481727F00B00DE6269 /* Release */,
+				5F53DB491727F00B00DE6269 /* Plugin */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		79CFD12809F702BF00172CDD /* Build configuration list for PBXNativeTarget "Framework" */ = {
 			isa = XCConfigurationList;

@@ -159,6 +159,14 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     {
         NSString* key = [NSString stringWithFormat:@"%@URL", self.type];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
+        
+#if TARGET_OS_IPHONE
+        if (!setting) {
+            setting = @"MockServer";
+            [[NSUserDefaults standardUserDefaults] setObject:setting forKey:key];
+        }
+#endif
+        
         STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
     }
 
