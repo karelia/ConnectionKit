@@ -950,12 +950,13 @@
 - (void)didEnqueueUpload:(CKTransferRecord *)record toPath:(NSString *)path
 {
     if (!_started && !([self options] & CKUploadingDryRun))
-    {        
-        NSURL *url = [[self request] URL];
+    {
+        NSURLRequest *request = self.request;
+        NSURL *url = request.URL;
         
         NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
                                                                             port:[[url port] integerValue]
-                                                                        protocol:([[self request] curl_desiredSSLLevel] >= CURLUSESSL_CONTROL ? @"ftps" : [url scheme])
+                                                                        protocol:([request curl_desiredSSLLevel] >= CURLUSESSL_CONTROL ? @"ftps" : url.scheme)
                                                                            realm:nil
                                                             authenticationMethod:nil];
         
