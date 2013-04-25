@@ -64,6 +64,14 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  
  Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).
  
+ Many protocols provide a decent error code indicating *why* the operation
+ failed. Unfortunately, FTP cannot. The FTP spec means the only machine-readable
+ response is a 550 code. This covers pretty much any sort of filesystem access
+ problem (as opposed to an issue with the connection itself). Thus FTP ops
+ cannot distinguish between a folder not existing, not actually being a folder,
+ and the user having insufficient permissions to access it. Instead you'll get
+ back plain old `NSFileReadUnknownError`.
+ 
  @param url for the directory whose contents you want to enumerate.
  @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
