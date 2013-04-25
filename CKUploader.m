@@ -954,6 +954,8 @@
         NSURLRequest *request = self.request;
         NSURL *url = request.URL;
         
+        NSLog(@"Creating protection space for request: %@ (%i)", url, [request curl_desiredSSLLevel]);
+        
         NSURLProtectionSpace *space = [[NSURLProtectionSpace alloc] initWithHost:[url host]
                                                                             port:[[url port] integerValue]
                                                                         protocol:([request curl_desiredSSLLevel] >= CURLUSESSL_CONTROL ? @"ftps" : url.scheme)
