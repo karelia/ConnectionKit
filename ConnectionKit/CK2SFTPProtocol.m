@@ -11,7 +11,9 @@
 
 #import <CURLHandle/CK2SSHCredential.h>
 
+#if !TARGET_OS_IPHONE
 #import <AppKit/AppKit.h>
+#endif
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <libssh2_sftp.h>
 
@@ -304,7 +306,7 @@
     {
         // Report the key back to delegate to see how it feels about this. Unfortunately have to uglily use a semaphore to do so
         NSURLProtectionSpace *space = [NSURLProtectionSpace ck2_protectionSpaceWithHost:self.request.URL.host
-                                                                                                    knownHostMatch:match];
+                                                                                                    knownHostMatch:(CK2KnownHostMatch)match];
         
         NSURLCredential *credential = nil;
         if (match != CURLKHMATCH_MISMATCH) credential = [NSURLCredential ck2_credentialForKnownHostWithPersistence:NSURLCredentialPersistencePermanent];

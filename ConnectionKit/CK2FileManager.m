@@ -43,26 +43,26 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                completionHandler:(void (^)(NSArray *, NSError *))block;
 {
     NSMutableArray *contents = [[NSMutableArray alloc] init];
-    
+
     id result = [self enumerateContentsOfURL:url includingPropertiesForKeys:keys options:(mask|NSDirectoryEnumerationSkipsSubdirectoryDescendants) usingBlock:^(NSURL *aURL) {
-        
+
         [contents addObject:aURL];
-        
+
     } completionHandler:^(NSError *error) {
-        
+
         block((error ? nil : contents), // don't confuse clients should we have recieved only a partial listing
               error);
-        
+
         [contents release];
     }];
-    
+
     return result;
 }
 
 - (id)enumerateContentsOfURL:(NSURL *)url includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask usingBlock:(void (^)(NSURL *))block completionHandler:(void (^)(NSError *))completionBlock;
 {
     NSParameterAssert(url);
-    
+
     CK2FileOperation *operation = [[[self classForOperation] alloc] initEnumerationOperationWithURL:url
                                                                  includingPropertiesForKeys:keys
                                                                                     options:mask
@@ -77,7 +77,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (id)createDirectoryAtURL:(NSURL *)url withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(url);
-    
+
     CK2FileOperation *operation = [[[self classForOperation] alloc] initDirectoryCreationOperationWithURL:url
                                                                       withIntermediateDirectories:createIntermediates
                                                                                 openingAttributes:attributes
@@ -95,7 +95,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                      manager:self
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
-    
+
     return [operation autorelease];
 }
 
@@ -108,7 +108,19 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                                                                                      manager:self
                                                                                progressBlock:progressBlock
                                                                              completionBlock:handler];
-    
+
+    return [operation autorelease];
+}
+
+- (id)readFileAtURL:(NSURL *)sourceURL toLocalURL:(NSURL *)destinationURL progressBlock:(void (^)(NSUInteger))progressBlock completionHandler:(void (^)(NSError *))completionHandler;
+{
+    NSMutableURLRequest *request = [[NSMutableURLRequest alloc] initWithURL:sourceURL];
+
+    CK2FileOperation *operation = [[CK2FileOperation alloc] initFileReadOperationWithRequest:request
+                                                                              destinationURL:destinationURL
+                                                                                     manager:self
+                                                                               progressBlock:progressBlock
+                                                                             completionBlock:completionHandler];
     return [operation autorelease];
 }
 
@@ -123,7 +135,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 - (id)setAttributes:(NSDictionary *)keyedValues ofItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler;
 {
     NSParameterAssert(keyedValues);
-    
+
     CK2FileOperation *operation = [[[self classForOperation] alloc] initResourceValueSettingOperationWithURL:url
                                                                                               values:keyedValues
                                                                                              manager:self
@@ -160,28 +172,28 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     // Strip down to just host URL
     CFIndex length = CFURLGetBytes((CFURLRef)baseURL, NULL, 0);
     CFRange pathRange = CFURLGetByteRangeForComponent((CFURLRef)baseURL, kCFURLComponentPath, NULL);
-    
+
     if (pathRange.location != kCFNotFound &&
         pathRange.location < length)
     {
         NSMutableData *data = [[NSMutableData alloc] initWithLength:pathRange.location];
         CFURLGetBytes((CFURLRef)baseURL, data.mutableBytes, pathRange.location);
-        
+
         NSString *string = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
         baseURL = [NSURL URLWithString:string];
-        
+
         [string release];
         [data release];
     }
-    
+
     NSURL *result = [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
-    
+
     // Turn path into a directory if requested (matches +fileURLWithPath:isDirectory: behaviour)
     if (isDir && !CFURLHasDirectoryPath((CFURLRef)result))
     {
         result = [result URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
     }
-    
+
     return result;
 }
 
@@ -228,12 +240,12 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 {
     // Store the block as an associated object
     objc_setAssociatedObject(url, key, block, OBJC_ASSOCIATION_COPY);
-    
-    
+
+
     // Swizzle so getter method includes cache in its search
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
-        
+
         Class class = NSURL.class;
         Method originalMethod = class_getInstanceMethod(class, @selector(getResourceValue:forKey:error:));
         Method overrideMethod = class_getInstanceMethod(class, @selector(ck2_getResourceValue:forKey:error:));
@@ -243,16 +255,16 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 /*!
  @method         canHandleURL:
- 
+
  @abstract
  Performs a "preflight" operation that performs some speculative checks to see if a URL has a suitable protocol registered to handle it.
- 
+
  @discussion
  The result of this method is valid only as long as no protocols are registered or unregistered, and as long as the request is not mutated (if the request is mutable). Hence, clients should be prepared to handle failures even if they have performed request preflighting by calling this method.
- 
+
  @param
  url     The URL to preflight.
- 
+
  @result
  YES         if it is likely that the given request can be used to
  perform a file operation and the associated I/O can be
@@ -280,18 +292,18 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
     {
         return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
     }
-    
-    
+
+
     // See if key has been cached
     id (^block)(void) = objc_getAssociatedObject(self, key);
-    
+
     if (block)
     {
         *value = block();
         return YES;
     }
-    
-    
+
+
     // A few special keys we generate on-demand pretty much by guessing since the server isn't up to providing that sort of info
         if ([key isEqualToString:NSURLHasHiddenExtensionKey])
         {
@@ -303,7 +315,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             *value = [self lastPathComponent];
             return YES;
         }
-        
+
         // Have to define NSURLPathKey as a macro for older releases:
 #if (!defined MAC_OS_X_VERSION_10_8) || MAC_OS_X_VERSION_MIN_REQUIRED < MAC_OS_X_VERSION_10_8
 #define NSURLPathKey @"_NSURLPathKey"
@@ -314,13 +326,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
             return YES;
         }
 #undef NSURLPathKey
-        
+
         else if ([key isEqualToString:NSURLIsPackageKey])
         {
             NSString        *extension;
-            
+
             extension = [self pathExtension];
-            
+
             if ([extension length] > 0)
             {
                 if ([extension isEqual:@"app"])
@@ -328,12 +340,13 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                     *value = @YES;
                     return YES;
                 }
+#if !TARGET_OS_IPHONE
                 else
                 {
                     OSStatus        status;
-                    
+
                     status = LSGetApplicationForInfo(kLSUnknownType, kLSUnknownCreator, (CFStringRef)extension, kLSRolesAll, NULL, NULL);
-                    
+
                     if (status == kLSApplicationNotFoundErr)
                     {
                         *value = @NO;
@@ -349,8 +362,9 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
                         return YES;
                     }
                 }
+#endif
             }
-            
+
             *value = @NO;
             return YES;
         }
@@ -358,7 +372,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         {
             return [self ck2_getResourceValue:value forKey:key error:error];    // calls the original implementation
         }
-    
+
     return YES;
 }
 

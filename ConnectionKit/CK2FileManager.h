@@ -6,6 +6,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#if TARGET_OS_IPHONE
+#import <MobileCoreServices/MobileCoreServices.h>
+#endif
 
 
 typedef void (^CK2ProgressBlock)(NSUInteger bytesWritten, NSUInteger previousAttemptCount);
@@ -213,6 +216,10 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  @return An opaque token object representing the operation for passing to `-cancelOperation:` if needed.
  */
 - (id)createFileAtURL:(NSURL *)destinationURL withContentsOfURL:(NSURL *)sourceURL withIntermediateDirectories:(BOOL)createIntermediates openingAttributes:(NSDictionary *)attributes progressBlock:(CK2ProgressBlock)progressBlock completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1,2)));
+
+#pragma mark Reading Items
+
+- (id)readFileAtURL:(NSURL *)sourceURL toLocalURL:(NSURL *)destinationURL progressBlock:(void (^)(NSUInteger bytesWritten))progressBlock completionHandler:(void (^)(NSError *error))completionHandler;
 
 
 #pragma mark Deleting Items
