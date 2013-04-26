@@ -133,7 +133,6 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)setupSessionWithResponses:(NSString*)responses;
 {
-    NSLog(@"==SETUP=============================================================");
     if ([responses isEqualToString:@"webdav"])
     {
         self.type = @"CKWebDAVTest";
@@ -185,10 +184,9 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     else
     {
         NSURL* url = [NSURL URLWithString:setting];
-        NSLog(@"Tests using server %@ for %@", url, responses);
         self.user = url.user;
         self.password = url.password;
-        self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@", url.scheme, url.host, url.path]];
+        self.url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@%@/", url.scheme, url.host, url.path]];
         ok = YES;
     }
 
@@ -287,7 +285,10 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
     @synchronized(self.transcript)
     {
-        [self.transcript appendFormat:@"%@ %@\n", prefix, info];
+        [self.transcript appendFormat:@"%@ %@", prefix, info];
+        UniChar lastChar = [info characterAtIndex:[info length] - 1];
+        if ((lastChar != '\n') && (lastChar != '\r'))
+            [self.transcript appendString:@"\n"];
     }
 }
 
@@ -337,7 +338,10 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 - (void)tearDown
 {
     [super tearDown];
-    NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+    if ([self.transcript length] > 0)
+    {
+        NSLog(@"\n\nSession transcript:\n%@\n\n", self.transcript);
+    }
     [self removeTemporaryFolder];
 }
 
@@ -370,7 +374,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
             [self removeTestDirectory];
         }
 
-        NSLog(@"<<<< Making Test Directory");
+        LogHousekeeping(@"<<<< Making Test Directory");
 
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
         session.dontShareConnections = YES;
@@ -390,7 +394,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
                         STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
                         [self pause];
-                        NSLog(@"<<<< Made Test Files");
+                        LogHousekeeping(@"<<<< Made Test Files");
                     }];
                 }];
             }
@@ -398,7 +402,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
             {
                 [self pause];
             }
-            NSLog(@"<<<< Made Test Directory");
+            LogHousekeeping(@"<<<< Made Test Directory");
         }];
 
         [self runUntilPaused];
@@ -411,7 +415,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 {
     if (kMakeRemoveTestFilesOnMockServer || !self.useMockServer)
     {
-        NSLog(@"<<<< Removing Test Files");
+        LogHousekeeping(@"<<<< Removing Test Files");
         CK2FileManagerWithTestSupport* session = [[CK2FileManagerWithTestSupport alloc] init];
         session.dontShareConnections = YES;
         session.delegate = [TestFileDelegate delegateWithTest:self];
@@ -425,7 +429,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
                     if (error) LogHousekeeping(@"housekeeping error : %@", error);
                     [self pause];
 
-                    NSLog(@"<<<< Removed Test Files");
+                    LogHousekeeping(@"<<<< Removed Test Files");
                 }];
             }];
         }];
@@ -500,8 +504,44 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error
 {
-    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
-    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileNoSuchFileError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
+}
+
+- (BOOL)checkIsRemovalError:(NSError*)error
+{
+    // failure to remove something might result in the CK2Protocol's
+    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
+    // (which one it is depends on how much error information the protocol gets)
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+
+    return (error == nil) || (domainOK && codeOK);
+}
+
+- (BOOL)checkIsFileCantReadError:(NSError*)error;
+{
+    // failure to remove something might result in the CK2Protocol's
+    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
+    // (which one it is depends on how much error information the protocol gets)
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = error.code == NSFileReadUnknownError;
+    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    
+    return (error == nil) || (domainOK && codeOK);
+}
+
+- (BOOL)checkIsUpdateError:(NSError*)error
+{
+    // failure to update something might result in the CK2Protocol's
+    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
+    // (which one it is depends on how much error information the protocol gets)
+    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
+    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
     [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
 
     return (error == nil) || (domainOK && codeOK);
