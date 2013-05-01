@@ -151,8 +151,9 @@
         NSURL* url = [self URLForPath:@""];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
 
-        // do the test with the wrong password
-
+        // Try to do the test with the wrong password
+        // NB be carefult to ensure that your Keychain doesn't have a password saved for the test server!
+        // If is does, that password will be used and our intentionally bad password won't - causing the test to fail because the directory listing unexpectedly succeeds!
         NSString* oldPassword = self.password;
         self.password = @"wrong";
         [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {

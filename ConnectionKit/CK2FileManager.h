@@ -64,6 +64,14 @@ typedef NS_ENUM(NSInteger, CK2DirectoryEnumerationOptions) {
  
  Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).
  
+ Many protocols provide a decent error code indicating *why* the operation
+ failed. Unfortunately, FTP cannot. The FTP spec means the only machine-readable
+ response is a 550 code. This covers pretty much any sort of filesystem access
+ problem (as opposed to an issue with the connection itself). Thus FTP ops
+ cannot distinguish between a folder not existing, not actually being a folder,
+ and the user having insufficient permissions to access it. Instead you'll get
+ back plain old `NSFileReadUnknownError`.
+ 
  @param url for the directory whose contents you want to enumerate.
  @param keys to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get 
  @param mask of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory
@@ -121,6 +129,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  If you particularly care about setting attributes on a remote server, then a
  follow-up call to -setAttributes:… is needed.
  
+ Note: Even though this is a "write" operation, it is still possible to get back
+ something like `NSFileReadUnknownError`. In particular, FTP must traverse the
+ directory hierarchy which can fail if the target directory turns out not to
+ exist, or the user has insufficient permissions to access it.
+ 
  @param url A URL that specifies the directory to create. This parameter must not be nil.
  @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.
  @param attributes to apply *only* if the server supports supplying them at creation time. See discussion for more details.
@@ -147,6 +160,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  If you particularly care about setting attributes on a remote server, then a
  follow-up call to -setAttributes:… is needed.
+ 
+ Note: Even though this is a "write" operation, it is still possible to get back
+ something like `NSFileReadUnknownError`. In particular, FTP must traverse the
+ directory hierarchy which can fail if the target directory turns out not to
+ exist, or the user has insufficient permissions to access it.
  
  @param url A URL that specifies the file to create. This parameter must not be nil.
  @param data A data object containing the contents of the new file.
@@ -181,6 +199,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  It's up to the individual protocol implementation, but generally ConnectionKit
  will avoid loading the entire source file into memory at once.
  
+ Note: Even though this is a "write" operation, it is still possible to get back
+ something like `NSFileReadUnknownError`. In particular, FTP must traverse the
+ directory hierarchy which can fail if the target directory turns out not to
+ exist, or the user has insufficient permissions to access it.
+ 
  @param destinationURL A URL that specifies the file to create. This parameter must not be nil.
  @param sourceURL The file whose contents to use for creating the new file.
  @param createIntermediates If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.
@@ -199,6 +222,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  
  Right now, deletion of files is fully implemented, but whether deleting a
  directory succeeds is pretty much at the mercy of the server/protocol used.
+ 
+ Note: Even though this is a "write" operation, it is still possible to get back
+ something like `NSFileReadUnknownError`. In particular, FTP must traverse the
+ directory hierarchy which can fail if the target directory turns out not to
+ exist, or the user has insufficient permissions to access it.
  
  @param url A file URL specifying the file or directory to remove.
  @param handler Called at the end of the operation. A non-nil error indicates failure.
@@ -221,6 +249,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
  - SFTP:   Only NSFilePosixPermissions is supported
  - WebDAV: No attributes are supported
  - file:   Same attributes as NSFileManager supports
+ 
+ Note: Even though this is a "write" operation, it is still possible to get back
+ something like `NSFileReadUnknownError`. In particular, FTP must traverse the
+ directory hierarchy which can fail if the target directory turns out not to
+ exist, or the user has insufficient permissions to access it.
  
  @param keyedValues A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.
  @param url The URL of a file or directory.
