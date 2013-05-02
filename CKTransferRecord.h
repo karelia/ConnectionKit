@@ -50,6 +50,8 @@
 	
 	id <CKConnection> _connection; //not retained
 	NSError *_error;
+    
+    void *_observationInfo;
 }
 
 - (BOOL)isUpload;
