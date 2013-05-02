@@ -23,11 +23,6 @@ static const CreateMode kCreateMode = kCreateWithPOSIXAndGCD;
 
 static size_t kCopyBufferSize = 4096;
 
-@interface CK2FileProtocol()
-
-@property (assign, nonatomic) dispatch_queue_t queue;
-
-@end
 
 @implementation CK2FileProtocol
 

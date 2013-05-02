@@ -20,7 +20,27 @@
 {
     if (self = [self initWithRequest:request client:client])
     {
-        _completionHandler = [handler copy];
+        [self pushCompletionHandler:^(NSError *error) {
+            
+            // Update cache
+            if (!error)
+            {
+                [self updateHomeDirectoryStore];
+            }
+            
+            // Report the completion to handler or protocol
+            if (handler)
+            {
+                handler(error);
+            }
+            else
+            {
+                [self reportToProtocolWithError:error];
+            }
+            
+            // Clean up handle
+            [_handle release]; _handle = nil;
+        }];
     }
     
     return self;
@@ -423,31 +443,40 @@
     }
 }
 
-- (void)endWithError:(NSError *)error;
-{
-    // Update cache
-    if (!error)
-    {
-        [self updateHomeDirectoryStore];
-    }
-
-    if (_completionHandler)
-    {
-        _completionHandler(error);
-        [_completionHandler release]; _completionHandler = nil;
-    }
-    else
-    {
-        [self reportToProtocolWithError:error];
-    }
-
-    [_handle release]; _handle = nil;
-}
-
-
 - (void)stop;
 {
     [_handle cancel];
+}
+
+#pragma mark Managing the Completion Handler
+
+/*  This code is devious and perhaps even evil. Manages a "stack" of completion
+ *  handlers by actually only having a single block. When the block runs, it
+ *  replaces itself with the next one down the stack.
+ */
+
+- (void)pushCompletionHandler:(void (^)(NSError*))block;
+{
+    NSParameterAssert(block);
+    
+    id previousHandler = _completionHandler;
+    
+    _completionHandler = ^(NSError *error) {
+        
+        // Put the old handler back, then execute what was actually requested of us
+        [_completionHandler release]; _completionHandler = previousHandler;
+        block(error);
+    };
+    _completionHandler = [_completionHandler copy];
+}
+
+- (void)popCompletionHandlerByExecutingWithError:(NSError *)error;
+{
+    // If the block is nil, that means the entire stack of handlers has already been popped, which should be a programmer error
+    id keepAlive = _completionHandler;
+    [keepAlive retain];
+    _completionHandler(error);
+    [keepAlive release];
 }
 
 #pragma mark URLs
@@ -543,7 +572,7 @@
         error = [NSError errorWithDomain:NSURLErrorDomain code:NSURLErrorUnknown userInfo:nil];
     }
     
-    [self endWithError:error];
+    [self popCompletionHandlerByExecutingWithError:error];
 }
 
 - (void)handle:(CURLHandle *)handle didReceiveData:(NSData *)data;
@@ -559,7 +588,7 @@
 
 - (void)handleDidFinish:(CURLHandle *)handle;
 {
-    [self endWithError:nil];
+    [self popCompletionHandlerByExecutingWithError:nil];
 }
 
 - (void)handle:(CURLHandle *)handle didReceiveDebugInformation:(NSString *)string ofType:(curl_infotype)type;
@@ -596,17 +625,11 @@
 - (void)useCredential:(NSURLCredential *)credential forAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge;
 {
     // Swap out existing handler for one that retries after an auth failure. Stores credential if requested upon success
-    void (^oldHandler)(NSError *) = _completionHandler;
-    
-    _completionHandler = ^(NSError *error) {
+    [self pushCompletionHandler:^(NSError *error) {
         
-        if ([error code] == NSURLErrorUserAuthenticationRequired && [[error domain] isEqualToString:NSURLErrorDomain])
+        if (error.code == NSURLErrorUserAuthenticationRequired && [error.domain isEqualToString:NSURLErrorDomain])
         {
-            // Swap back to the original handler...
-            void (^thisBlock)(NSError *) = _completionHandler;
-            _completionHandler = [oldHandler copy];
-            
-            // ...then retry auth
+            // Retry auth
             NSURLAuthenticationChallenge *newChallenge = [[NSURLAuthenticationChallenge alloc]
                                                           initWithProtectionSpace:[challenge protectionSpace]
                                                           proposedCredential:credential
@@ -617,8 +640,6 @@
             
             [[self client] protocol:self didReceiveAuthenticationChallenge:newChallenge];
             [newChallenge release];
-            
-            [thisBlock release];
         }
         else
         {
@@ -627,26 +648,9 @@
                 [[NSURLCredentialStorage sharedCredentialStorage] setCredential:credential forProtectionSpace:challenge.protectionSpace];
             }
             
-            if (oldHandler)
-            {
-                oldHandler(error);
-            }
-            else
-            {
-                if (error)
-                {
-                    [[self client] protocol:self didFailWithError:error];
-                }
-                else
-                {
-                    [[self client] protocolDidFinish:self];
-                }
-            }
+            [self popCompletionHandlerByExecutingWithError:error];
         }
-    };
-    
-    _completionHandler = [_completionHandler copy];
-    [oldHandler release];
+    }];
     
     [self startWithCredential:credential];
 }
