@@ -272,7 +272,7 @@
     return self;
 }
 
-- (void)endWithError:(NSError *)error;
+- (void)popCompletionHandlerByExecutingWithError:(NSError *)error;
 {
     if (error)
     {
@@ -293,7 +293,7 @@
         }
     }
 
-    [super endWithError:error];
+    [super popCompletionHandlerByExecutingWithError:error];
 }
 
 #pragma mark Host Fingerprint
