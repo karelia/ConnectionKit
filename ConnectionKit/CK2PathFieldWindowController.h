@@ -12,6 +12,7 @@
 {
     IBOutlet NSTextField        *_field;
     IBOutlet NSButton           *_goButton;
+    NSString                    *_stringValue;
 }
 
 @property (readwrite, copy) NSString    *stringValue;
