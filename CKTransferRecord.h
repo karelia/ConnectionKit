@@ -84,6 +84,8 @@
 - (NSInteger)progress;
 - (void)setProgress:(NSInteger)progress;
 
+- (NSDictionary *)nameWithProgressAndFileSize;
+
 - (void)addContent:(CKTransferRecord *)record;
 - (NSArray *)contents;
 

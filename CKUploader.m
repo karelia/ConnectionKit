@@ -207,6 +207,12 @@
         
         result = [CKTransferRecord recordWithName:[path lastPathComponent] size:0];
         [parent addContent:result];
+        
+        id <CKUploaderDelegate> delegate = self.delegate;
+        if ([delegate respondsToSelector:@selector(uploader:didAddTransferRecord:)])
+        {
+            [delegate uploader:self didAddTransferRecord:result];
+        }
     }
     
     return result;
@@ -236,6 +242,12 @@
     
     CKTransferRecord *parent = [self createDirectoryAtPath:[path stringByDeletingLastPathComponent]];
     [parent addContent:record];
+    
+    id <CKUploaderDelegate> delegate = self.delegate;
+    if ([delegate respondsToSelector:@selector(uploader:didAddTransferRecord:)])
+    {
+        [delegate uploader:self didAddTransferRecord:record];
+    }
 }
 
 - (CKTransferRecord *)uploadData:(NSData *)data toPath:(NSString *)path;
