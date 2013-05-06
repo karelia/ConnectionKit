@@ -166,7 +166,7 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
 
 #pragma mark URLs
 
-+ (NSURL *)URLWithPath:(NSString *)path hostURL:(NSURL *)baseURL;
++ (NSURL *)URLWithPath:(NSString *)path isDirectory:(BOOL)isDir hostURL:(NSURL *)baseURL;
 {
     // Strip down to just host URL
     CFIndex length = CFURLGetBytes((CFURLRef)baseURL, NULL, 0);
@@ -185,7 +185,15 @@ NSString * const CK2URLSymbolicLinkDestinationKey = @"CK2URLSymbolicLinkDestinat
         [data release];
     }
     
-    return [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
+    NSURL *result = [self URLWithPath:path relativeToURL:baseURL].absoluteURL;
+    
+    // Turn path into a directory if requested (matches +fileURLWithPath:isDirectory: behaviour)
+    if (isDir && !CFURLHasDirectoryPath((CFURLRef)result))
+    {
+        result = [result URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
+    }
+    
+    return result;
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;

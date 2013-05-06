@@ -29,7 +29,7 @@ static NSString* gResponsesToUse = nil;
 
 + (id) defaultTestSuite
 {
-    NSArray* responses = @[@"ftp", @"sftp"];
+    NSArray* responses = @[@"sftp", @"ftp", @"webdav"];
 
     SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
     for (NSString* name in responses)
@@ -86,6 +86,19 @@ static NSString* gResponsesToUse = nil;
 {
     self.user = @"bad";
     [self useResponseSet:@"bad login"];
+}
+
+- (void)enumerateWithBadURLS:(void (^)(NSURL* url))block
+{
+    if ([self setup])
+    {
+        NSArray* badURLS = @[@"idontexist-noreally.com/nonexistantfolder", @"127.0.0.1/nonexistantfolder", @"karelia.com/nonexistantfolder"];
+        for (NSString* urlPart in badURLS)
+        {
+            NSURL* url = [NSURL URLWithString:[NSString stringWithFormat:@"%@://%@", self.responsesToUse, urlPart]];
+            block(url);
+        }
+    }
 }
 
 #pragma mark - Result Checking Support
@@ -157,6 +170,18 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testContentsOfDirectoryAtURLBadURL
+{
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
+        [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testContentsOfDirectoryAtURLBadLogin
 {
     if ([self setup])
@@ -206,6 +231,19 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testEnumerateContentsOfURLBadURL
+{
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
+        [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *item) {
+        } completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testEnumerateContentsOfURLBadLogin
 {
     if ([self setup])
@@ -245,6 +283,17 @@ static NSString* gResponsesToUse = nil;
     [self runUntilPaused];
 }
 
+- (void)testCreateDirectoryAtURLBadURL
+{
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testCreateDirectoryAtURLAlreadyExists
 {
     if ([self setup])
@@ -268,7 +317,7 @@ static NSString* gResponsesToUse = nil;
     if ([self setup])
     {
         [self useBadLogin];
-        NSURL* url = [self URLForPath:@"/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForPath:@"/blah/directory/intermediate/newdirectory"];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
             STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
@@ -297,6 +346,18 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testCreateFileAtURLBadURL
+{
+    NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testCreateFileAtURL2
 {
     if ([self setup])
@@ -319,6 +380,58 @@ static NSString* gResponsesToUse = nil;
         [self runUntilPaused];
 
         STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+    }
+}
+
+- (void)testCreateFileAtURLBadURL2
+{
+    NSURL* temp = [NSURL fileURLWithPath:NSTemporaryDirectory()];
+    NSURL* source = [temp URLByAppendingPathComponent:@"test.txt"];
+    NSError* error = nil;
+    STAssertTrue([@"Some test text" writeToURL:source atomically:YES encoding:NSUTF8StringEncoding error:&error], @"failed to write temporary file with error %@", error);
+
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+
+    STAssertTrue([[NSFileManager defaultManager] removeItemAtURL:source error:&error], @"failed to remove temporary file with error %@", error);
+}
+
+- (void)testCreateFileAtURLSourceDoesntExist
+{
+    if ([self setup])
+    {
+        NSURL* source = [NSURL fileURLWithPath:@"/tmp/i-dont-exist.txt"];
+        NSURL* url = [self URLForTestFile1];
+
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
+    }
+}
+
+- (void)testCreateFileAtURLSourceIsntLocal
+{
+    if ([self setup])
+    {
+        NSURL* source = [NSURL URLWithString:@"http://karelia.com/tmp/i-dont-exist.txt"];
+        NSURL* url = [self URLForTestFile1];
+
+        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+
+            [self pause];
+        }];
+
+        [self runUntilPaused];
     }
 }
 
@@ -373,7 +486,7 @@ static NSString* gResponsesToUse = nil;
     // I found we were constructing URLs wrong for the paths like: /example.txt
     // Such files were ending up in the home folder, rather than root
 
-    if ([self.responsesToUse isEqualToString:@"ftp"] && self.useMockServer && [self setup]) // only perform this test for FTP using MockServer
+    if ([self.responsesToUse isEqualToString:@"ftp"] && [self setup] && self.useMockServer) // only perform this test for FTP using MockServer
     {
         [self useResponseSet:@"chroot fail"];
         NSURL* url = [self URLForPath:@"/test.txt"];
@@ -505,6 +618,17 @@ static NSString* gResponsesToUse = nil;
     [self runUntilPaused];
 }
 
+- (void)testRemoveFileAtURLBadURL
+{
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testRemoveFileAtURLFileDoesnExist
 {
     if ([self setup])
@@ -513,8 +637,8 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"delete fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            
-            STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+
+            STAssertTrue([self checkIsRemovalError:error], @"expected file not found error, got %@", error);
 
             [self pause];
         }];
@@ -532,7 +656,7 @@ static NSString* gResponsesToUse = nil;
         [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkNoErrorOrIsFileNotFoundError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsFileCantReadError:error], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
@@ -590,6 +714,18 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testSetAttributesOnFileBadURL
+{
+    NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
+    [self enumerateWithBadURLS:^(NSURL *url) {
+        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+            STAssertNotNil(error, @"expected an error");
+            [self pause];
+        }];
+        [self runUntilPaused];
+    }];
+}
+
 - (void)testSetAttributesOnFolder
 {
     if ([self setup])
@@ -615,7 +751,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -632,7 +768,7 @@ static NSString* gResponsesToUse = nil;
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -700,7 +836,7 @@ static NSString* gResponsesToUse = nil;
 
             [self pause];
         }];
-
+        
         [self runUntilPaused];
     }
 }
@@ -711,7 +847,7 @@ static NSString* gResponsesToUse = nil;
     {
         [self removeTestDirectory];
         [self useBadLogin];
-
+        
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             

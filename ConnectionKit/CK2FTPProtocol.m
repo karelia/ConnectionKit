@@ -18,7 +18,10 @@
 + (BOOL)canHandleURL:(NSURL *)url;
 {
     NSString *scheme = [url scheme];
-    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame || [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
+    
+    return ([@"ftp" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftpes" caseInsensitiveCompare:scheme] == NSOrderedSame ||
+            [@"ftps" caseInsensitiveCompare:scheme] == NSOrderedSame);
 }
 
 + (NSURL *)URLWithPath:(NSString *)path relativeToURL:(NSURL *)baseURL;
@@ -52,6 +55,26 @@
     return result;
 }
 
+#pragma mark URL Requests
+
+- (id)initWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
+{
+    // libcurl doesn't understand ftpes: URLs natively, so convert them back into ftp: with the appropriate connection settings
+    NSURL *url = request.URL;
+    if ([url.scheme caseInsensitiveCompare:@"ftpes"] == NSOrderedSame)
+    {
+        url = [NSURL URLWithString:[url.absoluteString stringByReplacingCharactersInRange:NSMakeRange(0, 5) // bit hacky
+                                                                               withString:@"ftp"]];
+        
+        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
+        mutableRequest.URL = url;
+        [mutableRequest curl_setDesiredSSLLevel:CURLUSESSL_ALL];
+        request = mutableRequest;
+    }
+    
+    return [super initWithRequest:request client:client];
+}
+
 #pragma mark Operations
 
 - (id)initWithCustomCommands:(NSArray *)commands request:(NSURLRequest *)childRequest createIntermediateDirectories:(BOOL)createIntermediates client:(id<CK2ProtocolClient>)client completionHandler:(void (^)(NSError *))handler;
@@ -76,7 +99,12 @@
           createIntermediateDirectories:createIntermediates
                                  client:client
                       completionHandler:^(NSError *error) {
-                          error = [self translateStandardErrors:error];
+
+                          if (error)
+                          {
+                              error = [self translateStandardErrors:error];
+                          }
+
                           [self reportToProtocolWithError:error];
                       }
 
@@ -91,23 +119,7 @@
         [mutableRequest curl_setCreateIntermediateDirectories:createIntermediates];
         request = mutableRequest;
     }
-    
-    
-    // Correct for files at root level (libcurl treats them as if creating in home folder)
-    NSURL *url = request.URL;
-    NSString *path = [self.class pathOfURLRelativeToHomeDirectory:url];
-    
-    if (path.isAbsolutePath && path.pathComponents.count == 2)
-    {
-        path = [@"/%2F" stringByAppendingPathComponent:[path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]];
-        url = [NSURL URLWithString:path relativeToURL:url];
-        
-        NSMutableURLRequest *mutableRequest = [[request mutableCopy] autorelease];
-        mutableRequest.URL = url.absoluteURL;
-        request = mutableRequest;
-    }
-    
-    
+
     // Use our own progress block to watch for the file end being reached before passing onto the original requester
     __block BOOL atEnd = NO;
     
@@ -163,7 +175,11 @@
           createIntermediateDirectories:NO
                                  client:client
                       completionHandler:^(NSError *error) {
-                          error = [self translateStandardErrors:error];
+                          if (error)
+                          {
+                              error = [self translateStandardErrors:error];
+                          }
+
                           [self reportToProtocolWithError:error];
                       }];
 }
@@ -187,8 +203,11 @@
                               
                               if (error)
                               {
+                                  NSString* domain = error.domain;
+                                  NSInteger code = error.code;
+
                                   // CHMOD failures for unsupported or unrecognized command should go ignored
-                                  if ([error code] == CURLE_QUOTE_ERROR && [[error domain] isEqualToString:CURLcodeErrorDomain])
+                                  if (code== CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
                                   {
                                       NSUInteger responseCode = [error curlResponseCode];
                                       if (responseCode == 500 || responseCode == 502 || responseCode == 504)
@@ -196,9 +215,13 @@
                                           error = nil;
                                       }
                                   }
+
+                                  if (error)
+                                  {
+                                      error = [self translateStandardErrors:error];
+                                  }
                               }
 
-                              error = [self translateStandardErrors:error];
                               [self reportToProtocolWithError:error];
                           }];
     }
@@ -207,6 +230,39 @@
         self = [self initWithRequest:nil client:client];
         return self;
     }
+}
+
+#pragma mark Errors
+
+- (NSError*)translateStandardErrors:(NSError*)error
+{
+    NSString* domain = error.domain;
+    NSInteger code = error.code;
+    
+    if (code == CURLE_QUOTE_ERROR && [domain isEqualToString:CURLcodeErrorDomain])
+    {
+        NSUInteger responseCode = [error curlResponseCode];
+        if (responseCode == 550)
+        {
+            error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+        }
+    }
+    else if (code == CURLE_REMOTE_ACCESS_DENIED && [domain isEqualToString:CURLcodeErrorDomain])
+    {
+        // Could be a permissions problem, or could be that a CWD command failed because the directory doesn't exist
+        error = [self standardCouldntReadErrorWithUnderlyingError:error];
+    }
+    else if ((code == NSURLErrorNoPermissionsToReadFile) && ([domain isEqualToString:NSURLErrorDomain]))
+    {
+        // CURLHandle helpfully returns a URL error here, but we want to return a cocoa error instead
+        error = [self standardCouldntWriteErrorWithUnderlyingError:error];
+    }
+    else
+    {
+        NSLog(@"untranslated error for %@ %@", NSStringFromSelector(_cmd), error);
+    }
+
+    return error;
 }
 
 #pragma mark Lifecycle
@@ -220,7 +276,7 @@
         [[self client] protocolDidFinish:self];
         return;
     }
-    
+
     NSURL *url = [[self request] URL];
     NSString *protocol = ([@"ftps" caseInsensitiveCompare:[url scheme]] == NSOrderedSame ? @"ftps" : NSURLProtectionSpaceFTP);
     
@@ -284,6 +340,6 @@
 #pragma mark Backend
 
 // Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return YES; }
++ (BOOL)usesMultiHandle; { return NO; }
 
 @end

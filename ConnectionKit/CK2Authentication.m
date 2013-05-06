@@ -45,14 +45,14 @@
 
 @implementation NSURLProtectionSpace (CK2SSHHostFingerprint)
 
+- (CK2KnownHostMatch)ck2_knownHostMatch; { return 0; }
+
+NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMethodHostFingerprint";
+
 + (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)host knownHostMatch:(CK2KnownHostMatch)match;
 {
     return [[[CK2SSHHostFingerprintProtectionSpace alloc] initWithHost:host match:match] autorelease];
 }
-
-- (CK2KnownHostMatch)ck2_knownHostMatch; { return 0; }
-
-NSString * const CK2AuthenticationMethodHostFingerprint = @"CK2AuthenticationMethodHostFingerprint";
 
 @end
 

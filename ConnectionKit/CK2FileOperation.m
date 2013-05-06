@@ -73,8 +73,18 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
                     if (![self isCancelled])
                     {
                         _protocol = createBlock(protocolClass);
-                        // TODO: Handle protocol's init method returning nil
-                        
+                        if (!_protocol)
+                        {
+                            // it's likely that the protocol has already called protocol:didFailWithError:, which will have called finishWithError:, which means that a call to the completion
+                            // block is queue up already with an error in it
+                            // just in case though, we can report a more generic error here - once the completion block is called once it will be cleared out, the protocol's error will win
+                            // if there is one
+                            NSDictionary *info = @{NSURLErrorKey : url, NSURLErrorFailingURLErrorKey : url, NSURLErrorFailingURLStringErrorKey : [url absoluteString]};
+                            NSError *error = [[NSError alloc] initWithDomain:NSURLErrorDomain code:NSURLErrorUnsupportedURL userInfo:info]; // TODO: what's the correct error to report here?
+                            [self finishWithError:error];
+                            [error release];
+                        }
+
                         if (![self isCancelled]) [_protocol start];
                     }
                 });
