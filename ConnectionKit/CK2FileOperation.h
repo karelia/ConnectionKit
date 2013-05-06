@@ -61,6 +61,11 @@
                           manager:(CK2FileManager *)manager
                   completionBlock:(void (^)(NSError *))block;
 
+- (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
+                      newName:(NSString *)newName
+                             manager:(CK2FileManager *)manager
+                     completionBlock:(void (^)(NSError *))block;
+
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
                                         values:(NSDictionary *)keyedValues
                                        manager:(CK2FileManager *)manager

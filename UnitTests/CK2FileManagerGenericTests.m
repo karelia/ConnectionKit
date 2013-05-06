@@ -573,6 +573,36 @@ static NSString* gResponsesToUse = nil;
     }
 }
 
+- (void)testRenameFileAtURL
+{
+    if ([self setup])
+    {
+        [self makeTestDirectoryWithFiles:YES];
+        NSURL* url = [self URLForTestFile1];
+        NSString* extension = [url pathExtension];
+        NSString* newName = [@"renamed" stringByAppendingPathExtension:extension];
+        NSURL* renamed = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
+
+        // rename file
+        [self.session renameItemAtURL:url toFilename:newName completionHandler:^(NSError *error) {
+            STAssertNil(error, @"got unexpected error %@", error);
+
+            // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
+            [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+                STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"unexpected error %@", error);
+
+                // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
+                [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
+                    STAssertNil(error, @"got unexpected error %@", error);
+                    [self pause];
+                }];
+            }];
+        }];
+    }
+
+    [self runUntilPaused];
+}
+
 - (void)testRemoveFileAtURL
 {
     if ([self setup])
