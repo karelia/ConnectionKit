@@ -153,10 +153,10 @@
         [_fileManager cancelOperation:operation];
     }
     
-    if (_currentBootstrapOperation != nil)
+    if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentBootstrapOperation];
-        [_currentBootstrapOperation release];
+        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation release];
     }
     
     [self close];   // just to be sure
@@ -421,11 +421,11 @@
     }
     [_runningOperations removeAllObjects];
     
-    if (_currentBootstrapOperation != nil)
+    if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentBootstrapOperation];
-        [_currentBootstrapOperation release];
-        _currentBootstrapOperation = nil;
+        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation release];
+        _currentLoadingOperation = nil;
     }
 
     [_urlCache removeAllObjects];
@@ -484,13 +484,13 @@
     
     
     //PENDING: compare url
-    if (_currentBootstrapOperation != nil)
+    if (_currentLoadingOperation != nil)
     {
-        [_fileManager cancelOperation:_currentBootstrapOperation];
-        [_currentBootstrapOperation release];
+        [_fileManager cancelOperation:_currentLoadingOperation];
+        [_currentLoadingOperation release];
     }
     
-    _currentBootstrapOperation = [_fileManager contentsOfDirectoryAtURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) completionHandler:
+    _currentLoadingOperation = [_fileManager contentsOfDirectoryAtURL:directoryURL includingPropertiesForKeys:[self fileProperties] options:(NSDirectoryEnumerationSkipsSubdirectoryDescendants | CK2DirectoryEnumerationIncludesDirectory) completionHandler:
     ^(NSArray *contents, NSError *blockError)
     {
         if (blockError != nil)
@@ -514,8 +514,8 @@
                 [self cacheChildren:children forURL:resolvedURL];
                 [self urlDidLoad:resolvedURL];
                 
-                [_currentBootstrapOperation release];
-                _currentBootstrapOperation = nil;
+                [_currentLoadingOperation release];
+                _currentLoadingOperation = nil;
                 
                 if (blockError == nil)
                 {
@@ -542,7 +542,7 @@
     
     // There shouldn't be a race condition with the block above since this should be on the main thread and
     // the above block won't run on the main thread until this code completes and returns to the run loop.
-    [_currentBootstrapOperation retain];
+    [_currentLoadingOperation retain];
     
     [_hostField setStringValue:[directoryURL host]];
     [self validateViews];
@@ -776,7 +776,7 @@
 {
     BOOL    enable;
     
-    enable = (_currentBootstrapOperation == nil);
+    enable = (_currentLoadingOperation == nil);
     
     [_viewPicker setEnabled:enable];
     [_homeButton setEnabled:enable];
@@ -834,7 +834,7 @@
         urlIsLoading = ([_runningOperations objectForKey:[self directoryURL]] != nil);
     }
     
-    if ((_currentBootstrapOperation == nil) && !urlIsLoading)
+    if ((_currentLoadingOperation == nil) && !urlIsLoading)
     {
         [_progressIndicator stopAnimation:self];
         [_progressIndicator setHidden:YES];
@@ -905,7 +905,7 @@
     BOOL    isValid;
     
     isValid = NO;
-    if (_currentBootstrapOperation == nil)
+    if (_currentLoadingOperation == nil)
     {
         isValid = YES;
         for (NSURL *url in [self URLs])
@@ -982,8 +982,8 @@
 
 - (void)validateHistoryButtons
 {
-    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && ([_historyManager canUndo])) forSegment:0];
-    [_historyButtons setEnabled:((_currentBootstrapOperation == nil) && ([_historyManager canRedo])) forSegment:1];
+    [_historyButtons setEnabled:((_currentLoadingOperation == nil) && ([_historyManager canUndo])) forSegment:0];
+    [_historyButtons setEnabled:((_currentLoadingOperation == nil) && ([_historyManager canRedo])) forSegment:1];
 }
 
 - (IBAction)changeHistory:(id)sender
@@ -1065,17 +1065,21 @@
     
     if (homeURL == nil)
     {
-        // The homeURL isn't resolved so we resolve it here and also load/cache its children.        
-        id                              operation;
+        if (_currentLoadingOperation != nil)
+        {
+            [_fileManager cancelOperation:_currentLoadingOperation];
+            [_currentLoadingOperation release];
+        }
 
+        // The homeURL isn't resolved so we resolve it here and also load/cache its children.        
         homeURL = [[[CK2FileManager URLWithPath:@"" isDirectory:YES hostURL:[self directoryURL]] URLByAppendingPathComponent:@""] absoluteURL];
         
-        operation = [_fileManager contentsOfDirectoryAtURL:homeURL includingPropertiesForKeys:[self fileProperties] options:CK2DirectoryEnumerationIncludesDirectory completionHandler:
+        _currentLoadingOperation = [_fileManager contentsOfDirectoryAtURL:homeURL includingPropertiesForKeys:[self fileProperties] options:CK2DirectoryEnumerationIncludesDirectory completionHandler:
         ^(NSArray *contents, NSError *blockError)
         {
             NSArray     *children;
             NSURL       *resolvedURL;
-
+            
             resolvedURL = homeURL;
             if (blockError != nil)
             {
@@ -1096,7 +1100,8 @@
                 [self setHomeURL:resolvedURL];
                 [self cacheChildren:children forURL:resolvedURL];
 
-                [_runningOperations removeObjectForKey:homeURL];
+                [_currentLoadingOperation release];
+                _currentLoadingOperation = nil;
 
                 [self validateProgressIndicator];
                 [self urlDidLoad:resolvedURL];
@@ -1109,7 +1114,7 @@
         
         // There shouldn't be a race condition with the block above since this should be on the main thread and
         // the above block won't run on the main thread until this code completes and returns to the run loop.
-        [_runningOperations setObject:operation forKey:homeURL];
+        [_currentLoadingOperation retain];
         
         [self validateProgressIndicator];
     }
