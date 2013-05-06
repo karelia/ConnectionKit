@@ -99,8 +99,14 @@ static size_t kCopyBufferSize = 4096;
 {
     return [self initWithBlock:^{
         
+        NSURL *url = request.URL;
+        
         NSError *error;
-        if ([[NSFileManager defaultManager] createDirectoryAtURL:[request URL] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
+        if ([[NSFileManager defaultManager] createDirectoryAtURL:url withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
+#else
+        if ([[NSFileManager defaultManager] createDirectoryAtPath:[url path] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
+#endif
         {
             [client protocolDidFinish:self];
         }
@@ -119,9 +125,14 @@ static size_t kCopyBufferSize = 4096;
         // Sadly libcurl doesn't support creating intermediate directories for local files, so do it ourself
         if (createIntermediates)
         {
-            NSError *error;
             NSURL* intermediates = [[request URL] URLByDeletingLastPathComponent];
+            
+            NSError *error;
+#if MAC_OS_X_VERSION_MIN_REQUIRED >= MAC_OS_X_VERSION_10_7
             if (![[NSFileManager defaultManager] createDirectoryAtURL:intermediates withIntermediateDirectories:YES attributes:nil error:&error])
+#else
+            if (![[NSFileManager defaultManager] createDirectoryAtPath:[intermediates path] withIntermediateDirectories:createIntermediates attributes:attributes error:&error])
+#endif
             {
                 [client protocol:self didFailWithError:error];
                 return;
@@ -145,6 +156,24 @@ static size_t kCopyBufferSize = 4096;
 
             default:
                 [self createFileAsyncForRequest:request openingAttributes:attributes client:client progressBlock:progressBlock];
+        }
+    }];
+}
+
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
+{
+    return [self initWithBlock:^{
+
+        NSError *error;
+        NSURL* srcURL = [request URL];
+        NSURL* dstURL = [[srcURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
+        if ([[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
+        {
+            [client protocolDidFinish:self];
+        }
+        else
+        {
+            [client protocol:self didFailWithError:error];
         }
     }];
 }
