@@ -235,6 +235,11 @@ extern NSString * const CK2URLSymbolicLinkDestinationKey; // The destination URL
 - (id)removeItemAtURL:(NSURL *)url completionHandler:(void (^)(NSError *error))handler __attribute((nonnull(1)));
 
 
+#pragma mark Moving Items
+// This is solely for renaming an item. Moving items between different directories/servers/protocols is not supported at the moment, and attempting to do so produces undefined results
+- (BOOL)renameItemAtURL:(NSURL *)srcURL toFilename:(NSString *)newName completionHandler:(void (^)(NSError *error))handler;
+
+
 #pragma mark Getting and Setting Attributes
 
 /**

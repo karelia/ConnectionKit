@@ -230,6 +230,17 @@ createProtocolBlock:(CK2Protocol *(^)(Class protocolClass))createBlock;
     }];
 }
 
+- (id)initRenameOperationWithSourceURL:(NSURL *)srcURL
+                      newName:(NSString *)newName
+                             manager:(CK2FileManager *)manager
+                     completionBlock:(void (^)(NSError *))block;
+{
+    return [self initWithURL:srcURL manager:manager completionHandler:block createProtocolBlock:^CK2Protocol *(Class protocolClass) {
+        
+        return [[protocolClass alloc] initForRenamingItemWithRequest:[self requestWithURL:srcURL] newName:newName client:self];
+    }];
+}
+
 - (id)initResourceValueSettingOperationWithURL:(NSURL *)url
                                         values:(NSDictionary *)keyedValues
                                        manager:(CK2FileManager *)manager

@@ -149,6 +149,24 @@ static size_t kCopyBufferSize = 4096;
     }];
 }
 
+- (id)initForRenamingItemWithRequest:(NSURLRequest *)request newName:(NSString *)newName client:(id<CK2ProtocolClient>)client
+{
+    return [self initWithBlock:^{
+
+        NSError *error;
+        NSURL* srcURL = [request URL];
+        NSURL* dstURL = [[srcURL URLByDeletingLastPathComponent] URLByAppendingPathComponent:newName];
+        if ([[NSFileManager defaultManager] moveItemAtURL:srcURL toURL:dstURL error:&error])
+        {
+            [client protocolDidFinish:self];
+        }
+        else
+        {
+            [client protocol:self didFailWithError:error];
+        }
+    }];
+}
+
 - (id)initForRemovingFileWithRequest:(NSURLRequest *)request client:(id<CK2ProtocolClient>)client;
 {
     return [self initWithBlock:^{
