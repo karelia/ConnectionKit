@@ -159,7 +159,11 @@
                             NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                             BOOL isDirectory = [type intValue] == DT_DIR;
                             
-                            NSURL *aURL = [directoryURL URLByAppendingPathComponent:name isDirectory:isDirectory];
+                            NSURL *aURL = [directoryURL URLByAppendingPathComponent:name];
+                            if (isDirectory && !CFURLHasDirectoryPath((CFURLRef)aURL))
+                            {
+                                aURL = [aURL URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
+                            }
                             
                             // Fill in requested keys as best we can
                             NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
