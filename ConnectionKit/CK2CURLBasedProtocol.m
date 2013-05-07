@@ -166,64 +166,13 @@
                             }
                             
                             // Fill in requested keys as best we can
-                            NSArray *keysToFill = (keys ? keys : [NSArray arrayWithObjects:
-                                                                  NSURLContentModificationDateKey,
-                                                                  NSURLIsDirectoryKey,
-                                                                  NSURLIsRegularFileKey,
-                                                                  NSURLIsSymbolicLinkKey,
-                                                                  NSURLNameKey,
-                                                                  NSURLFileSizeKey,
-                                                                  CK2URLSymbolicLinkDestinationKey,
-                                                                  NSURLFileResourceTypeKey, // 10.7 properties go last because might be nil at runtime
-                                                                  NSURLFileSecurityKey,
-                                                                  nil]);
+                            NSArray *keysToFill = (keys ? keys : self.class.defaultPropertyKeys);
                             
                             for (NSString *aKey in keysToFill)
                             {
                                 if ([aKey isEqualToString:NSURLContentModificationDateKey])
                                 {
                                     [CK2FileManager setTemporaryResourceValue:CFDictionaryGetValue(parsedDict, kCFFTPResourceModDate) forKey:aKey inURL:aURL];
-                                }
-                                else if ([aKey isEqualToString:NSURLFileResourceTypeKey])
-                                {
-                                    NSString *typeValue;
-                                    switch ([type integerValue])
-                                    {
-                                        case DT_CHR:
-                                            typeValue = NSURLFileResourceTypeCharacterSpecial;
-                                            break;
-                                        case DT_DIR:
-                                            typeValue = NSURLFileResourceTypeDirectory;
-                                            break;
-                                        case DT_BLK:
-                                            typeValue = NSURLFileResourceTypeBlockSpecial;
-                                            break;
-                                        case DT_REG:
-                                            typeValue = NSURLFileResourceTypeRegular;
-                                            break;
-                                        case DT_LNK:
-                                            typeValue = NSURLFileResourceTypeSymbolicLink;
-                                            break;
-                                        case DT_SOCK:
-                                            typeValue = NSURLFileResourceTypeSocket;
-                                            break;
-                                        default:
-                                            typeValue = NSURLFileResourceTypeUnknown;
-                                    }
-                                    
-                                    [CK2FileManager setTemporaryResourceValue:typeValue forKey:aKey inURL:aURL];
-                                }
-                                else if ([aKey isEqualToString:NSURLFileSecurityKey])
-                                {
-                                    CFFileSecurityRef security = CFFileSecurityCreate(NULL);
-                                    
-                                    NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
-                                    if (CFFileSecuritySetMode(security, mode.unsignedShortValue))
-                                    {
-                                        [CK2FileManager setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey inURL:aURL];
-                                    }
-                                    
-                                    CFRelease(security);
                                 }
                                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                                 {
@@ -293,6 +242,52 @@
                                         [CK2FileManager setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey inURL:aURL];
                                     }
                                 }
+                                
+                                // Trying to access a constant not available on an old platform will crash. Runtime check seems to be our best bet
+                                else if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+                                {
+                                    if ([aKey isEqualToString:NSURLFileResourceTypeKey])
+                                    {
+                                        NSString *typeValue;
+                                        switch ([type integerValue])
+                                        {
+                                            case DT_CHR:
+                                                typeValue = NSURLFileResourceTypeCharacterSpecial;
+                                                break;
+                                            case DT_DIR:
+                                                typeValue = NSURLFileResourceTypeDirectory;
+                                                break;
+                                            case DT_BLK:
+                                                typeValue = NSURLFileResourceTypeBlockSpecial;
+                                                break;
+                                            case DT_REG:
+                                                typeValue = NSURLFileResourceTypeRegular;
+                                                break;
+                                            case DT_LNK:
+                                                typeValue = NSURLFileResourceTypeSymbolicLink;
+                                                break;
+                                            case DT_SOCK:
+                                                typeValue = NSURLFileResourceTypeSocket;
+                                                break;
+                                            default:
+                                                typeValue = NSURLFileResourceTypeUnknown;
+                                        }
+                                        
+                                        [CK2FileManager setTemporaryResourceValue:typeValue forKey:aKey inURL:aURL];
+                                    }
+                                    else if ([aKey isEqualToString:NSURLFileSecurityKey])
+                                    {
+                                        CFFileSecurityRef security = CFFileSecurityCreate(NULL);
+                                        
+                                        NSNumber *mode = CFDictionaryGetValue(parsedDict, kCFFTPResourceMode);
+                                        if (CFFileSecuritySetMode(security, mode.unsignedShortValue))
+                                        {
+                                            [CK2FileManager setTemporaryResourceValue:(NSFileSecurity *)security forKey:aKey inURL:aURL];
+                                        }
+                                        
+                                        CFRelease(security);
+                                    }
+                                }
                             }
                             
                             [self.client protocol:self didDiscoverItemAtURL:aURL];
@@ -327,6 +322,26 @@
     [totalData release];
     [request release];
     return self;
+}
+
++ (NSArray *)defaultPropertyKeys;
+{
+    NSArray *result = @[NSURLContentModificationDateKey,
+                        NSURLIsDirectoryKey,
+                        NSURLIsRegularFileKey,
+                        NSURLIsSymbolicLinkKey,
+                        NSURLNameKey,
+                        NSURLFileSizeKey,
+                        CK2URLSymbolicLinkDestinationKey];
+    
+    if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+    {
+        result = [result arrayByAddingObjectsFromArray:@[
+                  NSURLFileResourceTypeKey,
+                  NSURLFileSecurityKey]];
+    }
+    
+    return result;
 }
 
 + (NSURL *)URLByReplacingUserInfoInURL:(NSURL *)aURL withUser:(NSString *)nsUser;
@@ -500,7 +515,7 @@
         {
             CFStringRef lastComponent = CFURLCopyLastPathComponent((CFURLRef)url);    // keeps %2F kinda intact as a regular slash
             
-            url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:(NSString *)lastComponent isDirectory:directory];
+            url = [[url URLByDeletingLastPathComponent] URLByAppendingPathComponent:(NSString *)lastComponent];
             // any slash from %2F will go back in to give a URL containing an extra slash, which should be good enough for libcurl to handle
             
             CFRelease(lastComponent);
