@@ -1225,6 +1225,17 @@
 
 #pragma mark CK2FileManagerDelegate
 
+// CK2FileManager will use a default behavior if its delegate doesn't implement this. Since we do implement it,
+// we check if OUR delegate does or not and return that.
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+    if (aSelector == @selector(fileManager:didReceiveAuthenticationChallenge:))
+    {
+        return [[[self openPanel] delegate] respondsToSelector:@selector(panel:didReceiveAuthenticationChallenge:)];
+    }
+    return [super respondsToSelector:aSelector];
+}
+
 /*  These delegate methods are received on arbitrary threads, but as a UI component, be nice and deliver our equivalent on the main thread
  */
 
