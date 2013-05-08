@@ -94,11 +94,19 @@
                     NSURL* url = [davRequest concatenatedURLWithPath:[item href]];
                     [CK2FileManager setTemporaryResourceValue:[item modificationDate] forKey:NSURLContentModificationDateKey inURL:url];
                     [CK2FileManager setTemporaryResourceValue:[item creationDate] forKey:NSURLCreationDateKey inURL:url];
-                    [CK2FileManager setTemporaryResourceValue:[NSNumber numberWithUnsignedInteger:[item contentLength]] forKey:NSURLFileSizeKey inURL:url];
+                    [CK2FileManager setTemporaryResourceValue:@(item.contentLength) forKey:NSURLFileSizeKey inURL:url];
                     [item.fileAttributes enumerateKeysAndObjectsUsingBlock:^(id key, id obj, BOOL *stop) {
                         [CK2FileManager setTemporaryResourceValue:obj forKey:key inURL:url];
                     }];
-                    [CK2FileManager setTemporaryResourceValue:[item contentType] forKey:NSURLFileResourceTypeKey inURL:url];
+                    
+                    NSString *mimeType = item.contentType;
+                    if (mimeType)
+                    {
+                        CFStringRef uti = UTTypeCreatePreferredIdentifierForTag(kUTTagClassMIMEType, (CFStringRef)mimeType, NULL);
+                        [CK2FileManager setTemporaryResourceValue:(NSString *)uti forKey:NSURLTypeIdentifierKey inURL:url];
+                        CFRelease(uti);
+                    }
+                    
                     [client protocol:self didDiscoverItemAtURL:url];
                     CK2WebDAVLog(@"%@", url);
                 }
