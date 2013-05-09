@@ -93,7 +93,6 @@
 {
     [_viewController close]; // holds a weak ref to us which needs breaking
     
-    [self setCompletionBlock:nil];
     [_viewController release];
     [_title release];
     [_prompt release];
