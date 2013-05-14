@@ -79,13 +79,15 @@
         self.completionHandler = ^(id result) {
             CK2WebDAVLog(@"enumerating directory results");
 
-            if (mask & CK2DirectoryEnumerationIncludesDirectory && result)
+            NSArray* items = result;
+
+            // first item should always be the directory itself
+            if (result && !(mask & CK2DirectoryEnumerationIncludesDirectory))
             {
-                NSURL *directoryURL = [request.URL URLByAppendingPathComponent:@""];    // ensure has a trailing slash
-                [client protocol:self didDiscoverItemAtURL:directoryURL];
+                items = [items subarrayWithRange:NSMakeRange(1, [items count] - 1)];
             }
             
-            for (DAVResponseItem* item in result)
+            for (DAVResponseItem* item in items)
             {
                 NSString *name = [[item href] lastPathComponent];
                 if (!((mask & NSDirectoryEnumerationSkipsHiddenFiles) && [name hasPrefix:@"."]))
