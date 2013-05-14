@@ -28,8 +28,17 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
 - (BOOL)setup
 {
-    BOOL result = ([self setupSessionWithResponses:self.responsesToUse]);
-    self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
+    BOOL result;
+    if (!self.responsesToUse)
+    {
+        STFail(@"responsesToUse not set. Are you trying to run the tests on CK2FileManagerGenericTests? They should be run by subclasses.");
+        result = NO;
+    }
+    else
+    {
+        result = ([self setupSessionWithResponses:self.responsesToUse]);
+        self.server.data = [ExampleListing dataUsingEncoding:NSUTF8StringEncoding];
+    }
 
     return result;
 }
