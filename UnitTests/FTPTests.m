@@ -5,17 +5,17 @@
 
 #import "CK2FileManagerGenericTests.h"
 
-@interface CK2FileManagerWebDAVTests2 : CK2FileManagerGenericTests
+@interface FTPTests : CK2FileManagerGenericTests
 
 @end
 
-@implementation CK2FileManagerWebDAVTests2
+@implementation FTPTests
 
 - (id)initWithInvocation:(NSInvocation *)anInvocation
 {
     if ((self = [super initWithInvocation:anInvocation]) != nil)
     {
-        self.responsesToUse = @"webdav";
+        self.responsesToUse = @"ftp";
     }
 
     return self;

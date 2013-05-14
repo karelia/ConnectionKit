@@ -8,11 +8,11 @@
 #import <DAVKit/DAVKit.h>
 #import "KMSServer.h"
 
-@interface CK2FileManagerWebDAVTests : CK2FileManagerBaseTests
+@interface OldWebDAVTests : CK2FileManagerBaseTests
 
 @end
 
-@implementation CK2FileManagerWebDAVTests
+@implementation OldWebDAVTests
 
 #pragma mark - Utilities
 
@@ -120,7 +120,7 @@
     // try to upload
     if (useStream)
     {
-        tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"CK2FileManagerWebDAVTestsTemp.txt"];
+        tempFile = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:@"OldWebDAVTestsTemp.txt"];
         BOOL ok = [data writeToURL:tempFile options:NSDataWritingAtomic error:&error];
         STAssertTrue(ok, @"failed to write temporary file with error %@", error);
         [self.session createFileAtURL:url withContentsOfURL:tempFile withIntermediateDirectories:YES openingAttributes:nil progressBlock:progress completionHandler:^(NSError *error) {

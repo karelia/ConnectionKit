@@ -5,11 +5,11 @@
 
 #import "CK2FileManagerGenericTests.h"
 
-@interface CK2FileManagerSFTPTests : CK2FileManagerGenericTests
+@interface SFTPTests : CK2FileManagerGenericTests
 
 @end
 
-@implementation CK2FileManagerSFTPTests
+@implementation SFTPTests
 
 - (id)initWithInvocation:(NSInvocation *)anInvocation
 {

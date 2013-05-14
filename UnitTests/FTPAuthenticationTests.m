@@ -9,11 +9,11 @@
 
 #import <CURLHandle/CURLHandle.h>
 
-@interface CK2FileManagerFTPAuthenticationTests : CK2FileManagerBaseTests
+@interface FTPAuthenticationTests : CK2FileManagerBaseTests
 
 @end
 
-@implementation CK2FileManagerFTPAuthenticationTests
+@implementation FTPAuthenticationTests
 
 - (void)fileManager:(CK2FileManager *)manager didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge
 {
