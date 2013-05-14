@@ -340,6 +340,6 @@
 #pragma mark Backend
 
 // Alas, we must go back to the "easy" synchronous API for now. Multi API has a tendency to get confused by perfectly good response codes and think they're an error
-+ (BOOL)usesMultiHandle; { return NO; }
++ (BOOL)usesMultiHandle; { return YES; }
 
 @end
