@@ -3,7 +3,7 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "CK2FileManagerGenericTests.h"
 
 #import "KMSServer.h"
 #import "KMSTranscriptEntry.h"
@@ -15,47 +15,9 @@
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileManagerGenericTests : CK2FileManagerBaseTests
-
-@property (strong, nonatomic) NSString* responsesToUse;
-
-@end
-
 @implementation CK2FileManagerGenericTests
 
 static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 file1.txt\r\n-rw-------   1 user  staff     3 Mar  6  2012 file2.txt\r\n\r\n";
-
-static NSString* gResponsesToUse = nil;
-
-+ (id) defaultTestSuite
-{
-    NSArray* responses = @[@"sftp", @"ftp", @"webdav"];
-
-    SenTestSuite* result = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Collection", NSStringFromClass(self)]];
-    for (NSString* name in responses)
-    {
-        // in order to re-use the default SenTest mechanism for building up a suite of tests, we set some global variables
-        // to indicate the test configuration we want, then call on to the defaultTestSuite to get a set of tests using that configuration.
-        gResponsesToUse = name;
-        SenTestSuite* suite = [[SenTestSuite alloc] initWithName:[NSString stringWithFormat:@"%@Using%@", NSStringFromClass(self), [name uppercaseString]]];
-        [suite addTest:[super defaultTestSuite]];
-        [result addTest:suite];
-        [suite release];
-    }
-
-    return [result autorelease];
-}
-
-- (id)initWithInvocation:(NSInvocation *)anInvocation
-{
-    if ((self = [super initWithInvocation:anInvocation]) != nil)
-    {
-        // store the value of the globals here, since they'll potentially be different by the time we're actually run
-        self.responsesToUse = gResponsesToUse;
-    }
-
-    return self;
-}
 
 - (void)dealloc
 {

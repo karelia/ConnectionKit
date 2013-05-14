@@ -38,6 +38,9 @@
 		2288CD72165A96E800F34E24 /* CK2FileManagerWebDAVTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */; };
 		2288CD76165A99FC00F34E24 /* CK2WebDAVProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */; };
 		228E180C1700AD5600ACDE94 /* CURLHandle.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220526E8165E96AA00A2BBC9 /* CURLHandle.framework */; };
+		22AC1C141742980000AB09E1 /* CK2FileManagerFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22AC1C111742980000AB09E1 /* CK2FileManagerFTPTests.m */; };
+		22AC1C151742980000AB09E1 /* CK2FileManagerSFTPTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22AC1C121742980000AB09E1 /* CK2FileManagerSFTPTests.m */; };
+		22AC1C161742980000AB09E1 /* CK2FileManagerWebDAVTests2.m in Sources */ = {isa = PBXBuildFile; fileRef = 22AC1C131742980000AB09E1 /* CK2FileManagerWebDAVTests2.m */; };
 		22C9CF991703327A004610FE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27F3372A16BC1FB100E70511 /* Cocoa.framework */; };
 		22C9CF9F1703327A004610FE /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 22C9CF9D1703327A004610FE /* InfoPlist.strings */; };
 		22C9CFA11703327A004610FE /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 22C9CFA01703327A004610FE /* main.m */; };
@@ -155,6 +158,20 @@
 			remoteGlobalIDString = 223FD091160B523700BE1C80;
 			remoteInfo = CURLHandleTests;
 		};
+		22AC1C0D174297C500AB09E1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 5FEEF26016CE830C002C1CBF;
+			remoteInfo = "DAVKit iOS";
+		};
+		22AC1C0F174297C500AB09E1 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 221F8BA817259BFF004E7B9D;
+			remoteInfo = "Tests iOS";
+		};
 		22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */;
@@ -256,6 +273,10 @@
 		2288CD74165A98E300F34E24 /* CK2WebDAVProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2WebDAVProtocol.m; sourceTree = "<group>"; };
 		228E180D1700AEA200ACDE94 /* CK2FileManagerWithTestSupport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerWithTestSupport.h; sourceTree = "<group>"; };
 		228E180E1700AEA300ACDE94 /* CK2FileManagerWithTestSupport.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWithTestSupport.m; sourceTree = "<group>"; };
+		22AC1BFE174297C500AB09E1 /* CK2FileManagerGenericTests.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CK2FileManagerGenericTests.h; sourceTree = "<group>"; };
+		22AC1C111742980000AB09E1 /* CK2FileManagerFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFTPTests.m; sourceTree = "<group>"; };
+		22AC1C121742980000AB09E1 /* CK2FileManagerSFTPTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerSFTPTests.m; sourceTree = "<group>"; };
+		22AC1C131742980000AB09E1 /* CK2FileManagerWebDAVTests2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerWebDAVTests2.m; sourceTree = "<group>"; };
 		22C7A9E316FCC8C300C88317 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = text; path = README.md; sourceTree = "<group>"; wrapsLines = 1; };
 		22C9CF981703327A004610FE /* ProfilingTester.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ProfilingTester.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		22C9CF9C1703327A004610FE /* ProfilingTester-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "ProfilingTester-Info.plist"; sourceTree = "<group>"; };
@@ -416,7 +437,11 @@
 				22F6D102165A8A2200443CC9 /* CK2FileManagerURLTests.m */,
 				22CC56F81509048E00F94154 /* CK2FileManagerPathTests.m */,
 				22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */,
+				22AC1BFE174297C500AB09E1 /* CK2FileManagerGenericTests.h */,
 				22F6D0E7165A8A2200443CC9 /* CK2FileManagerGenericTests.m */,
+				22AC1C111742980000AB09E1 /* CK2FileManagerFTPTests.m */,
+				22AC1C121742980000AB09E1 /* CK2FileManagerSFTPTests.m */,
+				22AC1C131742980000AB09E1 /* CK2FileManagerWebDAVTests2.m */,
 				220526B9165E8C9D00A2BBC9 /* CK2FileManagerFTPAuthenticationTests.m */,
 				278CFE1216BADE030018A14B /* CK2CURLProtocolURLManipulationTests.m */,
 				2288CD71165A96E800F34E24 /* CK2FileManagerWebDAVTests.m */,
@@ -484,6 +509,8 @@
 			children = (
 				220526F1165E97B400A2BBC9 /* DAVKit.framework */,
 				220526F3165E97B400A2BBC9 /* Tests.octest */,
+				22AC1C0E174297C500AB09E1 /* libDAVKit.a */,
+				22AC1C10174297C500AB09E1 /* Tests iOS.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -928,6 +955,20 @@
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		22AC1C0E174297C500AB09E1 /* libDAVKit.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libDAVKit.a;
+			remoteRef = 22AC1C0D174297C500AB09E1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		22AC1C10174297C500AB09E1 /* Tests iOS.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "Tests iOS.octest";
+			remoteRef = 22AC1C0F174297C500AB09E1 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 		22C9CFFB1703AD4D004610FE /* crashtest */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.executable";
@@ -1062,6 +1103,9 @@
 				27999BAB170B4B9800A54BEE /* CK2FileOperationWithTestSupport.m in Sources */,
 				27999BB7170B4BA200A54BEE /* CK2FileManagerWithTestSupport.m in Sources */,
 				220C11961715C5E20086F199 /* CK2FileManagerErrorTests.m in Sources */,
+				22AC1C141742980000AB09E1 /* CK2FileManagerFTPTests.m in Sources */,
+				22AC1C151742980000AB09E1 /* CK2FileManagerSFTPTests.m in Sources */,
+				22AC1C161742980000AB09E1 /* CK2FileManagerWebDAVTests2.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
