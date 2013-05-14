@@ -557,9 +557,18 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     BOOL result = nilAllowed && error == nil;
     if (!result)
     {
-        result = [self checkIsFileCantWriteError:error log:YES];
+        result = [self checkIsFileNotFoundError:error log:NO];
+    }
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO];
     }
 
+    if (!result)
+    {
+        NSLog(@"expecting file not found or file can't write error, got %@", error);
+    }
+    
     return result;
 }
 
