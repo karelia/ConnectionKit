@@ -8,6 +8,8 @@
 
 #import <SenTestingKit/SenTestingKit.h>
 
+#import "CK2CURLBasedProtocol.h"
+
 @interface URLCanonicalizationTests : SenTestCase
 @end
 
