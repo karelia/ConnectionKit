@@ -45,6 +45,17 @@
 	
 	
 	
+	<option value="instance_methods">Instance Methods</option>
+	
+	<option value="//api/name/standardAuthenticationErrorWithUnderlyingError:">&nbsp;&nbsp;&nbsp;&nbsp;- standardAuthenticationErrorWithUnderlyingError:</option>
+	
+	<option value="//api/name/standardCouldntReadErrorWithUnderlyingError:">&nbsp;&nbsp;&nbsp;&nbsp;- standardCouldntReadErrorWithUnderlyingError:</option>
+	
+	<option value="//api/name/standardCouldntWriteErrorWithUnderlyingError:">&nbsp;&nbsp;&nbsp;&nbsp;- standardCouldntWriteErrorWithUnderlyingError:</option>
+	
+	<option value="//api/name/standardFileNotFoundErrorWithUnderlyingError:">&nbsp;&nbsp;&nbsp;&nbsp;- standardFileNotFoundErrorWithUnderlyingError:</option>
+	
+	
 	
 </select>
 				</li>
@@ -73,6 +84,18 @@
 </ul></li>
 
 
+
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/standardAuthenticationErrorWithUnderlyingError:">standardAuthenticationErrorWithUnderlyingError:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/standardCouldntReadErrorWithUnderlyingError:">standardCouldntReadErrorWithUnderlyingError:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/standardCouldntWriteErrorWithUnderlyingError:">standardCouldntWriteErrorWithUnderlyingError:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/standardFileNotFoundErrorWithUnderlyingError:">standardFileNotFoundErrorWithUnderlyingError:</a></span></li>
+	
+</ul></li>
 
 
 			</ul>
@@ -118,6 +141,36 @@
 
 						<ul class="task-list">
 							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/standardCouldntWriteErrorWithUnderlyingError:">&ndash;&nbsp;standardCouldntWriteErrorWithUnderlyingError:</a></code>
+		<span class="tooltip"><p>Returned to represent general failures to create or write to something, in situations where we can&rsquo;t get a more specific error.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/standardCouldntReadErrorWithUnderlyingError:">&ndash;&nbsp;standardCouldntReadErrorWithUnderlyingError:</a></code>
+		<span class="tooltip"><p>Returned to represent general failures to find or read something, in situations where we can&rsquo;t get a more specific error.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/standardFileNotFoundErrorWithUnderlyingError:">&ndash;&nbsp;standardFileNotFoundErrorWithUnderlyingError:</a></code>
+		<span class="tooltip"><p>Returned to represent a failure that we <em>know</em> was caused by the requested item not being found.
+If the protocol can&rsquo;t be that specific, it should use standardCouldntWriteErrorWithUnderlyingError
+or standardCouldntReadErrorWithUnderlyingError instead.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/standardAuthenticationErrorWithUnderlyingError:">&ndash;&nbsp;standardAuthenticationErrorWithUnderlyingError:</a></code>
+		<span class="tooltip"><p>Returned to represent an authentication error, in situations where the protocol can&rsquo;t be more specific.</p></span>
+	</span>
+	
+	
+</li><li>
 	<span class="tooltip">
 		<code><a href="#//api/name/registerClass:">+&nbsp;registerClass:</a></code>
 		<span class="tooltip"><p>This method registers a protocol class, making it visible
@@ -207,6 +260,158 @@ Throws an exception if protocolClass isn&rsquo;t a subclass of CK2Protocol</p>
 					
 					
 					
+					<div class="section section-methods">
+						<a title="Instance Methods" name="instance_methods"></a>
+						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/standardAuthenticationErrorWithUnderlyingError:" title="standardAuthenticationErrorWithUnderlyingError:"></a>
+	<h3 class="subsubtitle method-title">standardAuthenticationErrorWithUnderlyingError:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returned to represent an authentication error, in situations where the protocol can&rsquo;t be more specific.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (NSError *)standardAuthenticationErrorWithUnderlyingError:(NSError *)<em>error</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2Protocol.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/standardCouldntReadErrorWithUnderlyingError:" title="standardCouldntReadErrorWithUnderlyingError:"></a>
+	<h3 class="subsubtitle method-title">standardCouldntReadErrorWithUnderlyingError:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returned to represent general failures to find or read something, in situations where we can&rsquo;t get a more specific error.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (NSError *)standardCouldntReadErrorWithUnderlyingError:(NSError *)<em>error</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2Protocol.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/standardCouldntWriteErrorWithUnderlyingError:" title="standardCouldntWriteErrorWithUnderlyingError:"></a>
+	<h3 class="subsubtitle method-title">standardCouldntWriteErrorWithUnderlyingError:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returned to represent general failures to create or write to something, in situations where we can&rsquo;t get a more specific error.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (NSError *)standardCouldntWriteErrorWithUnderlyingError:(NSError *)<em>error</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2Protocol.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/standardFileNotFoundErrorWithUnderlyingError:" title="standardFileNotFoundErrorWithUnderlyingError:"></a>
+	<h3 class="subsubtitle method-title">standardFileNotFoundErrorWithUnderlyingError:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Returned to represent a failure that we <em>know</em> was caused by the requested item not being found.
+If the protocol can&rsquo;t be that specific, it should use standardCouldntWriteErrorWithUnderlyingError
+or standardCouldntReadErrorWithUnderlyingError instead.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (NSError *)standardFileNotFoundErrorWithUnderlyingError:(NSError *)<em>error</em></code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2Protocol.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
 					
 				</div>
 				<div class="main-navigation navigation-bottom">
@@ -218,7 +423,7 @@ Throws an exception if protocolClass isn&rsquo;t a subclass of CK2Protocol</p>
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2013 Karelia Systems. All rights reserved. (Last updated: 2013-04-12)</span><br />
+						<p><span class="copyright">&copy; 2013 Karelia Systems. All rights reserved. (Last updated: 2013-05-14)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.1 (build 858)</a>.</span></p>
 						

@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="html/html; charset=utf-8" />
-		<title>NSURLCredential(CK2SSHPublicKey) Category Reference</title>
+		<title>NSURLProtectionSpace(CK2SSHHostFingerprint) Category Reference</title>
 		<meta id="xcode-display" name="xcode-display" content="render"/>
 		<meta name="viewport" content="width=550" />
 		<link rel="stylesheet" type="text/css" href="../css/styles.css" media="all" />
@@ -17,7 +17,7 @@
 			</div>
 			
 			<div id="title" role="banner">
-				<h1 class="hideInXcode">NSURLCredential(CK2SSHPublicKey) Category Reference</h1>
+				<h1 class="hideInXcode">NSURLProtectionSpace(CK2SSHHostFingerprint) Category Reference</h1>
 			</div>
 			<ul id="headerButtons" role="toolbar">
 				<li id="toc_button">
@@ -40,9 +40,14 @@
 	
 	<option value="class_methods">Class Methods</option>
 	
-	<option value="//api/name/ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:">&nbsp;&nbsp;&nbsp;&nbsp;+ ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:</option>
+	<option value="//api/name/ck2_protectionSpaceWithHost:knownHostMatch:">&nbsp;&nbsp;&nbsp;&nbsp;+ ck2_protectionSpaceWithHost:knownHostMatch:</option>
 	
 	
+	
+	
+	<option value="instance_methods">Instance Methods</option>
+	
+	<option value="//api/name/ck2_knownHostMatch">&nbsp;&nbsp;&nbsp;&nbsp;- ck2_knownHostMatch</option>
 	
 	
 	
@@ -68,18 +73,24 @@
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#class_methods">Class Methods</a></span><ul>
 	
-	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:">ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:</a></span></li>
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/ck2_protectionSpaceWithHost:knownHostMatch:">ck2_protectionSpaceWithHost:knownHostMatch:</a></span></li>
 	
 </ul></li>
 
 
+
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/ck2_knownHostMatch">ck2_knownHostMatch</a></span></li>
+	
+</ul></li>
 
 
 			</ul>
 		</nav>
 		<article>
 			<div id="contents" class="isShowingTOC" role="main">
-				<a title="NSURLCredential(CK2SSHPublicKey) Category Reference" name="top"></a>
+				<a title="NSURLProtectionSpace(CK2SSHHostFingerprint) Category Reference" name="top"></a>
 				<div class="main-navigation navigation-top">
 					<ul>
 	<li><a href="../index.html">Index</a></li>
@@ -88,7 +99,7 @@
 				</div>
 				<div id="header">
 					<div class="section-header">
-						<h1 class="title title-header">NSURLCredential(CK2SSHPublicKey) Category Reference</h1>
+						<h1 class="title title-header">NSURLProtectionSpace(CK2SSHHostFingerprint) Category Reference</h1>
 					</div>		
 				</div>
 				<div id="container">	
@@ -116,8 +127,15 @@
 						<ul class="task-list">
 							<li>
 	<span class="tooltip">
-		<code><a href="#//api/name/ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:">+&nbsp;ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:</a></code>
-		<span class="tooltip"><p>Constructs a credential to encapsulate the use of public key authentication</p></span>
+		<code><a href="#//api/name/ck2_knownHostMatch">&ndash;&nbsp;ck2_knownHostMatch</a></code>
+		<span class="tooltip"><p>The result of ConnectionKit checking the host&rsquo;s fingerprint against a local known_hosts file.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/ck2_protectionSpaceWithHost:knownHostMatch:">+&nbsp;ck2_protectionSpaceWithHost:knownHostMatch:</a></code>
+		<span class="tooltip"><p>Creates a protection space object to encapsulate the result of checking an SSH server&rsquo;s host fingerprint</p></span>
 	</span>
 	
 	
@@ -137,18 +155,18 @@
 						<h2 class="subtitle subtitle-methods">Class Methods</h2>
 						
 						<div class="section-method">
-	<a name="//api/name/ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:" title="ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:"></a>
-	<h3 class="subsubtitle method-title">ck2_credentialWithUser:publicKeyURL:privateKeyURL:password:persistence:</h3>
+	<a name="//api/name/ck2_protectionSpaceWithHost:knownHostMatch:" title="ck2_protectionSpaceWithHost:knownHostMatch:"></a>
+	<h3 class="subsubtitle method-title">ck2_protectionSpaceWithHost:knownHostMatch:</h3>
 	
 	
 	
 	<div class="method-subsection brief-description">
-		<p>Constructs a credential to encapsulate the use of public key authentication</p>
+		<p>Creates a protection space object to encapsulate the result of checking an SSH server&rsquo;s host fingerprint</p>
 	</div>		
 	
     
 
-	<div class="method-subsection method-declaration"><code>+ (NSURLCredential *)ck2_credentialWithUser:(NSString *)<em>user</em> publicKeyURL:(NSURL *)<em>publicKey</em> privateKeyURL:(NSURL *)<em>privateKey</em> password:(NSString *)<em>passphrase</em> persistence:(NSURLCredentialPersistence)<em>persistence</em></code></div>
+	<div class="method-subsection method-declaration"><code>+ (NSURLProtectionSpace *)ck2_protectionSpaceWithHost:(NSString *)<em>host</em> knownHostMatch:(CK2KnownHostMatch)<em>match</em></code></div>
 
     
 	
@@ -156,28 +174,13 @@
 		<h4 class="method-subtitle parameter-title">Parameters</h4>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>user</em></dt>
-			<dd><p>to log in as</p></dd>
+			<dt><em>host</em></dt>
+			<dd><p>name of the server being connected to.</p></dd>
 		</dl>
 		
 		<dl class="argument-def parameter-def">
-			<dt><em>publicKey</em></dt>
-			<dd><p>is the location of the public key file. If using OpenSSL (usually the case on OS X), pass nil here to have the public key automatically derived from the private key</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>privateKey</em></dt>
-			<dd><p>is the location of the private key file. Pass nil to use SSH-Agent instead (note: fails when sandboxed)</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>passphrase</em></dt>
-			<dd><p>is used to decrypt a passphrase-protected private key file</p></dd>
-		</dl>
-		
-		<dl class="argument-def parameter-def">
-			<dt><em>persistence</em></dt>
-			<dd><p>specifies whether to store passphrase in the keychain or not</p></dd>
+			<dt><em>match</em></dt>
+			<dd><p>is one of CK2KnownHostMatch&rsquo;s enumerations that declares the result of the check.</p></dd>
 		</dl>
 		
 	</div>
@@ -186,12 +189,18 @@
 	
 	<div class="method-subsection return">
 		<h4 class="method-subtitle parameter-title">Return Value</h4>
-		<p>the credential</p>
+		<p>a protection spaces whose <code>-authenticationMethod</code> is <code>CK2AuthenticationMethodHostFingerprint</code>.</p>
 	</div>
 	
 	
 	
 	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Generally clients are handed <code>NSURLProtectionSpace</code>s by ConnectionKit and have
+no need to construct their own. So can probably ignore this method :)</p>
+	</div>
 	
 	
 	
@@ -210,6 +219,68 @@
 					</div>
 					
 					
+					
+					<div class="section section-methods">
+						<a title="Instance Methods" name="instance_methods"></a>
+						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/ck2_knownHostMatch" title="ck2_knownHostMatch"></a>
+	<h3 class="subsubtitle method-title">ck2_knownHostMatch</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>The result of ConnectionKit checking the host&rsquo;s fingerprint against a local known_hosts file.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (CK2KnownHostMatch)ck2_knownHostMatch</code></div>
+
+    
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>One of the CK2KnownHostMatch enum. 0 for auth methods other than CK2AuthenticationMethodHostFingerprint.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Upon connecting to an SSH server, ConnectionKit compares its host fingerprint
+against the contents of the local known_hosts file. An authentication challenge
+is then issued to the delegate asking it how it would like to handle the result
+of that check. This method encapsulates that result:</p>
+
+<ul>
+<li><code>CK2KnownHostMatchOK</code> — the server and known_hosts match.</li>
+<li><code>CK2KnownHostMatchMissing</code> — the server appears not to have been connected to before, as no entry for it is present in known_hosts.</li>
+<li><code>CK2KnownHostMatchMismatch</code> — the server&rsquo;s fingerprint is different to that in the known_hosts file. It is likely the server has been compromised, modified, or replaced</li>
+</ul>
+
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2Authentication.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
 					
 					
 				</div>

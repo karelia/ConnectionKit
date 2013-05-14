@@ -38,15 +38,41 @@
 	
 	
 	
+	<option value="properties">Properties</option>
+	
+	<option value="//api/name/delegate">&nbsp;&nbsp;&nbsp;&nbsp;delegate</option>
+	
+	
 	
 	
 	<option value="class_methods">Class Methods</option>
+	
+	<option value="//api/name/URLWithPath:isDirectory:hostURL:">&nbsp;&nbsp;&nbsp;&nbsp;+ URLWithPath:isDirectory:hostURL:</option>
 	
 	<option value="//api/name/pathOfURL:">&nbsp;&nbsp;&nbsp;&nbsp;+ pathOfURL:</option>
 	
 	<option value="//api/name/setTemporaryResourceValue:forKey:inURL:">&nbsp;&nbsp;&nbsp;&nbsp;+ setTemporaryResourceValue:forKey:inURL:</option>
 	
 	
+	
+	
+	<option value="instance_methods">Instance Methods</option>
+	
+	<option value="//api/name/cancelOperation:">&nbsp;&nbsp;&nbsp;&nbsp;- cancelOperation:</option>
+	
+	<option value="//api/name/contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:</option>
+	
+	<option value="//api/name/createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:</option>
+	
+	<option value="//api/name/createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</option>
+	
+	<option value="//api/name/createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</option>
+	
+	<option value="//api/name/enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:</option>
+	
+	<option value="//api/name/removeItemAtURL:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- removeItemAtURL:completionHandler:</option>
+	
+	<option value="//api/name/setAttributes:ofItemAtURL:completionHandler:">&nbsp;&nbsp;&nbsp;&nbsp;- setAttributes:ofItemAtURL:completionHandler:</option>
 	
 	
 	
@@ -72,9 +98,17 @@
 
 
 
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#properties">Properties</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/delegate">delegate</a></span></li>
+	
+</ul></li>
+
 
 
 <li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#class_methods">Class Methods</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/URLWithPath:isDirectory:hostURL:">URLWithPath:isDirectory:hostURL:</a></span></li>
 	
 	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/pathOfURL:">pathOfURL:</a></span></li>
 	
@@ -83,6 +117,26 @@
 </ul></li>
 
 
+
+<li role="treeitem" class="children"><span class="disclosure"></span><span class="sectionName"><a href="#instance_methods">Instance Methods</a></span><ul>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/cancelOperation:">cancelOperation:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:">contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:">createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:">enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/removeItemAtURL:completionHandler:">removeItemAtURL:completionHandler:</a></span></li>
+	
+	<li><span class="nodisclosure"></span><span class="sectionName"><a href="#//api/name/setAttributes:ofItemAtURL:completionHandler:">setAttributes:ofItemAtURL:completionHandler:</a></span></li>
+	
+</ul></li>
 
 
 			</ul>
@@ -122,13 +176,63 @@
 						<p>ConnectionKit&rsquo;s equivalent of NSFileManager
 All operations are asynchronous, including ones on the local file system.
 Supports remote file servers, currently over FTP, SFTP and WebDAV.
-&ldquo;Worker&rdquo; methods return an opaque object which you can pass to -cancelOperation: if needed.
 Allocate and initialise as many file managers as you wish; there is no +defaultManager method
 Provide a file manager with a delegate to handle authentication in the same fashion as NSURLConnection
 Behind the scenes, ConnectionKit takes care of creating as many connections to
 servers as are needed. This means you can perform multiple operations at once,
 but please avoid performing too many at once as that could easily upset a
 server.</p>
+
+<p>Supported protocols and their URL schemes:</p>
+
+<table>
+<thead>
+<tr>
+<th>Scheme </th>
+<th> Protocol</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>file   </td>
+<td> Local files</td>
+</tr>
+<tr>
+<td>ftp    </td>
+<td> FTP</td>
+</tr>
+<tr>
+<td>ftps   </td>
+<td> FTP with Implicit SSL</td>
+</tr>
+<tr>
+<td>ftpes  </td>
+<td> FTP with TLS/SSL</td>
+</tr>
+<tr>
+<td>http   </td>
+<td> WebDAV</td>
+</tr>
+<tr>
+<td>https  </td>
+<td> WebDAV over HTTPS</td>
+</tr>
+<tr>
+<td>sftp   </td>
+<td> SFTP</td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+<p>Completion handlers (and other blocks) and delegate methods are called by
+CK2FileManager on arbitrary threads/queues. It is your responsibility not to
+block that thread for too long, and to dispatch work over to another thread if
+required.</p>
 					</div>
 					
 					
@@ -140,11 +244,89 @@ server.</p>
 						<h2 class="subtitle subtitle-tasks">Tasks</h2>
 						
 						
-						<a title="(null) from URLs" name="task_(null) from URLs"></a>
 						
-<h3 class="subsubtitle task-title">(null) from URLs</h3>
+						<h3 class="subsubtitle task-title">Other Methods</h3>
+
 						<ul class="task-list">
 							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:">&ndash;&nbsp;contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:</a></code>
+		<span class="tooltip"><p>Performs a shallow search of the specified directory and returns URLs for the contained items.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:">&ndash;&nbsp;enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:</a></code>
+		<span class="tooltip"><p>Block-based enumeration of directory contents</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:">&ndash;&nbsp;createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:</a></code>
+		<span class="tooltip"><p>Creates a directory at the specified URL.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">&ndash;&nbsp;createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</a></code>
+		<span class="tooltip"><p>Creates a file with the specified content at the specified URL.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:">&ndash;&nbsp;createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</a></code>
+		<span class="tooltip"><p>Creates a file by copying the content of the specified URL.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/removeItemAtURL:completionHandler:">&ndash;&nbsp;removeItemAtURL:completionHandler:</a></code>
+		<span class="tooltip"><p>Removes the item at the specified URL.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/setAttributes:ofItemAtURL:completionHandler:">&ndash;&nbsp;setAttributes:ofItemAtURL:completionHandler:</a></code>
+		<span class="tooltip"><p>Sets the attributes of the specified file or directory.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/cancelOperation:">&ndash;&nbsp;cancelOperation:</a></code>
+		<span class="tooltip"><p>Cancels an operation.</p></span>
+	</span>
+	
+	
+</li><li>
+	<span class="tooltip">
+		<code><a href="#//api/name/delegate">&nbsp;&nbsp;delegate</a></code>
+		<span class="tooltip"><p>The file manager&rsquo;s delegate.</p></span>
+	</span>
+	<span class="task-item-suffix">property</span>
+	
+</li>
+						</ul>
+						
+						
+						<a title="(null) from URLs" name="task_(null) from URLs"></a>
+						<h3 class="subsubtitle task-title">(null) from URLs</h3>
+
+						<ul class="task-list">
+							<li>
+	<span class="tooltip">
+		<code><a href="#//api/name/URLWithPath:isDirectory:hostURL:">+&nbsp;URLWithPath:isDirectory:hostURL:</a></code>
+		<span class="tooltip"><p>Initializes and returns a newly created NSURL object by changing <code>baseURL</code> to the specified path.</p></span>
+	</span>
+	
+	
+</li><li>
 	<span class="tooltip">
 		<code><a href="#//api/name/pathOfURL:">+&nbsp;pathOfURL:</a></code>
 		<span class="tooltip"><p>Extracts the path component of a URL, accounting for the subtleties of FTP etc.</p></span>
@@ -167,11 +349,163 @@ server.</p>
 					
 					
 					
+					<div class="section section-methods">
+						<a title="Properties" name="properties"></a>
+						<h2 class="subtitle subtitle-methods">Properties</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/delegate" title="delegate"></a>
+	<h3 class="subsubtitle method-title">delegate</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>The file manager&rsquo;s delegate.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>@property (assign) id&lt;CK2FileManagerDelegate&gt; delegate</code></div>
+
+    
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Delegate methods are delivered on an arbitrary queue/thread.
+Changing delegate might mean you still receive messages shortly after the change. Not ideal I know!</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
 					
 					
 					<div class="section section-methods">
 						<a title="Class Methods" name="class_methods"></a>
 						<h2 class="subtitle subtitle-methods">Class Methods</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/URLWithPath:isDirectory:hostURL:" title="URLWithPath:isDirectory:hostURL:"></a>
+	<h3 class="subsubtitle method-title">URLWithPath:isDirectory:hostURL:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Initializes and returns a newly created NSURL object by changing <code>baseURL</code> to the specified path.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>+ (NSURL *)URLWithPath:(NSString *)<em>path</em> isDirectory:(BOOL)<em>isDir</em> hostURL:(NSURL *)<em>baseURL</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>path</em></dt>
+			<dd><p>The path that the NSURL object will represent. If path is a relative path, it is treated as being relative to the user&rsquo;s home directory once connected to <code>baseURL</code>. Passing nil for this parameter produces an exception.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>isDir</em></dt>
+			<dd><p>A Boolean value that specifies whether path is treated as a directory path when resolving against relative path components. Pass YES if the path indicates a directory, NO otherwise.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>baseURL</em></dt>
+			<dd><p>A URL providing at least a scheme and host for the result to be based on. Any path as part of this URL is ignored.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An NSURL object initialized with path. <code>nil</code> if <code>baseURL</code> proved unsuitable.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Some protocols differentiate between absolute paths, and those relative to the
+user&rsquo;s home directory. This method constructs URLs to accomodate that and the
+quirks of different protocols. Here are some example URLs:</p>
+
+<table>
+<thead>
+<tr>
+<th>Protocol </th>
+<th> <code>/absolute</code> path              </th>
+<th> <code>relative</code> path</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTTP     </td>
+<td> <code>http://example.com/absolute</code> </td>
+<td> <code>http://example.com/relative</code></td>
+</tr>
+<tr>
+<td>FTP      </td>
+<td> <code>ftp://example.com//absolute</code> </td>
+<td> <code>ftp://example.com/relative</code></td>
+</tr>
+<tr>
+<td>SSH      </td>
+<td> <code>sftp://example.com/absolute</code> </td>
+<td> <code>sftp://example.com/~/relative</code></td>
+</tr>
+<tr>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+
+
+<p>There is a subtle bug in 10.6&rsquo;s handling of relative file URLs. This method
+stops it hitting you.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
 						
 						<div class="section-method">
 	<a name="//api/name/pathOfURL:" title="pathOfURL:"></a>
@@ -307,6 +641,680 @@ CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must 
 					
 					
 					
+					<div class="section section-methods">
+						<a title="Instance Methods" name="instance_methods"></a>
+						<h2 class="subtitle subtitle-methods">Instance Methods</h2>
+						
+						<div class="section-method">
+	<a name="//api/name/cancelOperation:" title="cancelOperation:"></a>
+	<h3 class="subsubtitle method-title">cancelOperation:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Cancels an operation.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (void)cancelOperation:(id)<em>operation</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>operation</em></dt>
+			<dd><p>An opaque token object representing the operation, as returned by any of <code>CK2FileManager</code>&rsquo;s worker methods.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If an operation is cancelled before it finishes, its completion handler is
+called with an <code>NSURLErrorCancelled</code> error to indicate the failure can be
+ignored.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:" title="contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">contentsOfDirectoryAtURL:includingPropertiesForKeys:options:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Performs a shallow search of the specified directory and returns URLs for the contained items.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)contentsOfDirectoryAtURL:(NSURL *)<em>url</em> includingPropertiesForKeys:(NSArray *)<em>keys</em> options:(NSDirectoryEnumerationOptions)<em>mask</em> completionHandler:(void ( ^ ) ( NSArray *contents , NSError *error ))<em>block</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>for the directory whose contents you want to enumerate.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>keys</em></dt>
+			<dd><p>to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>mask</em></dt>
+			<dd><p>of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>block</em></dt>
+			<dd><p>called with URLs, each of which identifies a file, directory, or symbolic link. If the directory contains no entries, the array is empty. If an error occurs, contents is nil and error should be non-nil.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>This method performs a shallow search of the directory and therefore does not traverse symbolic links or return the contents of any subdirectories. This method also does not return URLs for the current directory (“.”), parent directory (“..”) but it can return hidden files (files that begin with a period character)</p>
+
+<p>The order of the files in the returned array generally follows that returned by the server, which is likely undefined.</p>
+
+<p>Paths are standardized if possible (i.e. case is corrected if needed, and relative paths resolved).</p>
+
+<p>Many protocols provide a decent error code indicating <em>why</em> the operation
+failed. Unfortunately, FTP cannot. The FTP spec means the only machine-readable
+response is a 550 code. This covers pretty much any sort of filesystem access
+problem (as opposed to an issue with the connection itself). Thus FTP ops
+cannot distinguish between a folder not existing, not actually being a folder,
+and the user having insufficient permissions to access it. Instead you&rsquo;ll get
+back plain old <code>NSFileReadUnknownError</code>.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:" title="createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">createDirectoryAtURL:withIntermediateDirectories:openingAttributes:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Creates a directory at the specified URL.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)createDirectoryAtURL:(NSURL *)<em>url</em> withIntermediateDirectories:(BOOL)<em>createIntermediates</em> openingAttributes:(NSDictionary *)<em>attributes</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>handler</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>A URL that specifies the directory to create. This parameter must not be nil.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>createIntermediates</em></dt>
+			<dd><p>If YES, this method creates any non-existent parent directories as part of creating the directory in url. If NO, this method fails if any of the intermediate parent directories does not exist.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>attributes</em></dt>
+			<dd><p>to apply <em>only</em> if the server supports supplying them at creation time. See discussion for more details.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>handler</em></dt>
+			<dd><p>Called at the end of the operation. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If a file or directory already exists at <code>url</code>, it is at the server&rsquo;s discretion
+whether the operation succeeds by replacing the existing item, or fails.</p>
+
+<p>Only some protocols/servers support/respect applying attributes to a directory
+as part of creating it. Indeed, some servers don&rsquo;t really support attributes at
+all! So any attributes you pass here might well go ignored. In practice, at
+present you should see something like this:</p>
+
+<ul>
+<li>FTP:    Attributes are completely ignored</li>
+<li>SFTP:   Only <code>NSFilePosixPermissions</code> is used; some servers choose to ignore it</li>
+<li>WebDAV: Attributes are ignored</li>
+<li>file:   The full suite of attributes supported by <code>NSFileManager</code> should be available</li>
+</ul>
+
+
+<p>If you particularly care about setting attributes on a remote server, then a
+follow-up call to -setAttributes:… is needed.</p>
+
+<p>Note: Even though this is a &ldquo;write&rdquo; operation, it is still possible to get back
+something like <code>NSFileReadUnknownError</code>. In particular, FTP must traverse the
+directory hierarchy which can fail if the target directory turns out not to
+exist, or the user has insufficient permissions to access it.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:" title="createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">createFileAtURL:contents:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Creates a file with the specified content at the specified URL.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)createFileAtURL:(NSURL *)<em>url</em> contents:(NSData *)<em>data</em> withIntermediateDirectories:(BOOL)<em>createIntermediates</em> openingAttributes:(NSDictionary *)<em>attributes</em> progressBlock:(CK2ProgressBlock)<em>progressBlock</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>handler</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>A URL that specifies the file to create. This parameter must not be nil.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>data</em></dt>
+			<dd><p>A data object containing the contents of the new file.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>createIntermediates</em></dt>
+			<dd><p>If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>attributes</em></dt>
+			<dd><p>to apply <em>only</em> if the server supports supplying them at creation time. See discussion for more details.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>progressBlock</em></dt>
+			<dd><p>Called as each &ldquo;chunk&rdquo; of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>handler</em></dt>
+			<dd><p>Called at the end of the operation. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If a file or directory already exists at <code>url</code>, it is at the server&rsquo;s discretion
+whether the operation succeeds by replacing the existing item, or fails.</p>
+
+<p>Only some protocols/servers support/respect applying attributes to a file as
+part of creating it. Indeed, some servers don&rsquo;t really support attributes at
+all! So any attributes you pass here might well go ignored. In practice, at
+present you should see something like this:</p>
+
+<ul>
+<li>FTP:    Attributes are completely ignored</li>
+<li>SFTP:   Only <code>NSFilePosixPermissions</code> is used; some servers choose to ignore it</li>
+<li>WebDAV: Only <code>CK2FileMIMEType</code> is supported</li>
+<li>file:   Attributes are ignored</li>
+</ul>
+
+
+<p>If you particularly care about setting attributes on a remote server, then a
+follow-up call to -setAttributes:… is needed.</p>
+
+<p>Note: Even though this is a &ldquo;write&rdquo; operation, it is still possible to get back
+something like <code>NSFileReadUnknownError</code>. In particular, FTP must traverse the
+directory hierarchy which can fail if the target directory turns out not to
+exist, or the user has insufficient permissions to access it.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:" title="createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">createFileAtURL:withContentsOfURL:withIntermediateDirectories:openingAttributes:progressBlock:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Creates a file by copying the content of the specified URL.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)createFileAtURL:(NSURL *)<em>destinationURL</em> withContentsOfURL:(NSURL *)<em>sourceURL</em> withIntermediateDirectories:(BOOL)<em>createIntermediates</em> openingAttributes:(NSDictionary *)<em>attributes</em> progressBlock:(CK2ProgressBlock)<em>progressBlock</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>handler</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>destinationURL</em></dt>
+			<dd><p>A URL that specifies the file to create. This parameter must not be nil.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>sourceURL</em></dt>
+			<dd><p>The file whose contents to use for creating the new file.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>createIntermediates</em></dt>
+			<dd><p>If YES, this method creates any non-existent parent directories as part of creating the file in url. If NO, this method fails if any of the intermediate parent directories does not exist.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>attributes</em></dt>
+			<dd><p>to apply <em>only</em> if the server supports supplying them at creation time. See discussion for more details.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>progressBlock</em></dt>
+			<dd><p>Called as each &ldquo;chunk&rdquo; of the file is written. In some cases, uploads have to be restarted from the beginning; the previousAttemptCount argument tells you how many times that has happened so far</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>handler</em></dt>
+			<dd><p>Called at the end of the operation. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If a file or directory already exists at <code>destinationURL</code>, it is at the
+server&rsquo;s discretion whether the operation succeeds by replacing the existing
+item, or fails.</p>
+
+<p>Only some protocols/servers support/respect applying attributes to a file as
+part of creating it. Indeed, some servers don&rsquo;t really support attributes at
+all! So any attributes you pass here might well go ignored. In practice, at
+present you should see something like this:</p>
+
+<ul>
+<li>FTP:    Attributes are completely ignored</li>
+<li>SFTP:   Only <code>NSFilePosixPermissions</code> is used; some servers choose to ignore it</li>
+<li>WebDAV: Only <code>CK2FileMIMEType</code> is supported</li>
+<li>file:   Attributes are ignored</li>
+</ul>
+
+
+<p>If you particularly care about setting attributes on a remote server, then a
+follow-up call to -setAttributes:… is needed.</p>
+
+<p>It&rsquo;s up to the individual protocol implementation, but generally ConnectionKit
+will avoid loading the entire source file into memory at once.</p>
+
+<p>Note: Even though this is a &ldquo;write&rdquo; operation, it is still possible to get back
+something like <code>NSFileReadUnknownError</code>. In particular, FTP must traverse the
+directory hierarchy which can fail if the target directory turns out not to
+exist, or the user has insufficient permissions to access it.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:" title="enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">enumerateContentsOfURL:includingPropertiesForKeys:options:usingBlock:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Block-based enumeration of directory contents</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)enumerateContentsOfURL:(NSURL *)<em>url</em> includingPropertiesForKeys:(NSArray *)<em>keys</em> options:(NSDirectoryEnumerationOptions)<em>mask</em> usingBlock:(void ( ^ ) ( NSURL *url ))<em>block</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>completionBlock</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>for the directory whose contents you want to enumerate.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>keys</em></dt>
+			<dd><p>to try and include from the server. Pass nil to get a default set. Include NSURLParentDirectoryURLKey to get</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>mask</em></dt>
+			<dd><p>of options. In addition to NSDirectoryEnumerationOptions, accepts CK2DirectoryEnumerationIncludesDirectory. Not all protocols support deep enumeration at present, so it is recommended you include NSDirectoryEnumerationSkipsSubdirectoryDescendants for now.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>block</em></dt>
+			<dd><p>is called for each URL encountered.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>completionBlock</em></dt>
+			<dd><p>is called once enumeration finishes or fails. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>If possible, listing results are delivered as they arrive over the wire. This
+makes it possible that the operation fails mid-way, having received only some
+of the total directory contents.</p>
+
+<p>All docs for -contentsOfDirectoryAtURL:… should apply here too</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/removeItemAtURL:completionHandler:" title="removeItemAtURL:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">removeItemAtURL:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Removes the item at the specified URL.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)removeItemAtURL:(NSURL *)<em>url</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>handler</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>A file URL specifying the file or directory to remove.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>handler</em></dt>
+			<dd><p>Called at the end of the operation. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Right now, deletion of files is fully implemented, but whether deleting a
+directory succeeds is pretty much at the mercy of the server/protocol used.</p>
+
+<p>Note: Even though this is a &ldquo;write&rdquo; operation, it is still possible to get back
+something like <code>NSFileReadUnknownError</code>. In particular, FTP must traverse the
+directory hierarchy which can fail if the target directory turns out not to
+exist, or the user has insufficient permissions to access it.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+						<div class="section-method">
+	<a name="//api/name/setAttributes:ofItemAtURL:completionHandler:" title="setAttributes:ofItemAtURL:completionHandler:"></a>
+	<h3 class="subsubtitle method-title">setAttributes:ofItemAtURL:completionHandler:</h3>
+	
+	
+	
+	<div class="method-subsection brief-description">
+		<p>Sets the attributes of the specified file or directory.</p>
+	</div>		
+	
+    
+
+	<div class="method-subsection method-declaration"><code>- (id)setAttributes:(NSDictionary *)<em>keyedValues</em> ofItemAtURL:(NSURL *)<em>url</em> completionHandler:(void ( ^ ) ( NSError *error ))<em>handler</em></code></div>
+
+    
+	
+	<div class="method-subsection arguments-section parameters">
+		<h4 class="method-subtitle parameter-title">Parameters</h4>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>keyedValues</em></dt>
+			<dd><p>A dictionary containing as keys the attributes to set for path and as values the corresponding value for the attribute.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>url</em></dt>
+			<dd><p>The URL of a file or directory.</p></dd>
+		</dl>
+		
+		<dl class="argument-def parameter-def">
+			<dt><em>handler</em></dt>
+			<dd><p>Called at the end of the operation. A non-nil error indicates failure.</p></dd>
+		</dl>
+		
+	</div>
+	
+	
+	
+	<div class="method-subsection return">
+		<h4 class="method-subtitle parameter-title">Return Value</h4>
+		<p>An opaque token object representing the operation for passing to <code>-cancelOperation:</code> if needed.</p>
+	</div>
+	
+	
+	
+	
+	
+	<div class="method-subsection discussion-section">
+		<h4 class="method-subtitle">Discussion</h4>
+		<p>Unsupported attributes are ignored. Failure is only considered to have occurred
+when an attribute appears to be supported by the server/protocol in use, but
+actually fails to set. In practice at present the supported attributes should
+be:</p>
+
+<ul>
+<li>FTP:    Only NSFilePosixPermissions is supported, and not by all servers</li>
+<li>SFTP:   Only NSFilePosixPermissions is supported</li>
+<li>WebDAV: No attributes are supported</li>
+<li>file:   Same attributes as NSFileManager supports</li>
+</ul>
+
+
+<p>Note: Even though this is a &ldquo;write&rdquo; operation, it is still possible to get back
+something like <code>NSFileReadUnknownError</code>. In particular, FTP must traverse the
+directory hierarchy which can fail if the target directory turns out not to
+exist, or the user has insufficient permissions to access it.</p>
+	</div>
+	
+	
+	
+	
+	
+	
+	
+	<div class="method-subsection declared-in-section">
+		<h4 class="method-subtitle">Declared In</h4>
+		<code class="declared-in-ref">CK2FileManager.h</code><br />
+	</div>				
+	
+	
+</div>
+						
+					</div>
+					
 					
 				</div>
 				<div class="main-navigation navigation-bottom">
@@ -318,7 +1326,7 @@ CRITICAL: keys are tested using POINTER equality for non-file URLs, so you must 
 				<div id="footer">
 					<hr />
 					<div class="footer-copyright">
-						<p><span class="copyright">&copy; 2013 Karelia Systems. All rights reserved. (Last updated: 2013-04-12)</span><br />
+						<p><span class="copyright">&copy; 2013 Karelia Systems. All rights reserved. (Last updated: 2013-05-14)</span><br />
 						
 						<span class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.1 (build 858)</a>.</span></p>
 						

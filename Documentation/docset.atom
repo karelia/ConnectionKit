@@ -1,18 +1,18 @@
 <?xml version="1.0" standalone="no"?>
 <feed xmlns="http://www.w3.org/2005/Atom" xmlns:docset="http://developer.apple.com/rss/docset_extensions" xml:lang="en">
-    <id>http://karelia.github.com/ConnectionKit/Documentation/docset.atom/20130412143847</id>
+    <id>http://karelia.github.com/ConnectionKit/Documentation/docset.atom/20130514115144</id>
     <title type="text">ConnectionKit Documentation</title>
     <rights>Copyright © 2013 Karelia Systems. All rights reserved.</rights>
     <link rel="self" href="http://karelia.github.com/ConnectionKit/Documentation/docset.atom"></link>
     <docset:publisherName>Karelia Systems</docset:publisherName>
     <docset:publisherID>com.karelia.documentation</docset:publisherID>
-    <updated>2013-04-12T14:38:47+01:00</updated>
+    <updated>2013-05-14T11:51:44+01:00</updated>
     <entry>
-        <id>tag:karelia.github.com,2013-04-12:com.karelia.ConnectionKit/1.0.0</id>
+        <id>tag:karelia.github.com,2013-05-14:com.karelia.ConnectionKit/1.0.0</id>
         <title type="text">ConnectionKit Documentation</title>
-        <updated>2013-04-12T14:38:47+01:00</updated>
+        <updated>2013-05-14T11:51:44+01:00</updated>
         <content type="text">ConnectionKit Documentation (v1.0.0)</content>
-        <link rel="enclosure" type="application/octet-stream" href="http://karelia.github.com/ConnectionKit/Documentation/com.karelia.ConnectionKit-1.0.xar" length="62081"></link>
+        <link rel="enclosure" type="application/octet-stream" href="http://karelia.github.com/ConnectionKit/Documentation/com.karelia.ConnectionKit-1.0.xar" length="92168"></link>
         <docset:identifier>com.karelia.ConnectionKit</docset:identifier>
         <docset:version>1.0.0</docset:version>
         <docset:minimumXcodeVersion>3.0.0</docset:minimumXcodeVersion>
