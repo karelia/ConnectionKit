@@ -288,10 +288,10 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self useBadLogin];
-        NSURL* url = [self URLForPath:@"/blah/directory/intermediate/newdirectory"];
+        NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@", error);
+            STAssertTrue([self checkIsAuthenticationError:error], @"was expecting authentication error, got %@ underlying %@", error, error.userInfo[NSUnderlyingErrorKey]);
             [self pause];
         }];
 
@@ -725,7 +725,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsUpdateError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
+            BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"webdav"]; // no errors because it's not supported in WebDAV
+            STAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -742,7 +743,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsUpdateError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
+            BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"webdav"]; // no errors because it's not supported in WebDAV
+            STAssertTrue([self checkIsUpdateError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
