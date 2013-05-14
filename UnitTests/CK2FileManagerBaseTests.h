@@ -34,12 +34,8 @@
 #pragma mark - Error Checking
 
 - (BOOL)checkIsAuthenticationError:(NSError*)error;
-- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error;
-- (BOOL)checkIsFileCantWriteError:(NSError*)error;
-- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error;
-- (BOOL)checkIsFileNotFoundError:(NSError*)error;
-- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error;
-- (BOOL)checkIsRemovalError:(NSError*)error;
-- (BOOL)checkIsFileCantReadError:(NSError*)error;
-- (BOOL)checkIsUpdateError:(NSError*)error;
+- (BOOL)checkIsCreationError:(NSError*)error nilAllowed:(BOOL)nilAllowed;
+- (BOOL)checkIsRemovalError:(NSError*)error nilAllowed:(BOOL)nilAllowed;
+- (BOOL)checkIsUpdateError:(NSError*)error nilAllowed:(BOOL)nilAllowed;
+- (BOOL)checkIsMissingError:(NSError*)error nilAllowed:(BOOL)nilAllowed;
 @end

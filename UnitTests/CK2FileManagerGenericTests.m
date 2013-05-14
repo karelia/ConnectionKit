@@ -274,7 +274,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantWriteError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsCreationError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
@@ -560,7 +560,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 
             // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
             [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-                STAssertTrue([self checkNoErrorOrIsFileCantWriteError:error], @"unexpected error %@", error);
+                STAssertTrue([self checkIsRemovalError:error nilAllowed:NO], @"unexpected error %@", error);
 
                 // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
                 [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
@@ -609,7 +609,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
 
-            STAssertTrue([self checkIsRemovalError:error], @"expected file not found error, got %@", error);
+            STAssertTrue([self checkIsRemovalError:error nilAllowed:NO], @"expected file not found error, got %@", error);
 
             [self pause];
         }];
@@ -627,7 +627,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self useResponseSet:@"cwd fail"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsFileCantReadError:error], @"expected file can't write error, got %@", error);
+            BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"ftp"]; // FTP is a bit crap at reporting errors
+            STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
 
             [self pause];
         }];
@@ -722,7 +723,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 
@@ -739,7 +740,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         NSURL* url = [self URLForTestFolder];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsUpdateError:error], @"expected file can't write error, got %@", error);
+            STAssertTrue([self checkIsUpdateError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
             [self pause];
         }];
 

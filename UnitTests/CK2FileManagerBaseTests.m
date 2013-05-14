@@ -375,16 +375,16 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         // make the folder if necessary
         NSURL* url = [self URLForTestFolder];
         [session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+            STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
 
             // if we want the files, make them too
             if (withFiles)
             {
                 NSData* contents = [@"This is a test file" dataUsingEncoding:NSUTF8StringEncoding];
                 [session createFileAtURL:[self URLForTestFile1] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                    STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                    STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                     [session createFileAtURL:[self URLForTestFile2] contents:contents withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
-                        STAssertTrue([self checkNoErrorOrFileExistsError:error], @"expected no error or file exists error, got %@", error);
+                        STAssertTrue([self checkIsCreationError:error nilAllowed:YES], @"expected no error or file exists error, got %@", error);
                         [self pause];
                         LogHousekeeping(@"<<<< Made Test Files");
                     }];
@@ -433,110 +433,156 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 #pragma mark - Error Checking Helpers
 
-- (void)logError:(NSError*)error mustHaveError:(BOOL)mustHaveError domainOK:(BOOL)domainOK codeOK:(BOOL)codeOK
-{
-    if (!error && mustHaveError)
-    {
-        NSLog(@"expecting error, got none");
-    }
-    else if (!domainOK && error)
-    {
-        NSLog(@"unexpected error domain %@", error.domain);
-    }
-    else if (!codeOK && error)
-    {
-        NSLog(@"unexpected error code %ld", error.code);
-    }
-}
-
-- (BOOL)checkIsAuthenticationError:(NSError*)error
+- (BOOL)checkIsAuthenticationError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
     BOOL codeOK = error.code == NSURLErrorUserAuthenticationRequired || error.code == NSURLErrorUserCancelledAuthentication;
     BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting authentication error, got %@", error);
+    }
 
     return result;
 }
 
-- (BOOL)checkNoErrorOrFileExistsError:(NSError*)error
+- (BOOL)checkIsAuthenticationError:(NSError*)error
+{
+    return [self checkIsAuthenticationError:error log:YES];
+}
+
+- (BOOL)checkIsFileCantWriteError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
     BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting cant write error, got %@", error);
+    }
 
-    return error == nil || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsFileCantWriteError:(NSError*)error
+- (BOOL)checkIsFileCantReadError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
+    BOOL codeOK = error.code == NSFileReadUnknownError;
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file not found error, got %@", error);
+    }
 
-    return (error != nil) && domainOK && codeOK;
+    return result;
 }
 
-- (BOOL)checkNoErrorOrIsFileCantWriteError:(NSError*)error
-{
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileWriteUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
 
-    return (error == nil) || (domainOK && codeOK);
-}
-
-- (BOOL)checkIsFileNotFoundError:(NSError*)error
-{
-    BOOL domainOK = [error.domain isEqualToString:NSURLErrorDomain];
-    BOOL codeOK = error.code == NSURLErrorNoPermissionsToReadFile;
-    [self logError:error mustHaveError:YES domainOK:domainOK codeOK:codeOK];
-
-    return (error != nil) && domainOK && codeOK;
-}
-
-- (BOOL)checkNoErrorOrIsFileNotFoundError:(NSError*)error
+- (BOOL)checkIsFileNotFoundError:(NSError*)error log:(BOOL)log
 {
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
     BOOL codeOK = error.code == NSFileNoSuchFileError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file not found error, got %@", error);
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsRemovalError:(NSError*)error
+- (BOOL)checkIsFileExistsError:(NSError*)error log:(BOOL)log
 {
-    // failure to remove something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
     BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL codeOK = error.code == NSFileWriteFileExistsError;
+    BOOL result = domainOK && codeOK;
+    if (log && !result)
+    {
+        NSLog(@"expecting file exists error, got %@", error);
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    return result;
 }
 
-- (BOOL)checkIsFileCantReadError:(NSError*)error;
+
+- (BOOL)checkIsRemovalError:(NSError*)error nilAllowed:(BOOL)nilAllowed
 {
-    // failure to remove something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = error.code == NSFileReadUnknownError;
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileNotFoundError:error log:NO]; // file wasn't there?
+    }
     
-    return (error == nil) || (domainOK && codeOK);
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO]; // file was there but locked - or protocol is bad at reporting file not found
+    }
+
+    if (!result)
+    {
+        result = [self checkIsFileCantReadError:error log:NO]; // file wasn't there, but protocol isn't good a reporting it?
+    }
+
+    if (!result)
+    {
+        NSLog(@"expecting file not found or can't read or write errors, got %@", error);
+    }
+
+    return result;
 }
 
-- (BOOL)checkIsUpdateError:(NSError*)error
+- (BOOL)checkIsCreationError:(NSError*)error nilAllowed:(BOOL)nilAllowed
 {
-    // failure to update something might result in the CK2Protocol's
-    // standardCouldntWriteErrorWithUnderlyingError or standardFileNotFoundErrorWithUnderlyingError errors, so we need to check for either
-    // (which one it is depends on how much error information the protocol gets)
-    BOOL domainOK = [error.domain isEqualToString:NSCocoaErrorDomain];
-    BOOL codeOK = (error.code == NSFileWriteUnknownError) || (error.code == NSFileNoSuchFileError);
-    [self logError:error mustHaveError:NO domainOK:domainOK codeOK:codeOK];
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileExistsError:error log:NO];
+    }
+    
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:NO];
+    }
 
-    return (error == nil) || (domainOK && codeOK);
+    if (!result)
+    {
+        NSLog(@"expecting file exists or can't write errors, got %@", error);
+    }
+    
+    return result;
 }
+
+- (BOOL)checkIsUpdateError:(NSError*)error nilAllowed:(BOOL)nilAllowed
+{
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileCantWriteError:error log:YES];
+    }
+
+    return result;
+}
+
+- (BOOL)checkIsMissingError:(NSError*)error nilAllowed:(BOOL)nilAllowed
+{
+    BOOL result = nilAllowed && error == nil;
+    if (!result)
+    {
+        result = [self checkIsFileNotFoundError:error log:NO];
+    }
+
+    if (!result)
+    {
+        result = [self checkIsFileCantReadError:error log:NO];
+    }
+
+    if (!result)
+    {
+        NSLog(@"expecting file not found or file can't read errors, got %@", error);
+    }
+
+    return result;
+}
+
 
 @end
