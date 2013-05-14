@@ -257,7 +257,7 @@
 
     if ((self = [self initWithRequest:request client:client]) != nil)
     {
-        [self reportFailedWithError:[self standardCouldntWriteErrorWithUnderlyingError:nil]];
+        [self reportFinished];
     }
 
     return self;
