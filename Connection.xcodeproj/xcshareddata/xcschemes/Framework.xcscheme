@@ -56,6 +56,12 @@
                <Test
                   Identifier = "CK2FileManagerBaseTests">
                </Test>
+               <Test
+                  Identifier = "CK2FileManagerGenericTests">
+               </Test>
+               <Test
+                  Identifier = "CKUploaderTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
