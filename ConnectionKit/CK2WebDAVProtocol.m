@@ -139,7 +139,7 @@
 
         // when a real error occurs, report it
         CK2WebDAVErrorHandler handleRealError = ^(NSError *error) {
-            CK2WebDAVLog(@"create directory failed %@", path);
+            CK2WebDAVLog(@"create directory %@ failed with error %@", path, error);
             [self reportFailedWithError:error];
         };
 
@@ -150,7 +150,7 @@
             // 409 Conflict - A collection cannot be made at the Request-URI until one or more intermediate collections have been created.
             if (createIntermediates && [error.domain isEqualToString:DAVClientErrorDomain] && ((error.code == 409) || (error.code == 404)))
             {
-                CK2WebDAVLog(@"making directory failed, retrying making each intermediate %@", path);
+                CK2WebDAVLog(@"making directory failed with error %@, retrying making each intermediate %@", error, path);
                 [self addCreateDirectoryRequestForPath:path withIntermediateDirectories:YES errorHandler:handleRealError completionHandler:handleCompletion];
             }
             else
@@ -462,7 +462,7 @@
     });
 
     CK2WebDAVErrorHandler errorBlock = Block_copy(^(NSError* error) {
-        CK2WebDAVLog(@"create directory failed for %@ with %@", path, error);
+        CK2WebDAVLog(@"create directory (during create file) failed for %@ with %@", path, error);
         if (([error.domain isEqualToString:DAVClientErrorDomain]) && (error.code == 405))
         {
             // ignore failure to create the directories
