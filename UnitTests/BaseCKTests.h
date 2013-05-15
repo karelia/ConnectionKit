@@ -7,21 +7,26 @@
 #import "KMSState.h"
 #import "CK2FileManager.h"
 
-@interface CK2FileManagerBaseTests : KMSTestCase<CK2FileManagerDelegate>
+@interface BaseCKTests : KMSTestCase<CK2FileManagerDelegate>
 
-@property (strong, nonatomic) CK2FileManager* session;
+@property (strong, nonatomic) CK2FileManager* manager;
 @property (assign, atomic) KMSState state;
 @property (strong, nonatomic) NSMutableString* transcript;
-@property (strong, nonatomic) NSString* type;
+@property (readonly, nonatomic) NSString* protocol;
 @property (assign, nonatomic) BOOL useMockServer;
 @property (strong, nonatomic) NSString* originalUser;
 @property (strong, nonatomic) NSString* originalPassword;
-@property (strong, nonatomic) NSString* extendedName;
 
 
+- (BOOL)setupTest;
+- (BOOL)isSetup;
+- (BOOL)protocolUsesAuthentication;
 - (NSURL*)temporaryFolder;
-- (BOOL)setupSession;
-- (BOOL)setupSessionWithResponses:(NSString*)responsesFile;
+
+- (BOOL)usingProtocol:(NSString*)type;
+- (BOOL)usingMockServerWithProtocol:(NSString*)type;
+- (void)useBadLogin;
+- (NSData*)mockServerDirectoryListingData;
 
 #pragma mark - Test File Support
 
@@ -31,8 +36,10 @@
 - (void)makeTestDirectoryWithFiles:(BOOL)withFiles;
 - (void)removeTestDirectory;
 
-#pragma mark - Error Checking
+#pragma mark - Checking
 
+- (void)checkURL:(NSURL*)url isNamed:(NSString*)name;
+- (void)checkURLs:(NSMutableArray*)urls containItemNamed:(NSString*)name;
 - (BOOL)checkIsAuthenticationError:(NSError*)error;
 - (BOOL)checkIsCreationError:(NSError*)error nilAllowed:(BOOL)nilAllowed;
 - (BOOL)checkIsRemovalError:(NSError*)error nilAllowed:(BOOL)nilAllowed;

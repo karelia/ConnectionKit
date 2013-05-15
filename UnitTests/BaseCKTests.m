@@ -3,7 +3,7 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "BaseCKTests.h"
 #import "CK2Authentication.h"
 
 #import "CK2FileManagerWithTestSupport.h"
@@ -13,7 +13,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 @interface TestFileDelegate : CK2FileManager<CK2FileManagerDelegate>
 
-@property (strong, nonatomic) CK2FileManagerBaseTests* tests;
+@property (strong, nonatomic) BaseCKTests* tests;
 
 @end
 
@@ -29,7 +29,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 //#define LogHousekeeping NSLog // macro to use for logging "housekeeping" output - ie stuff related to making/removing test files, rather than the tests themselves
 #define LogHousekeeping(...)
 
-+ (TestFileDelegate*)delegateWithTest:(CK2FileManagerBaseTests*)tests
++ (TestFileDelegate*)delegateWithTest:(BaseCKTests*)tests
 {
     TestFileDelegate* result = [[TestFileDelegate alloc] init];
     result.tests = tests;
@@ -77,13 +77,14 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 @end
 
 
-@implementation CK2FileManagerBaseTests
+@implementation BaseCKTests
 
 - (void)dealloc
 {
-    [_session release];
+    [_manager release];
+    [_originalPassword release];
+    [_originalUser release];
     [_transcript release];
-    [_type release];
     
     [super dealloc];
 }
@@ -91,8 +92,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)temporaryFolder
 {
-    NSString* type = self.type ?: @"CK2FileTest";
-    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", type]];
+    NSURL* result = [[NSURL fileURLWithPath:NSTemporaryDirectory()] URLByAppendingPathComponent:[NSString stringWithFormat:@"%@Tests", self.protocol]];
     NSError* error = nil;
     BOOL ok = [[NSFileManager defaultManager] createDirectoryAtURL:result withIntermediateDirectories:YES attributes:nil error:&error];
     STAssertTrue(ok, @"failed to make temporary folder with error %@", error);
@@ -119,59 +119,79 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     return ok;
 }
 
-- (BOOL)setupSession
+- (BOOL)setupManager
 {
     CK2FileManagerWithTestSupport* fm = [[CK2FileManagerWithTestSupport alloc] init];
     fm.dontShareConnections = YES;
     fm.delegate = self;
-    self.session = fm;
+    self.manager = fm;
     self.transcript = [[[NSMutableString alloc] init] autorelease];
     [fm release];
 
-    return self.session != nil;
+    return self.manager != nil;
 }
 
-- (BOOL)setupSessionWithResponses:(NSString*)responses;
+- (BOOL)isSetup
 {
-    if ([responses isEqualToString:@"webdav"])
-    {
-        self.type = @"CKWebDAVTest";
-    }
-    else if ([responses isEqualToString:@"ftp"])
-    {
-        self.type = @"CKFTPTest";
-    }
-    else if ([responses isEqualToString:@"sftp"])
-    {
-        self.type = @"CKSFTPTest";
-    }
-    else
-    {
-        self.type = nil;
-    }
+    return self.manager != nil;
+}
 
-    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
-    self.extendedName = [NSString stringWithFormat:@"%@Using%@", name, [responses uppercaseString]];
+- (NSString*)protocol
+{
+    return @"Unknown";
+}
 
+- (BOOL)protocolUsesAuthentication
+{
+    return NO;
+}
+
+- (BOOL)usingProtocol:(NSString*)type
+{
+    return [[self.protocol lowercaseString] isEqualToString:type];
+}
+
+- (BOOL)usingMockServerWithProtocol:(NSString*)type
+{
+    return self.useMockServer && [self usingProtocol:type];
+}
+
+- (void)useBadLogin
+{
+    self.user = @"bad";
+    [self useResponseSet:@"bad login"];
+}
+
+
+- (NSData*)mockServerDirectoryListingData
+{
+    return nil;
+}
+
+
+- (BOOL)setupFromSettings
+{
     NSString* setting = nil;
-    if (self.type)
+    NSString* protocol = self.protocol;
+    
+    if (protocol)
     {
-        NSString* key = [NSString stringWithFormat:@"%@URL", self.type];
+        NSString* key = [NSString stringWithFormat:@"CK%@TestURL", protocol];
         setting = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", responses, key, key, responses);
+        STAssertNotNil(setting, @"You need to set a test server address for %@ tests. Use the defaults command on the command line: defaults write otest %@ \"server-url-here\". Use \"MockServer\" instead of a url to use a mock server instead. Use \"Off\" instead of a url to disable %@ tests", protocol, key, key, protocol);
     }
 
     BOOL ok;
     if (!setting || [setting isEqualToString:@"Off"])
     {
-        NSLog(@"Tests turned off for %@", responses);
+        NSLog(@"Tests turned off for %@", protocol);
         ok = NO;
     }
     else if ([setting isEqualToString:@"MockServer"])
     {
-        NSLog(@"Tests using MockServer for %@", responses);
+        NSLog(@"Tests using MockServer for %@", protocol);
         self.useMockServer = YES;
-        ok = [super setupServerWithResponseFileNamed:responses];
+        ok = [super setupServerWithResponseFileNamed:[self.protocol lowercaseString]];
         [KMSServer setLoggingLevel:KMSLoggingOff];
     }
     else
@@ -183,22 +203,34 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         ok = YES;
     }
 
+    return ok;
+}
+
+- (NSString*)testName
+{
+    NSString* name = [[[self.name substringToIndex:[self.name length] - 1] componentsSeparatedByString:@" "] objectAtIndex:1];
+    return name;
+}
+
+- (BOOL)setupTest
+{
+    BOOL ok = [self setupFromSettings];
     if (ok)
     {
         self.originalUser = self.user;
         self.originalPassword = self.password;
 
-        [self setupSession];
-        ok = self.session != nil;
+        [self setupManager];
+        ok = self.manager != nil;
     }
 
     if (ok)
     {
-        NSLog(@"Tests setup for %@, user:%@, password:%@ url:%@", responses, self.user, self.password, self.url);
+        NSLog(@"Tests setup for %@, user:%@, password:%@ url:%@", self.protocol, self.user, self.password, self.url);
     }
     else
     {
-        NSLog(@"Tests not setup for %@", responses);
+        NSLog(@"Tests not setup for %@", self.protocol);
     }
 
     NSLog(@"====================================================================");
@@ -342,7 +374,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
 - (NSURL*)URLForTestFolder
 {
-    return [self URLForPath:[@"CK2FileManagerTests" stringByAppendingPathComponent:self.extendedName]];
+    return [self URLForPath:[[@"CK2FileManagerTests" stringByAppendingPathComponent:self.protocol] stringByAppendingPathComponent:[self testName]]];
 }
 
 - (NSURL*)URLForTestFile1
@@ -432,7 +464,30 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
     }
 }
 
-#pragma mark - Error Checking Helpers
+#pragma mark - Checking Helpers
+
+- (void)checkURL:(NSURL*)url isNamed:(NSString*)name
+{
+    STAssertTrue([[url lastPathComponent] isEqualToString:name], @"URL %@ name was wrong, expected %@", url, name);
+}
+
+- (void)checkURLs:(NSMutableArray*)urls containItemNamed:(NSString*)name
+{
+    BOOL found = NO;
+    NSUInteger count = [urls count];
+    for (NSUInteger n = 0; n < count; ++n)
+    {
+        NSURL* url = urls[n];
+        if ([[url lastPathComponent] isEqualToString:name])
+        {
+            [urls removeObjectAtIndex:n];
+            found = YES;
+            break;
+        }
+    }
+
+    STAssertTrue(found, @"unexpected item with name %@", name);
+}
 
 - (BOOL)checkIsAuthenticationError:(NSError*)error log:(BOOL)log
 {

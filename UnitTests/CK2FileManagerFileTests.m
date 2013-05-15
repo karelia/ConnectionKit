@@ -3,14 +3,14 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "BaseCKTests.h"
 #import "KMSServer.h"
 
 #import "CK2FileManager.h"
 #import <SenTestingKit/SenTestingKit.h>
 #import <curl/curl.h>
 
-@interface CK2FileManagerFileTests : CK2FileManagerBaseTests
+@interface CK2FileManagerFileTests : BaseCKTests
 
 @end
 
@@ -53,13 +53,13 @@
 
 - (void)testContentsOfDirectoryAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* url = [self makeTestContents];
         if (url)
         {
             NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
-            [self.session contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
+            [self.manager contentsOfDirectoryAtURL:url includingPropertiesForKeys:nil options:options completionHandler:^(NSArray *contents, NSError *error) {
 
                 if (error)
                 {
@@ -86,7 +86,7 @@
 
 - (void)testEnumerateContentsOfDirectoryAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* url = [self makeTestContents];
         if (url)
@@ -94,7 +94,7 @@
             NSString* folderName = [url lastPathComponent];
             NSMutableArray* expected = [@[ folderName, @"test.txt", @"subfolder" ] mutableCopy];
             NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
-            [self.session enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
+            [self.manager enumerateContentsOfURL:url includingPropertiesForKeys:nil options:options usingBlock:^(NSURL *url) {
 
                 NSString* name = [url lastPathComponent];
                 STAssertTrue([expected containsObject:name], @"unexpected name %@", name);
@@ -115,7 +115,7 @@
 
 - (void)testCreateDirectoryAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSFileManager* fm = [NSFileManager defaultManager];
         NSURL* temp = [self temporaryFolder];
@@ -127,7 +127,7 @@
         [fm removeItemAtURL:directory error:&error];
 
         // try to make subdirectory with intermediate directory - should fail
-        [self.session createDirectoryAtURL:subdirectory withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
+        [self.manager createDirectoryAtURL:subdirectory withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -139,7 +139,7 @@
         STAssertFalse([fm fileExistsAtPath:[subdirectory path]], @"directory shouldn't exist");
 
         // try to make subdirectory
-        [self.session createDirectoryAtURL:subdirectory withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+        [self.manager createDirectoryAtURL:subdirectory withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -153,7 +153,7 @@
         STAssertTrue(isDir, @"somehow we've ended up with a file not a directory");
 
         // try to make it again - should quietly work
-        [self.session createDirectoryAtURL:subdirectory withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+        [self.manager createDirectoryAtURL:subdirectory withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -167,13 +167,13 @@
 
 - (void)testCreateDirectoryAtURLNoPermission
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSFileManager* fm = [NSFileManager defaultManager];
         NSURL* url = [NSURL fileURLWithPath:@"/System/Test Directory"];
 
         // try to make subdirectory in /System - this really ought to fail
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
+        [self.manager createDirectoryAtURL:url withIntermediateDirectories:NO openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
@@ -188,7 +188,7 @@
 
 - (void)testCreateFileAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSFileManager* fm = [NSFileManager defaultManager];
         NSURL* temp = [self temporaryFolder];
@@ -202,7 +202,7 @@
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         // try to make file - should fail because intermediate directory isn't present
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -213,7 +213,7 @@
         [self runUntilPaused];
 
         // try again, should work
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -226,7 +226,7 @@
 
         // and again - should fail because the file exists
         [self resume];
-        [self.session createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -239,13 +239,13 @@
 
 - (void)testCreateFileAtURLNoPermission
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSData* data = [@"Some test text" dataUsingEncoding:NSUTF8StringEncoding];
 
         // try to make file - should fail because we don't have permission
         NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:url contents:data withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
@@ -257,7 +257,7 @@
 
         // try again, should fail again, but this time because we can't make the intermediate directory
         url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
-        [self.session createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:url contents:data withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
@@ -272,7 +272,7 @@
 
 - (void)testCreateFileAtURLWithContents
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSFileManager* fm = [NSFileManager defaultManager];
         NSURL* temp = [self temporaryFolder];
@@ -288,7 +288,7 @@
         STAssertTrue([fm fileExistsAtPath:[source path]], @"source file hasn't been created");
 
         // try to make file - should fail because intermediate directory isn't present
-        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -299,7 +299,7 @@
         [self runUntilPaused];
 
         // try again, should work
-        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:YES openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -312,7 +312,7 @@
         STAssertTrue([string isEqualToString:@"Some test text"], @"bad contents of file: %@", string);
 
         // and again - should fail because the file exists
-        [self.session createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:file withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];
@@ -325,7 +325,7 @@
 
 - (void)testCreateFileAtURLWithContentsNoPermission
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSError* error = nil;
         NSURL* temp = [self temporaryFolder];
@@ -334,7 +334,7 @@
 
         // try to make file - should fail because we don't have permission
         NSURL* url = [NSURL fileURLWithPath:@"/System/test.txt"];
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileWriteNoPermissionError, @"unexpected error code %ld", [error code]);
@@ -346,7 +346,7 @@
 
         // try again, should fail again, but this time because we can't make the intermediate directory
         url = [NSURL fileURLWithPath:@"/System/Test Directory/test.txt"];
-        [self.session createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
+        [self.manager createFileAtURL:url withContentsOfURL:source withIntermediateDirectories:NO openingAttributes:nil progressBlock:nil completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected an error here");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -361,7 +361,7 @@
 
 - (void)testRenameFileAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self makeTestContents];
         if (temp)
@@ -378,7 +378,7 @@
             STAssertTrue(![fm fileExistsAtPath:[renamedFile path]], @"file shouldn't exist");
 
             // rename file
-            [self.session renameItemAtURL:testFile toFilename:renamedFileName completionHandler:^(NSError *error) {
+            [self.manager renameItemAtURL:testFile toFilename:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -388,7 +388,7 @@
             STAssertTrue([fm fileExistsAtPath:[renamedFile path]], @"file should exist");
 
             // rename it again - should obviously fail
-            [self.session renameItemAtURL:testFile toFilename:renamedFileName completionHandler:^(NSError *error) {
+            [self.manager renameItemAtURL:testFile toFilename:renamedFileName completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
                 STAssertEquals([error code], (NSInteger) NSFileWriteFileExistsError, @"unexpected error code %ld", [error code]);
@@ -397,7 +397,7 @@
             [self runUntilPaused];
 
             // rename directory
-            [self.session renameItemAtURL:subdirectory toFilename:renamedDirectoryName completionHandler:^(NSError *error) {
+            [self.manager renameItemAtURL:subdirectory toFilename:renamedDirectoryName completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -412,7 +412,7 @@
 }
 - (void)testRemoveFileAtURL
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self makeTestContents];
         if (temp)
@@ -424,7 +424,7 @@
             STAssertTrue([fm fileExistsAtPath:[testFile path]], @"file should exist");
 
             // remove a file
-            [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
+            [self.manager removeItemAtURL:testFile completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -432,7 +432,7 @@
             STAssertFalse([fm fileExistsAtPath:[testFile path]], @"removal should have worked");
 
             // remove it again - should obviously fail
-            [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
+            [self.manager removeItemAtURL:testFile completionHandler:^(NSError *error) {
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
                 STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -441,7 +441,7 @@
             [self runUntilPaused];
 
             // remove subdirectory - now empty, so should work
-            [self.session removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
+            [self.manager removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
                 STAssertNil(error, @"got unexpected error %@", error);
                 [self pause];
             }];
@@ -459,13 +459,13 @@
 
 - (void)testRemoveFileAtURLDirectoryContainingItems
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self makeTestContents];
         NSURL* subdirectory = [temp URLByAppendingPathComponent:@"subfolder"];
 
         // remove subdirectory that has something in it - should fail
-        [self.session removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
+        [self.manager removeItemAtURL:subdirectory completionHandler:^(NSError *error) {
             #if DELETING_DIRECTORY_WITH_ITEMS_FAILS
                 STAssertNotNil(error, @"expected error");
                 STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
@@ -487,12 +487,12 @@
 
 - (void)testRemoveFileAtURLDoesntExist
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self temporaryFolder];
         NSURL* testFile = [temp URLByAppendingPathComponent:@"imaginary.txt"];
 
-        [self.session removeItemAtURL:testFile completionHandler:^(NSError *error) {
+        [self.manager removeItemAtURL:testFile completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected error");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -505,13 +505,13 @@
 
 - (void)testSetAttributes
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self makeTestContents];
         NSURL* url = [temp URLByAppendingPathComponent:@"test.txt"];
 
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
-        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+        [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];
@@ -522,13 +522,13 @@
 
 - (void)testSetAttributesFileDoesntExist
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self temporaryFolder];
         NSURL* url = [temp URLByAppendingPathComponent:@"imaginary.txt"];
 
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
-        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+        [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNotNil(error, @"expected error");
             STAssertTrue([[error domain] isEqualToString:NSCocoaErrorDomain], @"unexpected error domain %@", [error domain]);
             STAssertEquals([error code], (NSInteger) NSFileNoSuchFileError, @"unexpected error code %ld", [error code]);
@@ -541,7 +541,7 @@
 
 - (void)testSetAttributesMadeUpAttribute
 {
-    if ([self setupSession])
+    if ([self setupTest])
     {
         NSURL* temp = [self makeTestContents];
         NSURL* url = [temp URLByAppendingPathComponent:@"test.txt"];
@@ -549,7 +549,7 @@
         // we try to set a completely nonsense attribute
         // the expectation is that this will be silently ignored, rather than causing an error
         NSDictionary* values = @{ @"Awesomeness" : @"Totally Rad" };
-        [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
+        [self.manager setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
             [self pause];
         }];

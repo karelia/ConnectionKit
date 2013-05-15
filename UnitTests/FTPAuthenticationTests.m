@@ -3,13 +3,13 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerBaseTests.h"
+#import "BaseCKTests.h"
 
 #import "CK2FileManager.h"
 
 #import <CURLHandle/CURLHandle.h>
 
-@interface FTPAuthenticationTests : CK2FileManagerBaseTests
+@interface FTPAuthenticationTests : BaseCKTests
 
 @end
 
@@ -38,19 +38,24 @@
     [challenge.sender useCredential:credential forAuthenticationChallenge:challenge];
 }
 
+- (NSString*)protocol
+{
+    return @"FTP";
+}
+
 #pragma mark - Tests
 
 - (void)testBadLoginThenGoodLogin
 {
     // the server starts by rejecting the password
     // after the first challenge though, we switch to the "normal" responses so that it accepts it
-    if ([self setupSessionWithResponses:@"ftp"])
+    if ([self setupTest])
     {
         [self removeTestDirectory];
         [self useResponseSet:@"bad login"];
 
         NSURL* url = [self URLForTestFolder];
-        [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
+        [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
             [self pause];

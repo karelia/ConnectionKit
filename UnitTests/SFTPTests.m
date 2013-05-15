@@ -3,22 +3,22 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerGenericTests.h"
+#import "BaseCKProtocolTests.h"
 
-@interface SFTPTests : CK2FileManagerGenericTests
+@interface SFTPTests : BaseCKProtocolTests
 
 @end
 
 @implementation SFTPTests
 
-- (id)initWithInvocation:(NSInvocation *)anInvocation
+- (NSString*)protocol
 {
-    if ((self = [super initWithInvocation:anInvocation]) != nil)
-    {
-        self.responsesToUse = @"sftp";
-    }
+    return @"SFTP";
+}
 
-    return self;
+- (BOOL)protocolUsesAuthentication
+{
+    return YES;
 }
 
 @end

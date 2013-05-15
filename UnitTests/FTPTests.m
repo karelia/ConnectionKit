@@ -3,22 +3,33 @@
 //  Copyright 2012 Karelia Software. All rights reserved.
 //
 
-#import "CK2FileManagerGenericTests.h"
+#import "BaseCKProtocolTests.h"
 
-@interface FTPTests : CK2FileManagerGenericTests
+@interface FTPTests : BaseCKProtocolTests
 
 @end
 
 @implementation FTPTests
 
-- (id)initWithInvocation:(NSInvocation *)anInvocation
+- (NSString*)protocol
 {
-    if ((self = [super initWithInvocation:anInvocation]) != nil)
-    {
-        self.responsesToUse = @"ftp";
-    }
+    return @"FTP";
+}
 
-    return self;
+- (BOOL)protocolUsesAuthentication
+{
+    return YES;
+}
+
+- (NSData*)mockServerDirectoryListingData
+{
+    NSString* listing = [NSString stringWithFormat:
+                         @"total 1\r\n-rw-------   1 user  staff     3 Mar  6  2012 %@\r\n-rw-------   1 user  staff     3 Mar  6  2012 %@\r\n\r\n",
+                         [[self URLForTestFile1] lastPathComponent],
+                         [[self URLForTestFile2] lastPathComponent]
+                         ];
+    
+    return [listing dataUsingEncoding:NSUTF8StringEncoding];
 }
 
 @end
