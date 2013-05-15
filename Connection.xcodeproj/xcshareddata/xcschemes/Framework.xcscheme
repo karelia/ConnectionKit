@@ -62,6 +62,12 @@
                <Test
                   Identifier = "CKUploaderTests">
                </Test>
+               <Test
+                  Identifier = "BaseCKProtocolTests">
+               </Test>
+               <Test
+                  Identifier = "BaseCKTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
