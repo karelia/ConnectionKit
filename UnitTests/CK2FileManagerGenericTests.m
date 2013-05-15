@@ -72,6 +72,48 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     }
 }
 
+- (NSData*)webdavDirectoryListingData
+{
+    NSString* xml = [NSString stringWithFormat:
+                     @"<D:multistatus xmlns:D=\"DAV:\" xmlns:ns0=\"DAV:\">"
+
+                     "<D:response xmlns:lp1=\"DAV:\">"
+                     "<D:href>%@</D:href>"
+                     "<D:propstat>"
+                     "<D:prop>"
+                     "<lp1:resourcetype><D:collection/></lp1:resourcetype>"
+                     "</D:prop>"
+                     "<D:status>HTTP/1.1 200 OK</D:status>"
+                     "</D:propstat>"
+                     "</D:response>"
+
+                     "<D:response xmlns:lp1=\"DAV:\">"
+                     "<D:href>%@</D:href>"
+                     "<D:propstat>"
+                     "<D:prop>"
+                     "<lp1:resourcetype/>"
+                     "</D:prop>"
+                     "<D:status>HTTP/1.1 200 OK</D:status>"
+                     "</D:propstat>"
+                     "</D:response>"
+
+                     "<D:response xmlns:lp1=\"DAV:\">"
+                     "<D:href>%@</D:href>"
+                     "<D:propstat>"
+                     "<D:prop>"
+                     "<lp1:resourcetype/>"
+                     "</D:prop>"
+                     "<D:status>HTTP/1.1 200 OK</D:status>"
+                     "</D:propstat>"
+                     "</D:response>"
+
+                     "</D:multistatus>\r\n", [self URLForTestFolder], [self URLForTestFile1], [self URLForTestFile2]];
+
+    NSData* data = [xml dataUsingEncoding:NSUTF8StringEncoding];
+    
+    return data;
+}
+
 #pragma mark - Result Checking Support
 
 - (void)checkURL:(NSURL*)url isNamed:(NSString*)name
@@ -114,6 +156,15 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self makeTestDirectoryWithFiles:YES];
+
+        if (self.useMockServer)
+        {
+            // need to set up the data to return for webdav
+            if ([self.responsesToUse isEqualToString:@"webdav"])
+            {
+                self.server.data = [self webdavDirectoryListingData];
+            }
+        }
 
         NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants;
@@ -270,7 +321,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self makeTestDirectoryWithFiles:NO];
-        [self useResponseSet:@"mkdir fail"];
+        [self useResponseSet:@"make fails"];
 
         NSURL* url = [self URLForTestFolder];
         [self.session createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
@@ -558,17 +609,24 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
         [self.session renameItemAtURL:url toFilename:newName completionHandler:^(NSError *error) {
             STAssertNil(error, @"got unexpected error %@", error);
 
-            // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
-            [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
-                BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"sftp"]; // SFTP is a bit crap at reporting errors
-                STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
+            if (!self.useMockServer)
+            {
+                // try to remove original file - if we don't get an error here it's a hint that the move didn't work (although sadly for SFTP we won't get an error currently, so it's not conclusive)
+                [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
+                    BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"sftp"]; // SFTP is a bit crap at reporting errors
+                    STAssertTrue([self checkIsRemovalError:error nilAllowed:errorCanBeNil], @"expected removal error, got %@", error);
 
-                // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
-                [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
-                    STAssertNil(error, @"got unexpected error %@", error);
-                    [self pause];
+                    // try to remove renamed file - again, if we get an error here it's a big hint that the move didn't work
+                    [self.session removeItemAtURL:renamed completionHandler:^(NSError *error) {
+                        STAssertNil(error, @"got unexpected error %@", error);
+                        [self pause];
+                    }];
                 }];
-            }];
+            }
+            else
+            {
+                [self pause];
+            }
         }];
     }
 
@@ -606,7 +664,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self makeTestDirectoryWithFiles:NO];
-        [self useResponseSet:@"delete fail"];
+        [self useResponseSet:@"delete fails"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
 
@@ -626,7 +684,7 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
     if ([self setup])
     {
         [self removeTestDirectory];
-        [self useResponseSet:@"cwd fail"];
+        [self useResponseSet:@"delete fails missing directory"];
         NSURL* url = [self URLForTestFile1];
         [self.session removeItemAtURL:url completionHandler:^(NSError *error) {
             BOOL errorCanBeNil = [self.responsesToUse isEqualToString:@"sftp"]; // SFTP is a bit crap at reporting errors
@@ -720,8 +778,8 @@ static NSString *const ExampleListing = @"total 1\r\n-rw-------   1 user  staff 
 {
     if ([self setup])
     {
-        [self useResponseSet:@"chmod not permitted"];
         [self makeTestDirectoryWithFiles:NO];
+        [self useResponseSet:@"chmod not permitted"];
         NSURL* url = [self URLForTestFile1];
         NSDictionary* values = @{ NSFilePosixPermissions : @(0744)};
         [self.session setAttributes:values ofItemAtURL:url completionHandler:^(NSError *error) {
