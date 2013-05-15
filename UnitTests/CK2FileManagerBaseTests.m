@@ -7,7 +7,7 @@
 #import "CK2Authentication.h"
 
 #import "CK2FileManagerWithTestSupport.h"
-#import <DAVKit/DAVKit.h>
+#import "KMSServer.h"
 
 static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
 
@@ -172,6 +172,7 @@ static const BOOL kMakeRemoveTestFilesOnMockServer = YES;
         NSLog(@"Tests using MockServer for %@", responses);
         self.useMockServer = YES;
         ok = [super setupServerWithResponseFileNamed:responses];
+        [KMSServer setLoggingLevel:KMSLoggingOff];
     }
     else
     {
