@@ -72,26 +72,30 @@ static size_t kCopyBufferSize = 4096;
         
         
         // Enumerate contents
+        __block NSError* enumerationError = nil;
         NSDirectoryEnumerator *enumerator = [[NSFileManager defaultManager] enumeratorAtURL:[request URL]
                                                                  includingPropertiesForKeys:keys
                                                                                     options:mask
                                                                                errorHandler:^BOOL(NSURL *url, NSError *error) {
-            
-                                                                                   NSLog(@"enumeration error: %@", error);
-                                                                                   return YES;
+
+                                                                                   enumerationError = error;
+                                                                                   return NO; // TODO: are there errors that we want to ignore here?
                                                                                }];
         
-         if (_cancelled) return; // bail should we be cancelled
-        
+
         NSURL *aURL;
-        while (aURL = [enumerator nextObject])
+        while (!_cancelled && !enumerationError && (aURL = [enumerator nextObject]))
         {
             [client protocol:self didDiscoverItemAtURL:aURL];
             
-            if (_cancelled) return;
         }
-                
-        [client protocolDidFinish:self];
+
+        if (_cancelled) return; // bail should we be cancelled
+
+        if (enumerationError)
+            [client protocol:self didFailWithError:enumerationError];
+        else
+            [client protocolDidFinish:self];
     }];
 }
 
