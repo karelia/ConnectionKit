@@ -239,7 +239,8 @@
 
         NSURL* url = [self URLForTestFolder];
         [self.manager createDirectoryAtURL:url withIntermediateDirectories:YES openingAttributes:nil completionHandler:^(NSError *error) {
-            STAssertTrue([self checkIsCreationError:error nilAllowed:NO], @"expected file can't write error, got %@", error);
+            BOOL errorCanBeNil = [self usingProtocol:@"file"]; // the file protocol doesn't report an error in this situation
+            STAssertTrue([self checkIsCreationError:error nilAllowed:errorCanBeNil], @"expected file can't write error, got %@", error);
 
             [self pause];
         }];
