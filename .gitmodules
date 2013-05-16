@@ -4,3 +4,6 @@
 [submodule "CurlHandle"]
 	path = CurlHandle
 	url = https://github.com/karelia/CurlHandle.git
+[submodule "KSFTPDirectoryParser"]
+	path = KSFTPDirectoryParser
+	url = https://github.com/karelia/KSFTPDirectoryParser

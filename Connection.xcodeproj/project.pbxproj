@@ -160,6 +160,27 @@
 			remoteGlobalIDString = 223FD091160B523700BE1C80;
 			remoteInfo = CURLHandleTests;
 		};
+		223807DD174524430057E044 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 8DC2EF4F0486A6940098B216;
+			remoteInfo = "DAVKit OS X";
+		};
+		223807EC17452B5A0057E044 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 223807DF17452B540057E044 /* KSFTPParser.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 2238075F1744F1FD0057E044;
+			remoteInfo = KSFTPParser;
+		};
+		223807EE17452B5A0057E044 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 223807DF17452B540057E044 /* KSFTPParser.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 223807771744F1FE0057E044;
+			remoteInfo = KSFTPParserTests;
+		};
 		22AC1C0D174297C500AB09E1 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
@@ -229,6 +250,7 @@
 		220AD7981509019B00748655 /* UnitTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnitTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		220AD7991509019B00748655 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		220C11951715C5E10086F199 /* ErrorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorTests.m; sourceTree = "<group>"; };
+		223807DF17452B540057E044 /* KSFTPParser.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = KSFTPParser.xcodeproj; path = ../KSFTPDirectoryParser/KSFTPParser.xcodeproj; sourceTree = "<group>"; };
 		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = CurlHandle/SFTP/libssl.dylib; sourceTree = "<group>"; };
 		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = CurlHandle/SFTP/libcrypto.dylib; sourceTree = "<group>"; };
 		22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFileTests.m; sourceTree = "<group>"; };
@@ -514,6 +536,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		223807E817452B5A0057E044 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				223807ED17452B5A0057E044 /* KSFTPParser.framework */,
+				223807EF17452B5A0057E044 /* KSFTPParserTests.octest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		2280F4A4171826A500BBEF22 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -715,6 +746,7 @@
 			children = (
 				27BFFEDA15027F4100EFA319 /* CURLHandle.xcodeproj */,
 				27448C2414580F7500EB086F /* DAVKit.xcodeproj */,
+				223807DF17452B540057E044 /* KSFTPParser.xcodeproj */,
 			);
 			name = Dependencies;
 			path = ConnectionKit;
@@ -886,6 +918,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				223807DE174524430057E044 /* PBXTargetDependency */,
 				220526FD165EA20600A2BBC9 /* PBXTargetDependency */,
 			);
 			name = Framework;
@@ -929,6 +962,10 @@
 					ProductGroup = 220526EC165E97B400A2BBC9 /* Products */;
 					ProjectRef = 27448C2414580F7500EB086F /* DAVKit.xcodeproj */;
 				},
+				{
+					ProductGroup = 223807E817452B5A0057E044 /* Products */;
+					ProjectRef = 223807DF17452B540057E044 /* KSFTPParser.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -967,6 +1004,20 @@
 			fileType = wrapper.cfbundle;
 			path = Tests.octest;
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		223807ED17452B5A0057E044 /* KSFTPParser.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = KSFTPParser.framework;
+			remoteRef = 223807EC17452B5A0057E044 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		223807EF17452B5A0057E044 /* KSFTPParserTests.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = KSFTPParserTests.octest;
+			remoteRef = 223807EE17452B5A0057E044 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		22AC1C0E174297C500AB09E1 /* libDAVKit.a */ = {
@@ -1180,6 +1231,11 @@
 			isa = PBXTargetDependency;
 			name = CURLHandleTests;
 			targetProxy = 22182129170209D300584589 /* PBXContainerItemProxy */;
+		};
+		223807DE174524430057E044 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "DAVKit OS X";
+			targetProxy = 223807DD174524430057E044 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
