@@ -10,7 +10,7 @@
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
-#import <KSFTPParser/KSFTPParser.h>
+#import <KSFTPDirectoryParser/KSFTPDirectoryParser.h>
 #import <AppKit/AppKit.h>   // for NSImage
 
 
@@ -124,12 +124,7 @@
                 {
                     NSNumber *type = CFDictionaryGetValue(parsedDict, kCFFTPResourceType);
                     BOOL isDirectory = [type intValue] == DT_DIR;
-
-                    NSURL *aURL = [directoryURL URLByAppendingPathComponent:name];
-                    if (isDirectory && !CFURLHasDirectoryPath((CFURLRef)aURL))
-                    {
-                        aURL = [aURL URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
-                    }
+                    NSURL *aURL = [self cleanURLWithName:name directory:directoryURL isDirectory:isDirectory];
 
                     // Fill in requested keys as best we can
                     NSArray *keysToFill = (keys ? keys : self.class.defaultPropertyKeys);
@@ -283,11 +278,22 @@
     return result;
 }
 
-- (NSError*)newProcessDirectoryData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
+- (NSURL*)cleanURLWithName:(NSString*)name directory:(NSURL*)directoryURL isDirectory:(BOOL)isDirectory
+{
+    NSURL *url = [directoryURL URLByAppendingPathComponent:name];
+    if (isDirectory && !CFURLHasDirectoryPath((CFURLRef)url))
+    {
+        url = [url URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
+    }
+
+    return url;
+}
+
+- (NSError*)processDirectoryData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
 {
     NSError* result = nil;
 
-    NSArray* items = [KSFTPParser parseData:data includingExtraEntries:NO];
+    NSArray* items = [KSFTPDirectoryParser parseData:data includingExtraEntries:NO];
     for (NSDictionary* item in items)
     {
         NSString *name = item[@"name"];
@@ -296,11 +302,7 @@
             KSFTPEntryType type = (KSFTPEntryType) [item[@"type"] integerValue];
             BOOL isDirectory = type == KSFTPDirectoryEntry;
             BOOL isLink = [item[@"link"] length] > 0; // TODO: test this!
-            NSURL *aURL = [directoryURL URLByAppendingPathComponent:name];
-            if (isDirectory && !CFURLHasDirectoryPath((CFURLRef)aURL))
-            {
-                aURL = [aURL URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
-            }
+            NSURL *aURL = [self cleanURLWithName:name directory:directoryURL isDirectory:isDirectory];
 
             // Fill in requested keys as best we can
             NSArray *keysToFill = (keys ? keys : self.class.defaultPropertyKeys);
@@ -450,7 +452,7 @@
             }
 
            // Process the data to make a directory listing
-            NSError* error = [self newProcessDirectoryData:totalData request:request url:directoryURL path:directoryPath keys:keys options:mask];
+            NSError* error = [self processDirectoryData:totalData request:request url:directoryURL path:directoryPath keys:keys options:mask];
             if (error)
             {
                 [self.client protocol:self didFailWithError:error];
