@@ -10,7 +10,7 @@
 
 #import <CurlHandle/NSURLRequest+CURLHandle.h>
 #import <sys/dirent.h>
-
+#import <KSFTPParser/KSFTPParser.h>
 #import <AppKit/AppKit.h>   // for NSImage
 
 
@@ -98,9 +98,9 @@
     return YES;
 }
 
-- (NSError*)processData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
+- (NSError*)oldProcessDirectoryData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
 {
-    NSError* result;
+    NSError* result = nil;
 
     // Process the data to make a directory listing
     while (1)
@@ -283,6 +283,137 @@
     return result;
 }
 
+- (NSError*)newProcessDirectoryData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
+{
+    NSError* result = nil;
+
+    NSArray* items = [KSFTPParser parseData:data includingExtraEntries:NO];
+    for (NSDictionary* item in items)
+    {
+        NSString *name = item[@"name"];
+        if ([self shouldEnumerateFilename:name options:mask])
+        {
+            KSFTPEntryType type = (KSFTPEntryType) [item[@"type"] integerValue];
+            BOOL isDirectory = type == KSFTPDirectoryEntry;
+            BOOL isLink = [item[@"link"] length] > 0; // TODO: test this!
+            NSURL *aURL = [directoryURL URLByAppendingPathComponent:name];
+            if (isDirectory && !CFURLHasDirectoryPath((CFURLRef)aURL))
+            {
+                aURL = [aURL URLByAppendingPathComponent:@""];  // http://www.mikeabdullah.net/guaranteeing-directory-urls.html
+            }
+
+            // Fill in requested keys as best we can
+            NSArray *keysToFill = (keys ? keys : self.class.defaultPropertyKeys);
+
+            for (NSString *aKey in keysToFill)
+            {
+                if ([aKey isEqualToString:NSURLContentModificationDateKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:item[@"modified"] forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLIsDirectoryKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:@(isDirectory) forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLIsHiddenKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:@([name hasPrefix:@"."]) forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLIsRegularFileKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:@(type == KSFTPFileEntry) forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLIsSymbolicLinkKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:@(isLink) forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLLocalizedTypeDescriptionKey])
+                {
+                    // Could guess from extension
+                }
+                else if ([aKey isEqualToString:NSURLNameKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:name forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLParentDirectoryURLKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:directoryPath forKey:NSURLParentDirectoryURLKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:NSURLTypeIdentifierKey])
+                {
+                    // Guess from symlink, extension, and directory
+                    if (isLink)
+                    {
+                        [CK2FileManager setTemporaryResourceValue:(NSString *)kUTTypeSymLink forKey:aKey inURL:aURL];
+                    }
+                    else
+                    {
+                        NSString *extension = [name pathExtension];
+                        if ([extension length])
+                        {
+                            CFStringRef type = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension,
+                                                                                     (CFStringRef)extension,
+                                                                                     (isDirectory ? kUTTypeDirectory : kUTTypeData));
+
+                            [CK2FileManager setTemporaryResourceValue:(NSString *)type forKey:aKey inURL:aURL];
+                            CFRelease(type);
+                        }
+                        else
+                        {
+                            [CK2FileManager setTemporaryResourceValue:(NSString *)kUTTypeData forKey:aKey inURL:aURL];
+                        }
+                    }
+                }
+                else if ([aKey isEqualToString:NSURLFileSizeKey])
+                {
+                    [CK2FileManager setTemporaryResourceValue:item[@"size"] forKey:aKey inURL:aURL];
+                }
+                else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
+                {
+                    NSString *path = item[@"link"];
+                    if ([path length])
+                    {
+                        // Servers in my experience hand include a trailing slash to indicate if the target is a directory
+                        // Could generate a CK2RemoteURL instead so as to explicitly mark it as a directory, but that seems unecessary for now
+                        // According to the original CKConnectionOpenPanel source, some servers use a backslash instead. I don't know what though – Windows based ones? If so, do they use backslashes for all path components?
+                        [CK2FileManager setTemporaryResourceValue:[self.class URLWithPath:path relativeToURL:directoryURL] forKey:aKey inURL:aURL];
+                    }
+                }
+
+                // Trying to access a constant not available on an old platform will crash. Runtime check seems to be our best bet
+                else if (NSFoundationVersionNumber >= NSFoundationVersionNumber10_6)
+                {
+                    if ([aKey isEqualToString:NSURLFileResourceTypeKey])
+                    {
+                        NSString *typeValue;
+                        if (isLink)
+                        {
+                            typeValue = NSURLFileResourceTypeSymbolicLink;
+                        }
+                        else switch (type)
+                        {
+                            case KSFTPDirectoryEntry:
+                                typeValue = NSURLFileResourceTypeDirectory;
+                                break;
+                            case KSFTPFileEntry:
+                                typeValue = NSURLFileResourceTypeRegular;
+                                break;
+                            default:
+                                typeValue = NSURLFileResourceTypeUnknown;
+                        }
+
+                        [CK2FileManager setTemporaryResourceValue:typeValue forKey:aKey inURL:aURL];
+                    }
+                }
+            }
+
+            [self.client protocol:self didDiscoverItemAtURL:aURL];
+        }
+    }
+
+    return result;
+}
+
 - (id)initForEnumeratingDirectoryWithRequest:(NSURLRequest *)request includingPropertiesForKeys:(NSArray *)keys options:(NSDirectoryEnumerationOptions)mask client:(id<CK2ProtocolClient>)client;
 {
     request = [[self class] newRequestWithRequest:request isDirectory:YES];
@@ -319,7 +450,7 @@
             }
 
            // Process the data to make a directory listing
-            NSError* error = [self processData:totalData request:request url:directoryURL path:directoryPath keys:keys options:mask];
+            NSError* error = [self newProcessDirectoryData:totalData request:request url:directoryURL path:directoryPath keys:keys options:mask];
             if (error)
             {
                 [self.client protocol:self didFailWithError:error];
