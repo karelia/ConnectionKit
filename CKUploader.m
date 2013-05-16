@@ -996,17 +996,17 @@
 {
     [_queue addOperationWithBlock:^{
         
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [[self delegate] uploader:self didBeginUploadToPath:path];
             [record transferDidBegin:record];
-        }];
+        });
         
         NSError *error;
         BOOL result = uploadBlock(&error, ^(NSUInteger bytesWritten) {
             
-            [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+			dispatch_async(dispatch_get_main_queue(), ^{
                 [record transfer:record transferredDataOfLength:bytesWritten];
-            }];
+            });
         });
         
         if (result)
@@ -1022,9 +1022,9 @@
             [self FTPSession:[self FTPSession] didReceiveDebugInfo:description ofType:CKTranscriptReceived];
         }
         
-        [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+        dispatch_async(dispatch_get_main_queue(), ^{
             [record transferDidFinish:record error:error];
-        }];
+        });
     }];
         
     [self didEnqueueUpload:record toPath:path];
@@ -1083,11 +1083,11 @@
 
 - (void)FTPSession:(CURLFTPSession *)session didReceiveDebugInfo:(NSString *)string ofType:(curl_infotype)type;
 {
-    [[NSOperationQueue mainQueue] addOperationWithBlock:^{
+	dispatch_async(dispatch_get_main_queue(), ^{
         [[self delegate] uploader:self
                      appendString:string
                      toTranscript:(type == CURLINFO_HEADER_IN ? CKTranscriptReceived : CKTranscriptSent)];
-    }];
+    });
 }
 
 #pragma mark NSURLAuthenticationChallengeSender
