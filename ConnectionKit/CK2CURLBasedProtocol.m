@@ -296,12 +296,12 @@
     NSArray* items = [KSFTPDirectoryParser parseData:data includingExtraEntries:NO];
     for (NSDictionary* item in items)
     {
-        NSString *name = item[@"name"];
+        NSString *name = [item objectForKey:@"name"];
         if ([self shouldEnumerateFilename:name options:mask])
         {
-            KSFTPEntryType type = (KSFTPEntryType) [item[@"type"] integerValue];
+            KSFTPEntryType type = (KSFTPEntryType) [[item objectForKey:@"type"] integerValue];
             BOOL isDirectory = type == KSFTPDirectoryEntry;
-            BOOL isLink = [item[@"link"] length] > 0; // TODO: test this!
+            BOOL isLink = [[item objectForKey:@"link"] length] > 0; // TODO: test this!
             NSURL *aURL = [self cleanURLWithName:name directory:directoryURL isDirectory:isDirectory];
 
             // Fill in requested keys as best we can
@@ -311,7 +311,7 @@
             {
                 if ([aKey isEqualToString:NSURLContentModificationDateKey])
                 {
-                    [CK2FileManager setTemporaryResourceValue:item[@"modified"] forKey:aKey inURL:aURL];
+                    [CK2FileManager setTemporaryResourceValue:[item objectForKey:@"modified"] forKey:aKey inURL:aURL];
                 }
                 else if ([aKey isEqualToString:NSURLIsDirectoryKey])
                 {
@@ -368,11 +368,11 @@
                 }
                 else if ([aKey isEqualToString:NSURLFileSizeKey])
                 {
-                    [CK2FileManager setTemporaryResourceValue:item[@"size"] forKey:aKey inURL:aURL];
+                    [CK2FileManager setTemporaryResourceValue:[item objectForKey:@"size"] forKey:aKey inURL:aURL];
                 }
                 else if ([aKey isEqualToString:CK2URLSymbolicLinkDestinationKey])
                 {
-                    NSString *path = item[@"link"];
+                    NSString *path = [item objectForKey:@"link"];
                     if ([path length])
                     {
                         // Servers in my experience hand include a trailing slash to indicate if the target is a directory
