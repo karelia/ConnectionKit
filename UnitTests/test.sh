@@ -21,14 +21,21 @@ mkdir -p "$build"
 echo Building 32-bit
 
 xcodebuild -workspace "ConnectionKit.xcworkspace" -scheme "Framework" -sdk "macosx" -config "Debug" -arch i386 build OBJROOT="$obj" SYMROOT="$sym" > "$testout" 2> "$testerr"
-cd "$build"
-"../$ocunit2junit" < "$testout"
+if [ $? != 0 ]; then
+	echo "32-bit build failed"
+	cat "$testerr"
+fi
+
 
 echo Building and Testing 64-bit
 
-cd ..
 xcodebuild -workspace "ConnectionKit.xcworkspace" -scheme "Framework" -sdk "macosx" -config "Debug" -arch x86_64 test OBJROOT="$obj" SYMROOT="$sym" > "$testout" 2> "$testerr"
-cd "$build"
-"../$ocunit2junit" < "$testout"
+if [ $? != 0 ]; then
+	echo "64-bit build failed"
+	cat "$testerr"
+else
+	cd "$build"
+	"../$ocunit2junit" < "$testout"
+fi
 
 
