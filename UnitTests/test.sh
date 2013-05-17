@@ -6,7 +6,7 @@ base=`dirname $0`
 echo "$base"
 pushd "$base/.." > /dev/null
 build="$PWD/test-build"
-ocunit2junit="$base/../CurlHandle/CURLHandleSource/CURLHandleTests/MockServer/UnitTests/OCUnit2JUnit/bin/ocunit2junit"
+ocunit2junit="$base/../CurlHandle/CURLHandleSource/Tests/MockServer/UnitTests/OCUnit2JUnit/bin/ocunit2junit"
 popd > /dev/null
 
 sym="$build/sym"
@@ -18,6 +18,17 @@ testerr="$build/error.log"
 rm -rf "$build"
 mkdir -p "$build"
 
-xcodebuild -workspace "ConnectionKit.xcworkspace" -scheme "Framework" -sdk "macosx" -config "Debug" test OBJROOT="$obj" SYMROOT="$sym" > "$testout" 2> "$testerr"
+echo Building 32-bit
+
+xcodebuild -workspace "ConnectionKit.xcworkspace" -scheme "Framework" -sdk "macosx" -config "Debug" -arch i386 build OBJROOT="$obj" SYMROOT="$sym" > "$testout" 2> "$testerr"
 cd "$build"
 "../$ocunit2junit" < "$testout"
+
+echo Building and Testing 64-bit
+
+cd ..
+xcodebuild -workspace "ConnectionKit.xcworkspace" -scheme "Framework" -sdk "macosx" -config "Debug" -arch x86_64 test OBJROOT="$obj" SYMROOT="$sym" > "$testout" 2> "$testerr"
+cd "$build"
+"../$ocunit2junit" < "$testout"
+
+
