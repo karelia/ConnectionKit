@@ -143,6 +143,10 @@
     if ([self setupTest])
     {
         [self makeTestDirectoryWithFiles:YES];
+        if (self.useMockServer)
+        {
+            self.server.data = [self mockServerDirectoryListingData];
+        }
 
         NSURL* url = [self URLForTestFolder];
         NSDirectoryEnumerationOptions options = NSDirectoryEnumerationSkipsSubdirectoryDescendants|CK2DirectoryEnumerationIncludesDirectory;
