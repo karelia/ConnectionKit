@@ -14,7 +14,6 @@
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220C11961715C5E20086F199 /* ErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220C11951715C5E10086F199 /* ErrorTests.m */; };
 		22407D54166F9A6100E1EAD4 /* BaseCKProtocolTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* BaseCKProtocolTests.m */; };
-		22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */; };
 		2246AF6516B99987001D39D9 /* KMSSendStringCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */; };
 		2246AF6616B99987001D39D9 /* KMSSendDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */; };
 		2246AF6716B99987001D39D9 /* KMSSendServerDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5C16B99986001D39D9 /* KMSSendServerDataCommand.m */; };
@@ -231,7 +230,6 @@
 		220C11951715C5E10086F199 /* ErrorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ErrorTests.m; sourceTree = "<group>"; };
 		22407D5A166FA12500E1EAD4 /* libssl.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.dylib; path = CurlHandle/SFTP/libssl.dylib; sourceTree = "<group>"; };
 		22407D5D166FA17600E1EAD4 /* libcrypto.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.dylib; path = CurlHandle/SFTP/libcrypto.dylib; sourceTree = "<group>"; };
-		22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CK2FileManagerFileTests.m; sourceTree = "<group>"; };
 		2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSSendStringCommand.m; sourceTree = "<group>"; };
 		2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KMSSendDataCommand.m; sourceTree = "<group>"; };
 		2246AF5B16B99986001D39D9 /* KMSSendStringCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KMSSendStringCommand.h; sourceTree = "<group>"; };
@@ -434,7 +432,6 @@
 			isa = PBXGroup;
 			children = (
 				2264399116FCB702001FDC20 /* README.md */,
-				22407D60166FA94600E1EAD4 /* CK2FileManagerFileTests.m */,
 				225FCA3716B046F800A9F5AE /* CKUploaderTests.m */,
 				220C11951715C5E10086F199 /* ErrorTests.m */,
 				2298E4AA17442272005A4160 /* FileTests.m */,
@@ -1103,7 +1100,6 @@
 				224AB38A166E52680066B1C6 /* KMSTestCase.m in Sources */,
 				224AB38C166E587F0066B1C6 /* KMSManualTests.m in Sources */,
 				22407D54166F9A6100E1EAD4 /* BaseCKProtocolTests.m in Sources */,
-				22407D61166FA94600E1EAD4 /* CK2FileManagerFileTests.m in Sources */,
 				22FEB6691680818800BB778B /* KMSTranscriptEntry.m in Sources */,
 				225FCA3816B046F800A9F5AE /* CKUploaderTests.m in Sources */,
 				2246AF6516B99987001D39D9 /* KMSSendStringCommand.m in Sources */,
