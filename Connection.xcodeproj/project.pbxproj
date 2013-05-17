@@ -13,8 +13,8 @@
 		22052706165EA62500A2BBC9 /* DAVKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27448C371458100D00EB086F /* DAVKit.framework */; };
 		220AD79A1509019B00748655 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 220AD7991509019B00748655 /* SenTestingKit.framework */; };
 		220C11961715C5E20086F199 /* ErrorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 220C11951715C5E10086F199 /* ErrorTests.m */; };
-		2238080C1745356C0057E044 /* KSFTPParser.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22380809174534D70057E044 /* KSFTPParser.framework */; };
-		2238080D174535760057E044 /* KSFTPParser.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22380809174534D70057E044 /* KSFTPParser.framework */; };
+		2238080C1745356C0057E044 /* Framework Mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 22380809174534D70057E044 /* Framework Mac.framework */; };
+		2238080D174535760057E044 /* Framework Mac.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = 22380809174534D70057E044 /* Framework Mac.framework */; };
 		22407D54166F9A6100E1EAD4 /* BaseCKProtocolTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 22F6D0E7165A8A2200443CC9 /* BaseCKProtocolTests.m */; };
 		2246AF6516B99987001D39D9 /* KMSSendStringCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5916B99986001D39D9 /* KMSSendStringCommand.m */; };
 		2246AF6616B99987001D39D9 /* KMSSendDataCommand.m in Sources */ = {isa = PBXBuildFile; fileRef = 2246AF5A16B99986001D39D9 /* KMSSendDataCommand.m */; };
@@ -203,6 +203,27 @@
 			remoteGlobalIDString = 22C9CFBF17035A0A004610FE;
 			remoteInfo = crashtest;
 		};
+		22D68A1C1746858000922709 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 223807DF17452B540057E044 /* KSFTPDirectoryParser.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 2238075E1744F1FD0057E044;
+			remoteInfo = "Framework Mac";
+		};
+		22D68A2F1746858100922709 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 223807DF17452B540057E044 /* KSFTPDirectoryParser.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 22380823174547A00057E044;
+			remoteInfo = "Library iOS";
+		};
+		22D68A311746858100922709 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 223807DF17452B540057E044 /* KSFTPDirectoryParser.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 22380831174547A00057E044;
+			remoteInfo = "UnitTests iOS";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -231,7 +252,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				2238080D174535760057E044 /* KSFTPParser.framework in CopyFiles */,
+				2238080D174535760057E044 /* Framework Mac.framework in CopyFiles */,
 				271059521671334500E20511 /* DAVKit.framework in CopyFiles */,
 				27105953167143D800E20511 /* CURLHandle.framework in CopyFiles */,
 				271059541671441700E20511 /* libssh2.dylib in CopyFiles */,
@@ -425,7 +446,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2238080C1745356C0057E044 /* KSFTPParser.framework in Frameworks */,
+				2238080C1745356C0057E044 /* Framework Mac.framework in Frameworks */,
 				22052702165EA23800A2BBC9 /* CURLHandle.framework in Frameworks */,
 				220526F8165E9DE400A2BBC9 /* DAVKit.framework in Frameworks */,
 				79CFD92F09F7080B00172CDD /* libz.dylib in Frameworks */,
@@ -540,8 +561,10 @@
 		22380804174534D70057E044 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				22380809174534D70057E044 /* KSFTPParser.framework */,
+				22380809174534D70057E044 /* Framework Mac.framework */,
 				2238080B174534D70057E044 /* KSFTPParserTests.octest */,
+				22D68A301746858100922709 /* libLibrary iOS.a */,
+				22D68A321746858100922709 /* UnitTests iOS.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -919,6 +942,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				22D68A1D1746858000922709 /* PBXTargetDependency */,
 				223807DE174524430057E044 /* PBXTargetDependency */,
 				220526FD165EA20600A2BBC9 /* PBXTargetDependency */,
 			);
@@ -1007,17 +1031,17 @@
 			remoteRef = 220526F2165E97B400A2BBC9 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		22380809174534D70057E044 /* KSFTPParser.framework */ = {
+		22380809174534D70057E044 /* Framework Mac.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
-			path = KSFTPParser.framework;
+			path = "Framework Mac.framework";
 			remoteRef = 22380808174534D70057E044 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		2238080B174534D70057E044 /* KSFTPParserTests.octest */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.cfbundle;
-			path = KSFTPParserTests.octest;
+			path = "UnitTests Mac.octest";
 			remoteRef = 2238080A174534D70057E044 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -1041,6 +1065,20 @@
 			name = crashtest;
 			path = "Standalone Test";
 			remoteRef = 22C9CFFA1703AD4D004610FE /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		22D68A301746858100922709 /* libLibrary iOS.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libLibrary iOS.a";
+			remoteRef = 22D68A2F1746858100922709 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		22D68A321746858100922709 /* UnitTests iOS.octest */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.cfbundle;
+			path = "UnitTests iOS.octest";
+			remoteRef = 22D68A311746858100922709 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -1236,6 +1274,11 @@
 			isa = PBXTargetDependency;
 			name = "DAVKit OS X";
 			targetProxy = 223807DD174524430057E044 /* PBXContainerItemProxy */;
+		};
+		22D68A1D1746858000922709 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "Framework Mac";
+			targetProxy = 22D68A1C1746858000922709 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
