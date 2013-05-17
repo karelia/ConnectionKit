@@ -100,7 +100,7 @@
 
 - (NSError*)processData:(NSMutableData*)data request:(NSURLRequest *)request url:(NSURL*)directoryURL path:(NSString*)directoryPath keys:(NSArray*)keys options:(NSDirectoryEnumerationOptions)mask
 {
-    NSError* result;
+    NSError* result = nil;
 
     // Process the data to make a directory listing
     while (1)
